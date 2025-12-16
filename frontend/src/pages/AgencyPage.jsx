@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Users, Target, Heart, Zap, ArrowRight, CheckCircle } from "lucide-react";
+import { Users, Target, Heart, Zap, ArrowRight } from "lucide-react";
 import { Button } from "../components/ui/button";
 
 const AgencyPage = () => {
@@ -56,10 +56,9 @@ const AgencyPage = () => {
   ];
 
   return (
-    <div data-testid="agency-page" className="bg-[#050505]">
+    <div data-testid="agency-page" className="bg-white">
       {/* Hero */}
-      <section className="relative pt-32 pb-24 px-6 overflow-hidden">
-        <div className="absolute inset-0 hero-glow" />
+      <section className="relative pt-32 pb-24 px-6 overflow-hidden bg-[#F8F8F8]">
         <div className="max-w-7xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -69,12 +68,12 @@ const AgencyPage = () => {
           >
             <h1 
               data-testid="agency-headline"
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#1A1A1A] mb-6"
             >
               L'agence digitale<br />
-              <span className="text-[#6A0F1A]">made in Guadeloupe</span>
+              <span className="text-[#CE0202]">made in Guadeloupe</span>
             </h1>
-            <p className="text-lg lg:text-xl text-[#A1A1AA]">
+            <p className="text-lg lg:text-xl text-[#666666]">
               ALPHA Agency est une agence de communication digitale 360° basée en Guadeloupe. 
               Nous accompagnons les entreprises locales et nationales dans leur transformation digitale.
             </p>
@@ -83,7 +82,7 @@ const AgencyPage = () => {
       </section>
 
       {/* About Section */}
-      <section className="py-24 px-6">
+      <section className="py-24 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <motion.div
@@ -108,19 +107,19 @@ const AgencyPage = () => {
               viewport={{ once: true }}
               className="lg:col-span-6"
             >
-              <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
-                Notre <span className="text-[#6A0F1A]">vision</span>
+              <h2 className="text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-6">
+                Notre <span className="text-[#CE0202]">vision</span>
               </h2>
-              <p className="text-[#A1A1AA] text-lg mb-6">
+              <p className="text-[#666666] text-lg mb-6">
                 Fondée avec la conviction que chaque entreprise mérite une présence digitale professionnelle, 
                 ALPHA Agency s'est donné pour mission de démocratiser l'accès aux services web de qualité.
               </p>
-              <p className="text-[#A1A1AA] text-lg mb-6">
+              <p className="text-[#666666] text-lg mb-6">
                 Nous croyons que la performance digitale ne devrait pas être réservée aux grandes entreprises. 
                 C'est pourquoi nous avons créé une offre accessible : un site web professionnel à partir de 90€/mois, 
                 livré en seulement 7 jours.
               </p>
-              <p className="text-[#A1A1AA] text-lg">
+              <p className="text-[#666666] text-lg">
                 Notre ancrage en Guadeloupe nous permet de comprendre les spécificités du marché antillais 
                 tout en appliquant les standards internationaux du web.
               </p>
@@ -130,7 +129,7 @@ const AgencyPage = () => {
       </section>
 
       {/* Values Section */}
-      <section data-testid="values-section" className="py-24 px-6 bg-[#0A0A0A]">
+      <section data-testid="values-section" className="py-24 px-6 bg-[#F8F8F8]">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -138,10 +137,10 @@ const AgencyPage = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
-              Nos <span className="text-[#6A0F1A]">valeurs</span>
+            <h2 className="text-3xl lg:text-5xl font-bold text-[#1A1A1A] mb-4">
+              Nos <span className="text-[#CE0202]">valeurs</span>
             </h2>
-            <p className="text-[#A1A1AA] text-lg max-w-2xl mx-auto">
+            <p className="text-[#666666] text-lg max-w-2xl mx-auto">
               Les principes qui guident notre travail au quotidien
             </p>
           </motion.div>
@@ -155,13 +154,13 @@ const AgencyPage = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
                 data-testid={`value-${index}`}
-                className="card-marketing text-center"
+                className="bg-white p-8 rounded-lg border border-[#E5E5E5] text-center"
               >
-                <div className="w-16 h-16 bg-[#6A0F1A]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <value.icon className="w-8 h-8 text-[#6A0F1A]" />
+                <div className="w-16 h-16 bg-[#CE0202]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <value.icon className="w-8 h-8 text-[#CE0202]" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">{value.title}</h3>
-                <p className="text-[#A1A1AA]">{value.description}</p>
+                <h3 className="text-xl font-bold text-[#1A1A1A] mb-3">{value.title}</h3>
+                <p className="text-[#666666]">{value.description}</p>
               </motion.div>
             ))}
           </div>
@@ -169,7 +168,7 @@ const AgencyPage = () => {
       </section>
 
       {/* Methodology Section */}
-      <section data-testid="methodology-section" className="py-24 px-6">
+      <section data-testid="methodology-section" className="py-24 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -177,10 +176,10 @@ const AgencyPage = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
-              Notre <span className="text-[#6A0F1A]">méthodologie</span>
+            <h2 className="text-3xl lg:text-5xl font-bold text-[#1A1A1A] mb-4">
+              Notre <span className="text-[#CE0202]">méthodologie</span>
             </h2>
-            <p className="text-[#A1A1AA] text-lg max-w-2xl mx-auto">
+            <p className="text-[#666666] text-lg max-w-2xl mx-auto">
               Un process éprouvé pour garantir le succès de votre projet
             </p>
           </motion.div>
@@ -193,14 +192,14 @@ const AgencyPage = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 data-testid={`methodology-${index}`}
-                className="flex flex-col md:flex-row items-start gap-6 glass p-8 rounded-lg"
+                className="flex flex-col md:flex-row items-start gap-6 bg-[#F8F8F8] p-8 rounded-lg border border-[#E5E5E5]"
               >
-                <div className="text-5xl font-bold text-[#6A0F1A]/30 font-mono">
+                <div className="text-5xl font-bold text-[#CE0202]/30 font-mono">
                   {item.step}
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">{item.title}</h3>
-                  <p className="text-[#A1A1AA] text-lg">{item.description}</p>
+                  <h3 className="text-2xl font-bold text-[#1A1A1A] mb-2">{item.title}</h3>
+                  <p className="text-[#666666] text-lg">{item.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -209,7 +208,7 @@ const AgencyPage = () => {
       </section>
 
       {/* Team Section Placeholder */}
-      <section className="py-24 px-6 bg-[#0A0A0A]">
+      <section className="py-24 px-6 bg-[#F8F8F8]">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -217,10 +216,10 @@ const AgencyPage = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl lg:text-5xl font-bold text-white mb-4">
-              L'<span className="text-[#6A0F1A]">équipe</span>
+            <h2 className="text-3xl lg:text-5xl font-bold text-[#1A1A1A] mb-4">
+              L'<span className="text-[#CE0202]">équipe</span>
             </h2>
-            <p className="text-[#A1A1AA] text-lg max-w-2xl mx-auto">
+            <p className="text-[#666666] text-lg max-w-2xl mx-auto">
               Des experts passionnés au service de votre réussite digitale
             </p>
           </motion.div>
@@ -237,13 +236,13 @@ const AgencyPage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="text-center"
+                className="text-center bg-white p-8 rounded-lg border border-[#E5E5E5]"
               >
-                <div className="w-32 h-32 bg-[#6A0F1A]/10 rounded-full mx-auto mb-6 flex items-center justify-center">
-                  <Users className="w-12 h-12 text-[#6A0F1A]" />
+                <div className="w-32 h-32 bg-[#CE0202]/10 rounded-full mx-auto mb-6 flex items-center justify-center">
+                  <Users className="w-12 h-12 text-[#CE0202]" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-1">{member.name}</h3>
-                <p className="text-[#A1A1AA]">{member.role}</p>
+                <h3 className="text-xl font-bold text-[#1A1A1A] mb-1">{member.name}</h3>
+                <p className="text-[#666666]">{member.role}</p>
               </motion.div>
             ))}
           </div>
@@ -251,24 +250,24 @@ const AgencyPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-6">
+      <section className="py-24 px-6 bg-white">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl lg:text-5xl font-bold text-white mb-6">
+            <h2 className="text-3xl lg:text-5xl font-bold text-[#1A1A1A] mb-6">
               Prêt à travailler<br />
-              <span className="text-[#6A0F1A]">ensemble ?</span>
+              <span className="text-[#CE0202]">ensemble ?</span>
             </h2>
-            <p className="text-[#A1A1AA] text-lg mb-8">
+            <p className="text-[#666666] text-lg mb-8">
               Discutons de votre projet et voyons comment nous pouvons vous aider.
             </p>
             <Link to="/contact">
               <Button 
                 data-testid="agency-cta"
-                className="bg-[#6A0F1A] hover:bg-[#8B1422] text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider"
+                className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider"
               >
                 Nous contacter
                 <ArrowRight className="ml-2 w-4 h-4" />

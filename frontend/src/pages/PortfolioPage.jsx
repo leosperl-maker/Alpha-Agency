@@ -12,6 +12,7 @@ const PortfolioPage = () => {
   const filters = [
     { id: "all", label: "Tous" },
     { id: "site_web", label: "Site Web" },
+    { id: "site_ecommerce", label: "E-commerce" },
     { id: "reseaux_sociaux", label: "Réseaux Sociaux" },
     { id: "photo", label: "Photo" },
     { id: "video", label: "Vidéo" },
@@ -31,10 +32,10 @@ const PortfolioPage = () => {
     {
       id: "2",
       title: "Boutique Créole",
-      category: "site_web",
+      category: "site_ecommerce",
       description: "E-commerce de produits locaux guadeloupéens",
       image_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80",
-      tags: ["Site Web", "E-commerce"]
+      tags: ["E-commerce", "Boutique"]
     },
     {
       id: "3",
@@ -76,7 +77,6 @@ const PortfolioPage = () => {
         const response = await portfolioAPI.getAll();
         setItems(response.data.length > 0 ? response.data : placeholderItems);
       } catch (error) {
-        // Use placeholder data if API fails
         setItems(placeholderItems);
       } finally {
         setLoading(false);
@@ -90,10 +90,9 @@ const PortfolioPage = () => {
     : items.filter(item => item.category === activeFilter);
 
   return (
-    <div data-testid="portfolio-page" className="bg-[#050505]">
+    <div data-testid="portfolio-page" className="bg-white">
       {/* Hero */}
-      <section className="relative pt-32 pb-24 px-6 overflow-hidden">
-        <div className="absolute inset-0 hero-glow" />
+      <section className="relative pt-32 pb-24 px-6 overflow-hidden bg-[#F8F8F8]">
         <div className="max-w-7xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -103,11 +102,11 @@ const PortfolioPage = () => {
           >
             <h1 
               data-testid="portfolio-headline"
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#1A1A1A] mb-6"
             >
-              Nos <span className="text-[#6A0F1A]">réalisations</span>
+              Nos <span className="text-[#CE0202]">réalisations</span>
             </h1>
-            <p className="text-lg lg:text-xl text-[#A1A1AA]">
+            <p className="text-lg lg:text-xl text-[#666666]">
               Découvrez quelques-uns de nos projets et laissez-vous inspirer pour votre prochaine collaboration.
             </p>
           </motion.div>
@@ -115,7 +114,7 @@ const PortfolioPage = () => {
       </section>
 
       {/* Filters */}
-      <section className="px-6 pb-12">
+      <section className="px-6 py-12 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-wrap justify-center gap-3">
             {filters.map((filter) => (
@@ -126,8 +125,8 @@ const PortfolioPage = () => {
                 onClick={() => setActiveFilter(filter.id)}
                 className={`rounded-full px-6 py-2 text-sm ${
                   activeFilter === filter.id
-                    ? "bg-[#6A0F1A] text-white"
-                    : "border-white/20 text-white hover:border-[#6A0F1A] hover:text-[#6A0F1A] bg-transparent"
+                    ? "bg-[#CE0202] text-white hover:bg-[#B00202]"
+                    : "border-[#E5E5E5] text-[#1A1A1A] hover:border-[#CE0202] hover:text-[#CE0202] bg-transparent"
                 }`}
               >
                 {filter.label}
@@ -138,12 +137,12 @@ const PortfolioPage = () => {
       </section>
 
       {/* Portfolio Grid */}
-      <section data-testid="portfolio-grid" className="px-6 pb-24">
+      <section data-testid="portfolio-grid" className="px-6 pb-24 bg-white">
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="aspect-[4/3] bg-white/5 animate-pulse rounded-lg" />
+                <div key={i} className="aspect-[4/3] bg-[#F8F8F8] animate-pulse rounded-lg" />
               ))}
             </div>
           ) : (
@@ -161,7 +160,7 @@ const PortfolioPage = () => {
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     data-testid={`portfolio-item-${index}`}
-                    className="group relative aspect-[4/3] rounded-lg overflow-hidden cursor-pointer"
+                    className="group relative aspect-[4/3] rounded-lg overflow-hidden cursor-pointer shadow-lg"
                   >
                     {/* Image */}
                     <div 
@@ -178,20 +177,20 @@ const PortfolioPage = () => {
                         {item.tags?.map((tag, i) => (
                           <span 
                             key={i}
-                            className="text-xs px-2 py-1 bg-[#6A0F1A]/80 text-white rounded"
+                            className="text-xs px-2 py-1 bg-[#CE0202]/80 text-white rounded"
                           >
                             {tag}
                           </span>
                         ))}
                       </div>
                       <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-                      <p className="text-[#A1A1AA] text-sm">{item.description}</p>
+                      <p className="text-white/80 text-sm">{item.description}</p>
                       {item.link && (
                         <a 
                           href={item.link} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="mt-4 inline-flex items-center gap-2 text-[#6A0F1A] text-sm font-semibold"
+                          className="mt-4 inline-flex items-center gap-2 text-[#CE0202] text-sm font-semibold"
                         >
                           Voir le projet <ExternalLink className="w-4 h-4" />
                         </a>
@@ -206,7 +205,7 @@ const PortfolioPage = () => {
           {filteredItems.length === 0 && !loading && (
             <div className="text-center py-16">
               <Filter className="w-12 h-12 text-[#A1A1AA] mx-auto mb-4" />
-              <p className="text-[#A1A1AA]">Aucune réalisation dans cette catégorie pour le moment.</p>
+              <p className="text-[#666666]">Aucune réalisation dans cette catégorie pour le moment.</p>
             </div>
           )}
         </div>
