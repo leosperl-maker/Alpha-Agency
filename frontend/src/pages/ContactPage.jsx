@@ -26,7 +26,8 @@ const ContactPage = () => {
   const [success, setSuccess] = useState(false);
 
   const projectTypes = [
-    { value: "site_web", label: "Site Web" },
+    { value: "site_vitrine", label: "Site Vitrine" },
+    { value: "site_ecommerce", label: "Site E-commerce" },
     { value: "community_management", label: "Community Management" },
     { value: "photo", label: "Photography" },
     { value: "video", label: "Vidéography" },
@@ -78,23 +79,23 @@ const ContactPage = () => {
 
   if (success) {
     return (
-      <div data-testid="contact-success" className="bg-[#050505] min-h-screen pt-32 px-6">
+      <div data-testid="contact-success" className="bg-white min-h-screen pt-32 px-6">
         <div className="max-w-xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass p-12 rounded-lg"
+            className="bg-[#F8F8F8] p-12 rounded-lg border border-[#E5E5E5]"
           >
             <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-10 h-10 text-green-500" />
             </div>
-            <h2 className="text-3xl font-bold text-white mb-4">Merci !</h2>
-            <p className="text-[#A1A1AA] text-lg mb-8">
+            <h2 className="text-3xl font-bold text-[#1A1A1A] mb-4">Merci !</h2>
+            <p className="text-[#666666] text-lg mb-8">
               Votre demande a bien été envoyée. Nous vous recontacterons dans les plus brefs délais.
             </p>
             <Button
               onClick={() => setSuccess(false)}
-              className="bg-[#6A0F1A] hover:bg-[#8B1422] text-white rounded-none px-8 py-4"
+              className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none px-8 py-4"
             >
               Envoyer une autre demande
             </Button>
@@ -105,10 +106,9 @@ const ContactPage = () => {
   }
 
   return (
-    <div data-testid="contact-page" className="bg-[#050505]">
+    <div data-testid="contact-page" className="bg-white">
       {/* Hero */}
-      <section className="relative pt-32 pb-16 px-6 overflow-hidden">
-        <div className="absolute inset-0 hero-glow" />
+      <section className="relative pt-32 pb-16 px-6 overflow-hidden bg-[#F8F8F8]">
         <div className="max-w-7xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -118,11 +118,11 @@ const ContactPage = () => {
           >
             <h1 
               data-testid="contact-headline"
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#1A1A1A] mb-6"
             >
-              <span className="text-[#6A0F1A]">Contactez</span>-nous
+              <span className="text-[#CE0202]">Contactez</span>-nous
             </h1>
-            <p className="text-lg lg:text-xl text-[#A1A1AA]">
+            <p className="text-lg lg:text-xl text-[#666666]">
               Une question, un projet ? Remplissez le formulaire ci-dessous et nous vous recontacterons rapidement.
             </p>
           </motion.div>
@@ -130,7 +130,7 @@ const ContactPage = () => {
       </section>
 
       {/* Contact Section */}
-      <section className="px-6 pb-24">
+      <section className="px-6 py-24 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             {/* Form */}
@@ -143,7 +143,7 @@ const ContactPage = () => {
               <form onSubmit={handleSubmit} data-testid="contact-form" className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="first_name">Prénom *</Label>
+                    <Label htmlFor="first_name" className="text-[#1A1A1A]">Prénom *</Label>
                     <Input
                       id="first_name"
                       name="first_name"
@@ -151,11 +151,11 @@ const ContactPage = () => {
                       value={formData.first_name}
                       onChange={handleChange}
                       required
-                      className="bg-black/50 border-white/10 focus:border-[#6A0F1A] h-12"
+                      className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="last_name">Nom *</Label>
+                    <Label htmlFor="last_name" className="text-[#1A1A1A]">Nom *</Label>
                     <Input
                       id="last_name"
                       name="last_name"
@@ -163,26 +163,26 @@ const ContactPage = () => {
                       value={formData.last_name}
                       onChange={handleChange}
                       required
-                      className="bg-black/50 border-white/10 focus:border-[#6A0F1A] h-12"
+                      className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="company">Entreprise</Label>
+                  <Label htmlFor="company" className="text-[#1A1A1A]">Entreprise</Label>
                   <Input
                     id="company"
                     name="company"
                     data-testid="input-company"
                     value={formData.company}
                     onChange={handleChange}
-                    className="bg-black/50 border-white/10 focus:border-[#6A0F1A] h-12"
+                    className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email" className="text-[#1A1A1A]">Email *</Label>
                     <Input
                       id="email"
                       name="email"
@@ -191,11 +191,11 @@ const ContactPage = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="bg-black/50 border-white/10 focus:border-[#6A0F1A] h-12"
+                      className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Téléphone</Label>
+                    <Label htmlFor="phone" className="text-[#1A1A1A]">Téléphone</Label>
                     <Input
                       id="phone"
                       name="phone"
@@ -203,14 +203,14 @@ const ContactPage = () => {
                       data-testid="input-phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="bg-black/50 border-white/10 focus:border-[#6A0F1A] h-12"
+                      className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label>Type de projet *</Label>
+                    <Label className="text-[#1A1A1A]">Type de projet *</Label>
                     <Select
                       value={formData.project_type}
                       onValueChange={(value) => setFormData(prev => ({ ...prev, project_type: value }))}
@@ -218,13 +218,13 @@ const ContactPage = () => {
                     >
                       <SelectTrigger 
                         data-testid="select-project-type"
-                        className="bg-black/50 border-white/10 focus:border-[#6A0F1A] h-12"
+                        className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
                       >
                         <SelectValue placeholder="Sélectionnez" />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#0A0A0A] border-white/10">
+                      <SelectContent className="bg-white border-[#E5E5E5]">
                         {projectTypes.map(type => (
-                          <SelectItem key={type.value} value={type.value}>
+                          <SelectItem key={type.value} value={type.value} className="text-[#1A1A1A]">
                             {type.label}
                           </SelectItem>
                         ))}
@@ -232,20 +232,20 @@ const ContactPage = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Budget estimé</Label>
+                    <Label className="text-[#1A1A1A]">Budget estimé</Label>
                     <Select
                       value={formData.budget}
                       onValueChange={(value) => setFormData(prev => ({ ...prev, budget: value }))}
                     >
                       <SelectTrigger 
                         data-testid="select-budget"
-                        className="bg-black/50 border-white/10 focus:border-[#6A0F1A] h-12"
+                        className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
                       >
                         <SelectValue placeholder="Sélectionnez" />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#0A0A0A] border-white/10">
+                      <SelectContent className="bg-white border-[#E5E5E5]">
                         {budgets.map(budget => (
-                          <SelectItem key={budget.value} value={budget.value}>
+                          <SelectItem key={budget.value} value={budget.value} className="text-[#1A1A1A]">
                             {budget.label}
                           </SelectItem>
                         ))}
@@ -255,7 +255,7 @@ const ContactPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="message">Message</Label>
+                  <Label htmlFor="message" className="text-[#1A1A1A]">Message</Label>
                   <Textarea
                     id="message"
                     name="message"
@@ -263,7 +263,7 @@ const ContactPage = () => {
                     value={formData.message}
                     onChange={handleChange}
                     rows={5}
-                    className="bg-black/50 border-white/10 focus:border-[#6A0F1A] resize-none"
+                    className="bg-white border-[#E5E5E5] focus:border-[#CE0202] resize-none text-[#1A1A1A]"
                     placeholder="Décrivez votre projet..."
                   />
                 </div>
@@ -274,11 +274,11 @@ const ContactPage = () => {
                     data-testid="checkbox-rgpd"
                     checked={formData.rgpd}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, rgpd: checked }))}
-                    className="mt-1"
+                    className="mt-1 border-[#E5E5E5]"
                   />
-                  <Label htmlFor="rgpd" className="text-sm text-[#A1A1AA] leading-relaxed">
+                  <Label htmlFor="rgpd" className="text-sm text-[#666666] leading-relaxed">
                     J'accepte que mes données soient traitées conformément à la{" "}
-                    <a href="/confidentialite" className="text-[#6A0F1A] hover:underline">
+                    <a href="/confidentialite" className="text-[#CE0202] hover:underline">
                       politique de confidentialité
                     </a>
                     . *
@@ -289,7 +289,7 @@ const ContactPage = () => {
                   type="submit"
                   data-testid="submit-btn"
                   disabled={loading}
-                  className="bg-[#6A0F1A] hover:bg-[#8B1422] text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider w-full sm:w-auto"
+                  className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider w-full sm:w-auto"
                 >
                   {loading ? "Envoi en cours..." : "Envoyer ma demande"}
                   <Send className="ml-2 w-4 h-4" />
@@ -304,39 +304,39 @@ const ContactPage = () => {
               viewport={{ once: true }}
               className="lg:col-span-5"
             >
-              <div className="glass p-8 rounded-lg mb-8">
-                <h3 className="text-xl font-bold text-white mb-6">Nos coordonnées</h3>
+              <div className="bg-[#F8F8F8] p-8 rounded-lg border border-[#E5E5E5] mb-8">
+                <h3 className="text-xl font-bold text-[#1A1A1A] mb-6">Nos coordonnées</h3>
                 <ul className="space-y-6">
                   <li className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-[#6A0F1A]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-5 h-5 text-[#6A0F1A]" />
+                    <div className="w-10 h-10 bg-[#CE0202]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-5 h-5 text-[#CE0202]" />
                     </div>
                     <div>
-                      <p className="text-white font-medium">Adresse</p>
-                      <p className="text-[#A1A1AA] text-sm">
+                      <p className="text-[#1A1A1A] font-medium">Adresse</p>
+                      <p className="text-[#666666] text-sm">
                         3 Boulevard du Marquisat de Houelbourg<br />
                         97122 Baie-Mahault, Guadeloupe
                       </p>
                     </div>
                   </li>
                   <li className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-[#6A0F1A]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Phone className="w-5 h-5 text-[#6A0F1A]" />
+                    <div className="w-10 h-10 bg-[#CE0202]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-5 h-5 text-[#CE0202]" />
                     </div>
                     <div>
-                      <p className="text-white font-medium">Téléphone</p>
-                      <a href="tel:0691266003" className="text-[#A1A1AA] text-sm hover:text-[#6A0F1A]">
+                      <p className="text-[#1A1A1A] font-medium">Téléphone</p>
+                      <a href="tel:0691266003" className="text-[#666666] text-sm hover:text-[#CE0202]">
                         0691 266 003
                       </a>
                     </div>
                   </li>
                   <li className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-[#6A0F1A]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Mail className="w-5 h-5 text-[#6A0F1A]" />
+                    <div className="w-10 h-10 bg-[#CE0202]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Mail className="w-5 h-5 text-[#CE0202]" />
                     </div>
                     <div>
-                      <p className="text-white font-medium">Email</p>
-                      <a href="mailto:leo.sperl@alphagency.fr" className="text-[#A1A1AA] text-sm hover:text-[#6A0F1A]">
+                      <p className="text-[#1A1A1A] font-medium">Email</p>
+                      <a href="mailto:leo.sperl@alphagency.fr" className="text-[#666666] text-sm hover:text-[#CE0202]">
                         leo.sperl@alphagency.fr
                       </a>
                     </div>
@@ -345,7 +345,7 @@ const ContactPage = () => {
               </div>
 
               {/* Map placeholder */}
-              <div className="aspect-[4/3] bg-white/5 rounded-lg overflow-hidden">
+              <div className="aspect-[4/3] bg-[#F8F8F8] rounded-lg overflow-hidden border border-[#E5E5E5]">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3828.8!2d-61.5891!3d16.2708!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTbCsDE2JzE0LjkiTiA2McKwMzUnMjAuOCJX!5e0!3m2!1sfr!2sfr!4v1600000000000!5m2!1sfr!2sfr"
                   width="100%"
