@@ -1,49 +1,69 @@
-import { useEffect } from "react";
-import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import { Toaster } from "sonner";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// Pages vitrine
+import HomePage from "./pages/HomePage";
+import AgencyPage from "./pages/AgencyPage";
+import OffersPage from "./pages/OffersPage";
+import PortfolioPage from "./pages/PortfolioPage";
+import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
+import ContactPage from "./pages/ContactPage";
+import LegalPage from "./pages/LegalPage";
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+// Dashboard pages
+import LoginPage from "./pages/dashboard/LoginPage";
+import DashboardLayout from "./pages/dashboard/DashboardLayout";
+import DashboardOverview from "./pages/dashboard/DashboardOverview";
+import ContactsPage from "./pages/dashboard/ContactsPage";
+import PipelinePage from "./pages/dashboard/PipelinePage";
+import QuotesPage from "./pages/dashboard/QuotesPage";
+import InvoicesPage from "./pages/dashboard/InvoicesPage";
+import SubscriptionsPage from "./pages/dashboard/SubscriptionsPage";
+import SettingsPage from "./pages/dashboard/SettingsPage";
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+// Layout
+import MainLayout from "./components/MainLayout";
 
 function App() {
   return (
     <div className="App">
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          style: {
+            background: '#0A0A0A',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: '#E1E1E1',
+          },
+        }}
+      />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
+          {/* Site vitrine */}
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/agence" element={<AgencyPage />} />
+            <Route path="/offres" element={<OffersPage />} />
+            <Route path="/realisations" element={<PortfolioPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/mentions-legales" element={<LegalPage type="mentions" />} />
+            <Route path="/confidentialite" element={<LegalPage type="privacy" />} />
+            <Route path="/cookies" element={<LegalPage type="cookies" />} />
+          </Route>
+          
+          {/* Dashboard */}
+          <Route path="/admin/login" element={<LoginPage />} />
+          <Route path="/admin" element={<DashboardLayout />}>
+            <Route index element={<DashboardOverview />} />
+            <Route path="contacts" element={<ContactsPage />} />
+            <Route path="pipeline" element={<PipelinePage />} />
+            <Route path="devis" element={<QuotesPage />} />
+            <Route path="factures" element={<InvoicesPage />} />
+            <Route path="abonnements" element={<SubscriptionsPage />} />
+            <Route path="parametres" element={<SettingsPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
