@@ -11,7 +11,8 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  Image
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 
@@ -47,6 +48,7 @@ const DashboardLayout = () => {
     { path: "/admin/devis", icon: FileText, label: "Devis" },
     { path: "/admin/factures", icon: Receipt, label: "Factures" },
     { path: "/admin/abonnements", icon: CreditCard, label: "Abonnements" },
+    { path: "/admin/realisations", icon: Image, label: "Réalisations" },
     { path: "/admin/parametres", icon: Settings, label: "Paramètres" }
   ];
 

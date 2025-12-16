@@ -20,6 +20,7 @@ import PipelinePage from "./pages/dashboard/PipelinePage";
 import QuotesPage from "./pages/dashboard/QuotesPage";
 import InvoicesPage from "./pages/dashboard/InvoicesPage";
 import SubscriptionsPage from "./pages/dashboard/SubscriptionsPage";
+import PortfolioManagePage from "./pages/dashboard/PortfolioManagePage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
 
 // Layout
@@ -63,6 +64,7 @@ function App() {
             <Route path="devis" element={<QuotesPage />} />
             <Route path="factures" element={<InvoicesPage />} />
             <Route path="abonnements" element={<SubscriptionsPage />} />
+            <Route path="realisations" element={<PortfolioManagePage />} />
             <Route path="parametres" element={<SettingsPage />} />
           </Route>
         </Routes>
