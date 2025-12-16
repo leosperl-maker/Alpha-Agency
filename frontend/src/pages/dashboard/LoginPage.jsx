@@ -64,7 +64,7 @@ const LoginPage = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <span className="text-4xl font-bold font-['Syne']">
-            <span className="text-[#6A0F1A]">A</span>
+            <span className="text-[#CE0202]">A</span>
             <span className="text-white">LPHA</span>
           </span>
           <p className="text-[#A1A1AA] mt-2">Dashboard Administration</p>
@@ -87,7 +87,7 @@ const LoginPage = () => {
                   value={formData.full_name}
                   onChange={handleChange}
                   required={!isLogin}
-                  className="bg-black/50 border-white/10 focus:border-[#6A0F1A] h-12"
+                  className="bg-black/50 border-white/10 focus:border-[#CE0202] h-12"
                   placeholder="Votre nom"
                 />
               </div>
@@ -105,7 +105,7 @@ const LoginPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="bg-black/50 border-white/10 focus:border-[#6A0F1A] h-12 pl-10"
+                  className="bg-black/50 border-white/10 focus:border-[#CE0202] h-12 pl-10"
                   placeholder="admin@alphagency.fr"
                 />
               </div>
@@ -123,7 +123,7 @@ const LoginPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="bg-black/50 border-white/10 focus:border-[#6A0F1A] h-12 pl-10 pr-10"
+                  className="bg-black/50 border-white/10 focus:border-[#CE0202] h-12 pl-10 pr-10"
                   placeholder="••••••••"
                 />
                 <button
@@ -140,7 +140,7 @@ const LoginPage = () => {
               type="submit"
               data-testid="submit-btn"
               disabled={loading}
-              className="w-full bg-[#6A0F1A] hover:bg-[#8B1422] text-white rounded-none py-6 text-sm font-bold uppercase tracking-wider"
+              className="w-full bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none py-6 text-sm font-bold uppercase tracking-wider"
             >
               {loading ? "Chargement..." : (isLogin ? "Se connecter" : "Créer le compte")}
             </Button>

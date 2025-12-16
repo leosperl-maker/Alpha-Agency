@@ -52,7 +52,7 @@ const DashboardOverview = () => {
       value: stats?.contacts?.total || 0,
       subValue: `${stats?.contacts?.new_leads || 0} nouveaux`,
       icon: Users,
-      color: "#6A0F1A",
+      color: "#CE0202",
       trend: "up"
     },
     {
@@ -184,9 +184,9 @@ const DashboardOverview = () => {
                 <Line 
                   type="monotone" 
                   dataKey="leads" 
-                  stroke="#6A0F1A" 
+                  stroke="#CE0202" 
                   strokeWidth={2}
-                  dot={{ fill: '#6A0F1A', strokeWidth: 2 }}
+                  dot={{ fill: '#CE0202', strokeWidth: 2 }}
                 />
               </LineChart>
             </ResponsiveContainer>

@@ -63,7 +63,7 @@ const DashboardLayout = () => {
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-white/5">
           <span className="text-2xl font-bold font-['Syne']">
-            <span className="text-[#6A0F1A]">A</span>
+            <span className="text-[#CE0202]">A</span>
             <span className="text-white">LPHA</span>
           </span>
           <button
@@ -85,7 +85,7 @@ const DashboardLayout = () => {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   isActive
-                    ? "bg-[#6A0F1A]/20 text-white border-l-2 border-[#6A0F1A]"
+                    ? "bg-[#CE0202]/20 text-white border-l-2 border-[#CE0202]"
                     : "text-[#A1A1AA] hover:text-white hover:bg-white/5"
                 }`
               }
@@ -100,8 +100,8 @@ const DashboardLayout = () => {
         {/* User & Logout */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-[#6A0F1A]/20 rounded-full flex items-center justify-center">
-              <span className="text-[#6A0F1A] font-bold">
+            <div className="w-10 h-10 bg-[#CE0202]/20 rounded-full flex items-center justify-center">
+              <span className="text-[#CE0202] font-bold">
                 {user?.full_name?.charAt(0) || "A"}
               </span>
             </div>
