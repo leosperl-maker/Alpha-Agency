@@ -1,0 +1,135 @@
+{
+  "identity": {
+    "name": "E1",
+    "role": "Anti-AI Creative Designer",
+    "mission": "Create a 'Digital Noir' aesthetic that blends high-tech precision with the organic warmth of Guadeloupe."
+  },
+  "typography": {
+    "headings": {
+      "font_family": "Syne, sans-serif",
+      "weights": ["700", "800"],
+      "usage": "Use for all H1-H3. Tight tracking (-0.02em).",
+      "import_url": "https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap"
+    },
+    "body": {
+      "font_family": "Manrope, sans-serif",
+      "weights": ["400", "500", "600"],
+      "usage": "Use for all body text, UI elements, and data.",
+      "import_url": "https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap"
+    },
+    "mono": {
+      "font_family": "JetBrains Mono, monospace",
+      "usage": "Use for small labels, KPIs, and technical details."
+    }
+  },
+  "colors": {
+    "palette": {
+      "background": {
+        "default": "#050505",
+        "paper": "#0A0A0A",
+        "subtle": "#121212"
+      },
+      "primary": {
+        "main": "#6A0F1A",
+        "light": "#8B1422",
+        "dark": "#4A0B12",
+        "foreground": "#FFFFFF"
+      },
+      "secondary": {
+        "main": "#E1E1E1",
+        "muted": "#A1A1AA"
+      },
+      "accent": {
+        "chrome": "#D4D4D8",
+        "glass": "rgba(255, 255, 255, 0.05)"
+      }
+    },
+    "gradients": {
+      "hero_glow": "radial-gradient(circle at 50% 50%, rgba(106, 15, 26, 0.15) 0%, rgba(5, 5, 5, 0) 70%)",
+      "card_border": "linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(106, 15, 26, 0.3) 100%)"
+    }
+  },
+  "visual_enhancers": {
+    "borders": "1px solid rgba(255, 255, 255, 0.08)",
+    "glassmorphism": {
+      "default": "backdrop-blur-xl bg-black/40 border border-white/10",
+      "heavy": "backdrop-blur-2xl bg-black/80 border border-white/5"
+    },
+    "shadows": {
+      "glow": "0 0 40px -10px rgba(106, 15, 26, 0.3)",
+      "sharp": "0 1px 2px 0 rgba(0, 0, 0, 0.5)"
+    },
+    "textures": "Add a subtle noise overlay (opacity 0.03) to the main background to kill the 'digital flatness'."
+  },
+  "grids": {
+    "marketing": {
+      "type": "Tetris Grid",
+      "classes": "grid grid-cols-1 md:grid-cols-12 gap-8",
+      "rules": "Never fill 100%. Use col-span-7 vs col-span-5 asymmetry."
+    },
+    "dashboard": {
+      "type": "Control Room",
+      "classes": "grid grid-cols-1 md:grid-cols-4 gap-4",
+      "rules": "Dense. No gaps > 16px. Use h-full for all children."
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#6A0F1A] text-white hover:bg-[#8B1422] rounded-none uppercase tracking-widest text-xs font-bold px-8 py-4 transition-all duration-300",
+      "outline": "border border-white/20 text-white hover:border-[#6A0F1A] hover:text-[#6A0F1A] bg-transparent rounded-none uppercase tracking-widest text-xs font-bold px-8 py-4"
+    },
+    "cards": {
+      "marketing": "bg-white/5 border border-white/10 hover:border-[#6A0F1A]/50 transition-colors duration-500 p-8 rounded-sm",
+      "dashboard": "bg-[#0A0A0A] border border-white/5 p-6 rounded-md"
+    },
+    "inputs": {
+      "style": "bg-black/50 border-white/10 focus:border-[#6A0F1A] rounded-sm h-12"
+    }
+  },
+  "motion": {
+    "scroll": "Use 'lenis' for smooth scrolling.",
+    "transitions": "transition-all duration-500 ease-[0.22, 1, 0.36, 1]",
+    "micro": "Buttons should have a magnetic pull or a subtle scale (0.98) on click."
+  },
+  "media": {
+    "image_urls": {
+      "hero_bg": {
+        "url": "https://images.unsplash.com/photo-1724355221699-962d54e6a119?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "desc": "Guadeloupe Aerial - Darken this by 70% and use as hero background",
+        "category": "background"
+      },
+      "team_meeting": {
+        "url": "https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "desc": "Modern team working - Use for 'L'Agence' section",
+        "category": "content"
+      },
+      "tech_abstract": {
+        "url": "https://images.unsplash.com/photo-1544380904-c686aad2fc40?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "desc": "3D Abstract Red/Black - Use for 'Expertises' background or cards",
+        "category": "decoration"
+      },
+      "guadeloupe_nature": {
+        "url": "https://images.unsplash.com/photo-1652300842180-abd09727d3f9?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "desc": "Guadeloupe Mountains - Use for 'Contact' section background (darkened)",
+        "category": "background"
+      }
+    }
+  },
+  "instructions_to_main_agent": [
+    "1. SETUP: Install 'lenis' for smooth scrolling immediately.",
+    "2. THEME: Force DARK MODE as default. The brand is 'Digital Noir'.",
+    "3. LAYOUT: Do not use standard Bootstrap containers. Use the 'Tetris Grid' for the landing page.",
+    "4. NAV: Create a floating glass navbar. It should NOT be full width. It should be a pill or a compact bar centered or right-aligned.",
+    "5. DASHBOARD: Keep it strictly functional. High contrast. No decorative gradients in the dashboard, only in the marketing site.",
+    "6. LOGO: Create a text-based logo using the 'Syne' font with a large 'A' in #6A0F1A if no SVG is available.",
+    "7. SHADCN: Customize all Shadcn components to remove the 'default Vercel look'. Set rounded-radius to '0.25rem' or '0' for a sharper look."
+  ],
+  "universal_guidelines": [
+    "Avoid 'AI Slop': No generic centered layouts.",
+    "Dark colors must be solid or subtle noise, NO muddy gradients.",
+    "Use 2-3x more spacing than typical (p-12, p-24).",
+    "All interactive elements must have data-testid.",
+    "Use 'sonner' for toasts.",
+    "Never use emoji icons. Use Lucide React icons."
+  ]
+}
