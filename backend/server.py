@@ -873,6 +873,22 @@ async def get_portfolio(category: Optional[str] = None):
     items = await db.portfolio.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
     return items
 
+@api_router.put("/portfolio/{item_id}", response_model=dict)
+async def update_portfolio_item(item_id: str, item: PortfolioCreate, current_user: dict = Depends(get_current_user)):
+    update_data = item.model_dump()
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    result = await db.portfolio.update_one({"id": item_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Réalisation non trouvée")
+    return {"message": "Réalisation mise à jour"}
+
+@api_router.delete("/portfolio/{item_id}", response_model=dict)
+async def delete_portfolio_item(item_id: str, current_user: dict = Depends(get_current_user)):
+    result = await db.portfolio.delete_one({"id": item_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Réalisation non trouvée")
+    return {"message": "Réalisation supprimée"}
+
 # ==================== LEAD FORM (PUBLIC) ====================
 
 @api_router.post("/lead", response_model=dict)
