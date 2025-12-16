@@ -30,7 +30,7 @@ const Navbar = () => {
       <nav
         data-testid="main-navbar"
         className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${
-          isScrolled ? "glass" : "bg-transparent"
+          isScrolled ? "bg-white/95 shadow-lg backdrop-blur-md" : "bg-white/80 backdrop-blur-sm"
         } rounded-full px-2 py-2`}
       >
         <div className="flex items-center gap-2">
@@ -40,10 +40,11 @@ const Navbar = () => {
             data-testid="logo-link"
             className="flex items-center gap-2 px-4"
           >
-            <span className="text-2xl font-bold font-['Syne']">
-              <span className="text-[#6A0F1A]">A</span>
-              <span className="text-white">LPHA</span>
-            </span>
+            <img 
+              src="https://customer-assets.emergentagent.com/job_webproject-alpha/artifacts/n1wsh7m3_Logo%20Header.png" 
+              alt="ALPHA Agency"
+              className="h-10 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -55,8 +56,8 @@ const Navbar = () => {
                 data-testid={`nav-${link.label.toLowerCase().replace(/[^a-z]/g, "")}`}
                 className={`px-4 py-2 text-sm font-medium transition-colors animated-underline ${
                   location.pathname === link.href
-                    ? "text-white"
-                    : "text-[#A1A1AA] hover:text-white"
+                    ? "text-[#1A1A1A]"
+                    : "text-[#666666] hover:text-[#1A1A1A]"
                 }`}
               >
                 {link.label}
@@ -68,7 +69,7 @@ const Navbar = () => {
           <Link to="/contact" className="hidden lg:block">
             <Button
               data-testid="cta-devis-btn"
-              className="bg-[#6A0F1A] hover:bg-[#8B1422] text-white rounded-full px-6 py-2 text-xs font-bold uppercase tracking-wider"
+              className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-full px-6 py-2 text-xs font-bold uppercase tracking-wider"
             >
               Demander un devis
             </Button>
@@ -77,7 +78,7 @@ const Navbar = () => {
           {/* Mobile Menu Button */}
           <button
             data-testid="mobile-menu-btn"
-            className="lg:hidden p-2 text-white"
+            className="lg:hidden p-2 text-[#1A1A1A]"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -89,7 +90,7 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div
           data-testid="mobile-menu"
-          className="fixed inset-0 z-40 glass-heavy pt-24"
+          className="fixed inset-0 z-40 bg-white pt-24"
         >
           <div className="flex flex-col items-center gap-6 p-8">
             {navLinks.map((link) => (
@@ -97,7 +98,7 @@ const Navbar = () => {
                 key={link.href}
                 to={link.href}
                 data-testid={`mobile-nav-${link.label.toLowerCase().replace(/[^a-z]/g, "")}`}
-                className="text-2xl font-semibold text-white"
+                className="text-2xl font-semibold text-[#1A1A1A]"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {link.label}
@@ -110,7 +111,7 @@ const Navbar = () => {
             >
               <Button
                 data-testid="mobile-cta-btn"
-                className="bg-[#6A0F1A] hover:bg-[#8B1422] text-white rounded-none px-8 py-4 text-sm font-bold uppercase tracking-wider"
+                className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none px-8 py-4 text-sm font-bold uppercase tracking-wider"
               >
                 Demander un devis
               </Button>
@@ -123,7 +124,7 @@ const Navbar = () => {
       <a
         href="tel:0691266003"
         data-testid="sticky-phone-btn"
-        className="fixed bottom-6 right-6 z-50 bg-[#6A0F1A] hover:bg-[#8B1422] text-white p-4 rounded-full shadow-lg transition-all glow-bordeaux-hover"
+        className="fixed bottom-6 right-6 z-50 bg-[#CE0202] hover:bg-[#B00202] text-white p-4 rounded-full shadow-lg transition-all glow-red-hover"
       >
         <Phone size={24} />
       </a>

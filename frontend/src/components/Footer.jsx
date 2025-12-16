@@ -9,10 +9,11 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <Link to="/" className="inline-block mb-6">
-              <span className="text-3xl font-bold font-['Syne']">
-                <span className="text-[#6A0F1A]">A</span>
-                <span className="text-white">LPHA</span>
-              </span>
+              <img 
+                src="https://customer-assets.emergentagent.com/job_webproject-alpha/artifacts/o1l1nzgi_Agence%20de%20Communication%20360%C2%B0%20%281%29.png" 
+                alt="ALPHA Agency - Agence de Communication 360°"
+                className="h-16 w-auto"
+              />
             </Link>
             <p className="text-[#A1A1AA] text-sm mb-6">
               Agence de communication digitale 360° en Guadeloupe. Site web, community management, photo, vidéo et publicité digitale.
@@ -23,7 +24,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="social-linkedin"
-                className="text-[#A1A1AA] hover:text-[#6A0F1A] transition-colors"
+                className="text-[#A1A1AA] hover:text-[#CE0202] transition-colors"
               >
                 <Linkedin size={20} />
               </a>
@@ -32,7 +33,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="social-instagram"
-                className="text-[#A1A1AA] hover:text-[#6A0F1A] transition-colors"
+                className="text-[#A1A1AA] hover:text-[#CE0202] transition-colors"
               >
                 <Instagram size={20} />
               </a>
@@ -41,7 +42,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="social-facebook"
-                className="text-[#A1A1AA] hover:text-[#6A0F1A] transition-colors"
+                className="text-[#A1A1AA] hover:text-[#CE0202] transition-colors"
               >
                 <Facebook size={20} />
               </a>
@@ -55,6 +56,11 @@ const Footer = () => {
               <li>
                 <Link to="/offres" className="text-[#A1A1AA] hover:text-white text-sm animated-underline">
                   Site web à 90€/mois
+                </Link>
+              </li>
+              <li>
+                <Link to="/offres" className="text-[#A1A1AA] hover:text-white text-sm animated-underline">
+                  Site e-commerce
                 </Link>
               </li>
               <li>
@@ -112,20 +118,20 @@ const Footer = () => {
             <h4 className="text-white font-semibold mb-6 uppercase text-sm tracking-wider">Contact</h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
-                <MapPin size={18} className="text-[#6A0F1A] mt-0.5 flex-shrink-0" />
+                <MapPin size={18} className="text-[#CE0202] mt-0.5 flex-shrink-0" />
                 <span className="text-[#A1A1AA] text-sm">
                   3 Boulevard du Marquisat de Houelbourg<br />
                   97122 Baie-Mahault, Guadeloupe
                 </span>
               </li>
               <li className="flex items-center gap-3">
-                <Phone size={18} className="text-[#6A0F1A] flex-shrink-0" />
+                <Phone size={18} className="text-[#CE0202] flex-shrink-0" />
                 <a href="tel:0691266003" className="text-[#A1A1AA] hover:text-white text-sm animated-underline">
                   0691 266 003
                 </a>
               </li>
               <li className="flex items-center gap-3">
-                <Mail size={18} className="text-[#6A0F1A] flex-shrink-0" />
+                <Mail size={18} className="text-[#CE0202] flex-shrink-0" />
                 <a href="mailto:leo.sperl@alphagency.fr" className="text-[#A1A1AA] hover:text-white text-sm animated-underline">
                   leo.sperl@alphagency.fr
                 </a>
