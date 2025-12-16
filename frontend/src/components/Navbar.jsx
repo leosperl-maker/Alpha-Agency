@@ -21,7 +21,7 @@ const Navbar = () => {
     { href: "/agence", label: "L'agence" },
     { href: "/offres", label: "Nos offres" },
     { href: "/realisations", label: "Réalisations" },
-    { href: "/blog", label: "Blog" },
+    { href: "/actualites", label: "Actualités" },
     { href: "/contact", label: "Contact" },
   ];
 

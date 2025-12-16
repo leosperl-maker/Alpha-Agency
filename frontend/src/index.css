@@ -186,7 +186,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-outline:hover {
     border-color: #CE0202;
-    color: #CE0202;
+    background-color: #CE0202;
+    color: white;
 }
 
 /* Card styles */

@@ -12,7 +12,7 @@ const Footer = () => {
               <img 
                 src="https://customer-assets.emergentagent.com/job_webproject-alpha/artifacts/o1l1nzgi_Agence%20de%20Communication%20360%C2%B0%20%281%29.png" 
                 alt="ALPHA Agency - Agence de Communication 360°"
-                className="h-16 w-auto"
+                className="h-28 w-auto"
               />
             </Link>
             <p className="text-[#A1A1AA] text-sm mb-6">
@@ -101,8 +101,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/blog" className="text-[#A1A1AA] hover:text-white text-sm animated-underline">
-                  Blog
+                <Link to="/actualites" className="text-[#A1A1AA] hover:text-white text-sm animated-underline">
+                  Actualités
                 </Link>
               </li>
               <li>
