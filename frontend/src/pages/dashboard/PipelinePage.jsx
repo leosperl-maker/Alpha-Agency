@@ -109,36 +109,36 @@ const PipelinePage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Pipeline</h1>
-          <p className="text-[#A1A1AA]">Gérez vos opportunités commerciales</p>
+          <h1 className="text-2xl font-bold text-[#1A1A1A]">Pipeline</h1>
+          <p className="text-[#666666] text-sm">Gérez vos opportunités commerciales</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button 
               data-testid="add-opportunity-btn"
               onClick={resetForm}
-              className="bg-[#6A0F1A] hover:bg-[#8B1422] text-white"
+              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
             >
               <Plus className="w-4 h-4 mr-2" />
               Nouvelle opportunité
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[#0A0A0A] border-white/10 max-w-lg">
+          <DialogContent className="bg-white border-[#E5E5E5] max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-white">Nouvelle opportunité</DialogTitle>
+              <DialogTitle className="text-[#1A1A1A]">Nouvelle opportunité</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Contact *</Label>
+                <Label className="text-[#1A1A1A]">Contact *</Label>
                 <Select
                   value={formData.contact_id}
                   onValueChange={(value) => setFormData({...formData, contact_id: value})}
                   required
                 >
-                  <SelectTrigger className="bg-black/50 border-white/10">
+                  <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
                     <SelectValue placeholder="Sélectionner un contact" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0A0A0A] border-white/10">
+                  <SelectContent className="bg-white border-[#E5E5E5]">
                     {contacts.map((contact) => (
                       <SelectItem key={contact.id} value={contact.id}>
                         {contact.first_name} {contact.last_name}
@@ -148,83 +148,83 @@ const PipelinePage = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Titre *</Label>
+                <Label className="text-[#1A1A1A]">Titre *</Label>
                 <Input
                   value={formData.title}
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
                   required
                   placeholder="Ex: Site web vitrine"
-                  className="bg-black/50 border-white/10"
+                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Montant (€) *</Label>
+                  <Label className="text-[#1A1A1A]">Montant (€) *</Label>
                   <Input
                     type="number"
                     value={formData.amount}
                     onChange={(e) => setFormData({...formData, amount: e.target.value})}
                     required
                     placeholder="1000"
-                    className="bg-black/50 border-white/10"
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Probabilité (%)</Label>
+                  <Label className="text-[#1A1A1A]">Probabilité (%)</Label>
                   <Input
                     type="number"
                     min="0"
                     max="100"
                     value={formData.probability}
                     onChange={(e) => setFormData({...formData, probability: parseInt(e.target.value)})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Type d'offre</Label>
+                  <Label className="text-[#1A1A1A]">Type d'offre</Label>
                   <Select
                     value={formData.offer_type}
                     onValueChange={(value) => setFormData({...formData, offer_type: value})}
                   >
-                    <SelectTrigger className="bg-black/50 border-white/10">
+                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
                       <SelectValue placeholder="Sélectionner" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#0A0A0A] border-white/10">
+                    <SelectContent className="bg-white border-[#E5E5E5]">
                       <SelectItem value="site_web">Site Web 90€/mois</SelectItem>
                       <SelectItem value="cm">Community Management</SelectItem>
-                      <SelectItem value="photo">Photography</SelectItem>
-                      <SelectItem value="video">Vidéography</SelectItem>
+                      <SelectItem value="photo">Photographie</SelectItem>
+                      <SelectItem value="video">Vidéographie</SelectItem>
                       <SelectItem value="ads">Publicité Digitale</SelectItem>
                       <SelectItem value="pack_360">Pack 360°</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Date de clôture prévue</Label>
+                  <Label className="text-[#1A1A1A]">Date de clôture prévue</Label>
                   <Input
                     type="date"
                     value={formData.expected_close_date}
                     onChange={(e) => setFormData({...formData, expected_close_date: e.target.value})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Notes</Label>
+                <Label className="text-[#1A1A1A]">Notes</Label>
                 <Textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                  className="bg-black/50 border-white/10"
+                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   rows={3}
                 />
               </div>
               <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Annuler
                 </Button>
-                <Button type="submit" className="bg-[#6A0F1A] hover:bg-[#8B1422]">
+                <Button type="submit" className="bg-[#CE0202] hover:bg-[#B00202] text-white">
                   Créer
                 </Button>
               </div>
@@ -238,7 +238,7 @@ const PipelinePage = () => {
         <div className="flex gap-4 overflow-x-auto pb-4">
           {columns.map((col) => (
             <div key={col.id} className="flex-shrink-0 w-72">
-              <div className="h-96 bg-white/5 animate-pulse rounded-lg" />
+              <div className="h-96 bg-[#E5E5E5] animate-pulse rounded-lg" />
             </div>
           ))}
         </div>
@@ -250,50 +250,50 @@ const PipelinePage = () => {
               data-testid={`pipeline-column-${column.id}`}
               className="flex-shrink-0 w-72"
             >
-              <Card className="pipeline-column h-full">
-                <CardHeader className="pb-3">
+              <div className="bg-white rounded-lg border border-[#E5E5E5] h-full">
+                <div className="p-4 border-b border-[#E5E5E5]">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div 
                         className="w-3 h-3 rounded-full"
                         style={{ backgroundColor: column.color }}
                       />
-                      <CardTitle className="text-white text-sm font-medium">
+                      <span className="text-[#1A1A1A] text-sm font-medium">
                         {column.label}
-                      </CardTitle>
-                      <Badge variant="secondary" className="bg-white/10 text-white">
+                      </span>
+                      <Badge variant="secondary" className="bg-[#F8F8F8] text-[#666666]">
                         {(pipeline[column.id] || []).length}
                       </Badge>
                     </div>
                   </div>
-                  <p className="text-[#A1A1AA] text-xs font-mono">
+                  <p className="text-[#666666] text-xs font-mono mt-1">
                     {getColumnTotal(column.id).toLocaleString()}€
                   </p>
-                </CardHeader>
-                <CardContent className="space-y-3">
+                </div>
+                <div className="p-3 space-y-3">
                   {(pipeline[column.id] || []).map((opp) => (
                     <div
                       key={opp.id}
                       data-testid={`opportunity-${opp.id}`}
-                      className="pipeline-card"
+                      className="bg-[#F8F8F8] rounded-lg p-3 border border-[#E5E5E5]"
                     >
-                      <h4 className="text-white font-medium text-sm mb-2">{opp.title}</h4>
-                      <div className="flex items-center gap-2 text-xs text-[#A1A1AA] mb-2">
+                      <h4 className="text-[#1A1A1A] font-medium text-sm mb-2">{opp.title}</h4>
+                      <div className="flex items-center gap-2 text-xs text-[#666666] mb-2">
                         <User className="w-3 h-3" />
                         <span>
                           {opp.contact?.first_name} {opp.contact?.last_name}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-[#6A0F1A] font-bold text-sm">
+                        <span className="text-[#CE0202] font-bold text-sm">
                           {opp.amount?.toLocaleString()}€
                         </span>
-                        <Badge className="bg-white/10 text-white text-xs">
+                        <Badge className="bg-[#E5E5E5] text-[#666666] text-xs">
                           {opp.probability}%
                         </Badge>
                       </div>
                       {opp.expected_close_date && (
-                        <div className="flex items-center gap-1 text-xs text-[#A1A1AA] mt-2">
+                        <div className="flex items-center gap-1 text-xs text-[#666666] mt-2">
                           <Calendar className="w-3 h-3" />
                           <span>{new Date(opp.expected_close_date).toLocaleDateString('fr-FR')}</span>
                         </div>
@@ -303,10 +303,10 @@ const PipelinePage = () => {
                         value={opp.status}
                         onValueChange={(value) => handleStatusChange(opp.id, value)}
                       >
-                        <SelectTrigger className="mt-3 h-8 text-xs bg-black/30 border-white/5">
+                        <SelectTrigger className="mt-3 h-8 text-xs bg-white border-[#E5E5E5] text-[#1A1A1A]">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#0A0A0A] border-white/10">
+                        <SelectContent className="bg-white border-[#E5E5E5]">
                           {columns.map((col) => (
                             <SelectItem key={col.id} value={col.id}>
                               {col.label}
@@ -317,12 +317,12 @@ const PipelinePage = () => {
                     </div>
                   ))}
                   {(pipeline[column.id] || []).length === 0 && (
-                    <p className="text-[#A1A1AA] text-xs text-center py-8">
+                    <p className="text-[#666666] text-xs text-center py-8">
                       Aucune opportunité
                     </p>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           ))}
         </div>

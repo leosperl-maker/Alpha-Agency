@@ -123,20 +123,20 @@ const ContactsPage = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      nouveau: "bg-blue-500/20 text-blue-500",
-      qualifie: "bg-purple-500/20 text-purple-500",
-      en_discussion: "bg-yellow-500/20 text-yellow-500",
-      client: "bg-green-500/20 text-green-500",
-      perdu: "bg-red-500/20 text-red-500"
+      nouveau: "bg-blue-100 text-blue-700",
+      qualifie: "bg-purple-100 text-purple-700",
+      en_discussion: "bg-yellow-100 text-yellow-700",
+      client: "bg-green-100 text-green-700",
+      perdu: "bg-red-100 text-red-700"
     };
     return styles[status] || styles.nouveau;
   };
 
   const getScoreBadge = (score) => {
     const styles = {
-      chaud: "bg-red-500/20 text-red-500",
-      tiede: "bg-yellow-500/20 text-yellow-500",
-      froid: "bg-blue-500/20 text-blue-500"
+      chaud: "bg-red-100 text-red-700",
+      tiede: "bg-yellow-100 text-yellow-700",
+      froid: "bg-blue-100 text-blue-700"
     };
     return styles[score] || styles.tiede;
   };
@@ -146,86 +146,86 @@ const ContactsPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Contacts</h1>
-          <p className="text-[#A1A1AA]">{contacts.length} contacts au total</p>
+          <h1 className="text-2xl font-bold text-[#1A1A1A]">Contacts</h1>
+          <p className="text-[#666666] text-sm">{contacts.length} contacts au total</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button 
               data-testid="add-contact-btn"
               onClick={resetForm}
-              className="bg-[#6A0F1A] hover:bg-[#8B1422] text-white"
+              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
             >
               <Plus className="w-4 h-4 mr-2" />
               Nouveau contact
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[#0A0A0A] border-white/10">
+          <DialogContent className="bg-white border-[#E5E5E5]">
             <DialogHeader>
-              <DialogTitle className="text-white">
+              <DialogTitle className="text-[#1A1A1A]">
                 {editingContact ? "Modifier le contact" : "Nouveau contact"}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Prénom *</Label>
+                  <Label className="text-[#1A1A1A]">Prénom *</Label>
                   <Input
                     value={formData.first_name}
                     onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                     required
-                    className="bg-black/50 border-white/10"
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Nom *</Label>
+                  <Label className="text-[#1A1A1A]">Nom *</Label>
                   <Input
                     value={formData.last_name}
                     onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                     required
-                    className="bg-black/50 border-white/10"
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Email *</Label>
+                <Label className="text-[#1A1A1A]">Email *</Label>
                 <Input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   required
-                  className="bg-black/50 border-white/10"
+                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Téléphone</Label>
+                  <Label className="text-[#1A1A1A]">Téléphone</Label>
                   <Input
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Entreprise</Label>
+                  <Label className="text-[#1A1A1A]">Entreprise</Label>
                   <Input
                     value={formData.company}
                     onChange={(e) => setFormData({...formData, company: e.target.value})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Statut</Label>
+                  <Label className="text-[#1A1A1A]">Statut</Label>
                   <Select
                     value={formData.status}
                     onValueChange={(value) => setFormData({...formData, status: value})}
                   >
-                    <SelectTrigger className="bg-black/50 border-white/10">
+                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#0A0A0A] border-white/10">
+                    <SelectContent className="bg-white border-[#E5E5E5]">
                       <SelectItem value="nouveau">Nouveau</SelectItem>
                       <SelectItem value="qualifie">Qualifié</SelectItem>
                       <SelectItem value="en_discussion">En discussion</SelectItem>
@@ -235,15 +235,15 @@ const ContactsPage = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Score</Label>
+                  <Label className="text-[#1A1A1A]">Score</Label>
                   <Select
                     value={formData.score}
                     onValueChange={(value) => setFormData({...formData, score: value})}
                   >
-                    <SelectTrigger className="bg-black/50 border-white/10">
+                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#0A0A0A] border-white/10">
+                    <SelectContent className="bg-white border-[#E5E5E5]">
                       <SelectItem value="chaud">Chaud</SelectItem>
                       <SelectItem value="tiède">Tiède</SelectItem>
                       <SelectItem value="froid">Froid</SelectItem>
@@ -252,10 +252,10 @@ const ContactsPage = () => {
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Annuler
                 </Button>
-                <Button type="submit" className="bg-[#6A0F1A] hover:bg-[#8B1422]">
+                <Button type="submit" className="bg-[#CE0202] hover:bg-[#B00202] text-white">
                   {editingContact ? "Mettre à jour" : "Créer"}
                 </Button>
               </div>
@@ -267,21 +267,21 @@ const ContactsPage = () => {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A1A1AA]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
           <Input
             data-testid="search-contacts"
             placeholder="Rechercher un contact..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-black/50 border-white/10"
+            className="pl-10 bg-white border-[#E5E5E5] text-[#1A1A1A]"
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-48 bg-black/50 border-white/10">
+          <SelectTrigger className="w-48 bg-white border-[#E5E5E5] text-[#1A1A1A]">
             <Filter className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Filtrer par statut" />
           </SelectTrigger>
-          <SelectContent className="bg-[#0A0A0A] border-white/10">
+          <SelectContent className="bg-white border-[#E5E5E5]">
             <SelectItem value="all">Tous les statuts</SelectItem>
             <SelectItem value="nouveau">Nouveau</SelectItem>
             <SelectItem value="qualifie">Qualifié</SelectItem>
@@ -296,86 +296,82 @@ const ContactsPage = () => {
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-white/5 animate-pulse rounded-lg" />
+            <div key={i} className="h-24 bg-[#E5E5E5] animate-pulse rounded-lg" />
           ))}
         </div>
       ) : filteredContacts.length === 0 ? (
-        <Card className="card-dashboard">
-          <CardContent className="p-12 text-center">
-            <p className="text-[#A1A1AA]">Aucun contact trouvé</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-12 text-center">
+          <p className="text-[#666666]">Aucun contact trouvé</p>
+        </div>
       ) : (
         <div className="space-y-4">
           {filteredContacts.map((contact) => (
-            <Card 
+            <div 
               key={contact.id}
               data-testid={`contact-${contact.id}`}
-              className="card-dashboard hover:border-[#6A0F1A]/30 transition-colors"
+              className="bg-white rounded-lg border border-[#E5E5E5] p-4 hover:border-[#CE0202]/30 transition-colors"
             >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[#6A0F1A]/20 rounded-full flex items-center justify-center">
-                      <span className="text-[#6A0F1A] font-bold">
-                        {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-white font-semibold">
-                        {contact.first_name} {contact.last_name}
-                      </h3>
-                      <div className="flex items-center gap-4 text-sm text-[#A1A1AA]">
-                        <span className="flex items-center gap-1">
-                          <Mail className="w-3 h-3" />
-                          {contact.email}
-                        </span>
-                        {contact.phone && (
-                          <span className="flex items-center gap-1">
-                            <Phone className="w-3 h-3" />
-                            {contact.phone}
-                          </span>
-                        )}
-                        {contact.company && (
-                          <span className="flex items-center gap-1">
-                            <Building className="w-3 h-3" />
-                            {contact.company}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[#CE0202]/10 rounded-full flex items-center justify-center">
+                    <span className="text-[#CE0202] font-bold">
+                      {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="flex gap-2">
-                      <Badge className={getStatusBadge(contact.status)}>
-                        {contact.status}
-                      </Badge>
-                      <Badge className={getScoreBadge(contact.score)}>
-                        {contact.score}
-                      </Badge>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEditDialog(contact)}
-                        className="text-[#A1A1AA] hover:text-white"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(contact.id)}
-                        className="text-[#A1A1AA] hover:text-red-500"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                  <div>
+                    <h3 className="text-[#1A1A1A] font-semibold">
+                      {contact.first_name} {contact.last_name}
+                    </h3>
+                    <div className="flex items-center gap-4 text-sm text-[#666666]">
+                      <span className="flex items-center gap-1">
+                        <Mail className="w-3 h-3" />
+                        {contact.email}
+                      </span>
+                      {contact.phone && (
+                        <span className="flex items-center gap-1">
+                          <Phone className="w-3 h-3" />
+                          {contact.phone}
+                        </span>
+                      )}
+                      {contact.company && (
+                        <span className="flex items-center gap-1">
+                          <Building className="w-3 h-3" />
+                          {contact.company}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex items-center gap-4">
+                  <div className="flex gap-2">
+                    <Badge className={getStatusBadge(contact.status)}>
+                      {contact.status}
+                    </Badge>
+                    <Badge className={getScoreBadge(contact.score)}>
+                      {contact.score}
+                    </Badge>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openEditDialog(contact)}
+                      className="text-[#666666] hover:text-[#1A1A1A]"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(contact.id)}
+                      className="text-[#666666] hover:text-red-500"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       )}
