@@ -1,13 +1,19 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, Filter } from "lucide-react";
+import { ExternalLink, Filter, X, ChevronLeft, ChevronRight, Download, Play, Pause, Volume2 } from "lucide-react";
 import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Dialog, DialogContent } from "../components/ui/dialog";
 import { portfolioAPI } from "../lib/api";
 
 const PortfolioPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const filters = [
     { id: "all", label: "Tous" },
@@ -20,71 +26,126 @@ const PortfolioPage = () => {
     { id: "ads", label: "Ads" }
   ];
 
-  // Placeholder data for demo
+  // Placeholder data with rich content
   const placeholderItems = [
     {
       id: "1",
       title: "Restaurant Le Marin",
       category: "site_web",
-      description: "Site vitrine responsive avec réservation en ligne",
+      description: "Création d'un site vitrine responsive avec système de réservation en ligne pour un restaurant gastronomique en Guadeloupe. Design moderne et élégant, mis en avant des plats signature et de l'ambiance du lieu.",
       image_url: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80",
-      tags: ["Site Web", "Restaurant"]
+      gallery: [
+        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
+        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80",
+        "https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?w=1200&q=80"
+      ],
+      tags: ["Site Web", "Restaurant", "Responsive"],
+      link: "https://example.com",
+      client: "Le Marin",
+      date: "2024"
     },
     {
       id: "2",
       title: "Boutique Créole",
       category: "site_ecommerce",
-      description: "E-commerce de produits locaux guadeloupéens",
+      description: "Développement d'une boutique e-commerce complète pour la vente de produits locaux guadeloupéens. Intégration de paiement sécurisé, gestion des stocks et livraison.",
       image_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80",
-      tags: ["E-commerce", "Boutique"]
+      gallery: [
+        "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80",
+        "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1200&q=80"
+      ],
+      tags: ["E-commerce", "Boutique", "Stripe"],
+      client: "Boutique Créole",
+      date: "2024"
     },
     {
       id: "3",
       title: "Cabinet d'Avocats",
       category: "site_web",
-      description: "Site institutionnel avec prise de rendez-vous",
+      description: "Site institutionnel professionnel avec prise de rendez-vous en ligne et présentation de l'équipe et des domaines d'expertise.",
       image_url: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&q=80",
-      tags: ["Site Web", "Services"]
+      gallery: [
+        "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1200&q=80"
+      ],
+      tags: ["Site Web", "Services", "Juridique"],
+      client: "Cabinet Martin & Associés",
+      date: "2024"
     },
     {
       id: "4",
-      title: "Campagne Social Media",
+      title: "Campagne Social Media - Resort",
       category: "reseaux_sociaux",
-      description: "Stratégie et création de contenu Instagram",
+      description: "Stratégie de contenu complète pour Instagram et Facebook. Création de posts, stories et reels pour augmenter l'engagement et les réservations.",
       image_url: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&q=80",
-      tags: ["Social Media", "Instagram"]
+      gallery: [
+        "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=1200&q=80",
+        "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=1200&q=80",
+        "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=1200&q=80"
+      ],
+      tags: ["Social Media", "Instagram", "Facebook"],
+      client: "Paradise Resort",
+      date: "2024"
     },
     {
       id: "5",
-      title: "Shooting Hôtel",
+      title: "Shooting Hôtel 4 Étoiles",
       category: "photo",
-      description: "Photos corporate et lifestyle pour hôtel 4 étoiles",
+      description: "Reportage photo complet pour un hôtel de luxe : chambres, espaces communs, restaurant, piscine. Photos lifestyle et ambiance pour communication print et web.",
       image_url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
-      tags: ["Photo", "Hôtellerie"]
+      gallery: [
+        "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80",
+        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1200&q=80",
+        "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1200&q=80",
+        "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=1200&q=80"
+      ],
+      tags: ["Photo", "Hôtellerie", "Lifestyle"],
+      client: "Hôtel La Créole",
+      date: "2024"
     },
     {
       id: "6",
-      title: "Vidéo Promotionnelle",
+      title: "Spot Publicitaire - Lancement Produit",
       category: "video",
-      description: "Spot vidéo pour lancement de produit",
+      description: "Réalisation d'un spot vidéo de 30 secondes pour le lancement d'un nouveau produit. Captation, montage et post-production.",
       image_url: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600&q=80",
-      tags: ["Vidéo", "Marketing"]
+      gallery: [
+        "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1200&q=80"
+      ],
+      tags: ["Vidéo", "Marketing", "Publicité"],
+      client: "Tropical Drinks",
+      date: "2024"
     },
     {
       id: "7",
       title: "Identité Visuelle Restaurant",
       category: "infographie",
-      description: "Création de logo, carte de visite et menu",
+      description: "Création complète de l'identité visuelle : logo, charte graphique, carte de visite, menu, packaging. Design moderne et élégant inspiré de la gastronomie locale.",
       image_url: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80",
-      tags: ["Infographie", "Branding"]
+      gallery: [
+        "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=1200&q=80",
+        "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=1200&q=80"
+      ],
+      tags: ["Infographie", "Branding", "Logo"],
+      client: "Saveurs Antillaises",
+      date: "2024",
+      documents: [
+        { name: "Charte graphique.pdf", url: "#" },
+        { name: "Logo HD.zip", url: "#" }
+      ]
     },
     {
       id: "8",
-      title: "Flyers Événement",
-      category: "infographie",
-      description: "Conception de supports print pour événement",
+      title: "Pub Radio - Festival",
+      category: "ads",
+      description: "Création d'un spot radio de 20 secondes pour la promotion d'un festival de musique. Composition musicale originale et voix off professionnelle.",
       image_url: "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=600&q=80",
-      tags: ["Infographie", "Print"]
+      gallery: [
+        "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=1200&q=80"
+      ],
+      tags: ["Publicité", "Radio", "Audio"],
+      client: "Festival Gwoka",
+      date: "2024",
+      audio_url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
     }
   ];
 
@@ -105,6 +166,41 @@ const PortfolioPage = () => {
   const filteredItems = activeFilter === "all" 
     ? items 
     : items.filter(item => item.category === activeFilter);
+
+  const handleItemClick = (item) => {
+    setSelectedItem(item);
+    setCurrentImageIndex(0);
+    setIsPlaying(false);
+    setDialogOpen(true);
+  };
+
+  const nextImage = () => {
+    if (selectedItem?.gallery) {
+      setCurrentImageIndex((prev) => 
+        prev === selectedItem.gallery.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  const prevImage = () => {
+    if (selectedItem?.gallery) {
+      setCurrentImageIndex((prev) => 
+        prev === 0 ? selectedItem.gallery.length - 1 : prev - 1
+      );
+    }
+  };
+
+  const toggleAudio = () => {
+    const audio = document.getElementById('portfolio-audio');
+    if (audio) {
+      if (isPlaying) {
+        audio.pause();
+      } else {
+        audio.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
 
   return (
     <div data-testid="portfolio-page" className="bg-white">
@@ -178,6 +274,7 @@ const PortfolioPage = () => {
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     data-testid={`portfolio-item-${index}`}
                     className="group relative aspect-[4/3] rounded-lg overflow-hidden cursor-pointer shadow-lg"
+                    onClick={() => handleItemClick(item)}
                   >
                     {/* Image */}
                     <div 
@@ -191,7 +288,7 @@ const PortfolioPage = () => {
                     {/* Content */}
                     <div className="absolute inset-0 p-6 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="flex flex-wrap gap-2 mb-3">
-                        {item.tags?.map((tag, i) => (
+                        {item.tags?.slice(0, 2).map((tag, i) => (
                           <span 
                             key={i}
                             className="text-xs px-2 py-1 bg-[#CE0202]/80 text-white rounded"
@@ -201,17 +298,7 @@ const PortfolioPage = () => {
                         ))}
                       </div>
                       <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-                      <p className="text-white/80 text-sm">{item.description}</p>
-                      {item.link && (
-                        <a 
-                          href={item.link} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="mt-4 inline-flex items-center gap-2 text-[#CE0202] text-sm font-semibold"
-                        >
-                          Voir le projet <ExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
+                      <p className="text-white/80 text-sm line-clamp-2">{item.description}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -227,6 +314,149 @@ const PortfolioPage = () => {
           )}
         </div>
       </section>
+
+      {/* Detail Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="bg-white border-[#E5E5E5] max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+          {selectedItem && (
+            <div className="flex flex-col">
+              {/* Gallery */}
+              <div className="relative aspect-video bg-black">
+                <img
+                  src={selectedItem.gallery?.[currentImageIndex] || selectedItem.image_url}
+                  alt={selectedItem.title}
+                  className="w-full h-full object-contain"
+                />
+                
+                {/* Gallery Navigation */}
+                {selectedItem.gallery && selectedItem.gallery.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
+                    >
+                      <ChevronLeft className="w-6 h-6 text-[#1A1A1A]" />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
+                    >
+                      <ChevronRight className="w-6 h-6 text-[#1A1A1A]" />
+                    </button>
+                    
+                    {/* Dots */}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                      {selectedItem.gallery.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setCurrentImageIndex(i)}
+                          className={`w-2 h-2 rounded-full transition-colors ${
+                            i === currentImageIndex ? 'bg-[#CE0202]' : 'bg-white/50'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* Close Button */}
+                <button
+                  onClick={() => setDialogOpen(false)}
+                  className="absolute top-4 right-4 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-[#1A1A1A]" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-8">
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {selectedItem.tags?.map((tag, i) => (
+                    <Badge key={i} className="bg-[#CE0202]/10 text-[#CE0202] border-none">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+
+                {/* Title & Meta */}
+                <h2 className="text-3xl font-bold text-[#1A1A1A] mb-2">{selectedItem.title}</h2>
+                <div className="flex items-center gap-4 text-sm text-[#666666] mb-6">
+                  {selectedItem.client && <span>Client: {selectedItem.client}</span>}
+                  {selectedItem.date && <span>• {selectedItem.date}</span>}
+                </div>
+
+                {/* Description */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold text-[#1A1A1A] mb-3">Description du projet</h3>
+                  <p className="text-[#666666] leading-relaxed">{selectedItem.description}</p>
+                </div>
+
+                {/* Audio Player */}
+                {selectedItem.audio_url && (
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
+                      <Volume2 className="w-5 h-5 text-[#CE0202]" />
+                      Écouter la réalisation audio
+                    </h3>
+                    <div className="bg-[#F8F8F8] p-4 rounded-lg border border-[#E5E5E5]">
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={toggleAudio}
+                          className="w-12 h-12 bg-[#CE0202] hover:bg-[#B00202] text-white rounded-full flex items-center justify-center transition-colors"
+                        >
+                          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-1" />}
+                        </button>
+                        <div className="flex-1">
+                          <p className="text-[#1A1A1A] font-medium">Spot publicitaire radio</p>
+                          <p className="text-sm text-[#666666]">Cliquez pour écouter</p>
+                        </div>
+                      </div>
+                      <audio id="portfolio-audio" src={selectedItem.audio_url} onEnded={() => setIsPlaying(false)} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Documents */}
+                {selectedItem.documents && selectedItem.documents.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
+                      <Download className="w-5 h-5 text-[#CE0202]" />
+                      Documents téléchargeables
+                    </h3>
+                    <div className="space-y-2">
+                      {selectedItem.documents.map((doc, i) => (
+                        <a
+                          key={i}
+                          href={doc.url}
+                          download
+                          className="flex items-center gap-3 p-3 bg-[#F8F8F8] rounded-lg border border-[#E5E5E5] hover:border-[#CE0202] transition-colors group"
+                        >
+                          <Download className="w-5 h-5 text-[#666666] group-hover:text-[#CE0202]" />
+                          <span className="text-[#1A1A1A] group-hover:text-[#CE0202]">{doc.name}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* External Link */}
+                {selectedItem.link && (
+                  <a
+                    href={selectedItem.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-[#CE0202] hover:underline font-medium"
+                  >
+                    Voir le projet en ligne
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
