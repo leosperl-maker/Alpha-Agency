@@ -1672,6 +1672,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_db_client():
+    # Create initial super admin if no users exist
+    await create_initial_super_admin()
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
