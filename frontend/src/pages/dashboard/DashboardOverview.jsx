@@ -111,7 +111,7 @@ const DashboardOverview = () => {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#1A1A1A]">Vue d'ensemble</h1>
-        <p className="text-[#666666]">Bienvenue sur votre dashboard ALPHA Agency</p>
+        <p className="text-[#666666]">Bienvenue sur votre dashboard Alpha Agency</p>
       </div>
 
       {/* KPI Cards */}
