@@ -1233,6 +1233,433 @@ async def update_settings_integrations(integrations: SettingsIntegrations, curre
     )
     return {"message": "Intégrations mises à jour"}
 
+# ==================== CLOUDINARY UPLOAD ROUTES ====================
+
+from fastapi import UploadFile, File
+
+@api_router.post("/upload/image", response_model=dict)
+async def upload_image(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload image to Cloudinary"""
+    if not CLOUDINARY_CLOUD_NAME:
+        raise HTTPException(status_code=500, detail="Cloudinary non configuré")
+    
+    # Validate file type
+    allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Type de fichier non autorisé. Formats acceptés: JPEG, PNG, GIF, WEBP")
+    
+    try:
+        # Read file content
+        content = await file.read()
+        
+        # Upload to Cloudinary
+        result = cloudinary.uploader.upload(
+            content,
+            folder="alpha-agency",
+            resource_type="image"
+        )
+        
+        return {
+            "url": result['secure_url'],
+            "public_id": result['public_id'],
+            "width": result.get('width'),
+            "height": result.get('height'),
+            "format": result.get('format')
+        }
+    except Exception as e:
+        logger.error(f"Cloudinary upload error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'upload: {str(e)}")
+
+@api_router.post("/upload/document", response_model=dict)
+async def upload_document(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload document (PDF, etc.) to Cloudinary"""
+    if not CLOUDINARY_CLOUD_NAME:
+        raise HTTPException(status_code=500, detail="Cloudinary non configuré")
+    
+    allowed_types = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Type de fichier non autorisé. Formats acceptés: PDF, DOC, DOCX")
+    
+    try:
+        content = await file.read()
+        result = cloudinary.uploader.upload(
+            content,
+            folder="alpha-agency/documents",
+            resource_type="raw"
+        )
+        return {
+            "url": result['secure_url'],
+            "public_id": result['public_id']
+        }
+    except Exception as e:
+        logger.error(f"Cloudinary upload error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'upload: {str(e)}")
+
+@api_router.post("/upload/audio", response_model=dict)
+async def upload_audio(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload audio file to Cloudinary"""
+    if not CLOUDINARY_CLOUD_NAME:
+        raise HTTPException(status_code=500, detail="Cloudinary non configuré")
+    
+    allowed_types = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 'audio/webm']
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Type de fichier non autorisé. Formats acceptés: MP3, WAV, OGG")
+    
+    try:
+        content = await file.read()
+        result = cloudinary.uploader.upload(
+            content,
+            folder="alpha-agency/audio",
+            resource_type="video"  # Cloudinary uses 'video' for audio too
+        )
+        return {
+            "url": result['secure_url'],
+            "public_id": result['public_id'],
+            "duration": result.get('duration')
+        }
+    except Exception as e:
+        logger.error(f"Cloudinary upload error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'upload: {str(e)}")
+
+@api_router.delete("/upload/{public_id:path}", response_model=dict)
+async def delete_upload(public_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete file from Cloudinary"""
+    if not CLOUDINARY_CLOUD_NAME:
+        raise HTTPException(status_code=500, detail="Cloudinary non configuré")
+    
+    try:
+        result = cloudinary.uploader.destroy(public_id)
+        return {"message": "Fichier supprimé", "result": result}
+    except Exception as e:
+        logger.error(f"Cloudinary delete error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la suppression: {str(e)}")
+
+# ==================== DOCUMENTS PDF ROUTES ====================
+
+# Document types and templates
+DOCUMENT_TYPES = {
+    "lettre_mission": {
+        "name": "Lettre de mission",
+        "templates": [
+            {"id": "lm_site_web", "name": "Lettre de mission – Site web"},
+            {"id": "lm_community_management", "name": "Lettre de mission – Community management"},
+            {"id": "lm_meta_ads", "name": "Lettre de mission – Publicité Meta"},
+            {"id": "lm_google_ads", "name": "Lettre de mission – Publicité Google Ads"},
+            {"id": "lm_newsletter", "name": "Lettre de mission – Gestion de newsletter"},
+            {"id": "lm_blog", "name": "Lettre de mission – Rédaction & publication d'articles de blog"}
+        ]
+    },
+    "fiche_contact": {
+        "name": "Fiche de contact",
+        "templates": [
+            {"id": "fc_community_management", "name": "Fiche de contact – Community management"},
+            {"id": "fc_site_web_infographie", "name": "Fiche de contact – Site web + infographie"}
+        ]
+    }
+}
+
+class DocumentCreate(BaseModel):
+    type: str  # lettre_mission or fiche_contact
+    template_id: str
+    internal_name: str
+    client_name: str
+    client_company: Optional[str] = None
+    client_email: Optional[str] = None
+    client_phone: Optional[str] = None
+    client_address: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    duration: Optional[str] = None
+    tarif: Optional[str] = None
+    description: Optional[str] = None
+    custom_fields: Optional[Dict[str, Any]] = None
+    status: str = "brouillon"  # brouillon, finalisé
+
+class DocumentUpdate(BaseModel):
+    internal_name: Optional[str] = None
+    client_name: Optional[str] = None
+    client_company: Optional[str] = None
+    client_email: Optional[str] = None
+    client_phone: Optional[str] = None
+    client_address: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    duration: Optional[str] = None
+    tarif: Optional[str] = None
+    description: Optional[str] = None
+    custom_fields: Optional[Dict[str, Any]] = None
+    status: Optional[str] = None
+
+@api_router.get("/documents/types", response_model=dict)
+async def get_document_types(current_user: dict = Depends(get_current_user)):
+    """Get available document types and templates"""
+    return DOCUMENT_TYPES
+
+@api_router.post("/documents", response_model=dict)
+async def create_document(doc: DocumentCreate, current_user: dict = Depends(get_current_user)):
+    """Create a new document"""
+    if doc.type not in DOCUMENT_TYPES:
+        raise HTTPException(status_code=400, detail="Type de document invalide")
+    
+    valid_templates = [t['id'] for t in DOCUMENT_TYPES[doc.type]['templates']]
+    if doc.template_id not in valid_templates:
+        raise HTTPException(status_code=400, detail="Modèle invalide pour ce type de document")
+    
+    doc_id = str(uuid.uuid4())
+    template_name = next((t['name'] for t in DOCUMENT_TYPES[doc.type]['templates'] if t['id'] == doc.template_id), "")
+    
+    doc_data = {
+        "id": doc_id,
+        "type": doc.type,
+        "type_name": DOCUMENT_TYPES[doc.type]['name'],
+        "template_id": doc.template_id,
+        "template_name": template_name,
+        "internal_name": doc.internal_name,
+        "client_name": doc.client_name,
+        "client_company": doc.client_company,
+        "client_email": doc.client_email,
+        "client_phone": doc.client_phone,
+        "client_address": doc.client_address,
+        "start_date": doc.start_date,
+        "end_date": doc.end_date,
+        "duration": doc.duration,
+        "tarif": doc.tarif,
+        "description": doc.description,
+        "custom_fields": doc.custom_fields or {},
+        "status": doc.status,
+        "created_by": current_user['user_id'],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.documents.insert_one(doc_data)
+    return {"id": doc_id, "message": "Document créé avec succès"}
+
+@api_router.get("/documents", response_model=List[dict])
+async def get_documents(
+    current_user: dict = Depends(get_current_user),
+    type: Optional[str] = None,
+    template_id: Optional[str] = None,
+    client_name: Optional[str] = None,
+    status: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None
+):
+    """Get all documents with optional filters"""
+    query = {}
+    if type:
+        query["type"] = type
+    if template_id:
+        query["template_id"] = template_id
+    if client_name:
+        query["client_name"] = {"$regex": client_name, "$options": "i"}
+    if status:
+        query["status"] = status
+    if start_date:
+        query["created_at"] = {"$gte": start_date}
+    if end_date:
+        if "created_at" in query:
+            query["created_at"]["$lte"] = end_date
+        else:
+            query["created_at"] = {"$lte": end_date}
+    
+    # Archive: only show documents from last 3 months by default
+    three_months_ago = (datetime.now(timezone.utc) - timedelta(days=90)).isoformat()
+    if "created_at" not in query:
+        query["created_at"] = {"$gte": three_months_ago}
+    
+    documents = await db.documents.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return documents
+
+@api_router.get("/documents/{doc_id}", response_model=dict)
+async def get_document(doc_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a single document"""
+    doc = await db.documents.find_one({"id": doc_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document non trouvé")
+    return doc
+
+@api_router.put("/documents/{doc_id}", response_model=dict)
+async def update_document(doc_id: str, doc_update: DocumentUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a document"""
+    existing = await db.documents.find_one({"id": doc_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Document non trouvé")
+    
+    update_data = {k: v for k, v in doc_update.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.documents.update_one({"id": doc_id}, {"$set": update_data})
+    return {"message": "Document mis à jour"}
+
+@api_router.delete("/documents/{doc_id}", response_model=dict)
+async def delete_document(doc_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a document"""
+    result = await db.documents.delete_one({"id": doc_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Document non trouvé")
+    return {"message": "Document supprimé"}
+
+@api_router.get("/documents/{doc_id}/pdf")
+async def generate_document_pdf(doc_id: str, current_user: dict = Depends(get_current_user)):
+    """Generate PDF for a document"""
+    doc = await db.documents.find_one({"id": doc_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document non trouvé")
+    
+    # Generate PDF
+    buffer = BytesIO()
+    pdf_doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm, leftMargin=2*cm, rightMargin=2*cm)
+    styles = getSampleStyleSheet()
+    elements = []
+    
+    # Header
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=18, textColor=colors.HexColor('#CE0202'), spaceAfter=20)
+    elements.append(Paragraph(doc['template_name'], title_style))
+    elements.append(Spacer(1, 12))
+    
+    # Company info
+    company_style = ParagraphStyle('Company', parent=styles['Normal'], fontSize=10)
+    elements.append(Paragraph(f"<b>{COMPANY_INFO['commercial_name']}</b>", company_style))
+    elements.append(Paragraph(f"{COMPANY_INFO['address']}", company_style))
+    elements.append(Paragraph(f"Tél: {COMPANY_INFO['phone']} - Email: {COMPANY_INFO['email']}", company_style))
+    elements.append(Spacer(1, 24))
+    
+    # Client info
+    elements.append(Paragraph("<b>Client :</b>", styles['Heading3']))
+    elements.append(Paragraph(f"Nom : {doc['client_name']}", styles['Normal']))
+    if doc.get('client_company'):
+        elements.append(Paragraph(f"Entreprise : {doc['client_company']}", styles['Normal']))
+    if doc.get('client_email'):
+        elements.append(Paragraph(f"Email : {doc['client_email']}", styles['Normal']))
+    if doc.get('client_phone'):
+        elements.append(Paragraph(f"Téléphone : {doc['client_phone']}", styles['Normal']))
+    if doc.get('client_address'):
+        elements.append(Paragraph(f"Adresse : {doc['client_address']}", styles['Normal']))
+    elements.append(Spacer(1, 24))
+    
+    # Mission details
+    elements.append(Paragraph("<b>Détails de la mission :</b>", styles['Heading3']))
+    if doc.get('start_date'):
+        elements.append(Paragraph(f"Date de début : {doc['start_date']}", styles['Normal']))
+    if doc.get('end_date'):
+        elements.append(Paragraph(f"Date de fin : {doc['end_date']}", styles['Normal']))
+    if doc.get('duration'):
+        elements.append(Paragraph(f"Durée : {doc['duration']}", styles['Normal']))
+    if doc.get('tarif'):
+        elements.append(Paragraph(f"Tarif : {doc['tarif']}", styles['Normal']))
+    elements.append(Spacer(1, 12))
+    
+    # Description
+    if doc.get('description'):
+        elements.append(Paragraph("<b>Description :</b>", styles['Heading3']))
+        elements.append(Paragraph(doc['description'], styles['Normal']))
+        elements.append(Spacer(1, 24))
+    
+    # Custom fields
+    if doc.get('custom_fields'):
+        elements.append(Paragraph("<b>Informations complémentaires :</b>", styles['Heading3']))
+        for key, value in doc['custom_fields'].items():
+            elements.append(Paragraph(f"{key} : {value}", styles['Normal']))
+        elements.append(Spacer(1, 24))
+    
+    # Placeholder for legal text
+    elements.append(Spacer(1, 48))
+    placeholder_style = ParagraphStyle('Placeholder', parent=styles['Normal'], fontSize=9, textColor=colors.grey, borderColor=colors.grey, borderWidth=1, borderPadding=10)
+    elements.append(Paragraph("[Emplacement réservé pour les clauses juridiques - À compléter]", placeholder_style))
+    
+    # Signatures
+    elements.append(Spacer(1, 48))
+    sig_data = [
+        ["Pour Alpha Agency", "Pour le Client"],
+        ["", ""],
+        ["Date : _______________", "Date : _______________"],
+        ["Signature :", "Signature :"],
+        ["", ""]
+    ]
+    sig_table = Table(sig_data, colWidths=[8*cm, 8*cm])
+    sig_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+    ]))
+    elements.append(sig_table)
+    
+    # Footer
+    elements.append(Spacer(1, 24))
+    footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=colors.grey, alignment=TA_CENTER)
+    elements.append(Paragraph(f"Document généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')}", footer_style))
+    elements.append(Paragraph(f"{COMPANY_INFO['commercial_name']} - {COMPANY_INFO.get('legal_form', 'SASU')}", footer_style))
+    
+    pdf_doc.build(elements)
+    buffer.seek(0)
+    
+    filename = f"{doc['internal_name'].replace(' ', '_')}.pdf"
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+@api_router.post("/documents/export-zip", response_model=dict)
+async def export_documents_zip(
+    current_user: dict = Depends(get_current_user),
+    type: Optional[str] = None,
+    client_name: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None
+):
+    """Export multiple documents as ZIP (returns download info)"""
+    # For now, return document IDs that would be included
+    query = {}
+    if type:
+        query["type"] = type
+    if client_name:
+        query["client_name"] = {"$regex": client_name, "$options": "i"}
+    if start_date:
+        query["created_at"] = {"$gte": start_date}
+    if end_date:
+        if "created_at" in query:
+            query["created_at"]["$lte"] = end_date
+        else:
+            query["created_at"] = {"$lte": end_date}
+    
+    documents = await db.documents.find(query, {"_id": 0, "id": 1, "internal_name": 1}).to_list(100)
+    
+    return {
+        "message": f"{len(documents)} documents trouvés",
+        "documents": documents,
+        "note": "Utilisez GET /api/documents/{id}/pdf pour télécharger chaque document"
+    }
+
+# ==================== ADMIN USERS MANAGEMENT ====================
+
+@api_router.get("/admin/users", response_model=List[dict])
+async def get_admin_users(current_user: dict = Depends(get_current_user)):
+    """Get all admin users (super_admin only)"""
+    user = await db.users.find_one({"id": current_user['user_id']}, {"_id": 0})
+    if not user or user.get('role') != 'super_admin':
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(100)
+    return users
+
+@api_router.delete("/admin/users/{user_id}", response_model=dict)
+async def delete_admin_user(user_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete an admin user (super_admin only)"""
+    user = await db.users.find_one({"id": current_user['user_id']}, {"_id": 0})
+    if not user or user.get('role') != 'super_admin':
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    if user_id == current_user['user_id']:
+        raise HTTPException(status_code=400, detail="Vous ne pouvez pas supprimer votre propre compte")
+    
+    result = await db.users.delete_one({"id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    return {"message": "Utilisateur supprimé"}
+
 # ==================== MAIN APP CONFIG ====================
 
 app.include_router(api_router)
