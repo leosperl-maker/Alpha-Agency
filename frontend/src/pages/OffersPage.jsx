@@ -54,7 +54,7 @@ const OffersPage = () => {
     },
     {
       icon: Camera,
-      title: "Photography",
+      title: "Photographie",
       description: "Shootings professionnels pour votre marque",
       features: [
         "Photos corporate & portraits",
@@ -67,7 +67,7 @@ const OffersPage = () => {
     },
     {
       icon: Video,
-      title: "Vidéography",
+      title: "Vidéographie",
       description: "Captation et montage vidéo haute qualité",
       features: [
         "Spots publicitaires",

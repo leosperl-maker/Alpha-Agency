@@ -26,9 +26,9 @@ const ContactPage = () => {
   const projectTypes = [
     { value: "site_vitrine", label: "Site vitrine" },
     { value: "site_ecommerce", label: "Site e-commerce" },
-    { value: "community_management", label: "Community Management" },
-    { value: "photo", label: "Photo" },
-    { value: "video", label: "Vidéo" },
+    { value: "community_management", label: "Community Management (gestion réseaux sociaux)" },
+    { value: "photo", label: "Photographie" },
+    { value: "video", label: "Vidéographie" },
     { value: "infographie", label: "Infographie" },
     { value: "ads", label: "Publicité digitale" },
     { value: "pack_360", label: "Pack 360°" },
@@ -309,8 +309,8 @@ const ContactPage = () => {
                     <div>
                       <p className="text-white font-medium">Horaires</p>
                       <p className="text-[#A1A1AA] text-sm">
-                        Lundi - Vendredi<br />
-                        9h00 - 18h00
+                        Du mardi au samedi<br />
+                        10h à 19h
                       </p>
                     </div>
                   </li>
