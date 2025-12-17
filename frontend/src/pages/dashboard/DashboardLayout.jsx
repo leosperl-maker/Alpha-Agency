@@ -13,7 +13,8 @@ import {
   X,
   ChevronRight,
   Image,
-  Inbox
+  Inbox,
+  FileCheck
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 
