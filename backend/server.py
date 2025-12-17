@@ -437,8 +437,29 @@ def generate_invoice_pdf(invoice: dict, contact: dict) -> BytesIO:
 
 # ==================== AUTH ROUTES ====================
 
+# Création du super admin initial si aucun utilisateur n'existe
+async def create_initial_super_admin():
+    count = await db.users.count_documents({})
+    if count == 0:
+        user_id = str(uuid.uuid4())
+        user_doc = {
+            "id": user_id,
+            "email": "admin@alphagency.fr",
+            "password": hash_password("Alpha2024!"),
+            "full_name": "Super Admin",
+            "role": "super_admin",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.users.insert_one(user_doc)
+        logger.info("Super admin initial créé: admin@alphagency.fr / Alpha2024!")
+
 @api_router.post("/auth/register", response_model=dict)
-async def register(user: UserCreate):
+async def register(user: UserCreate, current_user: dict = Depends(get_current_user)):
+    # Seul un super_admin peut créer de nouveaux comptes
+    existing_user = await db.users.find_one({"id": current_user['user_id']}, {"_id": 0})
+    if not existing_user or existing_user.get('role') != 'super_admin':
+        raise HTTPException(status_code=403, detail="Seul un super administrateur peut créer des comptes")
+    
     existing = await db.users.find_one({"email": user.email}, {"_id": 0})
     if existing:
         raise HTTPException(status_code=400, detail="Email déjà utilisé")
@@ -453,8 +474,7 @@ async def register(user: UserCreate):
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.users.insert_one(user_doc)
-    token = create_token(user_id, user.email, "admin")
-    return {"token": token, "user": {"id": user_id, "email": user.email, "full_name": user.full_name, "role": "admin"}}
+    return {"id": user_id, "message": "Compte administrateur créé avec succès"}
 
 @api_router.post("/auth/login", response_model=dict)
 async def login(credentials: UserLogin):
