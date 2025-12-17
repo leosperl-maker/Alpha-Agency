@@ -27,6 +27,7 @@ const LegalPage = ({ type }) => {
               <li>Conseil en stratégie digitale</li>
               <li>Gestion des réseaux sociaux (Community Management)</li>
               <li>Production photo et vidéo</li>
+              <li>Création graphique et infographie</li>
             </ul>
           `
         },
@@ -148,20 +149,19 @@ const LegalPage = ({ type }) => {
   const pageContent = content[type] || content.mentions;
 
   return (
-    <div data-testid={`legal-page-${type}`} className="bg-[#050505]">
+    <div data-testid={`legal-page-${type}`} className="bg-white">
       {/* Hero */}
-      <section className="relative pt-32 pb-16 px-6 overflow-hidden">
-        <div className="absolute inset-0 hero-glow" />
+      <section className="relative pt-32 pb-16 px-6 overflow-hidden bg-[#F8F8F8]">
         <div className="max-w-4xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
+            <h1 className="text-4xl sm:text-5xl font-bold text-[#1A1A1A] mb-6">
               {pageContent.title}
             </h1>
-            <p className="text-[#A1A1AA]">
+            <p className="text-[#666666]">
               Dernière mise à jour : {new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
             </p>
           </motion.div>
@@ -169,7 +169,7 @@ const LegalPage = ({ type }) => {
       </section>
 
       {/* Content */}
-      <section className="px-6 pb-24">
+      <section className="px-6 pb-24 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="space-y-12">
             {pageContent.sections.map((section, index) => (
@@ -179,11 +179,11 @@ const LegalPage = ({ type }) => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="glass p-8 rounded-lg"
+                className="bg-[#F8F8F8] p-8 rounded-lg border border-[#E5E5E5]"
               >
-                <h2 className="text-2xl font-bold text-white mb-4">{section.title}</h2>
+                <h2 className="text-2xl font-bold text-[#1A1A1A] mb-4">{section.title}</h2>
                 <div 
-                  className="text-[#A1A1AA] leading-relaxed [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>li]:mb-2 [&>a]:text-[#6A0F1A] [&>a]:hover:underline"
+                  className="text-[#666666] leading-relaxed [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>li]:mb-2 [&_a]:text-[#CE0202] [&_a]:hover:underline"
                   dangerouslySetInnerHTML={{ __html: section.content }}
                 />
               </motion.div>

@@ -1,8 +1,14 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
-  Globe, Users, Camera, Video, Target, ShoppingCart,
-  CheckCircle, ArrowRight, Sparkles 
+  Globe, 
+  Users, 
+  Camera, 
+  Video, 
+  Target, 
+  ArrowRight, 
+  CheckCircle,
+  Palette
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -10,38 +16,25 @@ import { Badge } from "../components/ui/badge";
 
 const OffersPage = () => {
   const mainOffer = {
-    title: "Site Web en 7 jours",
-    price: "90€",
+    title: "Site Web Professionnel",
+    subtitle: "Vitrine ou E-commerce",
+    price: "90",
     period: "/mois",
-    highlight: "Offre phare",
     engagement: "Engagement 24 mois",
-    description: "Votre site web professionnel clé en main, livré rapidement et sans compromis sur la qualité.",
+    highlight: "Le plus populaire",
+    description: "Votre site web professionnel livré en 7 jours. Site vitrine ou e-commerce, c'est vous qui choisissez. Design moderne, optimisé SEO et mobile-first.",
     features: [
-      "Site vitrine jusqu'à 5 pages",
-      "Design responsive (mobile, tablette, desktop)",
-      "Intégration de vos contenus (textes, images)",
-      "SEO on-page de base (balises, structure)",
-      "Formulaire de contact intégré",
-      "Maintenance & mises à jour incluses",
-      "Hébergement sécurisé inclus",
+      "Site vitrine OU e-commerce au choix",
+      "Design personnalisé et responsive",
+      "Optimisation SEO de base",
+      "Formulaire de contact",
+      "Intégration Google Analytics",
       "Certificat SSL (HTTPS)",
-      "Support réactif"
-    ]
-  };
-
-  const ecommerceOffer = {
-    title: "Site E-commerce",
-    highlight: "Boutique en ligne",
-    description: "Lancez votre boutique en ligne avec une solution performante et sécurisée.",
-    features: [
-      "Catalogue produits illimité",
-      "Gestion des stocks",
-      "Paiement sécurisé (CB, PayPal)",
-      "Design responsive",
-      "Tableau de bord vendeur",
-      "SEO e-commerce optimisé",
-      "Intégration transporteurs",
-      "Formation incluse"
+      "Nom de domaine inclus (1ère année)",
+      "Hébergement inclus",
+      "Maintenance & mises à jour",
+      "Support technique prioritaire",
+      "Livraison en 7 jours"
     ]
   };
 
@@ -49,58 +42,67 @@ const OffersPage = () => {
     {
       icon: Users,
       title: "Community Management",
-      description: "Gestion complète de vos réseaux sociaux pour développer votre communauté.",
+      description: "Gestion complète de vos réseaux sociaux",
       features: [
-        "Stratégie éditoriale sur-mesure",
-        "Calendrier de contenus mensuel",
-        "Création de posts (visuels + textes)",
-        "Gestion de la communauté",
-        "Modération des commentaires",
-        "Reporting mensuel détaillé"
+        "Stratégie social media personnalisée",
+        "Création de contenus (posts, stories, reels)",
+        "Planning éditorial mensuel",
+        "Veille et modération",
+        "Reporting mensuel"
       ],
       cta: "Demander un devis"
     },
     {
       icon: Camera,
       title: "Photography",
-      description: "Des visuels professionnels pour sublimer votre marque.",
+      description: "Shootings professionnels pour votre marque",
       features: [
-        "Shooting corporate",
-        "Photos produits",
-        "Couverture événementielle",
-        "Retouches professionnelles",
-        "Livraison HD optimisée web",
-        "Droits d'utilisation inclus"
+        "Photos corporate & portraits",
+        "Packshots produits",
+        "Reportage événementiel",
+        "Photos lifestyle & ambiance",
+        "Retouche professionnelle"
       ],
-      cta: "Demander un devis"
+      cta: "Réserver un shooting"
     },
     {
       icon: Video,
       title: "Vidéography",
-      description: "Contenus vidéo engageants pour vos réseaux et votre site.",
+      description: "Captation et montage vidéo haute qualité",
       features: [
-        "Reels & shorts",
+        "Spots publicitaires",
         "Vidéos corporate",
+        "Reels & contenus sociaux",
         "Captation événementielle",
-        "Montage professionnel",
-        "Motion design",
-        "Sous-titrage"
+        "Montage & post-production"
+      ],
+      cta: "Demander un devis"
+    },
+    {
+      icon: Palette,
+      title: "Infographie",
+      description: "Création graphique de visuels en tout genre",
+      features: [
+        "Création de logos & identité visuelle",
+        "Design de flyers & brochures",
+        "Cartes de visite & papeterie",
+        "Visuels pour réseaux sociaux",
+        "Tous formats print & digital"
       ],
       cta: "Demander un devis"
     },
     {
       icon: Target,
       title: "Publicité Digitale",
-      description: "Campagnes publicitaires orientées ROI sur tous les canaux.",
+      description: "Campagnes publicitaires performantes",
       features: [
-        "Meta Ads (Facebook, Instagram)",
-        "Google Ads (Search, Display)",
-        "TikTok Ads",
-        "Création des visuels publicitaires",
+        "Campagnes Meta Ads (Facebook/Instagram)",
+        "Campagnes Google Ads",
+        "Stratégie d'audience ciblée",
         "A/B testing & optimisation",
-        "Reporting ROI détaillé"
+        "Reporting & analyse ROI"
       ],
-      cta: "Demander un devis"
+      cta: "Lancer ma campagne"
     }
   ];
 
@@ -122,33 +124,33 @@ const OffersPage = () => {
               Nos <span className="text-[#CE0202]">offres</span>
             </h1>
             <p className="text-lg lg:text-xl text-[#666666]">
-              Des solutions digitales complètes pour développer votre présence en ligne, 
-              adaptées à tous les budgets.
+              Des solutions digitales adaptées à vos besoins et votre budget.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Main Offer - Site Web 90€ */}
-      <section data-testid="main-offer-section" className="py-24 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
+      {/* Main Offer */}
+      <section className="py-24 px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Card className="bg-gradient-to-br from-[#CE0202]/10 to-transparent border-[#CE0202]/30 overflow-hidden">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Card className="bg-white border-2 border-[#CE0202] overflow-hidden shadow-xl">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                 <CardContent className="p-8 lg:p-12">
                   <Badge className="bg-[#CE0202] text-white mb-4">
-                    <Sparkles className="w-3 h-3 mr-1" />
+                    <Globe className="w-3 h-3 mr-1" />
                     {mainOffer.highlight}
                   </Badge>
-                  <h2 className="text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-4">
+                  <h2 className="text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-2">
                     {mainOffer.title}
                   </h2>
+                  <p className="text-lg text-[#CE0202] font-semibold mb-4">{mainOffer.subtitle}</p>
                   <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-5xl lg:text-6xl font-bold text-[#CE0202]">{mainOffer.price}</span>
+                    <span className="text-5xl font-bold text-[#1A1A1A]">{mainOffer.price}€</span>
                     <span className="text-xl text-[#666666]">{mainOffer.period}</span>
                   </div>
                   <p className="text-[#CE0202] font-semibold text-sm mb-6">{mainOffer.engagement}</p>
@@ -158,7 +160,7 @@ const OffersPage = () => {
                   <Link to="/contact">
                     <Button 
                       data-testid="main-offer-cta"
-                      className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider w-full sm:w-auto"
+                      className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider w-full sm:w-auto"
                     >
                       Lancer mon site à 90€/mois
                       <ArrowRight className="ml-2 w-4 h-4" />
@@ -183,58 +185,8 @@ const OffersPage = () => {
         </div>
       </section>
 
-      {/* E-commerce Offer */}
-      <section className="py-24 px-6 bg-[#F8F8F8]">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Card className="bg-white border-[#E5E5E5] overflow-hidden">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <CardContent className="p-8 lg:p-12">
-                  <Badge className="bg-[#1A1A1A] text-white mb-4">
-                    <ShoppingCart className="w-3 h-3 mr-1" />
-                    {ecommerceOffer.highlight}
-                  </Badge>
-                  <h2 className="text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-4">
-                    {ecommerceOffer.title}
-                  </h2>
-                  <p className="text-2xl font-bold text-[#CE0202] mb-6">Sur devis</p>
-                  <p className="text-[#666666] text-lg mb-8">
-                    {ecommerceOffer.description}
-                  </p>
-                  <Link to="/contact">
-                    <Button 
-                      data-testid="ecommerce-offer-cta"
-                      className="bg-[#1A1A1A] hover:bg-[#333] text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider w-full sm:w-auto"
-                    >
-                      Demander un devis e-commerce
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </Link>
-                </CardContent>
-                
-                <CardContent className="p-8 lg:p-12 border-l border-[#E5E5E5]">
-                  <h3 className="text-xl font-bold text-[#1A1A1A] mb-6">Fonctionnalités :</h3>
-                  <ul className="space-y-4">
-                    {ecommerceOffer.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-[#CE0202] flex-shrink-0 mt-0.5" />
-                        <span className="text-[#1A1A1A]">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </div>
-            </Card>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Other Services */}
-      <section data-testid="services-section" className="py-24 px-6 bg-white">
+      <section data-testid="services-section" className="py-24 px-6 bg-[#F8F8F8]">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -250,7 +202,7 @@ const OffersPage = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) => (
               <motion.div
                 key={service.title}
@@ -282,7 +234,7 @@ const OffersPage = () => {
                     <Link to="/contact">
                       <Button 
                         variant="outline"
-                        className="border-[#1A1A1A]/20 hover:border-[#CE0202] hover:text-[#CE0202] text-[#1A1A1A] rounded-none w-full py-4 text-sm font-bold uppercase tracking-wider bg-transparent"
+                        className="border-[#1A1A1A]/20 hover:border-[#CE0202] hover:bg-[#CE0202] hover:text-white text-[#1A1A1A] rounded-none w-full py-4 text-sm font-bold uppercase tracking-wider bg-transparent"
                       >
                         {service.cta}
                       </Button>
@@ -317,7 +269,7 @@ const OffersPage = () => {
             <Link to="/contact">
               <Button 
                 data-testid="pack-360-cta"
-                className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider"
+                className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider"
               >
                 Demander un devis Pack 360°
                 <ArrowRight className="ml-2 w-4 h-4" />
