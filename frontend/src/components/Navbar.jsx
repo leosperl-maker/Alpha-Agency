@@ -41,9 +41,9 @@ const Navbar = () => {
             className="flex items-center gap-2 px-4"
           >
             <img 
-              src="https://customer-assets.emergentagent.com/job_alphacommunicate/artifacts/nvab6j8h_Design%20sans%20titre%20%2890%29.png" 
+              src="https://customer-assets.emergentagent.com/job_alphacommunicate/artifacts/10nsa4du_Design%20sans%20titre%20%2893%29.png" 
               alt="ALPHA Agency"
-              className="h-10 w-auto"
+              className="h-14 w-auto"
             />
           </Link>
 
