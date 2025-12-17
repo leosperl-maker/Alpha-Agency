@@ -397,3 +397,8 @@ input:focus, textarea:focus, select:focus {
         display: contents !important;
     }
 }
+
+/* Hide Emergent badge */
+#emergent-badge {
+    display: none !important;
+}
