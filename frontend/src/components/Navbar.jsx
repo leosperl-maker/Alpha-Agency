@@ -41,7 +41,7 @@ const Navbar = () => {
             className="flex items-center gap-2 px-4"
           >
             <img 
-              src="https://customer-assets.emergentagent.com/job_webproject-alpha/artifacts/n1wsh7m3_Logo%20Header.png" 
+              src="https://customer-assets.emergentagent.com/job_alphacommunicate/artifacts/nvab6j8h_Design%20sans%20titre%20%2890%29.png" 
               alt="ALPHA Agency"
               className="h-10 w-auto"
             />
@@ -69,7 +69,7 @@ const Navbar = () => {
           <Link to="/contact" className="hidden lg:block">
             <Button
               data-testid="cta-devis-btn"
-              className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-full px-6 py-2 text-xs font-bold uppercase tracking-wider"
+              className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-full px-6 py-2 text-xs font-bold uppercase tracking-wider"
             >
               Demander un devis
             </Button>
@@ -111,7 +111,7 @@ const Navbar = () => {
             >
               <Button
                 data-testid="mobile-cta-btn"
-                className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none px-8 py-4 text-sm font-bold uppercase tracking-wider"
+                className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-none px-8 py-4 text-sm font-bold uppercase tracking-wider"
               >
                 Demander un devis
               </Button>

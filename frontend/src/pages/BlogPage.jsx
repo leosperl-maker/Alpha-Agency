@@ -67,10 +67,9 @@ const BlogPage = () => {
   };
 
   return (
-    <div data-testid="blog-page" className="bg-[#050505]">
+    <div data-testid="blog-page" className="bg-white">
       {/* Hero */}
-      <section className="relative pt-32 pb-24 px-6 overflow-hidden">
-        <div className="absolute inset-0 hero-glow" />
+      <section className="relative pt-32 pb-24 px-6 overflow-hidden bg-[#F8F8F8]">
         <div className="max-w-7xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -80,28 +79,24 @@ const BlogPage = () => {
           >
             <h1 
               data-testid="blog-headline"
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#1A1A1A] mb-6"
             >
-              <span className="text-[#6A0F1A]">Actualités</span> & conseils
+              Nos <span className="text-[#CE0202]">actualités</span>
             </h1>
-            <p className="text-lg lg:text-xl text-[#A1A1AA]">
-              Retrouvez nos articles, conseils et actualités pour développer votre présence digitale.
+            <p className="text-lg lg:text-xl text-[#666666]">
+              Conseils, tendances et bonnes pratiques pour développer votre présence digitale.
             </p>
           </motion.div>
         </div>
       </section>
 
       {/* Blog Grid */}
-      <section data-testid="blog-grid" className="px-6 pb-24">
+      <section data-testid="blog-grid" className="px-6 py-24 bg-white">
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="space-y-4">
-                  <div className="aspect-[16/9] bg-white/5 animate-pulse rounded-lg" />
-                  <div className="h-6 bg-white/5 animate-pulse rounded" />
-                  <div className="h-20 bg-white/5 animate-pulse rounded" />
-                </div>
+                <div key={i} className="aspect-[4/3] bg-[#F8F8F8] animate-pulse rounded-lg" />
               ))}
             </div>
           ) : (
@@ -114,10 +109,10 @@ const BlogPage = () => {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Link to={`/blog/${post.slug}`}>
+                  <Link to={`/actualites/${post.slug}`}>
                     <Card 
-                      data-testid={`blog-post-${index}`}
-                      className="card-marketing group h-full overflow-hidden"
+                      data-testid={`blog-card-${index}`}
+                      className="card-marketing h-full group cursor-pointer bg-white border border-[#E5E5E5] overflow-hidden"
                     >
                       {/* Image */}
                       <div className="aspect-[16/9] overflow-hidden">
@@ -133,34 +128,33 @@ const BlogPage = () => {
                           {post.tags?.map((tag, i) => (
                             <Badge 
                               key={i}
-                              variant="secondary"
-                              className="bg-[#6A0F1A]/20 text-[#6A0F1A] border-none text-xs"
+                              className="bg-[#CE0202]/10 text-[#CE0202] border-none"
                             >
                               {tag}
                             </Badge>
                           ))}
                         </div>
-
+                        
                         {/* Title */}
-                        <h2 className="text-xl font-bold text-white mb-3 group-hover:text-[#6A0F1A] transition-colors">
+                        <h2 className="text-xl font-bold text-[#1A1A1A] mb-3 group-hover:text-[#CE0202] transition-colors">
                           {post.title}
                         </h2>
-
+                        
                         {/* Excerpt */}
-                        <p className="text-[#A1A1AA] text-sm mb-4 line-clamp-3">
+                        <p className="text-[#666666] text-sm mb-4 line-clamp-2">
                           {post.excerpt}
                         </p>
-
+                        
                         {/* Meta */}
-                        <div className="flex items-center justify-between text-xs text-[#A1A1AA]">
-                          <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-4 text-xs text-[#666666]">
+                          <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
-                            <span>{formatDate(post.created_at)}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
+                            {formatDate(post.created_at)}
+                          </span>
+                          <span className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            <span>{post.read_time || "5 min"}</span>
-                          </div>
+                            {post.read_time}
+                          </span>
                         </div>
                       </CardContent>
                     </Card>
@@ -172,7 +166,7 @@ const BlogPage = () => {
 
           {posts.length === 0 && !loading && (
             <div className="text-center py-16">
-              <p className="text-[#A1A1AA]">Aucun article publié pour le moment.</p>
+              <p className="text-[#666666]">Aucun article publié pour le moment.</p>
             </div>
           )}
         </div>
