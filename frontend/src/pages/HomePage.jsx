@@ -13,7 +13,7 @@ import {
   Zap,
   Shield,
   ChevronRight,
-  ShoppingCart
+  Palette
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -66,15 +66,9 @@ const HomePage = () => {
   const services = [
     {
       icon: Globe,
-      title: "Site Vitrine",
-      description: "Sites vitrines professionnels livrés en 7 jours",
+      title: "Site Web",
+      description: "Sites vitrines et e-commerce livrés en 7 jours",
       highlight: "À partir de 90€/mois"
-    },
-    {
-      icon: ShoppingCart,
-      title: "Site E-commerce",
-      description: "Boutiques en ligne performantes et sécurisées",
-      highlight: "Sur devis"
     },
     {
       icon: Users,
@@ -93,6 +87,12 @@ const HomePage = () => {
       title: "Vidéography",
       description: "Captation et montage vidéo haute qualité",
       highlight: "Reels & Spots"
+    },
+    {
+      icon: Palette,
+      title: "Infographie",
+      description: "Création graphique de visuels en tout genre",
+      highlight: "Print & Digital"
     },
     {
       icon: Target,
@@ -177,7 +177,7 @@ const HomePage = () => {
               <Link to="/contact">
                 <Button 
                   data-testid="hero-cta-devis"
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider"
+                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider"
                 >
                   Demander un devis
                   <ArrowRight className="ml-2 w-4 h-4" />
@@ -187,7 +187,7 @@ const HomePage = () => {
                 <Button 
                   data-testid="hero-cta-offres"
                   variant="outline"
-                  className="border-white/40 hover:border-white hover:bg-white/10 text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider bg-transparent"
+                  className="border-white/40 hover:border-white hover:bg-white hover:text-[#1A1A1A] text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider bg-transparent"
                 >
                   Découvrir nos offres
                 </Button>
@@ -218,7 +218,7 @@ const HomePage = () => {
             <Link to="/offres">
               <Button 
                 data-testid="banner-cta"
-                className="bg-white text-[#CE0202] hover:bg-white/90 rounded-none px-6 py-3 text-sm font-bold uppercase tracking-wider"
+                className="bg-white text-[#CE0202] hover:bg-white/90 hover:text-[#CE0202] rounded-none px-6 py-3 text-sm font-bold uppercase tracking-wider"
               >
                 En savoir plus
                 <ChevronRight className="ml-1 w-4 h-4" />
@@ -360,7 +360,7 @@ const HomePage = () => {
               <Link to="/agence">
                 <Button 
                   data-testid="cta-decouvrir-agence"
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none px-8 py-4 text-sm font-bold uppercase tracking-wider"
+                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-none px-8 py-4 text-sm font-bold uppercase tracking-wider"
                 >
                   Découvrir l'agence
                   <ArrowRight className="ml-2 w-4 h-4" />
@@ -417,7 +417,7 @@ const HomePage = () => {
               <Link to="/contact">
                 <Button 
                   data-testid="final-cta-devis"
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider"
+                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider"
                 >
                   Demander un devis gratuit
                   <ArrowRight className="ml-2 w-4 h-4" />
@@ -427,7 +427,7 @@ const HomePage = () => {
                 <Button 
                   data-testid="final-cta-call"
                   variant="outline"
-                  className="border-[#1A1A1A]/20 hover:border-[#CE0202] hover:text-[#CE0202] text-[#1A1A1A] rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider bg-transparent"
+                  className="border-[#1A1A1A]/20 hover:border-[#CE0202] hover:bg-[#CE0202] hover:text-white text-[#1A1A1A] rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider bg-transparent"
                 >
                   Être rappelé
                 </Button>
