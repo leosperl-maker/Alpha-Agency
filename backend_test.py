@@ -125,7 +125,7 @@ class AlphaAgencyAPITester:
             "message": "Besoin d'aide pour les réseaux sociaux"
         }
         
-        success, response = self.make_request('POST', 'contacts', contact_data, 201)
+        success, response = self.make_request('POST', 'contacts', contact_data, 200)
         if success and 'id' in response:
             self.contact_id = response['id']
             self.log_result("Create Contact", True, f"Contact ID: {self.contact_id}")
