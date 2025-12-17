@@ -183,4 +183,4 @@ test_plan:
 
 agent_communication:
   - agent: "main"
-    message: "Implémenté la page Documents pour le moteur de PDF. Triple-clic corrigé avec refs. Super admin recréé dans la bonne DB (test_database). À tester: création, édition, suppression de documents + téléchargement PDF."
+    message: "Session de fork - Corrections majeures: 1) Favicon ajouté, 2) Onglet KPIs manuels supprimé, 3) Thème clair appliqué sur TOUTES les pages du dashboard, 4) Réalisations migrées vers la BDD (8 items), 5) Image hero restaurée, 6) Génération PDF fonctionnelle."
