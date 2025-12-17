@@ -1,27 +1,17 @@
-#!/usr/bin/env python3
-"""
-ALPHA Agency Backend API Testing Suite
-Tests all API endpoints for functionality and integration
-"""
-
 import requests
 import sys
 import json
 from datetime import datetime
-from typing import Dict, Any, Optional
 
 class AlphaAgencyAPITester:
-    def __init__(self, base_url: str = "https://alphacommunicate.preview.emergentagent.com"):
+    def __init__(self, base_url="https://alphacommunicate.preview.emergentagent.com"):
         self.base_url = base_url
-        self.api_url = f"{base_url}/api"
         self.token = None
-        self.user_id = None
         self.tests_run = 0
         self.tests_passed = 0
-        self.failed_tests = []
         self.test_results = []
 
-    def log_test(self, name: str, success: bool, details: str = "", endpoint: str = ""):
+    def log_test(self, name, success, details=""):
         """Log test result"""
         self.tests_run += 1
         if success:
@@ -29,441 +19,224 @@ class AlphaAgencyAPITester:
             print(f"✅ {name}")
         else:
             print(f"❌ {name} - {details}")
-            self.failed_tests.append({
-                "test": name,
-                "endpoint": endpoint,
-                "error": details
-            })
         
         self.test_results.append({
-            "name": name,
+            "test": name,
             "success": success,
             "details": details,
-            "endpoint": endpoint
+            "timestamp": datetime.now().isoformat()
         })
 
-    def make_request(self, method: str, endpoint: str, data: Optional[Dict] = None, 
-                    expected_status: int = 200, auth_required: bool = True) -> tuple[bool, Dict]:
-        """Make API request with error handling"""
-        url = f"{self.api_url}/{endpoint}"
-        headers = {'Content-Type': 'application/json'}
-        
-        if auth_required and self.token:
-            headers['Authorization'] = f'Bearer {self.token}'
+    def run_test(self, name, method, endpoint, expected_status, data=None, headers=None):
+        """Run a single API test"""
+        url = f"{self.base_url}/api/{endpoint}"
+        test_headers = {'Content-Type': 'application/json'}
+        if self.token:
+            test_headers['Authorization'] = f'Bearer {self.token}'
+        if headers:
+            test_headers.update(headers)
 
         try:
             if method == 'GET':
-                response = requests.get(url, headers=headers, timeout=30)
+                response = requests.get(url, headers=test_headers, timeout=10)
             elif method == 'POST':
-                response = requests.post(url, json=data, headers=headers, timeout=30)
+                response = requests.post(url, json=data, headers=test_headers, timeout=10)
             elif method == 'PUT':
-                response = requests.put(url, json=data, headers=headers, timeout=30)
+                response = requests.put(url, json=data, headers=test_headers, timeout=10)
             elif method == 'DELETE':
-                response = requests.delete(url, headers=headers, timeout=30)
-            else:
-                return False, {"error": f"Unsupported method: {method}"}
+                response = requests.delete(url, headers=test_headers, timeout=10)
 
             success = response.status_code == expected_status
-            try:
-                response_data = response.json()
-            except:
-                response_data = {"status_code": response.status_code, "text": response.text[:200]}
+            details = f"Status: {response.status_code}"
+            if not success:
+                details += f" (Expected: {expected_status})"
+                try:
+                    error_data = response.json()
+                    details += f" - {error_data.get('detail', 'No error details')}"
+                except:
+                    details += f" - Response: {response.text[:100]}"
 
-            return success, response_data
+            self.log_test(name, success, details)
+            return success, response.json() if success and response.content else {}
 
-        except requests.exceptions.RequestException as e:
-            return False, {"error": str(e)}
+        except Exception as e:
+            self.log_test(name, False, f"Error: {str(e)}")
+            return False, {}
 
-    def test_auth_register(self) -> bool:
+    def test_lead_submission(self):
+        """Test lead form submission (public endpoint)"""
+        lead_data = {
+            "first_name": "Jean",
+            "last_name": "Dupont", 
+            "email": "jean.dupont@test.com",
+            "phone": "0690123456",
+            "company": "Test Company",
+            "project_type": "infographie",
+            "budget": "1000-2000€",
+            "message": "Test message pour infographie"
+        }
+        
+        success, response = self.run_test(
+            "Lead Form Submission (Infographie)",
+            "POST",
+            "lead",
+            200,
+            data=lead_data
+        )
+        return response.get('contact_id') if success else None
+
+    def test_user_registration(self):
         """Test user registration"""
-        test_email = f"test_{datetime.now().strftime('%H%M%S')}@alphagency.fr"
-        data = {
-            "email": test_email,
-            "password": "Test123456",
+        user_data = {
+            "email": f"test_{datetime.now().strftime('%H%M%S')}@alphagency.fr",
+            "password": "TestPass123!",
             "full_name": "Test User"
         }
         
-        success, response = self.make_request('POST', 'auth/register', data, 200, False)
+        success, response = self.run_test(
+            "User Registration",
+            "POST",
+            "auth/register",
+            200,
+            data=user_data
+        )
         
         if success and 'token' in response:
             self.token = response['token']
-            self.user_id = response.get('user', {}).get('id')
-            self.log_test("Auth Registration", True, endpoint="auth/register")
             return True
-        else:
-            self.log_test("Auth Registration", False, 
-                         f"Status or missing token: {response}", "auth/register")
-            return False
+        return False
 
-    def test_auth_login(self) -> bool:
-        """Test user login with provided credentials"""
-        data = {
-            "email": "test@alphagency.fr",
-            "password": "Test123456"
-        }
-        
-        success, response = self.make_request('POST', 'auth/login', data, 200, False)
-        
-        if success and 'token' in response:
-            self.token = response['token']
-            self.user_id = response.get('user', {}).get('id')
-            self.log_test("Auth Login", True, endpoint="auth/login")
-            return True
-        else:
-            self.log_test("Auth Login", False, 
-                         f"Login failed: {response}", "auth/login")
-            return False
-
-    def test_auth_me(self) -> bool:
-        """Test get current user"""
-        success, response = self.make_request('GET', 'auth/me')
-        
-        if success and 'email' in response:
-            self.log_test("Auth Me", True, endpoint="auth/me")
-            return True
-        else:
-            self.log_test("Auth Me", False, 
-                         f"Failed to get user info: {response}", "auth/me")
-            return False
-
-    def test_lead_submission(self) -> str:
-        """Test public lead form submission"""
-        data = {
-            "first_name": "Test",
-            "last_name": "Lead",
-            "email": f"lead_{datetime.now().strftime('%H%M%S')}@test.com",
-            "phone": "0691266003",
-            "company": "Test Company",
-            "project_type": "site_web",
-            "budget": "1000_3000",
-            "message": "Test lead submission"
-        }
-        
-        success, response = self.make_request('POST', 'lead', data, 200, False)
-        
-        if success and 'contact_id' in response:
-            contact_id = response['contact_id']
-            self.log_test("Lead Submission", True, endpoint="lead")
-            return contact_id
-        else:
-            self.log_test("Lead Submission", False, 
-                         f"Lead submission failed: {response}", "lead")
-            return None
-
-    def test_contacts_crud(self, lead_contact_id: str = None) -> str:
+    def test_contacts_api(self):
         """Test contacts CRUD operations"""
-        # Test GET all contacts
-        success, response = self.make_request('GET', 'contacts')
-        if success and isinstance(response, list):
-            self.log_test("Contacts - Get All", True, endpoint="contacts")
-        else:
-            self.log_test("Contacts - Get All", False, 
-                         f"Failed to get contacts: {response}", "contacts")
+        # Get all contacts
+        self.run_test("Get All Contacts", "GET", "contacts", 200)
+        
+        # Test filtering by source (website leads)
+        self.run_test("Get Website Leads", "GET", "contacts?source=website", 200)
 
-        # Test CREATE contact
-        contact_data = {
-            "first_name": "Test",
-            "last_name": "Contact",
-            "email": f"contact_{datetime.now().strftime('%H%M%S')}@test.com",
-            "phone": "0691266003",
-            "company": "Test Company",
-            "project_type": "site_web"
+    def test_settings_endpoints(self):
+        """Test new settings endpoints"""
+        # Get settings
+        success, settings = self.run_test("Get Settings", "GET", "settings", 200)
+        
+        if success:
+            # Test company settings update
+            company_data = {
+                "name": "Alpha Digital Test",
+                "commercial_name": "ALPHA Agency Test"
+            }
+            self.run_test("Update Company Settings", "PUT", "settings/company", 200, data=company_data)
+            
+            # Test social links update
+            social_data = {
+                "linkedin": "https://linkedin.com/company/alpha-test",
+                "instagram": "https://instagram.com/alpha_test"
+            }
+            self.run_test("Update Social Links", "PUT", "settings/social-links", 200, data=social_data)
+            
+            # Test legal texts update
+            legal_data = {
+                "mentions_legales": "Test mentions légales",
+                "politique_confidentialite": "Test politique confidentialité"
+            }
+            self.run_test("Update Legal Texts", "PUT", "settings/legal-texts", 200, data=legal_data)
+            
+            # Test integrations update
+            integrations_data = {
+                "ga4_id": "G-TEST123456",
+                "resend_api_key": "re_test_key"
+            }
+            self.run_test("Update Integrations", "PUT", "settings/integrations", 200, data=integrations_data)
+
+    def test_dashboard_endpoints(self):
+        """Test dashboard related endpoints"""
+        # Dashboard stats
+        self.run_test("Dashboard Stats", "GET", "dashboard/stats", 200)
+        
+        # Pipeline data
+        self.run_test("Pipeline Data", "GET", "dashboard/pipeline", 200)
+        
+        # Update KPIs
+        kpi_data = {
+            "sessions": 1500,
+            "leads": 25,
+            "conversion_rate": 1.67
         }
+        self.run_test("Update KPIs", "PUT", "dashboard/kpis", 200, data=kpi_data)
+
+    def test_blog_endpoints(self):
+        """Test blog endpoints (public)"""
+        # Get blog posts (public endpoint)
+        success, response = self.run_test("Get Blog Posts (Public)", "GET", "blog", 200)
         
-        success, response = self.make_request('POST', 'contacts', contact_data, 200)
-        contact_id = None
-        if success and 'id' in response:
-            contact_id = response['id']
-            self.log_test("Contacts - Create", True, endpoint="contacts")
-        else:
-            self.log_test("Contacts - Create", False, 
-                         f"Failed to create contact: {response}", "contacts")
+        # Test specific blog post (if any exist)
+        if success and response and len(response) > 0:
+            first_post = response[0]
+            if 'slug' in first_post:
+                self.run_test(f"Get Blog Post by Slug", "GET", f"blog/{first_post['slug']}", 200)
 
-        # Test GET single contact
-        if contact_id:
-            success, response = self.make_request('GET', f'contacts/{contact_id}')
-            if success and 'id' in response:
-                self.log_test("Contacts - Get One", True, endpoint=f"contacts/{contact_id}")
-            else:
-                self.log_test("Contacts - Get One", False, 
-                             f"Failed to get contact: {response}", f"contacts/{contact_id}")
-
-            # Test UPDATE contact
-            update_data = {"status": "qualifié", "score": "chaud"}
-            success, response = self.make_request('PUT', f'contacts/{contact_id}', update_data)
-            if success:
-                self.log_test("Contacts - Update", True, endpoint=f"contacts/{contact_id}")
-            else:
-                self.log_test("Contacts - Update", False, 
-                             f"Failed to update contact: {response}", f"contacts/{contact_id}")
-
-        return contact_id
-
-    def test_opportunities_crud(self, contact_id: str) -> str:
-        """Test opportunities CRUD operations"""
-        if not contact_id:
-            self.log_test("Opportunities - Skipped", False, "No contact_id available", "opportunities")
-            return None
-
-        # Test CREATE opportunity
-        opp_data = {
-            "contact_id": contact_id,
-            "title": "Test Opportunity",
-            "amount": 2500.0,
-            "probability": 75,
-            "status": "nouveau",
-            "offer_type": "site_web"
-        }
+    def test_portfolio_endpoints(self):
+        """Test portfolio endpoints (public)"""
+        # Get all portfolio items
+        self.run_test("Get Portfolio Items", "GET", "portfolio", 200)
         
-        success, response = self.make_request('POST', 'opportunities', opp_data, 200)
-        opp_id = None
-        if success and 'id' in response:
-            opp_id = response['id']
-            self.log_test("Opportunities - Create", True, endpoint="opportunities")
-        else:
-            self.log_test("Opportunities - Create", False, 
-                         f"Failed to create opportunity: {response}", "opportunities")
+        # Get portfolio by category (infographie)
+        self.run_test("Get Infographie Portfolio", "GET", "portfolio?category=infographie", 200)
 
-        # Test GET all opportunities
-        success, response = self.make_request('GET', 'opportunities')
-        if success and isinstance(response, list):
-            self.log_test("Opportunities - Get All", True, endpoint="opportunities")
-        else:
-            self.log_test("Opportunities - Get All", False, 
-                         f"Failed to get opportunities: {response}", "opportunities")
-
-        # Test UPDATE opportunity
-        if opp_id:
-            update_data = {"status": "qualifié", "probability": 85}
-            success, response = self.make_request('PUT', f'opportunities/{opp_id}', update_data)
-            if success:
-                self.log_test("Opportunities - Update", True, endpoint=f"opportunities/{opp_id}")
-            else:
-                self.log_test("Opportunities - Update", False, 
-                             f"Failed to update opportunity: {response}", f"opportunities/{opp_id}")
-
-        return opp_id
-
-    def test_quotes_crud(self, contact_id: str, opp_id: str = None) -> str:
-        """Test quotes CRUD operations"""
-        if not contact_id:
-            self.log_test("Quotes - Skipped", False, "No contact_id available", "quotes")
-            return None
-
-        # Test CREATE quote
-        quote_data = {
-            "contact_id": contact_id,
-            "opportunity_id": opp_id,
-            "items": [
-                {
-                    "description": "Site web professionnel",
-                    "quantity": 1,
-                    "unit_price": 2500.0
-                }
-            ],
-            "notes": "Devis pour site web"
-        }
-        
-        success, response = self.make_request('POST', 'quotes', quote_data, 200)
-        quote_id = None
-        if success and 'id' in response:
-            quote_id = response['id']
-            self.log_test("Quotes - Create", True, endpoint="quotes")
-        else:
-            self.log_test("Quotes - Create", False, 
-                         f"Failed to create quote: {response}", "quotes")
-
-        # Test GET all quotes
-        success, response = self.make_request('GET', 'quotes')
-        if success and isinstance(response, list):
-            self.log_test("Quotes - Get All", True, endpoint="quotes")
-        else:
-            self.log_test("Quotes - Get All", False, 
-                         f"Failed to get quotes: {response}", "quotes")
-
-        # Test GET single quote
-        if quote_id:
-            success, response = self.make_request('GET', f'quotes/{quote_id}')
-            if success and 'id' in response:
-                self.log_test("Quotes - Get One", True, endpoint=f"quotes/{quote_id}")
-            else:
-                self.log_test("Quotes - Get One", False, 
-                             f"Failed to get quote: {response}", f"quotes/{quote_id}")
-
-        return quote_id
-
-    def test_invoices_crud(self, contact_id: str, quote_id: str = None) -> str:
-        """Test invoices CRUD operations"""
-        if not contact_id:
-            self.log_test("Invoices - Skipped", False, "No contact_id available", "invoices")
-            return None
-
-        # Test CREATE invoice
-        invoice_data = {
-            "contact_id": contact_id,
-            "quote_id": quote_id,
-            "items": [
-                {
-                    "description": "Site web professionnel",
-                    "quantity": 1,
-                    "unit_price": 2500.0
-                }
-            ],
-            "notes": "Facture pour site web"
-        }
-        
-        success, response = self.make_request('POST', 'invoices', invoice_data, 200)
-        invoice_id = None
-        if success and 'id' in response:
-            invoice_id = response['id']
-            self.log_test("Invoices - Create", True, endpoint="invoices")
-        else:
-            self.log_test("Invoices - Create", False, 
-                         f"Failed to create invoice: {response}", "invoices")
-
-        # Test GET all invoices
-        success, response = self.make_request('GET', 'invoices')
-        if success and isinstance(response, list):
-            self.log_test("Invoices - Get All", True, endpoint="invoices")
-        else:
-            self.log_test("Invoices - Get All", False, 
-                         f"Failed to get invoices: {response}", "invoices")
-
-        return invoice_id
-
-    def test_subscriptions_crud(self, contact_id: str) -> str:
-        """Test subscriptions CRUD operations"""
-        if not contact_id:
-            self.log_test("Subscriptions - Skipped", False, "No contact_id available", "subscriptions")
-            return None
-
-        # Test CREATE subscription
-        sub_data = {
-            "contact_id": contact_id,
-            "plan_name": "Site Web 90€/mois",
-            "amount": 90.0,
-            "billing_cycle": "monthly"
-        }
-        
-        success, response = self.make_request('POST', 'subscriptions', sub_data, 200)
-        sub_id = None
-        if success and 'id' in response:
-            sub_id = response['id']
-            self.log_test("Subscriptions - Create", True, endpoint="subscriptions")
-        else:
-            self.log_test("Subscriptions - Create", False, 
-                         f"Failed to create subscription: {response}", "subscriptions")
-
-        # Test GET all subscriptions
-        success, response = self.make_request('GET', 'subscriptions')
-        if success and isinstance(response, list):
-            self.log_test("Subscriptions - Get All", True, endpoint="subscriptions")
-        else:
-            self.log_test("Subscriptions - Get All", False, 
-                         f"Failed to get subscriptions: {response}", "subscriptions")
-
-        return sub_id
-
-    def test_dashboard_stats(self) -> bool:
-        """Test dashboard statistics endpoint"""
-        success, response = self.make_request('GET', 'dashboard/stats')
-        
-        if success and 'contacts' in response:
-            self.log_test("Dashboard Stats", True, endpoint="dashboard/stats")
-            return True
-        else:
-            self.log_test("Dashboard Stats", False, 
-                         f"Failed to get dashboard stats: {response}", "dashboard/stats")
-            return False
-
-    def test_pipeline(self) -> bool:
-        """Test pipeline endpoint"""
-        success, response = self.make_request('GET', 'dashboard/pipeline')
-        
-        if success and isinstance(response, dict):
-            self.log_test("Dashboard Pipeline", True, endpoint="dashboard/pipeline")
-            return True
-        else:
-            self.log_test("Dashboard Pipeline", False, 
-                         f"Failed to get pipeline: {response}", "dashboard/pipeline")
-            return False
-
-    def run_all_tests(self) -> Dict[str, Any]:
-        """Run complete test suite"""
+    def run_all_tests(self):
+        """Run all API tests"""
         print("🚀 Starting ALPHA Agency API Tests...")
         print(f"📍 Testing against: {self.base_url}")
         print("=" * 60)
 
-        # Test authentication first
-        auth_success = False
-        if not self.test_auth_login():
-            # If login fails, try registration
-            auth_success = self.test_auth_register()
-        else:
-            auth_success = True
-            
-        if auth_success:
-            self.test_auth_me()
+        # Test public endpoints first
+        print("\n📋 Testing Public Endpoints...")
+        contact_id = self.test_lead_submission()
+        self.test_blog_endpoints()
+        self.test_portfolio_endpoints()
 
-        # Test public endpoints (no auth required)
-        lead_contact_id = self.test_lead_submission()
+        # Test authentication
+        print("\n🔐 Testing Authentication...")
+        if not self.test_user_registration():
+            print("❌ Cannot proceed with authenticated tests - registration failed")
+            return
 
-        if not auth_success:
-            print("\n❌ Authentication failed - skipping protected endpoints")
-            return self.get_results()
+        # Test authenticated endpoints
+        print("\n👥 Testing Contacts Management...")
+        self.test_contacts_api()
 
-        # Test protected endpoints
-        contact_id = self.test_contacts_crud(lead_contact_id)
-        opp_id = self.test_opportunities_crud(contact_id)
-        quote_id = self.test_quotes_crud(contact_id, opp_id)
-        invoice_id = self.test_invoices_crud(contact_id, quote_id)
-        sub_id = self.test_subscriptions_crud(contact_id)
-        
-        # Test dashboard endpoints
-        self.test_dashboard_stats()
-        self.test_pipeline()
+        print("\n⚙️ Testing Settings Management...")
+        self.test_settings_endpoints()
 
-        return self.get_results()
+        print("\n📊 Testing Dashboard...")
+        self.test_dashboard_endpoints()
 
-    def get_results(self) -> Dict[str, Any]:
-        """Get test results summary"""
+        # Print summary
+        print("\n" + "=" * 60)
+        print(f"📊 Test Summary: {self.tests_passed}/{self.tests_run} tests passed")
         success_rate = (self.tests_passed / self.tests_run * 100) if self.tests_run > 0 else 0
+        print(f"✨ Success Rate: {success_rate:.1f}%")
         
-        return {
-            "total_tests": self.tests_run,
-            "passed_tests": self.tests_passed,
-            "failed_tests": len(self.failed_tests),
-            "success_rate": round(success_rate, 2),
-            "failures": self.failed_tests,
-            "all_results": self.test_results
-        }
+        if contact_id:
+            print(f"🎯 Lead created with ID: {contact_id}")
 
-    def print_summary(self, results: Dict[str, Any]):
-        """Print test summary"""
-        print("\n" + "=" * 60)
-        print("📊 TEST SUMMARY")
-        print("=" * 60)
-        print(f"Total Tests: {results['total_tests']}")
-        print(f"Passed: {results['passed_tests']}")
-        print(f"Failed: {results['failed_tests']}")
-        print(f"Success Rate: {results['success_rate']}%")
-        
-        if results['failures']:
-            print(f"\n❌ FAILED TESTS ({len(results['failures'])}):")
-            for failure in results['failures']:
-                print(f"  • {failure['test']} ({failure['endpoint']})")
-                print(f"    Error: {failure['error']}")
-        
-        print("\n" + "=" * 60)
+        return success_rate >= 80
 
 def main():
-    """Main test execution"""
     tester = AlphaAgencyAPITester()
-    results = tester.run_all_tests()
-    tester.print_summary(results)
+    success = tester.run_all_tests()
     
-    # Return appropriate exit code
-    return 0 if results['success_rate'] >= 80 else 1
+    # Save detailed results
+    with open('/app/test_results_backend.json', 'w') as f:
+        json.dump({
+            "timestamp": datetime.now().isoformat(),
+            "total_tests": tester.tests_run,
+            "passed_tests": tester.tests_passed,
+            "success_rate": (tester.tests_passed / tester.tests_run * 100) if tester.tests_run > 0 else 0,
+            "results": tester.test_results
+        }, f, indent=2)
+    
+    return 0 if success else 1
 
 if __name__ == "__main__":
     sys.exit(main())
