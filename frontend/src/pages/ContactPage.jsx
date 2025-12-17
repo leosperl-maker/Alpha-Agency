@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Send, CheckCircle } from "lucide-react";
+import { Send, MapPin, Phone, Mail, Clock, CheckCircle } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Checkbox } from "../components/ui/checkbox";
 import { leadAPI } from "../lib/api";
 import { toast } from "sonner";
 
 const ContactPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -19,55 +20,27 @@ const ContactPage = () => {
     phone: "",
     project_type: "",
     budget: "",
-    message: "",
-    rgpd: false
+    message: ""
   });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const projectTypes = [
-    { value: "site_vitrine", label: "Site Vitrine" },
-    { value: "site_ecommerce", label: "Site E-commerce" },
+    { value: "site_vitrine", label: "Site vitrine" },
+    { value: "site_ecommerce", label: "Site e-commerce" },
     { value: "community_management", label: "Community Management" },
-    { value: "photo", label: "Photography" },
-    { value: "video", label: "Vidéography" },
-    { value: "ads", label: "Publicité Digitale" },
-    { value: "pack_360", label: "Pack 360°" }
+    { value: "photo", label: "Photo" },
+    { value: "video", label: "Vidéo" },
+    { value: "infographie", label: "Infographie" },
+    { value: "ads", label: "Publicité digitale" },
+    { value: "pack_360", label: "Pack 360°" },
+    { value: "autre", label: "Autre" }
   ];
-
-  const budgets = [
-    { value: "moins_500", label: "Moins de 500€" },
-    { value: "500_1000", label: "500€ - 1000€" },
-    { value: "1000_3000", label: "1000€ - 3000€" },
-    { value: "3000_5000", label: "3000€ - 5000€" },
-    { value: "plus_5000", label: "Plus de 5000€" }
-  ];
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.rgpd) {
-      toast.error("Veuillez accepter la politique de confidentialité");
-      return;
-    }
-
     setLoading(true);
+    
     try {
-      await leadAPI.submit({
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        company: formData.company,
-        email: formData.email,
-        phone: formData.phone,
-        project_type: formData.project_type,
-        budget: formData.budget,
-        message: formData.message
-      });
+      await leadAPI.submit(formData);
       setSuccess(true);
       toast.success("Votre demande a été envoyée avec succès !");
     } catch (error) {
@@ -77,30 +50,37 @@ const ContactPage = () => {
     }
   };
 
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   if (success) {
     return (
-      <div data-testid="contact-success" className="bg-white min-h-screen pt-32 px-6">
-        <div className="max-w-xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#F8F8F8] p-12 rounded-lg border border-[#E5E5E5]"
-          >
-            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-10 h-10 text-green-500" />
-            </div>
-            <h2 className="text-3xl font-bold text-[#1A1A1A] mb-4">Merci !</h2>
-            <p className="text-[#666666] text-lg mb-8">
-              Votre demande a bien été envoyée. Nous vous recontacterons dans les plus brefs délais.
-            </p>
-            <Button
-              onClick={() => setSuccess(false)}
-              className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none px-8 py-4"
+      <div data-testid="contact-page" className="bg-white min-h-screen">
+        <section className="pt-32 pb-24 px-6">
+          <div className="max-w-2xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#F8F8F8] p-12 rounded-lg"
             >
-              Envoyer une autre demande
-            </Button>
-          </motion.div>
-        </div>
+              <div className="w-20 h-20 bg-[#CE0202]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-10 h-10 text-[#CE0202]" />
+              </div>
+              <h1 className="text-3xl font-bold text-[#1A1A1A] mb-4">Demande envoyée !</h1>
+              <p className="text-[#666666] mb-6">
+                Merci pour votre demande. Notre équipe vous recontactera dans les plus brefs délais, 
+                généralement sous 24 heures ouvrées.
+              </p>
+              <Button
+                onClick={() => setSuccess(false)}
+                className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white"
+              >
+                Envoyer une autre demande
+              </Button>
+            </motion.div>
+          </div>
+        </section>
       </div>
     );
   }
@@ -120,181 +100,169 @@ const ContactPage = () => {
               data-testid="contact-headline"
               className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#1A1A1A] mb-6"
             >
-              <span className="text-[#CE0202]">Contactez</span>-nous
+              Parlons de votre <span className="text-[#CE0202]">projet</span>
             </h1>
             <p className="text-lg lg:text-xl text-[#666666]">
-              Une question, un projet ? Remplissez le formulaire ci-dessous et nous vous recontacterons rapidement.
+              Prenez contact avec notre équipe pour un audit gratuit et un devis personnalisé.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section className="px-6 py-24 bg-white">
+      {/* Contact Content */}
+      <section className="py-24 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            {/* Form */}
+            {/* Contact Form */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               className="lg:col-span-7"
             >
-              <form onSubmit={handleSubmit} data-testid="contact-form" className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="first_name" className="text-[#1A1A1A]">Prénom *</Label>
-                    <Input
-                      id="first_name"
-                      name="first_name"
-                      data-testid="input-first-name"
-                      value={formData.first_name}
-                      onChange={handleChange}
-                      required
-                      className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
-                    />
+              <div className="bg-[#F8F8F8] p-8 rounded-lg border border-[#E5E5E5]">
+                <h2 className="text-2xl font-bold text-[#1A1A1A] mb-6">Demande de devis</h2>
+                
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="first_name">Prénom *</Label>
+                      <Input
+                        id="first_name"
+                        data-testid="input-firstname"
+                        value={formData.first_name}
+                        onChange={(e) => handleChange("first_name", e.target.value)}
+                        required
+                        className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                        placeholder="Votre prénom"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="last_name">Nom *</Label>
+                      <Input
+                        id="last_name"
+                        data-testid="input-lastname"
+                        value={formData.last_name}
+                        onChange={(e) => handleChange("last_name", e.target.value)}
+                        required
+                        className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                        placeholder="Votre nom"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="last_name" className="text-[#1A1A1A]">Nom *</Label>
-                    <Input
-                      id="last_name"
-                      name="last_name"
-                      data-testid="input-last-name"
-                      value={formData.last_name}
-                      onChange={handleChange}
-                      required
-                      className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
-                    />
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="company" className="text-[#1A1A1A]">Entreprise</Label>
-                  <Input
-                    id="company"
-                    name="company"
-                    data-testid="input-company"
-                    value={formData.company}
-                    onChange={handleChange}
-                    className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-[#1A1A1A]">Email *</Label>
+                    <Label htmlFor="company">Entreprise</Label>
                     <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      data-testid="input-email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
+                      id="company"
+                      data-testid="input-company"
+                      value={formData.company}
+                      onChange={(e) => handleChange("company", e.target.value)}
+                      className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                      placeholder="Nom de votre entreprise"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-[#1A1A1A]">Téléphone</Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      data-testid="input-phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
-                    />
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label className="text-[#1A1A1A]">Type de projet *</Label>
-                    <Select
-                      value={formData.project_type}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, project_type: value }))}
-                      required
-                    >
-                      <SelectTrigger 
-                        data-testid="select-project-type"
-                        className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        data-testid="input-email"
+                        value={formData.email}
+                        onChange={(e) => handleChange("email", e.target.value)}
+                        required
+                        className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                        placeholder="votre@email.com"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Téléphone</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        data-testid="input-phone"
+                        value={formData.phone}
+                        onChange={(e) => handleChange("phone", e.target.value)}
+                        className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                        placeholder="0690 00 00 00"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="project_type">Type de projet *</Label>
+                      <Select
+                        value={formData.project_type}
+                        onValueChange={(value) => handleChange("project_type", value)}
+                        required
                       >
-                        <SelectValue placeholder="Sélectionnez" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-[#E5E5E5]">
-                        {projectTypes.map(type => (
-                          <SelectItem key={type.value} value={type.value} className="text-[#1A1A1A]">
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                        <SelectTrigger 
+                          id="project_type"
+                          data-testid="select-project-type"
+                          className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                        >
+                          <SelectValue placeholder="Sélectionnez un type" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-[#E5E5E5] z-[100]">
+                          {projectTypes.map((type) => (
+                            <SelectItem 
+                              key={type.value} 
+                              value={type.value}
+                              className="text-[#1A1A1A] hover:bg-[#F8F8F8] cursor-pointer"
+                            >
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="budget">Budget estimé</Label>
+                      <Input
+                        id="budget"
+                        data-testid="input-budget"
+                        value={formData.budget}
+                        onChange={(e) => handleChange("budget", e.target.value)}
+                        className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                        placeholder="Votre budget (optionnel)"
+                      />
+                    </div>
                   </div>
+
                   <div className="space-y-2">
-                    <Label className="text-[#1A1A1A]">Budget estimé</Label>
-                    <Select
-                      value={formData.budget}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, budget: value }))}
-                    >
-                      <SelectTrigger 
-                        data-testid="select-budget"
-                        className="bg-white border-[#E5E5E5] focus:border-[#CE0202] h-12 text-[#1A1A1A]"
-                      >
-                        <SelectValue placeholder="Sélectionnez" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-[#E5E5E5]">
-                        {budgets.map(budget => (
-                          <SelectItem key={budget.value} value={budget.value} className="text-[#1A1A1A]">
-                            {budget.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="message">Votre message *</Label>
+                    <Textarea
+                      id="message"
+                      data-testid="textarea-message"
+                      value={formData.message}
+                      onChange={(e) => handleChange("message", e.target.value)}
+                      required
+                      rows={5}
+                      className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                      placeholder="Décrivez votre projet, vos besoins et vos objectifs..."
+                    />
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="message" className="text-[#1A1A1A]">Message</Label>
-                  <Textarea
-                    id="message"
-                    name="message"
-                    data-testid="input-message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    rows={5}
-                    className="bg-white border-[#E5E5E5] focus:border-[#CE0202] resize-none text-[#1A1A1A]"
-                    placeholder="Décrivez votre projet..."
-                  />
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="rgpd"
-                    data-testid="checkbox-rgpd"
-                    checked={formData.rgpd}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, rgpd: checked }))}
-                    className="mt-1 border-[#E5E5E5]"
-                  />
-                  <Label htmlFor="rgpd" className="text-sm text-[#666666] leading-relaxed">
-                    J'accepte que mes données soient traitées conformément à la{" "}
-                    <a href="/confidentialite" className="text-[#CE0202] hover:underline">
-                      politique de confidentialité
-                    </a>
-                    . *
-                  </Label>
-                </div>
-
-                <Button
-                  type="submit"
-                  data-testid="submit-btn"
-                  disabled={loading}
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider w-full sm:w-auto"
-                >
-                  {loading ? "Envoi en cours..." : "Envoyer ma demande"}
-                  <Send className="ml-2 w-4 h-4" />
-                </Button>
-              </form>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    data-testid="submit-btn"
+                    className="w-full bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-none py-6 text-sm font-bold uppercase tracking-wider"
+                  >
+                    {loading ? (
+                      "Envoi en cours..."
+                    ) : (
+                      <>
+                        Envoyer ma demande
+                        <Send className="ml-2 w-4 h-4" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </div>
             </motion.div>
 
             {/* Contact Info */}
@@ -302,60 +270,63 @@ const ContactPage = () => {
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="lg:col-span-5"
+              className="lg:col-span-5 space-y-8"
             >
-              <div className="bg-[#F8F8F8] p-8 rounded-lg border border-[#E5E5E5] mb-8">
-                <h3 className="text-xl font-bold text-[#1A1A1A] mb-6">Nos coordonnées</h3>
+              {/* Contact Details */}
+              <div className="bg-[#1A1A1A] p-8 rounded-lg">
+                <h3 className="text-xl font-bold text-white mb-6">Nos coordonnées</h3>
                 <ul className="space-y-6">
                   <li className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-[#CE0202]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-5 h-5 text-[#CE0202]" />
-                    </div>
+                    <MapPin className="w-5 h-5 text-[#CE0202] mt-1 flex-shrink-0" />
                     <div>
-                      <p className="text-[#1A1A1A] font-medium">Adresse</p>
-                      <p className="text-[#666666] text-sm">
+                      <p className="text-white font-medium">Adresse</p>
+                      <p className="text-[#A1A1AA] text-sm">
                         3 Boulevard du Marquisat de Houelbourg<br />
                         97122 Baie-Mahault, Guadeloupe
                       </p>
                     </div>
                   </li>
                   <li className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-[#CE0202]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Phone className="w-5 h-5 text-[#CE0202]" />
-                    </div>
+                    <Phone className="w-5 h-5 text-[#CE0202] mt-1 flex-shrink-0" />
                     <div>
-                      <p className="text-[#1A1A1A] font-medium">Téléphone</p>
-                      <a href="tel:0691266003" className="text-[#666666] text-sm hover:text-[#CE0202]">
+                      <p className="text-white font-medium">Téléphone</p>
+                      <a href="tel:0691266003" className="text-[#A1A1AA] text-sm hover:text-white">
                         0691 266 003
                       </a>
                     </div>
                   </li>
                   <li className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-[#CE0202]/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Mail className="w-5 h-5 text-[#CE0202]" />
-                    </div>
+                    <Mail className="w-5 h-5 text-[#CE0202] mt-1 flex-shrink-0" />
                     <div>
-                      <p className="text-[#1A1A1A] font-medium">Email</p>
-                      <a href="mailto:leo.sperl@alphagency.fr" className="text-[#666666] text-sm hover:text-[#CE0202]">
+                      <p className="text-white font-medium">Email</p>
+                      <a href="mailto:leo.sperl@alphagency.fr" className="text-[#A1A1AA] text-sm hover:text-white">
                         leo.sperl@alphagency.fr
                       </a>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-4">
+                    <Clock className="w-5 h-5 text-[#CE0202] mt-1 flex-shrink-0" />
+                    <div>
+                      <p className="text-white font-medium">Horaires</p>
+                      <p className="text-[#A1A1AA] text-sm">
+                        Lundi - Vendredi<br />
+                        9h00 - 18h00
+                      </p>
                     </div>
                   </li>
                 </ul>
               </div>
 
-              {/* Map placeholder */}
-              <div className="aspect-[4/3] bg-[#F8F8F8] rounded-lg overflow-hidden border border-[#E5E5E5]">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3828.8!2d-61.5891!3d16.2708!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTbCsDE2JzE0LjkiTiA2McKwMzUnMjAuOCJX!5e0!3m2!1sfr!2sfr!4v1600000000000!5m2!1sfr!2sfr"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen=""
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="ALPHA Agency location"
-                />
+              {/* Quick Info */}
+              <div className="bg-[#F8F8F8] p-8 rounded-lg border border-[#E5E5E5]">
+                <h3 className="text-xl font-bold text-[#1A1A1A] mb-4">Réponse rapide</h3>
+                <p className="text-[#666666] text-sm mb-4">
+                  Nous nous engageons à répondre à toutes les demandes sous 24 heures ouvrées.
+                </p>
+                <div className="flex items-center gap-2 text-[#CE0202] text-sm font-medium">
+                  <CheckCircle className="w-4 h-4" />
+                  Audit gratuit inclus
+                </div>
               </div>
             </motion.div>
           </div>

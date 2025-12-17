@@ -16,6 +16,7 @@ const PortfolioPage = () => {
     { id: "reseaux_sociaux", label: "Réseaux Sociaux" },
     { id: "photo", label: "Photo" },
     { id: "video", label: "Vidéo" },
+    { id: "infographie", label: "Infographie" },
     { id: "ads", label: "Ads" }
   ];
 
@@ -68,6 +69,22 @@ const PortfolioPage = () => {
       description: "Spot vidéo pour lancement de produit",
       image_url: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600&q=80",
       tags: ["Vidéo", "Marketing"]
+    },
+    {
+      id: "7",
+      title: "Identité Visuelle Restaurant",
+      category: "infographie",
+      description: "Création de logo, carte de visite et menu",
+      image_url: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80",
+      tags: ["Infographie", "Branding"]
+    },
+    {
+      id: "8",
+      title: "Flyers Événement",
+      category: "infographie",
+      description: "Conception de supports print pour événement",
+      image_url: "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=600&q=80",
+      tags: ["Infographie", "Print"]
     }
   ];
 
@@ -125,7 +142,7 @@ const PortfolioPage = () => {
                 onClick={() => setActiveFilter(filter.id)}
                 className={`rounded-full px-6 py-2 text-sm ${
                   activeFilter === filter.id
-                    ? "bg-[#CE0202] text-white hover:bg-[#B00202]"
+                    ? "bg-[#CE0202] text-white hover:bg-[#B00202] hover:text-white"
                     : "border-[#E5E5E5] text-[#1A1A1A] hover:border-[#CE0202] hover:text-[#CE0202] bg-transparent"
                 }`}
               >
