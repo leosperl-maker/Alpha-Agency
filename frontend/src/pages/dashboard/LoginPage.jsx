@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, Shield } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -10,13 +10,11 @@ import { toast } from "sonner";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
-    password: "",
-    full_name: ""
+    password: ""
   });
 
   const handleChange = (e) => {
@@ -29,26 +27,17 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      let response;
-      if (isLogin) {
-        response = await authAPI.login({
-          email: formData.email,
-          password: formData.password
-        });
-      } else {
-        response = await authAPI.register({
-          email: formData.email,
-          password: formData.password,
-          full_name: formData.full_name
-        });
-      }
+      const response = await authAPI.login({
+        email: formData.email,
+        password: formData.password
+      });
 
       localStorage.setItem("alpha_token", response.data.token);
       localStorage.setItem("alpha_user", JSON.stringify(response.data.user));
-      toast.success(isLogin ? "Connexion réussie" : "Compte créé avec succès");
+      toast.success("Connexion réussie");
       navigate("/admin");
     } catch (error) {
-      toast.error(error.response?.data?.detail || "Une erreur est survenue");
+      toast.error(error.response?.data?.detail || "Identifiants incorrects");
     } finally {
       setLoading(false);
     }
@@ -65,34 +54,21 @@ const LoginPage = () => {
         <div className="text-center mb-8">
           <span className="text-4xl font-bold font-['Syne']">
             <span className="text-[#CE0202]">A</span>
-            <span className="text-white">LPHA</span>
+            <span className="text-white">lpha</span>
           </span>
-          <p className="text-[#A1A1AA] mt-2">Dashboard Administration</p>
+          <p className="text-[#A1A1AA] mt-2">Espace administration</p>
         </div>
 
         {/* Form */}
         <div className="glass p-8 rounded-lg">
-          <h2 className="text-2xl font-bold text-white mb-6 text-center">
-            {isLogin ? "Connexion" : "Créer un compte"}
-          </h2>
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <Shield className="w-5 h-5 text-[#CE0202]" />
+            <h2 className="text-2xl font-bold text-white text-center">
+              Connexion sécurisée
+            </h2>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="full_name">Nom complet</Label>
-                <Input
-                  id="full_name"
-                  name="full_name"
-                  data-testid="input-fullname"
-                  value={formData.full_name}
-                  onChange={handleChange}
-                  required={!isLogin}
-                  className="bg-black/50 border-white/10 focus:border-[#CE0202] h-12"
-                  placeholder="Votre nom"
-                />
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -140,20 +116,15 @@ const LoginPage = () => {
               type="submit"
               data-testid="submit-btn"
               disabled={loading}
-              className="w-full bg-[#CE0202] hover:bg-[#B00202] text-white rounded-none py-6 text-sm font-bold uppercase tracking-wider"
+              className="w-full bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-none py-6 text-sm font-bold uppercase tracking-wider"
             >
-              {loading ? "Chargement..." : (isLogin ? "Se connecter" : "Créer le compte")}
+              {loading ? "Connexion..." : "Se connecter"}
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-[#A1A1AA] hover:text-white text-sm"
-            >
-              {isLogin ? "Pas encore de compte ? Créer un compte" : "Déjà un compte ? Se connecter"}
-            </button>
-          </div>
+          <p className="mt-6 text-center text-xs text-[#666666]">
+            Accès réservé aux administrateurs Alpha Agency
+          </p>
         </div>
       </motion.div>
     </div>
