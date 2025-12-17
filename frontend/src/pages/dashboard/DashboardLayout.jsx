@@ -12,7 +12,8 @@ import {
   Menu,
   X,
   ChevronRight,
-  Image
+  Image,
+  Inbox
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 
@@ -43,6 +44,7 @@ const DashboardLayout = () => {
 
   const navItems = [
     { path: "/admin", icon: LayoutDashboard, label: "Vue d'ensemble", end: true },
+    { path: "/admin/demandes", icon: Inbox, label: "Demandes" },
     { path: "/admin/contacts", icon: Users, label: "Contacts" },
     { path: "/admin/pipeline", icon: Kanban, label: "Pipeline" },
     { path: "/admin/devis", icon: FileText, label: "Devis" },
