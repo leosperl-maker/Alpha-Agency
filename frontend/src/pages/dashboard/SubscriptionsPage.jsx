@@ -86,10 +86,10 @@ const SubscriptionsPage = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      actif: { class: "bg-green-500/20 text-green-500", icon: CheckCircle },
-      suspendu: { class: "bg-yellow-500/20 text-yellow-500", icon: PauseCircle },
-      annulé: { class: "bg-red-500/20 text-red-500", icon: XCircle },
-      expiré: { class: "bg-gray-500/20 text-gray-400", icon: XCircle }
+      actif: { class: "bg-green-100 text-green-700", icon: CheckCircle },
+      suspendu: { class: "bg-yellow-100 text-yellow-700", icon: PauseCircle },
+      annulé: { class: "bg-red-100 text-red-700", icon: XCircle },
+      expiré: { class: "bg-gray-100 text-gray-600", icon: XCircle }
     };
     return styles[status] || styles.actif;
   };
@@ -119,36 +119,36 @@ const SubscriptionsPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Abonnements</h1>
-          <p className="text-[#A1A1AA]">{subscriptions.length} abonnements au total</p>
+          <h1 className="text-2xl font-bold text-[#1A1A1A]">Abonnements</h1>
+          <p className="text-[#666666] text-sm">{subscriptions.length} abonnements au total</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button 
               data-testid="add-subscription-btn"
               onClick={resetForm}
-              className="bg-[#6A0F1A] hover:bg-[#8B1422] text-white"
+              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
             >
               <Plus className="w-4 h-4 mr-2" />
               Nouvel abonnement
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[#0A0A0A] border-white/10">
+          <DialogContent className="bg-white border-[#E5E5E5]">
             <DialogHeader>
-              <DialogTitle className="text-white">Nouvel abonnement</DialogTitle>
+              <DialogTitle className="text-[#1A1A1A]">Nouvel abonnement</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Contact *</Label>
+                <Label className="text-[#1A1A1A]">Contact *</Label>
                 <Select
                   value={formData.contact_id}
                   onValueChange={(value) => setFormData({...formData, contact_id: value})}
                   required
                 >
-                  <SelectTrigger className="bg-black/50 border-white/10">
+                  <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
                     <SelectValue placeholder="Sélectionner un contact" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0A0A0A] border-white/10">
+                  <SelectContent className="bg-white border-[#E5E5E5]">
                     {contacts.map((contact) => (
                       <SelectItem key={contact.id} value={contact.id}>
                         {contact.first_name} {contact.last_name}
@@ -159,7 +159,7 @@ const SubscriptionsPage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Plan *</Label>
+                <Label className="text-[#1A1A1A]">Plan *</Label>
                 <Select
                   value={formData.plan_name}
                   onValueChange={(value) => {
@@ -171,10 +171,10 @@ const SubscriptionsPage = () => {
                     });
                   }}
                 >
-                  <SelectTrigger className="bg-black/50 border-white/10">
+                  <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0A0A0A] border-white/10">
+                  <SelectContent className="bg-white border-[#E5E5E5]">
                     {plans.map((plan) => (
                       <SelectItem key={plan.name} value={plan.name}>
                         {plan.name} - {plan.amount}€/mois
@@ -186,30 +186,30 @@ const SubscriptionsPage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Montant (€/mois)</Label>
+                  <Label className="text-[#1A1A1A]">Montant (€/mois)</Label>
                   <Input
                     type="number"
                     value={formData.amount}
                     onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Date de début</Label>
+                  <Label className="text-[#1A1A1A]">Date de début</Label>
                   <Input
                     type="date"
                     value={formData.start_date}
                     onChange={(e) => setFormData({...formData, start_date: e.target.value})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   />
                 </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Annuler
                 </Button>
-                <Button type="submit" className="bg-[#6A0F1A] hover:bg-[#8B1422]">
+                <Button type="submit" className="bg-[#CE0202] hover:bg-[#B00202] text-white">
                   Créer
                 </Button>
               </div>
@@ -219,95 +219,89 @@ const SubscriptionsPage = () => {
       </div>
 
       {/* MRR Card */}
-      <Card className="card-dashboard bg-gradient-to-br from-[#6A0F1A]/20 to-transparent border-[#6A0F1A]/30">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[#A1A1AA] text-sm">Revenus Récurrents Mensuels (MRR)</p>
-              <p className="text-4xl font-bold text-white font-mono">{mrr.toLocaleString()}€</p>
-              <p className="text-[#A1A1AA] text-sm mt-1">
-                {activeCount} abonnement{activeCount > 1 ? 's' : ''} actif{activeCount > 1 ? 's' : ''}
-              </p>
-            </div>
-            <div className="w-16 h-16 bg-[#6A0F1A]/20 rounded-full flex items-center justify-center">
-              <CreditCard className="w-8 h-8 text-[#6A0F1A]" />
-            </div>
+      <div className="bg-white rounded-lg border border-[#CE0202]/20 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[#666666] text-sm">Revenus Récurrents Mensuels (MRR)</p>
+            <p className="text-4xl font-bold text-[#1A1A1A] font-mono">{mrr.toLocaleString()}€</p>
+            <p className="text-[#666666] text-sm mt-1">
+              {activeCount} abonnement{activeCount > 1 ? 's' : ''} actif{activeCount > 1 ? 's' : ''}
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <div className="w-16 h-16 bg-[#CE0202]/10 rounded-full flex items-center justify-center">
+            <CreditCard className="w-8 h-8 text-[#CE0202]" />
+          </div>
+        </div>
+      </div>
 
       {/* Subscriptions List */}
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-white/5 animate-pulse rounded-lg" />
+            <div key={i} className="h-24 bg-[#E5E5E5] animate-pulse rounded-lg" />
           ))}
         </div>
       ) : subscriptions.length === 0 ? (
-        <Card className="card-dashboard">
-          <CardContent className="p-12 text-center">
-            <CreditCard className="w-12 h-12 text-[#A1A1AA] mx-auto mb-4" />
-            <p className="text-[#A1A1AA]">Aucun abonnement créé</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-12 text-center">
+          <CreditCard className="w-12 h-12 text-[#666666] mx-auto mb-4" />
+          <p className="text-[#666666]">Aucun abonnement créé</p>
+        </div>
       ) : (
         <div className="space-y-4">
           {subscriptions.map((sub) => {
             const statusInfo = getStatusBadge(sub.status);
             return (
-              <Card 
+              <div 
                 key={sub.id}
                 data-testid={`subscription-${sub.id}`}
-                className="card-dashboard hover:border-[#6A0F1A]/30 transition-colors"
+                className="bg-white rounded-lg border border-[#E5E5E5] p-4 hover:border-[#CE0202]/30 transition-colors"
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[#6A0F1A]/20 rounded-lg flex items-center justify-center">
-                        <CreditCard className="w-6 h-6 text-[#6A0F1A]" />
-                      </div>
-                      <div>
-                        <h3 className="text-white font-semibold">
-                          {sub.plan_name}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm text-[#A1A1AA]">
-                          <User className="w-3 h-3" />
-                          <span>{getContactName(sub.contact_id)}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-[#A1A1AA]">
-                          <Calendar className="w-3 h-3" />
-                          <span>
-                            Prochaine facturation : {sub.next_billing_date ? new Date(sub.next_billing_date).toLocaleDateString('fr-FR') : 'Non définie'}
-                          </span>
-                        </div>
-                      </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[#CE0202]/10 rounded-lg flex items-center justify-center">
+                      <CreditCard className="w-6 h-6 text-[#CE0202]" />
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-white font-mono">
-                          {sub.amount?.toLocaleString()}€<span className="text-sm text-[#A1A1AA]">/mois</span>
-                        </p>
-                        <Badge className={statusInfo.class}>
-                          {sub.status}
-                        </Badge>
+                    <div>
+                      <h3 className="text-[#1A1A1A] font-semibold">
+                        {sub.plan_name}
+                      </h3>
+                      <div className="flex items-center gap-2 text-sm text-[#666666]">
+                        <User className="w-3 h-3" />
+                        <span>{getContactName(sub.contact_id)}</span>
                       </div>
-                      <Select
-                        value={sub.status}
-                        onValueChange={(value) => handleStatusUpdate(sub.id, value)}
-                      >
-                        <SelectTrigger className="w-32 h-8 text-xs bg-black/30 border-white/5">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#0A0A0A] border-white/10">
-                          <SelectItem value="actif">Actif</SelectItem>
-                          <SelectItem value="suspendu">Suspendu</SelectItem>
-                          <SelectItem value="annulé">Annulé</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="flex items-center gap-2 text-xs text-[#666666]">
+                        <Calendar className="w-3 h-3" />
+                        <span>
+                          Prochaine facturation : {sub.next_billing_date ? new Date(sub.next_billing_date).toLocaleDateString('fr-FR') : 'Non définie'}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-[#1A1A1A] font-mono">
+                        {sub.amount?.toLocaleString()}€<span className="text-sm text-[#666666]">/mois</span>
+                      </p>
+                      <Badge className={statusInfo.class}>
+                        {sub.status}
+                      </Badge>
+                    </div>
+                    <Select
+                      value={sub.status}
+                      onValueChange={(value) => handleStatusUpdate(sub.id, value)}
+                    >
+                      <SelectTrigger className="w-32 h-8 text-xs bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-[#E5E5E5]">
+                        <SelectItem value="actif">Actif</SelectItem>
+                        <SelectItem value="suspendu">Suspendu</SelectItem>
+                        <SelectItem value="annulé">Annulé</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
             );
           })}
         </div>

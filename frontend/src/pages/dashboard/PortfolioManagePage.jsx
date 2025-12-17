@@ -35,9 +35,10 @@ const PortfolioManagePage = () => {
     { value: "site_web", label: "Site Web" },
     { value: "site_ecommerce", label: "Site E-commerce" },
     { value: "reseaux_sociaux", label: "Réseaux Sociaux" },
-    { value: "photo", label: "Photo" },
+    { value: "photo", label: "Photographie" },
     { value: "video", label: "Vidéo" },
-    { value: "ads", label: "Ads" }
+    { value: "infographie", label: "Infographie" },
+    { value: "ads", label: "Publicité digitale" }
   ];
 
   const fetchItems = async () => {
@@ -124,8 +125,8 @@ const PortfolioManagePage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Réalisations</h1>
-          <p className="text-[#A1A1AA]">{items.length} réalisation{items.length > 1 ? 's' : ''} au total</p>
+          <h1 className="text-2xl font-bold text-[#1A1A1A]">Réalisations</h1>
+          <p className="text-[#666666] text-sm">{items.length} réalisation{items.length > 1 ? 's' : ''} au total</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -138,35 +139,35 @@ const PortfolioManagePage = () => {
               Nouvelle réalisation
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[#0A0A0A] border-white/10 max-w-lg">
+          <DialogContent className="bg-white border-[#E5E5E5] max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-white">
+              <DialogTitle className="text-[#1A1A1A]">
                 {editingItem ? "Modifier la réalisation" : "Nouvelle réalisation"}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Titre *</Label>
+                <Label className="text-[#1A1A1A]">Titre *</Label>
                 <Input
                   value={formData.title}
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
                   required
                   placeholder="Ex: Restaurant Le Marin"
-                  className="bg-black/50 border-white/10"
+                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Catégorie *</Label>
+                <Label className="text-[#1A1A1A]">Catégorie *</Label>
                 <Select
                   value={formData.category}
                   onValueChange={(value) => setFormData({...formData, category: value})}
                   required
                 >
-                  <SelectTrigger className="bg-black/50 border-white/10">
+                  <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
                     <SelectValue placeholder="Sélectionner une catégorie" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#0A0A0A] border-white/10">
+                  <SelectContent className="bg-white border-[#E5E5E5]">
                     {categories.map((cat) => (
                       <SelectItem key={cat.value} value={cat.value}>
                         {cat.label}
@@ -177,53 +178,53 @@ const PortfolioManagePage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Description *</Label>
+                <Label className="text-[#1A1A1A]">Description *</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   required
                   placeholder="Description du projet..."
-                  className="bg-black/50 border-white/10"
+                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   rows={3}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>URL de l'image *</Label>
+                <Label className="text-[#1A1A1A]">URL de l'image *</Label>
                 <Input
                   value={formData.image_url}
                   onChange={(e) => setFormData({...formData, image_url: e.target.value})}
                   required
                   placeholder="https://..."
-                  className="bg-black/50 border-white/10"
+                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Lien vers le projet</Label>
+                <Label className="text-[#1A1A1A]">Lien vers le projet</Label>
                 <Input
                   value={formData.link}
                   onChange={(e) => setFormData({...formData, link: e.target.value})}
                   placeholder="https://..."
-                  className="bg-black/50 border-white/10"
+                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Tags (séparés par des virgules)</Label>
+                <Label className="text-[#1A1A1A]">Tags (séparés par des virgules)</Label>
                 <Input
                   value={formData.tags}
                   onChange={(e) => setFormData({...formData, tags: e.target.value})}
                   placeholder="Site Web, Restaurant, Guadeloupe"
-                  className="bg-black/50 border-white/10"
+                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                 />
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Annuler
                 </Button>
-                <Button type="submit" className="bg-[#CE0202] hover:bg-[#B00202]">
+                <Button type="submit" className="bg-[#CE0202] hover:bg-[#B00202] text-white">
                   {editingItem ? "Mettre à jour" : "Ajouter"}
                 </Button>
               </div>
@@ -236,26 +237,24 @@ const PortfolioManagePage = () => {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="aspect-[4/3] bg-white/5 animate-pulse rounded-lg" />
+            <div key={i} className="aspect-[4/3] bg-[#E5E5E5] animate-pulse rounded-lg" />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <Card className="card-dashboard">
-          <CardContent className="p-12 text-center">
-            <Image className="w-12 h-12 text-[#A1A1AA] mx-auto mb-4" />
-            <p className="text-[#A1A1AA]">Aucune réalisation ajoutée</p>
-            <p className="text-[#666666] text-sm mt-2">
-              Cliquez sur "Nouvelle réalisation" pour en ajouter une
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-12 text-center">
+          <Image className="w-12 h-12 text-[#666666] mx-auto mb-4" />
+          <p className="text-[#666666]">Aucune réalisation ajoutée</p>
+          <p className="text-[#999999] text-sm mt-2">
+            Cliquez sur "Nouvelle réalisation" pour en ajouter une
+          </p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((item) => (
-            <Card 
+            <div 
               key={item.id}
               data-testid={`portfolio-item-${item.id}`}
-              className="card-dashboard overflow-hidden group"
+              className="bg-white rounded-lg border border-[#E5E5E5] overflow-hidden group"
             >
               {/* Image */}
               <div className="aspect-[16/10] relative overflow-hidden">
@@ -272,7 +271,7 @@ const PortfolioManagePage = () => {
                     size="sm"
                     variant="ghost"
                     onClick={() => openEditDialog(item)}
-                    className="bg-white/10 text-white hover:bg-white/20"
+                    className="bg-white/20 text-white hover:bg-white/30"
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
@@ -280,7 +279,7 @@ const PortfolioManagePage = () => {
                     size="sm"
                     variant="ghost"
                     onClick={() => handleDelete(item.id)}
-                    className="bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                    className="bg-red-500/30 text-white hover:bg-red-500/40"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -289,7 +288,7 @@ const PortfolioManagePage = () => {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="bg-white/10 text-white hover:bg-white/20"
+                        className="bg-white/20 text-white hover:bg-white/30"
                       >
                         <ExternalLink className="w-4 h-4" />
                       </Button>
@@ -298,26 +297,26 @@ const PortfolioManagePage = () => {
                 </div>
               </div>
               
-              <CardContent className="p-4">
-                <Badge className="bg-[#CE0202]/20 text-[#CE0202] border-none text-xs mb-2">
+              <div className="p-4">
+                <Badge className="bg-[#CE0202]/10 text-[#CE0202] border-none text-xs mb-2">
                   {getCategoryLabel(item.category)}
                 </Badge>
-                <h3 className="text-white font-semibold mb-1">{item.title}</h3>
-                <p className="text-[#A1A1AA] text-sm line-clamp-2">{item.description}</p>
+                <h3 className="text-[#1A1A1A] font-semibold mb-1">{item.title}</h3>
+                <p className="text-[#666666] text-sm line-clamp-2">{item.description}</p>
                 {item.tags?.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-3">
                     {item.tags.map((tag, i) => (
                       <span 
                         key={i}
-                        className="text-xs px-2 py-0.5 bg-white/5 text-[#A1A1AA] rounded"
+                        className="text-xs px-2 py-0.5 bg-[#F8F8F8] text-[#666666] rounded"
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}
