@@ -21,6 +21,7 @@ import QuotesPage from "./pages/dashboard/QuotesPage";
 import InvoicesPage from "./pages/dashboard/InvoicesPage";
 import SubscriptionsPage from "./pages/dashboard/SubscriptionsPage";
 import PortfolioManagePage from "./pages/dashboard/PortfolioManagePage";
+import DemandesPage from "./pages/dashboard/DemandesPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
 
 // Layout
@@ -59,6 +60,7 @@ function App() {
           <Route path="/admin/login" element={<LoginPage />} />
           <Route path="/admin" element={<DashboardLayout />}>
             <Route index element={<DashboardOverview />} />
+            <Route path="demandes" element={<DemandesPage />} />
             <Route path="contacts" element={<ContactsPage />} />
             <Route path="pipeline" element={<PipelinePage />} />
             <Route path="devis" element={<QuotesPage />} />
