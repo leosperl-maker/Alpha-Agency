@@ -131,34 +131,34 @@ const SettingsPage = () => {
     <div data-testid="settings-page" className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Paramètres</h1>
-        <p className="text-[#A1A1AA]">Configuration du dashboard et de l'entreprise</p>
+        <h1 className="text-3xl font-bold text-[#1A1A1A]">Paramètres</h1>
+        <p className="text-[#666666]">Configuration du dashboard et de l'entreprise</p>
       </div>
 
       <Tabs defaultValue="company" className="space-y-6">
-        <TabsList className="bg-white/5 border border-white/10 flex-wrap">
-          <TabsTrigger value="company" className="data-[state=active]:bg-[#CE0202]">
+        <TabsList className="bg-white border border-[#E5E5E5] flex-wrap">
+          <TabsTrigger value="company" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             Entreprise
           </TabsTrigger>
-          <TabsTrigger value="social" className="data-[state=active]:bg-[#CE0202]">
+          <TabsTrigger value="social" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             Réseaux sociaux
           </TabsTrigger>
-          <TabsTrigger value="legal" className="data-[state=active]:bg-[#CE0202]">
+          <TabsTrigger value="legal" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             Pages légales
           </TabsTrigger>
-          <TabsTrigger value="kpis" className="data-[state=active]:bg-[#CE0202]">
+          <TabsTrigger value="kpis" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             KPIs
           </TabsTrigger>
-          <TabsTrigger value="integrations" className="data-[state=active]:bg-[#CE0202]">
+          <TabsTrigger value="integrations" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             Intégrations
           </TabsTrigger>
         </TabsList>
 
         {/* Company Tab */}
         <TabsContent value="company">
-          <Card className="card-dashboard">
+          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
                 <Building className="w-5 h-5 text-[#CE0202]" />
                 Informations légales
               </CardTitle>
@@ -169,78 +169,78 @@ const SettingsPage = () => {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Raison sociale</Label>
+                  <Label className="text-[#1A1A1A]">Raison sociale</Label>
                   <Input
                     value={companyInfo.name}
                     onChange={(e) => setCompanyInfo({...companyInfo, name: e.target.value})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Nom commercial</Label>
+                  <Label className="text-[#1A1A1A]">Nom commercial</Label>
                   <Input
                     value={companyInfo.commercial_name}
                     onChange={(e) => setCompanyInfo({...companyInfo, commercial_name: e.target.value})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Adresse</Label>
+                <Label className="text-[#1A1A1A]">Adresse</Label>
                 <Input
                   value={companyInfo.address}
                   onChange={(e) => setCompanyInfo({...companyInfo, address: e.target.value})}
-                  className="bg-black/50 border-white/10"
+                  className="bg-white border-[#E5E5E5]"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Téléphone</Label>
+                  <Label className="text-[#1A1A1A]">Téléphone</Label>
                   <Input
                     value={companyInfo.phone}
                     onChange={(e) => setCompanyInfo({...companyInfo, phone: e.target.value})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Email</Label>
+                  <Label className="text-[#1A1A1A]">Email</Label>
                   <Input
                     type="email"
                     value={companyInfo.email}
                     onChange={(e) => setCompanyInfo({...companyInfo, email: e.target.value})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label>SIREN</Label>
+                  <Label className="text-[#1A1A1A]">SIREN</Label>
                   <Input
                     value={companyInfo.siren}
                     onChange={(e) => setCompanyInfo({...companyInfo, siren: e.target.value})}
                     placeholder="123 456 789"
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>SIRET</Label>
+                  <Label className="text-[#1A1A1A]">SIRET</Label>
                   <Input
                     value={companyInfo.siret}
                     onChange={(e) => setCompanyInfo({...companyInfo, siret: e.target.value})}
                     placeholder="123 456 789 00012"
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Capital social</Label>
+                  <Label className="text-[#1A1A1A]">Capital social</Label>
                   <Input
                     value={companyInfo.capital}
                     onChange={(e) => setCompanyInfo({...companyInfo, capital: e.target.value})}
                     placeholder="1 000 €"
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
               </div>
@@ -261,9 +261,9 @@ const SettingsPage = () => {
 
         {/* Social Links Tab */}
         <TabsContent value="social">
-          <Card className="card-dashboard">
+          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
                 <Share2 className="w-5 h-5 text-[#CE0202]" />
                 Réseaux sociaux
               </CardTitle>
@@ -274,53 +274,53 @@ const SettingsPage = () => {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>LinkedIn</Label>
+                  <Label className="text-[#1A1A1A]">LinkedIn</Label>
                   <Input
                     value={socialLinks.linkedin}
                     onChange={(e) => setSocialLinks({...socialLinks, linkedin: e.target.value})}
                     placeholder="https://linkedin.com/company/..."
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Instagram</Label>
+                  <Label className="text-[#1A1A1A]">Instagram</Label>
                   <Input
                     value={socialLinks.instagram}
                     onChange={(e) => setSocialLinks({...socialLinks, instagram: e.target.value})}
                     placeholder="https://instagram.com/..."
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Facebook</Label>
+                  <Label className="text-[#1A1A1A]">Facebook</Label>
                   <Input
                     value={socialLinks.facebook}
                     onChange={(e) => setSocialLinks({...socialLinks, facebook: e.target.value})}
                     placeholder="https://facebook.com/..."
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Twitter / X</Label>
+                  <Label className="text-[#1A1A1A]">Twitter / X</Label>
                   <Input
                     value={socialLinks.twitter}
                     onChange={(e) => setSocialLinks({...socialLinks, twitter: e.target.value})}
                     placeholder="https://twitter.com/..."
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>YouTube</Label>
+                <Label className="text-[#1A1A1A]">YouTube</Label>
                 <Input
                   value={socialLinks.youtube}
                   onChange={(e) => setSocialLinks({...socialLinks, youtube: e.target.value})}
                   placeholder="https://youtube.com/@..."
-                  className="bg-black/50 border-white/10"
+                  className="bg-white border-[#E5E5E5]"
                 />
               </div>
 
@@ -340,9 +340,9 @@ const SettingsPage = () => {
 
         {/* Legal Texts Tab */}
         <TabsContent value="legal">
-          <Card className="card-dashboard">
+          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[#CE0202]" />
                 Textes des pages légales
               </CardTitle>
@@ -352,32 +352,32 @@ const SettingsPage = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label>Mentions légales (texte complémentaire)</Label>
+                <Label className="text-[#1A1A1A]">Mentions légales (texte complémentaire)</Label>
                 <Textarea
                   value={legalTexts.mentions_legales}
                   onChange={(e) => setLegalTexts({...legalTexts, mentions_legales: e.target.value})}
                   placeholder="Ajoutez des informations complémentaires pour vos mentions légales..."
-                  className="bg-black/50 border-white/10 min-h-[150px]"
+                  className="bg-white border-[#E5E5E5] min-h-[150px]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Politique de confidentialité (texte complémentaire)</Label>
+                <Label className="text-[#1A1A1A]">Politique de confidentialité (texte complémentaire)</Label>
                 <Textarea
                   value={legalTexts.politique_confidentialite}
                   onChange={(e) => setLegalTexts({...legalTexts, politique_confidentialite: e.target.value})}
                   placeholder="Ajoutez des informations complémentaires pour votre politique de confidentialité..."
-                  className="bg-black/50 border-white/10 min-h-[150px]"
+                  className="bg-white border-[#E5E5E5] min-h-[150px]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Politique de cookies (texte complémentaire)</Label>
+                <Label className="text-[#1A1A1A]">Politique de cookies (texte complémentaire)</Label>
                 <Textarea
                   value={legalTexts.politique_cookies}
                   onChange={(e) => setLegalTexts({...legalTexts, politique_cookies: e.target.value})}
                   placeholder="Ajoutez des informations complémentaires pour votre politique de cookies..."
-                  className="bg-black/50 border-white/10 min-h-[150px]"
+                  className="bg-white border-[#E5E5E5] min-h-[150px]"
                 />
               </div>
 
@@ -397,9 +397,9 @@ const SettingsPage = () => {
 
         {/* KPIs Tab */}
         <TabsContent value="kpis">
-          <Card className="card-dashboard">
+          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
                 <Globe className="w-5 h-5 text-[#CE0202]" />
                 KPIs manuels
               </CardTitle>
@@ -410,31 +410,31 @@ const SettingsPage = () => {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label>Sessions du site (ce mois)</Label>
+                  <Label className="text-[#1A1A1A]">Sessions du site (ce mois)</Label>
                   <Input
                     type="number"
                     value={kpis.sessions}
                     onChange={(e) => setKpis({...kpis, sessions: parseInt(e.target.value) || 0})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Leads générés (ce mois)</Label>
+                  <Label className="text-[#1A1A1A]">Leads générés (ce mois)</Label>
                   <Input
                     type="number"
                     value={kpis.leads}
                     onChange={(e) => setKpis({...kpis, leads: parseInt(e.target.value) || 0})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Taux de conversion (%)</Label>
+                  <Label className="text-[#1A1A1A]">Taux de conversion (%)</Label>
                   <Input
                     type="number"
                     step="0.1"
                     value={kpis.conversion_rate}
                     onChange={(e) => setKpis({...kpis, conversion_rate: parseFloat(e.target.value) || 0})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-white border-[#E5E5E5]"
                   />
                 </div>
               </div>
@@ -455,9 +455,9 @@ const SettingsPage = () => {
 
         {/* Integrations Tab */}
         <TabsContent value="integrations">
-          <Card className="card-dashboard">
+          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
+              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
                 <Key className="w-5 h-5 text-[#CE0202]" />
                 Intégrations
               </CardTitle>
@@ -467,42 +467,42 @@ const SettingsPage = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label>Google Analytics 4 - ID de propriété</Label>
+                <Label className="text-[#1A1A1A]">Google Analytics 4 - ID de propriété</Label>
                 <Input
                   value={integrations.ga4_id}
                   onChange={(e) => setIntegrations({...integrations, ga4_id: e.target.value})}
                   placeholder="G-XXXXXXXXXX"
-                  className="bg-black/50 border-white/10"
+                  className="bg-white border-[#E5E5E5]"
                 />
-                <p className="text-xs text-[#A1A1AA]">
+                <p className="text-xs text-[#666666]">
                   Ajoutez votre ID GA4 pour suivre les visites du site
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label>Resend - Clé API</Label>
+                <Label className="text-[#1A1A1A]">Resend - Clé API</Label>
                 <Input
                   type="password"
                   value={integrations.resend_api_key}
                   onChange={(e) => setIntegrations({...integrations, resend_api_key: e.target.value})}
                   placeholder="re_xxxxxxxxxxxx"
-                  className="bg-black/50 border-white/10"
+                  className="bg-white border-[#E5E5E5]"
                 />
-                <p className="text-xs text-[#A1A1AA]">
+                <p className="text-xs text-[#666666]">
                   Pour l'envoi automatique des emails de notification
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label>Stripe - Clé API secrète</Label>
+                <Label className="text-[#1A1A1A]">Stripe - Clé API secrète</Label>
                 <Input
                   type="password"
                   value={integrations.stripe_api_key}
                   onChange={(e) => setIntegrations({...integrations, stripe_api_key: e.target.value})}
                   placeholder="sk_xxxxxxxxxxxx"
-                  className="bg-black/50 border-white/10"
+                  className="bg-white border-[#E5E5E5]"
                 />
-                <p className="text-xs text-[#A1A1AA]">
+                <p className="text-xs text-[#666666]">
                   Pour la gestion des paiements en ligne
                 </p>
               </div>
