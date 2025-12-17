@@ -66,7 +66,7 @@ const DashboardLayout = () => {
         <div className="h-16 flex items-center justify-between px-6 border-b border-[#E5E5E5]">
           <span className="text-2xl font-bold font-['Syne']">
             <span className="text-[#CE0202]">A</span>
-            <span className="text-[#1A1A1A]">LPHA</span>
+            <span className="text-[#1A1A1A]">lpha</span>
           </span>
           <button
             onClick={() => setSidebarOpen(false)}
