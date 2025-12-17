@@ -89,17 +89,16 @@ const HomePage = () => {
       <section 
         data-testid="hero-section"
         className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #1A1A1A 0%, #0A0A0A 100%)'
-        }}
       >
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-            backgroundSize: '40px 40px'
-          }} />
-        </div>
+        {/* Background Image - Guadeloupe Ocean */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url(https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=1920&q=80)'
+          }}
+        />
+        {/* Dark Overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/80" />
 
         <div className="max-w-7xl mx-auto relative z-10 text-center">
           <motion.div
