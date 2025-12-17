@@ -66,10 +66,11 @@ const DashboardLayout = () => {
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-[#E5E5E5]">
-          <span className="text-2xl font-bold font-['Syne']">
-            <span className="text-[#CE0202]">A</span>
-            <span className="text-[#1A1A1A]">lpha</span>
-          </span>
+          <img 
+            src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png"
+            alt="Alpha Agency"
+            className="h-10 w-auto"
+          />
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden text-[#666666] hover:text-[#1A1A1A]"
