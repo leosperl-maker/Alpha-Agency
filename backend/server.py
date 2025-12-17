@@ -48,17 +48,34 @@ STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', 'sk_test_emergent')
 # Company Info
 COMPANY_INFO = {
     "name": "Alpha Digital",
-    "commercial_name": "ALPHA Agency",
+    "commercial_name": "Alpha Agency",
     "address": "3 Boulevard du Marquisat de Houelbourg, 97122 Baie-Mahault",
     "phone": "0691 266 003",
     "email": "leo.sperl@alphagency.fr",
     "siren": "À compléter",
     "siret": "À compléter",
     "capital": "À compléter",
-    "legal_form": "SASU"
+    "legal_form": "SASU",
+    "horaires": "Du mardi au samedi de 10h à 19h"
 }
 
-app = FastAPI(title="ALPHA Agency API")
+# Cloudinary Config
+CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
+CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY', '')
+CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET', '')
+
+# Initialize Cloudinary if credentials are available
+import cloudinary
+import cloudinary.uploader
+if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY:
+    cloudinary.config(
+        cloud_name=CLOUDINARY_CLOUD_NAME,
+        api_key=CLOUDINARY_API_KEY,
+        api_secret=CLOUDINARY_API_SECRET,
+        secure=True
+    )
+
+app = FastAPI(title="Alpha Agency API")
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer(auto_error=False)
 
