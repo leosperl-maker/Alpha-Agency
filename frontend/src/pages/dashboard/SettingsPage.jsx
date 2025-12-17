@@ -146,9 +146,6 @@ const SettingsPage = () => {
           <TabsTrigger value="legal" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             Pages légales
           </TabsTrigger>
-          <TabsTrigger value="kpis" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
-            KPIs
-          </TabsTrigger>
           <TabsTrigger value="integrations" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             Intégrations
           </TabsTrigger>
@@ -384,64 +381,6 @@ const SettingsPage = () => {
               <div className="flex justify-end">
                 <Button 
                   onClick={handleSaveLegal}
-                  disabled={loading}
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Enregistrer
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* KPIs Tab */}
-        <TabsContent value="kpis">
-          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
-                <Globe className="w-5 h-5 text-[#CE0202]" />
-                KPIs manuels
-              </CardTitle>
-              <CardDescription>
-                Renseignez manuellement les métriques qui ne sont pas automatiquement calculées
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Sessions du site (ce mois)</Label>
-                  <Input
-                    type="number"
-                    value={kpis.sessions}
-                    onChange={(e) => setKpis({...kpis, sessions: parseInt(e.target.value) || 0})}
-                    className="bg-white border-[#E5E5E5]"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Leads générés (ce mois)</Label>
-                  <Input
-                    type="number"
-                    value={kpis.leads}
-                    onChange={(e) => setKpis({...kpis, leads: parseInt(e.target.value) || 0})}
-                    className="bg-white border-[#E5E5E5]"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Taux de conversion (%)</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    value={kpis.conversion_rate}
-                    onChange={(e) => setKpis({...kpis, conversion_rate: parseFloat(e.target.value) || 0})}
-                    className="bg-white border-[#E5E5E5]"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <Button 
-                  onClick={handleSaveKPIs}
                   disabled={loading}
                   className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white"
                 >
