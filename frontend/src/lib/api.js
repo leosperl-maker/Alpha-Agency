@@ -73,7 +73,10 @@ export const quotesAPI = {
   create: (data) => api.post('/quotes', data),
   update: (id, data) => api.put(`/quotes/${id}`, data),
   updateStatus: (id, status) => api.patch(`/quotes/${id}/status`, { status }),
+  send: (id) => api.post(`/quotes/${id}/send`),
+  convertToInvoice: (id) => api.post(`/invoices/from-quote/${id}`),
   getPDF: (id) => api.get(`/quotes/${id}/pdf`, { responseType: 'blob' }),
+  downloadPDF: (id) => `${API_URL}/quotes/${id}/pdf`,
   delete: (id) => api.delete(`/quotes/${id}`),
 };
 
@@ -86,6 +89,7 @@ export const invoicesAPI = {
   update: (id, data) => api.put(`/invoices/${id}`, data),
   updateStatus: (id, status) => api.patch(`/invoices/${id}/status`, { status }),
   getPDF: (id) => api.get(`/invoices/${id}/pdf`, { responseType: 'blob' }),
+  downloadPDF: (id) => `${API_URL}/invoices/${id}/pdf`,
   delete: (id) => api.delete(`/invoices/${id}`),
 };
 
@@ -95,6 +99,7 @@ export const subscriptionsAPI = {
   getOne: (id) => api.get(`/subscriptions/${id}`),
   create: (data) => api.post('/subscriptions', data),
   update: (id, data) => api.put(`/subscriptions/${id}`, data),
+  updateStatus: (id, status) => api.patch(`/subscriptions/${id}/status`, { status }),
   delete: (id) => api.delete(`/subscriptions/${id}`),
 };
 
