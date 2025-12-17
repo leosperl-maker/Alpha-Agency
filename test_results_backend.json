@@ -1,0 +1,98 @@
+{
+  "timestamp": "2025-12-17T01:14:49.422441",
+  "total_tests": 15,
+  "passed_tests": 15,
+  "success_rate": 100.0,
+  "results": [
+    {
+      "test": "Lead Form Submission (Infographie)",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:48.409647"
+    },
+    {
+      "test": "Get Blog Posts (Public)",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:48.448436"
+    },
+    {
+      "test": "Get Portfolio Items",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:48.483562"
+    },
+    {
+      "test": "Get Infographie Portfolio",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:48.518769"
+    },
+    {
+      "test": "User Registration",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:48.818016"
+    },
+    {
+      "test": "Get All Contacts",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:48.852575"
+    },
+    {
+      "test": "Get Website Leads",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:48.886823"
+    },
+    {
+      "test": "Get Settings",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:48.921118"
+    },
+    {
+      "test": "Update Company Settings",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:49.013280"
+    },
+    {
+      "test": "Update Social Links",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:49.054824"
+    },
+    {
+      "test": "Update Legal Texts",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:49.092416"
+    },
+    {
+      "test": "Update Integrations",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:49.165551"
+    },
+    {
+      "test": "Dashboard Stats",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:49.240301"
+    },
+    {
+      "test": "Pipeline Data",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:49.274817"
+    },
+    {
+      "test": "Update KPIs",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2025-12-17T01:14:49.421625"
+    }
+  ]
+}
