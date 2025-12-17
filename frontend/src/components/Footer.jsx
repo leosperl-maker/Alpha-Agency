@@ -37,11 +37,13 @@ const Footer = () => {
           <div>
             <div 
               onClick={handleLogoClick}
+              data-testid="footer-logo-clickable"
               className="inline-block mb-6 cursor-pointer select-none"
             >
               <img 
                 src="https://customer-assets.emergentagent.com/job_webproject-alpha/artifacts/o1l1nzgi_Agence%20de%20Communication%20360%C2%B0%20%281%29.png" 
                 alt="Alpha Agency - Agence de Communication 360°"
+                data-testid="footer-logo-img"
                 className="h-40 w-auto"
               />
             </div>
