@@ -56,7 +56,8 @@ function App() {
             <Route path="/cookies" element={<LegalPage type="cookies" />} />
           </Route>
           
-          {/* Dashboard */}
+          {/* Dashboard - Accès caché */}
+          <Route path="/alpha-admin-2024" element={<LoginPage />} />
           <Route path="/admin/login" element={<LoginPage />} />
           <Route path="/admin" element={<DashboardLayout />}>
             <Route index element={<DashboardOverview />} />
