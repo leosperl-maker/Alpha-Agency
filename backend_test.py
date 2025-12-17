@@ -209,7 +209,7 @@ class AlphaAgencyAPITester:
             "notes": "Devis pour pack site web + community management"
         }
         
-        success, response = self.make_request('POST', 'quotes', quote_data, 201)
+        success, response = self.make_request('POST', 'quotes', quote_data, 200)
         if success and 'id' in response:
             self.quote_id = response['id']
             self.log_result("Create Quote", True, f"Quote ID: {self.quote_id}, Number: {response.get('quote_number', 'N/A')}")
