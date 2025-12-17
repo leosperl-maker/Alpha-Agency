@@ -97,10 +97,10 @@ const InvoicesPage = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      en_attente: { class: "bg-yellow-500/20 text-yellow-500", icon: Clock },
-      payée: { class: "bg-green-500/20 text-green-500", icon: CheckCircle },
-      en_retard: { class: "bg-red-500/20 text-red-500", icon: AlertTriangle },
-      annulée: { class: "bg-gray-500/20 text-gray-400", icon: null }
+      en_attente: { class: "bg-yellow-100 text-yellow-700", icon: Clock },
+      payée: { class: "bg-green-100 text-green-700", icon: CheckCircle },
+      en_retard: { class: "bg-red-100 text-red-700", icon: AlertTriangle },
+      annulée: { class: "bg-gray-100 text-gray-600", icon: null }
     };
     return styles[status] || styles.en_attente;
   };
@@ -124,37 +124,37 @@ const InvoicesPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Factures</h1>
-          <p className="text-[#A1A1AA]">{invoices.length} factures au total</p>
+          <h1 className="text-2xl font-bold text-[#1A1A1A]">Factures</h1>
+          <p className="text-[#666666] text-sm">{invoices.length} factures au total</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button 
               data-testid="add-invoice-btn"
               onClick={resetForm}
-              className="bg-[#6A0F1A] hover:bg-[#8B1422] text-white"
+              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
             >
               <Plus className="w-4 h-4 mr-2" />
               Nouvelle facture
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[#0A0A0A] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="bg-white border-[#E5E5E5] max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-white">Nouvelle facture</DialogTitle>
+              <DialogTitle className="text-[#1A1A1A]">Nouvelle facture</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Contact *</Label>
+                  <Label className="text-[#1A1A1A]">Contact *</Label>
                   <Select
                     value={formData.contact_id}
                     onValueChange={(value) => setFormData({...formData, contact_id: value})}
                     required
                   >
-                    <SelectTrigger className="bg-black/50 border-white/10">
+                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
                       <SelectValue placeholder="Sélectionner un contact" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#0A0A0A] border-white/10">
+                    <SelectContent className="bg-white border-[#E5E5E5]">
                       {contacts.map((contact) => (
                         <SelectItem key={contact.id} value={contact.id}>
                           {contact.first_name} {contact.last_name}
@@ -164,19 +164,19 @@ const InvoicesPage = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Date d'échéance</Label>
+                  <Label className="text-[#1A1A1A]">Date d'échéance</Label>
                   <Input
                     type="date"
                     value={formData.due_date}
                     onChange={(e) => setFormData({...formData, due_date: e.target.value})}
-                    className="bg-black/50 border-white/10"
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   />
                 </div>
               </div>
 
               {/* Items */}
               <div className="space-y-3">
-                <Label>Lignes de la facture</Label>
+                <Label className="text-[#1A1A1A]">Lignes de la facture</Label>
                 {items.map((item, index) => (
                   <div key={index} className="grid grid-cols-12 gap-2 items-end">
                     <div className="col-span-6">
@@ -184,7 +184,7 @@ const InvoicesPage = () => {
                         placeholder="Description"
                         value={item.description}
                         onChange={(e) => updateItem(index, "description", e.target.value)}
-                        className="bg-black/50 border-white/10"
+                        className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                       />
                     </div>
                     <div className="col-span-2">
@@ -194,7 +194,7 @@ const InvoicesPage = () => {
                         placeholder="Qté"
                         value={item.quantity}
                         onChange={(e) => updateItem(index, "quantity", e.target.value)}
-                        className="bg-black/50 border-white/10"
+                        className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                       />
                     </div>
                     <div className="col-span-4">
@@ -205,7 +205,7 @@ const InvoicesPage = () => {
                         placeholder="Prix €"
                         value={item.unit_price}
                         onChange={(e) => updateItem(index, "unit_price", e.target.value)}
-                        className="bg-black/50 border-white/10"
+                        className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                       />
                     </div>
                   </div>
@@ -214,7 +214,7 @@ const InvoicesPage = () => {
                   type="button"
                   variant="ghost"
                   onClick={addItem}
-                  className="text-[#6A0F1A]"
+                  className="text-[#CE0202]"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Ajouter une ligne
@@ -222,31 +222,31 @@ const InvoicesPage = () => {
               </div>
 
               {/* Total */}
-              <div className="text-right p-4 bg-white/5 rounded-lg">
-                <p className="text-[#A1A1AA] text-sm">Sous-total HT</p>
-                <p className="text-2xl font-bold text-white font-mono">
+              <div className="text-right p-4 bg-[#F8F8F8] rounded-lg border border-[#E5E5E5]">
+                <p className="text-[#666666] text-sm">Sous-total HT</p>
+                <p className="text-2xl font-bold text-[#1A1A1A] font-mono">
                   {calculateTotal().toLocaleString()}€
                 </p>
-                <p className="text-[#A1A1AA] text-sm">
+                <p className="text-[#666666] text-sm">
                   + TVA (8.5%) = {(calculateTotal() * 1.085).toLocaleString()}€ TTC
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label>Notes</Label>
+                <Label className="text-[#1A1A1A]">Notes</Label>
                 <Textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                  className="bg-black/50 border-white/10"
+                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                   rows={3}
                 />
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="ghost" onClick={() => setDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Annuler
                 </Button>
-                <Button type="submit" className="bg-[#6A0F1A] hover:bg-[#8B1422]">
+                <Button type="submit" className="bg-[#CE0202] hover:bg-[#B00202] text-white">
                   Créer la facture
                 </Button>
               </div>
@@ -257,125 +257,115 @@ const InvoicesPage = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="card-dashboard">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                <Clock className="w-5 h-5 text-yellow-500" />
-              </div>
-              <div>
-                <p className="text-[#A1A1AA] text-sm">En attente</p>
-                <p className="text-xl font-bold text-white font-mono">{totalPending.toLocaleString()}€</p>
-              </div>
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <Clock className="w-5 h-5 text-yellow-600" />
             </div>
-          </CardContent>
-        </Card>
-        <Card className="card-dashboard">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-5 h-5 text-green-500" />
-              </div>
-              <div>
-                <p className="text-[#A1A1AA] text-sm">Payées</p>
-                <p className="text-xl font-bold text-white font-mono">{totalPaid.toLocaleString()}€</p>
-              </div>
+            <div>
+              <p className="text-[#666666] text-sm">En attente</p>
+              <p className="text-xl font-bold text-[#1A1A1A] font-mono">{totalPending.toLocaleString()}€</p>
             </div>
-          </CardContent>
-        </Card>
-        <Card className="card-dashboard">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-red-500" />
-              </div>
-              <div>
-                <p className="text-[#A1A1AA] text-sm">En retard</p>
-                <p className="text-xl font-bold text-white font-mono">
-                  {invoices.filter(i => i.status === "en_retard").length}
-                </p>
-              </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
-          </CardContent>
-        </Card>
+            <div>
+              <p className="text-[#666666] text-sm">Payées</p>
+              <p className="text-xl font-bold text-[#1A1A1A] font-mono">{totalPaid.toLocaleString()}€</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <p className="text-[#666666] text-sm">En retard</p>
+              <p className="text-xl font-bold text-[#1A1A1A] font-mono">
+                {invoices.filter(i => i.status === "en_retard").length}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Invoices List */}
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-white/5 animate-pulse rounded-lg" />
+            <div key={i} className="h-24 bg-[#E5E5E5] animate-pulse rounded-lg" />
           ))}
         </div>
       ) : invoices.length === 0 ? (
-        <Card className="card-dashboard">
-          <CardContent className="p-12 text-center">
-            <Receipt className="w-12 h-12 text-[#A1A1AA] mx-auto mb-4" />
-            <p className="text-[#A1A1AA]">Aucune facture créée</p>
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-12 text-center">
+          <Receipt className="w-12 h-12 text-[#666666] mx-auto mb-4" />
+          <p className="text-[#666666]">Aucune facture créée</p>
+        </div>
       ) : (
         <div className="space-y-4">
           {invoices.map((invoice) => {
             const statusInfo = getStatusBadge(invoice.status);
             return (
-              <Card 
+              <div 
                 key={invoice.id}
                 data-testid={`invoice-${invoice.id}`}
-                className="card-dashboard hover:border-[#6A0F1A]/30 transition-colors"
+                className="bg-white rounded-lg border border-[#E5E5E5] p-4 hover:border-[#CE0202]/30 transition-colors"
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[#6A0F1A]/20 rounded-lg flex items-center justify-center">
-                        <Receipt className="w-6 h-6 text-[#6A0F1A]" />
-                      </div>
-                      <div>
-                        <h3 className="text-white font-semibold">
-                          {invoice.invoice_number}
-                        </h3>
-                        <p className="text-sm text-[#A1A1AA]">
-                          {getContactName(invoice.contact_id)}
-                        </p>
-                        <p className="text-xs text-[#A1A1AA]">
-                          Échéance : {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('fr-FR') : 'Non définie'}
-                        </p>
-                      </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[#CE0202]/10 rounded-lg flex items-center justify-center">
+                      <Receipt className="w-6 h-6 text-[#CE0202]" />
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-white font-mono">
-                          {invoice.total?.toLocaleString()}€
-                        </p>
-                        <Badge className={statusInfo.class}>
-                          {invoice.status?.replace("_", " ")}
-                        </Badge>
-                      </div>
-                      <div className="flex gap-2">
-                        <a
-                          href={invoicesAPI.downloadPDF(invoice.id)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Button variant="ghost" size="sm" className="text-[#A1A1AA] hover:text-white">
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </a>
-                        {invoice.status === "en_attente" && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleStatusUpdate(invoice.id, "payée")}
-                            className="text-green-500 hover:text-green-400"
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
+                    <div>
+                      <h3 className="text-[#1A1A1A] font-semibold">
+                        {invoice.invoice_number}
+                      </h3>
+                      <p className="text-sm text-[#666666]">
+                        {getContactName(invoice.contact_id)}
+                      </p>
+                      <p className="text-xs text-[#666666]">
+                        Échéance : {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('fr-FR') : 'Non définie'}
+                      </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-[#1A1A1A] font-mono">
+                        {invoice.total?.toLocaleString()}€
+                      </p>
+                      <Badge className={statusInfo.class}>
+                        {invoice.status?.replace("_", " ")}
+                      </Badge>
+                    </div>
+                    <div className="flex gap-2">
+                      <a
+                        href={invoicesAPI.downloadPDF(invoice.id)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="ghost" size="sm" className="text-[#666666] hover:text-[#1A1A1A]">
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </a>
+                      {invoice.status === "en_attente" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleStatusUpdate(invoice.id, "payée")}
+                          className="text-green-600 hover:text-green-700"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             );
           })}
         </div>
