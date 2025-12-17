@@ -23,7 +23,7 @@ class AlphaAgencyAPITester:
         
         # Test credentials
         self.admin_email = "admin@alphagency.fr"
-        self.admin_password = "Alpha2024!"
+        self.admin_password = "superpassword"
 
     def log_result(self, test_name: str, success: bool, details: str = ""):
         """Log test result"""
