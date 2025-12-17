@@ -1,24 +1,33 @@
-import { useState } from "react";
+import { useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, Clock } from "lucide-react";
 
 const Footer = () => {
   const navigate = useNavigate();
-  const [clicks, setClicks] = useState([]);
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef(null);
 
-  // Triple-click handler for hidden admin access
-  const handleLogoClick = () => {
-    const now = Date.now();
-    // Keep only clicks within the last 1 second
-    const recentClicks = [...clicks.filter(t => now - t < 1000), now];
-    setClicks(recentClicks);
+  // Triple-click handler for hidden admin access - using refs for reliability
+  const handleLogoClick = useCallback(() => {
+    clickCountRef.current += 1;
     
-    // If 3+ clicks within 1 second, navigate to admin
-    if (recentClicks.length >= 3) {
-      setClicks([]);
-      navigate("/alpha-admin-2024");
+    // Clear any existing timer
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
     }
-  };
+    
+    // If we reach 3 clicks, navigate immediately
+    if (clickCountRef.current >= 3) {
+      clickCountRef.current = 0;
+      navigate("/alpha-admin-2024");
+      return;
+    }
+    
+    // Reset click count after 1.5 seconds of no activity
+    clickTimerRef.current = setTimeout(() => {
+      clickCountRef.current = 0;
+    }, 1500);
+  }, [navigate]);
 
   return (
     <footer data-testid="main-footer" className="bg-[#0A0A0A] border-t border-white/5">
