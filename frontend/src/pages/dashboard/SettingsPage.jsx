@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { Save, Building, Globe, Key, Share2, FileText } from "lucide-react";
+import { Save, Building, Key, Share2, FileText } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { dashboardAPI, settingsAPI } from "../../lib/api";
+import { settingsAPI } from "../../lib/api";
 import { toast } from "sonner";
 
 const SettingsPage = () => {
@@ -35,12 +35,6 @@ const SettingsPage = () => {
     mentions_legales: "",
     politique_confidentialite: "",
     politique_cookies: ""
-  });
-
-  const [kpis, setKpis] = useState({
-    sessions: 0,
-    leads: 0,
-    conversion_rate: 0
   });
 
   const [integrations, setIntegrations] = useState({
@@ -96,18 +90,6 @@ const SettingsPage = () => {
     try {
       await settingsAPI.updateLegalTexts(legalTexts);
       toast.success("Textes légaux sauvegardés");
-    } catch (error) {
-      toast.error("Erreur lors de la sauvegarde");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSaveKPIs = async () => {
-    setLoading(true);
-    try {
-      await dashboardAPI.updateKPIs(kpis);
-      toast.success("KPIs mis à jour");
     } catch (error) {
       toast.error("Erreur lors de la sauvegarde");
     } finally {
