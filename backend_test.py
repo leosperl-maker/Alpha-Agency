@@ -253,7 +253,35 @@ class AlphaAgencyAPITester:
         success, response = self.make_request('GET', 'documents/types')
         if success:
             types_count = len(response.keys()) if isinstance(response, dict) else 0
-            self.log_result("Get Document Types", True, f"Found {types_count} document types")
+            templates_count = sum(len(doc_type.get('templates', [])) for doc_type in response.values())
+            self.log_result("Get Document Types", True, f"Found {types_count} document types with {templates_count} templates total")
+            
+            # Test document creation if types are available
+            if response and 'lettre_mission' in response:
+                templates = response['lettre_mission'].get('templates', [])
+                if templates:
+                    doc_data = {
+                        "type": "lettre_mission",
+                        "template_id": templates[0]['id'],
+                        "internal_name": "Test_LM_Client_2024",
+                        "client_name": "Test Client",
+                        "client_company": "Test Company SARL",
+                        "client_email": "test@client.com",
+                        "client_phone": "0690123456",
+                        "description": "Test document creation",
+                        "status": "brouillon"
+                    }
+                    
+                    success, response = self.make_request('POST', 'documents', doc_data, 200)
+                    if success and 'id' in response:
+                        doc_id = response['id']
+                        self.log_result("Create Document", True, f"Document ID: {doc_id}")
+                        
+                        # Test document retrieval
+                        success, response = self.make_request('GET', f'documents/{doc_id}')
+                        self.log_result("Get Document by ID", success, f"Document: {response.get('internal_name', 'N/A')}" if success else str(response))
+                    else:
+                        self.log_result("Create Document", False, str(response))
         else:
             self.log_result("Get Document Types", False, str(response))
         
