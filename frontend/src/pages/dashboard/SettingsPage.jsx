@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Save, Building, Mail, Phone, Globe, Key } from "lucide-react";
+import { Save, Building, Globe, Key, Share2, FileText } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { Textarea } from "../../components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { dashboardAPI } from "../../lib/api";
+import { dashboardAPI, settingsAPI } from "../../lib/api";
 import { toast } from "sonner";
 
 const SettingsPage = () => {
@@ -22,6 +23,20 @@ const SettingsPage = () => {
     tva_number: ""
   });
 
+  const [socialLinks, setSocialLinks] = useState({
+    linkedin: "https://linkedin.com",
+    instagram: "https://instagram.com",
+    facebook: "https://facebook.com",
+    twitter: "",
+    youtube: ""
+  });
+
+  const [legalTexts, setLegalTexts] = useState({
+    mentions_legales: "",
+    politique_confidentialite: "",
+    politique_cookies: ""
+  });
+
   const [kpis, setKpis] = useState({
     sessions: 0,
     leads: 0,
@@ -34,11 +49,53 @@ const SettingsPage = () => {
     stripe_api_key: ""
   });
 
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const response = await settingsAPI.getAll();
+      if (response.data) {
+        if (response.data.company) setCompanyInfo(response.data.company);
+        if (response.data.social_links) setSocialLinks(response.data.social_links);
+        if (response.data.legal_texts) setLegalTexts(response.data.legal_texts);
+        if (response.data.integrations) setIntegrations(response.data.integrations);
+      }
+    } catch (error) {
+      console.error("Error fetching settings", error);
+    }
+  };
+
   const handleSaveCompany = async () => {
     setLoading(true);
     try {
-      // In a real app, this would save to the backend
+      await settingsAPI.updateCompany(companyInfo);
       toast.success("Informations de l'entreprise sauvegardées");
+    } catch (error) {
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveSocial = async () => {
+    setLoading(true);
+    try {
+      await settingsAPI.updateSocialLinks(socialLinks);
+      toast.success("Liens réseaux sociaux sauvegardés");
+    } catch (error) {
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveLegal = async () => {
+    setLoading(true);
+    try {
+      await settingsAPI.updateLegalTexts(legalTexts);
+      toast.success("Textes légaux sauvegardés");
     } catch (error) {
       toast.error("Erreur lors de la sauvegarde");
     } finally {
@@ -61,7 +118,7 @@ const SettingsPage = () => {
   const handleSaveIntegrations = async () => {
     setLoading(true);
     try {
-      // In a real app, this would save to the backend
+      await settingsAPI.updateIntegrations(integrations);
       toast.success("Intégrations sauvegardées");
     } catch (error) {
       toast.error("Erreur lors de la sauvegarde");
@@ -79,14 +136,20 @@ const SettingsPage = () => {
       </div>
 
       <Tabs defaultValue="company" className="space-y-6">
-        <TabsList className="bg-white/5 border border-white/10">
-          <TabsTrigger value="company" className="data-[state=active]:bg-[#6A0F1A]">
+        <TabsList className="bg-white/5 border border-white/10 flex-wrap">
+          <TabsTrigger value="company" className="data-[state=active]:bg-[#CE0202]">
             Entreprise
           </TabsTrigger>
-          <TabsTrigger value="kpis" className="data-[state=active]:bg-[#6A0F1A]">
+          <TabsTrigger value="social" className="data-[state=active]:bg-[#CE0202]">
+            Réseaux sociaux
+          </TabsTrigger>
+          <TabsTrigger value="legal" className="data-[state=active]:bg-[#CE0202]">
+            Pages légales
+          </TabsTrigger>
+          <TabsTrigger value="kpis" className="data-[state=active]:bg-[#CE0202]">
             KPIs
           </TabsTrigger>
-          <TabsTrigger value="integrations" className="data-[state=active]:bg-[#6A0F1A]">
+          <TabsTrigger value="integrations" className="data-[state=active]:bg-[#CE0202]">
             Intégrations
           </TabsTrigger>
         </TabsList>
@@ -96,7 +159,7 @@ const SettingsPage = () => {
           <Card className="card-dashboard">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Building className="w-5 h-5 text-[#6A0F1A]" />
+                <Building className="w-5 h-5 text-[#CE0202]" />
                 Informations légales
               </CardTitle>
               <CardDescription>
@@ -186,7 +249,143 @@ const SettingsPage = () => {
                 <Button 
                   onClick={handleSaveCompany}
                   disabled={loading}
-                  className="bg-[#6A0F1A] hover:bg-[#8B1422]"
+                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Enregistrer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Social Links Tab */}
+        <TabsContent value="social">
+          <Card className="card-dashboard">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-[#CE0202]" />
+                Réseaux sociaux
+              </CardTitle>
+              <CardDescription>
+                Liens vers vos profils réseaux sociaux (affichés dans le footer)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>LinkedIn</Label>
+                  <Input
+                    value={socialLinks.linkedin}
+                    onChange={(e) => setSocialLinks({...socialLinks, linkedin: e.target.value})}
+                    placeholder="https://linkedin.com/company/..."
+                    className="bg-black/50 border-white/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Instagram</Label>
+                  <Input
+                    value={socialLinks.instagram}
+                    onChange={(e) => setSocialLinks({...socialLinks, instagram: e.target.value})}
+                    placeholder="https://instagram.com/..."
+                    className="bg-black/50 border-white/10"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Facebook</Label>
+                  <Input
+                    value={socialLinks.facebook}
+                    onChange={(e) => setSocialLinks({...socialLinks, facebook: e.target.value})}
+                    placeholder="https://facebook.com/..."
+                    className="bg-black/50 border-white/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Twitter / X</Label>
+                  <Input
+                    value={socialLinks.twitter}
+                    onChange={(e) => setSocialLinks({...socialLinks, twitter: e.target.value})}
+                    placeholder="https://twitter.com/..."
+                    className="bg-black/50 border-white/10"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>YouTube</Label>
+                <Input
+                  value={socialLinks.youtube}
+                  onChange={(e) => setSocialLinks({...socialLinks, youtube: e.target.value})}
+                  placeholder="https://youtube.com/@..."
+                  className="bg-black/50 border-white/10"
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <Button 
+                  onClick={handleSaveSocial}
+                  disabled={loading}
+                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Enregistrer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Legal Texts Tab */}
+        <TabsContent value="legal">
+          <Card className="card-dashboard">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[#CE0202]" />
+                Textes des pages légales
+              </CardTitle>
+              <CardDescription>
+                Personnalisez le contenu des pages Mentions légales, Confidentialité et Cookies
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label>Mentions légales (texte complémentaire)</Label>
+                <Textarea
+                  value={legalTexts.mentions_legales}
+                  onChange={(e) => setLegalTexts({...legalTexts, mentions_legales: e.target.value})}
+                  placeholder="Ajoutez des informations complémentaires pour vos mentions légales..."
+                  className="bg-black/50 border-white/10 min-h-[150px]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Politique de confidentialité (texte complémentaire)</Label>
+                <Textarea
+                  value={legalTexts.politique_confidentialite}
+                  onChange={(e) => setLegalTexts({...legalTexts, politique_confidentialite: e.target.value})}
+                  placeholder="Ajoutez des informations complémentaires pour votre politique de confidentialité..."
+                  className="bg-black/50 border-white/10 min-h-[150px]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Politique de cookies (texte complémentaire)</Label>
+                <Textarea
+                  value={legalTexts.politique_cookies}
+                  onChange={(e) => setLegalTexts({...legalTexts, politique_cookies: e.target.value})}
+                  placeholder="Ajoutez des informations complémentaires pour votre politique de cookies..."
+                  className="bg-black/50 border-white/10 min-h-[150px]"
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <Button 
+                  onClick={handleSaveLegal}
+                  disabled={loading}
+                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -201,7 +400,7 @@ const SettingsPage = () => {
           <Card className="card-dashboard">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Globe className="w-5 h-5 text-[#6A0F1A]" />
+                <Globe className="w-5 h-5 text-[#CE0202]" />
                 KPIs manuels
               </CardTitle>
               <CardDescription>
@@ -244,7 +443,7 @@ const SettingsPage = () => {
                 <Button 
                   onClick={handleSaveKPIs}
                   disabled={loading}
-                  className="bg-[#6A0F1A] hover:bg-[#8B1422]"
+                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -259,7 +458,7 @@ const SettingsPage = () => {
           <Card className="card-dashboard">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Key className="w-5 h-5 text-[#6A0F1A]" />
+                <Key className="w-5 h-5 text-[#CE0202]" />
                 Intégrations
               </CardTitle>
               <CardDescription>
@@ -312,7 +511,7 @@ const SettingsPage = () => {
                 <Button 
                   onClick={handleSaveIntegrations}
                   disabled={loading}
-                  className="bg-[#6A0F1A] hover:bg-[#8B1422]"
+                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
