@@ -55,22 +55,22 @@ const DashboardLayout = () => {
   ];
 
   return (
-    <div data-testid="dashboard-layout" className="min-h-screen bg-[#050505] flex">
+    <div data-testid="dashboard-layout" className="min-h-screen bg-white flex">
       {/* Sidebar */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0A0A0A] border-r border-white/5 transform transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#F8F8F8] border-r border-[#E5E5E5] transform transition-transform duration-300 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-white/5">
+        <div className="h-16 flex items-center justify-between px-6 border-b border-[#E5E5E5]">
           <span className="text-2xl font-bold font-['Syne']">
             <span className="text-[#CE0202]">A</span>
-            <span className="text-white">LPHA</span>
+            <span className="text-[#1A1A1A]">LPHA</span>
           </span>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-[#A1A1AA] hover:text-white"
+            className="lg:hidden text-[#666666] hover:text-[#1A1A1A]"
           >
             <X className="w-6 h-6" />
           </button>
@@ -87,8 +87,8 @@ const DashboardLayout = () => {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   isActive
-                    ? "bg-[#CE0202]/20 text-white border-l-2 border-[#CE0202]"
-                    : "text-[#A1A1AA] hover:text-white hover:bg-white/5"
+                    ? "bg-[#CE0202] text-white"
+                    : "text-[#666666] hover:text-[#1A1A1A] hover:bg-[#E5E5E5]"
                 }`
               }
               onClick={() => setSidebarOpen(false)}
@@ -100,23 +100,23 @@ const DashboardLayout = () => {
         </nav>
 
         {/* User & Logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/5">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#E5E5E5]">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-[#CE0202]/20 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#CE0202]/10 rounded-full flex items-center justify-center">
               <span className="text-[#CE0202] font-bold">
                 {user?.full_name?.charAt(0) || "A"}
               </span>
             </div>
             <div>
-              <p className="text-white font-medium text-sm">{user?.full_name || "Admin"}</p>
-              <p className="text-[#A1A1AA] text-xs">{user?.email || ""}</p>
+              <p className="text-[#1A1A1A] font-medium text-sm">{user?.full_name || "Admin"}</p>
+              <p className="text-[#666666] text-xs">{user?.email || ""}</p>
             </div>
           </div>
           <Button
             onClick={handleLogout}
             data-testid="logout-btn"
             variant="ghost"
-            className="w-full justify-start text-[#A1A1AA] hover:text-white hover:bg-white/5"
+            className="w-full justify-start text-[#666666] hover:text-[#1A1A1A] hover:bg-[#E5E5E5]"
           >
             <LogOut className="w-5 h-5 mr-2" />
             Déconnexion
@@ -127,7 +127,7 @@ const DashboardLayout = () => {
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/30 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -135,16 +135,16 @@ const DashboardLayout = () => {
       {/* Main content */}
       <main className="flex-1 lg:ml-64">
         {/* Header */}
-        <header className="h-16 bg-[#0A0A0A] border-b border-white/5 flex items-center justify-between px-6">
+        <header className="h-16 bg-white border-b border-[#E5E5E5] flex items-center justify-between px-6">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-[#A1A1AA] hover:text-white"
+            className="lg:hidden text-[#666666] hover:text-[#1A1A1A]"
           >
             <Menu className="w-6 h-6" />
           </button>
           
           <div className="flex items-center gap-2 text-sm">
-            <a href="/" target="_blank" className="text-[#A1A1AA] hover:text-white flex items-center gap-1">
+            <a href="/" target="_blank" className="text-[#666666] hover:text-[#CE0202] flex items-center gap-1">
               Voir le site
               <ChevronRight className="w-4 h-4" />
             </a>
@@ -152,7 +152,7 @@ const DashboardLayout = () => {
         </header>
 
         {/* Page content */}
-        <div className="p-6">
+        <div className="p-6 bg-[#F8F8F8] min-h-[calc(100vh-4rem)]">
           <Outlet />
         </div>
       </main>
