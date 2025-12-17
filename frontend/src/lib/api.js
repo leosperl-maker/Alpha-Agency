@@ -102,6 +102,17 @@ export const blogAPI = {
 export const portfolioAPI = {
   getAll: (params) => api.get('/portfolio', { params }),
   create: (data) => api.post('/portfolio', data),
+  update: (id, data) => api.put(`/portfolio/${id}`, data),
+  delete: (id) => api.delete(`/portfolio/${id}`),
+};
+
+// Settings
+export const settingsAPI = {
+  getAll: () => api.get('/settings'),
+  updateCompany: (data) => api.put('/settings/company', data),
+  updateSocialLinks: (data) => api.put('/settings/social-links', data),
+  updateLegalTexts: (data) => api.put('/settings/legal-texts', data),
+  updateIntegrations: (data) => api.put('/settings/integrations', data),
 };
 
 // Lead form (public)
