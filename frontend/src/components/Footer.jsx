@@ -4,23 +4,20 @@ import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, Clock } from "lucid
 
 const Footer = () => {
   const navigate = useNavigate();
-  const [clickCount, setClickCount] = useState(0);
-  const [lastClickTime, setLastClickTime] = useState(0);
+  const [clicks, setClicks] = useState([]);
 
   // Triple-click handler for hidden admin access
   const handleLogoClick = () => {
     const now = Date.now();
-    if (now - lastClickTime < 500) {
-      const newCount = clickCount + 1;
-      setClickCount(newCount);
-      if (newCount >= 3) {
-        navigate("/alpha-admin-2024");
-        setClickCount(0);
-      }
-    } else {
-      setClickCount(1);
+    // Keep only clicks within the last 1 second
+    const recentClicks = [...clicks.filter(t => now - t < 1000), now];
+    setClicks(recentClicks);
+    
+    // If 3+ clicks within 1 second, navigate to admin
+    if (recentClicks.length >= 3) {
+      setClicks([]);
+      navigate("/alpha-admin-2024");
     }
-    setLastClickTime(now);
   };
 
   return (
