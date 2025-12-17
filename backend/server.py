@@ -1100,6 +1100,102 @@ async def stripe_webhook(request: Request):
         logger.error(f"Webhook error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
+# ==================== SETTINGS ROUTES ====================
+
+class SettingsCompany(BaseModel):
+    name: Optional[str] = None
+    commercial_name: Optional[str] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    siren: Optional[str] = None
+    siret: Optional[str] = None
+    capital: Optional[str] = None
+    tva_number: Optional[str] = None
+
+class SettingsSocialLinks(BaseModel):
+    linkedin: Optional[str] = None
+    instagram: Optional[str] = None
+    facebook: Optional[str] = None
+    twitter: Optional[str] = None
+    youtube: Optional[str] = None
+
+class SettingsLegalTexts(BaseModel):
+    mentions_legales: Optional[str] = None
+    politique_confidentialite: Optional[str] = None
+    politique_cookies: Optional[str] = None
+
+class SettingsIntegrations(BaseModel):
+    ga4_id: Optional[str] = None
+    resend_api_key: Optional[str] = None
+    stripe_api_key: Optional[str] = None
+
+@api_router.get("/settings", response_model=dict)
+async def get_settings(current_user: dict = Depends(get_current_user)):
+    settings = await db.settings.find_one({"type": "global"}, {"_id": 0})
+    if not settings:
+        settings = {
+            "company": COMPANY_INFO,
+            "social_links": {
+                "linkedin": "https://linkedin.com",
+                "instagram": "https://instagram.com",
+                "facebook": "https://facebook.com",
+                "twitter": "",
+                "youtube": ""
+            },
+            "legal_texts": {
+                "mentions_legales": "",
+                "politique_confidentialite": "",
+                "politique_cookies": ""
+            },
+            "integrations": {
+                "ga4_id": "",
+                "resend_api_key": "",
+                "stripe_api_key": ""
+            }
+        }
+    return settings
+
+@api_router.put("/settings/company", response_model=dict)
+async def update_settings_company(company: SettingsCompany, current_user: dict = Depends(get_current_user)):
+    update_data = {k: v for k, v in company.model_dump().items() if v is not None}
+    await db.settings.update_one(
+        {"type": "global"},
+        {"$set": {"company": update_data, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    return {"message": "Informations entreprise mises à jour"}
+
+@api_router.put("/settings/social-links", response_model=dict)
+async def update_settings_social(social: SettingsSocialLinks, current_user: dict = Depends(get_current_user)):
+    update_data = {k: v for k, v in social.model_dump().items() if v is not None}
+    await db.settings.update_one(
+        {"type": "global"},
+        {"$set": {"social_links": update_data, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    return {"message": "Réseaux sociaux mis à jour"}
+
+@api_router.put("/settings/legal-texts", response_model=dict)
+async def update_settings_legal(legal: SettingsLegalTexts, current_user: dict = Depends(get_current_user)):
+    update_data = {k: v for k, v in legal.model_dump().items() if v is not None}
+    await db.settings.update_one(
+        {"type": "global"},
+        {"$set": {"legal_texts": update_data, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    return {"message": "Textes légaux mis à jour"}
+
+@api_router.put("/settings/integrations", response_model=dict)
+async def update_settings_integrations(integrations: SettingsIntegrations, current_user: dict = Depends(get_current_user)):
+    update_data = {k: v for k, v in integrations.model_dump().items() if v is not None}
+    await db.settings.update_one(
+        {"type": "global"},
+        {"$set": {"integrations": update_data, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    return {"message": "Intégrations mises à jour"}
+
 # ==================== MAIN APP CONFIG ====================
 
 app.include_router(api_router)
