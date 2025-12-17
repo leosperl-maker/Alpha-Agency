@@ -42,7 +42,7 @@ const Navbar = () => {
           >
             <img 
               src="https://customer-assets.emergentagent.com/job_alphacommunicate/artifacts/10nsa4du_Design%20sans%20titre%20%2893%29.png" 
-              alt="ALPHA Agency"
+              alt="Alpha Agency"
               className="h-14 w-auto"
             />
           </Link>

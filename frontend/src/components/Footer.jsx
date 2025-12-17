@@ -1,22 +1,46 @@
-import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, Clock } from "lucide-react";
 
 const Footer = () => {
+  const navigate = useNavigate();
+  const [clickCount, setClickCount] = useState(0);
+  const [lastClickTime, setLastClickTime] = useState(0);
+
+  // Triple-click handler for hidden admin access
+  const handleLogoClick = () => {
+    const now = Date.now();
+    if (now - lastClickTime < 500) {
+      const newCount = clickCount + 1;
+      setClickCount(newCount);
+      if (newCount >= 3) {
+        navigate("/alpha-admin-2024");
+        setClickCount(0);
+      }
+    } else {
+      setClickCount(1);
+    }
+    setLastClickTime(now);
+  };
+
   return (
     <footer data-testid="main-footer" className="bg-[#0A0A0A] border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand */}
           <div>
-            <Link to="/" className="inline-block mb-6">
+            <div 
+              onClick={handleLogoClick}
+              className="inline-block mb-6 cursor-pointer select-none"
+            >
               <img 
                 src="https://customer-assets.emergentagent.com/job_webproject-alpha/artifacts/o1l1nzgi_Agence%20de%20Communication%20360%C2%B0%20%281%29.png" 
-                alt="ALPHA Agency - Agence de Communication 360°"
+                alt="Alpha Agency - Agence de Communication 360°"
                 className="h-40 w-auto"
               />
-            </Link>
+            </div>
             <p className="text-[#A1A1AA] text-sm mb-6">
-              Agence de communication digitale 360° en Guadeloupe. Site web, community management, photo, vidéo et publicité digitale.
+              Agence de communication digitale 360° en Guadeloupe. Site web, community management (gestion des réseaux sociaux), photographie, vidéographie et publicité digitale.
             </p>
             <div className="flex gap-4">
               <a
@@ -65,12 +89,12 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/offres" className="text-[#A1A1AA] hover:text-white text-sm animated-underline">
-                  Photography
+                  Photographie
                 </Link>
               </li>
               <li>
                 <Link to="/offres" className="text-[#A1A1AA] hover:text-white text-sm animated-underline">
-                  Vidéography
+                  Vidéographie
                 </Link>
               </li>
               <li>
@@ -136,6 +160,13 @@ const Footer = () => {
                   leo.sperl@alphagency.fr
                 </a>
               </li>
+              <li className="flex items-start gap-3">
+                <Clock size={18} className="text-[#CE0202] mt-0.5 flex-shrink-0" />
+                <span className="text-[#A1A1AA] text-sm">
+                  Du mardi au samedi<br />
+                  10h à 19h
+                </span>
+              </li>
             </ul>
           </div>
         </div>
@@ -143,7 +174,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="border-t border-white/5 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-[#A1A1AA] text-xs">
-            © {new Date().getFullYear()} Alpha Digital (ALPHA Agency). Tous droits réservés.
+            © {new Date().getFullYear()} Alpha Digital (Alpha Agency). Tous droits réservés.
           </p>
           <div className="flex gap-6">
             <Link to="/mentions-legales" className="text-[#A1A1AA] hover:text-white text-xs animated-underline">
