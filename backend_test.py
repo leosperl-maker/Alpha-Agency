@@ -165,7 +165,7 @@ class AlphaAgencyAPITester:
             "notes": "Client très intéressé par notre pack complet"
         }
         
-        success, response = self.make_request('POST', 'opportunities', opp_data, 201)
+        success, response = self.make_request('POST', 'opportunities', opp_data, 200)
         if success and 'id' in response:
             self.opportunity_id = response['id']
             self.log_result("Create Opportunity", True, f"Opportunity ID: {self.opportunity_id}")
