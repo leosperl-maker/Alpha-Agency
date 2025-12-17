@@ -23,6 +23,7 @@ import SubscriptionsPage from "./pages/dashboard/SubscriptionsPage";
 import PortfolioManagePage from "./pages/dashboard/PortfolioManagePage";
 import DemandesPage from "./pages/dashboard/DemandesPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
+import DocumentsPage from "./pages/dashboard/DocumentsPage";
 
 // Layout
 import MainLayout from "./components/MainLayout";
@@ -68,6 +69,7 @@ function App() {
             <Route path="factures" element={<InvoicesPage />} />
             <Route path="abonnements" element={<SubscriptionsPage />} />
             <Route path="realisations" element={<PortfolioManagePage />} />
+            <Route path="documents" element={<DocumentsPage />} />
             <Route path="parametres" element={<SettingsPage />} />
           </Route>
         </Routes>
