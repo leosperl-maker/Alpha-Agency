@@ -245,52 +245,86 @@ const DashboardOverview = () => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="bg-white border border-[#E5E5E5] shadow-sm">
-          <CardHeader>
+        {/* Recent Tasks */}
+        <Card className="bg-white border border-[#E5E5E5] shadow-sm lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
-              <Receipt className="w-5 h-5 text-[#F59E0B]" />
-              Factures en attente
+              <CheckSquare className="w-5 h-5 text-[#3B82F6]" />
+              Tâches récentes
             </CardTitle>
+            <Link to="/admin/taches" className="text-sm text-[#CE0202] hover:underline">
+              Voir tout →
+            </Link>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-[#1A1A1A] font-mono">
-              {stats?.invoices?.pending || 0}
-            </div>
-            {stats?.invoices?.overdue > 0 && (
-              <p className="text-red-500 text-sm mt-2">
-                {stats.invoices.overdue} en retard
-              </p>
+            {recentTasks.length === 0 ? (
+              <p className="text-[#666666] text-center py-4">Aucune tâche</p>
+            ) : (
+              <div className="space-y-3">
+                {recentTasks.map(task => (
+                  <div key={task.id} className="flex items-center justify-between p-3 bg-[#F8F8F8] rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${
+                        task.status === 'done' ? 'bg-green-500' : 
+                        task.status === 'in_progress' ? 'bg-blue-500' : 'bg-gray-400'
+                      }`} />
+                      <span className={`text-sm ${task.status === 'done' ? 'line-through text-[#666666]' : 'text-[#1A1A1A]'}`}>
+                        {task.title}
+                      </span>
+                    </div>
+                    <Badge className={`text-xs border-none ${
+                      task.priority === 'urgent' ? 'bg-red-100 text-red-700' :
+                      task.priority === 'high' ? 'bg-orange-100 text-orange-700' :
+                      task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {task.priority === 'urgent' ? 'Urgent' : 
+                       task.priority === 'high' ? 'Haute' :
+                       task.priority === 'medium' ? 'Moyenne' : 'Basse'}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>
 
+        {/* Task Stats */}
         <Card className="bg-white border border-[#E5E5E5] shadow-sm">
           <CardHeader>
             <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
-              <Euro className="w-5 h-5 text-[#10B981]" />
-              CA Signé
+              <TrendingUp className="w-5 h-5 text-[#10B981]" />
+              Progression
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-bold text-[#1A1A1A] font-mono">
-              {(stats?.opportunities?.signed_revenue || 0).toLocaleString()}€
+              {taskStats?.completion_rate || 0}%
             </div>
-            <p className="text-[#666666] text-sm mt-2">Ce mois</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border border-[#E5E5E5] shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-[#8B5CF6]" />
-              Taux de conversion
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold text-[#1A1A1A] font-mono">
-              {stats?.kpis?.conversion_rate || 0}%
+            <p className="text-[#666666] text-sm mt-2">Tâches complétées</p>
+            
+            <div className="mt-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-[#666666]">À faire</span>
+                <span className="font-medium">{taskStats?.todo || 0}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-[#666666]">En cours</span>
+                <span className="font-medium">{taskStats?.in_progress || 0}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-[#666666]">Terminées</span>
+                <span className="font-medium text-green-600">{taskStats?.done || 0}</span>
+              </div>
+              {taskStats?.overdue > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-red-600 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" /> En retard
+                  </span>
+                  <span className="font-medium text-red-600">{taskStats.overdue}</span>
+                </div>
+              )}
             </div>
-            <p className="text-[#666666] text-sm mt-2">Lead → Client</p>
           </CardContent>
         </Card>
       </div>
