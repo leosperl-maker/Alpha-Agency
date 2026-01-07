@@ -129,39 +129,52 @@ const InvoicesPage = () => {
     fetchData();
   }, []);
 
-  // Save services to localStorage
-  const saveServicesToStorage = (services) => {
-    localStorage.setItem('alphagency_services', JSON.stringify(services));
-    setSavedServices(services);
-  };
-
-  const handleAddService = () => {
+  const handleAddService = async () => {
     if (!newService.title || !newService.price) {
       toast.error("Veuillez remplir le titre et le prix");
       return;
     }
-    const service = {
-      id: Date.now().toString(),
-      ...newService
-    };
-    saveServicesToStorage([...savedServices, service]);
-    setNewService({ title: "", description: "", price: 0 });
-    toast.success("Service enregistré");
+    try {
+      await servicesAPI.create(newService);
+      setNewService({ title: "", description: "", price: 0 });
+      toast.success("Service enregistré");
+      // Refresh services
+      const servicesRes = await servicesAPI.getAll();
+      setSavedServices(servicesRes.data);
+    } catch (error) {
+      toast.error("Erreur lors de l'enregistrement du service");
+    }
   };
 
-  const handleUpdateService = () => {
+  const handleUpdateService = async () => {
     if (!editingService) return;
-    const updated = savedServices.map(s => s.id === editingService.id ? editingService : s);
-    saveServicesToStorage(updated);
-    setEditingService(null);
-    toast.success("Service mis à jour");
+    try {
+      await servicesAPI.update(editingService.id, {
+        title: editingService.title,
+        description: editingService.description,
+        price: editingService.price
+      });
+      setEditingService(null);
+      toast.success("Service mis à jour");
+      // Refresh services
+      const servicesRes = await servicesAPI.getAll();
+      setSavedServices(servicesRes.data);
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour");
+    }
   };
 
-  const handleDeleteService = (id) => {
+  const handleDeleteService = async (id) => {
     if (!window.confirm("Supprimer ce service ?")) return;
-    const filtered = savedServices.filter(s => s.id !== id);
-    saveServicesToStorage(filtered);
-    toast.success("Service supprimé");
+    try {
+      await servicesAPI.delete(id);
+      toast.success("Service supprimé");
+      // Refresh services
+      const servicesRes = await servicesAPI.getAll();
+      setSavedServices(servicesRes.data);
+    } catch (error) {
+      toast.error("Erreur lors de la suppression");
+    }
   };
 
   const addServiceToInvoice = (service) => {
