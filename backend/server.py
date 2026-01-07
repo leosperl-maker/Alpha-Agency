@@ -1794,6 +1794,251 @@ async def delete_service(service_id: str, current_user: dict = Depends(get_curre
         raise HTTPException(status_code=404, detail="Service non trouvé")
     return {"message": "Service supprimé"}
 
+# ==================== TASKS ROUTES (Notion-style) ====================
+
+class TaskCreate(BaseModel):
+    title: str
+    description: Optional[str] = ""
+    status: Optional[str] = "todo"  # todo, in_progress, done
+    priority: Optional[str] = "medium"  # low, medium, high, urgent
+    category: Optional[str] = "general"
+    due_date: Optional[str] = None
+    assigned_to: Optional[str] = None
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    priority: Optional[str] = None
+    category: Optional[str] = None
+    due_date: Optional[str] = None
+    assigned_to: Optional[str] = None
+    completed_at: Optional[str] = None
+
+@api_router.get("/tasks", response_model=List[dict])
+async def get_tasks(status: Optional[str] = None, priority: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Get all tasks with optional filters"""
+    query = {}
+    if status:
+        query["status"] = status
+    if priority:
+        query["priority"] = priority
+    tasks = await db.tasks.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return tasks
+
+@api_router.post("/tasks", response_model=dict)
+async def create_task(task: TaskCreate, current_user: dict = Depends(get_current_user)):
+    """Create a new task"""
+    task_id = str(uuid.uuid4())
+    task_doc = {
+        "id": task_id,
+        **task.model_dump(),
+        "created_by": current_user['user_id'],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "completed_at": None
+    }
+    await db.tasks.insert_one(task_doc)
+    return {"id": task_id, "message": "Tâche créée"}
+
+@api_router.get("/tasks/{task_id}", response_model=dict)
+async def get_task(task_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a single task"""
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
+    if not task:
+        raise HTTPException(status_code=404, detail="Tâche non trouvée")
+    return task
+
+@api_router.put("/tasks/{task_id}", response_model=dict)
+async def update_task(task_id: str, task_update: TaskUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a task"""
+    existing = await db.tasks.find_one({"id": task_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Tâche non trouvée")
+    
+    update_data = {k: v for k, v in task_update.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    # Set completed_at when status changes to done
+    if update_data.get("status") == "done" and existing.get("status") != "done":
+        update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
+    elif update_data.get("status") != "done":
+        update_data["completed_at"] = None
+    
+    await db.tasks.update_one({"id": task_id}, {"$set": update_data})
+    return {"message": "Tâche mise à jour"}
+
+@api_router.delete("/tasks/{task_id}", response_model=dict)
+async def delete_task(task_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a task"""
+    result = await db.tasks.delete_one({"id": task_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Tâche non trouvée")
+    return {"message": "Tâche supprimée"}
+
+@api_router.get("/tasks/stats/summary", response_model=dict)
+async def get_tasks_stats(current_user: dict = Depends(get_current_user)):
+    """Get task statistics"""
+    total = await db.tasks.count_documents({})
+    todo = await db.tasks.count_documents({"status": "todo"})
+    in_progress = await db.tasks.count_documents({"status": "in_progress"})
+    done = await db.tasks.count_documents({"status": "done"})
+    
+    # Overdue tasks
+    now = datetime.now(timezone.utc).isoformat()
+    overdue = await db.tasks.count_documents({
+        "status": {"$ne": "done"},
+        "due_date": {"$lt": now, "$ne": None}
+    })
+    
+    return {
+        "total": total,
+        "todo": todo,
+        "in_progress": in_progress,
+        "done": done,
+        "overdue": overdue,
+        "completion_rate": round((done / total * 100) if total > 0 else 0, 1)
+    }
+
+# ==================== BUDGET ROUTES ====================
+
+class BudgetEntryCreate(BaseModel):
+    type: str  # income, expense
+    amount: float
+    category: str
+    description: Optional[str] = ""
+    date: Optional[str] = None
+    recurring: Optional[bool] = False
+    recurring_frequency: Optional[str] = None  # monthly, weekly, yearly
+
+class BudgetEntryUpdate(BaseModel):
+    type: Optional[str] = None
+    amount: Optional[float] = None
+    category: Optional[str] = None
+    description: Optional[str] = None
+    date: Optional[str] = None
+    recurring: Optional[bool] = None
+    recurring_frequency: Optional[str] = None
+
+@api_router.get("/budget", response_model=List[dict])
+async def get_budget_entries(
+    type: Optional[str] = None,
+    category: Optional[str] = None,
+    month: Optional[str] = None,  # Format: YYYY-MM
+    current_user: dict = Depends(get_current_user)
+):
+    """Get budget entries with optional filters"""
+    query = {}
+    if type:
+        query["type"] = type
+    if category:
+        query["category"] = category
+    if month:
+        query["date"] = {"$regex": f"^{month}"}
+    
+    entries = await db.budget.find(query, {"_id": 0}).sort("date", -1).to_list(1000)
+    return entries
+
+@api_router.post("/budget", response_model=dict)
+async def create_budget_entry(entry: BudgetEntryCreate, current_user: dict = Depends(get_current_user)):
+    """Create a budget entry"""
+    entry_id = str(uuid.uuid4())
+    entry_doc = {
+        "id": entry_id,
+        **entry.model_dump(),
+        "date": entry.date or datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "created_by": current_user['user_id'],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.budget.insert_one(entry_doc)
+    return {"id": entry_id, "message": "Entrée créée"}
+
+@api_router.put("/budget/{entry_id}", response_model=dict)
+async def update_budget_entry(entry_id: str, entry_update: BudgetEntryUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a budget entry"""
+    existing = await db.budget.find_one({"id": entry_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Entrée non trouvée")
+    
+    update_data = {k: v for k, v in entry_update.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.budget.update_one({"id": entry_id}, {"$set": update_data})
+    return {"message": "Entrée mise à jour"}
+
+@api_router.delete("/budget/{entry_id}", response_model=dict)
+async def delete_budget_entry(entry_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a budget entry"""
+    result = await db.budget.delete_one({"id": entry_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Entrée non trouvée")
+    return {"message": "Entrée supprimée"}
+
+@api_router.get("/budget/summary", response_model=dict)
+async def get_budget_summary(month: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Get budget summary with totals by category"""
+    query = {}
+    if month:
+        query["date"] = {"$regex": f"^{month}"}
+    else:
+        # Default to current month
+        current_month = datetime.now().strftime("%Y-%m")
+        query["date"] = {"$regex": f"^{current_month}"}
+    
+    entries = await db.budget.find(query, {"_id": 0}).to_list(1000)
+    
+    total_income = sum(e["amount"] for e in entries if e["type"] == "income")
+    total_expense = sum(e["amount"] for e in entries if e["type"] == "expense")
+    
+    # Group by category
+    income_by_category = {}
+    expense_by_category = {}
+    
+    for entry in entries:
+        cat = entry["category"]
+        if entry["type"] == "income":
+            income_by_category[cat] = income_by_category.get(cat, 0) + entry["amount"]
+        else:
+            expense_by_category[cat] = expense_by_category.get(cat, 0) + entry["amount"]
+    
+    return {
+        "total_income": total_income,
+        "total_expense": total_expense,
+        "balance": total_income - total_expense,
+        "income_by_category": income_by_category,
+        "expense_by_category": expense_by_category,
+        "entries_count": len(entries)
+    }
+
+@api_router.get("/budget/monthly-chart", response_model=list)
+async def get_monthly_chart_data(year: Optional[int] = None, current_user: dict = Depends(get_current_user)):
+    """Get monthly income/expense data for charts"""
+    if not year:
+        year = datetime.now().year
+    
+    months_data = []
+    month_names = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"]
+    
+    for month in range(1, 13):
+        month_str = f"{year}-{str(month).zfill(2)}"
+        entries = await db.budget.find(
+            {"date": {"$regex": f"^{month_str}"}},
+            {"_id": 0}
+        ).to_list(1000)
+        
+        income = sum(e["amount"] for e in entries if e["type"] == "income")
+        expense = sum(e["amount"] for e in entries if e["type"] == "expense")
+        
+        months_data.append({
+            "name": month_names[month - 1],
+            "month": month_str,
+            "income": income,
+            "expense": expense,
+            "balance": income - expense
+        })
+    
+    return months_data
+
 # ==================== ENHANCED INVOICE PDF ====================
 
 def generate_professional_invoice_pdf(invoice: dict, contact: dict) -> BytesIO:
