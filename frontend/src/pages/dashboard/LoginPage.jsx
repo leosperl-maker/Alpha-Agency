@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, Mail, Eye, EyeOff, Shield } from "lucide-react";
 import { Button } from "../../components/ui/button";
@@ -121,6 +121,15 @@ const LoginPage = () => {
             >
               {loading ? "Connexion..." : "Se connecter"}
             </Button>
+
+            <div className="text-center">
+              <Link 
+                to="/alpha-admin-2024/reset-password" 
+                className="text-sm text-[#CE0202] hover:underline"
+              >
+                Mot de passe oublié ?
+              </Link>
+            </div>
           </form>
 
           <p className="mt-6 text-center text-xs text-[#666666]">
