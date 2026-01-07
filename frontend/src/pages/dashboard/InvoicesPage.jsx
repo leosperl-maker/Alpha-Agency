@@ -764,10 +764,10 @@ const InvoicesPage = () => {
 
       {/* Create/Edit Sheet with Preview */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-[1200px] p-0 bg-[#F8F8F8]">
+        <SheetContent side="right" className="w-full sm:max-w-[1400px] p-0 bg-[#F8F8F8]">
           <div className="flex h-full">
-            {/* Form Side */}
-            <div className="flex-1 p-6 overflow-y-auto bg-white border-r border-[#E5E5E5]">
+            {/* Form Side - 50% */}
+            <div className="w-1/2 p-6 overflow-y-auto bg-white border-r border-[#E5E5E5]">
               <SheetHeader className="mb-6">
                 <SheetTitle className="text-[#1A1A1A] flex items-center gap-2">
                   {documentType === 'devis' ? <FileText className="w-5 h-5" /> : <Receipt className="w-5 h-5" />}
@@ -824,10 +824,14 @@ const InvoicesPage = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => addServiceToInvoice(service)}
-                          className="text-xs"
+                          className="text-xs text-left h-auto py-2"
+                          title={service.description}
                         >
-                          <Plus className="w-3 h-3 mr-1" />
-                          {service.title} ({formatCurrency(service.price)})
+                          <Plus className="w-3 h-3 mr-1 flex-shrink-0" />
+                          <span>
+                            <span className="font-bold">{service.title}</span>
+                            <span className="ml-1 text-[#666666]">({formatCurrency(service.price)})</span>
+                          </span>
                         </Button>
                       ))}
                     </div>
@@ -837,56 +841,64 @@ const InvoicesPage = () => {
                 {/* Items */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label className="text-[#1A1A1A] font-semibold">Lignes</Label>
+                    <Label className="text-[#1A1A1A] font-semibold">Lignes de facturation</Label>
                     <Button type="button" variant="ghost" onClick={addItem} className="text-[#CE0202]">
-                      <Plus className="w-4 h-4 mr-1" /> Ajouter
+                      <Plus className="w-4 h-4 mr-1" /> Ajouter une ligne
                     </Button>
                   </div>
                   
                   {items.map((item, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-2 items-start">
-                      <div className="col-span-6">
-                        <Textarea
-                          placeholder="Description"
-                          value={item.description}
-                          onChange={(e) => updateItem(index, "description", e.target.value)}
-                          className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A] min-h-[60px]"
-                          rows={2}
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Input
-                          type="number"
-                          min="1"
-                          placeholder="Qté"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(index, "quantity", e.target.value)}
-                          className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <Input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="Prix €"
-                          value={item.unit_price}
-                          onChange={(e) => updateItem(index, "unit_price", e.target.value)}
-                          className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
-                        />
-                      </div>
-                      <div className="col-span-1 flex justify-center pt-2">
+                    <div key={index} className="bg-[#F8F8F8] rounded-lg p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-[#666666]">Ligne {index + 1}</span>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => removeItem(index)}
-                          className="text-red-500 h-8 w-8 p-0"
+                          className="text-red-500 h-6 w-6 p-0"
                           disabled={items.length === 1}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
+                      <Textarea
+                        placeholder="Description du service ou produit (ex: Création site web vitrine - Design personnalisé, responsive, optimisé SEO)"
+                        value={item.description}
+                        onChange={(e) => updateItem(index, "description", e.target.value)}
+                        className="bg-white border-[#E5E5E5] text-[#1A1A1A] min-h-[80px]"
+                        rows={3}
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-xs text-[#666666]">Quantité</Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            placeholder="1"
+                            value={item.quantity}
+                            onChange={(e) => updateItem(index, "quantity", e.target.value)}
+                            className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-[#666666]">Prix unitaire HT (€)</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            value={item.unit_price}
+                            onChange={(e) => updateItem(index, "unit_price", e.target.value)}
+                            className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                          />
+                        </div>
+                      </div>
+                      {item.description && item.unit_price > 0 && (
+                        <div className="text-right text-sm font-medium text-[#1A1A1A]">
+                          Total ligne: {formatCurrency(item.quantity * item.unit_price)}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -936,8 +948,8 @@ const InvoicesPage = () => {
               </form>
             </div>
 
-            {/* Preview Side */}
-            <div className="w-[400px] p-4 hidden lg:block">
+            {/* Preview Side - 50% */}
+            <div className="w-1/2 p-4 hidden lg:block overflow-y-auto">
               <InvoicePreview />
             </div>
           </div>
