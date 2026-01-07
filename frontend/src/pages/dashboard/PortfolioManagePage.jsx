@@ -158,6 +158,38 @@ const PortfolioManagePage = () => {
     }));
   };
 
+  // Upload audio file to Cloudinary
+  const handleAudioUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Check file type
+    if (!file.type.startsWith('audio/')) {
+      toast.error("Veuillez sélectionner un fichier audio");
+      return;
+    }
+    
+    setUploading(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      
+      const response = await api.post('/upload/audio', formDataUpload, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setFormData(prev => ({ ...prev, audio_url: response.data.url }));
+      toast.success("Audio téléversé");
+    } catch (error) {
+      toast.error("Erreur lors du téléversement audio");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeAudio = () => {
+    setFormData(prev => ({ ...prev, audio_url: "" }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
