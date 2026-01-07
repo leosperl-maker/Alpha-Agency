@@ -111,11 +111,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "API Documents avec types (lettre_mission, fiche_contact) et templates fonctionnels"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - API Documents fonctionne parfaitement. Tests réussis: 1) GET /api/documents/types (2 types, 8 templates), 2) POST /api/documents (création lettre_mission), 3) GET /api/documents/{id} (récupération), 4) GET /api/documents (liste). Authentification JWT requise et fonctionnelle."
 
   - task: "Authentification admin"
     implemented: true
