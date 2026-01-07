@@ -45,6 +45,7 @@ function App() {
         }}
       />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           {/* Site vitrine */}
           <Route element={<MainLayout />}>
