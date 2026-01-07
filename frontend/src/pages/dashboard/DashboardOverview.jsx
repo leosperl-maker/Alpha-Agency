@@ -35,20 +35,31 @@ import {
 
 const DashboardOverview = () => {
   const [stats, setStats] = useState(null);
+  const [taskStats, setTaskStats] = useState(null);
+  const [budgetSummary, setBudgetSummary] = useState(null);
+  const [recentTasks, setRecentTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchAllData = async () => {
       try {
-        const response = await dashboardAPI.getStats();
-        setStats(response.data);
+        const [statsRes, taskStatsRes, budgetRes, tasksRes] = await Promise.all([
+          dashboardAPI.getStats(),
+          tasksAPI.getStats(),
+          budgetAPI.getSummary(),
+          tasksAPI.getAll({ limit: 5 })
+        ]);
+        setStats(statsRes.data);
+        setTaskStats(taskStatsRes.data);
+        setBudgetSummary(budgetRes.data);
+        setRecentTasks(tasksRes.data.slice(0, 5));
       } catch (error) {
         console.error("Error fetching stats:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchStats();
+    fetchAllData();
   }, []);
 
   const kpiCards = [
