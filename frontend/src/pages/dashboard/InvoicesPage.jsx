@@ -52,7 +52,7 @@ import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { invoicesAPI, contactsAPI } from "../../lib/api";
+import { invoicesAPI, contactsAPI, servicesAPI } from "../../lib/api";
 import api from "../../lib/api";
 import { toast } from "sonner";
 
