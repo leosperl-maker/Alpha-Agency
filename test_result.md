@@ -172,7 +172,7 @@ frontend:
     file: "/app/frontend/src/pages/dashboard/InvoicesPage.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "user"
@@ -180,6 +180,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "CORRIGÉ - Formulaire en plein écran sur mobile (w-full lg:w-1/2), preview cachée sur mobile (hidden lg:block)"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - Page Facturation mobile fonctionne parfaitement. Formulaire prend toute la largeur sur mobile (pas de preview 50/50), champs Client et Échéance empilés verticalement comme attendu. Navigation vers /admin/factures réussie, bouton 'Nouveau document' accessible, formulaire de création facture utilisable sur mobile."
 
 metadata:
   created_by: "main_agent"
