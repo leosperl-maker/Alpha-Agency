@@ -418,8 +418,8 @@ class AlphaAgencyAPITester:
         self.log_result("Update Complete Invoice", success, response.get('message', str(response)) if success else str(response))
 
     def test_invoice_pdf_generation(self):
-        """Test invoice PDF generation"""
-        print("\n📄 Testing Invoice PDF Generation...")
+        """Test invoice PDF generation with professional design"""
+        print("\n📄 Testing Invoice PDF Generation (Professional Design)...")
         
         if not self.invoice_id:
             self.log_result("Download Invoice PDF", False, "No invoice_id available")
@@ -434,14 +434,121 @@ class AlphaAgencyAPITester:
             if response.status_code == 200:
                 content_type = response.headers.get('content-type', '')
                 content_length = len(response.content)
-                if 'application/pdf' in content_type and content_length > 1000:
-                    self.log_result("Download Invoice PDF", True, f"PDF generated successfully ({content_length} bytes)")
+                content_disposition = response.headers.get('content-disposition', '')
+                
+                # Verify PDF properties
+                if 'application/pdf' in content_type and content_length > 100000:  # >100KB as requested
+                    self.log_result("Download Invoice PDF", True, f"PDF generated successfully ({content_length} bytes, Content-Type: {content_type})")
+                    
+                    # Verify Content-Disposition header
+                    if 'attachment' in content_disposition and 'facture_' in content_disposition:
+                        self.log_result("PDF Content-Disposition Header", True, f"Correct header: {content_disposition}")
+                    else:
+                        self.log_result("PDF Content-Disposition Header", False, f"Incorrect header: {content_disposition}")
+                        
+                elif content_length < 100000:
+                    self.log_result("Download Invoice PDF", False, f"PDF too small ({content_length} bytes) - should be >100KB with logo")
                 else:
                     self.log_result("Download Invoice PDF", False, f"Invalid PDF response: {content_type}, {content_length} bytes")
             else:
                 self.log_result("Download Invoice PDF", False, f"HTTP {response.status_code}: {response.text}")
         except Exception as e:
             self.log_result("Download Invoice PDF", False, f"Request failed: {str(e)}")
+
+    def test_quote_pdf_generation(self):
+        """Test quote PDF generation with professional design"""
+        print("\n📋 Testing Quote PDF Generation (Professional Design)...")
+        
+        if not self.quote_id:
+            self.log_result("Download Quote PDF", False, "No quote_id available")
+            return
+        
+        # Test PDF download endpoint
+        url = f"{self.base_url}/api/quotes/{self.quote_id}/pdf"
+        headers = {'Authorization': f'Bearer {self.token}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=15)
+            if response.status_code == 200:
+                content_type = response.headers.get('content-type', '')
+                content_length = len(response.content)
+                content_disposition = response.headers.get('content-disposition', '')
+                
+                # Verify PDF properties
+                if 'application/pdf' in content_type and content_length > 50000:  # Reasonable size for quote
+                    self.log_result("Download Quote PDF", True, f"PDF generated successfully ({content_length} bytes, Content-Type: {content_type})")
+                    
+                    # Verify Content-Disposition header
+                    if 'attachment' in content_disposition and 'devis_' in content_disposition:
+                        self.log_result("Quote PDF Content-Disposition Header", True, f"Correct header: {content_disposition}")
+                    else:
+                        self.log_result("Quote PDF Content-Disposition Header", False, f"Incorrect header: {content_disposition}")
+                        
+                else:
+                    self.log_result("Download Quote PDF", False, f"Invalid PDF response: {content_type}, {content_length} bytes")
+            else:
+                self.log_result("Download Quote PDF", False, f"HTTP {response.status_code}: {response.text}")
+        except Exception as e:
+            self.log_result("Download Quote PDF", False, f"Request failed: {str(e)}")
+
+    def test_pdf_authentication(self):
+        """Test PDF download authentication requirements"""
+        print("\n🔐 Testing PDF Authentication...")
+        
+        if not self.invoice_id:
+            self.log_result("PDF Auth Test", False, "No invoice_id available")
+            return
+        
+        # Test without token (should fail)
+        url = f"{self.base_url}/api/invoices/{self.invoice_id}/pdf"
+        try:
+            response = requests.get(url, timeout=10)
+            if response.status_code == 401:
+                self.log_result("PDF Without Auth", True, "Correctly rejected unauthenticated request")
+            else:
+                self.log_result("PDF Without Auth", False, f"Should have returned 401, got {response.status_code}")
+        except Exception as e:
+            self.log_result("PDF Without Auth", False, f"Request failed: {str(e)}")
+        
+        # Test with invalid token
+        headers = {'Authorization': 'Bearer invalid_token'}
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 401:
+                self.log_result("PDF Invalid Token", True, "Correctly rejected invalid token")
+            else:
+                self.log_result("PDF Invalid Token", False, f"Should have returned 401, got {response.status_code}")
+        except Exception as e:
+            self.log_result("PDF Invalid Token", False, f"Request failed: {str(e)}")
+        
+        # Test with valid token (should succeed)
+        headers = {'Authorization': f'Bearer {self.token}'}
+        try:
+            response = requests.get(url, headers=headers, timeout=15)
+            if response.status_code == 200 and 'application/pdf' in response.headers.get('content-type', ''):
+                self.log_result("PDF Valid Token", True, "Successfully downloaded with valid token")
+            else:
+                self.log_result("PDF Valid Token", False, f"Failed with valid token: {response.status_code}")
+        except Exception as e:
+            self.log_result("PDF Valid Token", False, f"Request failed: {str(e)}")
+
+    def test_pdf_not_found(self):
+        """Test PDF download for non-existent invoice"""
+        print("\n🔍 Testing PDF Not Found...")
+        
+        # Test with non-existent invoice ID
+        fake_id = "non-existent-invoice-id"
+        url = f"{self.base_url}/api/invoices/{fake_id}/pdf"
+        headers = {'Authorization': f'Bearer {self.token}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 404:
+                self.log_result("PDF Not Found", True, "Correctly returned 404 for non-existent invoice")
+            else:
+                self.log_result("PDF Not Found", False, f"Should have returned 404, got {response.status_code}")
+        except Exception as e:
+            self.log_result("PDF Not Found", False, f"Request failed: {str(e)}")
 
     def test_invoice_devis_creation(self):
         """Test creating a devis (quote) type invoice"""
