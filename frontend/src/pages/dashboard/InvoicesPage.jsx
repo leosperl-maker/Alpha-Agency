@@ -958,7 +958,7 @@ const InvoicesPage = () => {
 
       {/* Services Management Dialog */}
       <Dialog open={servicesDialogOpen} onOpenChange={setServicesDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-lg">
+        <DialogContent className="bg-white border-[#E5E5E5] max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-[#1A1A1A] flex items-center gap-2">
               <Package className="w-5 h-5 text-[#CE0202]" />
@@ -969,70 +969,104 @@ const InvoicesPage = () => {
           <div className="space-y-4">
             {/* Add New Service */}
             <div className="bg-[#F8F8F8] rounded-lg p-4 space-y-3">
-              <p className="text-sm font-medium text-[#1A1A1A]">Ajouter un service</p>
-              <Input
-                placeholder="Titre du service"
-                value={newService.title}
-                onChange={(e) => setNewService({...newService, title: e.target.value})}
-                className="bg-white border-[#E5E5E5]"
-              />
-              <Input
-                placeholder="Description (optionnel)"
-                value={newService.description}
-                onChange={(e) => setNewService({...newService, description: e.target.value})}
-                className="bg-white border-[#E5E5E5]"
-              />
-              <div className="flex gap-2">
-                <Input
-                  type="number"
-                  placeholder="Prix €"
-                  value={newService.price || ""}
-                  onChange={(e) => setNewService({...newService, price: parseFloat(e.target.value) || 0})}
-                  className="bg-white border-[#E5E5E5]"
-                />
-                <Button onClick={handleAddService} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
-                  <Plus className="w-4 h-4" />
-                </Button>
+              <p className="text-sm font-medium text-[#1A1A1A]">Ajouter un nouveau service</p>
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs text-[#666666]">Titre du service *</Label>
+                  <Input
+                    placeholder="Ex: Site web vitrine, Logo professionnel, Community Management..."
+                    value={newService.title}
+                    onChange={(e) => setNewService({...newService, title: e.target.value})}
+                    className="bg-white border-[#E5E5E5] font-bold"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-[#666666]">Description détaillée</Label>
+                  <Textarea
+                    placeholder="Décrivez en détail ce que comprend ce service : fonctionnalités incluses, livrables, délais, etc."
+                    value={newService.description}
+                    onChange={(e) => setNewService({...newService, description: e.target.value})}
+                    className="bg-white border-[#E5E5E5] min-h-[100px]"
+                    rows={4}
+                  />
+                </div>
+                <div className="flex gap-3 items-end">
+                  <div className="flex-1">
+                    <Label className="text-xs text-[#666666]">Prix HT (€) *</Label>
+                    <Input
+                      type="number"
+                      placeholder="0.00"
+                      value={newService.price || ""}
+                      onChange={(e) => setNewService({...newService, price: parseFloat(e.target.value) || 0})}
+                      className="bg-white border-[#E5E5E5]"
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleAddService} 
+                    className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+                    disabled={!newService.title || !newService.price}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Enregistrer
+                  </Button>
+                </div>
               </div>
             </div>
 
             {/* Services List */}
-            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {savedServices.length === 0 ? (
                 <p className="text-center text-[#666666] py-4">Aucun service enregistré</p>
               ) : (
                 savedServices.map((service) => (
-                  <div key={service.id} className="flex items-center justify-between p-3 bg-[#F8F8F8] rounded-lg">
+                  <div key={service.id} className="p-4 bg-[#F8F8F8] rounded-lg">
                     {editingService?.id === service.id ? (
-                      <div className="flex-1 space-y-2">
-                        <Input
-                          value={editingService.title}
-                          onChange={(e) => setEditingService({...editingService, title: e.target.value})}
-                          className="bg-white border-[#E5E5E5]"
-                        />
-                        <div className="flex gap-2">
+                      <div className="space-y-3">
+                        <div>
+                          <Label className="text-xs text-[#666666]">Titre</Label>
                           <Input
-                            type="number"
-                            value={editingService.price}
-                            onChange={(e) => setEditingService({...editingService, price: parseFloat(e.target.value) || 0})}
-                            className="bg-white border-[#E5E5E5]"
+                            value={editingService.title}
+                            onChange={(e) => setEditingService({...editingService, title: e.target.value})}
+                            className="bg-white border-[#E5E5E5] font-bold"
                           />
-                          <Button size="sm" onClick={handleUpdateService} className="bg-green-600 hover:bg-green-700">
-                            <Check className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-[#666666]">Description</Label>
+                          <Textarea
+                            value={editingService.description || ""}
+                            onChange={(e) => setEditingService({...editingService, description: e.target.value})}
+                            className="bg-white border-[#E5E5E5]"
+                            rows={3}
+                          />
+                        </div>
+                        <div className="flex gap-3 items-end">
+                          <div className="flex-1">
+                            <Label className="text-xs text-[#666666]">Prix HT (€)</Label>
+                            <Input
+                              type="number"
+                              value={editingService.price}
+                              onChange={(e) => setEditingService({...editingService, price: parseFloat(e.target.value) || 0})}
+                              className="bg-white border-[#E5E5E5]"
+                            />
+                          </div>
+                          <Button size="sm" onClick={handleUpdateService} className="bg-green-600 hover:bg-green-700 text-white">
+                            <Check className="w-4 h-4 mr-1" /> Sauvegarder
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => setEditingService(null)}>
-                            <XCircle className="w-4 h-4" />
+                          <Button size="sm" variant="outline" onClick={() => setEditingService(null)}>
+                            Annuler
                           </Button>
                         </div>
                       </div>
                     ) : (
-                      <>
-                        <div>
-                          <p className="font-medium text-[#1A1A1A]">{service.title}</p>
-                          {service.description && <p className="text-xs text-[#666666]">{service.description}</p>}
-                          <p className="text-sm text-[#CE0202] font-mono">{formatCurrency(service.price)}</p>
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <p className="font-bold text-[#1A1A1A]">{service.title}</p>
+                          {service.description && (
+                            <p className="text-sm text-[#666666] mt-1 whitespace-pre-wrap">{service.description}</p>
+                          )}
+                          <p className="text-lg text-[#CE0202] font-mono mt-2">{formatCurrency(service.price)}</p>
                         </div>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 flex-shrink-0">
                           <Button size="sm" variant="ghost" onClick={() => setEditingService(service)}>
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -1040,7 +1074,7 @@ const InvoicesPage = () => {
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
                 ))
