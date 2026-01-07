@@ -51,11 +51,14 @@ const DashboardLayout = () => {
     { path: "/admin/demandes", icon: Inbox, label: "Demandes" },
     { path: "/admin/contacts", icon: Users, label: "Contacts" },
     { path: "/admin/pipeline", icon: Kanban, label: "Pipeline" },
+    { path: "/admin/taches", icon: CheckSquare, label: "Tâches" },
     { path: "/admin/devis", icon: FileText, label: "Devis" },
     { path: "/admin/factures", icon: Receipt, label: "Factures" },
+    { path: "/admin/budget", icon: Wallet, label: "Budget" },
     { path: "/admin/abonnements", icon: CreditCard, label: "Abonnements" },
     { path: "/admin/realisations", icon: Image, label: "Réalisations" },
     { path: "/admin/documents", icon: FileCheck, label: "Documents" },
+    { path: "/admin/sauvegardes", icon: Database, label: "Sauvegardes" },
     { path: "/admin/parametres", icon: Settings, label: "Paramètres" }
   ];
 
