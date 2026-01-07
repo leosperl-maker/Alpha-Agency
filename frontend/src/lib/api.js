@@ -199,6 +199,33 @@ export const servicesAPI = {
   delete: (id) => api.delete(`/services/${id}`),
 };
 
+// Tasks API (Notion-style task manager)
+export const tasksAPI = {
+  getAll: (params) => api.get('/tasks', { params }),
+  getOne: (id) => api.get(`/tasks/${id}`),
+  create: (data) => api.post('/tasks', data),
+  update: (id, data) => api.put(`/tasks/${id}`, data),
+  delete: (id) => api.delete(`/tasks/${id}`),
+  getStats: () => api.get('/tasks/stats/summary'),
+};
+
+// Budget API
+export const budgetAPI = {
+  getAll: (params) => api.get('/budget', { params }),
+  create: (data) => api.post('/budget', data),
+  update: (id, data) => api.put(`/budget/${id}`, data),
+  delete: (id) => api.delete(`/budget/${id}`),
+  getSummary: (month) => api.get('/budget/summary', { params: { month } }),
+  getMonthlyChart: (year) => api.get('/budget/monthly-chart', { params: { year } }),
+};
+
+// Backup API
+export const backupAPI = {
+  triggerManual: () => api.post('/backup/manual'),
+  getStatus: () => api.get('/backup/status'),
+  getHistory: (limit) => api.get('/backup/history', { params: { limit } }),
+};
+
 // Admin Users API
 export const adminUsersAPI = {
   getAll: () => api.get('/admin/users'),
