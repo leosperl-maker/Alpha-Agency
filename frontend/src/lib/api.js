@@ -172,6 +172,15 @@ export const documentsAPI = {
   exportZip: (params) => api.post('/documents/export-zip', params),
 };
 
+// Services API (for invoicing)
+export const servicesAPI = {
+  getAll: () => api.get('/services'),
+  getOne: (id) => api.get(`/services/${id}`),
+  create: (data) => api.post('/services', data),
+  update: (id, data) => api.put(`/services/${id}`, data),
+  delete: (id) => api.delete(`/services/${id}`),
+};
+
 // Admin Users API
 export const adminUsersAPI = {
   getAll: () => api.get('/admin/users'),
