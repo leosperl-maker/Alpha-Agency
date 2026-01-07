@@ -14,7 +14,10 @@ import {
   ChevronRight,
   Image,
   Inbox,
-  FileCheck
+  FileCheck,
+  CheckSquare,
+  Wallet,
+  Database
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 
