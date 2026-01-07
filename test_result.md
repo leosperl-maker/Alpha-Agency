@@ -123,11 +123,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Statut retiré du PDF facture, ajout des notes, conditions et coordonnées bancaires à la place"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - PDF Facture sans statut fonctionne parfaitement. Génération PDF validée avec mise en page professionnelle, logo Alpha Agency, TVA 8.5% Guadeloupe, conditions de paiement et coordonnées bancaires incluses. Statut retiré du PDF comme demandé. Téléchargement avec authentification JWT opérationnel."
 
 frontend:
   - task: "Dashboard Vue d'ensemble connecté aux données réelles"
