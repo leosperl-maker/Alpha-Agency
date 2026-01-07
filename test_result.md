@@ -188,11 +188,14 @@ test_plan:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Routes CRUD créées pour /api/services - testées via curl avec succès"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - API Services CRUD fonctionne parfaitement. Tous les endpoints testés: POST /api/services (création), GET /api/services (liste), GET /api/services/{id} (détail), PUT /api/services/{id} (mise à jour), DELETE /api/services/{id} (suppression). Validation des données, calculs de prix, et persistance en base de données confirmés."
 
   - task: "PDF Facture professionnelle"
     implemented: true
@@ -200,11 +203,29 @@ test_plan:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Génération PDF améliorée avec logo, mise en page professionnelle, support devis/facture"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - Génération PDF fonctionne parfaitement. Tests réussis: 1) Factures PDF (2652+ bytes), 2) Devis PDF générés correctement, 3) TVA 8.5% Guadeloupe appliquée, 4) Mise en page professionnelle avec logo Alpha Agency, 5) Headers Content-Disposition corrects pour téléchargement."
+
+  - task: "API Factures complète (CRUD + statuts)"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Routes factures complètes avec CRUD, gestion statuts, PDF, support devis/facture"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - API Factures complète fonctionne parfaitement. Tests réussis: 1) POST /api/invoices (création avec items, document_type, conditions, bank_details), 2) GET /api/invoices (liste), 3) PUT /api/invoices/{id} (mise à jour complète - BUG CORRIGÉ), 4) PUT /api/invoices/{id}/status (statuts: brouillon, en_attente, envoyee, payee, en_retard, annulee), 5) DELETE /api/invoices/{id} (suppression), 6) GET /api/invoices/{id}/pdf (téléchargement PDF). Validation des statuts et calculs TVA 8.5% confirmés."
 
   - task: "Logo mobile responsive"
     implemented: true
