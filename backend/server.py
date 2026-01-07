@@ -1041,12 +1041,43 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     pending_quotes = await db.quotes.count_documents({"status": {"$in": ["brouillon", "envoyé"]}})
     accepted_quotes = await db.quotes.count_documents({"status": "accepté"})
     
-    # Invoices stats
-    pending_invoices = await db.invoices.count_documents({"status": "en_attente"})
+    # Invoices stats - updated for new status values
+    brouillon_invoices = await db.invoices.count_documents({"status": "brouillon"})
+    pending_invoices = await db.invoices.count_documents({"status": {"$in": ["en_attente", "envoyee"]}})
     overdue_invoices = await db.invoices.count_documents({"status": "en_retard"})
+    paid_invoices = await db.invoices.count_documents({"status": "payee"})
+    
+    # Invoices totals
+    total_invoiced = await db.invoices.aggregate([
+        {"$group": {"_id": None, "total": {"$sum": "$total"}}}
+    ]).to_list(1)
+    total_paid = await db.invoices.aggregate([
+        {"$match": {"status": "payee"}},
+        {"$group": {"_id": None, "total": {"$sum": "$total"}}}
+    ]).to_list(1)
     
     # KPIs from settings
     kpis = await db.settings.find_one({"type": "kpis"}, {"_id": 0})
+    
+    # Leads trend for the last 6 months (based on contacts created_at)
+    leads_trend = []
+    now = datetime.now(timezone.utc)
+    for i in range(5, -1, -1):
+        month_start = (now.replace(day=1) - timedelta(days=i*30)).replace(day=1)
+        month_end = (month_start + timedelta(days=32)).replace(day=1)
+        count = await db.contacts.count_documents({
+            "created_at": {"$gte": month_start.isoformat(), "$lt": month_end.isoformat()}
+        })
+        month_names = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"]
+        leads_trend.append({"name": month_names[month_start.month - 1], "leads": count})
+    
+    # Pipeline stages distribution
+    pipeline_stages = [
+        {"name": "Nouveau", "value": await db.opportunities.count_documents({"status": "nouveau"}), "color": "#3B82F6"},
+        {"name": "Qualifié", "value": await db.opportunities.count_documents({"status": "qualifié"}), "color": "#8B5CF6"},
+        {"name": "Devis", "value": await db.opportunities.count_documents({"status": "devis_envoyé"}), "color": "#F59E0B"},
+        {"name": "Gagné", "value": won_opportunities, "color": "#10B981"}
+    ]
     
     return {
         "contacts": {
@@ -1065,10 +1096,16 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
             "accepted": accepted_quotes
         },
         "invoices": {
+            "brouillon": brouillon_invoices,
             "pending": pending_invoices,
-            "overdue": overdue_invoices
+            "overdue": overdue_invoices,
+            "paid": paid_invoices,
+            "total_invoiced": total_invoiced[0]['total'] if total_invoiced else 0,
+            "total_paid": total_paid[0]['total'] if total_paid else 0
         },
-        "kpis": kpis.get("data", {}) if kpis else {"sessions": 0, "leads": 0, "conversion_rate": 0}
+        "kpis": kpis.get("data", {}) if kpis else {"sessions": 0, "leads": 0, "conversion_rate": 0},
+        "leads_trend": leads_trend,
+        "pipeline_stages": pipeline_stages
     }
 
 @api_router.put("/dashboard/kpis", response_model=dict)
