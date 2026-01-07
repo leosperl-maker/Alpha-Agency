@@ -69,15 +69,15 @@ const DashboardOverview = () => {
       subValue: `${stats?.contacts?.new_leads || 0} nouveaux`,
       icon: Users,
       color: "#CE0202",
-      trend: "up"
+      link: "/admin/contacts"
     },
     {
-      title: "Pipeline",
-      value: `${(stats?.opportunities?.pipeline_value || 0).toLocaleString()}€`,
-      subValue: `${stats?.opportunities?.total || 0} opportunités`,
-      icon: Target,
-      color: "#8B5CF6",
-      trend: "up"
+      title: "Tâches",
+      value: taskStats?.in_progress || 0,
+      subValue: `${taskStats?.todo || 0} à faire`,
+      icon: CheckSquare,
+      color: "#3B82F6",
+      link: "/admin/taches"
     },
     {
       title: "Factures",
@@ -85,15 +85,15 @@ const DashboardOverview = () => {
       subValue: `${stats?.invoices?.pending || 0} en attente`,
       icon: Receipt,
       color: "#F59E0B",
-      trend: "neutral"
+      link: "/admin/factures"
     },
     {
-      title: "CA Facturé",
-      value: `${(stats?.invoices?.total_paid || 0).toLocaleString()}€`,
-      subValue: `${(stats?.invoices?.total_invoiced || 0).toLocaleString()}€ total`,
-      icon: Euro,
-      color: "#10B981",
-      trend: "up"
+      title: "Budget",
+      value: `${((budgetSummary?.balance || 0) / 1000).toFixed(1)}k€`,
+      subValue: budgetSummary?.balance >= 0 ? "solde positif" : "solde négatif",
+      icon: Wallet,
+      color: budgetSummary?.balance >= 0 ? "#10B981" : "#EF4444",
+      link: "/admin/budget"
     }
   ];
 
