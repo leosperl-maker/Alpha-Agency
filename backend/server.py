@@ -761,14 +761,18 @@ async def get_invoice(invoice_id: str, current_user: dict = Depends(get_current_
         raise HTTPException(status_code=404, detail="Facture non trouvée")
     return invoice
 
+class StatusUpdate(BaseModel):
+    status: str
+
 @api_router.put("/invoices/{invoice_id}/status", response_model=dict)
-async def update_invoice_status(invoice_id: str, status: str, current_user: dict = Depends(get_current_user)):
-    valid_statuses = ["en_attente", "payée", "en_retard", "annulée"]
+async def update_invoice_status(invoice_id: str, status_update: StatusUpdate, current_user: dict = Depends(get_current_user)):
+    status = status_update.status
+    valid_statuses = ["brouillon", "en_attente", "envoyee", "payee", "en_retard", "annulee"]
     if status not in valid_statuses:
         raise HTTPException(status_code=400, detail=f"Statut invalide. Valeurs possibles: {valid_statuses}")
     
     update_data = {"status": status, "updated_at": datetime.now(timezone.utc).isoformat()}
-    if status == "payée":
+    if status == "payee":
         update_data["paid_at"] = datetime.now(timezone.utc).isoformat()
     
     result = await db.invoices.update_one({"id": invoice_id}, {"$set": update_data})
