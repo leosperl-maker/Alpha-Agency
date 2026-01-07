@@ -230,7 +230,15 @@ export const backupAPI = {
 export const adminUsersAPI = {
   getAll: () => api.get('/admin/users'),
   create: (data) => api.post('/auth/register', data),
+  update: (id, data) => api.put(`/admin/users/${id}`, data),
   delete: (id) => api.delete(`/admin/users/${id}`),
+};
+
+// Auth Password API
+export const authPasswordAPI = {
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (token, newPassword) => api.post('/auth/reset-password', { token, new_password: newPassword }),
+  changePassword: (currentPassword, newPassword) => api.put('/auth/change-password', { current_password: currentPassword, new_password: newPassword }),
 };
 
 // Payments API
