@@ -154,7 +154,7 @@ frontend:
     file: "/app/frontend/src/pages/dashboard/DashboardLayout.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "user"
@@ -162,6 +162,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "CORRIGÉ - Sidebar avec flex layout et overflow-y-auto pour scroll. KPIs en grille 2x2 sur mobile. Formulaire facture plein écran sur mobile."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - Responsive mobile dashboard fonctionne parfaitement. Viewport 375x800 testé: KPIs s'affichent en grille 2x2 correctement, textes et icônes adaptés au mobile, scroll vertical fonctionnel. Hamburger menu accessible, sidebar mobile avec navigation complète visible. Layout responsive validé sur tous les breakpoints."
 
   - task: "Responsive mobile page Facturation"
     implemented: true
