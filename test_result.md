@@ -321,6 +321,54 @@ test_plan:
         agent: "testing"
         comment: "✅ TESTÉ - Scroll to Top fonctionne parfaitement. Test 1: 2108px→0px, Test 2: 1044px→0px. Navigation depuis footer vers /realisations et /contact remonte bien en haut de page."
 
+  - task: "Page Tâches Alpha Agency"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/dashboard/TasksPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - Page Tâches fonctionne parfaitement. Tableau Kanban avec 3 colonnes (À faire, En cours, Terminé), 5 stats en haut (À faire, En cours, Terminées, En retard, Complétion), bouton 'Nouvelle tâche' fonctionnel avec dialog de création, changement de statut via menu d'actions disponible."
+
+  - task: "Page Budget Alpha Agency"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/dashboard/BudgetPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - Page Budget fonctionne parfaitement. 4 cartes (Revenus 5000€, Dépenses 150€, Solde 4850€, Transactions 2), 2 graphiques (Évolution mensuelle, Répartition des dépenses), ajout de revenus et dépenses fonctionnel avec dialog et mise à jour des totaux."
+
+  - task: "Page Sauvegardes Alpha Agency"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/dashboard/BackupPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - Page Sauvegardes fonctionne parfaitement. 4 cartes de statut (Système: Actif, Dropbox: Configuré, Email: Non configuré, Total backups: 1), configuration affichée (Fréquence: toutes les 6h, Destinataire: leo.sperli@alphagency.fr, Rétention: 30 jours), dernier backup affiché avec détails, historique des sauvegardes avec tableau."
+
+  - task: "Dashboard Vue d'ensemble Alpha Agency"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/dashboard/DashboardOverview.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - Dashboard Vue d'ensemble fonctionne parfaitement. 4 KPI Cards (Contacts, Tâches, Factures, Budget) cliquables et redirigent vers les bonnes pages, section 'Tâches récentes' présente, section 'Progression' avec pourcentage de complétion, graphiques d'évolution des leads et répartition pipeline."
+
 agent_communication:
   - agent: "main"
     message: "Session de fork - Corrections majeures: 1) Favicon ajouté, 2) Onglet KPIs manuels supprimé, 3) Thème clair appliqué sur TOUTES les pages du dashboard, 4) Réalisations migrées vers la BDD (8 items), 5) Image hero restaurée, 6) Génération PDF fonctionnelle."
@@ -334,3 +382,5 @@ agent_communication:
     message: "✅ TESTS FACTURATION VALIDÉS - Outil de facturation Alpha Agency fonctionne parfaitement. 41/41 tests réussis (100%). API Services CRUD complète, API Factures avec tous les statuts (brouillon→payee), génération PDF professionnelle (factures + devis), TVA 8.5% Guadeloupe, validation des statuts. BUG CORRIGÉ: invoice update endpoint (AttributeError model_dump). Authentification admin confirmée (admin@alphagency.fr / superpassword). Tous les endpoints requis opérationnels."
   - agent: "testing"
     message: "✅ TESTS PDF TÉLÉCHARGEMENT VALIDÉS - Téléchargement PDF factures/devis avec authentification JWT fonctionne parfaitement. Tests réussis: 1) Authentification admin@alphagency.fr/superpassword ✓, 2) GET /api/invoices/{id}/pdf AVEC token → PDF 2527 bytes, Content-Type: application/pdf ✓, 3) GET /api/invoices/{id}/pdf SANS token → 401 'Non authentifié' ✓, 4) Token invalide → 401 'Token invalide' ✓, 5) Invoice inexistante → 404 'Facture non trouvée' ✓. Frontend api.js utilise correctement axios avec JWT via interceptor. Fonction downloadPDF implémentée avec responseType: 'blob' et création de lien de téléchargement."
+  - agent: "testing"
+    message: "✅ TESTS ALPHA AGENCY NOUVELLES FONCTIONNALITÉS VALIDÉS - Toutes les nouvelles fonctionnalités Alpha Agency testées avec succès. Login admin@alphagency.fr/superpassword ✓, Page Tâches avec Kanban 3 colonnes et 5 stats ✓, Page Budget avec 4 cartes et 2 graphiques ✓, Page Sauvegardes avec 4 statuts et configuration ✓, Dashboard avec 4 KPIs cliquables ✓, Navigation sidebar avec Tâches/Budget/Sauvegardes ✓, Thème cohérent rouge #CE0202 ✓. Toutes les fonctionnalités demandées sont opérationnelles."
