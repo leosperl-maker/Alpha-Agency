@@ -2283,6 +2283,53 @@ async def delete_admin_user(user_id: str, current_user: dict = Depends(get_curre
     
     return {"message": "Utilisateur supprimé"}
 
+# ==================== BACKUP ROUTES ====================
+
+@api_router.post("/backup/manual", response_model=dict)
+async def trigger_manual_backup(current_user: dict = Depends(get_current_user)):
+    """Trigger a manual backup"""
+    global backup_manager
+    if current_user.get('role') != 'super_admin':
+        raise HTTPException(status_code=403, detail="Seul le super admin peut déclencher un backup")
+    
+    if not backup_manager:
+        raise HTTPException(status_code=500, detail="Backup system not initialized")
+    
+    try:
+        result = await backup_manager.create_backup(manual=True)
+        return {"message": "Backup terminé", "backup": result}
+    except Exception as e:
+        logger.error(f"Manual backup failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/backup/status", response_model=dict)
+async def get_backup_status(current_user: dict = Depends(get_current_user)):
+    """Get backup system status"""
+    global backup_manager
+    if not backup_manager:
+        raise HTTPException(status_code=500, detail="Backup system not initialized")
+    
+    try:
+        status = await backup_manager.get_backup_status()
+        status["scheduler"] = backup_scheduler.get_status()
+        return status
+    except Exception as e:
+        logger.error(f"Failed to get backup status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/backup/history", response_model=list)
+async def get_backup_history(limit: int = 20, current_user: dict = Depends(get_current_user)):
+    """Get backup history"""
+    global backup_manager
+    if not backup_manager:
+        raise HTTPException(status_code=500, detail="Backup system not initialized")
+    
+    try:
+        return await backup_manager.get_backup_history(limit)
+    except Exception as e:
+        logger.error(f"Failed to get backup history: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ==================== MAIN APP CONFIG ====================
 
 app.include_router(api_router)
@@ -2312,37 +2359,3 @@ async def shutdown_db_client():
     backup_scheduler.stop()
     client.close()
 
-# ==================== BACKUP ROUTES ====================
-
-@api_router.post("/backup/manual", response_model=dict)
-async def trigger_manual_backup(current_user: dict = Depends(get_current_user)):
-    """Trigger a manual backup"""
-    if current_user.get('role') != 'super_admin':
-        raise HTTPException(status_code=403, detail="Seul le super admin peut déclencher un backup")
-    
-    try:
-        result = await backup_manager.create_backup(manual=True)
-        return {"message": "Backup terminé", "backup": result}
-    except Exception as e:
-        logger.error(f"Manual backup failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/backup/status", response_model=dict)
-async def get_backup_status(current_user: dict = Depends(get_current_user)):
-    """Get backup system status"""
-    try:
-        status = await backup_manager.get_backup_status()
-        status["scheduler"] = backup_scheduler.get_status()
-        return status
-    except Exception as e:
-        logger.error(f"Failed to get backup status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/backup/history", response_model=list)
-async def get_backup_history(limit: int = 20, current_user: dict = Depends(get_current_user)):
-    """Get backup history"""
-    try:
-        return await backup_manager.get_backup_history(limit)
-    except Exception as e:
-        logger.error(f"Failed to get backup history: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
