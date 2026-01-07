@@ -795,20 +795,20 @@ const InvoicesPage = () => {
 
       {/* Create/Edit Sheet with Preview */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-[1400px] p-0 bg-[#F8F8F8]">
+        <SheetContent side="right" className="w-full sm:max-w-[1400px] p-0 bg-[#F8F8F8] overflow-hidden">
           <div className="flex h-full">
-            {/* Form Side - 50% */}
-            <div className="w-1/2 p-6 overflow-y-auto bg-white border-r border-[#E5E5E5]">
-              <SheetHeader className="mb-6">
+            {/* Form Side - Full width on mobile, 50% on desktop */}
+            <div className="w-full lg:w-1/2 p-4 sm:p-6 overflow-y-auto bg-white border-r border-[#E5E5E5]">
+              <SheetHeader className="mb-4 sm:mb-6">
                 <SheetTitle className="text-[#1A1A1A] flex items-center gap-2">
                   {documentType === 'devis' ? <FileText className="w-5 h-5" /> : <Receipt className="w-5 h-5" />}
                   {editingInvoice ? `Modifier ${documentType === 'devis' ? 'le devis' : 'la facture'}` : `Nouvelle ${documentType === 'devis' ? 'devis' : 'facture'}`}
                 </SheetTitle>
               </SheetHeader>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* Client & Dates */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-[#1A1A1A]">Client *</Label>
                     <Select
