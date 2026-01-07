@@ -202,18 +202,18 @@ const DashboardOverview = () => {
           >
             <Link to={kpi.link}>
               <Card className="bg-white border border-[#E5E5E5] shadow-sm hover:shadow-md transition-all cursor-pointer h-full">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <p className="text-[#666666] text-sm mb-1">{kpi.title}</p>
-                      <p className="text-2xl font-bold text-[#1A1A1A] font-mono">{kpi.value}</p>
-                      <p className="text-xs text-[#666666] mt-1">{kpi.subValue}</p>
+                <CardContent className="p-3 sm:p-5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[#666666] text-xs sm:text-sm mb-1 truncate">{kpi.title}</p>
+                      <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A] font-mono">{kpi.value}</p>
+                      <p className="text-[10px] sm:text-xs text-[#666666] mt-1 truncate">{kpi.subValue}</p>
                     </div>
                     <div 
-                      className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: `${kpi.color}15` }}
                     >
-                      <kpi.icon className="w-5 h-5" style={{ color: kpi.color }} />
+                      <kpi.icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: kpi.color }} />
                     </div>
                   </div>
                 </CardContent>
@@ -234,18 +234,18 @@ const DashboardOverview = () => {
           >
             <Link to={kpi.link}>
               <Card className="bg-white border border-[#E5E5E5] shadow-sm hover:shadow-md transition-all cursor-pointer h-full">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <p className="text-[#666666] text-sm mb-1">{kpi.title}</p>
-                      <p className="text-2xl font-bold text-[#1A1A1A] font-mono">{kpi.value}</p>
-                      <p className="text-xs text-[#666666] mt-1">{kpi.subValue}</p>
+                <CardContent className="p-3 sm:p-5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[#666666] text-xs sm:text-sm mb-1 truncate">{kpi.title}</p>
+                      <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A] font-mono">{kpi.value}</p>
+                      <p className="text-[10px] sm:text-xs text-[#666666] mt-1 truncate">{kpi.subValue}</p>
                     </div>
                     <div 
-                      className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: `${kpi.color}15` }}
                     >
-                      <kpi.icon className="w-5 h-5" style={{ color: kpi.color }} />
+                      <kpi.icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: kpi.color }} />
                     </div>
                   </div>
                 </CardContent>
