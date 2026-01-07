@@ -1632,6 +1632,285 @@ async def export_documents_zip(
         "note": "Utilisez GET /api/documents/{id}/pdf pour télécharger chaque document"
     }
 
+# ==================== SAVED SERVICES ROUTES ====================
+
+class ServiceCreate(BaseModel):
+    title: str
+    description: Optional[str] = ""
+    price: float
+
+class ServiceUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+
+@api_router.post("/services", response_model=dict)
+async def create_service(service: ServiceCreate, current_user: dict = Depends(get_current_user)):
+    """Create a saved service for invoicing"""
+    service_id = str(uuid.uuid4())
+    service_doc = {
+        "id": service_id,
+        "title": service.title,
+        "description": service.description or "",
+        "price": service.price,
+        "created_by": current_user['user_id'],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.services.insert_one(service_doc)
+    return {"id": service_id, "message": "Service créé avec succès"}
+
+@api_router.get("/services", response_model=List[dict])
+async def get_services(current_user: dict = Depends(get_current_user)):
+    """Get all saved services"""
+    services = await db.services.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return services
+
+@api_router.get("/services/{service_id}", response_model=dict)
+async def get_service(service_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a single service"""
+    service = await db.services.find_one({"id": service_id}, {"_id": 0})
+    if not service:
+        raise HTTPException(status_code=404, detail="Service non trouvé")
+    return service
+
+@api_router.put("/services/{service_id}", response_model=dict)
+async def update_service(service_id: str, service_update: ServiceUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a service"""
+    existing = await db.services.find_one({"id": service_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Service non trouvé")
+    
+    update_data = {k: v for k, v in service_update.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.services.update_one({"id": service_id}, {"$set": update_data})
+    return {"message": "Service mis à jour"}
+
+@api_router.delete("/services/{service_id}", response_model=dict)
+async def delete_service(service_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a service"""
+    result = await db.services.delete_one({"id": service_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Service non trouvé")
+    return {"message": "Service supprimé"}
+
+# ==================== ENHANCED INVOICE PDF ====================
+
+def generate_professional_invoice_pdf(invoice: dict, contact: dict) -> BytesIO:
+    """Generate a professional invoice PDF with logo and better formatting"""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=1.5*cm, bottomMargin=1.5*cm)
+    styles = getSampleStyleSheet()
+    elements = []
+    
+    # Custom styles
+    header_style = ParagraphStyle('Header', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#666666'))
+    title_style = ParagraphStyle('InvoiceTitle', parent=styles['Heading1'], fontSize=28, textColor=colors.HexColor('#CE0202'), alignment=TA_RIGHT)
+    section_title = ParagraphStyle('SectionTitle', parent=styles['Heading3'], fontSize=11, textColor=colors.HexColor('#1A1A1A'), spaceBefore=12, spaceAfter=6)
+    normal_style = ParagraphStyle('Normal', parent=styles['Normal'], fontSize=10, textColor=colors.HexColor('#333333'))
+    small_style = ParagraphStyle('Small', parent=styles['Normal'], fontSize=8, textColor=colors.HexColor('#666666'))
+    
+    # Document type
+    doc_type = invoice.get('document_type', 'facture')
+    doc_label = 'DEVIS' if doc_type == 'devis' else 'FACTURE'
+    
+    # Header with logo and company info
+    header_data = [
+        [
+            Paragraph(f"<b>{COMPANY_INFO['commercial_name']}</b><br/>{COMPANY_INFO['address']}<br/>Tél: {COMPANY_INFO['phone']}<br/>Email: {COMPANY_INFO['email']}", header_style),
+            Paragraph(f"<font size='28' color='#CE0202'><b>{doc_label}</b></font><br/><font size='12'>{invoice['invoice_number']}</font>", ParagraphStyle('Right', parent=styles['Normal'], alignment=TA_RIGHT))
+        ]
+    ]
+    header_table = Table(header_data, colWidths=[10*cm, 7*cm])
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
+    ]))
+    elements.append(header_table)
+    elements.append(Spacer(1, 0.8*cm))
+    
+    # Dates row
+    created_date = invoice.get('created_at', '')[:10] if invoice.get('created_at') else datetime.now().strftime('%Y-%m-%d')
+    due_date = invoice.get('due_date', '')
+    
+    date_data = [
+        [
+            Paragraph(f"<b>Date d'émission:</b> {created_date}", normal_style),
+            Paragraph(f"<b>Échéance:</b> {due_date if due_date else 'Non spécifiée'}", normal_style)
+        ]
+    ]
+    date_table = Table(date_data, colWidths=[8.5*cm, 8.5*cm])
+    date_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F8F8F8')),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+    ]))
+    elements.append(date_table)
+    elements.append(Spacer(1, 0.6*cm))
+    
+    # Client info box
+    client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip() or "Client"
+    client_company = contact.get('company', '')
+    client_email = contact.get('email', '')
+    client_phone = contact.get('phone', '')
+    
+    client_text = f"<b>{client_name}</b>"
+    if client_company:
+        client_text += f"<br/>{client_company}"
+    if client_email:
+        client_text += f"<br/>{client_email}"
+    if client_phone:
+        client_text += f"<br/>Tél: {client_phone}"
+    
+    client_data = [
+        [Paragraph("<b>FACTURER À:</b>", ParagraphStyle('Label', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#666666')))],
+        [Paragraph(client_text, normal_style)]
+    ]
+    client_table = Table(client_data, colWidths=[8*cm])
+    client_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F8F8F8')),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+    ]))
+    elements.append(client_table)
+    elements.append(Spacer(1, 0.8*cm))
+    
+    # Items table
+    items = invoice.get('items', [])
+    table_data = [
+        [
+            Paragraph('<b>DESCRIPTION</b>', ParagraphStyle('TableHeader', fontSize=9, textColor=colors.white)),
+            Paragraph('<b>QTÉ</b>', ParagraphStyle('TableHeader', fontSize=9, textColor=colors.white, alignment=TA_CENTER)),
+            Paragraph('<b>PRIX UNIT. HT</b>', ParagraphStyle('TableHeader', fontSize=9, textColor=colors.white, alignment=TA_RIGHT)),
+            Paragraph('<b>TOTAL HT</b>', ParagraphStyle('TableHeader', fontSize=9, textColor=colors.white, alignment=TA_RIGHT))
+        ]
+    ]
+    
+    subtotal = 0
+    for item in items:
+        qty = item.get('quantity', 1)
+        unit_price = item.get('unit_price', 0)
+        total = qty * unit_price
+        subtotal += total
+        
+        # Handle multi-line descriptions
+        desc = item.get('description', '').replace('\n', '<br/>')
+        
+        table_data.append([
+            Paragraph(desc, ParagraphStyle('ItemDesc', fontSize=9)),
+            Paragraph(str(qty), ParagraphStyle('ItemQty', fontSize=9, alignment=TA_CENTER)),
+            Paragraph(f"{unit_price:.2f} €", ParagraphStyle('ItemPrice', fontSize=9, alignment=TA_RIGHT)),
+            Paragraph(f"{total:.2f} €", ParagraphStyle('ItemTotal', fontSize=9, alignment=TA_RIGHT, fontName='Helvetica-Bold'))
+        ])
+    
+    tva = subtotal * 0.085
+    total_ttc = subtotal + tva
+    
+    items_table = Table(table_data, colWidths=[9*cm, 2*cm, 3*cm, 3*cm])
+    items_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1A1A1A')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
+        ('ALIGN', (2, 1), (-1, -1), 'RIGHT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('TOPPADDING', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+        ('GRID', (0, 1), (-1, -1), 0.5, colors.HexColor('#E5E5E5')),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#FAFAFA')]),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ]))
+    elements.append(items_table)
+    elements.append(Spacer(1, 0.3*cm))
+    
+    # Totals
+    totals_data = [
+        ['', '', 'Sous-total HT:', f"{subtotal:.2f} €"],
+        ['', '', 'TVA (8.5%):', f"{tva:.2f} €"],
+        ['', '', 'TOTAL TTC:', f"{total_ttc:.2f} €"]
+    ]
+    
+    totals_table = Table(totals_data, colWidths=[9*cm, 2*cm, 3*cm, 3*cm])
+    totals_table.setStyle(TableStyle([
+        ('ALIGN', (2, 0), (-1, -1), 'RIGHT'),
+        ('FONTNAME', (2, 0), (2, -1), 'Helvetica'),
+        ('FONTNAME', (3, 0), (3, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TEXTCOLOR', (2, 2), (2, 2), colors.HexColor('#CE0202')),
+        ('TEXTCOLOR', (3, 2), (3, 2), colors.HexColor('#CE0202')),
+        ('FONTSIZE', (2, 2), (3, 2), 12),
+        ('LINEABOVE', (2, 2), (3, 2), 2, colors.HexColor('#CE0202')),
+    ]))
+    elements.append(totals_table)
+    elements.append(Spacer(1, 0.8*cm))
+    
+    # Notes
+    notes = invoice.get('notes', '')
+    if notes:
+        elements.append(Paragraph("<b>Notes:</b>", section_title))
+        elements.append(Paragraph(notes, normal_style))
+        elements.append(Spacer(1, 0.4*cm))
+    
+    # Payment conditions and bank details
+    conditions = invoice.get('conditions', '')
+    bank_details = invoice.get('bank_details', '')
+    
+    footer_data = []
+    if conditions:
+        footer_data.append([Paragraph("<b>Conditions de paiement:</b><br/>" + conditions.replace('\n', '<br/>'), small_style)])
+    if bank_details:
+        footer_data.append([Paragraph("<b>Coordonnées bancaires:</b><br/><font face='Courier'>" + bank_details.replace('\n', '<br/>') + "</font>", small_style)])
+    
+    if footer_data:
+        elements.append(Spacer(1, 0.3*cm))
+        footer_table = Table(footer_data, colWidths=[17*cm])
+        footer_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F8F8F8')),
+            ('TOPPADDING', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+            ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ]))
+        elements.append(footer_table)
+    
+    # Legal footer
+    elements.append(Spacer(1, 1*cm))
+    legal_style = ParagraphStyle('Legal', parent=styles['Normal'], fontSize=7, textColor=colors.HexColor('#999999'), alignment=TA_CENTER)
+    elements.append(Paragraph(f"{COMPANY_INFO['commercial_name']} - {COMPANY_INFO.get('legal_form', 'SASU')} - SIRET: {COMPANY_INFO.get('siret', 'À compléter')}", legal_style))
+    elements.append(Paragraph(f"Document généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')}", legal_style))
+    
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
+
+# Override invoice PDF endpoint with professional version
+@api_router.get("/invoices/{invoice_id}/pdf")
+async def download_professional_invoice_pdf(invoice_id: str, current_user: dict = Depends(get_current_user)):
+    invoice = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+    
+    contact = await db.contacts.find_one({"id": invoice['contact_id']}, {"_id": 0})
+    if not contact:
+        contact = {"first_name": "", "last_name": "", "email": "", "company": ""}
+    
+    pdf_buffer = generate_professional_invoice_pdf(invoice, contact)
+    doc_type = invoice.get('document_type', 'facture')
+    prefix = 'devis' if doc_type == 'devis' else 'facture'
+    
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={prefix}_{invoice['invoice_number']}.pdf"}
+    )
+
 # ==================== ADMIN USERS MANAGEMENT ====================
 
 @api_router.get("/admin/users", response_model=List[dict])
