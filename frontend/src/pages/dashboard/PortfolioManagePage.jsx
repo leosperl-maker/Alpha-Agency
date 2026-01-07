@@ -492,6 +492,64 @@ const PortfolioManagePage = () => {
                 )}
               </div>
 
+              {/* Audio File - Optional */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-[#1A1A1A] flex items-center gap-2">
+                    <Volume2 className="w-4 h-4" />
+                    Fichier audio (optionnel)
+                  </Label>
+                  {!formData.audio_url && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => audioInputRef.current?.click()}
+                      disabled={uploading}
+                      className="text-[#CE0202] hover:text-[#B00202]"
+                    >
+                      {uploading ? (
+                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                      ) : (
+                        <Music className="w-4 h-4 mr-1" />
+                      )}
+                      Ajouter audio
+                    </Button>
+                  )}
+                </div>
+                <input
+                  ref={audioInputRef}
+                  type="file"
+                  accept="audio/*"
+                  onChange={handleAudioUpload}
+                  className="hidden"
+                />
+                {formData.audio_url ? (
+                  <div className="flex items-center gap-3 p-3 bg-[#F8F8F8] rounded-lg">
+                    <div className="w-10 h-10 bg-[#CE0202]/10 rounded-full flex items-center justify-center">
+                      <Volume2 className="w-5 h-5 text-[#CE0202]" />
+                    </div>
+                    <div className="flex-1">
+                      <audio controls className="w-full h-8">
+                        <source src={formData.audio_url} type="audio/mpeg" />
+                        Votre navigateur ne supporte pas l'audio.
+                      </audio>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeAudio}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-full"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-[#666666]">
+                    Ajoutez un fichier audio pour les réalisations radio/podcasts (MP3, WAV, OGG)
+                  </p>
+                )}
+              </div>
+
               {/* Link */}
               <div className="space-y-2">
                 <Label className="text-[#1A1A1A]">Lien vers le projet</Label>
