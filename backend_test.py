@@ -291,16 +291,240 @@ class AlphaAgencyAPITester:
         success, response = self.make_request('GET', 'documents')
         self.log_result("Get Documents", success, f"Found {len(response)} documents" if success else str(response))
 
-    def test_settings_endpoints(self):
-        """Test settings endpoints"""
-        print("\n⚙️ Testing Settings...")
+    def test_services_crud(self):
+        """Test services CRUD operations (Alpha Agency billing tool)"""
+        print("\n🛠️ Testing Services Management (Billing Tool)...")
         
-        success, response = self.make_request('GET', 'settings')
-        if success:
-            company_name = response.get('company', {}).get('commercial_name', 'N/A')
-            self.log_result("Get Settings", True, f"Company: {company_name}")
+        # Create service
+        service_data = {
+            "title": "Site web vitrine responsive",
+            "description": "Création d'un site web vitrine moderne et responsive avec CMS",
+            "price": 1200.0
+        }
+        
+        success, response = self.make_request('POST', 'services', service_data, 200)
+        if success and 'id' in response:
+            self.service_id = response['id']
+            self.log_result("Create Service", True, f"Service ID: {self.service_id}")
         else:
-            self.log_result("Get Settings", False, str(response))
+            self.log_result("Create Service", False, str(response))
+            return
+        
+        # Get all services
+        success, response = self.make_request('GET', 'services')
+        self.log_result("Get Services", success, f"Found {len(response)} services" if success else str(response))
+        
+        # Get specific service
+        success, response = self.make_request('GET', f'services/{self.service_id}')
+        self.log_result("Get Service by ID", success, f"Service: {response.get('title', 'N/A')} - {response.get('price', 0)}€" if success else str(response))
+        
+        # Update service
+        update_data = {
+            "title": "Site web vitrine responsive (Mise à jour)",
+            "description": "Création d'un site web vitrine moderne et responsive avec CMS - Version mise à jour",
+            "price": 1350.0
+        }
+        success, response = self.make_request('PUT', f'services/{self.service_id}', update_data)
+        self.log_result("Update Service", success, response.get('message', str(response)) if success else str(response))
+        
+        # Verify update
+        success, response = self.make_request('GET', f'services/{self.service_id}')
+        if success and response.get('price') == 1350.0:
+            self.log_result("Verify Service Update", True, f"Price updated to {response.get('price')}€")
+        else:
+            self.log_result("Verify Service Update", False, f"Price not updated correctly: {response}")
+
+    def test_invoices_crud(self):
+        """Test invoices CRUD operations (Alpha Agency billing tool)"""
+        print("\n🧾 Testing Invoices Management (Billing Tool)...")
+        
+        if not self.contact_id:
+            self.log_result("Create Invoice", False, "No contact_id available")
+            return
+        
+        # Create invoice with items, document_type, conditions, bank_details
+        invoice_data = {
+            "contact_id": self.contact_id,
+            "document_type": "facture",
+            "items": [
+                {
+                    "description": "Site web vitrine responsive",
+                    "quantity": 1,
+                    "unit_price": 1200.0
+                },
+                {
+                    "description": "Community Management (1 mois)",
+                    "quantity": 1,
+                    "unit_price": 450.0
+                }
+            ],
+            "conditions": "Paiement à 30 jours. Pénalités de retard applicables selon la loi.",
+            "bank_details": "IBAN: FR76 1234 5678 9012 3456 789A - BIC: TESTFRPP",
+            "notes": "Facture pour services Alpha Agency"
+        }
+        
+        success, response = self.make_request('POST', 'invoices', invoice_data, 200)
+        if success and 'id' in response:
+            self.invoice_id = response['id']
+            invoice_number = response.get('invoice_number', 'N/A')
+            self.log_result("Create Invoice", True, f"Invoice ID: {self.invoice_id}, Number: {invoice_number}")
+        else:
+            self.log_result("Create Invoice", False, str(response))
+            return
+        
+        # Get all invoices
+        success, response = self.make_request('GET', 'invoices')
+        self.log_result("Get Invoices", success, f"Found {len(response)} invoices" if success else str(response))
+        
+        # Get specific invoice
+        success, response = self.make_request('GET', f'invoices/{self.invoice_id}')
+        if success:
+            total = response.get('total', 0)
+            status = response.get('status', 'unknown')
+            self.log_result("Get Invoice by ID", True, f"Invoice total: {total}€, Status: {status}")
+        else:
+            self.log_result("Get Invoice by ID", False, str(response))
+        
+        # Update invoice status to "payee"
+        status_data = {"status": "payee"}
+        success, response = self.make_request('PUT', f'invoices/{self.invoice_id}/status', status_data)
+        self.log_result("Update Invoice Status", success, response.get('message', str(response)) if success else str(response))
+        
+        # Verify status update
+        success, response = self.make_request('GET', f'invoices/{self.invoice_id}')
+        if success and response.get('status') == 'payee':
+            self.log_result("Verify Status Update", True, f"Status updated to: {response.get('status')}")
+        else:
+            self.log_result("Verify Status Update", False, f"Status not updated correctly: {response}")
+        
+        # Update complete invoice
+        update_data = {
+            "items": [
+                {
+                    "description": "Site web vitrine responsive (Mise à jour)",
+                    "quantity": 1,
+                    "unit_price": 1350.0
+                },
+                {
+                    "description": "Community Management (2 mois)",
+                    "quantity": 2,
+                    "unit_price": 450.0
+                }
+            ],
+            "conditions": "Paiement à 30 jours. Conditions mises à jour.",
+            "notes": "Facture mise à jour avec nouveaux éléments"
+        }
+        success, response = self.make_request('PUT', f'invoices/{self.invoice_id}', update_data)
+        self.log_result("Update Complete Invoice", success, response.get('message', str(response)) if success else str(response))
+
+    def test_invoice_pdf_generation(self):
+        """Test invoice PDF generation"""
+        print("\n📄 Testing Invoice PDF Generation...")
+        
+        if not self.invoice_id:
+            self.log_result("Download Invoice PDF", False, "No invoice_id available")
+            return
+        
+        # Test PDF download endpoint
+        url = f"{self.base_url}/api/invoices/{self.invoice_id}/pdf"
+        headers = {'Authorization': f'Bearer {self.token}'}
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=15)
+            if response.status_code == 200:
+                content_type = response.headers.get('content-type', '')
+                content_length = len(response.content)
+                if 'application/pdf' in content_type and content_length > 1000:
+                    self.log_result("Download Invoice PDF", True, f"PDF generated successfully ({content_length} bytes)")
+                else:
+                    self.log_result("Download Invoice PDF", False, f"Invalid PDF response: {content_type}, {content_length} bytes")
+            else:
+                self.log_result("Download Invoice PDF", False, f"HTTP {response.status_code}: {response.text}")
+        except Exception as e:
+            self.log_result("Download Invoice PDF", False, f"Request failed: {str(e)}")
+
+    def test_invoice_devis_creation(self):
+        """Test creating a devis (quote) type invoice"""
+        print("\n📋 Testing Devis Creation...")
+        
+        if not self.contact_id:
+            self.log_result("Create Devis", False, "No contact_id available")
+            return
+        
+        # Create devis
+        devis_data = {
+            "contact_id": self.contact_id,
+            "document_type": "devis",
+            "items": [
+                {
+                    "description": "Pack Community Management",
+                    "quantity": 3,
+                    "unit_price": 450.0
+                }
+            ],
+            "conditions": "Devis valable 30 jours. TVA 8.5% (Guadeloupe).",
+            "notes": "Devis pour pack community management"
+        }
+        
+        success, response = self.make_request('POST', 'invoices', devis_data, 200)
+        if success and 'id' in response:
+            devis_id = response['id']
+            self.log_result("Create Devis", True, f"Devis ID: {devis_id}")
+            
+            # Test devis PDF generation
+            url = f"{self.base_url}/api/invoices/{devis_id}/pdf"
+            headers = {'Authorization': f'Bearer {self.token}'}
+            
+            try:
+                response = requests.get(url, headers=headers, timeout=15)
+                if response.status_code == 200 and 'application/pdf' in response.headers.get('content-type', ''):
+                    self.log_result("Download Devis PDF", True, f"Devis PDF generated successfully")
+                else:
+                    self.log_result("Download Devis PDF", False, f"PDF generation failed: {response.status_code}")
+            except Exception as e:
+                self.log_result("Download Devis PDF", False, f"Request failed: {str(e)}")
+        else:
+            self.log_result("Create Devis", False, str(response))
+
+    def test_invoice_status_validation(self):
+        """Test invoice status validation"""
+        print("\n✅ Testing Invoice Status Validation...")
+        
+        if not self.invoice_id:
+            self.log_result("Test Invalid Status", False, "No invoice_id available")
+            return
+        
+        # Test valid statuses
+        valid_statuses = ["brouillon", "en_attente", "envoyee", "payee", "en_retard", "annulee"]
+        
+        for status in ["brouillon", "en_attente", "envoyee"]:
+            status_data = {"status": status}
+            success, response = self.make_request('PUT', f'invoices/{self.invoice_id}/status', status_data)
+            self.log_result(f"Set Status to '{status}'", success, response.get('message', str(response)) if success else str(response))
+        
+        # Test invalid status
+        invalid_status_data = {"status": "invalid_status"}
+        success, response = self.make_request('PUT', f'invoices/{self.invoice_id}/status', invalid_status_data, 400)
+        self.log_result("Test Invalid Status", success, "Correctly rejected invalid status" if success else f"Should have rejected invalid status: {response}")
+
+    def cleanup_test_data(self):
+        """Clean up test data"""
+        print("\n🧹 Cleaning up test data...")
+        
+        # Delete test service
+        if self.service_id:
+            success, response = self.make_request('DELETE', f'services/{self.service_id}')
+            self.log_result("Delete Test Service", success, response.get('message', str(response)) if success else str(response))
+        
+        # Delete test invoice
+        if self.invoice_id:
+            success, response = self.make_request('DELETE', f'invoices/{self.invoice_id}')
+            self.log_result("Delete Test Invoice", success, response.get('message', str(response)) if success else str(response))
+        
+        # Delete test contact (this will cascade to opportunities)
+        if self.contact_id:
+            success, response = self.make_request('DELETE', f'contacts/{self.contact_id}')
+            self.log_result("Delete Test Contact", success, response.get('message', str(response)) if success else str(response))
 
     def run_all_tests(self):
         """Run all tests"""
