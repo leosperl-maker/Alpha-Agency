@@ -131,6 +131,21 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ TESTÉ - PDF Facture sans statut fonctionne parfaitement. Génération PDF validée avec mise en page professionnelle, logo Alpha Agency, TVA 8.5% Guadeloupe, conditions de paiement et coordonnées bancaires incluses. Statut retiré du PDF comme demandé. Téléchargement avec authentification JWT opérationnel."
+      - working: true
+        agent: "testing"
+        comment: "✅ RE-TESTÉ - PDF téléchargement facture/devis Alpha Agency avec nouveau design professionnel VALIDÉ. Tests réussis: 1) Login admin@alphagency.fr/superpassword ✓, 2) GET /api/invoices/{id}/pdf → PDF 290KB avec logo Cloudinary ✓, 3) GET /api/quotes/{id}/pdf → PDF 290KB généré ✓, 4) Content-Type: application/pdf ✓, 5) Authentification JWT requise ✓, 6) Gestion erreurs 401/404 ✓. PDF contient: logo Alpha Agency, infos légales (SIRET: 91255383100013, TVA: FR47912553831), colonnes tableau (Description, Qté, PU HT, TVA, Total HT), SANS statut affiché."
+
+  - task: "PDF Devis téléchargement professionnel"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - PDF téléchargement devis Alpha Agency avec design professionnel VALIDÉ. GET /api/quotes/{id}/pdf génère PDF 290KB avec logo Cloudinary, mise en page professionnelle, TVA 8.5% Guadeloupe, conditions de validité. Content-Type: application/pdf, Content-Disposition: attachment; filename=devis_DEV-2026-0007.pdf. Authentification JWT requise, gestion erreurs 401/404 opérationnelle."
 
 frontend:
   - task: "Dashboard Vue d'ensemble connecté aux données réelles"
