@@ -17,7 +17,8 @@ import {
   FileCheck,
   CheckSquare,
   Wallet,
-  Database
+  Database,
+  UserCog
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 
@@ -46,7 +47,8 @@ const DashboardLayout = () => {
     navigate("/admin/login");
   };
 
-  const navItems = [
+  // Navigation items - some restricted to super_admin
+  const baseNavItems = [
     { path: "/admin", icon: LayoutDashboard, label: "Vue d'ensemble", end: true },
     { path: "/admin/demandes", icon: Inbox, label: "Demandes" },
     { path: "/admin/contacts", icon: Users, label: "Contacts" },
@@ -59,8 +61,12 @@ const DashboardLayout = () => {
     { path: "/admin/realisations", icon: Image, label: "Réalisations" },
     { path: "/admin/documents", icon: FileCheck, label: "Documents" },
     { path: "/admin/sauvegardes", icon: Database, label: "Sauvegardes" },
-    { path: "/admin/parametres", icon: Settings, label: "Paramètres" }
   ];
+
+  // Add Users management for super_admin only
+  const navItems = user?.role === 'super_admin' 
+    ? [...baseNavItems, { path: "/admin/utilisateurs", icon: UserCog, label: "Utilisateurs" }, { path: "/admin/parametres", icon: Settings, label: "Paramètres" }]
+    : [...baseNavItems, { path: "/admin/parametres", icon: Settings, label: "Paramètres" }];
 
   return (
     <div data-testid="dashboard-layout" className="min-h-screen bg-white flex">
