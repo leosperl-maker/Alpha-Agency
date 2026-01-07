@@ -68,6 +68,9 @@ CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
 CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY', '')
 CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET', '')
 
+# Backup Manager (initialized at startup)
+backup_manager = None
+
 # Initialize Cloudinary if credentials are available
 import cloudinary
 import cloudinary.uploader
