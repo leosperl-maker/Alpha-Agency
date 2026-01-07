@@ -87,9 +87,9 @@ export const invoicesAPI = {
   create: (data) => api.post('/invoices', data),
   createFromQuote: (quoteId) => api.post(`/invoices/from-quote/${quoteId}`),
   update: (id, data) => api.put(`/invoices/${id}`, data),
-  updateStatus: (id, status) => api.patch(`/invoices/${id}/status`, { status }),
+  updateStatus: (id, status) => api.put(`/invoices/${id}/status`, { status }),
   getPDF: (id) => api.get(`/invoices/${id}/pdf`, { responseType: 'blob' }),
-  downloadPDF: (id) => `${API_URL}/invoices/${id}/pdf`,
+  downloadPDF: (id) => `${API_URL}/api/invoices/${id}/pdf`,
   delete: (id) => api.delete(`/invoices/${id}`),
 };
 
