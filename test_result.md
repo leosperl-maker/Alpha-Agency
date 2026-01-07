@@ -174,9 +174,10 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Logo mobile responsive"
+    - "Scroll to Top sur navigation"
     - "Page Documents Dashboard"
     - "Triple-clic footer pour accès admin"
-    - "API Documents - CRUD et types"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
