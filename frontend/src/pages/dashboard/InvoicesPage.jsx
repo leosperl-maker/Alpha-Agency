@@ -683,10 +683,30 @@ const InvoicesPage = () => {
                       <span className="font-mono font-bold text-[#1A1A1A]">{formatCurrency(invoice.total)}</span>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <Badge className={`${status.color} border-none`}>
-                        <StatusIcon className="w-3 h-3 mr-1" />
-                        {status.label}
-                      </Badge>
+                      <Select
+                        value={invoice.status}
+                        onValueChange={(newStatus) => handleStatusUpdate(invoice.id, newStatus)}
+                      >
+                        <SelectTrigger className={`w-[140px] h-8 ${status.color} border-none text-xs`}>
+                          <div className="flex items-center gap-1">
+                            <StatusIcon className="w-3 h-3" />
+                            <span>{status.label}</span>
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-[#E5E5E5]">
+                          {Object.entries(statusConfig).map(([key, config]) => {
+                            const Icon = config.icon;
+                            return (
+                              <SelectItem key={key} value={key} className="text-xs">
+                                <div className="flex items-center gap-2">
+                                  <Icon className="w-3 h-3" />
+                                  <span>{config.label}</span>
+                                </div>
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <DropdownMenu>
