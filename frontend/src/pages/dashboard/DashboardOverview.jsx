@@ -61,37 +61,38 @@ const DashboardOverview = () => {
       trend: "up"
     },
     {
-      title: "Devis en cours",
-      value: stats?.quotes?.pending || 0,
-      subValue: `${stats?.quotes?.accepted || 0} acceptés`,
-      icon: FileText,
+      title: "Factures",
+      value: stats?.invoices?.paid || 0,
+      subValue: `${stats?.invoices?.pending || 0} en attente`,
+      icon: Receipt,
       color: "#F59E0B",
       trend: "neutral"
     },
     {
-      title: "MRR",
-      value: `${(stats?.mrr || 0).toLocaleString()}€`,
-      subValue: "Abonnements actifs",
-      icon: CreditCard,
+      title: "CA Facturé",
+      value: `${(stats?.invoices?.total_paid || 0).toLocaleString()}€`,
+      subValue: `${(stats?.invoices?.total_invoiced || 0).toLocaleString()}€ total`,
+      icon: Euro,
       color: "#10B981",
       trend: "up"
     }
   ];
 
-  const leadsTrend = [
-    { name: "Jan", leads: 12 },
-    { name: "Fév", leads: 19 },
-    { name: "Mar", leads: 15 },
-    { name: "Avr", leads: 22 },
-    { name: "Mai", leads: 28 },
-    { name: "Juin", leads: 35 }
+  // Use real data from API if available, otherwise use placeholder
+  const leadsTrend = stats?.leads_trend?.length > 0 ? stats.leads_trend : [
+    { name: "Jan", leads: 0 },
+    { name: "Fév", leads: 0 },
+    { name: "Mar", leads: 0 },
+    { name: "Avr", leads: 0 },
+    { name: "Mai", leads: 0 },
+    { name: "Juin", leads: 0 }
   ];
 
-  const pipelineData = [
-    { name: "Nouveau", value: stats?.opportunities?.total || 5, color: "#3B82F6" },
-    { name: "Qualifié", value: 3, color: "#8B5CF6" },
-    { name: "Devis", value: 4, color: "#F59E0B" },
-    { name: "Gagné", value: stats?.opportunities?.won || 2, color: "#10B981" }
+  const pipelineData = stats?.pipeline_stages?.length > 0 ? stats.pipeline_stages : [
+    { name: "Nouveau", value: 0, color: "#3B82F6" },
+    { name: "Qualifié", value: 0, color: "#8B5CF6" },
+    { name: "Devis", value: 0, color: "#F59E0B" },
+    { name: "Gagné", value: 0, color: "#10B981" }
   ];
 
   if (loading) {
