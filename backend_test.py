@@ -20,6 +20,8 @@ class AlphaAgencyAPITester:
         self.contact_id = None
         self.opportunity_id = None
         self.quote_id = None
+        self.service_id = None
+        self.invoice_id = None
         
         # Test credentials
         self.admin_email = "admin@alphagency.fr"
