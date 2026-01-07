@@ -105,7 +105,7 @@
 user_problem_statement: "Application Alpha Agency - Agence de communication 360° en Guadeloupe. Site vitrine + Dashboard CRM avec moteur de documents PDF, accès admin caché, intégration Cloudinary."
 
 backend:
-  - task: "API Documents - CRUD et types"
+  - task: "API Dashboard stats"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -115,76 +115,84 @@ backend:
     status_history:
       - working: true
         agent: "main"
-        comment: "API Documents avec types (lettre_mission, fiche_contact) et templates fonctionnels"
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTÉ - API Documents fonctionne parfaitement. Tests réussis: 1) GET /api/documents/types (2 types, 8 templates), 2) POST /api/documents (création lettre_mission), 3) GET /api/documents/{id} (récupération), 4) GET /api/documents (liste). Authentification JWT requise et fonctionnelle."
+        comment: "API /dashboard/stats retourne correctement les données CRM (contacts, pipeline, factures, etc.)"
 
-  - task: "Authentification admin"
+  - task: "PDF Facture sans statut"
     implemented: true
     working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: true
         agent: "main"
-        comment: "Super admin créé: admin@alphagency.fr / superpassword"
+        comment: "Statut retiré du PDF facture, ajout des notes, conditions et coordonnées bancaires à la place"
 
 frontend:
-  - task: "Page Documents Dashboard"
+  - task: "Dashboard Vue d'ensemble connecté aux données réelles"
     implemented: true
     working: true
-    file: "/app/frontend/src/pages/dashboard/DocumentsPage.jsx"
+    file: "/app/frontend/src/pages/dashboard/DashboardOverview.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
+      - working: false
+        agent: "user"
+        comment: "Le dashboard affichait des zéros car l'API frontend appelait /stats/overview au lieu de /dashboard/stats"
       - working: true
         agent: "main"
-        comment: "Page créée avec CRUD complet, filtres, modal création/édition/visualisation"
+        comment: "CORRIGÉ - API frontend corrigée dans api.js pour appeler /dashboard/stats. Dashboard affiche maintenant les vraies données: 15 contacts, 17.5k€ pipeline, 8.4k€ CA facturé"
 
-  - task: "Triple-clic footer pour accès admin"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/components/Footer.jsx"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: true
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Logique corrigée avec useRef et timer de 1.5s - testé avec succès via screenshot"
-
-  - task: "Navigation Documents dans sidebar"
+  - task: "Responsive mobile Dashboard admin"
     implemented: true
     working: true
     file: "/app/frontend/src/pages/dashboard/DashboardLayout.jsx"
     stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
+    priority: "high"
+    needs_retesting: true
     status_history:
+      - working: false
+        agent: "user"
+        comment: "Sidebar mobile s'entassait, impossible de scroller. Textes tronqués. Preview facture non adaptée."
       - working: true
         agent: "main"
-        comment: "Lien 'Documents' ajouté avec icône FileCheck"
+        comment: "CORRIGÉ - Sidebar avec flex layout et overflow-y-auto pour scroll. KPIs en grille 2x2 sur mobile. Formulaire facture plein écran sur mobile."
+
+  - task: "Responsive mobile page Facturation"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/dashboard/InvoicesPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "Formulaire facture inutilisable sur mobile avec layout 50/50"
+      - working: true
+        agent: "main"
+        comment: "CORRIGÉ - Formulaire en plein écran sur mobile (w-full lg:w-1/2), preview cachée sur mobile (hidden lg:block)"
 
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 4
+  test_sequence: 5
   run_ui: true
 
 test_plan:
   current_focus:
-    - "Formulaire facture 50/50 (preview agrandie)"
-    - "Services enregistrés avec titre gras et description longue"
-    - "Statuts modifiables directement dans le tableau"
-    - "Dashboard connecté aux vraies données"
-    - "Réalisations avec support audio"
+    - "Responsive mobile Dashboard admin"
+    - "Dashboard Vue d'ensemble avec données réelles"
+    - "PDF Facture sans statut"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Fork 3 - Corrections P0 : 1) Dashboard connecté aux vraies données (correction API /stats/overview → /dashboard/stats), 2) Responsive mobile amélioré (sidebar scrollable, KPIs compacts), 3) PDF facture sans statut visible, 4) Formulaire facture mobile-first. Tests via screenshots confirmés."
 
   - task: "Formulaire facture layout 50/50"
     implemented: true
