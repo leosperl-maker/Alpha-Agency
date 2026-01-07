@@ -293,180 +293,357 @@ async def send_new_lead_notification(lead: dict):
 
 # ==================== PDF GENERATION ====================
 
-def generate_quote_pdf(quote: dict, contact: dict) -> BytesIO:
+import urllib.request
+from PIL import Image as PILImage
+
+def fetch_logo_image():
+    """Fetch and cache the logo image for PDF generation"""
+    try:
+        logo_path = "/tmp/alpha_logo.png"
+        urllib.request.urlretrieve(COMPANY_INFO['logo_url'], logo_path)
+        return logo_path
+    except Exception as e:
+        logger.error(f"Failed to fetch logo: {e}")
+        return None
+
+def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "facture") -> BytesIO:
+    """Generate professional PDF for invoice or quote matching the Alpha Agency design"""
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
+    doc = SimpleDocTemplate(
+        buffer, 
+        pagesize=A4, 
+        rightMargin=1.5*cm, 
+        leftMargin=1.5*cm, 
+        topMargin=1.5*cm, 
+        bottomMargin=2.5*cm
+    )
     styles = getSampleStyleSheet()
     elements = []
     
-    # Header
-    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=24, textColor=colors.HexColor('#6A0F1A'), alignment=TA_LEFT)
-    elements.append(Paragraph("ALPHA Agency", title_style))
-    elements.append(Spacer(1, 0.5*cm))
+    # Colors
+    BRAND_RED = colors.HexColor('#CE0202')
+    DARK_GRAY = colors.HexColor('#333333')
+    LIGHT_GRAY = colors.HexColor('#666666')
     
-    company_style = ParagraphStyle('Company', parent=styles['Normal'], fontSize=10, textColor=colors.grey)
-    elements.append(Paragraph(f"{COMPANY_INFO['address']}", company_style))
-    elements.append(Paragraph(f"Tél: {COMPANY_INFO['phone']} | Email: {COMPANY_INFO['email']}", company_style))
-    elements.append(Spacer(1, 1*cm))
+    # ===== HEADER SECTION =====
+    # Logo and company info in a table layout
+    logo_path = fetch_logo_image()
     
-    # Quote info
-    quote_title = ParagraphStyle('QuoteTitle', parent=styles['Heading2'], fontSize=18, textColor=colors.black)
-    elements.append(Paragraph(f"DEVIS N° {quote['quote_number']}", quote_title))
-    elements.append(Paragraph(f"Date: {quote['created_at'][:10]}", styles['Normal']))
-    elements.append(Paragraph(f"Validité: {quote.get('valid_until', 'Non spécifiée')}", styles['Normal']))
-    elements.append(Spacer(1, 0.5*cm))
+    # Company name style
+    company_name_style = ParagraphStyle(
+        'CompanyName', 
+        parent=styles['Heading1'], 
+        fontSize=20, 
+        textColor=BRAND_RED,
+        spaceAfter=0
+    )
+    company_tagline_style = ParagraphStyle(
+        'CompanyTagline', 
+        parent=styles['Normal'], 
+        fontSize=9, 
+        textColor=LIGHT_GRAY,
+        spaceAfter=2
+    )
+    company_info_style = ParagraphStyle(
+        'CompanyInfo', 
+        parent=styles['Normal'], 
+        fontSize=9, 
+        textColor=DARK_GRAY,
+        leading=12
+    )
     
-    # Client info
-    elements.append(Paragraph("<b>Client:</b>", styles['Normal']))
-    elements.append(Paragraph(f"{contact.get('first_name', '')} {contact.get('last_name', '')}", styles['Normal']))
+    # Build header content
+    header_left = []
+    if logo_path:
+        try:
+            header_left.append(Image(logo_path, width=4*cm, height=1.5*cm))
+        except:
+            header_left.append(Paragraph(f"<b>{COMPANY_INFO['commercial_name']}</b>", company_name_style))
+    else:
+        header_left.append(Paragraph(f"<b>{COMPANY_INFO['commercial_name']}</b>", company_name_style))
+    
+    header_left.append(Spacer(1, 0.2*cm))
+    header_left.append(Paragraph(COMPANY_INFO['tagline'], company_tagline_style))
+    header_left.append(Spacer(1, 0.3*cm))
+    header_left.append(Paragraph(f"{COMPANY_INFO['address']}", company_info_style))
+    header_left.append(Paragraph(f"{COMPANY_INFO['city']}, {COMPANY_INFO['region']}", company_info_style))
+    header_left.append(Spacer(1, 0.2*cm))
+    header_left.append(Paragraph(f"Tél: {COMPANY_INFO['phone']}", company_info_style))
+    header_left.append(Paragraph(f"Email: {COMPANY_INFO['email']}", company_info_style))
+    
+    # Document info (right side)
+    doc_title_style = ParagraphStyle(
+        'DocTitle', 
+        parent=styles['Heading1'], 
+        fontSize=16, 
+        textColor=DARK_GRAY,
+        alignment=TA_RIGHT,
+        spaceAfter=5
+    )
+    doc_info_style = ParagraphStyle(
+        'DocInfo', 
+        parent=styles['Normal'], 
+        fontSize=10, 
+        textColor=DARK_GRAY,
+        alignment=TA_RIGHT,
+        leading=14
+    )
+    
+    doc_number = doc_data.get('invoice_number') or doc_data.get('quote_number', '')
+    doc_date = doc_data.get('created_at', '')[:10]
+    
+    if doc_type == "devis":
+        title_text = f"Devis {doc_number}"
+        date_label = "En date du"
+        validity = doc_data.get('valid_until', '')
+        validity_text = f"Validité: {validity}" if validity else ""
+    else:
+        title_text = f"Facture {doc_number}"
+        date_label = "Date"
+        due_date = doc_data.get('due_date', '')
+        validity_text = f"Échéance: {due_date}" if due_date else ""
+    
+    header_right = []
+    header_right.append(Paragraph(f"<b>{title_text}</b>", doc_title_style))
+    header_right.append(Paragraph(f"{date_label}: {doc_date}", doc_info_style))
+    if validity_text:
+        header_right.append(Paragraph(validity_text, doc_info_style))
+    
+    # Create header table
+    header_table_data = [[header_left, header_right]]
+    header_table = Table(header_table_data, colWidths=[10*cm, 7*cm])
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
+    ]))
+    elements.append(header_table)
+    elements.append(Spacer(1, 0.8*cm))
+    
+    # ===== CLIENT SECTION =====
+    client_header_style = ParagraphStyle(
+        'ClientHeader', 
+        parent=styles['Normal'], 
+        fontSize=10, 
+        textColor=BRAND_RED,
+        spaceAfter=5
+    )
+    client_info_style = ParagraphStyle(
+        'ClientInfo', 
+        parent=styles['Normal'], 
+        fontSize=10, 
+        textColor=DARK_GRAY,
+        leading=14
+    )
+    
+    elements.append(Paragraph("<b>DESTINATAIRE</b>", client_header_style))
+    
+    client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+    if client_name:
+        elements.append(Paragraph(f"<b>{client_name}</b>", client_info_style))
     if contact.get('company'):
-        elements.append(Paragraph(f"{contact['company']}", styles['Normal']))
-    elements.append(Paragraph(f"{contact.get('email', '')}", styles['Normal']))
-    elements.append(Spacer(1, 1*cm))
+        elements.append(Paragraph(contact['company'], client_info_style))
+    if contact.get('email'):
+        elements.append(Paragraph(contact['email'], client_info_style))
+    if contact.get('phone'):
+        elements.append(Paragraph(contact['phone'], client_info_style))
     
-    # Items table
-    table_data = [['Description', 'Qté', 'Prix unitaire', 'Total']]
+    elements.append(Spacer(1, 0.8*cm))
+    
+    # ===== ITEMS TABLE =====
+    # Table header style
+    table_header_style = ParagraphStyle(
+        'TableHeader',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=colors.white,
+        alignment=TA_CENTER
+    )
+    table_cell_style = ParagraphStyle(
+        'TableCell',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=DARK_GRAY,
+        leading=12
+    )
+    table_cell_right_style = ParagraphStyle(
+        'TableCellRight',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=DARK_GRAY,
+        alignment=TA_RIGHT
+    )
+    
+    # Build table data
+    table_data = [[
+        Paragraph("<b>Description</b>", table_header_style),
+        Paragraph("<b>Qté</b>", table_header_style),
+        Paragraph("<b>PU HT</b>", table_header_style),
+        Paragraph("<b>TVA</b>", table_header_style),
+        Paragraph("<b>Total HT</b>", table_header_style)
+    ]]
+    
     subtotal = 0
-    for item in quote.get('items', []):
-        total = item['quantity'] * item['unit_price']
+    tva_rate = 0.085  # TVA Guadeloupe 8.5%
+    
+    for item in doc_data.get('items', []):
+        qty = item.get('quantity', 1)
+        unit_price = item.get('unit_price', 0)
+        total = qty * unit_price
         subtotal += total
+        tva_amount = total * tva_rate
+        
+        # Handle multi-line descriptions
+        desc = item.get('description', '').replace('\n', '<br/>')
+        
         table_data.append([
-            item['description'],
-            str(item['quantity']),
-            f"{item['unit_price']:.2f} €",
-            f"{total:.2f} €"
+            Paragraph(desc, table_cell_style),
+            Paragraph(str(qty), table_cell_right_style),
+            Paragraph(f"{unit_price:.2f} €", table_cell_right_style),
+            Paragraph(f"8.5%<br/>({tva_amount:.2f} €)", table_cell_right_style),
+            Paragraph(f"{total:.2f} €", table_cell_right_style)
         ])
     
-    tva = subtotal * 0.085  # TVA Guadeloupe 8.5%
-    total_ttc = subtotal + tva
-    
-    table_data.append(['', '', 'Sous-total HT:', f"{subtotal:.2f} €"])
-    table_data.append(['', '', 'TVA (8.5%):', f"{tva:.2f} €"])
-    table_data.append(['', '', 'Total TTC:', f"{total_ttc:.2f} €"])
-    
-    table = Table(table_data, colWidths=[9*cm, 2*cm, 3*cm, 3*cm])
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#6A0F1A')),
+    # Create table
+    items_table = Table(
+        table_data, 
+        colWidths=[8*cm, 1.5*cm, 2.5*cm, 2.5*cm, 2.5*cm],
+        repeatRows=1
+    )
+    items_table.setStyle(TableStyle([
+        # Header row
+        ('BACKGROUND', (0, 0), (-1, 0), BRAND_RED),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('GRID', (0, 0), (-1, -4), 0.5, colors.grey),
-        ('FONTNAME', (-2, -3), (-1, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('TOPPADDING', (0, 0), (-1, 0), 10),
+        # Content rows
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+        ('TOPPADDING', (0, 1), (-1, -1), 8),
+        # Alignment
+        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
+        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        # Grid
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+        # Alternate row colors
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F8F8F8')]),
     ]))
-    elements.append(table)
+    elements.append(items_table)
+    elements.append(Spacer(1, 0.5*cm))
+    
+    # ===== TOTALS SECTION =====
+    tva_total = subtotal * tva_rate
+    total_ttc = subtotal + tva_total
+    
+    totals_style = ParagraphStyle(
+        'Totals',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=DARK_GRAY,
+        alignment=TA_RIGHT
+    )
+    totals_bold_style = ParagraphStyle(
+        'TotalsBold',
+        parent=styles['Normal'],
+        fontSize=11,
+        textColor=BRAND_RED,
+        alignment=TA_RIGHT
+    )
+    
+    totals_data = [
+        ['', '', '', Paragraph("Total net HT:", totals_style), Paragraph(f"<b>{subtotal:.2f} €</b>", totals_style)],
+        ['', '', '', Paragraph("TVA 8.50%:", totals_style), Paragraph(f"<b>{tva_total:.2f} €</b>", totals_style)],
+        ['', '', '', Paragraph("<b>TOTAL TTC:</b>", totals_bold_style), Paragraph(f"<b>{total_ttc:.2f} €</b>", totals_bold_style)],
+    ]
+    
+    totals_table = Table(totals_data, colWidths=[8*cm, 1.5*cm, 2.5*cm, 2.5*cm, 2.5*cm])
+    totals_table.setStyle(TableStyle([
+        ('ALIGN', (3, 0), (-1, -1), 'RIGHT'),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('LINEABOVE', (3, 2), (-1, 2), 1, BRAND_RED),
+    ]))
+    elements.append(totals_table)
+    elements.append(Spacer(1, 0.8*cm))
+    
+    # ===== CONDITIONS & SIGNATURE SECTION (for quotes) =====
+    if doc_type == "devis":
+        conditions_style = ParagraphStyle(
+            'Conditions',
+            parent=styles['Normal'],
+            fontSize=9,
+            textColor=DARK_GRAY,
+            leading=12
+        )
+        
+        elements.append(Paragraph("<b>Conditions:</b>", conditions_style))
+        elements.append(Paragraph("• Date de validité: 30 jours à compter de la date du devis", conditions_style))
+        elements.append(Paragraph("• Moyen de règlement: Virement bancaire ou chèque", conditions_style))
+        elements.append(Paragraph("• Délai de règlement: 30% à la commande, solde à la livraison", conditions_style))
+        elements.append(Spacer(1, 0.8*cm))
+        
+        # Signature zone
+        elements.append(Paragraph("<b>Signature du client précédée de la mention 'Lu et approuvé, bon pour accord':</b>", conditions_style))
+        elements.append(Spacer(1, 2*cm))
+        elements.append(Paragraph("_" * 40, conditions_style))
+    
+    # ===== PAYMENT INFO (for invoices) =====
+    if doc_type == "facture":
+        payment_style = ParagraphStyle(
+            'Payment',
+            parent=styles['Normal'],
+            fontSize=9,
+            textColor=DARK_GRAY,
+            leading=12
+        )
+        
+        if doc_data.get('bank_details'):
+            elements.append(Paragraph("<b>Coordonnées bancaires:</b>", payment_style))
+            for line in doc_data['bank_details'].split('\n'):
+                elements.append(Paragraph(line, payment_style))
+            elements.append(Spacer(1, 0.5*cm))
+        
+        if doc_data.get('conditions'):
+            elements.append(Paragraph("<b>Conditions de paiement:</b>", payment_style))
+            for line in doc_data['conditions'].split('\n'):
+                elements.append(Paragraph(line, payment_style))
+    
+    # ===== FOOTER =====
     elements.append(Spacer(1, 1*cm))
     
-    # Notes
-    if quote.get('notes'):
-        elements.append(Paragraph("<b>Notes:</b>", styles['Normal']))
-        elements.append(Paragraph(quote['notes'], styles['Normal']))
+    footer_style = ParagraphStyle(
+        'Footer',
+        parent=styles['Normal'],
+        fontSize=8,
+        textColor=LIGHT_GRAY,
+        alignment=TA_CENTER,
+        leading=10
+    )
     
-    # Footer
-    elements.append(Spacer(1, 2*cm))
-    footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=colors.grey, alignment=TA_CENTER)
-    elements.append(Paragraph(f"{COMPANY_INFO['commercial_name']} - {COMPANY_INFO['legal_form']} au capital de {COMPANY_INFO['capital']}", footer_style))
-    elements.append(Paragraph(f"SIREN: {COMPANY_INFO['siren']} - SIRET: {COMPANY_INFO['siret']}", footer_style))
+    footer_text = f"{COMPANY_INFO['name']} - {COMPANY_INFO['address']} - {COMPANY_INFO['city']} - {COMPANY_INFO['region']}"
+    elements.append(Paragraph(footer_text, footer_style))
     
+    legal_text = f"SIRET: {COMPANY_INFO['siret']} | NAF: {COMPANY_INFO['naf']} | TVA: {COMPANY_INFO['tva_intra']} | RCS: {COMPANY_INFO['rcs']}"
+    elements.append(Paragraph(legal_text, footer_style))
+    
+    capital_text = f"{COMPANY_INFO['legal_form']} au capital de {COMPANY_INFO['capital']} € | Tél: {COMPANY_INFO['phone']} | Email: {COMPANY_INFO['email']}"
+    elements.append(Paragraph(capital_text, footer_style))
+    
+    # Build document
     doc.build(elements)
     buffer.seek(0)
     return buffer
 
+def generate_quote_pdf(quote: dict, contact: dict) -> BytesIO:
+    """Generate professional quote PDF"""
+    return generate_professional_pdf(quote, contact, doc_type="devis")
+
 def generate_invoice_pdf(invoice: dict, contact: dict) -> BytesIO:
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
-    styles = getSampleStyleSheet()
-    elements = []
-    
-    # Header
-    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=24, textColor=colors.HexColor('#6A0F1A'), alignment=TA_LEFT)
-    elements.append(Paragraph("ALPHA Agency", title_style))
-    elements.append(Spacer(1, 0.5*cm))
-    
-    company_style = ParagraphStyle('Company', parent=styles['Normal'], fontSize=10, textColor=colors.grey)
-    elements.append(Paragraph(f"{COMPANY_INFO['address']}", company_style))
-    elements.append(Paragraph(f"Tél: {COMPANY_INFO['phone']} | Email: {COMPANY_INFO['email']}", company_style))
-    elements.append(Spacer(1, 1*cm))
-    
-    # Invoice info
-    invoice_title = ParagraphStyle('InvoiceTitle', parent=styles['Heading2'], fontSize=18, textColor=colors.black)
-    elements.append(Paragraph(f"FACTURE N° {invoice['invoice_number']}", invoice_title))
-    elements.append(Paragraph(f"Date: {invoice['created_at'][:10]}", styles['Normal']))
-    elements.append(Paragraph(f"Échéance: {invoice.get('due_date', 'Non spécifiée')}", styles['Normal']))
-    elements.append(Spacer(1, 0.5*cm))
-    
-    # Client info
-    elements.append(Paragraph("<b>Client:</b>", styles['Normal']))
-    elements.append(Paragraph(f"{contact.get('first_name', '')} {contact.get('last_name', '')}", styles['Normal']))
-    if contact.get('company'):
-        elements.append(Paragraph(f"{contact['company']}", styles['Normal']))
-    elements.append(Paragraph(f"{contact.get('email', '')}", styles['Normal']))
-    elements.append(Spacer(1, 1*cm))
-    
-    # Items table
-    table_data = [['Description', 'Qté', 'Prix unitaire', 'Total']]
-    subtotal = 0
-    for item in invoice.get('items', []):
-        total = item['quantity'] * item['unit_price']
-        subtotal += total
-        table_data.append([
-            item['description'],
-            str(item['quantity']),
-            f"{item['unit_price']:.2f} €",
-            f"{total:.2f} €"
-        ])
-    
-    tva = subtotal * 0.085
-    total_ttc = subtotal + tva
-    
-    table_data.append(['', '', 'Sous-total HT:', f"{subtotal:.2f} €"])
-    table_data.append(['', '', 'TVA (8.5%):', f"{tva:.2f} €"])
-    table_data.append(['', '', 'Total TTC:', f"{total_ttc:.2f} €"])
-    
-    table = Table(table_data, colWidths=[9*cm, 2*cm, 3*cm, 3*cm])
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#6A0F1A')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('GRID', (0, 0), (-1, -4), 0.5, colors.grey),
-        ('FONTNAME', (-2, -3), (-1, -1), 'Helvetica-Bold'),
-    ]))
-    elements.append(table)
-    elements.append(Spacer(1, 1*cm))
-    
-    # Notes if any
-    if invoice.get('notes'):
-        elements.append(Paragraph("<b>Notes:</b>", styles['Normal']))
-        elements.append(Paragraph(invoice['notes'], styles['Normal']))
-        elements.append(Spacer(1, 0.5*cm))
-    
-    # Bank details if any
-    if invoice.get('bank_details'):
-        elements.append(Paragraph("<b>Coordonnées bancaires:</b>", styles['Normal']))
-        for line in invoice['bank_details'].split('\n'):
-            elements.append(Paragraph(line, styles['Normal']))
-        elements.append(Spacer(1, 0.5*cm))
-    
-    # Conditions if any
-    if invoice.get('conditions'):
-        elements.append(Paragraph("<b>Conditions:</b>", styles['Normal']))
-        conditions_style = ParagraphStyle('Conditions', parent=styles['Normal'], fontSize=9, textColor=colors.grey)
-        for line in invoice['conditions'].split('\n'):
-            elements.append(Paragraph(line, conditions_style))
-    
-    # Footer
-    elements.append(Spacer(1, 2*cm))
-    footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=colors.grey, alignment=TA_CENTER)
-    elements.append(Paragraph(f"{COMPANY_INFO['commercial_name']} - {COMPANY_INFO['legal_form']} au capital de {COMPANY_INFO['capital']}", footer_style))
-    elements.append(Paragraph(f"SIREN: {COMPANY_INFO['siren']} - SIRET: {COMPANY_INFO['siret']}", footer_style))
-    
-    doc.build(elements)
-    buffer.seek(0)
-    return buffer
+    """Generate professional invoice PDF"""
+    return generate_professional_pdf(invoice, contact, doc_type="facture")
 
 # ==================== AUTH ROUTES ====================
 
