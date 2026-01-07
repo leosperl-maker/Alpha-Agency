@@ -43,8 +43,8 @@ export const authAPI = {
 
 // Dashboard API
 export const dashboardAPI = {
-  getStats: () => api.get('/stats/overview'),
-  updateKPIs: (data) => api.put('/stats/kpis', data),
+  getStats: () => api.get('/dashboard/stats'),
+  updateKPIs: (data) => api.put('/dashboard/kpis', data),
 };
 
 // Contacts API

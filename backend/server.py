@@ -431,10 +431,25 @@ def generate_invoice_pdf(invoice: dict, contact: dict) -> BytesIO:
     elements.append(table)
     elements.append(Spacer(1, 1*cm))
     
-    # Payment status
-    status_color = colors.green if invoice.get('status') == 'payée' else colors.orange if invoice.get('status') == 'en_attente' else colors.red
-    status_style = ParagraphStyle('Status', parent=styles['Normal'], fontSize=12, textColor=status_color)
-    elements.append(Paragraph(f"<b>Statut: {invoice.get('status', 'En attente').upper()}</b>", status_style))
+    # Notes if any
+    if invoice.get('notes'):
+        elements.append(Paragraph("<b>Notes:</b>", styles['Normal']))
+        elements.append(Paragraph(invoice['notes'], styles['Normal']))
+        elements.append(Spacer(1, 0.5*cm))
+    
+    # Bank details if any
+    if invoice.get('bank_details'):
+        elements.append(Paragraph("<b>Coordonnées bancaires:</b>", styles['Normal']))
+        for line in invoice['bank_details'].split('\n'):
+            elements.append(Paragraph(line, styles['Normal']))
+        elements.append(Spacer(1, 0.5*cm))
+    
+    # Conditions if any
+    if invoice.get('conditions'):
+        elements.append(Paragraph("<b>Conditions:</b>", styles['Normal']))
+        conditions_style = ParagraphStyle('Conditions', parent=styles['Normal'], fontSize=9, textColor=colors.grey)
+        for line in invoice['conditions'].split('\n'):
+            elements.append(Paragraph(line, conditions_style))
     
     # Footer
     elements.append(Spacer(1, 2*cm))
