@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 
+// Components
+import ScrollToTop from "./components/ScrollToTop";
+
 // Pages vitrine
 import HomePage from "./pages/HomePage";
 import AgencyPage from "./pages/AgencyPage";
