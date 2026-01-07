@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   Users, 
@@ -8,10 +9,15 @@ import {
   CreditCard,
   ArrowUp,
   Euro,
-  Target
+  Target,
+  CheckSquare,
+  Wallet,
+  Clock,
+  AlertCircle
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { dashboardAPI } from "../../lib/api";
+import { Badge } from "../../components/ui/badge";
+import { dashboardAPI, tasksAPI, budgetAPI } from "../../lib/api";
 import { 
   LineChart, 
   Line, 
@@ -22,7 +28,9 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  BarChart,
+  Bar
 } from "recharts";
 
 const DashboardOverview = () => {
