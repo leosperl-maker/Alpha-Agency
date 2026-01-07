@@ -2456,6 +2456,22 @@ async def download_professional_invoice_pdf(invoice_id: str, current_user: dict 
 
 # ==================== ADMIN USERS MANAGEMENT ====================
 
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    role: Optional[str] = None
+
+class ChangePassword(BaseModel):
+    current_password: str
+    new_password: str
+
 @api_router.get("/admin/users", response_model=List[dict])
 async def get_admin_users(current_user: dict = Depends(get_current_user)):
     """Get all admin users (super_admin only)"""
@@ -2465,6 +2481,30 @@ async def get_admin_users(current_user: dict = Depends(get_current_user)):
     
     users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(100)
     return users
+
+@api_router.put("/admin/users/{user_id}", response_model=dict)
+async def update_admin_user(user_id: str, user_data: UserUpdate, current_user: dict = Depends(get_current_user)):
+    """Update an admin user (super_admin only)"""
+    admin = await db.users.find_one({"id": current_user['user_id']}, {"_id": 0})
+    if not admin or admin.get('role') != 'super_admin':
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    # Check if user exists
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    # Cannot change super_admin role
+    if user.get('role') == 'super_admin' and user_data.role and user_data.role != 'super_admin':
+        raise HTTPException(status_code=400, detail="Impossible de modifier le rôle du super admin")
+    
+    # Prepare update data
+    update_data = {k: v for k, v in user_data.model_dump().items() if v is not None}
+    if update_data:
+        update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await db.users.update_one({"id": user_id}, {"$set": update_data})
+    
+    return {"message": "Utilisateur mis à jour"}
 
 @api_router.delete("/admin/users/{user_id}", response_model=dict)
 async def delete_admin_user(user_id: str, current_user: dict = Depends(get_current_user)):
@@ -2476,11 +2516,116 @@ async def delete_admin_user(user_id: str, current_user: dict = Depends(get_curre
     if user_id == current_user['user_id']:
         raise HTTPException(status_code=400, detail="Vous ne pouvez pas supprimer votre propre compte")
     
+    # Check if target is super_admin
+    target_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if target_user and target_user.get('role') == 'super_admin':
+        raise HTTPException(status_code=400, detail="Impossible de supprimer un super admin")
+    
     result = await db.users.delete_one({"id": user_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
     
     return {"message": "Utilisateur supprimé"}
+
+@api_router.post("/auth/forgot-password", response_model=dict)
+async def forgot_password(request: PasswordResetRequest, background_tasks: BackgroundTasks):
+    """Request password reset - sends email with reset token"""
+    user = await db.users.find_one({"email": request.email}, {"_id": 0})
+    
+    # Always return success to prevent email enumeration
+    if not user:
+        return {"message": "Si un compte existe avec cet email, vous recevrez un lien de réinitialisation."}
+    
+    # Generate reset token (valid for 1 hour)
+    reset_token = str(uuid.uuid4())
+    reset_expiry = datetime.now(timezone.utc) + timedelta(hours=1)
+    
+    # Store reset token
+    await db.users.update_one(
+        {"email": request.email},
+        {"$set": {
+            "reset_token": reset_token,
+            "reset_token_expiry": reset_expiry.isoformat()
+        }}
+    )
+    
+    # Send reset email
+    reset_link = f"https://agency-backoffice.preview.emergentagent.com/alpha-admin-2024/reset-password?token={reset_token}"
+    html_content = f"""
+    <h2>Réinitialisation de mot de passe - Alpha Agency</h2>
+    <p>Bonjour {user.get('full_name', '')},</p>
+    <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
+    <p>Cliquez sur le lien ci-dessous pour définir un nouveau mot de passe :</p>
+    <p><a href="{reset_link}" style="background-color: #CE0202; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Réinitialiser mon mot de passe</a></p>
+    <p>Ce lien est valable pendant 1 heure.</p>
+    <p>Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
+    <br>
+    <p>L'équipe Alpha Agency</p>
+    """
+    
+    background_tasks.add_task(send_email_notification, request.email, "Réinitialisation de mot de passe - Alpha Agency", html_content)
+    
+    return {"message": "Si un compte existe avec cet email, vous recevrez un lien de réinitialisation."}
+
+@api_router.post("/auth/reset-password", response_model=dict)
+async def reset_password(request: PasswordResetConfirm):
+    """Reset password using token from email"""
+    user = await db.users.find_one({"reset_token": request.token}, {"_id": 0})
+    
+    if not user:
+        raise HTTPException(status_code=400, detail="Token invalide ou expiré")
+    
+    # Check token expiry
+    expiry = user.get('reset_token_expiry')
+    if expiry:
+        expiry_dt = datetime.fromisoformat(expiry.replace('Z', '+00:00'))
+        if datetime.now(timezone.utc) > expiry_dt:
+            raise HTTPException(status_code=400, detail="Token expiré. Veuillez demander un nouveau lien.")
+    
+    # Validate password strength
+    if len(request.new_password) < 8:
+        raise HTTPException(status_code=400, detail="Le mot de passe doit contenir au moins 8 caractères")
+    
+    # Update password and clear reset token
+    await db.users.update_one(
+        {"reset_token": request.token},
+        {"$set": {
+            "password": hash_password(request.new_password),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }, "$unset": {
+            "reset_token": "",
+            "reset_token_expiry": ""
+        }}
+    )
+    
+    return {"message": "Mot de passe réinitialisé avec succès. Vous pouvez maintenant vous connecter."}
+
+@api_router.put("/auth/change-password", response_model=dict)
+async def change_password(request: ChangePassword, current_user: dict = Depends(get_current_user)):
+    """Change password for logged in user"""
+    user = await db.users.find_one({"id": current_user['user_id']}, {"_id": 0})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    # Verify current password
+    if not verify_password(request.current_password, user['password']):
+        raise HTTPException(status_code=400, detail="Mot de passe actuel incorrect")
+    
+    # Validate new password
+    if len(request.new_password) < 8:
+        raise HTTPException(status_code=400, detail="Le nouveau mot de passe doit contenir au moins 8 caractères")
+    
+    # Update password
+    await db.users.update_one(
+        {"id": current_user['user_id']},
+        {"$set": {
+            "password": hash_password(request.new_password),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Mot de passe modifié avec succès"}
 
 # ==================== BACKUP ROUTES ====================
 
