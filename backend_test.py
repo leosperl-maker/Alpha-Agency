@@ -526,6 +526,17 @@ class AlphaAgencyAPITester:
             success, response = self.make_request('DELETE', f'contacts/{self.contact_id}')
             self.log_result("Delete Test Contact", success, response.get('message', str(response)) if success else str(response))
 
+    def test_settings_endpoints(self):
+        """Test settings endpoints"""
+        print("\n⚙️ Testing Settings...")
+        
+        success, response = self.make_request('GET', 'settings')
+        if success:
+            company_name = response.get('company', {}).get('commercial_name', 'N/A')
+            self.log_result("Get Settings", True, f"Company: {company_name}")
+        else:
+            self.log_result("Get Settings", False, str(response))
+
     def run_all_tests(self):
         """Run all tests"""
         print("🚀 Starting Alpha Agency Backend API Tests")
@@ -541,6 +552,15 @@ class AlphaAgencyAPITester:
         self.test_auth_me()
         self.test_contacts_crud()
         self.test_opportunities_crud()
+        
+        # PRIORITY TESTS - Alpha Agency Billing Tool
+        self.test_services_crud()
+        self.test_invoices_crud()
+        self.test_invoice_pdf_generation()
+        self.test_invoice_devis_creation()
+        self.test_invoice_status_validation()
+        
+        # Other tests
         self.test_quotes_crud()
         self.test_dashboard_stats()
         self.test_upload_endpoints()
@@ -549,6 +569,9 @@ class AlphaAgencyAPITester:
         
         # Test public endpoints
         self.test_lead_submission()
+        
+        # Clean up test data
+        self.cleanup_test_data()
         
         # Print summary
         print("\n" + "=" * 60)
