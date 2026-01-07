@@ -88,7 +88,7 @@ const HomePage = () => {
       {/* Hero Section */}
       <section 
         data-testid="hero-section"
-        className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden"
+        className="relative min-h-screen flex items-center justify-center px-6 pt-24 md:pt-0 overflow-hidden"
       >
         {/* Background Image - Guadeloupe Ocean */}
         <div 
@@ -106,19 +106,19 @@ const HomePage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <Badge className="bg-[#CE0202]/20 text-[#CE0202] border-[#CE0202]/30 mb-6">
+            <Badge className="bg-[#CE0202]/20 text-[#CE0202] border-[#CE0202]/30 mb-6 text-xs sm:text-sm">
               Agence de communication 360° en Guadeloupe
             </Badge>
             
             <h1 
               data-testid="hero-headline"
-              className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight"
+              className="text-3xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight"
             >
               Votre présence digitale<br />
               <span className="text-[#CE0202]">commence ici</span>
             </h1>
             
-            <p className="text-lg lg:text-xl text-white/70 max-w-2xl mx-auto mb-10">
+            <p className="text-base sm:text-lg lg:text-xl text-white/70 max-w-2xl mx-auto mb-10">
               Site web professionnel livré en 7 jours, community management (gestion des réseaux sociaux), 
               photographie, vidéographie et publicité digitale. Tout ce dont vous avez besoin pour briller en ligne.
             </p>
@@ -148,7 +148,7 @@ const HomePage = () => {
 
         {/* Scroll indicator */}
         <motion.div 
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block"
           animate={{ y: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
