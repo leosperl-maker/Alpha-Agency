@@ -1,4 +1,4 @@
-import { useRef, useCallback } from "react";
+import { useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, Clock } from "lucide-react";
 
@@ -7,26 +7,9 @@ const Footer = () => {
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef(null);
 
-  // Triple-click handler for hidden admin access - using refs for reliability
+  // Simple click handler for hidden admin access
   const handleLogoClick = useCallback(() => {
-    clickCountRef.current += 1;
-    
-    // Clear any existing timer
-    if (clickTimerRef.current) {
-      clearTimeout(clickTimerRef.current);
-    }
-    
-    // If we reach 3 clicks, navigate immediately
-    if (clickCountRef.current >= 3) {
-      clickCountRef.current = 0;
-      navigate("/alpha-admin-2024");
-      return;
-    }
-    
-    // Reset click count after 1.5 seconds of no activity
-    clickTimerRef.current = setTimeout(() => {
-      clickCountRef.current = 0;
-    }, 1500);
+    navigate("/alpha-admin-2024");
   }, [navigate]);
 
   return (
