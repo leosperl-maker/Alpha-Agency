@@ -163,7 +163,11 @@ class InvoiceCreate(BaseModel):
     contact_id: str
     items: List[QuoteItemCreate]
     due_date: Optional[str] = None
+    payment_terms: Optional[str] = "30"
     notes: Optional[str] = None
+    conditions: Optional[str] = None
+    bank_details: Optional[str] = None
+    document_type: Optional[str] = "facture"  # facture or devis
 
 class SubscriptionCreate(BaseModel):
     contact_id: str
