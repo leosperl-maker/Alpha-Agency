@@ -297,6 +297,17 @@ const InvoicesPage = () => {
     setViewDialogOpen(true);
   };
 
+  const handleDownloadPDF = async (invoice) => {
+    try {
+      toast.info("Préparation du PDF...");
+      const type = invoice.document_type === 'devis' ? 'devis' : 'facture';
+      await invoicesAPI.downloadPDF(invoice.id, invoice.invoice_number, type);
+      toast.success("PDF téléchargé");
+    } catch (error) {
+      toast.error("Erreur lors du téléchargement du PDF");
+    }
+  };
+
   const addItem = () => {
     setItems([...items, { description: "", quantity: 1, unit_price: 0 }]);
   };
