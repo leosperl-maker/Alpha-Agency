@@ -789,9 +789,9 @@ async def update_invoice(invoice_id: str, invoice_update: InvoiceUpdate, current
     for key, value in invoice_update.model_dump().items():
         if value is not None:
             if key == 'items':
-                update_data['items'] = [item.model_dump() for item in value]
+                update_data['items'] = [item.model_dump() if hasattr(item, 'model_dump') else item for item in value]
                 # Recalculate totals
-                subtotal = sum(item.quantity * item.unit_price for item in value)
+                subtotal = sum(item.get('quantity', 0) * item.get('unit_price', 0) if isinstance(item, dict) else item.quantity * item.unit_price for item in value)
                 tva = subtotal * 0.085
                 total = subtotal + tva
                 update_data['subtotal'] = subtotal
