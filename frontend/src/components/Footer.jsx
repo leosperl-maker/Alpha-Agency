@@ -4,8 +4,6 @@ import { Mail, Phone, MapPin, Linkedin, Instagram, Facebook, Clock } from "lucid
 
 const Footer = () => {
   const navigate = useNavigate();
-  const clickCountRef = useRef(0);
-  const clickTimerRef = useRef(null);
 
   // Simple click handler for hidden admin access
   const handleLogoClick = useCallback(() => {
