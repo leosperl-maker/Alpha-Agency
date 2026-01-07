@@ -30,6 +30,8 @@ import DocumentsPage from "./pages/dashboard/DocumentsPage";
 import TasksPage from "./pages/dashboard/TasksPage";
 import BudgetPage from "./pages/dashboard/BudgetPage";
 import BackupPage from "./pages/dashboard/BackupPage";
+import UsersPage from "./pages/dashboard/UsersPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 // Layout
 import MainLayout from "./components/MainLayout";
@@ -66,6 +68,7 @@ function App() {
           
           {/* Dashboard - Accès caché */}
           <Route path="/alpha-admin-2024" element={<LoginPage />} />
+          <Route path="/alpha-admin-2024/reset-password" element={<ResetPasswordPage />} />
           <Route path="/admin/login" element={<LoginPage />} />
           <Route path="/admin" element={<DashboardLayout />}>
             <Route index element={<DashboardOverview />} />
@@ -80,6 +83,7 @@ function App() {
             <Route path="taches" element={<TasksPage />} />
             <Route path="budget" element={<BudgetPage />} />
             <Route path="sauvegardes" element={<BackupPage />} />
+            <Route path="utilisateurs" element={<UsersPage />} />
             <Route path="parametres" element={<SettingsPage />} />
           </Route>
         </Routes>
