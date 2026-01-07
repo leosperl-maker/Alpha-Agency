@@ -110,18 +110,14 @@ const InvoicesPage = () => {
 
   const fetchData = async () => {
     try {
-      const [invoicesRes, contactsRes] = await Promise.all([
+      const [invoicesRes, contactsRes, servicesRes] = await Promise.all([
         invoicesAPI.getAll(),
-        contactsAPI.getAll()
+        contactsAPI.getAll(),
+        servicesAPI.getAll()
       ]);
       setInvoices(invoicesRes.data);
       setContacts(contactsRes.data);
-      
-      // Load saved services from localStorage
-      const saved = localStorage.getItem('alphagency_services');
-      if (saved) {
-        setSavedServices(JSON.parse(saved));
-      }
+      setSavedServices(servicesRes.data);
     } catch (error) {
       toast.error("Erreur lors du chargement");
     } finally {
