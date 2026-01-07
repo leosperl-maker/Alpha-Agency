@@ -56,6 +56,7 @@ const PortfolioManagePage = () => {
     description: "",
     image_url: "",
     gallery: [],
+    audio_url: "",  // New field for audio
     link: "",
     tags: "",
     status: "brouillon",
@@ -70,7 +71,8 @@ const PortfolioManagePage = () => {
     { value: "photo", label: "Photographie" },
     { value: "video", label: "Vidéo" },
     { value: "infographie", label: "Infographie" },
-    { value: "ads", label: "Publicité digitale" }
+    { value: "ads", label: "Publicité digitale" },
+    { value: "radio", label: "Radio / Audio" }
   ];
 
   const statuses = [
