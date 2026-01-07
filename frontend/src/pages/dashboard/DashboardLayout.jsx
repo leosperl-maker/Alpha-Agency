@@ -66,12 +66,12 @@ const DashboardLayout = () => {
     <div data-testid="dashboard-layout" className="min-h-screen bg-white flex">
       {/* Sidebar */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#F8F8F8] border-r border-[#E5E5E5] transform transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#F8F8F8] border-r border-[#E5E5E5] transform transition-transform duration-300 lg:translate-x-0 flex flex-col ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-[#E5E5E5]">
+        {/* Logo - Fixed Header */}
+        <div className="h-16 flex items-center justify-between px-6 border-b border-[#E5E5E5] flex-shrink-0">
           <img 
             src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png"
             alt="Alpha Agency"
@@ -85,8 +85,8 @@ const DashboardLayout = () => {
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="p-4 space-y-1">
+        {/* Navigation - Scrollable */}
+        <nav className="p-4 space-y-1 flex-1 overflow-y-auto pb-32">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -102,23 +102,23 @@ const DashboardLayout = () => {
               }
               onClick={() => setSidebarOpen(false)}
             >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
+              <item.icon className="w-5 h-5 flex-shrink-0" />
+              <span className="font-medium truncate">{item.label}</span>
             </NavLink>
           ))}
         </nav>
 
-        {/* User & Logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#E5E5E5]">
+        {/* User & Logout - Fixed Footer */}
+        <div className="p-4 border-t border-[#E5E5E5] bg-[#F8F8F8] flex-shrink-0">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-[#CE0202]/10 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#CE0202]/10 rounded-full flex items-center justify-center flex-shrink-0">
               <span className="text-[#CE0202] font-bold">
                 {user?.full_name?.charAt(0) || "A"}
               </span>
             </div>
-            <div>
-              <p className="text-[#1A1A1A] font-medium text-sm">{user?.full_name || "Admin"}</p>
-              <p className="text-[#666666] text-xs">{user?.email || ""}</p>
+            <div className="min-w-0">
+              <p className="text-[#1A1A1A] font-medium text-sm truncate">{user?.full_name || "Admin"}</p>
+              <p className="text-[#666666] text-xs truncate">{user?.email || ""}</p>
             </div>
           </div>
           <Button
