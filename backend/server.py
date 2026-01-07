@@ -761,6 +761,49 @@ async def get_invoice(invoice_id: str, current_user: dict = Depends(get_current_
         raise HTTPException(status_code=404, detail="Facture non trouvée")
     return invoice
 
+class InvoiceUpdate(BaseModel):
+    contact_id: Optional[str] = None
+    items: Optional[List[QuoteItemCreate]] = None
+    due_date: Optional[str] = None
+    payment_terms: Optional[str] = None
+    notes: Optional[str] = None
+    conditions: Optional[str] = None
+    bank_details: Optional[str] = None
+    document_type: Optional[str] = None
+
+@api_router.put("/invoices/{invoice_id}", response_model=dict)
+async def update_invoice(invoice_id: str, invoice_update: InvoiceUpdate, current_user: dict = Depends(get_current_user)):
+    existing = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+    
+    update_data = {}
+    for key, value in invoice_update.model_dump().items():
+        if value is not None:
+            if key == 'items':
+                update_data['items'] = [item.model_dump() for item in value]
+                # Recalculate totals
+                subtotal = sum(item.quantity * item.unit_price for item in value)
+                tva = subtotal * 0.085
+                total = subtotal + tva
+                update_data['subtotal'] = subtotal
+                update_data['tva'] = tva
+                update_data['total'] = total
+            else:
+                update_data[key] = value
+    
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.invoices.update_one({"id": invoice_id}, {"$set": update_data})
+    return {"message": "Facture mise à jour"}
+
+@api_router.delete("/invoices/{invoice_id}", response_model=dict)
+async def delete_invoice(invoice_id: str, current_user: dict = Depends(get_current_user)):
+    result = await db.invoices.delete_one({"id": invoice_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+    return {"message": "Facture supprimée"}
+
 class StatusUpdate(BaseModel):
     status: str
 
