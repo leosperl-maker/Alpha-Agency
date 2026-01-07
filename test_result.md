@@ -181,6 +181,32 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+  - task: "Logo mobile responsive"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/Navbar.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Logo corrigé avec classes responsive h-8 sm:h-10 et max-w-[120px] sur mobile"
+
+  - task: "Scroll to Top sur navigation"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ScrollToTop.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Composant ScrollToTop créé et intégré dans App.js - scroll vers le haut lors du changement de route"
+
 agent_communication:
   - agent: "main"
     message: "Session de fork - Corrections majeures: 1) Favicon ajouté, 2) Onglet KPIs manuels supprimé, 3) Thème clair appliqué sur TOUTES les pages du dashboard, 4) Réalisations migrées vers la BDD (8 items), 5) Image hero restaurée, 6) Génération PDF fonctionnelle."
+  - agent: "main"
+    message: "Fork 2 - Bugs P0 corrigés: 1) Logo mobile responsive avec flex-shrink-0 et max-width, 2) Composant ScrollToTop créé pour remonter en haut lors de la navigation. Tests screenshot validés."
