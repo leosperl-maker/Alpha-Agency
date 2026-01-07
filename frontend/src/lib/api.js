@@ -89,8 +89,26 @@ export const invoicesAPI = {
   update: (id, data) => api.put(`/invoices/${id}`, data),
   updateStatus: (id, status) => api.put(`/invoices/${id}/status`, { status }),
   getPDF: (id) => api.get(`/invoices/${id}/pdf`, { responseType: 'blob' }),
-  downloadPDF: (id) => `${API_URL}/api/invoices/${id}/pdf`,
   delete: (id) => api.delete(`/invoices/${id}`),
+  // Helper function to download PDF with authentication
+  downloadPDF: async (id, invoiceNumber, type = 'facture') => {
+    try {
+      const response = await api.get(`/invoices/${id}/pdf`, { responseType: 'blob' });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${type}_${invoiceNumber || id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      return true;
+    } catch (error) {
+      console.error('PDF download error:', error);
+      throw error;
+    }
+  }
 };
 
 // Subscriptions API
