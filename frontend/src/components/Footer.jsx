@@ -42,7 +42,7 @@ const Footer = () => {
                 <Linkedin size={20} />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/alphagency.fr/"
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="social-instagram"
@@ -51,7 +51,7 @@ const Footer = () => {
                 <Instagram size={20} />
               </a>
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/alphagency.fr"
                 target="_blank"
                 rel="noopener noreferrer"
                 data-testid="social-facebook"
