@@ -740,7 +740,7 @@ const InvoicesPage = () => {
                             Dupliquer
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            onClick={() => window.open(invoicesAPI.downloadPDF(invoice.id), '_blank')}
+                            onClick={() => handleDownloadPDF(invoice)}
                             className="cursor-pointer"
                           >
                             <Download className="w-4 h-4 mr-2" />
