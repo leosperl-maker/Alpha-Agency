@@ -26,6 +26,9 @@ class AlphaAgencyAPITester:
         # Test credentials
         self.admin_email = "admin@alphagency.fr"
         self.admin_password = "superpassword"
+        
+        # Test data for admin user management
+        self.test_admin_id = None
 
     def log_result(self, test_name: str, success: bool, details: str = ""):
         """Log test result"""
