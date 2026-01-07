@@ -23,6 +23,10 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 from fastapi.responses import StreamingResponse
 
+# Backup system imports
+from utils.backup_manager import BackupManager
+from utils.backup_scheduler import backup_scheduler
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
