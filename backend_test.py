@@ -723,7 +723,8 @@ class AlphaAgencyAPITester:
 
 def main():
     tester = AlphaAgencyAPITester()
-    success = tester.run_all_tests()
+    # Run focused PDF download tests as requested in review
+    success = tester.run_pdf_download_tests()
     return 0 if success else 1
 
 if __name__ == "__main__":
