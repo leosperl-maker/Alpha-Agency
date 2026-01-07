@@ -738,13 +738,17 @@ async def create_invoice(invoice: InvoiceCreate, current_user: dict = Depends(ge
         "invoice_number": invoice_number,
         "quote_id": invoice.quote_id,
         "contact_id": invoice.contact_id,
+        "document_type": invoice.document_type or "facture",
         "items": [item.model_dump() for item in invoice.items],
         "subtotal": subtotal,
         "tva": tva,
         "total": total,
-        "status": "en_attente",
+        "status": "brouillon",
         "due_date": invoice.due_date or (datetime.now(timezone.utc) + timedelta(days=30)).strftime("%Y-%m-%d"),
+        "payment_terms": invoice.payment_terms or "30",
         "notes": invoice.notes,
+        "conditions": invoice.conditions,
+        "bank_details": invoice.bank_details,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.invoices.insert_one(invoice_doc)
