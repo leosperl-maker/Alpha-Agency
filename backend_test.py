@@ -945,8 +945,8 @@ class AlphaAgencyAPITester:
 
 def main():
     tester = AlphaAgencyAPITester()
-    # Run focused PDF download tests as requested in review
-    success = tester.run_pdf_download_tests()
+    # Run admin user management tests as requested in review
+    success = tester.run_admin_user_management_tests()
     return 0 if success else 1
 
 if __name__ == "__main__":
