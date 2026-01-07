@@ -979,8 +979,8 @@ const InvoicesPage = () => {
               </form>
             </div>
 
-            {/* Preview Side - 50% */}
-            <div className="w-1/2 p-4 hidden lg:block overflow-y-auto">
+            {/* Preview Side - Hidden on mobile, 50% on desktop */}
+            <div className="hidden lg:block lg:w-1/2 p-4 overflow-y-auto">
               <InvoicePreview />
             </div>
           </div>
