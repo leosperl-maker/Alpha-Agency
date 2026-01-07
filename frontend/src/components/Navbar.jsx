@@ -31,19 +31,19 @@ const Navbar = () => {
         data-testid="main-navbar"
         className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ${
           isScrolled ? "bg-white/95 shadow-lg backdrop-blur-md" : "bg-white/80 backdrop-blur-sm"
-        } rounded-full px-2 py-2`}
+        } rounded-full px-3 py-2`}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {/* Logo */}
           <Link
             to="/"
             data-testid="logo-link"
-            className="flex items-center gap-2 px-4"
+            className="flex items-center gap-2 px-3"
           >
             <img 
-              src="https://customer-assets.emergentagent.com/job_alphacommunicate/artifacts/10nsa4du_Design%20sans%20titre%20%2893%29.png" 
+              src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png" 
               alt="Alpha Agency"
-              className="h-14 w-auto"
+              className="h-10 w-auto"
             />
           </Link>
 
@@ -54,7 +54,7 @@ const Navbar = () => {
                 key={link.href}
                 to={link.href}
                 data-testid={`nav-${link.label.toLowerCase().replace(/[^a-z]/g, "")}`}
-                className={`px-4 py-2 text-sm font-medium transition-colors animated-underline ${
+                className={`px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap animated-underline ${
                   location.pathname === link.href
                     ? "text-[#1A1A1A]"
                     : "text-[#666666] hover:text-[#1A1A1A]"
@@ -69,7 +69,7 @@ const Navbar = () => {
           <Link to="/contact" className="hidden lg:block">
             <Button
               data-testid="cta-devis-btn"
-              className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-full px-6 py-2 text-xs font-bold uppercase tracking-wider"
+              className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-full px-6 py-2 text-xs font-bold uppercase tracking-wider whitespace-nowrap"
             >
               Demander un devis
             </Button>
