@@ -38,12 +38,12 @@ const Navbar = () => {
           <Link
             to="/"
             data-testid="logo-link"
-            className="flex items-center gap-2 px-3"
+            className="flex items-center gap-2 px-2 lg:px-3 flex-shrink-0"
           >
             <img 
               src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png" 
               alt="Alpha Agency"
-              className="h-10 w-auto"
+              className="h-8 sm:h-10 w-auto object-contain max-w-[120px] sm:max-w-none"
             />
           </Link>
 
