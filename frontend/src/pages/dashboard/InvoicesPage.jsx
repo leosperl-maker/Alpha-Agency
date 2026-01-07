@@ -6,7 +6,6 @@ import {
   CheckCircle, 
   Clock, 
   AlertTriangle,
-  Send,
   Eye,
   Edit,
   Trash2,
@@ -15,13 +14,14 @@ import {
   MoreVertical,
   Mail,
   Euro,
-  Calendar,
-  Building,
   FileText,
   Loader2,
   Copy,
-  Printer,
-  XCircle
+  XCircle,
+  Save,
+  Package,
+  Settings,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -41,25 +41,52 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "../../components/ui/sheet";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { invoicesAPI, contactsAPI } from "../../lib/api";
+import api from "../../lib/api";
 import { toast } from "sonner";
 
 const TVA_RATE = 0.085; // 8.5% TVA Guadeloupe
 
+// Company Info
+const COMPANY_INFO = {
+  name: "Alpha Agency",
+  tagline: "Agence de communication 360°",
+  address: "Immeuble Hibiscus, Route de Montebello",
+  city: "97170 Petit-Bourg, Guadeloupe",
+  phone: "06 90 55 30 18",
+  email: "contact@alphagency.fr",
+  website: "www.alphagency.fr",
+  siret: "XXX XXX XXX XXXXX",
+  tva: "FR XX XXX XXX XXX",
+  logo: "https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png"
+};
+
 const InvoicesPage = () => {
   const [invoices, setInvoices] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [savedServices, setSavedServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [servicesDialogOpen, setServicesDialogOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [documentType, setDocumentType] = useState("facture"); // facture or devis
+  const [newService, setNewService] = useState({ title: "", description: "", price: 0 });
+  const [editingService, setEditingService] = useState(null);
   
   const [items, setItems] = useState([{ description: "", quantity: 1, unit_price: 0 }]);
   const [formData, setFormData] = useState({
@@ -67,8 +94,8 @@ const InvoicesPage = () => {
     due_date: "",
     payment_terms: "30",
     notes: "",
-    conditions: "Paiement par virement bancaire ou chèque à l'ordre de Alpha Agency.",
-    bank_details: "IBAN: FR76 XXXX XXXX XXXX XXXX XXXX XXX\nBIC: XXXXXXXX"
+    conditions: "Paiement par virement bancaire ou chèque à l'ordre de Alpha Agency.\nEn cas de retard de paiement, des pénalités de 3 fois le taux d'intérêt légal seront appliquées.",
+    bank_details: "IBAN: FR76 XXXX XXXX XXXX XXXX XXXX XXX\nBIC: XXXXXXXX\nBanque: Crédit Agricole Guadeloupe"
   });
 
   const statusConfig = {
@@ -88,6 +115,12 @@ const InvoicesPage = () => {
       ]);
       setInvoices(invoicesRes.data);
       setContacts(contactsRes.data);
+      
+      // Load saved services from localStorage
+      const saved = localStorage.getItem('alphagency_services');
+      if (saved) {
+        setSavedServices(JSON.parse(saved));
+      }
     } catch (error) {
       toast.error("Erreur lors du chargement");
     } finally {
@@ -99,6 +132,50 @@ const InvoicesPage = () => {
     fetchData();
   }, []);
 
+  // Save services to localStorage
+  const saveServicesToStorage = (services) => {
+    localStorage.setItem('alphagency_services', JSON.stringify(services));
+    setSavedServices(services);
+  };
+
+  const handleAddService = () => {
+    if (!newService.title || !newService.price) {
+      toast.error("Veuillez remplir le titre et le prix");
+      return;
+    }
+    const service = {
+      id: Date.now().toString(),
+      ...newService
+    };
+    saveServicesToStorage([...savedServices, service]);
+    setNewService({ title: "", description: "", price: 0 });
+    toast.success("Service enregistré");
+  };
+
+  const handleUpdateService = () => {
+    if (!editingService) return;
+    const updated = savedServices.map(s => s.id === editingService.id ? editingService : s);
+    saveServicesToStorage(updated);
+    setEditingService(null);
+    toast.success("Service mis à jour");
+  };
+
+  const handleDeleteService = (id) => {
+    if (!window.confirm("Supprimer ce service ?")) return;
+    const filtered = savedServices.filter(s => s.id !== id);
+    saveServicesToStorage(filtered);
+    toast.success("Service supprimé");
+  };
+
+  const addServiceToInvoice = (service) => {
+    setItems([...items, {
+      description: service.description ? `${service.title}\n${service.description}` : service.title,
+      quantity: 1,
+      unit_price: parseFloat(service.price)
+    }]);
+    toast.success("Service ajouté à la facture");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -106,6 +183,7 @@ const InvoicesPage = () => {
       const validItems = items.filter(item => item.description && item.unit_price > 0);
       const payload = {
         ...formData,
+        document_type: documentType,
         items: validItems.map(item => ({
           description: item.description,
           quantity: item.quantity,
@@ -115,12 +193,12 @@ const InvoicesPage = () => {
 
       if (editingInvoice) {
         await invoicesAPI.update(editingInvoice.id, payload);
-        toast.success("Facture mise à jour");
+        toast.success(`${documentType === 'devis' ? 'Devis' : 'Facture'} mise à jour`);
       } else {
         await invoicesAPI.create(payload);
-        toast.success("Facture créée");
+        toast.success(`${documentType === 'devis' ? 'Devis' : 'Facture'} créée`);
       }
-      setDialogOpen(false);
+      setSheetOpen(false);
       resetForm();
       fetchData();
     } catch (error) {
@@ -141,10 +219,10 @@ const InvoicesPage = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Supprimer cette facture ?")) return;
+    if (!window.confirm("Supprimer ce document ?")) return;
     try {
       await invoicesAPI.delete(id);
-      toast.success("Facture supprimée");
+      toast.success("Document supprimé");
       fetchData();
     } catch (error) {
       toast.error("Erreur lors de la suppression");
@@ -163,7 +241,7 @@ const InvoicesPage = () => {
         items: invoice.items
       };
       await invoicesAPI.create(newInvoice);
-      toast.success("Facture dupliquée");
+      toast.success("Document dupliqué");
       fetchData();
     } catch (error) {
       toast.error("Erreur lors de la duplication");
@@ -176,15 +254,22 @@ const InvoicesPage = () => {
       due_date: "",
       payment_terms: "30",
       notes: "",
-      conditions: "Paiement par virement bancaire ou chèque à l'ordre de Alpha Agency.",
-      bank_details: "IBAN: FR76 XXXX XXXX XXXX XXXX XXXX XXX\nBIC: XXXXXXXX"
+      conditions: "Paiement par virement bancaire ou chèque à l'ordre de Alpha Agency.\nEn cas de retard de paiement, des pénalités de 3 fois le taux d'intérêt légal seront appliquées.",
+      bank_details: "IBAN: FR76 XXXX XXXX XXXX XXXX XXXX XXX\nBIC: XXXXXXXX\nBanque: Crédit Agricole Guadeloupe"
     });
     setItems([{ description: "", quantity: 1, unit_price: 0 }]);
     setEditingInvoice(null);
   };
 
-  const openEditDialog = (invoice) => {
+  const openCreateSheet = (type) => {
+    resetForm();
+    setDocumentType(type);
+    setSheetOpen(true);
+  };
+
+  const openEditSheet = (invoice) => {
     setEditingInvoice(invoice);
+    setDocumentType(invoice.document_type || 'facture');
     setFormData({
       contact_id: invoice.contact_id,
       due_date: invoice.due_date?.split('T')[0] || "",
@@ -194,7 +279,7 @@ const InvoicesPage = () => {
       bank_details: invoice.bank_details || ""
     });
     setItems(invoice.items?.length > 0 ? invoice.items : [{ description: "", quantity: 1, unit_price: 0 }]);
-    setDialogOpen(true);
+    setSheetOpen(true);
   };
 
   const openViewDialog = (invoice) => {
@@ -230,13 +315,17 @@ const InvoicesPage = () => {
     return calculateSubtotal(invoiceItems) + calculateTVA(invoiceItems);
   };
 
+  const getContact = (contactId) => {
+    return contacts.find(c => c.id === contactId);
+  };
+
   const getContactName = (contactId) => {
-    const contact = contacts.find(c => c.id === contactId);
-    return contact ? `${contact.first_name} ${contact.last_name}` : "Contact inconnu";
+    const contact = getContact(contactId);
+    return contact ? `${contact.first_name} ${contact.last_name}` : "Client";
   };
 
   const getContactCompany = (contactId) => {
-    const contact = contacts.find(c => c.id === contactId);
+    const contact = getContact(contactId);
     return contact?.company || "";
   };
 
@@ -278,233 +367,180 @@ const InvoicesPage = () => {
     .filter(i => i.status === "en_retard")
     .reduce((sum, i) => sum + (i.total || 0), 0);
 
+  // Invoice Preview Component
+  const InvoicePreview = () => {
+    const contact = getContact(formData.contact_id);
+    const today = new Date().toLocaleDateString('fr-FR');
+    const dueDate = formData.due_date ? formatDate(formData.due_date) : "-";
+    
+    return (
+      <div className="bg-white border border-[#E5E5E5] rounded-lg shadow-lg overflow-hidden h-full">
+        <div className="bg-[#F8F8F8] px-4 py-2 border-b border-[#E5E5E5] flex items-center justify-between">
+          <span className="text-sm font-medium text-[#666666]">Aperçu</span>
+          <Badge variant="outline" className="text-xs">
+            {documentType === 'devis' ? 'DEVIS' : 'FACTURE'}
+          </Badge>
+        </div>
+        <div className="p-6 text-xs overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+          {/* Header with Logo */}
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <img src={COMPANY_INFO.logo} alt="Alpha Agency" className="h-12 mb-2" />
+              <p className="text-[8px] text-[#666666]">{COMPANY_INFO.tagline}</p>
+            </div>
+            <div className="text-right">
+              <h2 className="text-lg font-bold text-[#CE0202] mb-1">
+                {documentType === 'devis' ? 'DEVIS' : 'FACTURE'}
+              </h2>
+              <p className="text-[#666666]">N° {editingInvoice?.invoice_number || 'NOUVEAU'}</p>
+              <p className="text-[#666666]">Date: {today}</p>
+            </div>
+          </div>
+
+          {/* Company & Client Info */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-[#F8F8F8] p-3 rounded">
+              <p className="font-bold text-[#1A1A1A] mb-1">{COMPANY_INFO.name}</p>
+              <p className="text-[#666666]">{COMPANY_INFO.address}</p>
+              <p className="text-[#666666]">{COMPANY_INFO.city}</p>
+              <p className="text-[#666666]">Tél: {COMPANY_INFO.phone}</p>
+              <p className="text-[#666666]">{COMPANY_INFO.email}</p>
+              <p className="text-[#666666] mt-1">SIRET: {COMPANY_INFO.siret}</p>
+            </div>
+            <div className="bg-[#F8F8F8] p-3 rounded">
+              <p className="font-bold text-[#666666] mb-1">FACTURER À:</p>
+              {contact ? (
+                <>
+                  <p className="font-bold text-[#1A1A1A]">{contact.first_name} {contact.last_name}</p>
+                  {contact.company && <p className="text-[#666666]">{contact.company}</p>}
+                  {contact.email && <p className="text-[#666666]">{contact.email}</p>}
+                  {contact.phone && <p className="text-[#666666]">Tél: {contact.phone}</p>}
+                </>
+              ) : (
+                <p className="text-[#999999] italic">Sélectionnez un client</p>
+              )}
+            </div>
+          </div>
+
+          {/* Dates */}
+          <div className="flex gap-4 mb-4 text-[10px]">
+            <div className="bg-[#CE0202]/10 px-3 py-1 rounded">
+              <span className="text-[#CE0202] font-medium">Date d'émission:</span> {today}
+            </div>
+            <div className="bg-[#CE0202]/10 px-3 py-1 rounded">
+              <span className="text-[#CE0202] font-medium">Échéance:</span> {dueDate}
+            </div>
+          </div>
+
+          {/* Items Table */}
+          <table className="w-full mb-4">
+            <thead>
+              <tr className="bg-[#1A1A1A] text-white">
+                <th className="text-left p-2 text-[10px]">Description</th>
+                <th className="text-center p-2 text-[10px] w-16">Qté</th>
+                <th className="text-right p-2 text-[10px] w-20">P.U. HT</th>
+                <th className="text-right p-2 text-[10px] w-24">Total HT</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.filter(i => i.description).map((item, index) => (
+                <tr key={index} className="border-b border-[#E5E5E5]">
+                  <td className="p-2 text-[10px] whitespace-pre-wrap">{item.description}</td>
+                  <td className="p-2 text-[10px] text-center">{item.quantity}</td>
+                  <td className="p-2 text-[10px] text-right">{formatCurrency(item.unit_price)}</td>
+                  <td className="p-2 text-[10px] text-right font-medium">{formatCurrency(item.quantity * item.unit_price)}</td>
+                </tr>
+              ))}
+              {items.filter(i => i.description).length === 0 && (
+                <tr>
+                  <td colSpan={4} className="p-4 text-center text-[#999999] italic">
+                    Ajoutez des lignes à votre {documentType}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {/* Totals */}
+          <div className="flex justify-end mb-4">
+            <div className="w-48">
+              <div className="flex justify-between py-1 text-[10px]">
+                <span className="text-[#666666]">Sous-total HT</span>
+                <span>{formatCurrency(calculateSubtotal())}</span>
+              </div>
+              <div className="flex justify-between py-1 text-[10px]">
+                <span className="text-[#666666]">TVA (8.5%)</span>
+                <span>{formatCurrency(calculateTVA())}</span>
+              </div>
+              <div className="flex justify-between py-2 text-sm font-bold border-t-2 border-[#CE0202] mt-1">
+                <span>Total TTC</span>
+                <span className="text-[#CE0202]">{formatCurrency(calculateTotal())}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Notes */}
+          {formData.notes && (
+            <div className="bg-[#F8F8F8] p-3 rounded mb-4">
+              <p className="font-bold text-[10px] mb-1">Notes:</p>
+              <p className="text-[10px] text-[#666666] whitespace-pre-wrap">{formData.notes}</p>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="border-t border-[#E5E5E5] pt-4 mt-4">
+            <div className="grid grid-cols-2 gap-4 text-[8px] text-[#666666]">
+              <div>
+                <p className="font-bold mb-1">Conditions de paiement:</p>
+                <p className="whitespace-pre-wrap">{formData.conditions}</p>
+              </div>
+              <div>
+                <p className="font-bold mb-1">Coordonnées bancaires:</p>
+                <p className="whitespace-pre-wrap font-mono">{formData.bank_details}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div data-testid="invoices-page" className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#1A1A1A]">Facturation</h1>
-          <p className="text-[#666666] text-sm">{invoices.length} factures au total</p>
+          <p className="text-[#666666] text-sm">{invoices.length} documents au total</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button 
-              data-testid="add-invoice-btn"
-              onClick={resetForm}
-              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nouvelle facture
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-white border-[#E5E5E5] max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-[#1A1A1A]">
-                {editingInvoice ? `Modifier la facture ${editingInvoice.invoice_number}` : "Nouvelle facture"}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Client & Dates */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Client *</Label>
-                  <Select
-                    value={formData.contact_id}
-                    onValueChange={(value) => setFormData({...formData, contact_id: value})}
-                    required
-                  >
-                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
-                      <SelectValue placeholder="Sélectionner un client" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-[#E5E5E5]">
-                      {contacts.map((contact) => (
-                        <SelectItem key={contact.id} value={contact.id}>
-                          <div>
-                            <span>{contact.first_name} {contact.last_name}</span>
-                            {contact.company && (
-                              <span className="text-[#666666] text-xs ml-2">({contact.company})</span>
-                            )}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Date d'échéance</Label>
-                  <Input
-                    type="date"
-                    value={formData.due_date}
-                    onChange={(e) => setFormData({...formData, due_date: e.target.value})}
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Délai de paiement</Label>
-                  <Select
-                    value={formData.payment_terms}
-                    onValueChange={(value) => setFormData({...formData, payment_terms: value})}
-                  >
-                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-[#E5E5E5]">
-                      <SelectItem value="0">Paiement immédiat</SelectItem>
-                      <SelectItem value="15">15 jours</SelectItem>
-                      <SelectItem value="30">30 jours</SelectItem>
-                      <SelectItem value="45">45 jours</SelectItem>
-                      <SelectItem value="60">60 jours</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Invoice Items */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-[#1A1A1A] font-semibold">Lignes de la facture</Label>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={addItem}
-                    className="text-[#CE0202] hover:text-[#B00202]"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Ajouter une ligne
-                  </Button>
-                </div>
-                
-                <div className="bg-[#F8F8F8] rounded-lg p-4 space-y-3">
-                  {/* Header */}
-                  <div className="grid grid-cols-12 gap-2 text-xs font-medium text-[#666666] uppercase">
-                    <div className="col-span-6">Description</div>
-                    <div className="col-span-2 text-center">Qté</div>
-                    <div className="col-span-3 text-right">Prix unitaire HT</div>
-                    <div className="col-span-1"></div>
-                  </div>
-                  
-                  {items.map((item, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-2 items-center">
-                      <div className="col-span-6">
-                        <Input
-                          placeholder="Description du service/produit"
-                          value={item.description}
-                          onChange={(e) => updateItem(index, "description", e.target.value)}
-                          className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Input
-                          type="number"
-                          min="1"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(index, "quantity", e.target.value)}
-                          className="bg-white border-[#E5E5E5] text-[#1A1A1A] text-center"
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={item.unit_price}
-                            onChange={(e) => updateItem(index, "unit_price", e.target.value)}
-                            className="bg-white border-[#E5E5E5] text-[#1A1A1A] pr-8 text-right"
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666666]">€</span>
-                        </div>
-                      </div>
-                      <div className="col-span-1 flex justify-center">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeItem(index)}
-                          className="text-red-500 hover:text-red-600 h-8 w-8 p-0"
-                          disabled={items.length === 1}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Totals */}
-              <div className="bg-[#1A1A1A] text-white rounded-lg p-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Sous-total HT</span>
-                    <span className="font-mono">{formatCurrency(calculateSubtotal())}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">TVA (8.5%)</span>
-                    <span className="font-mono">{formatCurrency(calculateTVA())}</span>
-                  </div>
-                  <div className="border-t border-white/20 pt-2 flex justify-between text-xl font-bold">
-                    <span>Total TTC</span>
-                    <span className="font-mono text-[#CE0202]">{formatCurrency(calculateTotal())}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Notes & Conditions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Notes (visible sur la facture)</Label>
-                  <Textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
-                    rows={3}
-                    placeholder="Notes ou mentions spéciales..."
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Conditions de paiement</Label>
-                  <Textarea
-                    value={formData.conditions}
-                    onChange={(e) => setFormData({...formData, conditions: e.target.value})}
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
-                    rows={3}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Coordonnées bancaires</Label>
-                <Textarea
-                  value={formData.bank_details}
-                  onChange={(e) => setFormData({...formData, bank_details: e.target.value})}
-                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A] font-mono text-sm"
-                  rows={2}
-                />
-              </div>
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  Annuler
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={saving || !formData.contact_id}
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white"
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Enregistrement...
-                    </>
-                  ) : (
-                    editingInvoice ? "Mettre à jour" : "Créer la facture"
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => setServicesDialogOpen(true)}
+            className="border-[#E5E5E5]"
+          >
+            <Package className="w-4 h-4 mr-2" />
+            Services
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Nouveau document
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-white border-[#E5E5E5]">
+              <DropdownMenuItem onClick={() => openCreateSheet('facture')} className="cursor-pointer">
+                <Receipt className="w-4 h-4 mr-2" />
+                Facture
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => openCreateSheet('devis')} className="cursor-pointer">
+                <FileText className="w-4 h-4 mr-2" />
+                Devis
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -593,7 +629,7 @@ const InvoicesPage = () => {
         <div className="bg-white rounded-lg border border-[#E5E5E5] p-12 text-center">
           <Receipt className="w-12 h-12 text-[#666666] mx-auto mb-4" />
           <p className="text-[#666666]">
-            {searchQuery || filterStatus !== "all" ? "Aucune facture trouvée" : "Aucune facture créée"}
+            {searchQuery || filterStatus !== "all" ? "Aucun document trouvé" : "Aucun document créé"}
           </p>
         </div>
       ) : (
@@ -654,7 +690,7 @@ const InvoicesPage = () => {
                             <Eye className="w-4 h-4 mr-2" />
                             Voir
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openEditDialog(invoice)} className="cursor-pointer">
+                          <DropdownMenuItem onClick={() => openEditSheet(invoice)} className="cursor-pointer">
                             <Edit className="w-4 h-4 mr-2" />
                             Modifier
                           </DropdownMenuItem>
@@ -716,6 +752,282 @@ const InvoicesPage = () => {
         </div>
       )}
 
+      {/* Create/Edit Sheet with Preview */}
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-[1200px] p-0 bg-[#F8F8F8]">
+          <div className="flex h-full">
+            {/* Form Side */}
+            <div className="flex-1 p-6 overflow-y-auto bg-white border-r border-[#E5E5E5]">
+              <SheetHeader className="mb-6">
+                <SheetTitle className="text-[#1A1A1A] flex items-center gap-2">
+                  {documentType === 'devis' ? <FileText className="w-5 h-5" /> : <Receipt className="w-5 h-5" />}
+                  {editingInvoice ? `Modifier ${documentType === 'devis' ? 'le devis' : 'la facture'}` : `Nouvelle ${documentType === 'devis' ? 'devis' : 'facture'}`}
+                </SheetTitle>
+              </SheetHeader>
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Client & Dates */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[#1A1A1A]">Client *</Label>
+                    <Select
+                      value={formData.contact_id}
+                      onValueChange={(value) => setFormData({...formData, contact_id: value})}
+                      required
+                    >
+                      <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-[#E5E5E5]">
+                        {contacts.map((contact) => (
+                          <SelectItem key={contact.id} value={contact.id}>
+                            {contact.first_name} {contact.last_name}
+                            {contact.company && <span className="text-[#666666] ml-1">({contact.company})</span>}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[#1A1A1A]">Échéance</Label>
+                    <Input
+                      type="date"
+                      value={formData.due_date}
+                      onChange={(e) => setFormData({...formData, due_date: e.target.value})}
+                      className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    />
+                  </div>
+                </div>
+
+                {/* Saved Services */}
+                {savedServices.length > 0 && (
+                  <div className="bg-[#F8F8F8] rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Package className="w-4 h-4 text-[#CE0202]" />
+                      <span className="text-sm font-medium text-[#1A1A1A]">Services enregistrés</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {savedServices.map((service) => (
+                        <Button
+                          key={service.id}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addServiceToInvoice(service)}
+                          className="text-xs"
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          {service.title} ({formatCurrency(service.price)})
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Items */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-[#1A1A1A] font-semibold">Lignes</Label>
+                    <Button type="button" variant="ghost" onClick={addItem} className="text-[#CE0202]">
+                      <Plus className="w-4 h-4 mr-1" /> Ajouter
+                    </Button>
+                  </div>
+                  
+                  {items.map((item, index) => (
+                    <div key={index} className="grid grid-cols-12 gap-2 items-start">
+                      <div className="col-span-6">
+                        <Textarea
+                          placeholder="Description"
+                          value={item.description}
+                          onChange={(e) => updateItem(index, "description", e.target.value)}
+                          className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A] min-h-[60px]"
+                          rows={2}
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Input
+                          type="number"
+                          min="1"
+                          placeholder="Qté"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(index, "quantity", e.target.value)}
+                          className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                        />
+                      </div>
+                      <div className="col-span-3">
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="Prix €"
+                          value={item.unit_price}
+                          onChange={(e) => updateItem(index, "unit_price", e.target.value)}
+                          className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                        />
+                      </div>
+                      <div className="col-span-1 flex justify-center pt-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeItem(index)}
+                          className="text-red-500 h-8 w-8 p-0"
+                          disabled={items.length === 1}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Notes */}
+                <div className="space-y-2">
+                  <Label className="text-[#1A1A1A]">Notes</Label>
+                  <Textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    rows={2}
+                    placeholder="Notes visibles sur le document..."
+                  />
+                </div>
+
+                {/* Totals */}
+                <div className="bg-[#1A1A1A] text-white rounded-lg p-4">
+                  <div className="flex justify-between py-1">
+                    <span className="text-white/70">Sous-total HT</span>
+                    <span className="font-mono">{formatCurrency(calculateSubtotal())}</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-white/70">TVA (8.5%)</span>
+                    <span className="font-mono">{formatCurrency(calculateTVA())}</span>
+                  </div>
+                  <div className="flex justify-between py-2 text-xl font-bold border-t border-white/20 mt-2">
+                    <span>Total TTC</span>
+                    <span className="font-mono text-[#CE0202]">{formatCurrency(calculateTotal())}</span>
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <div className="flex gap-3">
+                  <Button type="button" variant="outline" onClick={() => setSheetOpen(false)} className="flex-1">
+                    Annuler
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={saving || !formData.contact_id}
+                    className="flex-1 bg-[#CE0202] hover:bg-[#B00202] text-white"
+                  >
+                    {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                    {editingInvoice ? "Mettre à jour" : "Créer"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+
+            {/* Preview Side */}
+            <div className="w-[400px] p-4 hidden lg:block">
+              <InvoicePreview />
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Services Management Dialog */}
+      <Dialog open={servicesDialogOpen} onOpenChange={setServicesDialogOpen}>
+        <DialogContent className="bg-white border-[#E5E5E5] max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-[#1A1A1A] flex items-center gap-2">
+              <Package className="w-5 h-5 text-[#CE0202]" />
+              Services enregistrés
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Add New Service */}
+            <div className="bg-[#F8F8F8] rounded-lg p-4 space-y-3">
+              <p className="text-sm font-medium text-[#1A1A1A]">Ajouter un service</p>
+              <Input
+                placeholder="Titre du service"
+                value={newService.title}
+                onChange={(e) => setNewService({...newService, title: e.target.value})}
+                className="bg-white border-[#E5E5E5]"
+              />
+              <Input
+                placeholder="Description (optionnel)"
+                value={newService.description}
+                onChange={(e) => setNewService({...newService, description: e.target.value})}
+                className="bg-white border-[#E5E5E5]"
+              />
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="Prix €"
+                  value={newService.price || ""}
+                  onChange={(e) => setNewService({...newService, price: parseFloat(e.target.value) || 0})}
+                  className="bg-white border-[#E5E5E5]"
+                />
+                <Button onClick={handleAddService} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Services List */}
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {savedServices.length === 0 ? (
+                <p className="text-center text-[#666666] py-4">Aucun service enregistré</p>
+              ) : (
+                savedServices.map((service) => (
+                  <div key={service.id} className="flex items-center justify-between p-3 bg-[#F8F8F8] rounded-lg">
+                    {editingService?.id === service.id ? (
+                      <div className="flex-1 space-y-2">
+                        <Input
+                          value={editingService.title}
+                          onChange={(e) => setEditingService({...editingService, title: e.target.value})}
+                          className="bg-white border-[#E5E5E5]"
+                        />
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            value={editingService.price}
+                            onChange={(e) => setEditingService({...editingService, price: parseFloat(e.target.value) || 0})}
+                            className="bg-white border-[#E5E5E5]"
+                          />
+                          <Button size="sm" onClick={handleUpdateService} className="bg-green-600 hover:bg-green-700">
+                            <Check className="w-4 h-4" />
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setEditingService(null)}>
+                            <XCircle className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <p className="font-medium text-[#1A1A1A]">{service.title}</p>
+                          {service.description && <p className="text-xs text-[#666666]">{service.description}</p>}
+                          <p className="text-sm text-[#CE0202] font-mono">{formatCurrency(service.price)}</p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="ghost" onClick={() => setEditingService(service)}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => handleDeleteService(service.id)} className="text-red-500">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* View Invoice Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="bg-white border-[#E5E5E5] max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -724,7 +1036,7 @@ const InvoicesPage = () => {
               <DialogHeader>
                 <div className="flex items-center justify-between">
                   <DialogTitle className="text-[#1A1A1A]">
-                    Facture {selectedInvoice.invoice_number}
+                    {selectedInvoice.invoice_number}
                   </DialogTitle>
                   <Badge className={statusConfig[selectedInvoice.status]?.color}>
                     {statusConfig[selectedInvoice.status]?.label}
@@ -791,14 +1103,6 @@ const InvoicesPage = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Notes */}
-                {selectedInvoice.notes && (
-                  <div className="bg-[#F8F8F8] rounded-lg p-4">
-                    <p className="text-sm text-[#666666] mb-1">Notes</p>
-                    <p className="text-[#1A1A1A]">{selectedInvoice.notes}</p>
-                  </div>
-                )}
               </div>
 
               <DialogFooter>
