@@ -147,6 +147,18 @@ backend:
         agent: "testing"
         comment: "✅ TESTÉ - PDF téléchargement devis Alpha Agency avec design professionnel VALIDÉ. GET /api/quotes/{id}/pdf génère PDF 290KB avec logo Cloudinary, mise en page professionnelle, TVA 8.5% Guadeloupe, conditions de validité. Content-Type: application/pdf, Content-Disposition: attachment; filename=devis_DEV-2026-0007.pdf. Authentification JWT requise, gestion erreurs 401/404 opérationnelle."
 
+  - task: "API Gestion utilisateurs administrateurs Alpha Agency"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - API gestion utilisateurs administrateurs Alpha Agency fonctionne parfaitement (16/16 tests réussis, 100%). Tests validés: 1) GET /api/admin/users → liste utilisateurs sans mots de passe (super_admin uniquement) ✓, 2) POST /api/auth/register → création admin avec validation email unique ✓, 3) PUT /api/admin/users/{id} → modification utilisateur avec protection rôle super_admin ✓, 4) DELETE /api/admin/users/{id} → suppression avec protection super_admin et auto-suppression ✓, 5) POST /api/auth/forgot-password → demande réinitialisation (prévention énumération emails) ✓, 6) PUT /api/auth/change-password → changement mot de passe avec validation ✓. Contrôle d'accès: admin régulier correctement bloqué des endpoints super_admin. Authentification admin@alphagency.fr/superpassword validée."
+
 frontend:
   - task: "Dashboard Vue d'ensemble connecté aux données réelles"
     implemented: true
