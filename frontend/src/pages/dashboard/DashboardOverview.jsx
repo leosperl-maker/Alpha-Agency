@@ -143,32 +143,28 @@ const DashboardOverview = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <Card 
-              data-testid={`kpi-${index}`}
-              className="bg-white border border-[#E5E5E5] shadow-sm"
-            >
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-[#666666] text-sm mb-1">{kpi.title}</p>
-                    <p className="text-3xl font-bold text-[#1A1A1A] font-mono">{kpi.value}</p>
-                    <p className="text-xs text-[#666666] mt-1">{kpi.subValue}</p>
+            <Link to={kpi.link}>
+              <Card 
+                data-testid={`kpi-${index}`}
+                className="bg-white border border-[#E5E5E5] shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[#666666] text-sm mb-1">{kpi.title}</p>
+                      <p className="text-3xl font-bold text-[#1A1A1A] font-mono">{kpi.value}</p>
+                      <p className="text-xs text-[#666666] mt-1">{kpi.subValue}</p>
+                    </div>
+                    <div 
+                      className="w-12 h-12 rounded-lg flex items-center justify-center"
+                      style={{ backgroundColor: `${kpi.color}15` }}
+                    >
+                      <kpi.icon className="w-6 h-6" style={{ color: kpi.color }} />
+                    </div>
                   </div>
-                  <div 
-                    className="w-12 h-12 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: `${kpi.color}15` }}
-                  >
-                    <kpi.icon className="w-6 h-6" style={{ color: kpi.color }} />
-                  </div>
-                </div>
-                {kpi.trend === "up" && (
-                  <div className="flex items-center gap-1 mt-3 text-green-600 text-xs">
-                    <ArrowUp className="w-3 h-3" />
-                    <span>+12% ce mois</span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
           </motion.div>
         ))}
       </div>
