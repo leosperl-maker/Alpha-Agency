@@ -188,11 +188,14 @@ test_plan:
     file: "/app/frontend/src/components/Navbar.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Logo corrigé avec classes responsive h-8 sm:h-10 et max-w-[120px] sur mobile"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - Logo responsive fonctionne parfaitement. Desktop: 126x40px, Mobile: 101x32px. Contraintes de taille respectées (h-8=32px mobile, max-w-[120px]=101px). Aucune déformation observée."
 
   - task: "Scroll to Top sur navigation"
     implemented: true
@@ -200,11 +203,14 @@ test_plan:
     file: "/app/frontend/src/components/ScrollToTop.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Composant ScrollToTop créé et intégré dans App.js - scroll vers le haut lors du changement de route"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - Scroll to Top fonctionne parfaitement. Test 1: 2108px→0px, Test 2: 1044px→0px. Navigation depuis footer vers /realisations et /contact remonte bien en haut de page."
 
 agent_communication:
   - agent: "main"
