@@ -176,11 +176,35 @@ test_plan:
   current_focus:
     - "Logo mobile responsive"
     - "Scroll to Top sur navigation"
-    - "Page Documents Dashboard"
-    - "Triple-clic footer pour accès admin"
+    - "API Services enregistrés (CRUD)"
+    - "Page Factures avec services et PDF professionnel"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+
+  - task: "API Services enregistrés (CRUD)"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Routes CRUD créées pour /api/services - testées via curl avec succès"
+
+  - task: "PDF Facture professionnelle"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Génération PDF améliorée avec logo, mise en page professionnelle, support devis/facture"
 
   - task: "Logo mobile responsive"
     implemented: true
