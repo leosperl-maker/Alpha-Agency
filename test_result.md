@@ -266,3 +266,5 @@ agent_communication:
     message: "✅ TESTS P0 VALIDÉS - Logo mobile responsive et Scroll to Top fonctionnent parfaitement. Logo: Desktop 126x40px, Mobile 101x32px (contraintes respectées). Scroll: 2 tests réussis avec navigation footer→pages (2108px→0px, 1044px→0px). Menu mobile et CTA button également testés avec succès. Aucun problème détecté."
   - agent: "main"
     message: "Fork 2 - P1 Facturation: 1) API Services CRUD implémentée (backend), 2) Frontend mis à jour pour utiliser API au lieu de localStorage, 3) PDF professionnel avec logo et mise en page améliorée, 4) Routes factures update/delete ajoutées. Tests curl réussis."
+  - agent: "testing"
+    message: "✅ TESTS FACTURATION VALIDÉS - Outil de facturation Alpha Agency fonctionne parfaitement. 41/41 tests réussis (100%). API Services CRUD complète, API Factures avec tous les statuts (brouillon→payee), génération PDF professionnelle (factures + devis), TVA 8.5% Guadeloupe, validation des statuts. BUG CORRIGÉ: invoice update endpoint (AttributeError model_dump). Authentification admin confirmée (admin@alphagency.fr / superpassword). Tous les endpoints requis opérationnels."
