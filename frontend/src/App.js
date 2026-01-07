@@ -27,6 +27,9 @@ import PortfolioManagePage from "./pages/dashboard/PortfolioManagePage";
 import DemandesPage from "./pages/dashboard/DemandesPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
 import DocumentsPage from "./pages/dashboard/DocumentsPage";
+import TasksPage from "./pages/dashboard/TasksPage";
+import BudgetPage from "./pages/dashboard/BudgetPage";
+import BackupPage from "./pages/dashboard/BackupPage";
 
 // Layout
 import MainLayout from "./components/MainLayout";
