@@ -77,6 +77,9 @@ function App() {
             <Route path="abonnements" element={<SubscriptionsPage />} />
             <Route path="realisations" element={<PortfolioManagePage />} />
             <Route path="documents" element={<DocumentsPage />} />
+            <Route path="taches" element={<TasksPage />} />
+            <Route path="budget" element={<BudgetPage />} />
+            <Route path="sauvegardes" element={<BackupPage />} />
             <Route path="parametres" element={<SettingsPage />} />
           </Route>
         </Routes>
