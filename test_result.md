@@ -174,13 +174,74 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Logo mobile responsive"
-    - "Scroll to Top sur navigation"
-    - "API Services enregistrés (CRUD)"
-    - "Page Factures avec services et PDF professionnel"
+    - "Formulaire facture 50/50 (preview agrandie)"
+    - "Services enregistrés avec titre gras et description longue"
+    - "Statuts modifiables directement dans le tableau"
+    - "Dashboard connecté aux vraies données"
+    - "Réalisations avec support audio"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+
+  - task: "Formulaire facture layout 50/50"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/dashboard/InvoicesPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Sheet élargie à 1400px, formulaire et preview en 50/50 (w-1/2 chacun)"
+
+  - task: "Services avec titre gras et description longue"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/dashboard/InvoicesPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Dialogue services agrandi (max-w-2xl), titre en font-bold, Textarea pour description longue"
+
+  - task: "Statuts factures modifiables dans tableau"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/dashboard/InvoicesPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Badge remplacé par Select avec tous les statuts disponibles"
+
+  - task: "Dashboard connecté aux données réelles"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/dashboard/DashboardOverview.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "API dashboard/stats mise à jour avec leads_trend et pipeline_stages. Frontend utilise les données API."
+
+  - task: "Support audio dans réalisations"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/dashboard/PortfolioManagePage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Ajout champ audio_url, fonction upload audio, interface pour ajouter/supprimer fichier audio, catégorie Radio/Audio"
 
   - task: "API Services enregistrés (CRUD)"
     implemented: true
