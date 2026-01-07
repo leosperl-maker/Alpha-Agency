@@ -217,3 +217,5 @@ agent_communication:
     message: "Session de fork - Corrections majeures: 1) Favicon ajouté, 2) Onglet KPIs manuels supprimé, 3) Thème clair appliqué sur TOUTES les pages du dashboard, 4) Réalisations migrées vers la BDD (8 items), 5) Image hero restaurée, 6) Génération PDF fonctionnelle."
   - agent: "main"
     message: "Fork 2 - Bugs P0 corrigés: 1) Logo mobile responsive avec flex-shrink-0 et max-width, 2) Composant ScrollToTop créé pour remonter en haut lors de la navigation. Tests screenshot validés."
+  - agent: "testing"
+    message: "✅ TESTS P0 VALIDÉS - Logo mobile responsive et Scroll to Top fonctionnent parfaitement. Logo: Desktop 126x40px, Mobile 101x32px (contraintes respectées). Scroll: 2 tests réussis avec navigation footer→pages (2108px→0px, 1044px→0px). Menu mobile et CTA button également testés avec succès. Aucun problème détecté."
