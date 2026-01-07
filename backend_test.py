@@ -647,7 +647,226 @@ class AlphaAgencyAPITester:
         else:
             self.log_result("Get Settings", False, str(response))
 
-    def run_pdf_download_tests(self):
+    def test_admin_user_management(self):
+        """Test admin user management API endpoints"""
+        print("\n👤 Testing Admin User Management...")
+        
+        # 1. Test GET /api/admin/users - Liste des utilisateurs (super_admin only)
+        print("\n1️⃣ Testing GET /api/admin/users")
+        success, response = self.make_request('GET', 'admin/users')
+        if success:
+            users_count = len(response)
+            self.log_result("Get Admin Users", True, f"Found {users_count} users")
+            
+            # Verify no passwords are returned
+            has_password = any('password' in user for user in response)
+            self.log_result("Users Without Passwords", not has_password, "Passwords correctly excluded" if not has_password else "Passwords exposed in response")
+        else:
+            self.log_result("Get Admin Users", False, str(response))
+        
+        # 2. Test POST /api/auth/register - Création d'utilisateur
+        print("\n2️⃣ Testing POST /api/auth/register")
+        new_admin_data = {
+            "full_name": "Test Admin",
+            "email": "testadmin@alphagency.fr",
+            "password": "TestPassword123!"
+        }
+        
+        success, response = self.make_request('POST', 'auth/register', new_admin_data)
+        if success and 'id' in response:
+            self.test_admin_id = response['id']
+            self.log_result("Create Admin User", True, f"Admin created with ID: {self.test_admin_id}")
+        else:
+            self.log_result("Create Admin User", False, str(response))
+        
+        # Test duplicate email (should fail)
+        success, response = self.make_request('POST', 'auth/register', new_admin_data, 400)
+        self.log_result("Duplicate Email Prevention", success, "Correctly rejected duplicate email" if success else f"Should have rejected duplicate: {response}")
+        
+        # 3. Test PUT /api/admin/users/{user_id} - Modification d'utilisateur
+        print("\n3️⃣ Testing PUT /api/admin/users/{user_id}")
+        if self.test_admin_id:
+            update_data = {
+                "full_name": "Test Admin Updated",
+                "email": "testadmin.updated@alphagency.fr"
+            }
+            
+            success, response = self.make_request('PUT', f'admin/users/{self.test_admin_id}', update_data)
+            self.log_result("Update Admin User", success, response.get('message', str(response)) if success else str(response))
+            
+            # Test trying to change super_admin role (should fail)
+            # First get the super admin user ID
+            success, users_response = self.make_request('GET', 'admin/users')
+            if success:
+                super_admin = next((user for user in users_response if user.get('role') == 'super_admin'), None)
+                if super_admin:
+                    super_admin_id = super_admin['id']
+                    role_change_data = {"role": "admin"}
+                    success, response = self.make_request('PUT', f'admin/users/{super_admin_id}', role_change_data, 400)
+                    self.log_result("Prevent Super Admin Role Change", success, "Correctly prevented super admin role change" if success else f"Should have prevented role change: {response}")
+        
+        # 4. Test DELETE /api/admin/users/{user_id} - Suppression d'utilisateur
+        print("\n4️⃣ Testing DELETE /api/admin/users/{user_id}")
+        
+        # Test deleting super_admin (should fail)
+        success, users_response = self.make_request('GET', 'admin/users')
+        if success:
+            super_admin = next((user for user in users_response if user.get('role') == 'super_admin'), None)
+            if super_admin:
+                super_admin_id = super_admin['id']
+                success, response = self.make_request('DELETE', f'admin/users/{super_admin_id}', expected_status=400)
+                self.log_result("Prevent Super Admin Deletion", success, "Correctly prevented super admin deletion" if success else f"Should have prevented deletion: {response}")
+        
+        # Test self-deletion (should fail)
+        # Get current user info
+        success, me_response = self.make_request('GET', 'auth/me')
+        if success:
+            current_user_id = me_response.get('id')
+            success, response = self.make_request('DELETE', f'admin/users/{current_user_id}', expected_status=400)
+            self.log_result("Prevent Self Deletion", success, "Correctly prevented self deletion" if success else f"Should have prevented self deletion: {response}")
+        
+        # Test deleting regular admin (should succeed)
+        if self.test_admin_id:
+            success, response = self.make_request('DELETE', f'admin/users/{self.test_admin_id}')
+            self.log_result("Delete Regular Admin", success, response.get('message', str(response)) if success else str(response))
+            if success:
+                self.test_admin_id = None  # Clear the ID since user is deleted
+
+    def test_password_management(self):
+        """Test password management endpoints"""
+        print("\n🔑 Testing Password Management...")
+        
+        # 5. Test POST /api/auth/forgot-password - Demande de réinitialisation
+        print("\n5️⃣ Testing POST /api/auth/forgot-password")
+        
+        # Test with existing email
+        reset_data = {"email": "admin@alphagency.fr"}
+        success, response = self.make_request('POST', 'auth/forgot-password', reset_data)
+        self.log_result("Forgot Password - Existing Email", success, response.get('message', str(response)) if success else str(response))
+        
+        # Test with non-existing email (should still return success to prevent enumeration)
+        reset_data_fake = {"email": "nonexistent@example.com"}
+        success, response = self.make_request('POST', 'auth/forgot-password', reset_data_fake)
+        self.log_result("Forgot Password - Non-existing Email", success, "Correctly returned success (prevents enumeration)" if success else str(response))
+        
+        # 6. Test PUT /api/auth/change-password - Changement de mot de passe
+        print("\n6️⃣ Testing PUT /api/auth/change-password")
+        
+        # Test with correct current password
+        change_data = {
+            "current_password": self.admin_password,
+            "new_password": "NewPassword123!"
+        }
+        success, response = self.make_request('PUT', 'auth/change-password', change_data)
+        if success:
+            self.log_result("Change Password - Correct Current", True, response.get('message', str(response)))
+            # Update password for future tests
+            self.admin_password = "NewPassword123!"
+        else:
+            self.log_result("Change Password - Correct Current", False, str(response))
+        
+        # Test with wrong current password
+        wrong_change_data = {
+            "current_password": "WrongPassword",
+            "new_password": "AnotherPassword123!"
+        }
+        success, response = self.make_request('PUT', 'auth/change-password', wrong_change_data, 400)
+        self.log_result("Change Password - Wrong Current", success, "Correctly rejected wrong current password" if success else f"Should have rejected wrong password: {response}")
+        
+        # Test password length validation
+        short_password_data = {
+            "current_password": self.admin_password,
+            "new_password": "short"
+        }
+        success, response = self.make_request('PUT', 'auth/change-password', short_password_data, 400)
+        self.log_result("Password Length Validation", success, "Correctly rejected short password" if success else f"Should have rejected short password: {response}")
+
+    def test_admin_access_control(self):
+        """Test access control for admin endpoints"""
+        print("\n🔒 Testing Admin Access Control...")
+        
+        # Create a regular admin user first
+        if not self.test_admin_id:
+            new_admin_data = {
+                "full_name": "Regular Admin",
+                "email": "regularadmin@alphagency.fr", 
+                "password": "RegularPassword123!"
+            }
+            success, response = self.make_request('POST', 'auth/register', new_admin_data)
+            if success and 'id' in response:
+                self.test_admin_id = response['id']
+        
+        # Login as regular admin
+        regular_admin_login = {
+            "email": "regularadmin@alphagency.fr",
+            "password": "RegularPassword123!"
+        }
+        success, response = self.make_request('POST', 'auth/login', regular_admin_login)
+        if success and 'token' in response:
+            regular_token = response['token']
+            
+            # Temporarily switch to regular admin token
+            original_token = self.token
+            self.token = regular_token
+            
+            # Test access to admin endpoints (should fail with 403)
+            success, response = self.make_request('GET', 'admin/users', expected_status=403)
+            self.log_result("Regular Admin Access Control", success, "Correctly denied access to admin endpoints" if success else f"Should have denied access: {response}")
+            
+            # Restore super admin token
+            self.token = original_token
+        
+        # Clean up test admin
+        if self.test_admin_id:
+            success, response = self.make_request('DELETE', f'admin/users/{self.test_admin_id}')
+            if success:
+                self.test_admin_id = None
+
+    def run_admin_user_management_tests(self):
+        """Run focused admin user management tests as requested in review"""
+        print("🚀 Starting Alpha Agency Admin User Management Tests")
+        print("Testing API de gestion des utilisateurs administrateurs")
+        print(f"Testing against: {self.base_url}")
+        print("Credentials: admin@alphagency.fr / superpassword")
+        print("=" * 80)
+        
+        # 1. Test API Login
+        print("\n🔐 Test API Login avec credentials admin@alphagency.fr")
+        if not self.test_auth_login():
+            print("\n❌ Authentication failed - stopping tests")
+            return False
+        
+        # 2. Run admin user management tests
+        self.test_admin_user_management()
+        
+        # 3. Run password management tests
+        self.test_password_management()
+        
+        # 4. Run access control tests
+        self.test_admin_access_control()
+        
+        # Print summary
+        print("\n" + "=" * 80)
+        print(f"📊 ADMIN USER MANAGEMENT TEST SUMMARY")
+        print(f"Total tests: {self.tests_run}")
+        print(f"Passed: {self.tests_passed}")
+        print(f"Failed: {len(self.failed_tests)}")
+        print(f"Success rate: {(self.tests_passed/self.tests_run*100):.1f}%")
+        
+        if self.failed_tests:
+            print(f"\n❌ Failed tests:")
+            for failure in self.failed_tests:
+                print(f"  - {failure}")
+        else:
+            print(f"\n✅ All admin user management tests passed!")
+            print("✅ Super admin can list users without passwords")
+            print("✅ User creation with email validation works")
+            print("✅ User modification with role protection works")
+            print("✅ User deletion with super admin protection works")
+            print("✅ Password reset and change functionality works")
+            print("✅ Access control prevents non-super admins from admin endpoints")
+        
+        return len(self.failed_tests) == 0
         """Run focused PDF download tests as requested in review"""
         print("🚀 Starting Alpha Agency PDF Download Tests")
         print("Testing PDF téléchargement de facture/devis avec nouveau design professionnel")
