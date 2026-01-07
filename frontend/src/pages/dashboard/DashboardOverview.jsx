@@ -184,15 +184,15 @@ const DashboardOverview = () => {
   }
 
   return (
-    <div data-testid="dashboard-overview" className="space-y-6 p-6 bg-[#F8F8F8]">
+    <div data-testid="dashboard-overview" className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-[#F8F8F8]">
       {/* Header */}
       <div className="mb-2">
-        <h1 className="text-3xl font-bold text-[#1A1A1A]">Vue d'ensemble</h1>
-        <p className="text-[#666666]">Bienvenue sur votre dashboard Alpha Agency</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A]">Vue d'ensemble</h1>
+        <p className="text-[#666666] text-sm sm:text-base">Bienvenue sur votre dashboard Alpha Agency</p>
       </div>
 
       {/* Main KPI Cards - Row 1 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {mainKPIs.map((kpi, index) => (
           <motion.div
             key={kpi.title}
@@ -224,7 +224,7 @@ const DashboardOverview = () => {
       </div>
 
       {/* Secondary KPI Cards - Row 2 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {secondaryKPIs.map((kpi, index) => (
           <motion.div
             key={kpi.title}
