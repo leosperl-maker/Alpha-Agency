@@ -144,6 +144,9 @@ frontend:
       - working: true
         agent: "main"
         comment: "CORRIGÉ - API frontend corrigée dans api.js pour appeler /dashboard/stats. Dashboard affiche maintenant les vraies données: 15 contacts, 17.5k€ pipeline, 8.4k€ CA facturé"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - Dashboard données réelles fonctionne parfaitement. Valeurs confirmées: 15 contacts (≥15 attendu), 17.5k€ pipeline (≥17k€ attendu), 8.4k€ CA facturé (≥8k€ attendu). Graphiques 'Évolution des leads' et 'Répartition Pipeline' présents et fonctionnels. Authentification admin@alphagency.fr/superpassword validée."
 
   - task: "Responsive mobile Dashboard admin"
     implemented: true
