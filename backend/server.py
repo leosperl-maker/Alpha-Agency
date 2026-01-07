@@ -49,18 +49,25 @@ if RESEND_API_KEY:
 # Stripe Config
 STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', 'sk_test_emergent')
 
-# Company Info
+# Company Info - Updated with real information from PDF template
 COMPANY_INFO = {
-    "name": "Alpha Digital",
-    "commercial_name": "Alpha Agency",
-    "address": "3 Boulevard du Marquisat de Houelbourg, 97122 Baie-Mahault",
-    "phone": "0691 266 003",
-    "email": "leo.sperl@alphagency.fr",
-    "siren": "À compléter",
-    "siret": "À compléter",
-    "capital": "À compléter",
+    "name": "ALPHA DIGITAL",
+    "commercial_name": "ALPHAGENCY",
+    "tagline": "AGENCE DE COMMUNICATION 360°",
+    "address": "3 Boulevard du Marquisat de Houelbourg",
+    "city": "97122 Baie-Mahault",
+    "region": "Guadeloupe",
+    "phone": "0690 05 34 44",
+    "email": "comptabilite@alphagency.fr",
+    "contact_email": "leo.sperl@alphagency.fr",
+    "siret": "91255383100013",
+    "siren": "912553831",
+    "naf": "7311Z",
+    "tva_intra": "FR47912553831",
+    "rcs": "Pointe-à-Pitre",
+    "capital": "100",
     "legal_form": "SASU",
-    "horaires": "Du mardi au samedi de 10h à 19h"
+    "logo_url": "https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png"
 }
 
 # Cloudinary Config
