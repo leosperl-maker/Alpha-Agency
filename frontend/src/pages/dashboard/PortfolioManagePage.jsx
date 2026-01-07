@@ -51,6 +51,7 @@ const PortfolioManagePage = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const fileInputRef = useRef(null);
   const galleryInputRef = useRef(null);
+  const audioInputRef = useRef(null);
   
   const [formData, setFormData] = useState({
     title: "",
