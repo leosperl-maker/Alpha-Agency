@@ -130,6 +130,10 @@ export const invoicesAPI = {
   updateStatus: (id, status) => api.put(`/invoices/${id}/status`, { status }),
   getPDF: (id) => api.get(`/invoices/${id}/pdf`, { responseType: 'blob' }),
   delete: (id) => api.delete(`/invoices/${id}`),
+  // Payments
+  getPayments: (id) => api.get(`/invoices/${id}/payments`),
+  addPayment: (id, data) => api.post(`/invoices/${id}/payments`, data),
+  deletePayment: (invoiceId, paymentId) => api.delete(`/invoices/${invoiceId}/payments/${paymentId}`),
   // Helper function to download PDF with authentication
   downloadPDF: async (id, invoiceNumber, type = 'facture') => {
     try {
