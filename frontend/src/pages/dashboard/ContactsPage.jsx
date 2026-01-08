@@ -152,17 +152,26 @@ const ContactsPage = () => {
           <h1 className="text-2xl font-bold text-[#1A1A1A]">Contacts</h1>
           <p className="text-[#666666] text-sm">{contacts.length} contacts au total</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button 
-              data-testid="add-contact-btn"
-              onClick={resetForm}
-              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nouveau contact
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => setImportDialogOpen(true)}
+            className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202]/10"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Importer</span>
+          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                data-testid="add-contact-btn"
+                onClick={resetForm}
+                className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Nouveau contact</span>
+              </Button>
+            </DialogTrigger>
           <DialogContent className="bg-white border-[#E5E5E5]">
             <DialogHeader>
               <DialogTitle className="text-[#1A1A1A]">
