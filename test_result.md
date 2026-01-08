@@ -222,9 +222,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Responsive mobile Dashboard admin"
-    - "Dashboard Vue d'ensemble avec données réelles"
-    - "PDF Facture sans statut"
+    - "Module Tâches - Affichage corrigé avec statuts todo"
+    - "Module Tâches - Contact associé facultatif"
+    - "Téléchargement PDF Devis fonctionnel"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
