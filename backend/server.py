@@ -1318,7 +1318,7 @@ class StatusUpdate(BaseModel):
 @api_router.put("/invoices/{invoice_id}/status", response_model=dict)
 async def update_invoice_status(invoice_id: str, status_update: StatusUpdate, current_user: dict = Depends(get_current_user)):
     status = status_update.status
-    valid_statuses = ["brouillon", "en_attente", "envoyee", "payee", "en_retard", "annulee"]
+    valid_statuses = ["brouillon", "en_attente", "envoyee", "payée", "partiellement_payée", "en_retard", "annulee"]
     if status not in valid_statuses:
         raise HTTPException(status_code=400, detail=f"Statut invalide. Valeurs possibles: {valid_statuses}")
     
