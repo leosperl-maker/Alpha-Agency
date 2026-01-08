@@ -852,6 +852,15 @@ const InvoicesPage = () => {
                             Télécharger PDF
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
+                          {invoice.status !== "payee" && invoice.status !== "brouillon" && invoice.status !== "annulee" && (
+                            <DropdownMenuItem 
+                              onClick={() => openPaymentDialog(invoice)}
+                              className="cursor-pointer text-[#CE0202]"
+                            >
+                              <CreditCard className="w-4 h-4 mr-2" />
+                              Ajouter un paiement
+                            </DropdownMenuItem>
+                          )}
                           {invoice.status !== "payee" && (
                             <DropdownMenuItem 
                               onClick={() => handleStatusUpdate(invoice.id, "payee")}
