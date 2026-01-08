@@ -1623,7 +1623,7 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         {"$group": {"_id": None, "total": {"$sum": "$total"}}}
     ]).to_list(1)
     total_paid = await db.invoices.aggregate([
-        {"$match": {"status": "payee"}},
+        {"$match": {"status": "payée"}},
         {"$group": {"_id": None, "total": {"$sum": "$total"}}}
     ]).to_list(1)
     
