@@ -286,11 +286,11 @@ const PipelinePage = () => {
                 />
               </div>
               <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>
                   Annuler
                 </Button>
                 <Button type="submit" className="bg-[#CE0202] hover:bg-[#B00202] text-white">
-                  Créer
+                  {editingOpp ? "Mettre à jour" : "Créer"}
                 </Button>
               </div>
             </form>
