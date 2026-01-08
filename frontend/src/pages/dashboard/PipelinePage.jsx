@@ -95,6 +95,52 @@ const PipelinePage = () => {
     }
   };
 
+  const handleDelete = async (oppId) => {
+    if (!window.confirm("Supprimer cette opportunité ?")) return;
+    try {
+      await opportunitiesAPI.delete(oppId);
+      toast.success("Opportunité supprimée");
+      fetchData();
+    } catch (error) {
+      toast.error("Erreur lors de la suppression");
+    }
+  };
+
+  const handleArchive = async (oppId) => {
+    try {
+      await opportunitiesAPI.update(oppId, { archived: true });
+      toast.success("Opportunité archivée");
+      fetchData();
+    } catch (error) {
+      toast.error("Erreur lors de l'archivage");
+    }
+  };
+
+  const handleUnarchive = async (oppId) => {
+    try {
+      await opportunitiesAPI.update(oppId, { archived: false });
+      toast.success("Opportunité restaurée");
+      fetchData();
+    } catch (error) {
+      toast.error("Erreur");
+    }
+  };
+
+  const openEditDialog = (opp) => {
+    setEditingOpp(opp);
+    setFormData({
+      contact_id: opp.contact_id || "",
+      title: opp.title,
+      amount: opp.amount?.toString() || "",
+      probability: opp.probability || 50,
+      status: opp.status,
+      offer_type: opp.offer_type || "",
+      expected_close_date: opp.expected_close_date || "",
+      notes: opp.notes || ""
+    });
+    setDialogOpen(true);
+  };
+
   const resetForm = () => {
     setFormData({
       contact_id: "",
@@ -106,6 +152,7 @@ const PipelinePage = () => {
       expected_close_date: "",
       notes: ""
     });
+    setEditingOpp(null);
   };
 
   const getColumnTotal = (columnId) => {
