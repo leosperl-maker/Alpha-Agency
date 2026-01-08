@@ -134,7 +134,6 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 ## Backlog (Prioritized)
 
 ### P1 - High Priority
-- [ ] **Interface Devis/Factures clarification**: Consider unified "Documents" module
 - [ ] **Google Analytics 4 integration**
 
 ### P2 - Medium Priority
