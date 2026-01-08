@@ -117,10 +117,12 @@ const InvoicesPage = () => {
     brouillon: { label: "Brouillon", color: "bg-gray-100 text-gray-700", icon: FileText },
     en_attente: { label: "En attente", color: "bg-blue-100 text-blue-700", icon: Clock },
     envoyee: { label: "Envoyée", color: "bg-purple-100 text-purple-700", icon: Mail },
-    partiellement_payée: { label: "Partiel", color: "bg-orange-100 text-orange-700", icon: PiggyBank },
-    payee: { label: "Payée", color: "bg-green-100 text-green-700", icon: CheckCircle },
+    "partiellement_payée": { label: "Partiel", color: "bg-orange-100 text-orange-700", icon: PiggyBank },
+    "payée": { label: "Payée", color: "bg-green-100 text-green-700", icon: CheckCircle },
     en_retard: { label: "En retard", color: "bg-red-100 text-red-700", icon: AlertTriangle },
-    annulee: { label: "Annulée", color: "bg-gray-100 text-gray-500", icon: XCircle }
+    annulee: { label: "Annulée", color: "bg-gray-100 text-gray-500", icon: XCircle },
+    // Aliases for backward compatibility
+    payee: { label: "Payée", color: "bg-green-100 text-green-700", icon: CheckCircle },
   };
 
   const paymentMethods = {
