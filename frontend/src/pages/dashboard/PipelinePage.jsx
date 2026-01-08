@@ -298,98 +298,146 @@ const PipelinePage = () => {
 
       {/* Pipeline Board */}
       {loading ? (
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {columns.map((col) => (
-            <div key={col.id} className="flex-shrink-0 w-72">
-              <div className="h-96 bg-[#E5E5E5] animate-pulse rounded-lg" />
-            </div>
-          ))}
+        <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6 pb-4">
+          <div className="flex gap-4 min-w-max">
+            {columns.map((col) => (
+              <div key={col.id} className="flex-shrink-0 w-72">
+                <div className="h-96 bg-[#E5E5E5] animate-pulse rounded-lg" />
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {columns.map((column) => (
-            <div 
-              key={column.id}
-              data-testid={`pipeline-column-${column.id}`}
-              className="flex-shrink-0 w-72"
-            >
-              <div className="bg-white rounded-lg border border-[#E5E5E5] h-full">
-                <div className="p-4 border-b border-[#E5E5E5]">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: column.color }}
-                      />
-                      <span className="text-[#1A1A1A] text-sm font-medium">
-                        {column.label}
-                      </span>
-                      <Badge variant="secondary" className="bg-[#F8F8F8] text-[#666666]">
-                        {(pipeline[column.id] || []).length}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-[#666666] text-xs font-mono mt-1">
-                    {getColumnTotal(column.id).toLocaleString()}€
-                  </p>
-                </div>
-                <div className="p-3 space-y-3">
-                  {(pipeline[column.id] || []).map((opp) => (
-                    <div
-                      key={opp.id}
-                      data-testid={`opportunity-${opp.id}`}
-                      className="bg-[#F8F8F8] rounded-lg p-3 border border-[#E5E5E5]"
-                    >
-                      <h4 className="text-[#1A1A1A] font-medium text-sm mb-2">{opp.title}</h4>
-                      <div className="flex items-center gap-2 text-xs text-[#666666] mb-2">
-                        <User className="w-3 h-3" />
-                        <span>
-                          {opp.contact?.first_name} {opp.contact?.last_name}
+        <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6 pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex gap-4 min-w-max">
+            {columns.map((column) => {
+              // Filter out archived opportunities unless showArchived is true
+              const columnOpps = (pipeline[column.id] || []).filter(opp => showArchived || !opp.archived);
+              
+              return (
+              <div 
+                key={column.id}
+                data-testid={`pipeline-column-${column.id}`}
+                className="flex-shrink-0 w-72"
+              >
+                <div className="bg-white rounded-lg border border-[#E5E5E5] h-full">
+                  <div className="p-4 border-b border-[#E5E5E5]">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: column.color }}
+                        />
+                        <span className="text-[#1A1A1A] text-sm font-medium">
+                          {column.label}
                         </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#CE0202] font-bold text-sm">
-                          {opp.amount?.toLocaleString()}€
-                        </span>
-                        <Badge className="bg-[#E5E5E5] text-[#666666] text-xs">
-                          {opp.probability}%
+                        <Badge variant="secondary" className="bg-[#F8F8F8] text-[#666666]">
+                          {columnOpps.length}
                         </Badge>
                       </div>
-                      {opp.expected_close_date && (
-                        <div className="flex items-center gap-1 text-xs text-[#666666] mt-2">
-                          <Calendar className="w-3 h-3" />
-                          <span>{new Date(opp.expected_close_date).toLocaleDateString('fr-FR')}</span>
-                        </div>
-                      )}
-                      {/* Quick status change */}
-                      <Select
-                        value={opp.status}
-                        onValueChange={(value) => handleStatusChange(opp.id, value)}
-                      >
-                        <SelectTrigger className="mt-3 h-8 text-xs bg-white border-[#E5E5E5] text-[#1A1A1A]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-[#E5E5E5]">
-                          {columns.map((col) => (
-                            <SelectItem key={col.id} value={col.id}>
-                              {col.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
                     </div>
-                  ))}
-                  {(pipeline[column.id] || []).length === 0 && (
-                    <p className="text-[#666666] text-xs text-center py-8">
-                      Aucune opportunité
+                    <p className="text-[#666666] text-xs font-mono mt-1">
+                      {columnOpps.reduce((sum, opp) => sum + (opp.amount || 0), 0).toLocaleString()}€
                     </p>
-                  )}
+                  </div>
+                  <div className="p-3 space-y-3 max-h-[60vh] overflow-y-auto">
+                    {columnOpps.map((opp) => (
+                      <div
+                        key={opp.id}
+                        data-testid={`opportunity-${opp.id}`}
+                        className={`bg-[#F8F8F8] rounded-lg p-3 border border-[#E5E5E5] ${opp.archived ? 'opacity-60' : ''}`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="text-[#1A1A1A] font-medium text-sm flex-1">{opp.title}</h4>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0 -mr-1 -mt-1">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="bg-white border-[#E5E5E5]">
+                              <DropdownMenuItem onClick={() => openEditDialog(opp)}>
+                                <Edit className="w-4 h-4 mr-2" /> Modifier
+                              </DropdownMenuItem>
+                              {opp.archived ? (
+                                <DropdownMenuItem onClick={() => handleUnarchive(opp.id)}>
+                                  <Archive className="w-4 h-4 mr-2" /> Restaurer
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem onClick={() => handleArchive(opp.id)}>
+                                  <Archive className="w-4 h-4 mr-2" /> Archiver
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleDelete(opp.id)} className="text-red-600">
+                                <Trash2 className="w-4 h-4 mr-2" /> Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-[#666666] mb-2 mt-1">
+                          <User className="w-3 h-3" />
+                          <span>
+                            {opp.contact?.first_name} {opp.contact?.last_name}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[#CE0202] font-bold text-sm">
+                            {opp.amount?.toLocaleString()}€
+                          </span>
+                          <Badge className="bg-[#E5E5E5] text-[#666666] text-xs">
+                            {opp.probability}%
+                          </Badge>
+                        </div>
+                        {opp.expected_close_date && (
+                          <div className="flex items-center gap-1 text-xs text-[#666666] mt-2">
+                            <Calendar className="w-3 h-3" />
+                            <span>{new Date(opp.expected_close_date).toLocaleDateString('fr-FR')}</span>
+                          </div>
+                        )}
+                        {/* Quick status change */}
+                        <Select
+                          value={opp.status}
+                          onValueChange={(value) => handleStatusChange(opp.id, value)}
+                        >
+                          <SelectTrigger className="mt-3 h-8 text-xs bg-white border-[#E5E5E5] text-[#1A1A1A]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-[#E5E5E5]">
+                            {columns.map((col) => (
+                              <SelectItem key={col.id} value={col.id}>
+                                {col.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ))}
+                    {columnOpps.length === 0 && (
+                      <p className="text-[#666666] text-xs text-center py-8">
+                        Aucune opportunité
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )})}
+          </div>
         </div>
       )}
+
+      {/* Show archived toggle */}
+      <div className="mt-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowArchived(!showArchived)}
+          className="text-[#666666]"
+        >
+          <Archive className="w-4 h-4 mr-2" />
+          {showArchived ? "Masquer les archivées" : "Afficher les archivées"}
+        </Button>
+      </div>
     </div>
   );
 };
