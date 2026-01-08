@@ -854,7 +854,7 @@ const InvoicesPage = () => {
                             Télécharger PDF
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          {invoice.status !== "payee" && invoice.status !== "brouillon" && invoice.status !== "annulee" && (
+                          {invoice.status !== "payée" && invoice.status !== "payee" && invoice.status !== "brouillon" && invoice.status !== "annulee" && (
                             <DropdownMenuItem 
                               onClick={() => openPaymentDialog(invoice)}
                               className="cursor-pointer text-[#CE0202]"
@@ -863,9 +863,9 @@ const InvoicesPage = () => {
                               Ajouter un paiement
                             </DropdownMenuItem>
                           )}
-                          {invoice.status !== "payee" && (
+                          {invoice.status !== "payée" && invoice.status !== "payee" && (
                             <DropdownMenuItem 
-                              onClick={() => handleStatusUpdate(invoice.id, "payee")}
+                              onClick={() => handleStatusUpdate(invoice.id, "payée")}
                               className="cursor-pointer text-green-600"
                             >
                               <CheckCircle className="w-4 h-4 mr-2" />
@@ -881,7 +881,7 @@ const InvoicesPage = () => {
                               Marquer comme envoyée
                             </DropdownMenuItem>
                           )}
-                          {!["annulee", "payee"].includes(invoice.status) && (
+                          {!["annulee", "payée", "payee"].includes(invoice.status) && (
                             <DropdownMenuItem 
                               onClick={() => handleStatusUpdate(invoice.id, "annulee")}
                               className="cursor-pointer text-gray-600"
