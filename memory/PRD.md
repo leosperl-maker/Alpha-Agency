@@ -134,7 +134,7 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 ## Backlog (Prioritized)
 
 ### P2 - Medium Priority
-- [ ] **Resend email integration**: Replace mock email functionality
+- [ ] **Activer compte Brevo SMTP** : Contacter contact@brevo.com pour activer l'envoi d'emails transactionnels
 - [ ] **Audio player for portfolio**: Frontend player for uploaded audio files
 - [ ] **E2E test fix**: Contact form dropdown test (recurring issue)
 
