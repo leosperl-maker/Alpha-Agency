@@ -2283,7 +2283,7 @@ async def get_tasks(status: Optional[str] = None, priority: Optional[str] = None
     return tasks
 
 @api_router.post("/tasks", response_model=dict)
-async def create_task(task: TaskCreate, current_user: dict = Depends(get_current_user)):
+async def create_task(task: TaskCreateModel, current_user: dict = Depends(get_current_user)):
     """Create a new task"""
     task_id = str(uuid.uuid4())
     task_doc = {
