@@ -98,8 +98,25 @@ export const quotesAPI = {
   send: (id) => api.post(`/quotes/${id}/send`),
   convertToInvoice: (id) => api.post(`/invoices/from-quote/${id}`),
   getPDF: (id) => api.get(`/quotes/${id}/pdf`, { responseType: 'blob' }),
-  downloadPDF: (id) => `${API_URL}/quotes/${id}/pdf`,
   delete: (id) => api.delete(`/quotes/${id}`),
+  // Helper function to download PDF with authentication
+  downloadPDF: async (id, quoteNumber) => {
+    try {
+      const response = await api.get(`/quotes/${id}/pdf`, { responseType: 'blob' });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `devis_${quoteNumber || id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      throw error;
+    }
+  },
 };
 
 // Invoices API
