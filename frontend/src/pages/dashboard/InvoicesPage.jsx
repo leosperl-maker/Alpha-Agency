@@ -1315,7 +1315,7 @@ const InvoicesPage = () => {
                         <CreditCard className="w-4 h-4 text-[#CE0202]" />
                         Paiements
                       </h3>
-                      {selectedInvoice.status !== 'payee' && selectedInvoice.status !== 'annulee' && (
+                      {selectedInvoice.status !== 'payée' && selectedInvoice.status !== 'payee' && selectedInvoice.status !== 'annulee' && (
                         <Button
                           size="sm"
                           variant="outline"
