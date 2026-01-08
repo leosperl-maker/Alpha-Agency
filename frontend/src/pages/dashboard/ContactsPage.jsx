@@ -541,6 +541,13 @@ const ContactsPage = () => {
           ))}
         </div>
       )}
+
+      {/* Contact Detail Sheet */}
+      <ContactDetailSheet
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+        contactId={selectedContactId}
+      />
     </div>
   );
 };
