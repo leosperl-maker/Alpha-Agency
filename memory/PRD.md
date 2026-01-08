@@ -111,16 +111,14 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - Navigation to invoices page after conversion
 - Quote status updated to "accepté" after conversion
 
-### Contact History View (NEW)
-- New API route: `GET /api/contacts/{id}/history`
-  - Returns quotes, invoices, tasks, opportunities
-  - Summary with totals (quoted, invoiced, paid, remaining)
-- New component: `ContactDetailSheet.jsx`
-  - Slide-over panel from right side
-  - Header with contact info, status, score
-  - Summary cards with financial KPIs
-  - Tabbed interface for Quotes, Invoices, Tasks, Notes
-- Integration in ContactsPage with Eye (View) button
+### Unified Billing Interface (NEW)
+- [x] **Facturation Module** ✅ DONE 2025-01-08
+  - Single "Facturation" entry in sidebar (replaces Devis + Factures)
+  - Stats cards: Devis count, Factures count, Encaissé, À encaisser
+  - Tabbed interface for Quotes and Invoices
+  - Unified search and filter by status
+  - Quick actions: Convert quote to invoice, Add payment
+  - URL parameter support for tab persistence (?tab=devis|factures)
 
 ## Backlog (Prioritized)
 
