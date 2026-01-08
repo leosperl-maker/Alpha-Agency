@@ -97,7 +97,7 @@ export const quotesAPI = {
   update: (id, data) => api.put(`/quotes/${id}`, data),
   updateStatus: (id, status) => api.patch(`/quotes/${id}/status`, { status }),
   send: (id) => api.post(`/quotes/${id}/send`),
-  convertToInvoice: (id) => api.post(`/invoices/from-quote/${id}`),
+  convertToInvoice: (id) => api.post(`/quotes/${id}/convert-to-invoice`),
   getPDF: (id) => api.get(`/quotes/${id}/pdf`, { responseType: 'blob' }),
   delete: (id) => api.delete(`/quotes/${id}`),
   // Helper function to download PDF with authentication
