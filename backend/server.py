@@ -2550,7 +2550,8 @@ async def forgot_password(request: PasswordResetRequest, background_tasks: Backg
     )
     
     # Send reset email
-    reset_link = f"https://agency-backoffice.preview.emergentagent.com/alpha-admin-2024/reset-password?token={reset_token}"
+    frontend_url = os.environ.get('FRONTEND_URL', 'https://agency-backoffice.preview.emergentagent.com')
+    reset_link = f"{frontend_url}/alpha-admin-2024/reset-password?token={reset_token}"
     html_content = f"""
     <h2>Réinitialisation de mot de passe - Alpha Agency</h2>
     <p>Bonjour {user.get('full_name', '')},</p>
