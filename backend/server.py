@@ -1376,33 +1376,6 @@ async def update_subscription_status(sub_id: str, status: str, current_user: dic
 
 # ==================== TASKS ROUTES ====================
 
-@api_router.post("/tasks", response_model=dict)
-async def create_task(task: TaskCreate, current_user: dict = Depends(get_current_user)):
-    task_id = str(uuid.uuid4())
-    task_doc = {
-        "id": task_id,
-        **task.model_dump(),
-        "status": "à_faire",
-        "created_at": datetime.now(timezone.utc).isoformat()
-    }
-    await db.tasks.insert_one(task_doc)
-    return {"id": task_id, "message": "Tâche créée"}
-
-@api_router.get("/tasks", response_model=List[dict])
-async def get_tasks(current_user: dict = Depends(get_current_user), status: Optional[str] = None):
-    query = {}
-    if status:
-        query["status"] = status
-    tasks = await db.tasks.find(query, {"_id": 0}).sort("due_date", 1).to_list(1000)
-    return tasks
-
-@api_router.put("/tasks/{task_id}/status", response_model=dict)
-async def update_task_status(task_id: str, status: str, current_user: dict = Depends(get_current_user)):
-    result = await db.tasks.update_one({"id": task_id}, {"$set": {"status": status}})
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Tâche non trouvée")
-    return {"message": "Statut mis à jour"}
-
 # ==================== BLOG ROUTES ====================
 
 @api_router.post("/blog", response_model=dict)
