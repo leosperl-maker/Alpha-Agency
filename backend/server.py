@@ -1616,7 +1616,7 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     brouillon_invoices = await db.invoices.count_documents({"status": "brouillon"})
     pending_invoices = await db.invoices.count_documents({"status": {"$in": ["en_attente", "envoyee"]}})
     overdue_invoices = await db.invoices.count_documents({"status": "en_retard"})
-    paid_invoices = await db.invoices.count_documents({"status": "payee"})
+    paid_invoices = await db.invoices.count_documents({"status": "payée"})
     
     # Invoices totals
     total_invoiced = await db.invoices.aggregate([
