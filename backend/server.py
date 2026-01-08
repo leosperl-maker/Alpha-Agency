@@ -503,11 +503,19 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         subtotal += total
         tva_amount = total * tva_rate
         
-        # Handle multi-line descriptions
-        desc = item.get('description', '').replace('\n', '<br/>')
+        # Handle Titre + Description (Title in bold, description below)
+        title = item.get('title', '').strip()
+        desc = item.get('description', '').strip().replace('\n', '<br/>')
+        
+        if title and desc:
+            full_desc = f"<b>{title}</b><br/><font size='8'>{desc}</font>"
+        elif title:
+            full_desc = f"<b>{title}</b>"
+        else:
+            full_desc = desc
         
         table_data.append([
-            Paragraph(desc, table_cell_style),
+            Paragraph(full_desc, table_cell_style),
             Paragraph(str(qty), table_cell_right_style),
             Paragraph(f"{unit_price:.2f} €", table_cell_right_style),
             Paragraph(f"8.5%<br/>({tva_amount:.2f} €)", table_cell_right_style),
