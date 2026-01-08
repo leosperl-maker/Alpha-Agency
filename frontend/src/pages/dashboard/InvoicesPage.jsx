@@ -1304,6 +1304,103 @@ const InvoicesPage = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Payments Section */}
+                {selectedInvoice.status !== 'brouillon' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[#1A1A1A] flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-[#CE0202]" />
+                        Paiements
+                      </h3>
+                      {selectedInvoice.status !== 'payee' && selectedInvoice.status !== 'annulee' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setViewDialogOpen(false);
+                            openPaymentDialog(selectedInvoice);
+                          }}
+                          className="text-[#CE0202] border-[#CE0202]"
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Ajouter
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Payment Summary */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-[#F8F8F8] rounded-lg p-3 text-center">
+                        <p className="text-xs text-[#666666]">Total facture</p>
+                        <p className="font-mono font-bold text-[#1A1A1A]">{formatCurrency(selectedInvoice.total)}</p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-3 text-center">
+                        <p className="text-xs text-green-600">Payé</p>
+                        <p className="font-mono font-bold text-green-700">{formatCurrency(selectedInvoice.total_paid || 0)}</p>
+                      </div>
+                      <div className={`rounded-lg p-3 text-center ${(selectedInvoice.remaining || (selectedInvoice.total - (selectedInvoice.total_paid || 0))) > 0 ? 'bg-orange-50' : 'bg-green-50'}`}>
+                        <p className={`text-xs ${(selectedInvoice.remaining || (selectedInvoice.total - (selectedInvoice.total_paid || 0))) > 0 ? 'text-orange-600' : 'text-green-600'}`}>Reste à payer</p>
+                        <p className={`font-mono font-bold ${(selectedInvoice.remaining || (selectedInvoice.total - (selectedInvoice.total_paid || 0))) > 0 ? 'text-orange-700' : 'text-green-700'}`}>
+                          {formatCurrency(selectedInvoice.remaining || (selectedInvoice.total - (selectedInvoice.total_paid || 0)))}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Payments List */}
+                    {selectedInvoice.payments && selectedInvoice.payments.length > 0 ? (
+                      <div className="border border-[#E5E5E5] rounded-lg overflow-hidden">
+                        <table className="w-full">
+                          <thead className="bg-[#F8F8F8]">
+                            <tr>
+                              <th className="text-left px-4 py-2 text-xs font-medium text-[#666666]">Date</th>
+                              <th className="text-left px-4 py-2 text-xs font-medium text-[#666666]">Méthode</th>
+                              <th className="text-right px-4 py-2 text-xs font-medium text-[#666666]">Montant</th>
+                              <th className="text-right px-4 py-2 text-xs font-medium text-[#666666]">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#E5E5E5]">
+                            {selectedInvoice.payments.map((payment) => {
+                              const method = paymentMethods[payment.payment_method] || paymentMethods.virement;
+                              const MethodIcon = method.icon;
+                              return (
+                                <tr key={payment.id} className="hover:bg-[#F8F8F8]">
+                                  <td className="px-4 py-3 text-sm text-[#1A1A1A]">
+                                    {formatDate(payment.payment_date)}
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="flex items-center gap-2 text-sm text-[#666666]">
+                                      <MethodIcon className="w-4 h-4" />
+                                      {method.label}
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-3 text-right">
+                                    <span className="font-mono font-medium text-green-600">{formatCurrency(payment.amount)}</span>
+                                  </td>
+                                  <td className="px-4 py-3 text-right">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleDeletePayment(selectedInvoice.id, payment.id)}
+                                      className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-6 text-[#666666] bg-[#F8F8F8] rounded-lg">
+                        <Banknote className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">Aucun paiement enregistré</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <DialogFooter>
@@ -1311,7 +1408,7 @@ const InvoicesPage = () => {
                   Fermer
                 </Button>
                 <Button 
-                  onClick={() => window.open(invoicesAPI.downloadPDF(selectedInvoice.id), '_blank')}
+                  onClick={() => handleDownloadPDF(selectedInvoice)}
                   className="bg-[#CE0202] hover:bg-[#B00202] text-white"
                 >
                   <Download className="w-4 h-4 mr-2" />
@@ -1319,6 +1416,126 @@ const InvoicesPage = () => {
                 </Button>
               </DialogFooter>
             </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Payment Dialog */}
+      <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+        <DialogContent className="bg-white border-[#E5E5E5] max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-[#1A1A1A] flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-[#CE0202]" />
+              Enregistrer un paiement
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedInvoiceForPayment && (
+            <div className="space-y-4">
+              {/* Invoice Summary */}
+              <div className="bg-[#F8F8F8] rounded-lg p-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#666666]">Facture</span>
+                  <span className="font-mono font-medium">{selectedInvoiceForPayment.invoice_number}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#666666]">Total TTC</span>
+                  <span className="font-mono">{formatCurrency(selectedInvoiceForPayment.total)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#666666]">Déjà payé</span>
+                  <span className="font-mono text-green-600">{formatCurrency(selectedInvoiceForPayment.total_paid || 0)}</span>
+                </div>
+                <div className="flex justify-between text-sm font-bold border-t border-[#E5E5E5] pt-2">
+                  <span className="text-[#1A1A1A]">Reste à payer</span>
+                  <span className="font-mono text-[#CE0202]">
+                    {formatCurrency((selectedInvoiceForPayment.total || 0) - (selectedInvoiceForPayment.total_paid || 0))}
+                  </span>
+                </div>
+              </div>
+
+              {/* Payment Form */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-[#1A1A1A]">Montant *</Label>
+                  <div className="relative">
+                    <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      placeholder="0.00"
+                      value={paymentForm.amount}
+                      onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+                      className="pl-10 bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A] font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[#1A1A1A]">Date du paiement *</Label>
+                  <div className="relative">
+                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+                    <Input
+                      type="date"
+                      value={paymentForm.payment_date}
+                      onChange={(e) => setPaymentForm({ ...paymentForm, payment_date: e.target.value })}
+                      className="pl-10 bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[#1A1A1A]">Méthode de paiement</Label>
+                  <Select
+                    value={paymentForm.payment_method}
+                    onValueChange={(value) => setPaymentForm({ ...paymentForm, payment_method: value })}
+                  >
+                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-[#E5E5E5]">
+                      {Object.entries(paymentMethods).map(([key, method]) => {
+                        const Icon = method.icon;
+                        return (
+                          <SelectItem key={key} value={key}>
+                            <div className="flex items-center gap-2">
+                              <Icon className="w-4 h-4" />
+                              {method.label}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[#1A1A1A]">Notes (optionnel)</Label>
+                  <Textarea
+                    placeholder="Référence de virement, numéro de chèque..."
+                    value={paymentForm.notes}
+                    onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    rows={2}
+                  />
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setPaymentDialogOpen(false)}>
+                  Annuler
+                </Button>
+                <Button 
+                  onClick={handleAddPayment}
+                  disabled={savingPayment || !paymentForm.amount}
+                  className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+                >
+                  {savingPayment ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
+                  Enregistrer
+                </Button>
+              </DialogFooter>
+            </div>
           )}
         </DialogContent>
       </Dialog>
