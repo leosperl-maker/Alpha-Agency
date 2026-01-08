@@ -19,6 +19,7 @@ import { quotesAPI, contactsAPI } from "../../lib/api";
 import { toast } from "sonner";
 
 const QuotesPage = () => {
+  const navigate = useNavigate();
   const [quotes, setQuotes] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
