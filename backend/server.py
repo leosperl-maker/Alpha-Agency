@@ -1323,7 +1323,7 @@ async def update_invoice_status(invoice_id: str, status_update: StatusUpdate, cu
         raise HTTPException(status_code=400, detail=f"Statut invalide. Valeurs possibles: {valid_statuses}")
     
     update_data = {"status": status, "updated_at": datetime.now(timezone.utc).isoformat()}
-    if status == "payee":
+    if status == "payée":
         update_data["paid_at"] = datetime.now(timezone.utc).isoformat()
     
     result = await db.invoices.update_one({"id": invoice_id}, {"$set": update_data})
