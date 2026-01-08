@@ -647,21 +647,35 @@ def generate_invoice_pdf(invoice: dict, contact: dict) -> BytesIO:
 
 # ==================== AUTH ROUTES ====================
 
-# Création du super admin initial si aucun utilisateur n'existe
+# Création du super admin initial ou réinitialisation du mot de passe
 async def create_initial_super_admin():
-    count = await db.users.count_documents({})
-    if count == 0:
+    admin_email = "admin@alphagency.fr"
+    default_password = "superpassword"
+    
+    # Vérifier si l'admin existe
+    existing_admin = await db.users.find_one({"email": admin_email})
+    
+    if existing_admin:
+        # Réinitialiser le mot de passe de l'admin existant
+        new_hash = hash_password(default_password)
+        await db.users.update_one(
+            {"email": admin_email},
+            {"$set": {"password": new_hash}}
+        )
+        logger.info(f"Mot de passe admin réinitialisé: {admin_email} / {default_password}")
+    else:
+        # Créer le super admin s'il n'existe pas
         user_id = str(uuid.uuid4())
         user_doc = {
             "id": user_id,
-            "email": "admin@alphagency.fr",
-            "password": hash_password("Alpha2024!"),
+            "email": admin_email,
+            "password": hash_password(default_password),
             "full_name": "Super Admin",
             "role": "super_admin",
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.users.insert_one(user_doc)
-        logger.info("Super admin initial créé: admin@alphagency.fr / Alpha2024!")
+        logger.info(f"Super admin initial créé: {admin_email} / {default_password}")
 
 @api_router.post("/auth/register", response_model=dict)
 async def register(user: UserCreate, current_user: dict = Depends(get_current_user)):
