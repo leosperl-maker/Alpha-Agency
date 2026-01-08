@@ -72,16 +72,23 @@ const PipelinePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await opportunitiesAPI.create({
+      const data = {
         ...formData,
         amount: parseFloat(formData.amount)
-      });
-      toast.success("Opportunité créée");
+      };
+      
+      if (editingOpp) {
+        await opportunitiesAPI.update(editingOpp.id, data);
+        toast.success("Opportunité mise à jour");
+      } else {
+        await opportunitiesAPI.create(data);
+        toast.success("Opportunité créée");
+      }
       setDialogOpen(false);
       resetForm();
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la création");
+      toast.error("Erreur");
     }
   };
 
