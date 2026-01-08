@@ -3006,18 +3006,33 @@ async def forgot_password(request: PasswordResetRequest, background_tasks: Backg
     frontend_url = os.environ.get('FRONTEND_URL', 'https://crm-enhance-10.preview.emergentagent.com')
     reset_link = f"{frontend_url}/alpha-admin-2024/reset-password?token={reset_token}"
     html_content = f"""
-    <h2>Réinitialisation de mot de passe - Alpha Agency</h2>
-    <p>Bonjour {user.get('full_name', '')},</p>
-    <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
-    <p>Cliquez sur le lien ci-dessous pour définir un nouveau mot de passe :</p>
-    <p><a href="{reset_link}" style="background-color: #CE0202; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Réinitialiser mon mot de passe</a></p>
-    <p>Ce lien est valable pendant 1 heure.</p>
-    <p>Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
-    <br>
-    <p>L'équipe Alpha Agency</p>
+    <html>
+    <body style="font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 20px; margin: 0;">
+        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="background: #CE0202; color: white; padding: 30px; text-align: center;">
+                <h1 style="margin: 0; font-size: 24px;">Réinitialisation de mot de passe</h1>
+            </div>
+            <div style="padding: 40px 30px;">
+                <p style="color: #1A1A1A; font-size: 16px; margin-bottom: 20px;">Bonjour <strong>{user.get('full_name', '')}</strong>,</p>
+                <p style="color: #666666; font-size: 14px; line-height: 1.6;">Vous avez demandé la réinitialisation de votre mot de passe pour votre compte Alpha Agency.</p>
+                <p style="color: #666666; font-size: 14px; line-height: 1.6;">Cliquez sur le bouton ci-dessous pour définir un nouveau mot de passe :</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{reset_link}" style="background-color: #CE0202; color: white; padding: 14px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Réinitialiser mon mot de passe</a>
+                </div>
+                <p style="color: #999999; font-size: 12px; text-align: center;">Ce lien est valable pendant <strong>1 heure</strong>.</p>
+                <hr style="border: none; border-top: 1px solid #E5E5E5; margin: 30px 0;">
+                <p style="color: #999999; font-size: 12px;">Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email en toute sécurité.</p>
+                <p style="color: #999999; font-size: 12px; margin-top: 10px;">Lien direct : <a href="{reset_link}" style="color: #CE0202; word-break: break-all;">{reset_link}</a></p>
+            </div>
+            <div style="background: #f8f8f8; padding: 20px; text-align: center;">
+                <p style="color: #666666; font-size: 12px; margin: 0;">Alpha Agency - Agence de communication digitale</p>
+            </div>
+        </div>
+    </body>
+    </html>
     """
     
-    background_tasks.add_task(send_email_notification, request.email, "Réinitialisation de mot de passe - Alpha Agency", html_content)
+    background_tasks.add_task(send_email_notification, request.email, "🔐 Réinitialisation de mot de passe - Alpha Agency", html_content, user.get('full_name', ''))
     
     return {"message": "Si un compte existe avec cet email, vous recevrez un lien de réinitialisation."}
 
