@@ -76,6 +76,7 @@ function App() {
             <Route path="demandes" element={<DemandesPage />} />
             <Route path="contacts" element={<ContactsPage />} />
             <Route path="pipeline" element={<PipelinePage />} />
+            <Route path="facturation" element={<FacturationPage />} />
             <Route path="devis" element={<QuotesPage />} />
             <Route path="factures" element={<InvoicesPage />} />
             <Route path="abonnements" element={<SubscriptionsPage />} />
