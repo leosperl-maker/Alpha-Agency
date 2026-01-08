@@ -57,6 +57,7 @@ const TasksPage = () => {
 
   useEffect(() => {
     fetchData();
+    fetchContacts();
   }, []);
 
   const fetchData = async () => {
@@ -74,14 +75,37 @@ const TasksPage = () => {
     }
   };
 
+  const fetchContacts = async () => {
+    try {
+      const response = await contactsAPI.getAll();
+      setContacts(response.data);
+    } catch (error) {
+      console.error("Erreur chargement contacts:", error);
+    }
+  };
+
+  // Get contact name by ID
+  const getContactName = (contactId) => {
+    if (!contactId) return null;
+    const contact = contacts.find(c => c.id === contactId);
+    if (!contact) return null;
+    return `${contact.first_name} ${contact.last_name}${contact.company ? ` (${contact.company})` : ''}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Prepare data - don't send empty contact_id
+      const dataToSend = { ...formData };
+      if (!dataToSend.contact_id) {
+        delete dataToSend.contact_id;
+      }
+      
       if (editingTask) {
-        await tasksAPI.update(editingTask.id, formData);
+        await tasksAPI.update(editingTask.id, dataToSend);
         toast.success("Tâche mise à jour");
       } else {
-        await tasksAPI.create(formData);
+        await tasksAPI.create(dataToSend);
         toast.success("Tâche créée");
       }
       setDialogOpen(false);
