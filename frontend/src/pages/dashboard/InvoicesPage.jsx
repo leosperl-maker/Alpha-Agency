@@ -199,6 +199,59 @@ const InvoicesPage = () => {
     }
   };
 
+  // Payment functions
+  const openPaymentDialog = (invoice) => {
+    setSelectedInvoiceForPayment(invoice);
+    const remaining = (invoice.total || 0) - (invoice.total_paid || 0);
+    setPaymentForm({
+      amount: remaining > 0 ? remaining.toFixed(2) : "",
+      payment_date: new Date().toISOString().split('T')[0],
+      payment_method: "virement",
+      notes: ""
+    });
+    setPaymentDialogOpen(true);
+  };
+
+  const handleAddPayment = async () => {
+    if (!selectedInvoiceForPayment || !paymentForm.amount) {
+      toast.error("Veuillez saisir un montant");
+      return;
+    }
+    setSavingPayment(true);
+    try {
+      const response = await invoicesAPI.addPayment(selectedInvoiceForPayment.id, {
+        amount: parseFloat(paymentForm.amount),
+        payment_date: paymentForm.payment_date,
+        payment_method: paymentForm.payment_method,
+        notes: paymentForm.notes
+      });
+      toast.success(`Paiement enregistré - ${response.data.status === 'payée' ? 'Facture soldée !' : `Reste: ${formatCurrency(response.data.remaining)}`}`);
+      setPaymentDialogOpen(false);
+      setSelectedInvoiceForPayment(null);
+      fetchData();
+    } catch (error) {
+      toast.error("Erreur lors de l'enregistrement du paiement");
+    } finally {
+      setSavingPayment(false);
+    }
+  };
+
+  const handleDeletePayment = async (invoiceId, paymentId) => {
+    if (!window.confirm("Supprimer ce paiement ?")) return;
+    try {
+      await invoicesAPI.deletePayment(invoiceId, paymentId);
+      toast.success("Paiement supprimé");
+      fetchData();
+      // Refresh the selected invoice if viewing it
+      if (selectedInvoice && selectedInvoice.id === invoiceId) {
+        const updatedInvoice = await invoicesAPI.getOne(invoiceId);
+        setSelectedInvoice(updatedInvoice.data);
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la suppression");
+    }
+  };
+
   const addServiceToInvoice = (service) => {
     setItems([...items, {
       description: service.description ? `${service.title}\n${service.description}` : service.title,
