@@ -80,11 +80,17 @@ const QuotesPage = () => {
 
   const handleConvertToInvoice = async (quoteId) => {
     try {
-      await quotesAPI.convertToInvoice(quoteId);
-      toast.success("Facture créée à partir du devis");
+      const response = await quotesAPI.convertToInvoice(quoteId);
+      const invoiceNumber = response.data?.invoice_number || '';
+      toast.success(`Facture ${invoiceNumber} créée à partir du devis`, {
+        action: {
+          label: "Voir la facture",
+          onClick: () => navigate('/admin/factures')
+        }
+      });
       fetchData();
     } catch (error) {
-      toast.error("Erreur lors de la conversion");
+      toast.error("Erreur lors de la conversion en facture");
     }
   };
 
