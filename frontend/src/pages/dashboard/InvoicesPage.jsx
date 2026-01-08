@@ -729,51 +729,81 @@ const InvoicesPage = () => {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-[#E5E5E5] overflow-hidden">
+        <div className="bg-white rounded-lg border border-[#E5E5E5] overflow-hidden overflow-x-auto">
           <table className="w-full">
             <thead className="bg-[#F8F8F8] border-b border-[#E5E5E5]">
               <tr>
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#666666] uppercase">Numéro</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#666666] uppercase">Client</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#666666] uppercase">Date</th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-[#666666] uppercase">Échéance</th>
-                <th className="text-right px-6 py-3 text-xs font-medium text-[#666666] uppercase">Montant TTC</th>
-                <th className="text-center px-6 py-3 text-xs font-medium text-[#666666] uppercase">Statut</th>
-                <th className="text-right px-6 py-3 text-xs font-medium text-[#666666] uppercase">Actions</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase">Numéro</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase">Client</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase hidden md:table-cell">Date</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase hidden lg:table-cell">Échéance</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-[#666666] uppercase">Montant</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-[#666666] uppercase">Payé</th>
+                <th className="text-center px-4 py-3 text-xs font-medium text-[#666666] uppercase">Statut</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-[#666666] uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5E5E5]">
               {filteredInvoices.map((invoice) => {
                 const status = statusConfig[invoice.status] || statusConfig.brouillon;
                 const StatusIcon = status.icon;
+                const totalPaid = invoice.total_paid || 0;
+                const remaining = (invoice.total || 0) - totalPaid;
+                const paymentProgress = invoice.total > 0 ? (totalPaid / invoice.total) * 100 : 0;
                 return (
                   <tr key={invoice.id} className="hover:bg-[#F8F8F8] transition-colors">
-                    <td className="px-6 py-4">
-                      <span className="font-mono font-medium text-[#1A1A1A]">{invoice.invoice_number}</span>
+                    <td className="px-4 py-4">
+                      <span className="font-mono font-medium text-[#1A1A1A] text-sm">{invoice.invoice_number}</span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4">
                       <div>
-                        <p className="font-medium text-[#1A1A1A]">{getContactName(invoice.contact_id)}</p>
+                        <p className="font-medium text-[#1A1A1A] text-sm">{getContactName(invoice.contact_id)}</p>
                         {getContactCompany(invoice.contact_id) && (
                           <p className="text-xs text-[#666666]">{getContactCompany(invoice.contact_id)}</p>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-[#666666]">
+                    <td className="px-4 py-4 text-sm text-[#666666] hidden md:table-cell">
                       {formatDate(invoice.created_at)}
                     </td>
-                    <td className="px-6 py-4 text-sm text-[#666666]">
+                    <td className="px-4 py-4 text-sm text-[#666666] hidden lg:table-cell">
                       {formatDate(invoice.due_date)}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="font-mono font-bold text-[#1A1A1A]">{formatCurrency(invoice.total)}</span>
+                    <td className="px-4 py-4 text-right">
+                      <span className="font-mono font-bold text-[#1A1A1A] text-sm">{formatCurrency(invoice.total)}</span>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-4 py-4 text-right">
+                      <div className="flex flex-col items-end gap-1">
+                        <span className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-green-600 font-bold' : 'text-[#666666]'}`}>
+                          {formatCurrency(totalPaid)}
+                        </span>
+                        {invoice.total > 0 && totalPaid > 0 && totalPaid < invoice.total && (
+                          <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-orange-500 rounded-full transition-all"
+                              style={{ width: `${Math.min(paymentProgress, 100)}%` }}
+                            />
+                          </div>
+                        )}
+                        {remaining > 0 && invoice.status !== 'brouillon' && invoice.status !== 'annulee' && (
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="h-6 px-2 text-xs text-[#CE0202] hover:text-[#CE0202] hover:bg-[#CE0202]/10"
+                            onClick={() => openPaymentDialog(invoice)}
+                          >
+                            <Plus className="w-3 h-3 mr-1" />
+                            Paiement
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-center">
                       <Select
                         value={invoice.status}
                         onValueChange={(newStatus) => handleStatusUpdate(invoice.id, newStatus)}
                       >
-                        <SelectTrigger className={`w-[140px] h-8 ${status.color} border-none text-xs`}>
+                        <SelectTrigger className={`w-[120px] h-8 ${status.color} border-none text-xs`}>
                           <div className="flex items-center gap-1">
                             <StatusIcon className="w-3 h-3" />
                             <span>{status.label}</span>
@@ -794,7 +824,7 @@ const InvoicesPage = () => {
                         </SelectContent>
                       </Select>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 py-4 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
