@@ -286,39 +286,47 @@ BREVO_SENDER_EMAIL = os.environ.get('BREVO_SENDER_EMAIL', 'noreply@alphagency.fr
 BREVO_SENDER_NAME = os.environ.get('BREVO_SENDER_NAME', 'Alpha Agency')
 
 async def send_email_notification(to: str, subject: str, html_content: str, to_name: str = None):
-    """Send transactional email via Brevo SMTP"""
-    if not BREVO_SMTP_KEY:
-        logger.warning("BREVO_SMTP_KEY not configured, skipping email")
+    """Send transactional email via Brevo API"""
+    if not BREVO_API_KEY:
+        logger.warning("BREVO_API_KEY not configured, skipping email")
         return False
     
     try:
-        import smtplib
-        from email.mime.text import MIMEText
-        from email.mime.multipart import MIMEMultipart
+        url = "https://api.brevo.com/v3/smtp/email"
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "api-key": BREVO_API_KEY
+        }
         
-        # Create message
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = subject
-        msg['From'] = f"{BREVO_SENDER_NAME} <{BREVO_SENDER_EMAIL}>"
-        msg['To'] = to
+        # Use a verified sender - Brevo requires sender verification
+        sender_email = BREVO_SENDER_EMAIL
+        sender_name = BREVO_SENDER_NAME
         
-        # Attach HTML content
-        html_part = MIMEText(html_content, 'html', 'utf-8')
-        msg.attach(html_part)
+        payload = {
+            "sender": {
+                "name": sender_name,
+                "email": sender_email
+            },
+            "to": [{"email": to, "name": to_name or to.split('@')[0]}],
+            "subject": subject,
+            "htmlContent": html_content
+        }
         
-        # Send via Brevo SMTP
-        def send_smtp():
-            with smtplib.SMTP('smtp-relay.brevo.com', 587) as server:
-                server.starttls()
-                server.login(BREVO_SENDER_EMAIL, BREVO_SMTP_KEY)
-                server.sendmail(BREVO_SENDER_EMAIL, to, msg.as_string())
+        response = await asyncio.to_thread(
+            lambda: requests.post(url, headers=headers, json=payload, timeout=10)
+        )
         
-        await asyncio.to_thread(send_smtp)
-        logger.info(f"Email sent successfully to {to} via Brevo SMTP")
-        return True
+        if response.status_code == 201:
+            logger.info(f"Email sent successfully to {to} via Brevo API")
+            return True
+        else:
+            logger.error(f"Brevo API error: {response.status_code} - {response.text}")
+            # Log mais ne pas bloquer l'application
+            return False
             
     except Exception as e:
-        logger.error(f"Failed to send email via Brevo SMTP: {e}")
+        logger.error(f"Failed to send email via Brevo: {e}")
         return False
 
 async def send_new_lead_notification(lead: dict):
