@@ -428,6 +428,18 @@ agent_communication:
         agent: "testing"
         comment: "✅ TESTÉ - Fonctionnalité d'import de contacts Alpha Agency fonctionne parfaitement. Tests réussis: 1) Login admin@alphagency.fr/superpassword ✓, 2) Navigation vers /admin/contacts ✓, 3) Bouton 'Importer' présent à côté de 'Nouveau contact' ✓, 4) Dialog d'import s'ouvre avec titre correct 'Importer des contacts' ✓, 5) Wizard 3 étapes (Fichier → Correspondance → Options) avec indicateurs visuels ✓, 6) Dropzone fonctionnelle avec texte 'Glissez-déposez votre fichier ici' ✓, 7) Formats acceptés (.csv, .xls, .xlsx) affichés ✓, 8) Thème rouge #CE0202 appliqué (55 éléments détectés) ✓, 9) Boutons navigation (Suivant/Annuler) présents et fonctionnels ✓, 10) Bouton 'Suivant' correctement désactivé sans fichier ✓. Backend API endpoints /api/contacts/import/parse et /api/contacts/import/execute implémentés avec support pandas pour CSV/Excel. Interface utilisateur complète avec mapping automatique des colonnes, options d'import avancées, et gestion des erreurs."
 
+  - task: "Nouveaux champs formulaire contact Alpha Agency"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/dashboard/ContactsPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - Nouveaux champs du formulaire de contact et import avec champs étendus Alpha Agency fonctionnent parfaitement. Tests complets réussis: 1) Formulaire 'Nouveau contact': Tous les champs existants présents (Prénom, Nom, Email, Téléphone, Entreprise) ✓, Nouveaux champs implémentés: Poste (avec placeholder 'Ex: Directeur commercial') ✓, Ville ✓, Budget (avec placeholder 'Ex: 5 000 € - 10 000 €') ✓, Statut (dropdown avec 8 options: Nouveau, Prospect, Qualifié, En discussion, Client, VIP, Inactif, Perdu) ✓, Score (dropdown avec 3 options: Chaud, Tiède, Froid) ✓, Note (textarea multi-lignes avec placeholder) ✓, Informations supplémentaires (textarea multi-lignes avec placeholder) ✓. 2) Dialog d'import: Wizard 3 étapes fonctionnel ✓, Champs de mapping étendus incluant tous les nouveaux champs (Poste, Type de projet, Budget, Note, Informations sup., Date de création) disponibles dans CONTACT_FIELDS ✓, Dropzone avec formats acceptés (.csv, .xls, .xlsx) ✓. 3) Modification contact existant: Date de création affichée en lecture seule en haut du formulaire ✓, Tous les nouveaux champs éditables et fonctionnels ✓. Authentification admin@alphagency.fr/superpassword confirmée. Interface utilisateur complète selon spécifications demandées."
+
 agent_communication:
   - agent: "main"
     message: "Session de fork - Corrections majeures: 1) Favicon ajouté, 2) Onglet KPIs manuels supprimé, 3) Thème clair appliqué sur TOUTES les pages du dashboard, 4) Réalisations migrées vers la BDD (8 items), 5) Image hero restaurée, 6) Génération PDF fonctionnelle."
