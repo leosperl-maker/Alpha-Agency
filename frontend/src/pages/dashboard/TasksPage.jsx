@@ -144,7 +144,8 @@ const TasksPage = () => {
       status: "todo",
       priority: "medium",
       category: "general",
-      due_date: ""
+      due_date: "",
+      contact_id: ""
     });
     setEditingTask(null);
   };
@@ -157,7 +158,8 @@ const TasksPage = () => {
       status: task.status,
       priority: task.priority,
       category: task.category || "general",
-      due_date: task.due_date || ""
+      due_date: task.due_date || "",
+      contact_id: task.contact_id || ""
     });
     setDialogOpen(true);
   };
