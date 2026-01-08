@@ -472,6 +472,31 @@ const TasksPage = () => {
                 className="bg-[#F8F8F8] border-[#E5E5E5]"
               />
             </div>
+
+            {/* Contact associé (facultatif) */}
+            <div className="space-y-2">
+              <Label className="text-[#1A1A1A] flex items-center gap-1">
+                <User className="w-3 h-3" />
+                Contact associé (facultatif)
+              </Label>
+              <Select 
+                value={formData.contact_id || "none"} 
+                onValueChange={(v) => setFormData({...formData, contact_id: v === "none" ? "" : v})}
+              >
+                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                  <SelectValue placeholder="Aucun contact" />
+                </SelectTrigger>
+                <SelectContent className="bg-white max-h-60">
+                  <SelectItem value="none">— Aucun contact —</SelectItem>
+                  {contacts.map(contact => (
+                    <SelectItem key={contact.id} value={contact.id}>
+                      {contact.first_name} {contact.last_name}
+                      {contact.company && <span className="text-[#666666] ml-1">({contact.company})</span>}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             
             {editingTask && (
               <div className="space-y-2">
