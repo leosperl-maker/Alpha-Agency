@@ -53,7 +53,7 @@ STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', 'sk_test_emergent')
 COMPANY_INFO = {
     "name": "ALPHA DIGITAL",
     "commercial_name": "ALPHAGENCY",
-    "tagline": "AGENCE DE COMMUNICATION 360°",
+    "tagline": "",  # Retiré comme demandé
     "address": "3 Boulevard du Marquisat de Houelbourg",
     "city": "97122 Baie-Mahault",
     "region": "Guadeloupe",
@@ -67,7 +67,7 @@ COMPANY_INFO = {
     "rcs": "Pointe-à-Pitre",
     "capital": "100",
     "legal_form": "SASU",
-    "logo_url": "https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png"
+    "logo_url": "https://customer-assets.emergentagent.com/job_46adb236-f8e1-4856-a9f0-1ea29ce009cd/artifacts/kpvir23o_LOGO%20DEVIS%20FACTURES.png"
 }
 
 # Cloudinary Config
