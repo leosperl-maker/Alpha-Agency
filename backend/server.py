@@ -765,6 +765,218 @@ async def delete_contact(contact_id: str, current_user: dict = Depends(get_curre
         raise HTTPException(status_code=404, detail="Contact non trouvé")
     return {"message": "Contact supprimé"}
 
+# ==================== CONTACTS IMPORT ====================
+import pandas as pd
+import io
+import re
+
+class ImportOptions(BaseModel):
+    mapping: dict  # {"file_column": "db_field"}
+    status: str = "nouveau"
+    tags: List[str] = []
+    update_existing: bool = False
+    identifier_field: str = "email"  # "email" or "phone"
+    subscribe_email: bool = False
+    subscribe_sms: bool = False
+
+@api_router.post("/contacts/import/parse", response_model=dict)
+async def parse_import_file(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Parse uploaded file and return columns for mapping"""
+    
+    # Check file type
+    allowed_extensions = ['.csv', '.xls', '.xlsx']
+    file_ext = '.' + file.filename.split('.')[-1].lower() if '.' in file.filename else ''
+    
+    if file_ext not in allowed_extensions:
+        raise HTTPException(status_code=400, detail=f"Format non supporté. Utilisez {', '.join(allowed_extensions)}")
+    
+    # Check file size (100 MB max)
+    contents = await file.read()
+    if len(contents) > 100 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Fichier trop volumineux (max 100 MB)")
+    
+    try:
+        # Parse file based on type
+        if file_ext == '.csv':
+            # Try different encodings
+            for encoding in ['utf-8', 'latin-1', 'cp1252']:
+                try:
+                    df = pd.read_csv(io.BytesIO(contents), encoding=encoding, nrows=100)
+                    break
+                except:
+                    continue
+            else:
+                raise HTTPException(status_code=400, detail="Impossible de lire le fichier CSV")
+        elif file_ext == '.xlsx':
+            df = pd.read_excel(io.BytesIO(contents), engine='openpyxl', nrows=100)
+        elif file_ext == '.xls':
+            df = pd.read_excel(io.BytesIO(contents), engine='xlrd', nrows=100)
+        else:
+            raise HTTPException(status_code=400, detail="Format non supporté")
+        
+        # Get columns
+        columns = df.columns.tolist()
+        
+        # Get preview data (first 5 rows)
+        preview = df.head(5).fillna('').astype(str).to_dict('records')
+        
+        # Get total rows (re-read full file to count)
+        if file_ext == '.csv':
+            df_full = pd.read_csv(io.BytesIO(contents), encoding='utf-8')
+        else:
+            df_full = pd.read_excel(io.BytesIO(contents))
+        total_rows = len(df_full)
+        
+        return {
+            "columns": columns,
+            "preview": preview,
+            "total_rows": total_rows,
+            "filename": file.filename
+        }
+        
+    except Exception as e:
+        logger.error(f"Error parsing import file: {e}")
+        raise HTTPException(status_code=400, detail=f"Erreur lors de la lecture du fichier: {str(e)}")
+
+@api_router.post("/contacts/import/execute", response_model=dict)
+async def execute_import(
+    file: UploadFile = File(...),
+    mapping: str = Form(...),
+    status: str = Form("nouveau"),
+    tags: str = Form(""),
+    update_existing: bool = Form(False),
+    identifier_field: str = Form("email"),
+    subscribe_email: bool = Form(False),
+    subscribe_sms: bool = Form(False),
+    current_user: dict = Depends(get_current_user)
+):
+    """Execute the import with the specified options"""
+    import json
+    
+    # Parse mapping
+    try:
+        field_mapping = json.loads(mapping)
+    except:
+        raise HTTPException(status_code=400, detail="Mapping invalide")
+    
+    # Parse tags
+    tag_list = [t.strip() for t in tags.split(',') if t.strip()] if tags else []
+    
+    # Read file
+    contents = await file.read()
+    file_ext = '.' + file.filename.split('.')[-1].lower()
+    
+    try:
+        if file_ext == '.csv':
+            for encoding in ['utf-8', 'latin-1', 'cp1252']:
+                try:
+                    df = pd.read_csv(io.BytesIO(contents), encoding=encoding)
+                    break
+                except:
+                    continue
+        elif file_ext == '.xlsx':
+            df = pd.read_excel(io.BytesIO(contents), engine='openpyxl')
+        elif file_ext == '.xls':
+            df = pd.read_excel(io.BytesIO(contents), engine='xlrd')
+        else:
+            raise HTTPException(status_code=400, detail="Format non supporté")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Erreur lecture fichier: {str(e)}")
+    
+    # Results tracking
+    results = {
+        "imported": 0,
+        "updated": 0,
+        "skipped": 0,
+        "errors": []
+    }
+    
+    # Email validation regex
+    email_regex = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+    
+    # Process each row
+    for index, row in df.iterrows():
+        try:
+            # Build contact data from mapping
+            contact_data = {}
+            for file_col, db_field in field_mapping.items():
+                if db_field and db_field != "ignore" and file_col in df.columns:
+                    value = row[file_col]
+                    if pd.notna(value):
+                        contact_data[db_field] = str(value).strip()
+            
+            # Check required fields (email or phone)
+            email = contact_data.get('email', '').strip()
+            phone = contact_data.get('phone', '').strip()
+            
+            if not email and not phone:
+                results["errors"].append(f"Ligne {index + 2}: Email ou téléphone requis")
+                results["skipped"] += 1
+                continue
+            
+            # Validate email if provided
+            if email and not email_regex.match(email):
+                results["errors"].append(f"Ligne {index + 2}: Email invalide ({email})")
+                results["skipped"] += 1
+                continue
+            
+            # Check for existing contact
+            identifier_value = email if identifier_field == "email" else phone
+            identifier_query = {"email": email} if identifier_field == "email" and email else {"phone": phone}
+            
+            existing_contact = await db.contacts.find_one(identifier_query)
+            
+            if existing_contact:
+                if update_existing:
+                    # Update existing contact
+                    update_data = {k: v for k, v in contact_data.items() if v}
+                    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+                    if tag_list:
+                        existing_tags = existing_contact.get('tags', [])
+                        update_data["tags"] = list(set(existing_tags + tag_list))
+                    if subscribe_email:
+                        update_data["subscribe_email"] = True
+                    if subscribe_sms:
+                        update_data["subscribe_sms"] = True
+                    
+                    await db.contacts.update_one({"id": existing_contact["id"]}, {"$set": update_data})
+                    results["updated"] += 1
+                else:
+                    results["skipped"] += 1
+            else:
+                # Create new contact
+                contact_id = str(uuid.uuid4())
+                contact_doc = {
+                    "id": contact_id,
+                    "first_name": contact_data.get('first_name', ''),
+                    "last_name": contact_data.get('last_name', ''),
+                    "email": contact_data.get('email', ''),
+                    "phone": contact_data.get('phone', ''),
+                    "company": contact_data.get('company', ''),
+                    "city": contact_data.get('city', ''),
+                    "project_type": contact_data.get('project_type', ''),
+                    "status": status,
+                    "score": "tiède",
+                    "tags": tag_list,
+                    "subscribe_email": subscribe_email,
+                    "subscribe_sms": subscribe_sms,
+                    "source": "import",
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.contacts.insert_one(contact_doc)
+                results["imported"] += 1
+                
+        except Exception as e:
+            results["errors"].append(f"Ligne {index + 2}: {str(e)}")
+            results["skipped"] += 1
+    
+    # Limit errors to first 20
+    if len(results["errors"]) > 20:
+        results["errors"] = results["errors"][:20] + [f"... et {len(results['errors']) - 20} autres erreurs"]
+    
+    return results
+
 # ==================== OPPORTUNITIES ROUTES ====================
 
 @api_router.post("/opportunities", response_model=dict)
