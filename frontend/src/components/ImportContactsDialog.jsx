@@ -52,7 +52,12 @@ const CONTACT_FIELDS = [
   { value: "phone", label: "Téléphone" },
   { value: "company", label: "Entreprise" },
   { value: "city", label: "Ville" },
+  { value: "poste", label: "Poste" },
   { value: "project_type", label: "Type de projet" },
+  { value: "budget", label: "Budget (peut être sélectionné plusieurs fois)" },
+  { value: "note", label: "Note" },
+  { value: "infos_sup", label: "Informations sup." },
+  { value: "created_at", label: "Date de création" },
 ];
 
 // Status options
