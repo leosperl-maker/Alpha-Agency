@@ -416,6 +416,18 @@ agent_communication:
         agent: "testing"
         comment: "✅ TESTÉ - Dashboard Vue d'ensemble fonctionne parfaitement. 4 KPI Cards (Contacts, Tâches, Factures, Budget) cliquables et redirigent vers les bonnes pages, section 'Tâches récentes' présente, section 'Progression' avec pourcentage de complétion, graphiques d'évolution des leads et répartition pipeline."
 
+  - task: "Import de contacts Alpha Agency"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ImportContactsDialog.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTÉ - Fonctionnalité d'import de contacts Alpha Agency fonctionne parfaitement. Tests réussis: 1) Login admin@alphagency.fr/superpassword ✓, 2) Navigation vers /admin/contacts ✓, 3) Bouton 'Importer' présent à côté de 'Nouveau contact' ✓, 4) Dialog d'import s'ouvre avec titre correct 'Importer des contacts' ✓, 5) Wizard 3 étapes (Fichier → Correspondance → Options) avec indicateurs visuels ✓, 6) Dropzone fonctionnelle avec texte 'Glissez-déposez votre fichier ici' ✓, 7) Formats acceptés (.csv, .xls, .xlsx) affichés ✓, 8) Thème rouge #CE0202 appliqué (55 éléments détectés) ✓, 9) Boutons navigation (Suivant/Annuler) présents et fonctionnels ✓, 10) Bouton 'Suivant' correctement désactivé sans fichier ✓. Backend API endpoints /api/contacts/import/parse et /api/contacts/import/execute implémentés avec support pandas pour CSV/Excel. Interface utilisateur complète avec mapping automatique des colonnes, options d'import avancées, et gestion des erreurs."
+
 agent_communication:
   - agent: "main"
     message: "Session de fork - Corrections majeures: 1) Favicon ajouté, 2) Onglet KPIs manuels supprimé, 3) Thème clair appliqué sur TOUTES les pages du dashboard, 4) Réalisations migrées vers la BDD (8 items), 5) Image hero restaurée, 6) Génération PDF fonctionnelle."
@@ -437,3 +449,5 @@ agent_communication:
     message: "✅ TESTS PDF TÉLÉCHARGEMENT NOUVEAU DESIGN VALIDÉS - Tests spécialisés PDF téléchargement facture/devis Alpha Agency avec nouveau design professionnel RÉUSSIS (13/13 tests, 100%). 1) Login admin@alphagency.fr/superpassword ✓, 2) PDF Facture: 290KB avec logo Cloudinary, Content-Type: application/pdf, filename=facture_FAC-2026-0009.pdf ✓, 3) PDF Devis: 290KB avec logo, filename=devis_DEV-2026-0007.pdf ✓, 4) Authentification JWT requise (401 sans token) ✓, 5) Gestion erreurs 404 pour ID inexistant ✓. PDF contient: logo Alpha Agency, infos légales (SIRET: 91255383100013, TVA: FR47912553831), colonnes tableau (Description, Qté, PU HT, TVA, Total HT), SANS statut affiché comme demandé."
   - agent: "testing"
     message: "✅ TESTS API GESTION UTILISATEURS ADMINISTRATEURS VALIDÉS - API de gestion des utilisateurs administrateurs Alpha Agency fonctionne parfaitement (16/16 tests réussis, 100%). Tests validés avec credentials admin@alphagency.fr/superpassword: 1) GET /api/admin/users → liste 6 utilisateurs sans mots de passe (super_admin uniquement) ✓, 2) POST /api/auth/register → création admin avec validation email unique et prévention doublons ✓, 3) PUT /api/admin/users/{id} → modification utilisateur avec protection rôle super_admin ✓, 4) DELETE /api/admin/users/{id} → suppression avec protection super_admin et auto-suppression ✓, 5) POST /api/auth/forgot-password → demande réinitialisation avec prévention énumération emails ✓, 6) PUT /api/auth/change-password → changement mot de passe avec validation longueur minimum 8 caractères ✓. Contrôle d'accès: admin régulier correctement bloqué (403) des endpoints super_admin. Toutes les restrictions de sécurité respectées."
+  - agent: "testing"
+    message: "✅ TESTS IMPORT CONTACTS ALPHA AGENCY VALIDÉS - Fonctionnalité d'import de contacts testée avec succès. Login admin@alphagency.fr/superpassword ✓, Navigation /admin/contacts ✓, Bouton 'Importer' présent à côté de 'Nouveau contact' ✓, Dialog d'import avec wizard 3 étapes (Fichier → Correspondance → Options) ✓, Dropzone fonctionnelle avec formats .csv/.xls/.xlsx ✓, Thème rouge #CE0202 appliqué (55 éléments) ✓, Navigation boutons Suivant/Annuler ✓. Backend API endpoints /api/contacts/import/parse et /api/contacts/import/execute implémentés avec pandas. Interface complète avec mapping automatique, options avancées, gestion erreurs. Tous les critères de test respectés."
