@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, CheckCircle, Clock, AlertCircle, Calendar, MoreVertical, Trash2, Edit, Flag, ChevronDown, Search, Filter } from "lucide-react";
+import { Plus, CheckCircle, Clock, AlertCircle, Calendar, MoreVertical, Trash2, Edit, Flag, ChevronDown, Search, Filter, User } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
@@ -10,10 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../components/ui/dropdown-menu";
 import { Label } from "../../components/ui/label";
 import { toast } from "sonner";
-import { tasksAPI } from "../../lib/api";
+import { tasksAPI, contactsAPI } from "../../lib/api";
 
 const TasksPage = () => {
   const [tasks, setTasks] = useState([]);
+  const [contacts, setContacts] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -28,7 +29,8 @@ const TasksPage = () => {
     status: "todo",
     priority: "medium",
     category: "general",
-    due_date: ""
+    due_date: "",
+    contact_id: ""
   });
 
   const statusConfig = {
