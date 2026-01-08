@@ -55,6 +55,7 @@ export const contactsAPI = {
   create: (data) => api.post('/contacts', data),
   update: (id, data) => api.put(`/contacts/${id}`, data),
   delete: (id) => api.delete(`/contacts/${id}`),
+  getHistory: (id) => api.get(`/contacts/${id}/history`),
   // Import functions
   parseImportFile: (file) => {
     const formData = new FormData();
