@@ -133,9 +133,6 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 
 ## Backlog (Prioritized)
 
-### P1 - High Priority
-- [ ] **Google Analytics 4 integration**
-
 ### P2 - Medium Priority
 - [ ] **Resend email integration**: Replace mock email functionality
 - [ ] **Audio player for portfolio**: Frontend player for uploaded audio files
