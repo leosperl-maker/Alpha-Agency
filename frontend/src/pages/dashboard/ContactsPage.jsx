@@ -44,6 +44,8 @@ const ContactsPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [editingContact, setEditingContact] = useState(null);
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
+  const [selectedContactId, setSelectedContactId] = useState(null);
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
