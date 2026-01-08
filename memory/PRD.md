@@ -56,6 +56,18 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
   - Payment summary (total, paid, remaining)
 - [x] Download PDF functionality
 
+### Contacts Management
+- [x] Full CRUD operations
+- [x] Extended contact model (poste, note, infos_sup, budget, city)
+- [x] Contact import from CSV/Excel (3-step wizard)
+- [x] Status and score tracking
+- [x] Tags system
+- [x] **Contact History View** ✅ DONE 2025-01-08
+  - Slide-over panel with contact details
+  - Summary cards (quotes, invoices, paid, due)
+  - Tabs for Quotes, Invoices, Tasks, Notes
+  - Financial totals and history
+
 ### Dashboard
 - [x] KPI cards (contacts, pipeline, MRR, conversion rate)
 - [x] Charts (leads evolution, pipeline distribution)
