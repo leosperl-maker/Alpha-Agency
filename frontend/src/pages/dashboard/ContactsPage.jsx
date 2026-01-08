@@ -509,6 +509,18 @@ const ContactsPage = () => {
                     <Button
                       variant="ghost"
                       size="sm"
+                      onClick={() => {
+                        setSelectedContactId(contact.id);
+                        setDetailSheetOpen(true);
+                      }}
+                      className="text-[#CE0202] hover:text-[#CE0202] hover:bg-[#CE0202]/10"
+                      title="Voir les détails"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => openEditDialog(contact)}
                       className="text-[#666666] hover:text-[#1A1A1A]"
                     >
