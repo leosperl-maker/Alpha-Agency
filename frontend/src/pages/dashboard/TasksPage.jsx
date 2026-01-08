@@ -245,6 +245,15 @@ const TasksPage = () => {
             </Badge>
           )}
         </div>
+        {/* Contact associé */}
+        {task.contact_id && getContactName(task.contact_id) && (
+          <div className="mt-2 pt-2 border-t border-[#E5E5E5]">
+            <p className="text-xs text-[#666666] flex items-center gap-1">
+              <User className="w-3 h-3" />
+              {getContactName(task.contact_id)}
+            </p>
+          </div>
+        )}
       </div>
     );
   };
