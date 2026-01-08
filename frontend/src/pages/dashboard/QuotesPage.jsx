@@ -346,9 +346,11 @@ const QuotesPage = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleConvertToInvoice(quote.id)}
-                        className="text-green-600 hover:text-green-700"
+                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        title="Convertir en facture"
                       >
-                        <ArrowRight className="w-4 h-4" />
+                        <Receipt className="w-4 h-4 mr-1" />
+                        <span className="text-xs hidden sm:inline">Facturer</span>
                       </Button>
                     )}
                   </div>
