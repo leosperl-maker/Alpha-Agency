@@ -93,6 +93,15 @@ const InvoicesPage = () => {
   const [documentType, setDocumentType] = useState("facture"); // facture or devis
   const [newService, setNewService] = useState({ title: "", description: "", price: 0 });
   const [editingService, setEditingService] = useState(null);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState(null);
+  const [paymentForm, setPaymentForm] = useState({
+    amount: "",
+    payment_date: new Date().toISOString().split('T')[0],
+    payment_method: "virement",
+    notes: ""
+  });
+  const [savingPayment, setSavingPayment] = useState(false);
   
   const [items, setItems] = useState([{ description: "", quantity: 1, unit_price: 0 }]);
   const [formData, setFormData] = useState({
