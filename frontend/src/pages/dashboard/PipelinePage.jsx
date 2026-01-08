@@ -175,7 +175,7 @@ const PipelinePage = () => {
           <h1 className="text-2xl font-bold text-[#1A1A1A]">Pipeline</h1>
           <p className="text-[#666666] text-sm">Gérez vos opportunités commerciales</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
             <Button 
               data-testid="add-opportunity-btn"
@@ -188,7 +188,9 @@ const PipelinePage = () => {
           </DialogTrigger>
           <DialogContent className="bg-white border-[#E5E5E5] max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-[#1A1A1A]">Nouvelle opportunité</DialogTitle>
+              <DialogTitle className="text-[#1A1A1A]">
+                {editingOpp ? "Modifier l'opportunité" : "Nouvelle opportunité"}
+              </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
