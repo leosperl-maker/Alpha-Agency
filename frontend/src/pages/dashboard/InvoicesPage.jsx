@@ -458,7 +458,7 @@ const InvoicesPage = () => {
     .reduce((sum, i) => sum + (i.total || 0), 0);
   
   const totalPaid = invoices
-    .filter(i => i.status === "payee")
+    .filter(i => i.status === "payée" || i.status === "payee")
     .reduce((sum, i) => sum + (i.total || 0), 0);
 
   const totalOverdue = invoices
