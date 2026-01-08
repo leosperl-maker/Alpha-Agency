@@ -381,7 +381,8 @@ const TasksPage = () => {
       </div>
 
       {/* Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="overflow-x-auto -mx-6 px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-w-[900px] md:min-w-0">
         {Object.entries(statusConfig).map(([status, config]) => {
           const StatusIcon = config.icon;
           const statusTasks = tasksByStatus[status] || [];
@@ -408,7 +409,24 @@ const TasksPage = () => {
             </div>
           );
         })}
+        </div>
       </div>
+
+      {/* Overdue Tasks Section */}
+      {tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== "done").length > 0 && (
+        <div className="bg-red-50 rounded-lg border border-red-200 p-4 mt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <AlertCircle className="w-5 h-5 text-red-600" />
+            <h3 className="font-semibold text-red-700">Tâches en retard ({tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== "done").length})</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {tasks
+              .filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== "done")
+              .map(task => <TaskCard key={`overdue-${task.id}`} task={task} />)
+            }
+          </div>
+        </div>
+      )}
 
       {/* Dialog for Create/Edit */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
