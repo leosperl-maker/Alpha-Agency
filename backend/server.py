@@ -367,15 +367,15 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     header_left = []
     if logo_path:
         try:
-            header_left.append(Image(logo_path, width=4*cm, height=1.5*cm))
+            # Logo plus grand et visible
+            header_left.append(Image(logo_path, width=6*cm, height=2.2*cm))
         except:
             header_left.append(Paragraph(f"<b>{COMPANY_INFO['commercial_name']}</b>", company_name_style))
     else:
         header_left.append(Paragraph(f"<b>{COMPANY_INFO['commercial_name']}</b>", company_name_style))
     
-    header_left.append(Spacer(1, 0.2*cm))
-    header_left.append(Paragraph(COMPANY_INFO['tagline'], company_tagline_style))
     header_left.append(Spacer(1, 0.3*cm))
+    # Pas de tagline (retiré comme demandé)
     header_left.append(Paragraph(f"{COMPANY_INFO['address']}", company_info_style))
     header_left.append(Paragraph(f"{COMPANY_INFO['city']}, {COMPANY_INFO['region']}", company_info_style))
     header_left.append(Spacer(1, 0.2*cm))
