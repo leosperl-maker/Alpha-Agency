@@ -169,6 +169,7 @@ class OpportunityUpdate(BaseModel):
     notes: Optional[str] = None
 
 class QuoteItemCreate(BaseModel):
+    title: Optional[str] = ""  # Titre du service
     description: str
     quantity: int = 1
     unit_price: float
@@ -182,6 +183,12 @@ class QuoteCreate(BaseModel):
 
 class QuoteUpdate(BaseModel):
     status: Optional[str] = None
+    notes: Optional[str] = None
+
+class PaymentCreate(BaseModel):
+    amount: float
+    payment_date: str
+    payment_method: Optional[str] = "virement"  # virement, chèque, carte, espèces
     notes: Optional[str] = None
 
 class InvoiceCreate(BaseModel):
