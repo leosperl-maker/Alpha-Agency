@@ -221,10 +221,7 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus:
-    - "Module Tâches - Affichage corrigé avec statuts todo"
-    - "Module Tâches - Contact associé facultatif"
-    - "Téléchargement PDF Devis fonctionnel"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
