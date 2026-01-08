@@ -274,6 +274,17 @@ const ContactsPage = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
+
+        {/* Import Dialog */}
+        <ImportContactsDialog 
+          open={importDialogOpen} 
+          onOpenChange={setImportDialogOpen}
+          onImportSuccess={() => {
+            fetchContacts();
+            toast.success("Import terminé avec succès");
+          }}
+        />
       </div>
 
       {/* Filters */}
