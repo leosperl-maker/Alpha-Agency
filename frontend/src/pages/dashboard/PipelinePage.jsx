@@ -162,9 +162,9 @@ const PipelinePage = () => {
     setEditingOpp(null);
   };
 
-  const getColumnTotal = (columnId) => {
-    const opps = pipeline[columnId] || [];
-    return opps.reduce((sum, opp) => sum + (opp.amount || 0), 0);
+  const getContactName = (contactId) => {
+    const contact = contacts.find(c => c.id === contactId);
+    return contact ? `${contact.first_name} ${contact.last_name}` : "";
   };
 
   return (
