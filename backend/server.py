@@ -205,7 +205,6 @@ class SubscriptionCreate(BaseModel):
 class TaskCreate(BaseModel):
     title: str
     description: Optional[str] = None
-    contact_id: Optional[str] = None
     due_date: Optional[str] = None
     priority: Optional[str] = "medium"
 
