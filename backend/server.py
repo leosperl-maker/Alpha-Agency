@@ -281,6 +281,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 # ==================== EMAIL HELPERS (BREVO) ====================
 
 BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
+BREVO_SMTP_KEY = os.environ.get('BREVO_SMTP_KEY', '')
 BREVO_SENDER_EMAIL = os.environ.get('BREVO_SENDER_EMAIL', 'noreply@alphagency.fr')
 BREVO_SENDER_NAME = os.environ.get('BREVO_SENDER_NAME', 'Alpha Agency')
 
