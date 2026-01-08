@@ -106,7 +106,12 @@ const ContactsPage = () => {
       email: "",
       phone: "",
       company: "",
+      city: "",
+      poste: "",
       project_type: "",
+      budget: "",
+      note: "",
+      infos_sup: "",
       status: "nouveau",
       score: "tiède"
     });
@@ -115,8 +120,31 @@ const ContactsPage = () => {
 
   const openEditDialog = (contact) => {
     setEditingContact(contact);
-    setFormData(contact);
+    setFormData({
+      ...contact,
+      city: contact.city || "",
+      poste: contact.poste || "",
+      budget: contact.budget || "",
+      note: contact.note || "",
+      infos_sup: contact.infos_sup || "",
+    });
     setDialogOpen(true);
+  };
+
+  // Format date for display
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    try {
+      return new Date(dateStr).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    } catch {
+      return dateStr;
+    }
   };
 
   const filteredContacts = contacts.filter(contact => {
