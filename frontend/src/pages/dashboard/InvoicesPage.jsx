@@ -22,7 +22,12 @@ import {
   Package,
   Settings,
   ChevronRight,
-  Check
+  Check,
+  CreditCard,
+  Banknote,
+  CalendarDays,
+  PiggyBank,
+  ArrowRightLeft
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
