@@ -906,16 +906,31 @@ async def execute_import(
     # Email validation regex
     email_regex = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
     
+    # Identify which columns map to Budget (can be multiple)
+    budget_columns = [col for col, field in field_mapping.items() if field == "budget"]
+    
     # Process each row
     for index, row in df.iterrows():
         try:
             # Build contact data from mapping
             contact_data = {}
+            budget_values = []
+            
             for file_col, db_field in field_mapping.items():
                 if db_field and db_field != "ignore" and file_col in df.columns:
                     value = row[file_col]
                     if pd.notna(value):
-                        contact_data[db_field] = str(value).strip()
+                        value_str = str(value).strip()
+                        # Handle Budget concatenation (multiple columns → one field)
+                        if db_field == "budget":
+                            if value_str:
+                                budget_values.append(value_str)
+                        else:
+                            contact_data[db_field] = value_str
+            
+            # Concatenate budget values with " / "
+            if budget_values:
+                contact_data["budget"] = " / ".join(budget_values)
             
             # Check required fields (email or phone)
             email = contact_data.get('email', '').strip()
@@ -932,6 +947,29 @@ async def execute_import(
                 results["skipped"] += 1
                 continue
             
+            # Handle created_at: use from file if mapped, otherwise use import date
+            if 'created_at' in contact_data:
+                # Try to parse the date from file
+                try:
+                    # Try different date formats
+                    date_str = contact_data['created_at']
+                    parsed_date = None
+                    for fmt in ['%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y', '%Y/%m/%d', '%d.%m.%Y']:
+                        try:
+                            parsed_date = datetime.strptime(date_str, fmt)
+                            break
+                        except:
+                            continue
+                    if parsed_date:
+                        contact_data['created_at'] = parsed_date.replace(tzinfo=timezone.utc).isoformat()
+                    else:
+                        # If can't parse, use current date
+                        contact_data['created_at'] = datetime.now(timezone.utc).isoformat()
+                except:
+                    contact_data['created_at'] = datetime.now(timezone.utc).isoformat()
+            else:
+                contact_data['created_at'] = datetime.now(timezone.utc).isoformat()
+            
             # Check for existing contact
             identifier_value = email if identifier_field == "email" else phone
             identifier_query = {"email": email} if identifier_field == "email" and email else {"phone": phone}
@@ -940,8 +978,8 @@ async def execute_import(
             
             if existing_contact:
                 if update_existing:
-                    # Update existing contact
-                    update_data = {k: v for k, v in contact_data.items() if v}
+                    # Update existing contact (but not created_at)
+                    update_data = {k: v for k, v in contact_data.items() if v and k != 'created_at'}
                     update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
                     if tag_list:
                         existing_tags = existing_contact.get('tags', [])
@@ -967,13 +1005,17 @@ async def execute_import(
                     "company": contact_data.get('company', ''),
                     "city": contact_data.get('city', ''),
                     "project_type": contact_data.get('project_type', ''),
+                    "poste": contact_data.get('poste', ''),
+                    "note": contact_data.get('note', ''),
+                    "infos_sup": contact_data.get('infos_sup', ''),
+                    "budget": contact_data.get('budget', ''),
                     "status": status,
                     "score": "tiède",
                     "tags": tag_list,
                     "subscribe_email": subscribe_email,
                     "subscribe_sms": subscribe_sms,
                     "source": "import",
-                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "created_at": contact_data.get('created_at', datetime.now(timezone.utc).isoformat()),
                     "updated_at": datetime.now(timezone.utc).isoformat()
                 }
                 await db.contacts.insert_one(contact_doc)
