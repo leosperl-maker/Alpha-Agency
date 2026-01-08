@@ -440,6 +440,42 @@ agent_communication:
         agent: "testing"
         comment: "✅ TESTÉ - Nouveaux champs du formulaire de contact et import avec champs étendus Alpha Agency fonctionnent parfaitement. Tests complets réussis: 1) Formulaire 'Nouveau contact': Tous les champs existants présents (Prénom, Nom, Email, Téléphone, Entreprise) ✓, Nouveaux champs implémentés: Poste (avec placeholder 'Ex: Directeur commercial') ✓, Ville ✓, Budget (avec placeholder 'Ex: 5 000 € - 10 000 €') ✓, Statut (dropdown avec 8 options: Nouveau, Prospect, Qualifié, En discussion, Client, VIP, Inactif, Perdu) ✓, Score (dropdown avec 3 options: Chaud, Tiède, Froid) ✓, Note (textarea multi-lignes avec placeholder) ✓, Informations supplémentaires (textarea multi-lignes avec placeholder) ✓. 2) Dialog d'import: Wizard 3 étapes fonctionnel ✓, Champs de mapping étendus incluant tous les nouveaux champs (Poste, Type de projet, Budget, Note, Informations sup., Date de création) disponibles dans CONTACT_FIELDS ✓, Dropzone avec formats acceptés (.csv, .xls, .xlsx) ✓. 3) Modification contact existant: Date de création affichée en lecture seule en haut du formulaire ✓, Tous les nouveaux champs éditables et fonctionnels ✓. Authentification admin@alphagency.fr/superpassword confirmée. Interface utilisateur complète selon spécifications demandées."
 
+  - task: "Module Tâches - Affichage corrigé avec statuts todo"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/dashboard/TasksPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Correction du statut des tâches de 'à_faire' vers 'todo' pour correspondre au frontend. Les compteurs doivent maintenant correspondre aux tâches réelles affichées."
+
+  - task: "Module Tâches - Contact associé facultatif"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/dashboard/TasksPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Ajout du champ 'Contact associé (facultatif)' dans le formulaire de création de tâche. Le champ est un dropdown avec la liste des contacts (Nom Prénom + Entreprise) et peut rester vide."
+
+  - task: "Téléchargement PDF Devis fonctionnel"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/dashboard/QuotesPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Vérification que le téléchargement PDF des devis fonctionne correctement depuis la page /admin/devis avec le bouton de téléchargement."
+
 agent_communication:
   - agent: "main"
     message: "Session de fork - Corrections majeures: 1) Favicon ajouté, 2) Onglet KPIs manuels supprimé, 3) Thème clair appliqué sur TOUTES les pages du dashboard, 4) Réalisations migrées vers la BDD (8 items), 5) Image hero restaurée, 6) Génération PDF fonctionnelle."
@@ -465,3 +501,5 @@ agent_communication:
     message: "✅ TESTS IMPORT CONTACTS ALPHA AGENCY VALIDÉS - Fonctionnalité d'import de contacts testée avec succès. Login admin@alphagency.fr/superpassword ✓, Navigation /admin/contacts ✓, Bouton 'Importer' présent à côté de 'Nouveau contact' ✓, Dialog d'import avec wizard 3 étapes (Fichier → Correspondance → Options) ✓, Dropzone fonctionnelle avec formats .csv/.xls/.xlsx ✓, Thème rouge #CE0202 appliqué (55 éléments) ✓, Navigation boutons Suivant/Annuler ✓. Backend API endpoints /api/contacts/import/parse et /api/contacts/import/execute implémentés avec pandas. Interface complète avec mapping automatique, options avancées, gestion erreurs. Tous les critères de test respectés."
   - agent: "testing"
     message: "✅ TESTS NOUVEAUX CHAMPS FORMULAIRE CONTACT ALPHA AGENCY VALIDÉS - Tests complets des nouveaux champs du formulaire de contact et import avec champs étendus RÉUSSIS. 1) Formulaire 'Nouveau contact': Tous les champs existants présents (Prénom, Nom, Email, Téléphone, Entreprise) ✓, Nouveaux champs implémentés: Poste (avec placeholder 'Ex: Directeur commercial') ✓, Ville ✓, Budget (avec placeholder 'Ex: 5 000 € - 10 000 €') ✓, Statut (dropdown avec options: Nouveau, Prospect, Qualifié, En discussion, Client, VIP, Inactif, Perdu) ✓, Score (dropdown avec options: Chaud, Tiède, Froid) ✓, Note (textarea multi-lignes) ✓, Informations supplémentaires (textarea multi-lignes) ✓. 2) Dialog d'import: Wizard 3 étapes fonctionnel ✓, Champs de mapping étendus incluant tous les nouveaux champs (Poste, Type de projet, Budget, Note, Informations sup., Date de création) ✓, Dropzone avec formats acceptés (.csv, .xls, .xlsx) ✓. 3) Modification contact existant: Date de création affichée en lecture seule ✓, Tous les nouveaux champs éditables ✓. Authentification admin@alphagency.fr/superpassword confirmée. Tous les critères de test respectés selon spécifications utilisateur."
+  - agent: "main"
+    message: "Corrections du module Tâches et téléchargement PDF devis: 1) Statuts des tâches corrigés de 'à_faire' vers 'todo' pour correspondre au frontend, 2) Champ 'Contact associé (facultatif)' ajouté au formulaire de création de tâche, 3) Vérification du téléchargement PDF des devis. Tests requis pour valider les corrections."
