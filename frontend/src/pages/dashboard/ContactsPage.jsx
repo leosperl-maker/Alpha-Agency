@@ -210,13 +210,24 @@ const ContactsPage = () => {
                 <span className="hidden sm:inline">Nouveau contact</span>
               </Button>
             </DialogTrigger>
-          <DialogContent className="bg-white border-[#E5E5E5]">
+          <DialogContent className="bg-white border-[#E5E5E5] max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-[#1A1A1A]">
                 {editingContact ? "Modifier le contact" : "Nouveau contact"}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Date de création (lecture seule) */}
+              {editingContact && (
+                <div className="p-3 bg-[#F8F8F8] rounded-lg flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[#666666]" />
+                  <span className="text-sm text-[#666666]">
+                    Créé le: <strong className="text-[#1A1A1A]">{formatDate(editingContact.created_at)}</strong>
+                  </span>
+                </div>
+              )}
+              
+              {/* Prénom / Nom */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-[#1A1A1A]">Prénom *</Label>
@@ -237,6 +248,8 @@ const ContactsPage = () => {
                   />
                 </div>
               </div>
+
+              {/* Email */}
               <div className="space-y-2">
                 <Label className="text-[#1A1A1A]">Email *</Label>
                 <Input
@@ -247,6 +260,8 @@ const ContactsPage = () => {
                   className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
                 />
               </div>
+
+              {/* Téléphone / Entreprise */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-[#1A1A1A]">Téléphone</Label>
@@ -265,6 +280,46 @@ const ContactsPage = () => {
                   />
                 </div>
               </div>
+
+              {/* Poste / Ville */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[#1A1A1A] flex items-center gap-1">
+                    <Briefcase className="w-3 h-3" />
+                    Poste
+                  </Label>
+                  <Input
+                    value={formData.poste}
+                    onChange={(e) => setFormData({...formData, poste: e.target.value})}
+                    placeholder="Ex: Directeur commercial"
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[#1A1A1A]">Ville</Label>
+                  <Input
+                    value={formData.city}
+                    onChange={(e) => setFormData({...formData, city: e.target.value})}
+                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                  />
+                </div>
+              </div>
+
+              {/* Budget */}
+              <div className="space-y-2">
+                <Label className="text-[#1A1A1A] flex items-center gap-1">
+                  <DollarSign className="w-3 h-3" />
+                  Budget
+                </Label>
+                <Input
+                  value={formData.budget}
+                  onChange={(e) => setFormData({...formData, budget: e.target.value})}
+                  placeholder="Ex: 5 000 € - 10 000 €"
+                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                />
+              </div>
+
+              {/* Statut / Score */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-[#1A1A1A]">Statut</Label>
@@ -277,9 +332,12 @@ const ContactsPage = () => {
                     </SelectTrigger>
                     <SelectContent className="bg-white border-[#E5E5E5]">
                       <SelectItem value="nouveau">Nouveau</SelectItem>
+                      <SelectItem value="prospect">Prospect</SelectItem>
                       <SelectItem value="qualifie">Qualifié</SelectItem>
                       <SelectItem value="en_discussion">En discussion</SelectItem>
                       <SelectItem value="client">Client</SelectItem>
+                      <SelectItem value="vip">VIP</SelectItem>
+                      <SelectItem value="inactif">Inactif</SelectItem>
                       <SelectItem value="perdu">Perdu</SelectItem>
                     </SelectContent>
                   </Select>
@@ -301,6 +359,37 @@ const ContactsPage = () => {
                   </Select>
                 </div>
               </div>
+
+              {/* Note */}
+              <div className="space-y-2">
+                <Label className="text-[#1A1A1A] flex items-center gap-1">
+                  <FileText className="w-3 h-3" />
+                  Note
+                </Label>
+                <Textarea
+                  value={formData.note}
+                  onChange={(e) => setFormData({...formData, note: e.target.value})}
+                  placeholder="Notes sur ce contact..."
+                  rows={3}
+                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A] resize-none"
+                />
+              </div>
+
+              {/* Informations supplémentaires */}
+              <div className="space-y-2">
+                <Label className="text-[#1A1A1A] flex items-center gap-1">
+                  <Info className="w-3 h-3" />
+                  Informations supplémentaires
+                </Label>
+                <Textarea
+                  value={formData.infos_sup}
+                  onChange={(e) => setFormData({...formData, infos_sup: e.target.value})}
+                  placeholder="Informations diverses..."
+                  rows={3}
+                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A] resize-none"
+                />
+              </div>
+
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Annuler
