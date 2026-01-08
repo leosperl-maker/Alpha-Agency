@@ -2247,7 +2247,7 @@ async def delete_service(service_id: str, current_user: dict = Depends(get_curre
 
 # ==================== TASKS ROUTES (Notion-style) ====================
 
-class TaskCreate(BaseModel):
+class TaskCreateModel(BaseModel):
     title: str
     description: Optional[str] = ""
     status: Optional[str] = "todo"  # todo, in_progress, done
@@ -2255,8 +2255,9 @@ class TaskCreate(BaseModel):
     category: Optional[str] = "general"
     due_date: Optional[str] = None
     assigned_to: Optional[str] = None
+    contact_id: Optional[str] = None  # Lien facultatif vers un contact
 
-class TaskUpdate(BaseModel):
+class TaskUpdateModel(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     status: Optional[str] = None
@@ -2264,17 +2265,21 @@ class TaskUpdate(BaseModel):
     category: Optional[str] = None
     due_date: Optional[str] = None
     assigned_to: Optional[str] = None
+    contact_id: Optional[str] = None
     completed_at: Optional[str] = None
 
 @api_router.get("/tasks", response_model=List[dict])
-async def get_tasks(status: Optional[str] = None, priority: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+async def get_tasks(status: Optional[str] = None, priority: Optional[str] = None, contact_id: Optional[str] = None, current_user: dict = Depends(get_current_user)):
     """Get all tasks with optional filters"""
     query = {}
     if status:
         query["status"] = status
     if priority:
         query["priority"] = priority
+    if contact_id:
+        query["contact_id"] = contact_id
     tasks = await db.tasks.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return tasks
     return tasks
 
 @api_router.post("/tasks", response_model=dict)
