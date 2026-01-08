@@ -791,6 +791,47 @@ async def delete_contact(contact_id: str, current_user: dict = Depends(get_curre
         raise HTTPException(status_code=404, detail="Contact non trouvé")
     return {"message": "Contact supprimé"}
 
+@api_router.get("/contacts/{contact_id}/history", response_model=dict)
+async def get_contact_history(contact_id: str, current_user: dict = Depends(get_current_user)):
+    """Get all quotes, invoices and tasks associated with a contact"""
+    contact = await db.contacts.find_one({"id": contact_id}, {"_id": 0})
+    if not contact:
+        raise HTTPException(status_code=404, detail="Contact non trouvé")
+    
+    # Get quotes for this contact
+    quotes = await db.quotes.find({"contact_id": contact_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Get invoices for this contact
+    invoices = await db.invoices.find({"contact_id": contact_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Get tasks for this contact
+    tasks = await db.tasks.find({"contact_id": contact_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Get opportunities for this contact
+    opportunities = await db.opportunities.find({"contact_id": contact_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Calculate totals
+    total_quoted = sum(q.get('total', 0) for q in quotes)
+    total_invoiced = sum(i.get('total', 0) for i in invoices)
+    total_paid = sum(i.get('total_paid', 0) for i in invoices)
+    
+    return {
+        "quotes": quotes,
+        "invoices": invoices,
+        "tasks": tasks,
+        "opportunities": opportunities,
+        "summary": {
+            "total_quotes": len(quotes),
+            "total_invoices": len(invoices),
+            "total_tasks": len(tasks),
+            "total_opportunities": len(opportunities),
+            "total_quoted": total_quoted,
+            "total_invoiced": total_invoiced,
+            "total_paid": total_paid,
+            "total_remaining": total_invoiced - total_paid
+        }
+    }
+
 # ==================== CONTACTS IMPORT ====================
 import pandas as pd
 import io
