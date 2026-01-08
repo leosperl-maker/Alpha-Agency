@@ -34,6 +34,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { contactsAPI } from "../../lib/api";
 import { toast } from "sonner";
 import ImportContactsDialog from "../../components/ImportContactsDialog";
+import ContactDetailSheet from "../../components/ContactDetailSheet";
 
 const ContactsPage = () => {
   const [contacts, setContacts] = useState([]);
