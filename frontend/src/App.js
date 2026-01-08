@@ -22,6 +22,7 @@ import ContactsPage from "./pages/dashboard/ContactsPage";
 import PipelinePage from "./pages/dashboard/PipelinePage";
 import QuotesPage from "./pages/dashboard/QuotesPage";
 import InvoicesPage from "./pages/dashboard/InvoicesPage";
+import FacturationPage from "./pages/dashboard/FacturationPage";
 import SubscriptionsPage from "./pages/dashboard/SubscriptionsPage";
 import PortfolioManagePage from "./pages/dashboard/PortfolioManagePage";
 import DemandesPage from "./pages/dashboard/DemandesPage";
