@@ -787,7 +787,7 @@ const InvoicesPage = () => {
                             />
                           </div>
                         )}
-                        {remaining > 0 && invoice.status !== 'brouillon' && invoice.status !== 'annulee' && (
+                        {remaining > 0 && invoice.status !== 'brouillon' && invoice.status !== 'annulee' && invoice.status !== 'payée' && invoice.status !== 'payee' && (
                           <Button 
                             size="sm" 
                             variant="ghost" 
