@@ -126,7 +126,6 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 
 ### P1 - High Priority
 - [ ] **Interface Devis/Factures clarification**: Consider unified "Documents" module
-- [ ] **Contact history view**: Show quotes, invoices, tasks on contact detail page
 - [ ] **Google Analytics 4 integration**
 
 ### P2 - Medium Priority
@@ -138,6 +137,7 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [ ] Enhanced reporting and analytics
 - [ ] Email templates management
 - [ ] Bulk operations on contacts
+- [ ] Cascade delete for orphaned references (quotes with deleted contacts)
 
 ## Known Issues
 
