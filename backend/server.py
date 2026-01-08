@@ -277,37 +277,79 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Token invalide")
 
-# ==================== EMAIL HELPERS ====================
+# ==================== EMAIL HELPERS (BREVO) ====================
 
-async def send_email_notification(to: str, subject: str, html_content: str):
-    if not RESEND_API_KEY:
-        logger.warning("RESEND_API_KEY not configured, skipping email")
-        return
+BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
+BREVO_SENDER_EMAIL = os.environ.get('BREVO_SENDER_EMAIL', 'noreply@alphagency.fr')
+BREVO_SENDER_NAME = os.environ.get('BREVO_SENDER_NAME', 'Alpha Agency')
+
+async def send_email_notification(to: str, subject: str, html_content: str, to_name: str = None):
+    """Send transactional email via Brevo API"""
+    if not BREVO_API_KEY:
+        logger.warning("BREVO_API_KEY not configured, skipping email")
+        return False
+    
     try:
-        params = {
-            "from": SENDER_EMAIL,
-            "to": [to],
-            "subject": subject,
-            "html": html_content
+        url = "https://api.brevo.com/v3/smtp/email"
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "api-key": BREVO_API_KEY
         }
-        await asyncio.to_thread(resend.Emails.send, params)
-        logger.info(f"Email sent to {to}")
+        
+        payload = {
+            "sender": {
+                "name": BREVO_SENDER_NAME,
+                "email": BREVO_SENDER_EMAIL
+            },
+            "to": [{"email": to, "name": to_name or to.split('@')[0]}],
+            "subject": subject,
+            "htmlContent": html_content
+        }
+        
+        response = await asyncio.to_thread(
+            lambda: requests.post(url, headers=headers, json=payload, timeout=10)
+        )
+        
+        if response.status_code == 201:
+            logger.info(f"Email sent successfully to {to} via Brevo")
+            return True
+        else:
+            logger.error(f"Brevo API error: {response.status_code} - {response.text}")
+            return False
+            
     except Exception as e:
-        logger.error(f"Failed to send email: {e}")
+        logger.error(f"Failed to send email via Brevo: {e}")
+        return False
 
 async def send_new_lead_notification(lead: dict):
     admin_email = os.environ.get('ADMIN_EMAIL', 'leo.sperl@alphagency.fr')
     html = f"""
-    <h2>Nouveau lead reçu - ALPHA Agency</h2>
-    <p><strong>Nom:</strong> {lead.get('first_name')} {lead.get('last_name')}</p>
-    <p><strong>Email:</strong> {lead.get('email')}</p>
-    <p><strong>Téléphone:</strong> {lead.get('phone', 'Non renseigné')}</p>
-    <p><strong>Entreprise:</strong> {lead.get('company', 'Non renseignée')}</p>
-    <p><strong>Type de projet:</strong> {lead.get('project_type')}</p>
-    <p><strong>Budget:</strong> {lead.get('budget', 'Non renseigné')}</p>
-    <p><strong>Message:</strong> {lead.get('message', 'Aucun')}</p>
+    <html>
+    <body style="font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="background: #CE0202; color: white; padding: 20px; text-align: center;">
+                <h1 style="margin: 0; font-size: 24px;">Nouveau Lead Reçu</h1>
+            </div>
+            <div style="padding: 30px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">Nom</td><td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold;">{lead.get('first_name')} {lead.get('last_name')}</td></tr>
+                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">Email</td><td style="padding: 10px 0; border-bottom: 1px solid #eee;"><a href="mailto:{lead.get('email')}" style="color: #CE0202;">{lead.get('email')}</a></td></tr>
+                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">Téléphone</td><td style="padding: 10px 0; border-bottom: 1px solid #eee;">{lead.get('phone', 'Non renseigné')}</td></tr>
+                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">Entreprise</td><td style="padding: 10px 0; border-bottom: 1px solid #eee;">{lead.get('company', 'Non renseignée')}</td></tr>
+                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">Type de projet</td><td style="padding: 10px 0; border-bottom: 1px solid #eee;">{lead.get('project_type')}</td></tr>
+                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">Budget</td><td style="padding: 10px 0; border-bottom: 1px solid #eee;">{lead.get('budget', 'Non renseigné')}</td></tr>
+                </table>
+                {f'<div style="margin-top: 20px; padding: 15px; background: #f8f8f8; border-radius: 5px;"><strong>Message:</strong><br>{lead.get("message")}</div>' if lead.get('message') else ''}
+            </div>
+            <div style="background: #f8f8f8; padding: 15px; text-align: center; color: #666; font-size: 12px;">
+                Alpha Agency CRM - {datetime.now().strftime('%d/%m/%Y %H:%M')}
+            </div>
+        </div>
+    </body>
+    </html>
     """
-    await send_email_notification(admin_email, f"Nouveau lead: {lead.get('first_name')} {lead.get('last_name')}", html)
+    await send_email_notification(admin_email, f"🔔 Nouveau lead: {lead.get('first_name')} {lead.get('last_name')}", html, "Admin Alpha Agency")
 
 # ==================== PDF GENERATION ====================
 
