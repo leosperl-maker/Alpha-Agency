@@ -44,6 +44,7 @@ export const authAPI = {
 // Dashboard API
 export const dashboardAPI = {
   getStats: () => api.get('/dashboard/stats'),
+  getPipeline: () => api.get('/dashboard/pipeline'),
   updateKPIs: (data) => api.put('/dashboard/kpis', data),
 };
 
