@@ -54,6 +54,28 @@ export const contactsAPI = {
   create: (data) => api.post('/contacts', data),
   update: (id, data) => api.put(`/contacts/${id}`, data),
   delete: (id) => api.delete(`/contacts/${id}`),
+  // Import functions
+  parseImportFile: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/contacts/import/parse', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  executeImport: (file, options) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('mapping', JSON.stringify(options.mapping));
+    formData.append('status', options.status || 'nouveau');
+    formData.append('tags', options.tags?.join(',') || '');
+    formData.append('update_existing', options.updateExisting || false);
+    formData.append('identifier_field', options.identifierField || 'email');
+    formData.append('subscribe_email', options.subscribeEmail || false);
+    formData.append('subscribe_sms', options.subscribeSms || false);
+    return api.post('/contacts/import/execute', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
 };
 
 // Opportunities API
