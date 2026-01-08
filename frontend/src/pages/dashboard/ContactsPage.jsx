@@ -43,7 +43,12 @@ const ContactsPage = () => {
     email: "",
     phone: "",
     company: "",
+    city: "",
+    poste: "",
     project_type: "",
+    budget: "",
+    note: "",
+    infos_sup: "",
     status: "nouveau",
     score: "tiède"
   });
