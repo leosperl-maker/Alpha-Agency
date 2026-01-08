@@ -9,7 +9,8 @@ import {
   Building,
   Calendar,
   Trash2,
-  Edit
+  Edit,
+  Upload
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -26,6 +27,7 @@ import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { contactsAPI } from "../../lib/api";
 import { toast } from "sonner";
+import ImportContactsDialog from "../../components/ImportContactsDialog";
 
 const ContactsPage = () => {
   const [contacts, setContacts] = useState([]);
@@ -33,6 +35,7 @@ const ContactsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [editingContact, setEditingContact] = useState(null);
   const [formData, setFormData] = useState({
     first_name: "",
