@@ -2306,7 +2306,7 @@ async def get_task(task_id: str, current_user: dict = Depends(get_current_user))
     return task
 
 @api_router.put("/tasks/{task_id}", response_model=dict)
-async def update_task(task_id: str, task_update: TaskUpdate, current_user: dict = Depends(get_current_user)):
+async def update_task(task_id: str, task_update: TaskUpdateModel, current_user: dict = Depends(get_current_user)):
     """Update a task"""
     existing = await db.tasks.find_one({"id": task_id}, {"_id": 0})
     if not existing:
