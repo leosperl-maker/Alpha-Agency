@@ -2920,7 +2920,7 @@ async def forgot_password(request: PasswordResetRequest, background_tasks: Backg
     )
     
     # Send reset email
-    frontend_url = os.environ.get('FRONTEND_URL', 'https://agency-backoffice.preview.emergentagent.com')
+    frontend_url = os.environ.get('FRONTEND_URL', 'https://crm-enhance-10.preview.emergentagent.com')
     reset_link = f"{frontend_url}/alpha-admin-2024/reset-password?token={reset_token}"
     html_content = f"""
     <h2>Réinitialisation de mot de passe - Alpha Agency</h2>
