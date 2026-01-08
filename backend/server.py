@@ -126,6 +126,11 @@ class ContactCreate(BaseModel):
     budget: Optional[str] = None
     message: Optional[str] = None
     tags: Optional[List[str]] = []
+    # Nouveaux champs
+    poste: Optional[str] = None
+    note: Optional[str] = None
+    infos_sup: Optional[str] = None
+    city: Optional[str] = None
 
 class ContactUpdate(BaseModel):
     first_name: Optional[str] = None
@@ -136,6 +141,13 @@ class ContactUpdate(BaseModel):
     status: Optional[str] = None
     score: Optional[str] = None
     tags: Optional[List[str]] = None
+    # Nouveaux champs
+    poste: Optional[str] = None
+    note: Optional[str] = None
+    infos_sup: Optional[str] = None
+    budget: Optional[str] = None
+    city: Optional[str] = None
+    project_type: Optional[str] = None
 
 class OpportunityCreate(BaseModel):
     contact_id: str
