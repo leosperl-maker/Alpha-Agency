@@ -4008,23 +4008,38 @@ import httpx
 
 NEWSAPI_KEY = os.environ.get('NEWSAPI_KEY', '')
 
-# Categories available in NewsAPI
+# Categories available - News + Marketing categories
 NEWS_CATEGORIES = [
+    # General news categories
     {"id": "general", "label": "Général", "icon": "Newspaper", "color": "#6B7280"},
     {"id": "business", "label": "Business", "icon": "Briefcase", "color": "#3B82F6"},
     {"id": "technology", "label": "Tech", "icon": "Cpu", "color": "#8B5CF6"},
-    {"id": "science", "label": "Science", "icon": "Flask", "color": "#10B981"},
+    {"id": "science", "label": "Science", "icon": "FlaskConical", "color": "#10B981"},
     {"id": "health", "label": "Santé", "icon": "Heart", "color": "#EF4444"},
     {"id": "sports", "label": "Sports", "icon": "Trophy", "color": "#F59E0B"},
     {"id": "entertainment", "label": "Divertissement", "icon": "Film", "color": "#EC4899"},
+    # Marketing categories
+    {"id": "ads", "label": "Publicité en ligne", "icon": "Megaphone", "color": "#F97316"},
+    {"id": "social", "label": "Réseaux sociaux", "icon": "Share2", "color": "#06B6D4"},
+    {"id": "growth", "label": "Growth & Funnels", "icon": "TrendingUp", "color": "#84CC16"},
+    {"id": "crm", "label": "CRM & Vente", "icon": "Users", "color": "#A855F7"},
+    {"id": "local", "label": "Business Local", "icon": "Store", "color": "#22C55E"},
+    {"id": "design", "label": "Design & Branding", "icon": "Palette", "color": "#E11D48"},
 ]
 
-# Regional filters
+# Regional filters - DOM-TOM prioritized + France + International
 NEWS_REGIONS = [
-    {"id": "fr", "label": "France", "icon": "MapPin"},
-    {"id": "us", "label": "États-Unis", "icon": "Globe"},
-    {"id": "gb", "label": "Royaume-Uni", "icon": "Globe"},
-    {"id": "de", "label": "Allemagne", "icon": "Globe"},
+    # DOM-TOM (prioritized)
+    {"id": "guadeloupe", "label": "Guadeloupe", "icon": "MapPin", "priority": 1},
+    {"id": "martinique", "label": "Martinique", "icon": "MapPin", "priority": 2},
+    {"id": "saint-martin", "label": "Saint-Martin", "icon": "MapPin", "priority": 3},
+    {"id": "saint-barth", "label": "Saint-Barthélemy", "icon": "MapPin", "priority": 4},
+    {"id": "guyane", "label": "Guyane", "icon": "MapPin", "priority": 5},
+    # France + International
+    {"id": "fr", "label": "France", "icon": "Flag", "priority": 6},
+    {"id": "us", "label": "États-Unis", "icon": "Globe", "priority": 7},
+    {"id": "gb", "label": "Royaume-Uni", "icon": "Globe", "priority": 8},
+    {"id": "de", "label": "Allemagne", "icon": "Globe", "priority": 9},
 ]
 
 class NewsArticleModel(BaseModel):
