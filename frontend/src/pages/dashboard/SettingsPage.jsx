@@ -176,6 +176,10 @@ const SettingsPage = () => {
           <TabsTrigger value="integrations" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             Intégrations
           </TabsTrigger>
+          <TabsTrigger value="data" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+            <Database className="w-4 h-4 mr-2" />
+            Données
+          </TabsTrigger>
         </TabsList>
 
         {/* Company Tab */}
