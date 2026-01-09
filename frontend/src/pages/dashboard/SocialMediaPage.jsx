@@ -633,8 +633,33 @@ const SocialMediaPage = () => {
         {/* Calendar Tab */}
         <TabsContent value="calendar" className="mt-4">
           <Card className="bg-white border-[#E5E5E5]">
+            <CardHeader className="pb-3 border-b border-[#E5E5E5]">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-medium">Publications programmées</CardTitle>
+                <div className="flex items-center gap-1 bg-[#F8F8F8] rounded-lg p-1">
+                  <Button
+                    variant={calendarViewMode === "calendar" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setCalendarViewMode("calendar")}
+                    className={calendarViewMode === "calendar" ? "bg-white shadow-sm" : ""}
+                  >
+                    <Grid className="w-4 h-4 mr-1" />
+                    Calendrier
+                  </Button>
+                  <Button
+                    variant={calendarViewMode === "list" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setCalendarViewMode("list")}
+                    className={calendarViewMode === "list" ? "bg-white shadow-sm" : ""}
+                  >
+                    <List className="w-4 h-4 mr-1" />
+                    Liste
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
             <CardContent className="p-6">
-              {renderCalendar()}
+              {calendarViewMode === "calendar" ? renderCalendar() : renderListView()}
             </CardContent>
           </Card>
         </TabsContent>
