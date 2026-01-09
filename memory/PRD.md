@@ -86,21 +86,20 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 
 ## Backlog / Upcoming Tasks
 
-### P1 - Intégration Google Agenda
+### P1 - Amélioration Fiche Contact (style Pipedrive)
+- [ ] Timeline d'interactions
+- [ ] Accès rapides
+- [ ] Meilleure organisation visuelle ContactDetailSheet.jsx
+
+### P2 - Intégration Google Agenda
 - [ ] Guide utilisateur pour Google Cloud Console (OAuth credentials)
 - [ ] Endpoints backend pour OAuth2
 - [ ] Page /admin/agenda avec calendrier
 
-### P2 - Section Actualités (News)
-- [ ] Interface NewsPage.jsx avec grille de cartes
-- [ ] Filtres par thématique
-- [ ] Récupération périodique via Perplexity
-
-### P3 - Social Media Manager (style Agorapulse)
-- [ ] Architecture backend (posts programmés, modération)
-- [ ] Vue Calendrier éditorial
-- [ ] Boîte de réception sociale (Facebook/Instagram)
-- [ ] IA Perplexity pour suggestions de réponses
+### P3 - Social Media Manager - Intégration Meta API
+- [ ] Connexion OAuth Facebook/Instagram
+- [ ] Publication réelle des posts programmés
+- [ ] Récupération des commentaires/messages réels
 - [ ] Meta API integration (App ID: 4389601981285980)
 
 ### P4 - Améliorations futures
