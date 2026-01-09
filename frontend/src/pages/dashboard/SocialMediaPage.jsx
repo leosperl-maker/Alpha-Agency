@@ -800,6 +800,169 @@ const SocialMediaPage = () => {
     }
   };
 
+  // ========== META INTEGRATION FUNCTIONS ==========
+  
+  // Check for OAuth callback on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const metaCallback = urlParams.get('meta_callback');
+    const code = urlParams.get('code');
+    
+    if (metaCallback && code) {
+      handleMetaCallback(code);
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    // Check if Meta is already connected
+    checkMetaConnection();
+  }, []);
+
+  const checkMetaConnection = async () => {
+    try {
+      const res = await metaAPI.getPages();
+      if (res.data && res.data.length > 0) {
+        setMetaConnected(true);
+        setMetaPages(res.data);
+        fetchPublishedPosts();
+      }
+    } catch (error) {
+      // Not connected, that's fine
+      setMetaConnected(false);
+    }
+  };
+
+  const handleMetaCallback = async (code) => {
+    setMetaLoading(true);
+    try {
+      const redirectUri = `${window.location.origin}/admin/social?meta_callback=true`;
+      const res = await metaAPI.exchangeToken(code, redirectUri);
+      
+      if (res.data.success) {
+        toast.success(res.data.message);
+        setMetaConnected(true);
+        // Fetch pages after connection
+        await fetchMetaPages();
+      }
+    } catch (error) {
+      console.error("Meta callback error:", error);
+      toast.error("Erreur lors de la connexion Meta");
+    } finally {
+      setMetaLoading(false);
+    }
+  };
+
+  const handleConnectMeta = async () => {
+    setMetaLoading(true);
+    try {
+      const res = await metaAPI.getAuthUrl();
+      window.location.href = res.data.auth_url;
+    } catch (error) {
+      console.error("Error getting Meta auth URL:", error);
+      toast.error("Erreur lors de la connexion");
+      setMetaLoading(false);
+    }
+  };
+
+  const fetchMetaPages = async () => {
+    setMetaLoading(true);
+    try {
+      const res = await metaAPI.getPages();
+      setMetaPages(res.data || []);
+      if (res.data && res.data.length > 0) {
+        setSelectedPage(res.data[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching Meta pages:", error);
+      toast.error("Erreur lors de la récupération des pages");
+    } finally {
+      setMetaLoading(false);
+    }
+  };
+
+  const fetchPublishedPosts = async () => {
+    try {
+      const res = await metaAPI.getPublishedPosts(null, 20);
+      setPublishedPosts(res.data || []);
+    } catch (error) {
+      console.error("Error fetching published posts:", error);
+    }
+  };
+
+  const handleDisconnectMeta = async () => {
+    if (!window.confirm("Déconnecter votre compte Meta ?")) return;
+    try {
+      await metaAPI.disconnect();
+      setMetaConnected(false);
+      setMetaPages([]);
+      setPublishedPosts([]);
+      toast.success("Compte Meta déconnecté");
+    } catch (error) {
+      toast.error("Erreur lors de la déconnexion");
+    }
+  };
+
+  const handlePublishToFacebook = async () => {
+    if (!selectedPage || !publishContent.trim()) {
+      toast.error("Veuillez sélectionner une page et entrer du contenu");
+      return;
+    }
+    
+    setPublishing(true);
+    try {
+      const res = await metaAPI.publishFacebook({
+        page_id: selectedPage.page_id,
+        content: publishContent,
+        media_urls: publishImageUrl ? [publishImageUrl] : [],
+        link_url: null
+      });
+      
+      if (res.data.success) {
+        toast.success("Post publié sur Facebook !");
+        setPublishContent("");
+        setPublishImageUrl("");
+        setPublishModalOpen(false);
+        fetchPublishedPosts();
+      }
+    } catch (error) {
+      console.error("Error publishing to Facebook:", error);
+      toast.error(error.response?.data?.detail || "Erreur lors de la publication");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handlePublishToInstagram = async () => {
+    if (!selectedPage?.instagram_id || !publishContent.trim() || !publishImageUrl) {
+      toast.error("Instagram nécessite une image et une légende");
+      return;
+    }
+    
+    setPublishing(true);
+    try {
+      const res = await metaAPI.publishInstagram({
+        ig_account_id: selectedPage.instagram_id,
+        caption: publishContent,
+        image_url: publishImageUrl
+      });
+      
+      if (res.data.success) {
+        toast.success("Post publié sur Instagram !");
+        setPublishContent("");
+        setPublishImageUrl("");
+        setPublishModalOpen(false);
+        fetchPublishedPosts();
+      }
+    } catch (error) {
+      console.error("Error publishing to Instagram:", error);
+      toast.error(error.response?.data?.detail || "Erreur lors de la publication");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  // ========== END META INTEGRATION ==========
+
   const handleDeletePost = async (postId) => {
     if (!window.confirm("Supprimer ce post ?")) return;
     try {
