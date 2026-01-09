@@ -319,97 +319,98 @@ const PortfolioPage = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-white border-[#E5E5E5] max-w-4xl max-h-[90vh] overflow-y-auto p-0">
           {selectedItem && (
-            <div className="flex flex-col">
-              {/* Gallery */}
-              <div className="relative aspect-video bg-black">
-                <img
-                  src={selectedItem.gallery?.[currentImageIndex] || selectedItem.image_url}
-                  alt={selectedItem.title}
-                  className="w-full h-full object-contain"
-                />
-                
-                {/* Gallery Navigation */}
-                {selectedItem.gallery && selectedItem.gallery.length > 1 && (
-                  <>
-                    <button
-                      onClick={prevImage}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
-                    >
-                      <ChevronLeft className="w-6 h-6 text-[#1A1A1A]" />
-                    </button>
-                    <button
-                      onClick={nextImage}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
-                    >
-                      <ChevronRight className="w-6 h-6 text-[#1A1A1A]" />
-                    </button>
-                    
-                    {/* Dots */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                      {selectedItem.gallery.map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setCurrentImageIndex(i)}
-                          className={`w-2 h-2 rounded-full transition-colors ${
-                            i === currentImageIndex ? 'bg-[#CE0202]' : 'bg-white/50'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
+            <div className="flex flex-col lg:flex-row">
+              {/* Gallery - Left side */}
+              <div className="lg:w-1/2 relative bg-[#F8F8F8]">
+                <div className="aspect-square lg:aspect-auto lg:h-full relative min-h-[300px]">
+                  <img
+                    src={selectedItem.gallery?.[currentImageIndex] || selectedItem.image_url}
+                    alt={selectedItem.title}
+                    className="w-full h-full object-cover"
+                  />
+                  
+                  {/* Gallery Navigation */}
+                  {selectedItem.gallery && selectedItem.gallery.length > 1 && (
+                    <>
+                      <button
+                        onClick={prevImage}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-colors"
+                      >
+                        <ChevronLeft className="w-5 h-5 text-[#1A1A1A]" />
+                      </button>
+                      <button
+                        onClick={nextImage}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-colors"
+                      >
+                        <ChevronRight className="w-5 h-5 text-[#1A1A1A]" />
+                      </button>
+                      
+                      {/* Dots */}
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                        {selectedItem.gallery.map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setCurrentImageIndex(i)}
+                            className={`w-2 h-2 rounded-full transition-colors ${
+                              i === currentImageIndex ? 'bg-[#CE0202]' : 'bg-white/70'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
 
+              {/* Content - Right side */}
+              <div className="lg:w-1/2 p-6 lg:p-8 relative">
                 {/* Close Button */}
                 <button
                   onClick={() => setDialogOpen(false)}
-                  className="absolute top-4 right-4 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
+                  className="absolute top-4 right-4 lg:top-2 lg:right-2 bg-[#F8F8F8] hover:bg-[#E5E5E5] p-1.5 rounded-full transition-colors"
                 >
-                  <X className="w-5 h-5 text-[#1A1A1A]" />
+                  <X className="w-4 h-4 text-[#1A1A1A]" />
                 </button>
-              </div>
 
-              {/* Content */}
-              <div className="p-8">
                 {/* Tags */}
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 mb-3">
                   {selectedItem.tags?.map((tag, i) => (
-                    <Badge key={i} className="bg-[#CE0202]/10 text-[#CE0202] border-none">
+                    <Badge key={i} className="bg-[#CE0202]/10 text-[#CE0202] border-none text-xs">
                       {tag}
                     </Badge>
                   ))}
                 </div>
 
                 {/* Title & Meta */}
-                <h2 className="text-3xl font-bold text-[#1A1A1A] mb-2">{selectedItem.title}</h2>
-                <div className="flex items-center gap-4 text-sm text-[#666666] mb-6">
+                <h2 className="text-xl lg:text-2xl font-bold text-[#1A1A1A] mb-2">{selectedItem.title}</h2>
+                <div className="flex items-center gap-3 text-sm text-[#666666] mb-4">
                   {selectedItem.client && <span>Client: {selectedItem.client}</span>}
                   {selectedItem.date && <span>• {selectedItem.date}</span>}
                 </div>
 
                 {/* Description */}
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-[#1A1A1A] mb-3">Description du projet</h3>
-                  <p className="text-[#666666] leading-relaxed">{selectedItem.description}</p>
+                <div className="mb-6">
+                  <p className="text-sm text-[#666666] leading-relaxed">{selectedItem.description}</p>
                 </div>
 
                 {/* Audio Player */}
                 {selectedItem.audio_url && (
-                  <div className="mb-8">
-                    <h3 className="text-lg font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
-                      <Volume2 className="w-5 h-5 text-[#CE0202]" />
+                  <div className="mb-6">
+                    <h3 className="text-sm font-semibold text-[#1A1A1A] mb-2 flex items-center gap-2">
+                      <Volume2 className="w-4 h-4 text-[#CE0202]" />
                       Écouter la réalisation audio
                     </h3>
-                    <div className="bg-[#F8F8F8] p-4 rounded-lg border border-[#E5E5E5]">
-                      <div className="flex items-center gap-4">
+                    <div className="bg-[#F8F8F8] p-3 rounded-lg border border-[#E5E5E5]">
+                      <div className="flex items-center gap-3">
                         <button
                           onClick={toggleAudio}
-                          className="w-12 h-12 bg-[#CE0202] hover:bg-[#B00202] text-white rounded-full flex items-center justify-center transition-colors"
+                          className="w-10 h-10 bg-[#CE0202] hover:bg-[#B00202] text-white rounded-full flex items-center justify-center transition-colors"
                         >
-                          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-1" />}
+                          {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
                         </button>
                         <div className="flex-1">
-                          <p className="text-[#1A1A1A] font-medium">Spot publicitaire radio</p>
-                          <p className="text-sm text-[#666666]">Cliquez pour écouter</p>
+                          <p className="text-[#1A1A1A] font-medium text-sm">Spot publicitaire radio</p>
+                          <p className="text-xs text-[#666666]">Cliquez pour écouter</p>
                         </div>
                       </div>
                       <audio id="portfolio-audio" src={selectedItem.audio_url} onEnded={() => setIsPlaying(false)} />
@@ -419,9 +420,9 @@ const PortfolioPage = () => {
 
                 {/* Documents */}
                 {selectedItem.documents && selectedItem.documents.length > 0 && (
-                  <div className="mb-8">
-                    <h3 className="text-lg font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
-                      <Download className="w-5 h-5 text-[#CE0202]" />
+                  <div className="mb-6">
+                    <h3 className="text-sm font-semibold text-[#1A1A1A] mb-2 flex items-center gap-2">
+                      <Download className="w-4 h-4 text-[#CE0202]" />
                       Documents téléchargeables
                     </h3>
                     <div className="space-y-2">
@@ -430,9 +431,9 @@ const PortfolioPage = () => {
                           key={i}
                           href={doc.url}
                           download
-                          className="flex items-center gap-3 p-3 bg-[#F8F8F8] rounded-lg border border-[#E5E5E5] hover:border-[#CE0202] transition-colors group"
+                          className="flex items-center gap-2 p-2 bg-[#F8F8F8] rounded-lg border border-[#E5E5E5] hover:border-[#CE0202] transition-colors group text-sm"
                         >
-                          <Download className="w-5 h-5 text-[#666666] group-hover:text-[#CE0202]" />
+                          <Download className="w-4 h-4 text-[#666666] group-hover:text-[#CE0202]" />
                           <span className="text-[#1A1A1A] group-hover:text-[#CE0202]">{doc.name}</span>
                         </a>
                       ))}
@@ -446,7 +447,7 @@ const PortfolioPage = () => {
                     href={selectedItem.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-[#CE0202] hover:underline font-medium"
+                    className="inline-flex items-center gap-2 text-[#CE0202] hover:underline font-medium text-sm"
                   >
                     Voir le projet en ligne
                     <ExternalLink className="w-4 h-4" />
