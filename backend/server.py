@@ -233,6 +233,83 @@ class PortfolioCreate(BaseModel):
     link: Optional[str] = None
     tags: Optional[List[str]] = []
 
+# Enhanced Portfolio Model for Rich Content
+class ContentBlock(BaseModel):
+    id: str
+    type: str  # 'text', 'heading', 'image', 'gallery', 'audio', 'video', 'quote'
+    content: Optional[str] = None  # For text/heading/quote
+    level: Optional[int] = None  # For headings (h2, h3)
+    url: Optional[str] = None  # For media
+    urls: Optional[List[str]] = None  # For gallery
+    caption: Optional[str] = None  # For media
+    alignment: Optional[str] = "center"  # left, center, right, full
+    rounded: Optional[bool] = True
+    size: Optional[str] = "medium"  # small, medium, large, full
+
+class PortfolioItemCreate(BaseModel):
+    title: str
+    slug: Optional[str] = None
+    subtitle: Optional[str] = None  # Chapeau / intro text
+    category: str
+    tags: Optional[List[str]] = []
+    featured_image: Optional[str] = None
+    gallery_images: Optional[List[str]] = []
+    content_blocks: Optional[List[ContentBlock]] = []
+    audio_url: Optional[str] = None
+    video_url: Optional[str] = None
+    status: Optional[str] = "draft"  # draft, published
+    seo_title: Optional[str] = None
+    seo_description: Optional[str] = None
+
+class PortfolioItemUpdate(BaseModel):
+    title: Optional[str] = None
+    slug: Optional[str] = None
+    subtitle: Optional[str] = None
+    category: Optional[str] = None
+    tags: Optional[List[str]] = None
+    featured_image: Optional[str] = None
+    gallery_images: Optional[List[str]] = None
+    content_blocks: Optional[List[ContentBlock]] = None
+    audio_url: Optional[str] = None
+    video_url: Optional[str] = None
+    status: Optional[str] = None
+    seo_title: Optional[str] = None
+    seo_description: Optional[str] = None
+
+# Blog Article Model
+class BlogArticleCreate(BaseModel):
+    title: str
+    slug: Optional[str] = None
+    excerpt: Optional[str] = None  # Short description
+    featured_image: Optional[str] = None
+    content_blocks: Optional[List[ContentBlock]] = []
+    tags: Optional[List[str]] = []
+    category: Optional[str] = None
+    status: Optional[str] = "draft"  # draft, published
+    published_at: Optional[str] = None
+    seo_title: Optional[str] = None
+    seo_description: Optional[str] = None
+
+class BlogArticleUpdate(BaseModel):
+    title: Optional[str] = None
+    slug: Optional[str] = None
+    excerpt: Optional[str] = None
+    featured_image: Optional[str] = None
+    content_blocks: Optional[List[ContentBlock]] = None
+    tags: Optional[List[str]] = None
+    category: Optional[str] = None
+    status: Optional[str] = None
+    published_at: Optional[str] = None
+    seo_title: Optional[str] = None
+    seo_description: Optional[str] = None
+
+# Tag Management Model
+class TagCreate(BaseModel):
+    name: str
+    slug: Optional[str] = None
+    type: str = "portfolio"  # portfolio, blog
+    color: Optional[str] = "#CE0202"
+
 class LeadFormSubmission(BaseModel):
     first_name: str
     last_name: str
