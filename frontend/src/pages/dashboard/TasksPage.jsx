@@ -713,24 +713,23 @@ const TasksPage = () => {
   }
 
   return (
-    <div className="bg-[#F8F8F8] min-h-screen -m-3 sm:-m-4 md:-m-6 p-3 sm:p-4 md:p-6" data-testid="tasks-page">
+    <div className="space-y-4 sm:space-y-6 overflow-hidden" data-testid="tasks-page">
       {/* Header */}
-      <div className="flex flex-col gap-3 mb-4 sm:mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Tâches</h1>
-            <p className="text-[#666666] text-xs sm:text-sm">Gérez vos tâches et projets</p>
-          </div>
-          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-            <Button 
-              variant="outline" 
-              onClick={() => openColumnDialog()} 
-              className="border-[#CE0202] text-[#CE0202] flex-1 sm:flex-none text-sm"
-            >
-              <Settings2 className="w-4 h-4 mr-1 sm:mr-2" /> 
-              <span className="hidden sm:inline">Colonnes</span>
-              <span className="sm:hidden">Config</span>
-            </Button>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Tâches</h1>
+          <p className="text-[#666666] text-xs sm:text-sm">Gérez vos tâches et projets</p>
+        </div>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button 
+            variant="outline" 
+            onClick={() => openColumnDialog()} 
+            className="border-[#CE0202] text-[#CE0202] flex-1 sm:flex-none text-sm"
+          >
+            <Settings2 className="w-4 h-4 mr-1 sm:mr-2" /> 
+            <span className="hidden sm:inline">Colonnes</span>
+            <span className="sm:hidden">Config</span>
+          </Button>
           <Button 
             onClick={() => { resetForm(); setDialogOpen(true); }} 
             className="bg-[#CE0202] hover:bg-[#B00202] text-white flex-1 sm:flex-none text-sm"
@@ -741,71 +740,70 @@ const TasksPage = () => {
           </Button>
         </div>
       </div>
-      </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 mb-4 sm:mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
         <Card className="bg-white border-[#E5E5E5]">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-gray-100">
-                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+          <CardContent className="p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-gray-100 flex-shrink-0">
+                <Clock className="w-4 h-4 text-gray-600" />
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">{stats.todo || 0}</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.todo || 0}</p>
                 <p className="text-[10px] sm:text-xs text-[#666666]">À faire</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="bg-white border-[#E5E5E5]">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-blue-100">
-                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+          <CardContent className="p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-blue-100 flex-shrink-0">
+                <Clock className="w-4 h-4 text-blue-600" />
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">{stats.in_progress || 0}</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.in_progress || 0}</p>
                 <p className="text-[10px] sm:text-xs text-[#666666]">En cours</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="bg-white border-[#E5E5E5]">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-green-100">
-                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+          <CardContent className="p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-green-100 flex-shrink-0">
+                <CheckCircle className="w-4 h-4 text-green-600" />
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">{stats.done || 0}</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.done || 0}</p>
                 <p className="text-[10px] sm:text-xs text-[#666666]">Terminées</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="bg-white border-[#E5E5E5]">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-red-100">
-                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
+          <CardContent className="p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-red-100 flex-shrink-0">
+                <AlertCircle className="w-4 h-4 text-red-600" />
               </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">{overdueCount}</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{overdueCount}</p>
                 <p className="text-[10px] sm:text-xs text-[#666666]">En retard</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white border-[#E5E5E5]">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-[#CE0202]/10">
-                <CheckCircle className="w-5 h-5 text-[#CE0202]" />
+        <Card className="bg-white border-[#E5E5E5] col-span-2 sm:col-span-1">
+          <CardContent className="p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-[#CE0202]/10 flex-shrink-0">
+                <CheckCircle className="w-4 h-4 text-[#CE0202]" />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-[#1A1A1A]">{stats.completion_rate || 0}%</p>
-                <p className="text-xs text-[#666666]">Complétion</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.completion_rate || 0}%</p>
+                <p className="text-[10px] sm:text-xs text-[#666666]">Complétion</p>
               </div>
             </div>
           </CardContent>
