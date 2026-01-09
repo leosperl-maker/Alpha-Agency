@@ -37,6 +37,7 @@ import NewsPage from "./pages/dashboard/NewsPage";
 import SocialMediaPage from "./pages/dashboard/SocialMediaPage";
 import BlogAdminPage from "./pages/dashboard/BlogAdminPage";
 import TagsManagePage from "./pages/dashboard/TagsManagePage";
+import CampaignsPage from "./pages/dashboard/CampaignsPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 // Layout
