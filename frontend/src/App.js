@@ -34,6 +34,7 @@ import BackupPage from "./pages/dashboard/BackupPage";
 import UsersPage from "./pages/dashboard/UsersPage";
 import AIAssistantPage from "./pages/dashboard/AIAssistantPage";
 import NewsPage from "./pages/dashboard/NewsPage";
+import SocialMediaPage from "./pages/dashboard/SocialMediaPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 // Layout
@@ -90,6 +91,7 @@ function App() {
             <Route path="utilisateurs" element={<UsersPage />} />
             <Route path="assistant" element={<AIAssistantPage />} />
             <Route path="actualites" element={<NewsPage />} />
+            <Route path="social-media" element={<SocialMediaPage />} />
             <Route path="parametres" element={<SettingsPage />} />
           </Route>
         </Routes>
