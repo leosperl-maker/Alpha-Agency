@@ -22,7 +22,8 @@ import {
   Bot,
   Newspaper,
   CalendarDays,
-  Share2
+  Share2,
+  Tag
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import FloatingAIChat from "../../components/FloatingAIChat";
