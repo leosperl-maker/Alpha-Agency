@@ -462,10 +462,19 @@ const NewsPage = () => {
         selectedCategory === "all" ? null : selectedCategory,
         selectedRegion
       );
-      toast.success(result.data.message);
+      
+      // Check if rate limited
+      if (result.data.rate_limited) {
+        toast.error(result.data.message, { duration: 6000 });
+      } else if (result.data.message.includes("0 nouveaux")) {
+        toast.info(result.data.message);
+      } else {
+        toast.success(result.data.message);
+      }
       fetchArticles();
     } catch (error) {
-      toast.error("Erreur lors du rafraîchissement");
+      const errorMsg = error.response?.data?.detail || "Erreur lors du rafraîchissement";
+      toast.error(errorMsg);
     } finally {
       setRefreshing(false);
     }
