@@ -178,20 +178,22 @@ const NewsPage = () => {
   const businessTopics = topics.filter(t => ["marketing", "ads", "social", "growth", "crm", "local", "design"].includes(t.id));
 
   return (
-    <div data-testid="news-page" className="space-y-6">
+    <div data-testid="news-page" className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A] flex items-center gap-2">
-            <Newspaper className="w-7 h-7 text-[#CE0202]" />
-            Actualités
-          </h1>
-          <p className="text-[#666666] text-sm">Restez informé grâce à Perplexity AI</p>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A] flex items-center gap-2">
+              <Newspaper className="w-5 h-5 sm:w-7 sm:h-7 text-[#CE0202]" />
+              Actualités
+            </h1>
+            <p className="text-[#666666] text-xs sm:text-sm">Restez informé grâce à Perplexity AI</p>
+          </div>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-            <SelectTrigger className="w-48 bg-white border-[#E5E5E5]">
+            <SelectTrigger className="w-full sm:w-48 bg-white border-[#E5E5E5]">
               <Filter className="w-4 h-4 mr-2 text-[#666666]" />
               <SelectValue placeholder="Filtrer" />
             </SelectTrigger>
@@ -214,7 +216,7 @@ const NewsPage = () => {
           <Button
             onClick={() => handleRefresh(selectedTopic === "all" ? null : selectedTopic)}
             disabled={refreshing}
-            className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+            className="bg-[#CE0202] hover:bg-[#B00202] text-white w-full sm:w-auto"
           >
             {refreshing ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -227,7 +229,7 @@ const NewsPage = () => {
       </div>
 
       {/* Topic Categories */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
         {/* Actualités géographiques */}
         <Card className="bg-white border-[#E5E5E5]">
           <CardHeader className="pb-3">
