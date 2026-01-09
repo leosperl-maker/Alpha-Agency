@@ -347,6 +347,170 @@ const SocialMediaPage = () => {
     );
   };
 
+  // List view rendering
+  const renderListView = () => {
+    const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+                        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+    
+    // Sort posts by scheduled date
+    const sortedPosts = [...allPosts].sort((a, b) => 
+      new Date(a.scheduled_at) - new Date(b.scheduled_at)
+    );
+    
+    // Group posts by date
+    const groupedPosts = sortedPosts.reduce((acc, post) => {
+      const date = post.scheduled_at?.split('T')[0] || 'Sans date';
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(post);
+      return acc;
+    }, {});
+
+    return (
+      <div>
+        {/* Month navigation */}
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="outline" size="sm" onClick={() => {
+            if (currentMonth === 1) {
+              setCurrentMonth(12);
+              setCurrentYear(currentYear - 1);
+            } else {
+              setCurrentMonth(currentMonth - 1);
+            }
+          }}>
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <h3 className="text-lg font-semibold text-[#1A1A1A]">
+            {monthNames[currentMonth - 1]} {currentYear}
+          </h3>
+          <Button variant="outline" size="sm" onClick={() => {
+            if (currentMonth === 12) {
+              setCurrentMonth(1);
+              setCurrentYear(currentYear + 1);
+            } else {
+              setCurrentMonth(currentMonth + 1);
+            }
+          }}>
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Posts list */}
+        {Object.keys(groupedPosts).length === 0 ? (
+          <div className="text-center py-12">
+            <Calendar className="w-12 h-12 mx-auto mb-4 text-[#E5E5E5]" />
+            <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Aucun post programmé</h3>
+            <p className="text-[#666666] mb-4">Créez votre premier post pour ce mois</p>
+            <Button
+              onClick={() => { resetPostForm(); setPostDialogOpen(true); }}
+              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nouveau post
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {Object.entries(groupedPosts).map(([date, datePosts]) => {
+              const dateObj = new Date(date);
+              const isToday = new Date().toISOString().startsWith(date);
+              const isPast = dateObj < new Date() && !isToday;
+              
+              return (
+                <div key={date}>
+                  {/* Date header */}
+                  <div className={`flex items-center gap-3 mb-3 ${isToday ? 'text-[#CE0202]' : 'text-[#666666]'}`}>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold ${
+                      isToday ? 'bg-[#CE0202] text-white' : isPast ? 'bg-gray-100' : 'bg-[#F8F8F8]'
+                    }`}>
+                      {dateObj.getDate()}
+                    </div>
+                    <div>
+                      <p className="font-medium text-[#1A1A1A]">
+                        {dateObj.toLocaleDateString('fr-FR', { weekday: 'long' })}
+                        {isToday && <Badge className="ml-2 bg-[#CE0202] text-white text-xs">Aujourd'hui</Badge>}
+                      </p>
+                      <p className="text-xs text-[#666666]">
+                        {dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Posts for this date */}
+                  <div className="ml-[52px] space-y-3">
+                    {datePosts.map((post) => (
+                      <Card 
+                        key={post.id} 
+                        className={`bg-white border-[#E5E5E5] hover:shadow-md transition-shadow ${
+                          isPast && post.status !== 'published' ? 'opacity-60' : ''
+                        }`}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            {/* Left: Time and platforms */}
+                            <div className="flex items-center gap-3">
+                              <div className="text-center">
+                                <p className="text-lg font-bold text-[#1A1A1A]">
+                                  {new Date(post.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                                <div className="flex gap-1 justify-center mt-1">
+                                  {post.platforms?.map((p, idx) => (
+                                    <PlatformIcon key={idx} platform={p} className="w-4 h-4" />
+                                  ))}
+                                </div>
+                              </div>
+                              
+                              {/* Content preview */}
+                              <div className="border-l border-[#E5E5E5] pl-4">
+                                <p className="text-sm text-[#1A1A1A] line-clamp-2">{post.content}</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <StatusBadge status={post.status} />
+                                  <PostTypeIcon type={post.post_type} className="w-3 h-3 text-[#666666]" />
+                                  {post.hashtags?.length > 0 && (
+                                    <span className="text-xs text-[#999999]">
+                                      {post.hashtags.slice(0, 2).join(' ')}
+                                      {post.hashtags.length > 2 && ` +${post.hashtags.length - 2}`}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Right: Actions */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <MoreVertical className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-white">
+                                <DropdownMenuItem onClick={() => openEditPost(post)}>
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  Modifier
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                  onClick={() => handleDeletePost(post.id)}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Supprimer
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Filter inbox messages
   const filteredInbox = inbox.filter(m => {
     if (inboxFilter === "all") return true;
