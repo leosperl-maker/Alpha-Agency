@@ -80,6 +80,8 @@ const SocialMediaPage = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [calendarData, setCalendarData] = useState({});
+  const [calendarViewMode, setCalendarViewMode] = useState("calendar"); // "calendar" or "list"
+  const [allPosts, setAllPosts] = useState([]);
   
   // Post dialog
   const [postDialogOpen, setPostDialogOpen] = useState(false);
