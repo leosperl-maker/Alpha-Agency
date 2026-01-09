@@ -1056,6 +1056,27 @@ const PipelinePage = () => {
             </SortableContext>
           </div>
           
+          {/* Visible Horizontal Scrollbar Indicator */}
+          <div className="relative -mx-6 px-6 mt-2">
+            <div className="h-3 bg-[#F0F0F0] rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-[#CE0202] to-[#B00202] rounded-full cursor-pointer hover:from-[#B00202] hover:to-[#900202] transition-colors"
+                style={{ 
+                  width: '30%', 
+                  marginLeft: '0%',
+                }}
+                onClick={() => {
+                  if (scrollContainerRef.current) {
+                    scrollContainerRef.current.scrollLeft += 300;
+                  }
+                }}
+              />
+            </div>
+            <p className="text-xs text-[#999999] text-center mt-1">
+              ← Faites défiler pour voir plus de colonnes →
+            </p>
+          </div>
+          
           {/* Drag Overlay for visual feedback */}
           <DragOverlay>
             {activeItem && activeId && (
