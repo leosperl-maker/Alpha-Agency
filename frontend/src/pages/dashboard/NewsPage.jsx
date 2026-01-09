@@ -618,8 +618,12 @@ const NewsPage = () => {
           <CardContent className="py-16 text-center">
             <Newspaper className="w-16 h-16 mx-auto mb-4 text-[#E5E5E5]" />
             <h3 className="text-xl font-semibold text-[#1A1A1A] mb-2">Aucune actualité</h3>
-            <p className="text-[#666666] mb-6 max-w-md mx-auto">
+            <p className="text-[#666666] mb-2 max-w-md mx-auto">
               Cliquez sur "Actualiser" pour récupérer les dernières actualités depuis NewsAPI
+            </p>
+            <p className="text-xs text-[#999999] mb-6 max-w-md mx-auto">
+              <strong>Note :</strong> Le compte NewsAPI gratuit est limité à 100 requêtes/24h. 
+              Si aucun article n'apparaît, la limite peut avoir été atteinte.
             </p>
             <Button
               onClick={handleRefresh}
