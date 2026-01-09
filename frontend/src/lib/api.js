@@ -356,13 +356,17 @@ export const aiAPI = {
   deleteConversation: (id) => api.delete(`/ai/conversations/${id}`),
 };
 
-// News/Actualités API
+// News/Actualités API (NewsAPI.org - Style Perplexity Discover)
 export const newsAPI = {
-  getTopics: () => api.get('/news/topics'),
-  getArticles: (topicId, limit = 20) => api.get('/news', { params: { topic_id: topicId, limit } }),
-  refresh: (topicId) => api.post('/news/refresh', null, { params: { topic_id: topicId } }),
+  getCategories: () => api.get('/news/categories'),
+  getRegions: () => api.get('/news/regions'),
+  getTopics: () => api.get('/news/topics'), // Legacy endpoint
+  getArticles: (params) => api.get('/news', { params }),
+  getArticle: (articleId) => api.get(`/news/${articleId}`),
+  getRelated: (articleId, limit = 4) => api.get(`/news/related/${articleId}`, { params: { limit } }),
+  refresh: (category, region) => api.post('/news/refresh', null, { params: { category, region } }),
   delete: (articleId) => api.delete(`/news/${articleId}`),
-  clearTopic: (topicId) => api.delete(`/news/clear/${topicId}`),
+  clearCategory: (category) => api.delete(`/news/clear/${category}`),
 };
 
 // Budget Cashflow API (Phase 4)
