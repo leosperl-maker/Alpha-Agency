@@ -89,6 +89,7 @@ function App() {
             <Route path="sauvegardes" element={<BackupPage />} />
             <Route path="utilisateurs" element={<UsersPage />} />
             <Route path="assistant" element={<AIAssistantPage />} />
+            <Route path="actualites" element={<NewsPage />} />
             <Route path="parametres" element={<SettingsPage />} />
           </Route>
         </Routes>
