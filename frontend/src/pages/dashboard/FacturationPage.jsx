@@ -312,57 +312,59 @@ const FacturationPage = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Facturation</h1>
-          <p className="text-[#666666]">Gérez vos devis et factures</p>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Facturation</h1>
+            <p className="text-[#666666] text-xs sm:text-sm">Gérez vos devis et factures</p>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
             onClick={() => navigate('/admin/factures?action=services')}
             variant="outline"
-            className="border-[#E5E5E5] text-[#666666] hover:bg-[#F8F8F8]"
+            className="border-[#E5E5E5] text-[#666666] hover:bg-[#F8F8F8] flex-1 sm:flex-none text-sm"
           >
-            <Package className="w-4 h-4 mr-2" />
+            <Package className="w-4 h-4 mr-1 sm:mr-2" />
             Services
           </Button>
           <Button
             onClick={() => navigate('/admin/factures?action=new&type=devis')}
             variant="outline"
-            className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202]/10"
+            className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202]/10 flex-1 sm:flex-none text-sm"
           >
-            <FileText className="w-4 h-4 mr-2" />
-            Nouveau devis
+            <FileText className="w-4 h-4 mr-1 sm:mr-2" />
+            Devis
           </Button>
           <Button
             onClick={() => navigate('/admin/factures?action=new&type=facture')}
-            className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+            className="bg-[#CE0202] hover:bg-[#B00202] text-white flex-1 sm:flex-none text-sm"
           >
-            <Receipt className="w-4 h-4 mr-2" />
-            Nouvelle facture
+            <Receipt className="w-4 h-4 mr-1 sm:mr-2" />
+            Facture
           </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FileText className="w-5 h-5 text-blue-600" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-[#1A1A1A]">{stats.totalQuotes}</p>
-              <p className="text-xs text-[#666666]">Devis ({stats.pendingQuotes} en attente)</p>
+              <p className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">{stats.totalQuotes}</p>
+              <p className="text-[10px] sm:text-xs text-[#666666]">Devis ({stats.pendingQuotes} en att.)</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Receipt className="w-5 h-5 text-purple-600" />
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+              <Receipt className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
             </div>
             <div>
               <p className="text-2xl font-bold text-[#1A1A1A]">{stats.totalInvoices}</p>
