@@ -404,3 +404,20 @@ async def clear_news_category(category: str, current_user: dict = Depends(get_cu
     """Clear all news for a category"""
     result = await db.news_articles.delete_many({"category": category})
     return {"message": f"{result.deleted_count} articles supprimés"}
+
+
+@router.delete("/clear-region/{region}", response_model=dict)
+async def clear_news_region(region: str, current_user: dict = Depends(get_current_user)):
+    """Clear all news for a region - useful for refreshing local content"""
+    result = await db.news_articles.delete_many({"region": region})
+    return {"message": f"{result.deleted_count} articles supprimés pour {region}"}
+
+
+@router.post("/refresh-local/{region}", response_model=dict)
+async def refresh_local_news(region: str, current_user: dict = Depends(get_current_user)):
+    """Clear and refresh news for a specific region - gets truly local content"""
+    # First clear existing articles for this region
+    await db.news_articles.delete_many({"region": region})
+    
+    # Then fetch fresh local content
+    return await refresh_news(category=None, region=region, current_user=current_user)
