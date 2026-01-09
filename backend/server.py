@@ -1916,16 +1916,6 @@ async def delete_pipeline_column(column_id: str, current_user: dict = Depends(ge
     
     return {"message": "Colonne supprimée", "moved_to": target_status}
 
-@api_router.put("/pipeline/columns/reorder", response_model=dict)
-async def reorder_pipeline_columns(data: PipelineColumnReorder, current_user: dict = Depends(get_current_user)):
-    """Reorder pipeline columns"""
-    for i, column_id in enumerate(data.column_ids):
-        await db.pipeline_columns.update_one(
-            {"id": column_id},
-            {"$set": {"order": i, "updated_at": datetime.now(timezone.utc).isoformat()}}
-        )
-    return {"message": "Colonnes réorganisées"}
-
 @api_router.post("/pipeline/columns/initialize", response_model=dict)
 async def initialize_pipeline_columns(current_user: dict = Depends(get_current_user)):
     """Initialize default pipeline columns in database (for customization)"""
