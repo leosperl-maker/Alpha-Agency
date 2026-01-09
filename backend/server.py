@@ -1235,6 +1235,14 @@ async def update_quote(quote_id: str, update: QuoteUpdate, current_user: dict = 
         raise HTTPException(status_code=404, detail="Devis non trouvé")
     return {"message": "Devis mis à jour"}
 
+@api_router.delete("/quotes/{quote_id}", response_model=dict)
+async def delete_quote(quote_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a quote"""
+    result = await db.quotes.delete_one({"id": quote_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Devis non trouvé")
+    return {"message": "Devis supprimé"}
+
 @api_router.get("/quotes/{quote_id}/pdf")
 async def download_quote_pdf(quote_id: str, current_user: dict = Depends(get_current_user)):
     quote = await db.quotes.find_one({"id": quote_id}, {"_id": 0})
