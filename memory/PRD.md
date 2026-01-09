@@ -20,14 +20,14 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 
 ## Core Features Implemented
 
-### Pipeline / Opportunities ✅ COMPLETE
+### Pipeline / Opportunities ✅ COMPLETE (Updated 2026-01-09)
 - [x] Kanban-style pipeline view style Pipedrive
 - [x] Colonnes personnalisables (CRUD + réordonnement)
 - [x] **Drag & Drop des colonnes** ✅
-- [x] **Drag & Drop des cartes** avec handles (GripVertical) ✅ 2026-01-09
-- [x] **Scroll horizontal** fonctionnel ✅ 2026-01-09
-- [x] **Menus contextuels** (Modifier/Voir détails/Archiver/Supprimer) ✅ 2026-01-09
-- [x] **Vue détaillée** des opportunités (Sheet panel) ✅ 2026-01-09
+- [x] **Drag & Drop des cartes** avec handles (GripVertical) ✅
+- [x] **Scroll horizontal** fonctionnel (grab cursor, overflow-x-auto) ✅
+- [x] **Menus contextuels** (Modifier/Voir détails/Archiver/Supprimer) ✅
+- [x] **Vue détaillée** des opportunités (Sheet panel) ✅
 - [x] KPIs en haut (Valeur pipeline, Affaires actives, Taux conversion, Valeur moyenne)
 
 ### Tâches ✅ COMPLETE (2026-01-09)
