@@ -64,6 +64,7 @@ const DashboardLayout = () => {
     { path: "/admin/budget", icon: Wallet, label: "Budget" },
     { path: "/admin/abonnements", icon: CreditCard, label: "Abonnements" },
     { path: "/admin/realisations", icon: Image, label: "Réalisations" },
+    { path: "/admin/tags", icon: Tag, label: "Tags" },
     { path: "/admin/documents", icon: FileCheck, label: "Documents" },
     { path: "/admin/sauvegardes", icon: Database, label: "Sauvegardes" },
     { path: "/admin/assistant", icon: Bot, label: "Assistant IA" },
