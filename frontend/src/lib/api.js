@@ -262,6 +262,28 @@ export const budgetAPI = {
   delete: (id) => api.delete(`/budget/${id}`),
   getSummary: (month) => api.get('/budget/summary', { params: { month } }),
   getMonthlyChart: (year) => api.get('/budget/monthly-chart', { params: { year } }),
+  // Categories
+  getCategories: () => api.get('/budget/categories'),
+  createCategory: (data) => api.post('/budget/categories', data),
+  updateCategory: (id, data) => api.put(`/budget/categories/${id}`, data),
+  deleteCategory: (id) => api.delete(`/budget/categories/${id}`),
+  // Bank Transactions
+  getTransactions: (params) => api.get('/budget/transactions', { params }),
+  createTransaction: (data) => api.post('/budget/transactions', data),
+  updateTransaction: (id, data) => api.put(`/budget/transactions/${id}`, data),
+  deleteTransaction: (id) => api.delete(`/budget/transactions/${id}`),
+  getTransactionsSummary: (params) => api.get('/budget/transactions/summary', { params }),
+  importTransactions: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/budget/transactions/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  // Auto-categorization rules
+  getRules: () => api.get('/budget/rules'),
+  createRule: (data) => api.post('/budget/rules', data),
+  deleteRule: (id) => api.delete(`/budget/rules/${id}`),
 };
 
 // Backup API
