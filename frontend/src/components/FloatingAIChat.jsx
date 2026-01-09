@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { 
   Bot, Send, Loader2, X, Minimize2, Maximize2, 
-  MessageSquare, Sparkles, User
+  MessageSquare, Sparkles, User, History, ChevronLeft
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -21,6 +21,9 @@ const FloatingAIChat = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [conversations, setConversations] = useState([]);
+  const [currentConversationId, setCurrentConversationId] = useState(null);
+  const [showHistory, setShowHistory] = useState(false);
   const bubbleRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -40,18 +43,29 @@ const FloatingAIChat = () => {
     return () => window.removeEventListener('resize', updatePosition);
   }, []);
 
-  // Fetch AI status
+  // Fetch AI status and conversations
   useEffect(() => {
     if (shouldHide) return;
-    const fetchStatus = async () => {
+    const fetchData = async () => {
       try {
-        const res = await aiAPI.getStatus();
-        setStatus(res.data);
+        const [statusRes, convRes] = await Promise.all([
+          aiAPI.getStatus(),
+          aiAPI.getConversations(10)
+        ]);
+        setStatus(statusRes.data);
+        setConversations(convRes.data);
+        
+        // Load most recent conversation if exists
+        if (convRes.data.length > 0) {
+          const latest = convRes.data[0];
+          setCurrentConversationId(latest.id);
+          setMessages(latest.messages?.map(m => ({ role: m.role, content: m.content })) || []);
+        }
       } catch (error) {
         console.error("Error fetching AI status:", error);
       }
     };
-    fetchStatus();
+    fetchData();
   }, [shouldHide]);
 
   // Scroll to bottom when messages change
@@ -111,6 +125,18 @@ const FloatingAIChat = () => {
     };
   }, [isDragging, dragOffset]);
 
+  const loadConversation = async (conv) => {
+    setCurrentConversationId(conv.id);
+    setMessages(conv.messages?.map(m => ({ role: m.role, content: m.content })) || []);
+    setShowHistory(false);
+  };
+
+  const startNewConversation = () => {
+    setCurrentConversationId(null);
+    setMessages([]);
+    setShowHistory(false);
+  };
+
   const handleSend = async () => {
     if (!input.trim() || loading) return;
 
@@ -121,10 +147,9 @@ const FloatingAIChat = () => {
     setLoading(true);
 
     try {
-      const chatMessages = newMessages.filter(m => m.role === "user" || m.role === "assistant");
-      
-      const response = await aiAPI.chat({
-        messages: chatMessages.map(m => ({ role: m.role, content: m.content })),
+      const response = await aiAPI.chatWithConversation({
+        conversation_id: currentConversationId,
+        messages: newMessages.map(m => ({ role: m.role, content: m.content })),
         context_type: null,
         context_id: null
       });
@@ -133,6 +158,14 @@ const FloatingAIChat = () => {
         role: "assistant",
         content: response.data.message
       }]);
+
+      // Update conversation ID if new
+      if (!currentConversationId && response.data.conversation_id) {
+        setCurrentConversationId(response.data.conversation_id);
+        // Refresh conversations list
+        const convRes = await aiAPI.getConversations(10);
+        setConversations(convRes.data);
+      }
 
       if (response.data.usage) {
         setStatus(prev => ({
@@ -160,8 +193,20 @@ const FloatingAIChat = () => {
   const toggleChat = () => {
     if (!isOpen) {
       setIsMinimized(false);
+      setShowHistory(false);
     }
     setIsOpen(!isOpen);
+  };
+
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    if (diffDays === 1) return "Hier";
+    if (diffDays < 7) return date.toLocaleDateString('fr-FR', { weekday: 'short' });
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   };
 
   // Don't render on assistant page
@@ -203,175 +248,206 @@ const FloatingAIChat = () => {
           )}
         </div>
         
-        {!isOpen && status?.remaining > 0 && (
-          <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-            <Sparkles className="w-3 h-3 text-white" />
+        {/* Notification dot */}
+        {!isOpen && status && status.remaining > 0 && (
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+            <Sparkles className="w-2 h-2 text-white" />
           </div>
         )}
       </div>
 
       {/* Chat Window */}
-      {isOpen && !isMinimized && (
-        <div 
-          className="fixed z-[9998] w-[380px] max-w-[calc(100vw-32px)] bg-white rounded-2xl shadow-2xl border border-[#E5E5E5] overflow-hidden"
+      {isOpen && (
+        <div
+          className={`fixed z-[9998] bg-white rounded-2xl shadow-2xl border border-[#E5E5E5] overflow-hidden transition-all ${
+            isMinimized ? 'w-80 h-14' : 'w-80 sm:w-96 h-[500px]'
+          }`}
           style={{
-            right: Math.max(16, window.innerWidth - position.x - 380),
-            bottom: Math.max(16, window.innerHeight - position.y + 20),
-            maxHeight: 'calc(100vh - 120px)'
+            left: Math.min(position.x - 320, window.innerWidth - 400),
+            top: Math.max(position.y - 510, 10),
           }}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#CE0202] to-[#8B0000] p-4 text-white">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <Bot className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm">Assistant IA</h3>
-                  <p className="text-xs text-white/80">Perplexity • {status?.remaining || 0} requêtes</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0 text-white hover:bg-white/20"
-                  onClick={() => setIsMinimized(true)}
+          <div className="bg-gradient-to-r from-[#CE0202] to-[#8B0000] text-white p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {showHistory && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 w-7 p-0 text-white hover:bg-white/20"
+                  onClick={() => setShowHistory(false)}
                 >
-                  <Minimize2 className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0 text-white hover:bg-white/20"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
+              )}
+              <Bot className="w-5 h-5" />
+              <span className="font-medium text-sm">
+                {showHistory ? 'Historique' : 'Assistant IA'}
+              </span>
             </div>
-          </div>
-
-          {/* Messages */}
-          <ScrollArea className="h-[350px] p-4">
-            {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center py-8">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#CE0202] to-[#8B0000] flex items-center justify-center mb-3">
-                  <Bot className="w-6 h-6 text-white" />
-                </div>
-                <p className="text-[#1A1A1A] font-medium text-sm mb-1">Comment puis-je vous aider ?</p>
-                <p className="text-[#666666] text-xs max-w-[240px]">
-                  Posez-moi vos questions sur vos clients, votre pipeline, vos factures...
-                </p>
-                
-                <div className="mt-4 space-y-2 w-full">
-                  {["Résume mon pipeline", "Factures en attente ?", "Tâches urgentes"].map((prompt, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setInput(prompt)}
-                      className="w-full px-3 py-2 text-xs bg-[#F8F8F8] hover:bg-[#E5E5E5] text-[#666666] rounded-lg transition-colors text-left"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {messages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    {msg.role === "assistant" && (
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#CE0202] to-[#8B0000] flex items-center justify-center flex-shrink-0">
-                        <Bot className="w-3.5 h-3.5 text-white" />
-                      </div>
-                    )}
-                    <div
-                      className={`max-w-[75%] rounded-2xl px-3 py-2 ${
-                        msg.role === "user"
-                          ? "bg-[#CE0202] text-white"
-                          : "bg-[#F8F8F8] text-[#1A1A1A]"
-                      }`}
-                    >
-                      <p className="whitespace-pre-wrap text-xs leading-relaxed">{msg.content}</p>
-                    </div>
-                    {msg.role === "user" && (
-                      <div className="w-7 h-7 rounded-full bg-[#1A1A1A] flex items-center justify-center flex-shrink-0">
-                        <User className="w-3.5 h-3.5 text-white" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-                
-                {loading && (
-                  <div className="flex gap-2">
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#CE0202] to-[#8B0000] flex items-center justify-center">
-                      <Bot className="w-3.5 h-3.5 text-white" />
-                    </div>
-                    <div className="bg-[#F8F8F8] rounded-2xl px-3 py-2">
-                      <div className="flex items-center gap-1.5">
-                        <Loader2 className="w-3 h-3 animate-spin text-[#CE0202]" />
-                        <span className="text-xs text-[#666666]">Réflexion...</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                <div ref={messagesEndRef} />
-              </div>
-            )}
-          </ScrollArea>
-
-          {/* Input */}
-          <div className="p-3 border-t border-[#E5E5E5] bg-white">
-            <div className="flex gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Votre question..."
-                disabled={loading || (status && status.remaining <= 0)}
-                className="flex-1 text-sm bg-[#F8F8F8] border-[#E5E5E5] h-9"
-              />
+            <div className="flex items-center gap-1">
+              {!showHistory && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowHistory(true)}
+                  className="h-7 w-7 p-0 text-white hover:bg-white/20"
+                  title="Historique"
+                >
+                  <History className="w-4 h-4" />
+                </Button>
+              )}
               <Button
-                onClick={handleSend}
-                disabled={!input.trim() || loading || (status && status.remaining <= 0)}
-                className="bg-[#CE0202] hover:bg-[#B00202] text-white h-9 w-9 p-0"
+                size="sm"
+                variant="ghost"
+                onClick={() => setIsMinimized(!isMinimized)}
+                className="h-7 w-7 p-0 text-white hover:bg-white/20"
               >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
+                {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
               </Button>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Minimized state */}
-      {isOpen && isMinimized && (
-        <div 
-          className="fixed z-[9998] bg-white rounded-xl shadow-lg border border-[#E5E5E5] p-3 cursor-pointer hover:shadow-xl transition-shadow"
-          style={{
-            right: Math.max(16, window.innerWidth - position.x - 200),
-            bottom: Math.max(16, window.innerHeight - position.y + 20)
-          }}
-          onClick={() => setIsMinimized(false)}
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#CE0202] to-[#8B0000] flex items-center justify-center">
-              <Bot className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-[#1A1A1A]">Assistant IA</p>
-              <p className="text-xs text-[#666666]">{messages.length} messages</p>
-            </div>
-            <Maximize2 className="w-4 h-4 text-[#666666]" />
-          </div>
+          {!isMinimized && (
+            <>
+              {showHistory ? (
+                // History View
+                <div className="flex flex-col h-[calc(100%-52px)]">
+                  <div className="p-2 border-b border-[#E5E5E5]">
+                    <Button
+                      size="sm"
+                      onClick={startNewConversation}
+                      className="w-full h-8 bg-[#CE0202] hover:bg-[#B00202] text-white text-xs"
+                    >
+                      Nouvelle conversation
+                    </Button>
+                  </div>
+                  <ScrollArea className="flex-1">
+                    <div className="p-2 space-y-1">
+                      {conversations.length === 0 ? (
+                        <p className="text-center text-[#666666] text-xs py-8">Aucune conversation</p>
+                      ) : (
+                        conversations.map((conv) => (
+                          <div
+                            key={conv.id}
+                            onClick={() => loadConversation(conv)}
+                            className={`p-2 rounded-lg cursor-pointer transition-colors ${
+                              currentConversationId === conv.id
+                                ? 'bg-[#CE0202]/10'
+                                : 'hover:bg-[#F8F8F8]'
+                            }`}
+                          >
+                            <p className="text-xs font-medium text-[#1A1A1A] truncate">{conv.title}</p>
+                            <p className="text-[10px] text-[#666666] mt-0.5">
+                              {formatDate(conv.updated_at)} • {conv.messages?.length || 0} msg
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
+              ) : (
+                // Chat View
+                <>
+                  {/* Messages */}
+                  <ScrollArea className="h-[calc(100%-120px)] p-3">
+                    {messages.length === 0 ? (
+                      <div className="text-center py-8">
+                        <div className="w-12 h-12 mx-auto rounded-full bg-gradient-to-br from-[#CE0202] to-[#8B0000] flex items-center justify-center mb-3">
+                          <Bot className="w-6 h-6 text-white" />
+                        </div>
+                        <p className="text-sm text-[#666666]">
+                          Comment puis-je vous aider ?
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {messages.map((msg, idx) => (
+                          <div
+                            key={idx}
+                            className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                          >
+                            {msg.role === "assistant" && (
+                              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#CE0202] to-[#8B0000] flex items-center justify-center flex-shrink-0">
+                                <Bot className="w-3 h-3 text-white" />
+                              </div>
+                            )}
+                            <div
+                              className={`max-w-[80%] rounded-xl px-3 py-2 ${
+                                msg.role === "user"
+                                  ? "bg-[#CE0202] text-white"
+                                  : "bg-[#F8F8F8] text-[#1A1A1A]"
+                              }`}
+                            >
+                              <p className="whitespace-pre-wrap text-xs">{msg.content}</p>
+                            </div>
+                            {msg.role === "user" && (
+                              <div className="w-6 h-6 rounded-full bg-[#1A1A1A] flex items-center justify-center flex-shrink-0">
+                                <User className="w-3 h-3 text-white" />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        
+                        {loading && (
+                          <div className="flex gap-2">
+                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#CE0202] to-[#8B0000] flex items-center justify-center">
+                              <Bot className="w-3 h-3 text-white" />
+                            </div>
+                            <div className="bg-[#F8F8F8] rounded-xl px-3 py-2">
+                              <Loader2 className="w-4 h-4 animate-spin text-[#666666]" />
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div ref={messagesEndRef} />
+                      </div>
+                    )}
+                  </ScrollArea>
+
+                  {/* Usage indicator */}
+                  {status && (
+                    <div className="px-3 py-1 border-t border-[#E5E5E5] bg-[#F8F8F8]">
+                      <div className="flex items-center justify-between text-[10px] text-[#666666]">
+                        <span>{status.remaining}/{status.daily_limit} requêtes</span>
+                        <span className="flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" />
+                          Perplexity AI
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Input */}
+                  <div className="p-3 border-t border-[#E5E5E5]">
+                    <div className="flex gap-2">
+                      <Input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Votre message..."
+                        disabled={loading || (status && status.remaining <= 0)}
+                        className="flex-1 h-9 text-sm bg-[#F8F8F8] border-[#E5E5E5]"
+                      />
+                      <Button
+                        onClick={handleSend}
+                        disabled={!input.trim() || loading || (status && status.remaining <= 0)}
+                        size="sm"
+                        className="h-9 bg-[#CE0202] hover:bg-[#B00202] text-white"
+                      >
+                        {loading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Send className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </div>
       )}
     </>
