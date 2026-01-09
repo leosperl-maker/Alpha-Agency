@@ -5,7 +5,8 @@ import {
   ChevronLeft, ChevronRight, MoreVertical, Trash2, Edit, Eye, Filter,
   Inbox, Archive, Star, Reply, Bot, Loader2, RefreshCw, List, Grid,
   Smile, MapPin, Hash, X, Upload, FolderOpen, ChevronDown, CalendarDays,
-  LayoutList, Rows3, GripVertical
+  LayoutList, Rows3, GripVertical, Monitor, Smartphone, Heart, 
+  MessageCircle, Share2, Bookmark, ThumbsUp
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
