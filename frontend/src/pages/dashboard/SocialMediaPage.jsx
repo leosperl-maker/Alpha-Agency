@@ -748,6 +748,17 @@ const SocialMediaPage = () => {
   const [loadingAI, setLoadingAI] = useState(false);
   const [inboxFilter, setInboxFilter] = useState("all");
 
+  // Meta integration state
+  const [metaConnected, setMetaConnected] = useState(false);
+  const [metaPages, setMetaPages] = useState([]);
+  const [metaLoading, setMetaLoading] = useState(false);
+  const [publishedPosts, setPublishedPosts] = useState([]);
+  const [publishModalOpen, setPublishModalOpen] = useState(false);
+  const [selectedPage, setSelectedPage] = useState(null);
+  const [publishContent, setPublishContent] = useState("");
+  const [publishImageUrl, setPublishImageUrl] = useState("");
+  const [publishing, setPublishing] = useState(false);
+
   useEffect(() => {
     fetchData();
   }, []);
