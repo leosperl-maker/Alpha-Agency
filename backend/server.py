@@ -3285,6 +3285,219 @@ async def ai_chat(request: AIChatRequest, current_user: dict = Depends(get_curre
         logging.error(f"Perplexity request error: {str(e)}")
         raise HTTPException(status_code=502, detail="Erreur de connexion à l'API Perplexity")
 
+# ==================== AI CONVERSATIONS MANAGEMENT ====================
+
+class ConversationCreate(BaseModel):
+    title: Optional[str] = None
+    context_type: Optional[str] = None
+
+class ConversationMessageAdd(BaseModel):
+    conversation_id: str
+    role: str
+    content: str
+
+class AIChatWithConversation(BaseModel):
+    conversation_id: Optional[str] = None
+    messages: List[AIMessage]
+    context_type: Optional[str] = None
+    context_id: Optional[str] = None
+
+@api_router.get("/ai/conversations", response_model=List[dict])
+async def get_ai_conversations(limit: int = 50, current_user: dict = Depends(get_current_user)):
+    """Get all conversations for current user"""
+    conversations = await db.ai_conversations.find(
+        {"user_id": current_user["user_id"]},
+        {"_id": 0}
+    ).sort("updated_at", -1).limit(limit).to_list(limit)
+    
+    return conversations
+
+@api_router.post("/ai/conversations", response_model=dict)
+async def create_ai_conversation(data: ConversationCreate, current_user: dict = Depends(get_current_user)):
+    """Create a new AI conversation"""
+    conversation_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    conversation = {
+        "id": conversation_id,
+        "user_id": current_user["user_id"],
+        "title": data.title or "Nouvelle conversation",
+        "context_type": data.context_type,
+        "messages": [],
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.ai_conversations.insert_one(conversation)
+    
+    return {k: v for k, v in conversation.items() if k != "_id"}
+
+@api_router.get("/ai/conversations/{conversation_id}", response_model=dict)
+async def get_ai_conversation(conversation_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific conversation with all messages"""
+    conversation = await db.ai_conversations.find_one(
+        {"id": conversation_id, "user_id": current_user["user_id"]},
+        {"_id": 0}
+    )
+    
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation non trouvée")
+    
+    return conversation
+
+@api_router.put("/ai/conversations/{conversation_id}", response_model=dict)
+async def update_ai_conversation(conversation_id: str, title: str, current_user: dict = Depends(get_current_user)):
+    """Update conversation title"""
+    result = await db.ai_conversations.update_one(
+        {"id": conversation_id, "user_id": current_user["user_id"]},
+        {"$set": {"title": title, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Conversation non trouvée")
+    
+    conversation = await db.ai_conversations.find_one({"id": conversation_id}, {"_id": 0})
+    return conversation
+
+@api_router.delete("/ai/conversations/{conversation_id}")
+async def delete_ai_conversation(conversation_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a conversation"""
+    result = await db.ai_conversations.delete_one(
+        {"id": conversation_id, "user_id": current_user["user_id"]}
+    )
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Conversation non trouvée")
+    
+    return {"message": "Conversation supprimée"}
+
+@api_router.post("/ai/chat/conversation", response_model=dict)
+async def ai_chat_with_conversation(request: AIChatWithConversation, current_user: dict = Depends(get_current_user)):
+    """Chat with AI and persist to a conversation"""
+    
+    # Check if AI is enabled
+    if not AI_ENABLED:
+        raise HTTPException(status_code=503, detail="L'assistant IA est temporairement désactivé")
+    
+    if not PERPLEXITY_API_KEY:
+        raise HTTPException(status_code=503, detail="Clé API Perplexity non configurée")
+    
+    # Check daily limit
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    usage = await db.ai_usage.find_one({"user_id": current_user["user_id"], "date": today})
+    calls_today = usage["calls"] if usage else 0
+    
+    if calls_today >= AI_DAILY_LIMIT:
+        raise HTTPException(status_code=429, detail=f"Limite quotidienne atteinte ({AI_DAILY_LIMIT} requêtes/jour)")
+    
+    # Get or create conversation
+    conversation_id = request.conversation_id
+    if conversation_id:
+        conversation = await db.ai_conversations.find_one(
+            {"id": conversation_id, "user_id": current_user["user_id"]}
+        )
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation non trouvée")
+    else:
+        # Create new conversation
+        conversation_id = str(uuid.uuid4())
+        now = datetime.now(timezone.utc).isoformat()
+        # Generate title from first message
+        first_msg = request.messages[0].content if request.messages else "Nouvelle conversation"
+        title = first_msg[:50] + "..." if len(first_msg) > 50 else first_msg
+        
+        conversation = {
+            "id": conversation_id,
+            "user_id": current_user["user_id"],
+            "title": title,
+            "context_type": request.context_type,
+            "messages": [],
+            "created_at": now,
+            "updated_at": now
+        }
+        await db.ai_conversations.insert_one(conversation)
+    
+    # Build context and system prompt
+    context = await build_ai_context(request.context_type, request.context_id, current_user)
+    system_prompt = build_ai_system_prompt(context)
+    
+    # Build messages for Perplexity
+    perplexity_messages = [{"role": "system", "content": system_prompt}]
+    for msg in request.messages:
+        perplexity_messages.append({"role": msg.role, "content": msg.content})
+    
+    try:
+        # Call Perplexity API
+        response = requests.post(
+            "https://api.perplexity.ai/chat/completions",
+            headers={
+                "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "llama-3.1-sonar-small-128k-online",
+                "messages": perplexity_messages,
+                "temperature": 0.7,
+                "max_tokens": 1500
+            },
+            timeout=60
+        )
+        
+        response.raise_for_status()
+        data = response.json()
+        assistant_message = data["choices"][0]["message"]["content"]
+        
+        # Update usage
+        await db.ai_usage.update_one(
+            {"user_id": current_user["user_id"], "date": today},
+            {"$inc": {"calls": 1}},
+            upsert=True
+        )
+        
+        # Save messages to conversation
+        now = datetime.now(timezone.utc).isoformat()
+        new_messages = []
+        
+        # Add the last user message
+        if request.messages:
+            last_user_msg = request.messages[-1]
+            new_messages.append({
+                "role": last_user_msg.role,
+                "content": last_user_msg.content,
+                "timestamp": now
+            })
+        
+        # Add assistant response
+        new_messages.append({
+            "role": "assistant",
+            "content": assistant_message,
+            "timestamp": now
+        })
+        
+        # Update conversation with new messages
+        await db.ai_conversations.update_one(
+            {"id": conversation_id},
+            {
+                "$push": {"messages": {"$each": new_messages}},
+                "$set": {"updated_at": now}
+            }
+        )
+        
+        return {
+            "message": assistant_message,
+            "conversation_id": conversation_id,
+            "usage": {
+                "calls_today": calls_today + 1,
+                "remaining": AI_DAILY_LIMIT - calls_today - 1
+            }
+        }
+        
+    except requests.exceptions.Timeout:
+        raise HTTPException(status_code=504, detail="Timeout de l'API Perplexity")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Perplexity request error: {str(e)}")
+        raise HTTPException(status_code=502, detail="Erreur de connexion à l'API Perplexity")
+
 async def build_ai_context(context_type: Optional[str], context_id: Optional[str], current_user: dict) -> dict:
     """Build context data from database for AI assistant"""
     context = {
