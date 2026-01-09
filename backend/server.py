@@ -2607,6 +2607,17 @@ class SettingsIntegrations(BaseModel):
     resend_api_key: Optional[str] = None
     stripe_api_key: Optional[str] = None
 
+class APIKeysUpdate(BaseModel):
+    brevo_api_key: Optional[str] = None
+    newsapi_keys: Optional[List[str]] = None
+    perplexity_api_key: Optional[str] = None
+    cloudinary_cloud_name: Optional[str] = None
+    cloudinary_api_key: Optional[str] = None
+    cloudinary_api_secret: Optional[str] = None
+    meta_app_id: Optional[str] = None
+    meta_app_secret: Optional[str] = None
+    stripe_api_key: Optional[str] = None
+
 @api_router.get("/settings", response_model=dict)
 async def get_settings(current_user: dict = Depends(get_current_user)):
     settings = await db.settings.find_one({"type": "global"}, {"_id": 0})
