@@ -1008,15 +1008,28 @@ const PipelinePage = () => {
         >
           <div 
             ref={scrollContainerRef}
-            className="overflow-x-auto pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6"
+            className="overflow-x-auto overflow-y-visible pb-4 -mx-6 px-6"
             style={{ 
               WebkitOverflowScrolling: 'touch',
-              scrollbarWidth: 'thin',
-              scrollbarColor: '#CE0202 #E5E5E5'
+              scrollbarWidth: 'auto',
+              scrollbarColor: '#CE0202 #E5E5E5',
+              cursor: 'grab'
             }}
+            onMouseDown={(e) => {
+              if (e.target === scrollContainerRef.current || e.target.closest('[data-pipeline-scroll]')) {
+                scrollContainerRef.current.style.cursor = 'grabbing';
+              }
+            }}
+            onMouseUp={() => {
+              scrollContainerRef.current.style.cursor = 'grab';
+            }}
+            onMouseLeave={() => {
+              scrollContainerRef.current.style.cursor = 'grab';
+            }}
+            data-pipeline-scroll="true"
           >
             <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
-              <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
+              <div className="inline-flex gap-4 min-w-full" style={{ width: 'max-content' }}>
                 {columns.map((column) => {
                   const columnOpps = filterOpportunities(pipeline[column.id] || []);
                   const totalAmount = columnOpps.reduce((sum, opp) => sum + (opp.amount || 0), 0);
