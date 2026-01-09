@@ -2684,6 +2684,169 @@ async def update_settings_integrations(integrations: SettingsIntegrations, curre
     )
     return {"message": "Intégrations mises à jour"}
 
+
+# ==================== API KEYS MANAGEMENT ====================
+
+@api_router.get("/settings/api-keys", response_model=dict)
+async def get_api_keys_status(current_user: dict = Depends(get_current_user)):
+    """Get status of all configured API keys (masked for security)"""
+    def mask_key(key: str) -> dict:
+        if not key:
+            return {"configured": False, "masked": None}
+        if len(key) <= 8:
+            return {"configured": True, "masked": "****"}
+        return {"configured": True, "masked": f"{key[:4]}...{key[-4:]}"}
+    
+    # Get from environment
+    brevo_key = os.environ.get('BREVO_API_KEY', '')
+    newsapi_key = os.environ.get('NEWSAPI_KEY', '')
+    perplexity_key = os.environ.get('PERPLEXITY_API_KEY', '')
+    cloudinary_name = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
+    cloudinary_key = os.environ.get('CLOUDINARY_API_KEY', '')
+    meta_app_id = os.environ.get('META_APP_ID', '')
+    stripe_key = os.environ.get('STRIPE_API_KEY', '')
+    
+    # Additional NewsAPI keys (hardcoded in news.py for load balancing)
+    newsapi_extra_keys = [
+        '667902bcf7be4181a61b2836c3f09685',
+        '0f54d162b8ad409caea021a4fe481a81',
+        'af790e1e76ff48a3ae24180f77951d4b'
+    ]
+    
+    all_newsapi_keys = [newsapi_key] + newsapi_extra_keys if newsapi_key else newsapi_extra_keys
+    
+    return {
+        "api_keys": {
+            "brevo": {
+                **mask_key(brevo_key),
+                "name": "Brevo (Sendinblue)",
+                "description": "Email marketing et transactionnel",
+                "doc_url": "https://app.brevo.com/settings/keys/api"
+            },
+            "newsapi": {
+                "configured": len(all_newsapi_keys) > 0,
+                "count": len([k for k in all_newsapi_keys if k]),
+                "keys": [mask_key(k) for k in all_newsapi_keys if k],
+                "name": "NewsAPI.org",
+                "description": "Actualités et articles",
+                "doc_url": "https://newsapi.org/account"
+            },
+            "perplexity": {
+                **mask_key(perplexity_key),
+                "name": "Perplexity AI",
+                "description": "Assistant IA et suggestions de tags",
+                "doc_url": "https://www.perplexity.ai/settings/api"
+            },
+            "cloudinary": {
+                "configured": bool(cloudinary_name and cloudinary_key),
+                "cloud_name": cloudinary_name if cloudinary_name else None,
+                "masked": mask_key(cloudinary_key)["masked"] if cloudinary_key else None,
+                "name": "Cloudinary",
+                "description": "Hébergement d'images et médias",
+                "doc_url": "https://console.cloudinary.com/settings/api-keys"
+            },
+            "meta": {
+                **mask_key(meta_app_id),
+                "name": "Meta (Facebook/Instagram)",
+                "description": "Publication sur réseaux sociaux",
+                "doc_url": "https://developers.facebook.com/apps/"
+            },
+            "stripe": {
+                **mask_key(stripe_key),
+                "name": "Stripe",
+                "description": "Paiements en ligne",
+                "doc_url": "https://dashboard.stripe.com/apikeys"
+            }
+        },
+        "total_configured": sum([
+            bool(brevo_key),
+            len([k for k in all_newsapi_keys if k]) > 0,
+            bool(perplexity_key),
+            bool(cloudinary_name and cloudinary_key),
+            bool(meta_app_id),
+            bool(stripe_key)
+        ]),
+        "total_available": 6
+    }
+
+
+@api_router.get("/settings/api-keys/test/{service}", response_model=dict)
+async def test_api_key(service: str, current_user: dict = Depends(get_current_user)):
+    """Test if an API key is working"""
+    if service == "brevo":
+        brevo_key = os.environ.get('BREVO_API_KEY', '')
+        if not brevo_key:
+            return {"success": False, "message": "Clé non configurée"}
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    "https://api.brevo.com/v3/account",
+                    headers={"api-key": brevo_key}
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    return {"success": True, "message": f"Connecté: {data.get('email', 'OK')}", "data": {"email": data.get('email'), "plan": data.get('plan', [{}])[0].get('type', 'Free')}}
+                else:
+                    return {"success": False, "message": f"Erreur {response.status_code}"}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+    
+    elif service == "newsapi":
+        from routes.news import NEWSAPI_KEYS
+        results = []
+        for i, key in enumerate(NEWSAPI_KEYS):
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(
+                        "https://newsapi.org/v2/top-headlines",
+                        params={"apiKey": key, "country": "fr", "pageSize": 1}
+                    )
+                    if response.status_code == 200:
+                        results.append({"key": i+1, "status": "OK"})
+                    elif response.status_code == 429:
+                        results.append({"key": i+1, "status": "Rate limited"})
+                    else:
+                        results.append({"key": i+1, "status": f"Error {response.status_code}"})
+            except:
+                results.append({"key": i+1, "status": "Error"})
+        
+        working = sum(1 for r in results if r["status"] == "OK")
+        return {"success": working > 0, "message": f"{working}/{len(results)} clés actives", "data": results}
+    
+    elif service == "perplexity":
+        perplexity_key = os.environ.get('PERPLEXITY_API_KEY', '')
+        if not perplexity_key:
+            return {"success": False, "message": "Clé non configurée"}
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "https://api.perplexity.ai/chat/completions",
+                    headers={"Authorization": f"Bearer {perplexity_key}"},
+                    json={"model": "llama-3.1-sonar-small-128k-online", "messages": [{"role": "user", "content": "test"}], "max_tokens": 5}
+                )
+                if response.status_code == 200:
+                    return {"success": True, "message": "Clé valide"}
+                else:
+                    return {"success": False, "message": f"Erreur {response.status_code}"}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+    
+    elif service == "cloudinary":
+        cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
+        api_key = os.environ.get('CLOUDINARY_API_KEY', '')
+        api_secret = os.environ.get('CLOUDINARY_API_SECRET', '')
+        if not all([cloud_name, api_key, api_secret]):
+            return {"success": False, "message": "Configuration incomplète"}
+        try:
+            import cloudinary.api
+            result = cloudinary.api.ping()
+            return {"success": True, "message": "Cloudinary connecté", "data": {"cloud_name": cloud_name}}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+    
+    return {"success": False, "message": "Service non supporté"}
+
+
 # ==================== CLOUDINARY UPLOAD ROUTES ====================
 
 from fastapi import UploadFile, File
