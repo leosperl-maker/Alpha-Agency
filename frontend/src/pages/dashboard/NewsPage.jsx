@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { 
   Newspaper, RefreshCw, Loader2, ExternalLink, Trash2, X,
   Globe, MapPin, Briefcase, Cpu, Heart, Trophy, Film, FlaskConical,
-  Clock, ChevronLeft, ChevronRight, ArrowLeft, BookOpen
+  Clock, ChevronLeft, ChevronRight, ArrowLeft, BookOpen,
+  Megaphone, Share2, TrendingUp, Users, Store, Palette, Flag
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -19,6 +20,7 @@ import { newsAPI } from "../../lib/api";
 
 // Icons mapping for categories
 const categoryIcons = {
+  // Standard news categories
   general: Newspaper,
   business: Briefcase,
   technology: Cpu,
@@ -26,10 +28,18 @@ const categoryIcons = {
   health: Heart,
   sports: Trophy,
   entertainment: Film,
+  // Marketing categories
+  ads: Megaphone,
+  social: Share2,
+  growth: TrendingUp,
+  crm: Users,
+  local: Store,
+  design: Palette,
 };
 
 // Colors for categories
 const categoryColors = {
+  // Standard news categories
   general: { bg: "bg-gray-100", text: "text-gray-700", accent: "#6B7280" },
   business: { bg: "bg-blue-100", text: "text-blue-700", accent: "#3B82F6" },
   technology: { bg: "bg-purple-100", text: "text-purple-700", accent: "#8B5CF6" },
@@ -37,11 +47,25 @@ const categoryColors = {
   health: { bg: "bg-red-100", text: "text-red-700", accent: "#EF4444" },
   sports: { bg: "bg-amber-100", text: "text-amber-700", accent: "#F59E0B" },
   entertainment: { bg: "bg-pink-100", text: "text-pink-700", accent: "#EC4899" },
+  // Marketing categories
+  ads: { bg: "bg-orange-100", text: "text-orange-700", accent: "#F97316" },
+  social: { bg: "bg-cyan-100", text: "text-cyan-700", accent: "#06B6D4" },
+  growth: { bg: "bg-lime-100", text: "text-lime-700", accent: "#84CC16" },
+  crm: { bg: "bg-violet-100", text: "text-violet-700", accent: "#A855F7" },
+  local: { bg: "bg-green-100", text: "text-green-700", accent: "#22C55E" },
+  design: { bg: "bg-rose-100", text: "text-rose-700", accent: "#E11D48" },
 };
 
 // Region icons
 const regionIcons = {
-  fr: MapPin,
+  // DOM-TOM
+  guadeloupe: MapPin,
+  martinique: MapPin,
+  "saint-martin": MapPin,
+  "saint-barth": MapPin,
+  guyane: MapPin,
+  // France + International
+  fr: Flag,
   us: Globe,
   gb: Globe,
   de: Globe,
