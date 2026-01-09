@@ -187,31 +187,33 @@ const ContactsPage = () => {
   };
 
   return (
-    <div data-testid="contacts-page" className="space-y-6">
+    <div data-testid="contacts-page" className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Contacts</h1>
-          <p className="text-[#666666] text-sm">{contacts.length} contacts au total</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Contacts</h1>
+          <p className="text-[#666666] text-xs sm:text-sm">{contacts.length} contacts au total</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
           <Button 
             variant="outline"
             onClick={() => setImportDialogOpen(true)}
-            className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202]/10"
+            className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202]/10 flex-1 sm:flex-none text-sm"
           >
-            <Upload className="w-4 h-4 mr-2" />
+            <Upload className="w-4 h-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Importer</span>
+            <span className="sm:hidden">Import</span>
           </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button 
                 data-testid="add-contact-btn"
                 onClick={resetForm}
-                className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+                className="bg-[#CE0202] hover:bg-[#B00202] text-white flex-1 sm:flex-none text-sm"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Nouveau contact</span>
+                <span className="sm:hidden">Ajouter</span>
               </Button>
             </DialogTrigger>
           <DialogContent className="bg-white border-[#E5E5E5] max-w-2xl max-h-[90vh] overflow-y-auto">
