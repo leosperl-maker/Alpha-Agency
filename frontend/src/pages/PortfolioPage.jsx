@@ -315,59 +315,134 @@ const PortfolioPage = () => {
         </div>
       </section>
 
-      {/* Detail Dialog */}
+      {/* Detail Dialog - Modern Gallery Style */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+        <DialogContent className="bg-white border-[#E5E5E5] max-w-5xl max-h-[95vh] overflow-hidden p-0">
           {selectedItem && (
-            <div className="flex flex-col lg:flex-row">
-              {/* Gallery - Left side */}
-              <div className="lg:w-1/2 relative bg-[#F8F8F8]">
-                <div className="aspect-square lg:aspect-auto lg:h-full relative min-h-[300px]">
-                  <img
-                    src={selectedItem.gallery?.[currentImageIndex] || selectedItem.image_url}
-                    alt={selectedItem.title}
-                    className="w-full h-full object-cover"
-                  />
-                  
-                  {/* Gallery Navigation */}
-                  {selectedItem.gallery && selectedItem.gallery.length > 1 && (
-                    <>
-                      <button
-                        onClick={prevImage}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-colors"
-                      >
-                        <ChevronLeft className="w-5 h-5 text-[#1A1A1A]" />
-                      </button>
-                      <button
-                        onClick={nextImage}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-colors"
-                      >
-                        <ChevronRight className="w-5 h-5 text-[#1A1A1A]" />
-                      </button>
-                      
-                      {/* Dots */}
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                        {selectedItem.gallery.map((_, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setCurrentImageIndex(i)}
-                            className={`w-2 h-2 rounded-full transition-colors ${
-                              i === currentImageIndex ? 'bg-[#CE0202]' : 'bg-white/70'
-                            }`}
+            <div className="relative">
+              {/* Close Button - Fixed */}
+              <button
+                onClick={() => setDialogOpen(false)}
+                className="absolute top-4 right-4 z-50 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-[#1A1A1A]" />
+              </button>
+
+              {/* Scrollable Content */}
+              <div className="overflow-y-auto max-h-[95vh]">
+                {/* Header Section */}
+                <div className="p-6 pb-4 bg-white sticky top-0 z-40 border-b border-[#E5E5E5]">
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {selectedItem.tags?.map((tag, i) => (
+                      <Badge key={i} className="bg-[#CE0202]/10 text-[#CE0202] border-none text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  <h2 className="text-2xl font-bold text-[#1A1A1A]">{selectedItem.title}</h2>
+                  <div className="flex items-center gap-4 text-sm text-[#666666] mt-1">
+                    {selectedItem.client && <span>Client: {selectedItem.client}</span>}
+                    {selectedItem.date && <span>• {selectedItem.date}</span>}
+                  </div>
+                </div>
+
+                {/* Gallery - Vertical Scrolling Images */}
+                <div className="bg-[#0A0A0A]">
+                  {selectedItem.gallery && selectedItem.gallery.length > 0 ? (
+                    <div className="space-y-1">
+                      {selectedItem.gallery.map((img, idx) => (
+                        <div 
+                          key={idx} 
+                          className="relative group"
+                        >
+                          <img
+                            src={img}
+                            alt={`${selectedItem.title} - Image ${idx + 1}`}
+                            className="w-full h-auto max-h-[80vh] object-contain mx-auto"
+                            style={{ backgroundColor: '#0A0A0A' }}
                           />
-                        ))}
-                      </div>
-                    </>
+                          {/* Image counter overlay */}
+                          <div className="absolute bottom-4 right-4 bg-black/60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                            {idx + 1} / {selectedItem.gallery.length}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <img
+                      src={selectedItem.image_url}
+                      alt={selectedItem.title}
+                      className="w-full h-auto max-h-[70vh] object-contain mx-auto"
+                    />
                   )}
                 </div>
-              </div>
 
-              {/* Content - Right side */}
-              <div className="lg:w-1/2 p-6 lg:p-8 relative">
-                {/* Close Button */}
-                <button
-                  onClick={() => setDialogOpen(false)}
-                  className="absolute top-4 right-4 lg:top-2 lg:right-2 bg-[#F8F8F8] hover:bg-[#E5E5E5] p-1.5 rounded-full transition-colors"
+                {/* Content Section */}
+                <div className="p-6 bg-white">
+                  {/* Description */}
+                  {selectedItem.description && (
+                    <div className="mb-6">
+                      <h3 className="text-sm font-semibold text-[#1A1A1A] mb-2 uppercase tracking-wide">Description</h3>
+                      <p className="text-[#666666] leading-relaxed">{selectedItem.description}</p>
+                    </div>
+                  )}
+
+                  {/* Audio Player */}
+                  {selectedItem.audio_url && (
+                    <div className="mb-6">
+                      <h3 className="text-sm font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2 uppercase tracking-wide">
+                        <Volume2 className="w-4 h-4 text-[#CE0202]" />
+                        Audio
+                      </h3>
+                      <div className="bg-[#F8F8F8] p-4 rounded-lg border border-[#E5E5E5]">
+                        <div className="flex items-center gap-4">
+                          <button
+                            onClick={toggleAudio}
+                            className="w-12 h-12 bg-[#CE0202] hover:bg-[#B00202] text-white rounded-full flex items-center justify-center transition-colors"
+                          >
+                            {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                          </button>
+                          <div className="flex-1">
+                            <p className="text-[#1A1A1A] font-medium">Écouter</p>
+                            <p className="text-sm text-[#666666]">Spot publicitaire audio</p>
+                          </div>
+                        </div>
+                        <audio id="portfolio-audio" src={selectedItem.audio_url} onEnded={() => setIsPlaying(false)} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Documents */}
+                  {selectedItem.documents && selectedItem.documents.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-sm font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2 uppercase tracking-wide">
+                        <Download className="w-4 h-4 text-[#CE0202]" />
+                        Documents
+                      </h3>
+                      <div className="space-y-2">
+                        {selectedItem.documents.map((doc, i) => (
+                          <a
+                            key={i}
+                            href={doc.url}
+                            download
+                            className="flex items-center gap-3 p-3 bg-[#F8F8F8] rounded-lg border border-[#E5E5E5] hover:border-[#CE0202] transition-colors group"
+                          >
+                            <Download className="w-5 h-5 text-[#666666] group-hover:text-[#CE0202]" />
+                            <span className="text-[#1A1A1A] group-hover:text-[#CE0202]">{doc.name}</span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* External Link */}
+                  {selectedItem.link && (
+                    <a
+                      href={selectedItem.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-[#CE0202] hover:underline font-medium"
+                    >
                 >
                   <X className="w-4 h-4 text-[#1A1A1A]" />
                 </button>
