@@ -3,7 +3,7 @@ import {
   Mail, MessageSquare, Users, BarChart3, Plus, Send, Calendar,
   Loader2, Trash2, Eye, Clock, CheckCircle, AlertCircle, RefreshCw,
   ChevronRight, Inbox, List, Settings2, Search, Filter, MoreVertical,
-  Edit, Copy, ExternalLink, PhoneCall
+  Edit, Copy, ExternalLink, PhoneCall, FileText, Sparkles
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
