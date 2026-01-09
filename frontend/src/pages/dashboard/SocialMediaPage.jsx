@@ -75,6 +75,8 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
   const [isDraft, setIsDraft] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [previewPlatform, setPreviewPlatform] = useState("facebook");
+  const [previewDevice, setPreviewDevice] = useState("desktop");
   const fileInputRef = useRef(null);
   const dropZoneRef = useRef(null);
 
@@ -89,6 +91,13 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
       resetForm();
     }
   }, [editingPost, open]);
+
+  // Auto-update preview platform based on selected accounts
+  useEffect(() => {
+    if (selectedAccounts.length > 0 && !selectedAccounts.includes(previewPlatform)) {
+      setPreviewPlatform(selectedAccounts[0]);
+    }
+  }, [selectedAccounts]);
 
   const resetForm = () => {
     setContent("");
@@ -133,7 +142,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
     const validFiles = files.filter(file => {
       const isImage = file.type.startsWith("image/");
       const isVideo = file.type.startsWith("video/");
-      const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024; // 100MB video, 10MB image
+      const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
       
       if (!isImage && !isVideo) {
         toast.error(`${file.name}: Format non supporté`);
@@ -211,8 +220,143 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
     }
   };
 
-  // Preview mockup based on selected platform
-  const getPreviewPlatform = () => selectedAccounts[0] || "facebook";
+  // Facebook Preview Component
+  const FacebookPreview = () => (
+    <div className="bg-white rounded-lg shadow-sm border border-[#DADDE1] overflow-hidden">
+      {/* Facebook Header */}
+      <div className="p-3 flex items-start gap-3">
+        <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center flex-shrink-0">
+          <span className="text-white font-bold text-sm">A</span>
+        </div>
+        <div className="flex-1">
+          <p className="text-[15px] font-semibold text-[#050505]">Alpha Agency</p>
+          <div className="flex items-center gap-1 text-[13px] text-[#65676B]">
+            <span>À l'instant</span>
+            <span>·</span>
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 14.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      {/* Facebook Content */}
+      {content && (
+        <div className="px-3 pb-2">
+          <p className="text-[15px] text-[#050505] whitespace-pre-wrap">{content}</p>
+        </div>
+      )}
+      
+      {/* Facebook Media */}
+      {mediaUrls.length > 0 && (
+        <div className="bg-[#F0F2F5]">
+          <img 
+            src={mediaUrls[0]} 
+            alt="Preview" 
+            className="w-full object-cover max-h-[300px]" 
+          />
+        </div>
+      )}
+      
+      {/* Facebook Reactions Bar */}
+      <div className="px-3 py-2 flex items-center justify-between text-[13px] text-[#65676B] border-b border-[#CED0D4]">
+        <div className="flex items-center gap-1">
+          <div className="flex -space-x-1">
+            <div className="w-[18px] h-[18px] rounded-full bg-[#1877F2] flex items-center justify-center">
+              <ThumbsUp className="w-2.5 h-2.5 text-white" />
+            </div>
+            <div className="w-[18px] h-[18px] rounded-full bg-[#F33E58] flex items-center justify-center">
+              <Heart className="w-2.5 h-2.5 text-white" />
+            </div>
+          </div>
+          <span className="ml-1">24</span>
+        </div>
+        <div className="flex gap-3">
+          <span>3 commentaires</span>
+          <span>1 partage</span>
+        </div>
+      </div>
+      
+      {/* Facebook Actions */}
+      <div className="px-2 py-1 flex items-center justify-around">
+        <button className="flex-1 flex items-center justify-center gap-2 py-2 rounded-md hover:bg-[#F0F2F5] transition-colors">
+          <ThumbsUp className="w-5 h-5 text-[#65676B]" />
+          <span className="text-[15px] font-semibold text-[#65676B]">J'aime</span>
+        </button>
+        <button className="flex-1 flex items-center justify-center gap-2 py-2 rounded-md hover:bg-[#F0F2F5] transition-colors">
+          <MessageCircle className="w-5 h-5 text-[#65676B]" />
+          <span className="text-[15px] font-semibold text-[#65676B]">Commenter</span>
+        </button>
+        <button className="flex-1 flex items-center justify-center gap-2 py-2 rounded-md hover:bg-[#F0F2F5] transition-colors">
+          <Share2 className="w-5 h-5 text-[#65676B]" />
+          <span className="text-[15px] font-semibold text-[#65676B]">Partager</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  // Instagram Preview Component
+  const InstagramPreview = () => (
+    <div className="bg-white rounded-lg shadow-sm border border-[#DBDBDB] overflow-hidden">
+      {/* Instagram Header */}
+      <div className="px-3 py-2.5 flex items-center justify-between border-b border-[#EFEFEF]">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] p-[2px]">
+            <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
+              <span className="text-[10px] font-bold text-[#262626]">A</span>
+            </div>
+          </div>
+          <span className="text-[14px] font-semibold text-[#262626]">alphagency.fr</span>
+        </div>
+        <MoreVertical className="w-5 h-5 text-[#262626]" />
+      </div>
+      
+      {/* Instagram Media */}
+      {mediaUrls.length > 0 ? (
+        <div className="aspect-square bg-black">
+          <img 
+            src={mediaUrls[0]} 
+            alt="Preview" 
+            className="w-full h-full object-cover" 
+          />
+        </div>
+      ) : (
+        <div className="aspect-square bg-[#FAFAFA] flex items-center justify-center">
+          <Image className="w-12 h-12 text-[#DBDBDB]" />
+        </div>
+      )}
+      
+      {/* Instagram Actions */}
+      <div className="px-3 py-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Heart className="w-6 h-6 text-[#262626] cursor-pointer hover:text-[#8E8E8E]" />
+          <MessageCircle className="w-6 h-6 text-[#262626] cursor-pointer hover:text-[#8E8E8E]" />
+          <Send className="w-6 h-6 text-[#262626] cursor-pointer hover:text-[#8E8E8E]" />
+        </div>
+        <Bookmark className="w-6 h-6 text-[#262626] cursor-pointer hover:text-[#8E8E8E]" />
+      </div>
+      
+      {/* Instagram Likes */}
+      <div className="px-3 pb-1">
+        <p className="text-[14px] font-semibold text-[#262626]">127 J'aime</p>
+      </div>
+      
+      {/* Instagram Caption */}
+      {content && (
+        <div className="px-3 pb-2.5">
+          <p className="text-[14px] text-[#262626]">
+            <span className="font-semibold">alphagency.fr</span>{" "}
+            <span className="whitespace-pre-wrap">{content}</span>
+          </p>
+        </div>
+      )}
+      
+      {/* Instagram Timestamp */}
+      <div className="px-3 pb-3">
+        <p className="text-[10px] text-[#8E8E8E] uppercase">À l'instant</p>
+      </div>
+    </div>
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
