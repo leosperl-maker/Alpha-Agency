@@ -60,11 +60,11 @@ class TestPipelineColumnReorder(TestAuth):
         column_ids = [col["id"] for col in columns]
         reversed_ids = list(reversed(column_ids))
         
-        # Reorder columns
+        # Reorder columns (using new format with column_ids wrapper)
         response = requests.put(
             f"{BASE_URL}/api/pipeline/columns/reorder",
             headers=auth_headers,
-            json=reversed_ids
+            json={"column_ids": reversed_ids}
         )
         assert response.status_code == 200
         data = response.json()
@@ -81,7 +81,7 @@ class TestPipelineColumnReorder(TestAuth):
         response = requests.put(
             f"{BASE_URL}/api/pipeline/columns/reorder",
             headers=auth_headers,
-            json=column_ids
+            json={"column_ids": column_ids}
         )
         assert response.status_code == 200
         print(f"✓ PUT /api/pipeline/columns/reorder - Order restored")
