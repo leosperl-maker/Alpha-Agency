@@ -23,7 +23,8 @@ import {
   Newspaper,
   CalendarDays,
   Share2,
-  Tag
+  Tag,
+  Mail
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import FloatingAIChat from "../../components/FloatingAIChat";
