@@ -205,6 +205,7 @@ export const tagsAPI = {
   create: (data) => api.post('/tags', data),
   update: (id, name, color) => api.put(`/tags/${id}`, null, { params: { name, color } }),
   delete: (id) => api.delete(`/tags/${id}`),
+  suggest: (content, title, type) => api.post('/tags/suggest', { content, title, type }),
 };
 
 // Settings API
