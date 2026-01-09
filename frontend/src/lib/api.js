@@ -333,4 +333,16 @@ export const paymentsAPI = {
   getStatus: (sessionId) => api.get(`/payments/status/${sessionId}`),
 };
 
+// AI Assistant API (Perplexity)
+export const aiAPI = {
+  getStatus: () => api.get('/ai/status'),
+  chat: (data) => api.post('/ai/chat', data),
+  getHistory: (limit = 20) => api.get('/ai/history', { params: { limit } }),
+};
+
+// Budget Cashflow API (Phase 4)
+export const cashflowAPI = {
+  getProjection: (startMonth, months = 6) => api.get('/budget/cashflow', { params: { start_month: startMonth, months } }),
+};
+
 export default api;
