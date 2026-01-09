@@ -5614,7 +5614,7 @@ async def forgot_password(request: PasswordResetRequest, background_tasks: Backg
     )
     
     # Send reset email
-    frontend_url = os.environ.get('FRONTEND_URL', 'https://brevo-campaigns-1.preview.emergentagent.com')
+    frontend_url = os.environ.get('FRONTEND_URL', 'https://analytics-fix-17.preview.emergentagent.com')
     reset_link = f"{frontend_url}/alpha-admin-2024/reset-password?token={reset_token}"
     html_content = f"""
     <html>
