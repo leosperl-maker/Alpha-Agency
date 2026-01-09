@@ -12,190 +12,127 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - **Backend**: FastAPI (Python)
 - **Frontend**: React + Tailwind CSS + Shadcn UI
 - **Database**: MongoDB
+- **Drag & Drop**: @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities
+- **Charts**: Recharts
 - **PDF**: ReportLab
 - **Import**: Pandas, OpenPyXL
 - **Storage**: Cloudinary (images), Dropbox (backups)
 
 ## Core Features Implemented
 
-### Authentication & Users
-- [x] JWT-based authentication
-- [x] Super admin management
-- [x] User CRUD (create, read, update, delete)
-- [x] Password reset functionality
-- [x] Login page with "Mot de passe oublié"
-
-### Contacts Management
-- [x] Full CRUD operations
-- [x] Extended contact model (poste, note, infos_sup, budget, city)
-- [x] Contact import from CSV/Excel (3-step wizard)
-- [x] Status and score tracking
-- [x] Tags system
-- [x] **Contact History View** ✅ DONE 2025-01-08
-  - Slide-over panel with contact details
-  - Summary cards (quotes, invoices, paid, due)
-  - Tabs for Quotes, Invoices, Tasks, Notes
-  - Financial totals and history
-
-### Pipeline / Opportunities
+### Pipeline / Opportunities ✅ COMPLETE
 - [x] Kanban-style pipeline view
-- [x] Opportunity stages (dynamiques depuis la base de données)
-- [x] Drag & drop support
-- [x] Amount and probability tracking
 - [x] **Colonnes personnalisables** ✅ DONE 2025-01-09
   - API CRUD pour les colonnes (GET/POST/PUT/DELETE)
   - Interface pour ajouter/modifier/supprimer des étapes
   - Choix de couleur pour chaque colonne
-  - Réorganisation des colonnes
-  - Initialisation automatique des colonnes par défaut
+- [x] **Drag & Drop des colonnes** ✅ DONE 2025-01-09
+  - Réorganisation par glisser-déposer avec @dnd-kit
+  - Poignées de déplacement (GripVertical) sur chaque colonne
+  - API PUT /api/pipeline/columns/reorder
+  - Mise à jour en temps réel de l'ordre
 
-### Quotes (Devis)
-- [x] Quote creation with line items (title + description)
-- [x] Professional PDF generation with logo
-- [x] Status workflow (brouillon → envoyé → accepté)
-- [x] **Quote to Invoice conversion** ✅ DONE 2025-01-08
-- [x] Download PDF functionality
+### Budget & Trésorerie (Module Avancé) ✅ PHASES 1-3 COMPLETE
 
-### Invoices (Factures)
-- [x] Invoice creation with line items
-- [x] Professional PDF generation with company info
-- [x] Status workflow (brouillon → en_attente → envoyée → payée)
-- [x] **Payment tracking system** ✅ DONE 2025-01-08
-  - Add/delete payments (amount, date, method, notes)
-  - Automatic status updates (partiellement_payée, payée)
-  - Visual progress bar for partial payments
-  - Payment summary (total, paid, remaining)
-- [x] Download PDF functionality
-
-### Dashboard
-- [x] KPI cards (contacts, pipeline, MRR, conversion rate)
-- [x] Charts (leads evolution, pipeline distribution)
-- [x] Responsive design
-- [x] Real CRM data integration
-
-### Tasks
-- [x] Task management with priorities
-- [x] Due dates and status tracking
-- [x] Optional contact linking
-- [x] Task statistics
-- [x] **Tâches en retard** - Section dédiée avec indicateurs visuels
-
-### Budget & Trésorerie (Module Avancé) ✅ Phase 1 COMPLETE 2025-01-09
+#### Phase 1 ✅ COMPLETE (2025-01-09)
 - [x] Import de transactions bancaires (CSV)
 - [x] Gestion des transactions (CRUD)
 - [x] Catégories personnalisées (revenus/dépenses)
-- [x] Règles d'auto-catégorisation
 - [x] Vue d'ensemble avec graphiques
-  - Évolution mensuelle (revenus/dépenses)
-  - Répartition des dépenses par catégorie (pie chart)
-  - Top dépenses par catégorie (barres de progression)
-- [x] Filtres (mois, type, catégorie, recherche)
-- [x] Résumé financier (revenus, dépenses, résultat, non catégorisé)
 
-### Other Modules
+#### Phase 2 ✅ COMPLETE (2025-01-09) - Règles Auto-catégorisation Avancées
+- [x] **Types de correspondance** : contains, starts_with, ends_with, exact, regex
+- [x] **Filtre par type** : Revenus uniquement, Dépenses uniquement, ou les deux
+- [x] **Bouton "Appliquer les règles"** : Applique automatiquement les règles aux transactions non catégorisées
+- [x] API POST /api/budget/rules/apply avec filtre optionnel par mois
+- [x] API PUT /api/budget/rules/{id} pour modifier une règle existante
+- [x] Interface mise à jour avec nouveaux champs dans le dialogue de création
+
+#### Phase 3 ✅ COMPLETE (2025-01-09) - Budget Prévisionnel
+- [x] **Nouvel onglet "Prévisionnel"** dans le module Budget
+- [x] **Cartes de synthèse** : Revenus prévus vs Réel, Dépenses prévues vs Réel, Solde prévu vs Réel
+- [x] **Barres de progression** visuelles pour suivre l'avancement
+- [x] **Tableau "Prévu vs Réel par catégorie"** avec écarts et pourcentages
+- [x] **Alertes de dépassement** : Affichage automatique des catégories dépassant >20% du budget
+- [x] **Création de prévisions** : Par type (revenu/dépense), catégorie, montant et description
+- [x] **Copie vers autre mois** : Réplication des prévisions d'un mois vers un autre
+- [x] APIs complètes :
+  - GET /api/budget/forecast - Liste des prévisions
+  - POST /api/budget/forecast - Création de prévision
+  - PUT /api/budget/forecast/{id} - Modification
+  - DELETE /api/budget/forecast/{id} - Suppression
+  - GET /api/budget/forecast/comparison - Comparaison prévu vs réel
+  - POST /api/budget/forecast/copy - Copie vers autre mois
+
+### Other Core Features ✅
+- [x] Authentication & Users (JWT)
+- [x] Contacts Management (CRUD + Import)
+- [x] Quotes (Devis) with PDF generation
+- [x] Invoices with payment tracking
+- [x] Dashboard with KPIs and charts
+- [x] Tasks management
 - [x] Subscriptions management
 - [x] Portfolio management
 - [x] Blog/Articles management
 - [x] Document management
-- [x] Backup system (Dropbox integration)
-- [x] Settings page
-- [x] **Gestion des données de test** ✅ DONE 2025-01-08
+- [x] Backup system (Dropbox)
+- [x] Settings page with data management
 
 ## Recent Changes (2025-01-09)
 
-### Bug Fixes P0 ✅ VERIFIED
-- ✅ **Responsive mobile Pipeline/Tâches** - Scroll horizontal fonctionne (vérifié à 400px viewport)
-- ✅ **Tâches en retard** - Détection correcte (exclusion des dates vides) avec section dédiée
+### Session Accomplishments
+1. ✅ **Drag & Drop Pipeline** - Colonnes réorganisables avec @dnd-kit
+2. ✅ **Budget Phase 2** - Règles d'auto-catégorisation avancées (match_type, apply_to_type)
+3. ✅ **Budget Phase 3** - Budget prévisionnel complet avec comparaison prévu vs réel
 
-### Pipeline Improvements P1 ✅ IMPLEMENTED
-- ✅ **Colonnes personnalisables du Pipeline**
-  - API Routes: GET/POST/PUT/DELETE /api/pipeline/columns
-  - API Route: PUT /api/pipeline/columns/reorder (réorganisation)
-  - API Route: POST /api/pipeline/columns/initialize (initialisation)
-  - Interface: Bouton "Ajouter une étape"
-  - Interface: Menu de colonne (Modifier, Supprimer)
-  - Interface: Dialogue de création avec palette de couleurs
-  - Interface: Aperçu en temps réel
-- ✅ **Menu actions sur les cartes** - Modifier, Archiver, Supprimer
-- ✅ **Archivage** - Bouton "Afficher/Masquer les archivées"
-
-### Data Management P1 ✅ IMPLEMENTED (2025-01-08)
-- ✅ **Onglet Données** dans Paramètres
-- ✅ **Statistiques des collections**
-- ✅ **Suppression par collection**
-- ✅ **Suppression globale** avec double confirmation
-
-### Budget Module Phase 1 ✅ VERIFIED
-- ✅ Toutes les API fonctionnelles (22/22 tests passés)
-- ✅ Interface utilisateur complète avec 4 onglets
+### Tests Passed
+- **Backend**: 22/22 tests (100%)
+- **Frontend**: 100%
+- Test files: `/app/tests/test_phase2_phase3_features.py`
 
 ## Backlog (Prioritized)
 
 ### P2 - Medium Priority
-- [ ] **Module Budget Phase 2** - Règles d'auto-catégorisation avancées + graphiques additionnels
-- [ ] **Module Budget Phase 3** - Budget prévisionnel (Prévu vs Réel)
-- [ ] **Module Budget Phase 4** - Vue de cashflow prévisionnel
-- [ ] **Activer compte Brevo SMTP** - En attente activation par utilisateur
-- [ ] **Audio player for portfolio** - Lecteur audio sur page publique
+- [ ] **Module Budget Phase 4** - Vue de cashflow prévisionnel sur plusieurs mois
+- [ ] Graphiques de tendances et prévisions automatiques
 
 ### P3 - Low Priority
+- [ ] **Audio player for portfolio** - Lecteur audio sur page publique
 - [ ] Enhanced reporting and analytics
 - [ ] Email templates management
-- [ ] Bulk operations on contacts
-- [ ] E2E test fix for contact form dropdown (recurring issue)
 
-## Known Issues
-
-### Fixed in This Session
-- ✅ Mobile responsive issues (verified)
-- ✅ Pipeline columns hardcoded (now dynamic)
-
-### Still Pending
-- ⚠️ E2E test for contact form dropdown (Shadcn Select component)
-- ⚠️ Email functionality via Brevo (needs account activation by user)
+### Blocked
+- ⚠️ **Intégration Brevo (e-mails)** - En attente activation du compte par l'utilisateur
 
 ## API Credentials
 - **Admin Login**: admin@alphagency.fr / superpassword
 - **Admin URL**: /alpha-admin-2024
 
+## Database Collections
+- users, contacts, opportunities, quotes, invoices
+- subscriptions, tasks, blog_posts, portfolio
+- settings, services, counters
+- **pipeline_columns** (colonnes personnalisables)
+- **bank_transactions** (Budget module)
+- **budget_categories** (Budget module)
+- **auto_category_rules** (Budget module - règles avancées)
+- **budget_forecasts** (Budget module - prévisionnel)
+
 ## File Structure
 ```
 /app/
 ├── backend/
-│   ├── server.py          # Main API server (Pipeline columns routes added)
-│   └── utils/
-│       ├── backup_manager.py
-│       └── backup_scheduler.py
+│   ├── server.py          # API server with all routes
+│   └── tests/
+│       └── test_phase2_phase3_features.py  # Phase 2 & 3 tests
 ├── frontend/
 │   ├── src/
-│   │   ├── components/    # Reusable components
-│   │   ├── pages/
-│   │   │   ├── dashboard/ # Admin pages (PipelinePage updated)
-│   │   │   └── auth/      # Auth pages
+│   │   ├── pages/dashboard/
+│   │   │   ├── PipelinePage.jsx    # Drag & Drop with @dnd-kit
+│   │   │   └── BudgetPage.jsx      # All phases including ForecastTab
 │   │   └── lib/
-│   │       └── api.js     # API client (pipelineColumnsAPI added)
-├── tests/
-│   └── test_pipeline_budget.py  # NEW: Pipeline & Budget tests (22 tests)
+│   │       └── api.js              # API client updated
 └── test_reports/
-    ├── iteration_6.json
-    ├── iteration_7.json
-    └── iteration_8.json   # Latest test report (all passed)
+    ├── iteration_8.json
+    └── iteration_9.json            # Latest (Phase 2 & 3 tests)
 ```
-
-## Database Collections
-- users
-- contacts
-- opportunities
-- quotes
-- invoices
-- subscriptions
-- tasks
-- blog_posts
-- portfolio
-- settings
-- services
-- counters
-- **pipeline_columns** (NEW - pour les colonnes personnalisables)
-- **bank_transactions** (Budget module)
-- **budget_categories** (Budget module)
-- **auto_category_rules** (Budget module - règles d'auto-catégorisation)
