@@ -1090,7 +1090,7 @@ const PipelinePage = () => {
               />
             </div>
             <p className="text-xs text-[#999999] text-center mt-1">
-              ← Faites défiler horizontalement pour voir toutes les colonnes →
+              Faites défiler horizontalement pour voir toutes les colonnes
             </p>
           </div>
         </div>
