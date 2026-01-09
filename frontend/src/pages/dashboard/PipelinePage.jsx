@@ -1063,15 +1063,15 @@ const PipelinePage = () => {
                           <p className="text-xs">Aucune affaire</p>
                         </div>
                       )}
-                    </DroppableColumn>
+                  </DroppableColumn>
                   );
                 })}
-              </div>
-            </SortableContext>
-          </div>
+                </div>
+              </SortableContext>
+            </div>
           
-          {/* Drag Overlay for visual feedback */}
-          <DragOverlay>
+            {/* Drag Overlay for visual feedback */}
+            <DragOverlay>
             {activeItem && activeId && (
               <div className="opacity-90">
                 {activeItem.label ? (
