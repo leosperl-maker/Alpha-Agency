@@ -2,11 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { 
   Bot, Send, Loader2, X, Minimize2, Maximize2, 
-  MessageSquare, Sparkles, User, GripHorizontal
+  MessageSquare, Sparkles, User
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Badge } from "./ui/badge";
 import { ScrollArea } from "./ui/scroll-area";
 import { toast } from "sonner";
 import { aiAPI } from "../lib/api";
@@ -25,10 +24,8 @@ const FloatingAIChat = () => {
   const bubbleRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  // Don't render on the assistant page
-  if (location.pathname === "/admin/assistant") {
-    return null;
-  }
+  // Check if we should hide (on assistant page)
+  const shouldHide = location.pathname === "/admin/assistant";
 
   // Initialize position on mount
   useEffect(() => {
@@ -45,6 +42,7 @@ const FloatingAIChat = () => {
 
   // Fetch AI status
   useEffect(() => {
+    if (shouldHide) return;
     const fetchStatus = async () => {
       try {
         const res = await aiAPI.getStatus();
@@ -54,7 +52,7 @@ const FloatingAIChat = () => {
       }
     };
     fetchStatus();
-  }, []);
+  }, [shouldHide]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -63,6 +61,7 @@ const FloatingAIChat = () => {
 
   // Handle drag start
   const handleDragStart = (e) => {
+    if (e.target.closest('button') || e.target.closest('input')) return;
     e.preventDefault();
     setIsDragging(true);
     
@@ -83,11 +82,9 @@ const FloatingAIChat = () => {
       const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
       const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
       
-      // Calculate new position
       let newX = clientX - dragOffset.x;
       let newY = clientY - dragOffset.y;
       
-      // Keep bubble within viewport bounds
       const bubbleSize = 64;
       newX = Math.max(0, Math.min(newX, window.innerWidth - bubbleSize));
       newY = Math.max(0, Math.min(newY, window.innerHeight - bubbleSize));
@@ -124,7 +121,6 @@ const FloatingAIChat = () => {
     setLoading(true);
 
     try {
-      // Build messages - ensure last message is from user
       const chatMessages = newMessages.filter(m => m.role === "user" || m.role === "assistant");
       
       const response = await aiAPI.chat({
@@ -168,20 +164,17 @@ const FloatingAIChat = () => {
     setIsOpen(!isOpen);
   };
 
-  // Chat window position based on bubble position
-  const chatWindowStyle = {
-    position: 'fixed',
-    bottom: window.innerHeight - position.y + 10,
-    right: window.innerWidth - position.x + 10,
-    zIndex: 9998
-  };
+  // Don't render on assistant page
+  if (shouldHide) {
+    return null;
+  }
 
   return (
     <>
       {/* Floating Bubble */}
       <div
         ref={bubbleRef}
-        className={`fixed z-[9999] cursor-pointer transition-transform ${isDragging ? 'scale-110' : 'hover:scale-105'}`}
+        className={`fixed z-[9999] cursor-pointer transition-transform select-none ${isDragging ? 'scale-110' : 'hover:scale-105'}`}
         style={{
           left: position.x,
           top: position.y,
@@ -189,17 +182,20 @@ const FloatingAIChat = () => {
         }}
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
-        onClick={(e) => {
-          if (!isDragging) {
-            toggleChat();
-          }
-        }}
       >
-        <div className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all ${
-          isOpen 
-            ? 'bg-[#1A1A1A]' 
-            : 'bg-gradient-to-br from-[#CE0202] to-[#8B0000]'
-        }`}>
+        <div 
+          onClick={(e) => {
+            if (!isDragging) {
+              e.stopPropagation();
+              toggleChat();
+            }
+          }}
+          className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all ${
+            isOpen 
+              ? 'bg-[#1A1A1A]' 
+              : 'bg-gradient-to-br from-[#CE0202] to-[#8B0000]'
+          }`}
+        >
           {isOpen ? (
             <X className="w-6 h-6 text-white" />
           ) : (
@@ -207,7 +203,6 @@ const FloatingAIChat = () => {
           )}
         </div>
         
-        {/* Unread indicator */}
         {!isOpen && status?.remaining > 0 && (
           <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
             <Sparkles className="w-3 h-3 text-white" />
@@ -270,7 +265,6 @@ const FloatingAIChat = () => {
                   Posez-moi vos questions sur vos clients, votre pipeline, vos factures...
                 </p>
                 
-                {/* Quick actions */}
                 <div className="mt-4 space-y-2 w-full">
                   {["Résume mon pipeline", "Factures en attente ?", "Tâches urgentes"].map((prompt, idx) => (
                     <button
