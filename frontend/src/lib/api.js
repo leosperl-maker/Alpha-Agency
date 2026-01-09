@@ -194,6 +194,7 @@ export const leadAPI = {
 export const portfolioAPI = {
   getAll: (params) => api.get('/portfolio', { params }),
   getOne: (id) => api.get(`/portfolio/${id}`),
+  getBySlug: (slug) => api.get(`/portfolio/by-slug/${slug}`),
   create: (data) => api.post('/portfolio', data),
   update: (id, data) => api.put(`/portfolio/${id}`, data),
   delete: (id) => api.delete(`/portfolio/${id}`),
