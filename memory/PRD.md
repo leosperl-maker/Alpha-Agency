@@ -117,14 +117,14 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [x] **Design orange Agorapulse** (#FF6B35) appliqué
 - [ ] ⚠️ **Publication réelle** sur Meta - En attente OAuth integration
 
-## Responsive Design ✅ COMPLETE (2026-01-09)
-- [x] **Dashboard Overview** - KPIs en grille 4 cols desktop / 2 cols mobile ✅
-- [x] **Pipeline Page** - Kanban horizontal scrollable avec menu hamburger mobile ✅
-- [x] **Contacts Page** - Cartes responsives avec avatars et badges ✅
-- [x] **Tâches Page** - Kanban horizontal scrollable en mobile ✅
-- [x] **Facturation Page** - Stats en 2 cols mobile, table scrollable ✅
-- [x] **Navigation Mobile** - Menu hamburger avec overlay et sidebar ✅
-- [x] **ContactDetailSheet** - Style Pipedrive avec header gradient, 4 onglets ✅
+## Responsive Design ✅ AMÉLIORATION SIGNIFICATIVE (2026-01-09)
+- [x] **Pipeline Page** - Statistiques 2 cols mobile / 4 cols desktop, colonnes Kanban 260px mobile, cartes compactes ✅
+- [x] **Facturation Page** - Stats 2x2 compactes, onglets flexibles, recherche pleine largeur ✅
+- [x] **Dashboard Overview** - KPIs adaptatifs ✅
+- [x] **Contacts Page** - Cartes responsives ✅
+- [x] **Tâches Page** - Colonnes responsives ✅
+- [x] **Navigation Mobile** - Menu hamburger fonctionnel ✅
+- [x] **ContactDetailSheet** - Style Pipedrive avec header gradient ✅
 
 ## Backlog / Upcoming Tasks
 
