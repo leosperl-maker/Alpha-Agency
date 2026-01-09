@@ -32,6 +32,7 @@ import TasksPage from "./pages/dashboard/TasksPage";
 import BudgetPage from "./pages/dashboard/BudgetPage";
 import BackupPage from "./pages/dashboard/BackupPage";
 import UsersPage from "./pages/dashboard/UsersPage";
+import AIAssistantPage from "./pages/dashboard/AIAssistantPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 // Layout
