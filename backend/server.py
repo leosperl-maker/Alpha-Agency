@@ -435,6 +435,212 @@ async def send_new_lead_notification(lead: dict):
     """
     await send_email_notification(admin_email, f"🔔 Nouveau lead: {lead.get('first_name')} {lead.get('last_name')}", html, "Admin Alpha Agency")
 
+async def send_task_reminder_email(task: dict, user_email: str, user_name: str):
+    """Send task reminder email"""
+    html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="background: #F97316; color: white; padding: 20px; text-align: center;">
+                <h1 style="margin: 0; font-size: 24px;">⏰ Rappel de Tâche</h1>
+            </div>
+            <div style="padding: 30px;">
+                <h2 style="color: #1A1A1A; margin-bottom: 20px;">{task.get('title', 'Sans titre')}</h2>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">Échéance</td><td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #CE0202;">{task.get('due_date', 'Non définie')}</td></tr>
+                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">Priorité</td><td style="padding: 10px 0; border-bottom: 1px solid #eee;">{task.get('priority', 'Normal')}</td></tr>
+                    <tr><td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #666;">Statut</td><td style="padding: 10px 0; border-bottom: 1px solid #eee;">{task.get('status', 'À faire')}</td></tr>
+                </table>
+                {f'<div style="margin-top: 20px; padding: 15px; background: #f8f8f8; border-radius: 5px;">{task.get("description", "")}</div>' if task.get('description') else ''}
+                <div style="margin-top: 25px; text-align: center;">
+                    <a href="{os.environ.get('FRONTEND_URL', 'http://localhost:3000')}/admin/taches" style="display: inline-block; padding: 12px 30px; background: #CE0202; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">Voir mes tâches</a>
+                </div>
+            </div>
+            <div style="background: #f8f8f8; padding: 15px; text-align: center; color: #666; font-size: 12px;">
+                Alpha Agency CRM - Rappel automatique
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    await send_email_notification(user_email, f"⏰ Rappel: {task.get('title', 'Tâche')}", html, user_name)
+
+async def send_unpaid_invoice_reminder(invoice: dict, contact: dict, days_overdue: int):
+    """Send unpaid invoice reminder email"""
+    amount = invoice.get('total_ttc', invoice.get('total', 0))
+    html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="background: #CE0202; color: white; padding: 20px; text-align: center;">
+                <h1 style="margin: 0; font-size: 24px;">💳 Facture en attente</h1>
+            </div>
+            <div style="padding: 30px;">
+                <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                    Bonjour {contact.get('first_name', '')},<br><br>
+                    Nous vous informons que la facture <strong>#{invoice.get('invoice_number', invoice.get('id', '')[:8])}</strong> 
+                    est en attente de paiement depuis <strong>{days_overdue} jour(s)</strong>.
+                </p>
+                <div style="background: #f8f8f8; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <table style="width: 100%;">
+                        <tr><td style="color: #666;">Numéro de facture:</td><td style="text-align: right; font-weight: bold;">#{invoice.get('invoice_number', invoice.get('id', '')[:8])}</td></tr>
+                        <tr><td style="color: #666;">Date d'échéance:</td><td style="text-align: right; color: #CE0202; font-weight: bold;">{invoice.get('due_date', 'Non définie')}</td></tr>
+                        <tr><td style="color: #666;">Montant TTC:</td><td style="text-align: right; font-size: 20px; font-weight: bold;">{amount:.2f} €</td></tr>
+                    </table>
+                </div>
+                <p style="color: #666; font-size: 14px;">
+                    Si vous avez déjà effectué le règlement, merci de ne pas tenir compte de ce message.
+                </p>
+                <div style="margin-top: 25px; text-align: center;">
+                    <a href="mailto:{COMPANY_INFO['email']}?subject=Question%20facture%20{invoice.get('invoice_number', '')}" style="display: inline-block; padding: 12px 30px; background: #CE0202; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">Nous contacter</a>
+                </div>
+            </div>
+            <div style="background: #f8f8f8; padding: 15px; text-align: center; color: #666; font-size: 12px;">
+                {COMPANY_INFO['name']} - {COMPANY_INFO['email']} - {COMPANY_INFO['phone']}
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    await send_email_notification(contact.get('email'), f"Rappel: Facture #{invoice.get('invoice_number', '')} en attente", html, f"{contact.get('first_name', '')} {contact.get('last_name', '')}")
+
+# Notification settings storage
+class NotificationSettings(BaseModel):
+    task_reminders: bool = True
+    task_reminder_days: int = 1  # Days before due date
+    invoice_reminders: bool = True
+    invoice_reminder_days: List[int] = [7, 14, 30]  # Days after due date
+    new_lead_notifications: bool = True
+    admin_email: Optional[str] = None
+
+@api_router.get("/notifications/settings", response_model=dict)
+async def get_notification_settings(current_user: dict = Depends(get_current_user)):
+    """Get notification settings"""
+    settings = await db.notification_settings.find_one({"user_id": current_user["user_id"]}, {"_id": 0})
+    return settings or {
+        "task_reminders": True,
+        "task_reminder_days": 1,
+        "invoice_reminders": True,
+        "invoice_reminder_days": [7, 14, 30],
+        "new_lead_notifications": True,
+        "admin_email": current_user.get("email")
+    }
+
+@api_router.put("/notifications/settings", response_model=dict)
+async def update_notification_settings(settings: NotificationSettings, current_user: dict = Depends(get_current_user)):
+    """Update notification settings"""
+    settings_dict = settings.model_dump()
+    settings_dict["user_id"] = current_user["user_id"]
+    settings_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.notification_settings.update_one(
+        {"user_id": current_user["user_id"]},
+        {"$set": settings_dict},
+        upsert=True
+    )
+    return {"message": "Paramètres de notifications mis à jour"}
+
+@api_router.post("/notifications/send-task-reminders", response_model=dict)
+async def trigger_task_reminders(current_user: dict = Depends(get_current_user)):
+    """Send reminders for tasks due soon"""
+    settings = await db.notification_settings.find_one({"user_id": current_user["user_id"]})
+    if not settings or not settings.get("task_reminders", True):
+        return {"message": "Rappels de tâches désactivés", "sent": 0}
+    
+    reminder_days = settings.get("task_reminder_days", 1)
+    target_date = (datetime.now(timezone.utc) + timedelta(days=reminder_days)).strftime("%Y-%m-%d")
+    
+    # Find tasks due on target date that are not completed
+    tasks = await db.tasks.find({
+        "due_date": target_date,
+        "status": {"$ne": "completed"}
+    }).to_list(100)
+    
+    user = await db.users.find_one({"id": current_user["user_id"]})
+    user_email = user.get("email") if user else current_user.get("email")
+    user_name = user.get("full_name", "Utilisateur") if user else "Utilisateur"
+    
+    sent_count = 0
+    for task in tasks:
+        await send_task_reminder_email(task, user_email, user_name)
+        sent_count += 1
+    
+    return {"message": f"{sent_count} rappel(s) de tâche envoyé(s)", "sent": sent_count}
+
+@api_router.post("/notifications/send-invoice-reminders", response_model=dict)
+async def trigger_invoice_reminders(current_user: dict = Depends(get_current_user)):
+    """Send reminders for unpaid invoices"""
+    settings = await db.notification_settings.find_one({"user_id": current_user["user_id"]})
+    if not settings or not settings.get("invoice_reminders", True):
+        return {"message": "Rappels de factures désactivés", "sent": 0}
+    
+    reminder_days_list = settings.get("invoice_reminder_days", [7, 14, 30])
+    today = datetime.now(timezone.utc).date()
+    
+    # Find unpaid invoices
+    invoices = await db.invoices.find({
+        "status": {"$in": ["pending", "sent", "overdue"]}
+    }).to_list(500)
+    
+    sent_count = 0
+    for invoice in invoices:
+        due_date_str = invoice.get("due_date")
+        if not due_date_str:
+            continue
+            
+        try:
+            due_date = datetime.fromisoformat(due_date_str.replace('Z', '+00:00')).date()
+        except:
+            continue
+        
+        days_overdue = (today - due_date).days
+        
+        # Check if we should send a reminder today
+        if days_overdue in reminder_days_list:
+            # Get contact info
+            contact = await db.contacts.find_one({"id": invoice.get("contact_id")})
+            if contact and contact.get("email"):
+                await send_unpaid_invoice_reminder(invoice, contact, days_overdue)
+                sent_count += 1
+    
+    return {"message": f"{sent_count} rappel(s) de facture envoyé(s)", "sent": sent_count}
+
+@api_router.post("/notifications/test-email", response_model=dict)
+async def test_email_notification(current_user: dict = Depends(get_current_user)):
+    """Send a test email to verify Brevo configuration"""
+    user = await db.users.find_one({"id": current_user["user_id"]})
+    user_email = user.get("email") if user else None
+    
+    if not user_email:
+        raise HTTPException(status_code=400, detail="Email utilisateur non trouvé")
+    
+    html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="background: #22C55E; color: white; padding: 20px; text-align: center;">
+                <h1 style="margin: 0; font-size: 24px;">✅ Test Email Réussi</h1>
+            </div>
+            <div style="padding: 30px; text-align: center;">
+                <p style="color: #666; font-size: 16px;">
+                    Félicitations ! Votre configuration d'emails fonctionne correctement.
+                </p>
+                <p style="color: #999; font-size: 14px; margin-top: 20px;">
+                    Envoyé depuis Alpha Agency CRM via Brevo API
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    success = await send_email_notification(user_email, "✅ Test Email - Alpha Agency CRM", html, user.get("full_name", ""))
+    
+    if success:
+        return {"message": f"Email de test envoyé à {user_email}", "success": True}
+    else:
+        raise HTTPException(status_code=500, detail="Échec de l'envoi de l'email de test")
+
 # ==================== PDF GENERATION ====================
 
 import urllib.request
