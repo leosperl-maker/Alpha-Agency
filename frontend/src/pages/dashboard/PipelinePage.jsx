@@ -223,25 +223,25 @@ const SortableDealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDele
         </div>
       </div>
 
-      <div className="p-3">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[#CE0202] font-bold text-lg">
+      <div className="p-2.5 sm:p-3">
+        <div className="flex items-center justify-between mb-2 sm:mb-3">
+          <span className="text-[#CE0202] font-bold text-base sm:text-lg">
             {opp.amount?.toLocaleString()}€
           </span>
-          <div className="flex items-center gap-2">
-            <div className="w-16 h-1.5 bg-[#E5E5E5] rounded-full overflow-hidden">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="w-12 sm:w-16 h-1 sm:h-1.5 bg-[#E5E5E5] rounded-full overflow-hidden">
               <div 
                 className="h-full bg-[#CE0202] rounded-full transition-all"
                 style={{ width: `${opp.probability || 0}%` }}
               />
             </div>
-            <span className="text-xs text-[#666666] font-medium">{opp.probability}%</span>
+            <span className="text-[10px] sm:text-xs text-[#666666] font-medium">{opp.probability}%</span>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1.5 mb-3">
+        <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-2 sm:mb-3">
           {opp.offer_type && (
-            <Badge variant="outline" className="text-xs bg-[#F8F8F8] border-[#E5E5E5]">
+            <Badge variant="outline" className="text-[10px] sm:text-xs bg-[#F8F8F8] border-[#E5E5E5] py-0 px-1.5 sm:px-2">
               {opp.offer_type === 'site_web' ? 'Site Web' : 
                opp.offer_type === 'cm' ? 'CM' :
                opp.offer_type === 'photo' ? 'Photo' :
@@ -251,17 +251,17 @@ const SortableDealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDele
             </Badge>
           )}
           {isOverdue && (
-            <Badge className="text-xs bg-red-100 text-red-700 border-red-200">
-              <AlertCircle className="w-3 h-3 mr-1" /> En retard
+            <Badge className="text-[10px] sm:text-xs bg-red-100 text-red-700 border-red-200 py-0 px-1.5 sm:px-2">
+              <AlertCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" /> Retard
             </Badge>
           )}
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1 sm:space-y-2">
           {opp.expected_close_date && (
-            <div className={`flex items-center gap-2 text-xs ${isOverdue ? 'text-red-600' : 'text-[#666666]'}`}>
-              <CalendarClock className="w-3.5 h-3.5" />
-              <span>
+            <div className={`flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs ${isOverdue ? 'text-red-600' : 'text-[#666666]'}`}>
+              <CalendarClock className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+              <span className="truncate">
                 {new Date(opp.expected_close_date).toLocaleDateString('fr-FR')}
                 {daysUntilClose !== null && !isOverdue && daysUntilClose <= 7 && (
                   <span className="ml-1 text-orange-600">({daysUntilClose}j)</span>
@@ -271,8 +271,8 @@ const SortableDealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDele
           )}
           
           {opp.next_action && (
-            <div className="flex items-center gap-2 text-xs text-[#666666]">
-              <Clock className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-[#666666]">
+              <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
               <span className="truncate">{opp.next_action}</span>
             </div>
           )}
