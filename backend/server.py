@@ -6337,8 +6337,12 @@ async def disconnect_meta_account(current_user: dict = Depends(get_current_user)
     
     return {"message": "Compte Meta déconnecté"}
 
-# Include router after all routes are defined
+# Include routers after all routes are defined
 app.include_router(api_router)
+
+# Include campaigns router from routes module
+from routes.campaigns import router as campaigns_router
+app.include_router(campaigns_router, prefix="/api/campaigns", tags=["campaigns"])
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
