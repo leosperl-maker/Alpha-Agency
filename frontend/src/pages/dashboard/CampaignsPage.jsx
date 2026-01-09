@@ -218,6 +218,30 @@ const EmailCampaignsTab = () => {
             Actualiser
           </Button>
           
+          {/* Visual Editor Dialog */}
+          <Dialog open={showEditorDialog} onOpenChange={setShowEditorDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="border-purple-500 text-purple-600 hover:bg-purple-50">
+                <Paintbrush className="w-4 h-4 mr-2" />
+                Éditeur visuel
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-[95vw] max-h-[95vh] h-[90vh]">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Paintbrush className="w-5 h-5 text-purple-600" />
+                  Éditeur d'email visuel
+                </DialogTitle>
+                <DialogDescription>
+                  Créez votre email en glissant-déposant des blocs. Aucun code requis !
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex-1 h-[calc(100%-80px)] overflow-hidden">
+                <EmailEditor onExport={handleEditorExport} />
+              </div>
+            </DialogContent>
+          </Dialog>
+          
           {/* Templates Dialog */}
           <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
             <DialogTrigger asChild>
