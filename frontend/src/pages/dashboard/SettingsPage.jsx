@@ -44,9 +44,22 @@ const SettingsPage = () => {
     stripe_api_key: ""
   });
 
+  const [dataStats, setDataStats] = useState(null);
+  const [deletingData, setDeletingData] = useState(false);
+
   useEffect(() => {
     fetchSettings();
+    fetchDataStats();
   }, []);
+
+  const fetchDataStats = async () => {
+    try {
+      const response = await api.get('/admin/data-stats');
+      setDataStats(response.data);
+    } catch (error) {
+      console.error("Error fetching data stats", error);
+    }
+  };
 
   const fetchSettings = async () => {
     try {
