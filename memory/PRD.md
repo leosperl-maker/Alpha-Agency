@@ -185,6 +185,15 @@ Modèle appliqué : Pages "Vue d'ensemble" et "Demandes" utilisées comme réfé
 - [x] Boutons d'action rapide ✅
 - [x] ContactDetailSheet.jsx entièrement refait ✅
 
+### P2 - Gestion avancée des Tags ✅ COMPLETE (2026-01-09)
+- [x] **Page dédiée `/admin/tags`** ✅
+- [x] **Onglets Portfolio / Blog** avec compteurs ✅
+- [x] **Création de tags** avec nom, couleur (10 couleurs), type ✅
+- [x] **Modification de tags** (nom et couleur) ✅
+- [x] **Suppression de tags** avec confirmation ✅
+- [x] **Aperçu en temps réel** dans la modal ✅
+- [x] **Lien dans le menu** du dashboard ✅
+
 ### P2 - Intégration Google Agenda
 - [ ] Guide utilisateur pour Google Cloud Console (OAuth credentials)
 - [ ] Endpoints backend pour OAuth2
