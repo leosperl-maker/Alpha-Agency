@@ -2547,7 +2547,7 @@ async def get_tasks_stats(current_user: dict = Depends(get_current_user)):
     now = datetime.now(timezone.utc).isoformat()
     overdue = await db.tasks.count_documents({
         "status": {"$ne": "done"},
-        "due_date": {"$lt": now, "$ne": None}
+        "due_date": {"$lt": now, "$ne": None, "$ne": ""}
     })
     
     return {
