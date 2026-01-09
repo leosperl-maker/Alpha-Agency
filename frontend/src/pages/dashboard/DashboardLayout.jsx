@@ -61,6 +61,7 @@ const DashboardLayout = () => {
     { path: "/admin/realisations", icon: Image, label: "Réalisations" },
     { path: "/admin/documents", icon: FileCheck, label: "Documents" },
     { path: "/admin/sauvegardes", icon: Database, label: "Sauvegardes" },
+    { path: "/admin/assistant", icon: Bot, label: "Assistant IA" },
   ];
 
   // Add Users management for super_admin only
