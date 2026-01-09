@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   Plus, Euro, Calendar, User, MoreVertical, Trash2, Archive, Edit, 
   Settings2, GripVertical, Phone, Mail, Clock, AlertCircle, 
   TrendingUp, Filter, Search, ChevronDown, Eye, CalendarClock,
-  Target, DollarSign, Users, BarChart3
+  Target, DollarSign, Users, BarChart3, X, MessageSquare, FileText
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
@@ -23,6 +23,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "../../components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "../../components/ui/sheet";
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
@@ -39,12 +45,14 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   horizontalListSortingStrategy,
+  verticalListSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -124,8 +132,8 @@ const PipelineStats = ({ pipeline, columns }) => {
   );
 };
 
-// Sortable Column Component
-const SortableColumn = ({ column, children, onEdit, onDelete, oppsCount, totalAmount }) => {
+// Sortable Deal Card Component
+const SortableDealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDelete, onStatusChange, onViewDetails }) => {
   const {
     attributes,
     listeners,
@@ -133,76 +141,18 @@ const SortableColumn = ({ column, children, onEdit, onDelete, oppsCount, totalAm
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: column.id });
+  } = useSortable({ 
+    id: opp.id,
+    data: { type: 'card', opp }
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 1,
   };
 
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      data-testid={`pipeline-column-${column.id}`}
-      className="flex-shrink-0 w-80"
-    >
-      <div className="bg-white rounded-xl border border-[#E5E5E5] shadow-sm h-full">
-        <div className="p-4 border-b border-[#E5E5E5]">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button
-                {...attributes}
-                {...listeners}
-                className="cursor-grab active:cursor-grabbing p-1 hover:bg-[#F8F8F8] rounded"
-              >
-                <GripVertical className="w-4 h-4 text-[#666666]" />
-              </button>
-              <div 
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: column.color }}
-              />
-              <span className="text-[#1A1A1A] text-sm font-semibold">
-                {column.label}
-              </span>
-              <Badge variant="secondary" className="bg-[#F8F8F8] text-[#666666] text-xs">
-                {oppsCount}
-              </Badge>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                  <MoreVertical className="w-4 h-4 text-[#666666]" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white border-[#E5E5E5]">
-                <DropdownMenuItem onClick={() => onEdit(column)}>
-                  <Edit className="w-4 h-4 mr-2" /> Modifier
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => onDelete(column.id)} className="text-red-600">
-                  <Trash2 className="w-4 h-4 mr-2" /> Supprimer
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-[#CE0202] font-bold text-lg">
-              {totalAmount.toLocaleString()}€
-            </span>
-          </div>
-        </div>
-        <div className="p-3 space-y-3 max-h-[calc(100vh-380px)] overflow-y-auto">
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Draggable Deal Card Component (Pipedrive style)
-const DealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDelete, onStatusChange, onViewDetails, isDragging: isDraggingProp }) => {
   const isOverdue = opp.expected_close_date && new Date(opp.expected_close_date) < new Date() && !['gagne', 'perdu'].includes(opp.status);
   const daysUntilClose = opp.expected_close_date 
     ? Math.ceil((new Date(opp.expected_close_date) - new Date()) / (1000 * 60 * 60 * 24))
@@ -210,9 +160,11 @@ const DealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDelete, onSt
 
   return (
     <div
+      ref={setNodeRef}
+      style={style}
       data-testid={`opportunity-${opp.id}`}
       className={`bg-white rounded-lg border transition-all hover:shadow-md ${
-        isDraggingProp ? 'shadow-xl ring-2 ring-[#CE0202] opacity-90' : ''
+        isDragging ? 'shadow-xl ring-2 ring-[#CE0202]' : ''
       } ${
         opp.archived ? 'opacity-60 border-[#E5E5E5]' : 
         isOverdue ? 'border-red-300 bg-red-50/50' : 'border-[#E5E5E5]'
@@ -224,6 +176,8 @@ const DealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDelete, onSt
           <div className="flex items-start gap-2 flex-1 min-w-0">
             {/* Drag Handle */}
             <div 
+              {...attributes}
+              {...listeners}
               className="drag-handle cursor-grab active:cursor-grabbing p-1 -ml-1 mt-0.5 hover:bg-[#F8F8F8] rounded flex-shrink-0"
               data-testid={`drag-handle-${opp.id}`}
             >
@@ -249,24 +203,24 @@ const DealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDelete, onSt
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-white border-[#E5E5E5]" align="end">
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(opp); }} data-testid={`opp-edit-${opp.id}`}>
+              <DropdownMenuItem onClick={() => onEdit(opp)} data-testid={`opp-edit-${opp.id}`}>
                 <Edit className="w-4 h-4 mr-2" /> Modifier
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onViewDetails(opp); }} data-testid={`opp-view-${opp.id}`}>
+              <DropdownMenuItem onClick={() => onViewDetails(opp)} data-testid={`opp-view-${opp.id}`}>
                 <Eye className="w-4 h-4 mr-2" /> Voir détails
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               {opp.archived ? (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onUnarchive(opp.id); }} data-testid={`opp-restore-${opp.id}`}>
+                <DropdownMenuItem onClick={() => onUnarchive(opp.id)} data-testid={`opp-restore-${opp.id}`}>
                   <Archive className="w-4 h-4 mr-2" /> Restaurer
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onArchive(opp.id); }} data-testid={`opp-archive-${opp.id}`}>
+                <DropdownMenuItem onClick={() => onArchive(opp.id)} data-testid={`opp-archive-${opp.id}`}>
                   <Archive className="w-4 h-4 mr-2" /> Archiver
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete(opp.id); }} className="text-red-600" data-testid={`opp-delete-${opp.id}`}>
+              <DropdownMenuItem onClick={() => onDelete(opp.id)} className="text-red-600" data-testid={`opp-delete-${opp.id}`}>
                 <Trash2 className="w-4 h-4 mr-2" /> Supprimer
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -332,30 +286,270 @@ const DealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDelete, onSt
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+};
 
-        {/* Quick Status Change */}
-        <div className="mt-3 pt-3 border-t border-[#E5E5E5]">
-          <Select
-            value={opp.status}
-            onValueChange={(value) => onStatusChange(opp.id, value)}
+// Droppable Column Component
+const DroppableColumn = ({ column, children, onEdit, onDelete, oppsCount, totalAmount, opportunities }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setSortableRef,
+    transform,
+    transition,
+    isDragging: isColumnDragging,
+  } = useSortable({ 
+    id: column.id,
+    data: { type: 'column', column }
+  });
+
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: `column-${column.id}`,
+    data: { type: 'column', columnId: column.id }
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isColumnDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={(node) => {
+        setSortableRef(node);
+        setDroppableRef(node);
+      }}
+      style={style}
+      data-testid={`pipeline-column-${column.id}`}
+      className={`flex-shrink-0 w-[300px] md:w-80 ${isOver ? 'ring-2 ring-[#CE0202] ring-opacity-50' : ''}`}
+    >
+      <div className={`bg-white rounded-xl border shadow-sm h-full transition-all ${
+        isOver ? 'border-[#CE0202] bg-[#CE0202]/5' : 'border-[#E5E5E5]'
+      }`}>
+        <div className="p-4 border-b border-[#E5E5E5]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                {...attributes}
+                {...listeners}
+                className="cursor-grab active:cursor-grabbing p-1 hover:bg-[#F8F8F8] rounded"
+              >
+                <GripVertical className="w-4 h-4 text-[#666666]" />
+              </button>
+              <div 
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: column.color }}
+              />
+              <span className="text-[#1A1A1A] text-sm font-semibold">
+                {column.label}
+              </span>
+              <Badge variant="secondary" className="bg-[#F8F8F8] text-[#666666] text-xs">
+                {oppsCount}
+              </Badge>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                  <MoreVertical className="w-4 h-4 text-[#666666]" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white border-[#E5E5E5]">
+                <DropdownMenuItem onClick={() => onEdit(column)}>
+                  <Edit className="w-4 h-4 mr-2" /> Modifier
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onDelete(column.id)} className="text-red-600">
+                  <Trash2 className="w-4 h-4 mr-2" /> Supprimer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-[#CE0202] font-bold text-lg">
+              {totalAmount.toLocaleString()}€
+            </span>
+          </div>
+        </div>
+        <div className="p-3 space-y-3 max-h-[calc(100vh-380px)] overflow-y-auto">
+          <SortableContext 
+            items={opportunities.map(o => o.id)} 
+            strategy={verticalListSortingStrategy}
           >
-            <SelectTrigger className="h-8 text-xs bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-white border-[#E5E5E5]">
-              {columns.map((col) => (
-                <SelectItem key={col.id} value={col.id}>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: col.color }} />
-                    {col.label}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {children}
+          </SortableContext>
         </div>
       </div>
     </div>
+  );
+};
+
+// Opportunity Detail Sheet Component
+const OpportunityDetailSheet = ({ opp, open, onOpenChange, columns, onEdit, contacts }) => {
+  if (!opp) return null;
+  
+  const isOverdue = opp.expected_close_date && new Date(opp.expected_close_date) < new Date() && !['gagne', 'perdu'].includes(opp.status);
+  const contact = opp.contact || contacts?.find(c => c.id === opp.contact_id);
+  const column = columns.find(c => c.id === opp.status);
+  
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="bg-white w-full sm:max-w-lg overflow-y-auto">
+        <SheetHeader className="pb-4 border-b border-[#E5E5E5]">
+          <div className="flex items-start justify-between">
+            <div>
+              <SheetTitle className="text-xl text-[#1A1A1A]">{opp.title}</SheetTitle>
+              <p className="text-sm text-[#666666] mt-1">{contact?.first_name} {contact?.last_name}</p>
+            </div>
+            <Badge 
+              className="text-xs"
+              style={{ backgroundColor: `${column?.color}20`, color: column?.color, border: `1px solid ${column?.color}40` }}
+            >
+              {column?.label || opp.status}
+            </Badge>
+          </div>
+        </SheetHeader>
+        
+        <div className="py-6 space-y-6">
+          {/* Amount */}
+          <div className="bg-[#F8F8F8] rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-[#666666] uppercase">Montant</p>
+                <p className="text-2xl font-bold text-[#CE0202]">{opp.amount?.toLocaleString()}€</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-[#666666] uppercase">Probabilité</p>
+                <p className="text-xl font-bold text-[#1A1A1A]">{opp.probability}%</p>
+              </div>
+            </div>
+            <div className="mt-3 h-2 bg-[#E5E5E5] rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-[#CE0202] rounded-full transition-all"
+                style={{ width: `${opp.probability || 0}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Contact Info */}
+          {contact && (
+            <div>
+              <h3 className="text-sm font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
+                <User className="w-4 h-4" /> Contact
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2 text-[#666666]">
+                  <User className="w-4 h-4" />
+                  <span>{contact.first_name} {contact.last_name}</span>
+                </div>
+                {contact.email && (
+                  <a href={`mailto:${contact.email}`} className="flex items-center gap-2 text-[#666666] hover:text-[#CE0202]">
+                    <Mail className="w-4 h-4" />
+                    <span>{contact.email}</span>
+                  </a>
+                )}
+                {contact.phone && (
+                  <a href={`tel:${contact.phone}`} className="flex items-center gap-2 text-[#666666] hover:text-[#CE0202]">
+                    <Phone className="w-4 h-4" />
+                    <span>{contact.phone}</span>
+                  </a>
+                )}
+                {contact.company && (
+                  <div className="flex items-center gap-2 text-[#666666]">
+                    <FileText className="w-4 h-4" />
+                    <span>{contact.company}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Details */}
+          <div>
+            <h3 className="text-sm font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
+              <FileText className="w-4 h-4" /> Détails
+            </h3>
+            <div className="space-y-3 text-sm">
+              {opp.offer_type && (
+                <div className="flex justify-between">
+                  <span className="text-[#666666]">Type d'offre</span>
+                  <Badge variant="outline" className="bg-[#F8F8F8]">
+                    {opp.offer_type === 'site_web' ? 'Site Web' : 
+                     opp.offer_type === 'cm' ? 'CM' :
+                     opp.offer_type === 'photo' ? 'Photo' :
+                     opp.offer_type === 'video' ? 'Vidéo' :
+                     opp.offer_type === 'ads' ? 'Ads' :
+                     opp.offer_type === 'pack_360' ? 'Pack 360°' : opp.offer_type}
+                  </Badge>
+                </div>
+              )}
+              {opp.expected_close_date && (
+                <div className="flex justify-between">
+                  <span className="text-[#666666]">Date de clôture prévue</span>
+                  <span className={isOverdue ? 'text-red-600 font-medium' : 'text-[#1A1A1A]'}>
+                    {new Date(opp.expected_close_date).toLocaleDateString('fr-FR')}
+                    {isOverdue && <AlertCircle className="inline w-3 h-3 ml-1" />}
+                  </span>
+                </div>
+              )}
+              {opp.created_at && (
+                <div className="flex justify-between">
+                  <span className="text-[#666666]">Créée le</span>
+                  <span className="text-[#1A1A1A]">
+                    {new Date(opp.created_at).toLocaleDateString('fr-FR')}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Next Action */}
+          {opp.next_action && (
+            <div>
+              <h3 className="text-sm font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
+                <Clock className="w-4 h-4" /> Prochaine action
+              </h3>
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-sm text-orange-800">
+                {opp.next_action}
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
+          {opp.notes && (
+            <div>
+              <h3 className="text-sm font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" /> Notes
+              </h3>
+              <div className="bg-[#F8F8F8] rounded-lg p-3 text-sm text-[#666666] whitespace-pre-wrap">
+                {opp.notes}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="pt-4 border-t border-[#E5E5E5] flex gap-3">
+          <Button
+            onClick={() => { onOpenChange(false); onEdit(opp); }}
+            className="flex-1 bg-[#CE0202] hover:bg-[#B00202] text-white"
+          >
+            <Edit className="w-4 h-4 mr-2" /> Modifier
+          </Button>
+          {contact?.email && (
+            <Button
+              variant="outline"
+              onClick={() => window.location.href = `mailto:${contact.email}`}
+              className="flex-1"
+            >
+              <Mail className="w-4 h-4 mr-2" /> Email
+            </Button>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 
@@ -371,8 +565,12 @@ const PipelinePage = () => {
   const [editingColumn, setEditingColumn] = useState(null);
   const [columnForm, setColumnForm] = useState({ id: "", label: "", color: "#3B82F6" });
   const [activeId, setActiveId] = useState(null);
+  const [activeItem, setActiveItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [selectedOpp, setSelectedOpp] = useState(null);
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
+  const scrollContainerRef = useRef(null);
   
   const [formData, setFormData] = useState({
     contact_id: "",
@@ -392,7 +590,7 @@ const PipelinePage = () => {
   ];
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -417,22 +615,86 @@ const PipelinePage = () => {
     fetchData();
   }, []);
 
+  // Find which column contains an opportunity
+  const findColumnForOpp = (oppId) => {
+    for (const [columnId, opps] of Object.entries(pipeline)) {
+      if (opps.some(o => o.id === oppId)) {
+        return columnId;
+      }
+    }
+    return null;
+  };
+
+  const handleDragStart = (event) => {
+    const { active } = event;
+    setActiveId(active.id);
+    
+    // Check if it's a card or column
+    if (active.data.current?.type === 'card') {
+      setActiveItem(active.data.current.opp);
+    } else if (active.data.current?.type === 'column') {
+      setActiveItem(active.data.current.column);
+    }
+  };
+
   const handleDragEnd = async (event) => {
     const { active, over } = event;
     setActiveId(null);
+    setActiveItem(null);
 
-    if (active.id !== over?.id) {
-      const oldIndex = columns.findIndex((col) => col.id === active.id);
-      const newIndex = columns.findIndex((col) => col.id === over.id);
-      const newColumns = arrayMove(columns, oldIndex, newIndex);
-      setColumns(newColumns);
+    if (!over) return;
 
-      try {
-        await pipelineColumnsAPI.reorder(newColumns.map(col => col.id));
-        toast.success("Ordre mis à jour");
-      } catch (error) {
-        toast.error("Erreur");
-        fetchData();
+    const activeData = active.data.current;
+    const overData = over.data.current;
+
+    // Handle column reordering
+    if (activeData?.type === 'column' && columns.some(c => c.id === over.id)) {
+      if (active.id !== over.id) {
+        const oldIndex = columns.findIndex((col) => col.id === active.id);
+        const newIndex = columns.findIndex((col) => col.id === over.id);
+        const newColumns = arrayMove(columns, oldIndex, newIndex);
+        setColumns(newColumns);
+
+        try {
+          await pipelineColumnsAPI.reorder(newColumns.map(col => col.id));
+          toast.success("Ordre mis à jour");
+        } catch (error) {
+          toast.error("Erreur");
+          fetchData();
+        }
+      }
+      return;
+    }
+
+    // Handle card movement
+    if (activeData?.type === 'card') {
+      const oppId = active.id;
+      let targetColumnId = null;
+
+      // Determine target column
+      if (overData?.type === 'column') {
+        targetColumnId = overData.columnId?.replace('column-', '') || over.id.replace('column-', '');
+      } else if (overData?.type === 'card') {
+        // Dropped on another card - find its column
+        targetColumnId = findColumnForOpp(over.id);
+      } else {
+        // Check if over.id is a column ID
+        targetColumnId = over.id.startsWith('column-') ? over.id.replace('column-', '') : null;
+      }
+
+      if (!targetColumnId) return;
+
+      const sourceColumnId = findColumnForOpp(oppId);
+      
+      if (sourceColumnId && targetColumnId && sourceColumnId !== targetColumnId) {
+        // Move card to different column
+        try {
+          await opportunitiesAPI.update(oppId, { status: targetColumnId });
+          toast.success("Affaire déplacée");
+          fetchData();
+        } catch (error) {
+          toast.error("Erreur lors du déplacement");
+        }
       }
     }
   };
@@ -514,6 +776,11 @@ const PipelinePage = () => {
     setDialogOpen(true);
   };
 
+  const openViewDetails = (opp) => {
+    setSelectedOpp(opp);
+    setDetailSheetOpen(true);
+  };
+
   const resetForm = () => {
     setFormData({
       contact_id: "",
@@ -590,10 +857,8 @@ const PipelinePage = () => {
     });
   };
 
-  const activeColumn = activeId ? columns.find(col => col.id === activeId) : null;
-
   return (
-    <div data-testid="pipeline-page" className="space-y-6">
+    <div data-testid="pipeline-page" className="space-y-6 h-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -641,7 +906,7 @@ const PipelinePage = () => {
                   </div>
                   <div className="space-y-2">
                     <Label>Probabilité (%)</Label>
-                    <Input type="number" min="0" max="100" value={formData.probability} onChange={(e) => setFormData({...formData, probability: parseInt(e.target.value)})} className="bg-[#F8F8F8] border-[#E5E5E5]" />
+                    <Input type="number" min="0" max="100" value={formData.probability} onChange={(e) => setFormData({...formData, probability: parseInt(e.target.value) || 0})} className="bg-[#F8F8F8] border-[#E5E5E5]" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -663,6 +928,24 @@ const PipelinePage = () => {
                     <Label>Date de clôture</Label>
                     <Input type="date" value={formData.expected_close_date} onChange={(e) => setFormData({...formData, expected_close_date: e.target.value})} className="bg-[#F8F8F8] border-[#E5E5E5]" />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Statut</Label>
+                  <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
+                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      {columns.map((col) => (
+                        <SelectItem key={col.id} value={col.id}>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: col.color }} />
+                            {col.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Prochaine action</Label>
@@ -707,7 +990,7 @@ const PipelinePage = () => {
         </Button>
       </div>
 
-      {/* Pipeline Board */}
+      {/* Pipeline Board - Scrollable horizontally */}
       {loading ? (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {[1,2,3,4,5,6,7].map((i) => (
@@ -717,25 +1000,39 @@ const PipelinePage = () => {
           ))}
         </div>
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(e) => setActiveId(e.active.id)} onDragEnd={handleDragEnd}>
-          <div className="overflow-x-auto -mx-6 px-6 pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <DndContext 
+          sensors={sensors} 
+          collisionDetection={closestCenter} 
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <div 
+            ref={scrollContainerRef}
+            className="overflow-x-auto pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6"
+            style={{ 
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#CE0202 #E5E5E5'
+            }}
+          >
             <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
-              <div className="flex gap-4 min-w-max">
+              <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
                 {columns.map((column) => {
                   const columnOpps = filterOpportunities(pipeline[column.id] || []);
                   const totalAmount = columnOpps.reduce((sum, opp) => sum + (opp.amount || 0), 0);
                   
                   return (
-                    <SortableColumn
+                    <DroppableColumn
                       key={column.id}
                       column={column}
                       onEdit={openColumnDialog}
                       onDelete={handleDeleteColumn}
                       oppsCount={columnOpps.length}
                       totalAmount={totalAmount}
+                      opportunities={columnOpps}
                     >
                       {columnOpps.map((opp) => (
-                        <DealCard
+                        <SortableDealCard
                           key={opp.id}
                           opp={opp}
                           columns={columns}
@@ -744,6 +1041,7 @@ const PipelinePage = () => {
                           onUnarchive={handleUnarchive}
                           onDelete={handleDelete}
                           onStatusChange={handleStatusChange}
+                          onViewDetails={openViewDetails}
                         />
                       ))}
                       {columnOpps.length === 0 && (
@@ -752,21 +1050,32 @@ const PipelinePage = () => {
                           <p className="text-xs">Aucune affaire</p>
                         </div>
                       )}
-                    </SortableColumn>
+                    </DroppableColumn>
                   );
                 })}
               </div>
             </SortableContext>
           </div>
+          
+          {/* Drag Overlay for visual feedback */}
           <DragOverlay>
-            {activeColumn && (
-              <div className="w-80 opacity-80">
-                <div className="bg-white rounded-xl border-2 border-[#CE0202] shadow-xl p-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: activeColumn.color }} />
-                    <span className="text-[#1A1A1A] text-sm font-semibold">{activeColumn.label}</span>
+            {activeItem && activeId && (
+              <div className="opacity-90">
+                {activeItem.label ? (
+                  // Column overlay
+                  <div className="w-80 bg-white rounded-xl border-2 border-[#CE0202] shadow-xl p-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: activeItem.color }} />
+                      <span className="text-[#1A1A1A] text-sm font-semibold">{activeItem.label}</span>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  // Card overlay
+                  <div className="w-72 bg-white rounded-lg border-2 border-[#CE0202] shadow-xl p-3">
+                    <h4 className="text-[#1A1A1A] font-semibold text-sm truncate">{activeItem.title}</h4>
+                    <p className="text-[#CE0202] font-bold mt-2">{activeItem.amount?.toLocaleString()}€</p>
+                  </div>
+                )}
               </div>
             )}
           </DragOverlay>
@@ -806,6 +1115,16 @@ const PipelinePage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Opportunity Detail Sheet */}
+      <OpportunityDetailSheet
+        opp={selectedOpp}
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+        columns={columns}
+        onEdit={openEditDialog}
+        contacts={contacts}
+      />
     </div>
   );
 };
