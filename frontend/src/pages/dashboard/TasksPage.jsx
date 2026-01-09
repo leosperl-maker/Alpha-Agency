@@ -181,7 +181,7 @@ const TasksPage = () => {
 
   const TaskCard = ({ task }) => {
     const priority = priorityConfig[task.priority] || priorityConfig.medium;
-    const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== "done";
+    const isOverdue = task.due_date && task.due_date !== "" && new Date(task.due_date) < new Date() && task.status !== "done";
     
     return (
       <div className={`bg-white border border-[#E5E5E5] rounded-lg p-3 mb-2 hover:shadow-md transition-shadow ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}>
