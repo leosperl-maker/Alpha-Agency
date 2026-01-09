@@ -171,6 +171,7 @@ const SocialMediaPage = () => {
       setPostDialogOpen(false);
       resetPostForm();
       fetchCalendar();
+      fetchPosts();
       fetchData();
     } catch (error) {
       toast.error("Erreur lors de l'enregistrement");
@@ -183,6 +184,7 @@ const SocialMediaPage = () => {
       await socialAPI.deletePost(postId);
       toast.success("Post supprimé");
       fetchCalendar();
+      fetchPosts();
       fetchData();
     } catch (error) {
       toast.error("Erreur");
