@@ -1160,21 +1160,21 @@ const SocialMediaPage = () => {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="bg-white border border-[#E5E5E5] p-1 rounded-xl">
-          <TabsTrigger value="calendar" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg">
-            <Calendar className="w-4 h-4 mr-2" />
-            Calendrier
+        <TabsList className="bg-white border border-[#E5E5E5] p-1 rounded-xl w-full sm:w-auto grid grid-cols-3 sm:flex">
+          <TabsTrigger value="calendar" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg text-xs sm:text-sm">
+            <Calendar className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Calendrier</span>
           </TabsTrigger>
-          <TabsTrigger value="inbox" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg">
-            <Inbox className="w-4 h-4 mr-2" />
-            Boîte de réception
+          <TabsTrigger value="inbox" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg text-xs sm:text-sm">
+            <Inbox className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Boîte</span>
             {stats?.inbox?.unread > 0 && (
-              <Badge className="ml-2 bg-red-500 text-white text-xs">{stats.inbox.unread}</Badge>
+              <Badge className="ml-1 bg-red-500 text-white text-[10px] px-1">{stats.inbox.unread}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="accounts" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg">
-            <Settings className="w-4 h-4 mr-2" />
-            Comptes
+          <TabsTrigger value="accounts" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg text-xs sm:text-sm">
+            <Settings className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Comptes</span>
           </TabsTrigger>
         </TabsList>
 
