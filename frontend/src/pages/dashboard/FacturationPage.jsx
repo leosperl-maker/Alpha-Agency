@@ -522,7 +522,7 @@ const FacturationPage = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="bg-white border-[#E5E5E5]">
-                                <DropdownMenuItem onClick={() => navigate('/admin/devis')} className="cursor-pointer">
+                                <DropdownMenuItem onClick={() => navigate(`/admin/factures?action=view&id=${quote.id}&type=devis`)} className="cursor-pointer">
                                   <Eye className="w-4 h-4 mr-2" />
                                   Voir
                                 </DropdownMenuItem>
@@ -659,7 +659,7 @@ const FacturationPage = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-white border-[#E5E5E5]">
-                              <DropdownMenuItem onClick={() => navigate('/admin/factures')} className="cursor-pointer">
+                              <DropdownMenuItem onClick={() => navigate(`/admin/factures?action=view&id=${invoice.id}&type=facture`)} className="cursor-pointer">
                                 <Eye className="w-4 h-4 mr-2" />
                                 Voir
                               </DropdownMenuItem>
