@@ -1764,6 +1764,130 @@ const SocialMediaPage = () => {
           fetchData();
         }}
       />
+
+      {/* Meta Publish Modal */}
+      <Dialog open={publishModalOpen} onOpenChange={setPublishModalOpen}>
+        <DialogContent className="sm:max-w-[600px] bg-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1877F2] to-[#E4405F] flex items-center justify-center">
+                <Send className="w-4 h-4 text-white" />
+              </div>
+              Publier maintenant
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {/* Selected Page Info */}
+            {selectedPage && (
+              <div className="flex items-center gap-3 p-3 bg-[#F8F8F8] rounded-lg">
+                {selectedPage.picture_url ? (
+                  <img src={selectedPage.picture_url} alt={selectedPage.page_name} className="w-10 h-10 rounded-full" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center">
+                    <Facebook className="w-5 h-5 text-white" />
+                  </div>
+                )}
+                <div>
+                  <p className="font-medium text-[#1A1A1A]">{selectedPage.page_name}</p>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">
+                      <Facebook className="w-3 h-3 mr-1" />
+                      Facebook
+                    </Badge>
+                    {selectedPage.has_instagram && (
+                      <Badge className="bg-pink-100 text-pink-700 border-0 text-xs">
+                        <Instagram className="w-3 h-3 mr-1" />
+                        Instagram
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Content */}
+            <div className="space-y-2">
+              <Label>Contenu du post</Label>
+              <Textarea
+                value={publishContent}
+                onChange={(e) => setPublishContent(e.target.value)}
+                placeholder="Qu'avez-vous à partager aujourd'hui ?"
+                rows={4}
+                className="bg-white border-[#E5E5E5] resize-none"
+              />
+              <p className="text-xs text-[#999999] text-right">{publishContent.length} caractères</p>
+            </div>
+
+            {/* Image URL */}
+            <div className="space-y-2">
+              <Label>URL de l'image (optionnel pour Facebook, obligatoire pour Instagram)</Label>
+              <Input
+                value={publishImageUrl}
+                onChange={(e) => setPublishImageUrl(e.target.value)}
+                placeholder="https://exemple.com/image.jpg"
+                className="bg-white border-[#E5E5E5]"
+              />
+              {publishImageUrl && (
+                <div className="mt-2 relative">
+                  <img 
+                    src={publishImageUrl} 
+                    alt="Aperçu" 
+                    className="max-h-40 rounded-lg object-cover"
+                    onError={(e) => e.target.style.display = 'none'}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Platform info */}
+            <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-800">
+              <p className="font-medium mb-1">💡 Conseils :</p>
+              <ul className="text-xs space-y-1">
+                <li>• Facebook : Texte seul ou avec image/lien</li>
+                <li>• Instagram : Image obligatoire (URL publique accessible)</li>
+                <li>• Les hashtags sont inclus dans le contenu</li>
+              </ul>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setPublishModalOpen(false)}
+              disabled={publishing}
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={handlePublishToFacebook}
+              disabled={publishing || !publishContent.trim()}
+              className="bg-[#1877F2] hover:bg-[#166FE5] text-white"
+            >
+              {publishing ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Facebook className="w-4 h-4 mr-2" />
+              )}
+              Publier sur Facebook
+            </Button>
+            {selectedPage?.has_instagram && (
+              <Button
+                onClick={handlePublishToInstagram}
+                disabled={publishing || !publishContent.trim() || !publishImageUrl}
+                className="bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] hover:opacity-90 text-white"
+              >
+                {publishing ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Instagram className="w-4 h-4 mr-2" />
+                )}
+                Publier sur Instagram
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
