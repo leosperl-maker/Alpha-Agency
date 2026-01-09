@@ -1819,6 +1819,9 @@ class PipelineColumnUpdate(BaseModel):
     color: Optional[str] = None
     order: Optional[int] = None
 
+class PipelineColumnReorder(BaseModel):
+    column_ids: List[str]
+
 @api_router.get("/pipeline/columns", response_model=List[dict])
 async def get_pipeline_columns(current_user: dict = Depends(get_current_user)):
     """Get all pipeline columns"""
