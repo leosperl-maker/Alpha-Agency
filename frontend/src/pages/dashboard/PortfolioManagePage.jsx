@@ -525,7 +525,24 @@ const PortfolioEditor = ({ item, onSave, onCancel, tags: availableTags, categori
 
       {/* Tags */}
       <div className="space-y-2">
-        <Label>Tags</Label>
+        <div className="flex items-center justify-between">
+          <Label>Tags</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleSuggestTags}
+            disabled={suggestingTags}
+            className="text-[#CE0202] border-[#CE0202] hover:bg-[#CE0202] hover:text-white"
+          >
+            {suggestingTags ? (
+              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+            ) : (
+              <Sparkles className="w-3 h-3 mr-1" />
+            )}
+            Suggérer via IA
+          </Button>
+        </div>
         <div className="flex flex-wrap gap-1">
           {availableTags?.map(tag => (
             <Badge
@@ -549,6 +566,39 @@ const PortfolioEditor = ({ item, onSave, onCancel, tags: availableTags, categori
             <p className="text-sm text-[#666666]">Aucun tag - Créez-en dans la gestion des tags</p>
           )}
         </div>
+        
+        {/* Suggested new tags */}
+        {suggestedNewTags.length > 0 && (
+          <div className="mt-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
+            <p className="text-sm text-amber-800 font-medium mb-2 flex items-center gap-1">
+              <Sparkles className="w-4 h-4" />
+              Nouveaux tags suggérés par l'IA :
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {suggestedNewTags.map((tagName, idx) => (
+                <Badge
+                  key={idx}
+                  variant="outline"
+                  className="cursor-pointer border-amber-400 text-amber-700 hover:bg-amber-100"
+                  onClick={async () => {
+                    // Create the tag and add it
+                    try {
+                      await tagsAPI.create({ name: tagName, color: '#F97316', type: 'portfolio' });
+                      setFormData(prev => ({ ...prev, tags: [...prev.tags, tagName] }));
+                      setSuggestedNewTags(prev => prev.filter(t => t !== tagName));
+                      toast.success(`Tag "${tagName}" créé et ajouté`);
+                    } catch (error) {
+                      toast.error("Erreur lors de la création du tag");
+                    }
+                  }}
+                >
+                  + {tagName}
+                </Badge>
+              ))}
+            </div>
+            <p className="text-xs text-amber-600 mt-2">Cliquez pour créer et ajouter le tag</p>
+          </div>
+        )}
       </div>
 
       {/* Content Blocks */}
