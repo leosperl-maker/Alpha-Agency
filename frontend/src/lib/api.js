@@ -433,6 +433,10 @@ export const metaAPI = {
 
 // Campaigns API (Brevo - Email & SMS Marketing)
 export const campaignsAPI = {
+  // Email Templates
+  getTemplates: () => api.get('/campaigns/templates'),
+  getTemplate: (id) => api.get(`/campaigns/templates/${id}`),
+  
   // Email Campaigns
   createEmailCampaign: (data) => api.post('/campaigns/email/create', data),
   getEmailCampaigns: (params) => api.get('/campaigns/email/list', { params }),
@@ -468,6 +472,12 @@ export const campaignsAPI = {
   // Statistics
   getEmailStatistics: (params) => api.get('/campaigns/statistics/email', { params }),
   getSMSStatistics: (params) => api.get('/campaigns/statistics/sms', { params }),
+};
+
+// API Keys Management
+export const apiKeysAPI = {
+  getStatus: () => api.get('/settings/api-keys'),
+  testKey: (service) => api.get(`/settings/api-keys/test/${service}`),
 };
 
 export default api;
