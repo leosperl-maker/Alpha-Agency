@@ -123,6 +123,37 @@ const SettingsPage = () => {
     }
   };
 
+  const handleDeleteTestData = async (collection) => {
+    if (!window.confirm(`Supprimer toutes les données de test de ${collection} ? Cette action est irréversible.`)) return;
+    
+    setDeletingData(true);
+    try {
+      await api.delete(`/admin/test-data/${collection}`);
+      toast.success(`Données de test ${collection} supprimées`);
+      fetchDataStats();
+    } catch (error) {
+      toast.error("Erreur lors de la suppression");
+    } finally {
+      setDeletingData(false);
+    }
+  };
+
+  const handleClearAllTestData = async () => {
+    if (!window.confirm("⚠️ ATTENTION: Supprimer TOUTES les données de test de toutes les collections ? Cette action est irréversible !")) return;
+    if (!window.confirm("Êtes-vous vraiment sûr ? Cette action va supprimer toutes les données de démonstration.")) return;
+    
+    setDeletingData(true);
+    try {
+      await api.delete('/admin/test-data/all');
+      toast.success("Toutes les données de test ont été supprimées");
+      fetchDataStats();
+    } catch (error) {
+      toast.error("Erreur lors de la suppression");
+    } finally {
+      setDeletingData(false);
+    }
+  };
+
   return (
     <div data-testid="settings-page" className="space-y-6">
       {/* Header */}
