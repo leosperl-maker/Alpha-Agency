@@ -630,6 +630,30 @@ def get_brevo_service():
 
 # ==================== EMAIL CAMPAIGN ROUTES ====================
 
+@router.get("/templates")
+async def get_email_templates(current_user: dict = Depends(get_current_user)):
+    """Get available email templates"""
+    templates_list = []
+    for template_id, template in EMAIL_TEMPLATES.items():
+        templates_list.append({
+            "id": template["id"],
+            "name": template["name"],
+            "description": template["description"],
+            "preview_image": template["preview_image"],
+            "subject_template": template["subject_template"]
+        })
+    return templates_list
+
+
+@router.get("/templates/{template_id}")
+async def get_email_template(template_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific email template with full HTML"""
+    if template_id not in EMAIL_TEMPLATES:
+        raise HTTPException(status_code=404, detail="Template non trouvé")
+    
+    return EMAIL_TEMPLATES[template_id]
+
+
 @router.post("/email/create")
 async def create_email_campaign(
     payload: EmailCampaignCreate,
