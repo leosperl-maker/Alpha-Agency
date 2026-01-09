@@ -20,6 +20,398 @@ import { budgetAPI, contactsAPI, invoicesAPI } from "../../lib/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from "recharts";
 import { useDropzone } from "react-dropzone";
 
+// ForecastTab Component for Budget Prévisionnel (Phase 3)
+const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategories, formatCurrency }) => {
+  const [forecasts, setForecasts] = useState([]);
+  const [comparison, setComparison] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingForecast, setEditingForecast] = useState(null);
+  const [form, setForm] = useState({ month: selectedMonth, category_id: "", type: "expense", planned_amount: "", description: "" });
+  const [copyDialogOpen, setCopyDialogOpen] = useState(false);
+  const [targetMonth, setTargetMonth] = useState("");
+
+  const fetchForecastData = async () => {
+    setLoading(true);
+    try {
+      const [forecastsRes, comparisonRes] = await Promise.all([
+        budgetAPI.getForecasts({ month: selectedMonth }),
+        budgetAPI.getForecastComparison(selectedMonth)
+      ]);
+      setForecasts(forecastsRes.data);
+      setComparison(comparisonRes.data);
+    } catch (error) {
+      console.error("Error fetching forecasts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchForecastData();
+  }, [selectedMonth]);
+
+  const handleSaveForecast = async () => {
+    if (!form.category_id || !form.planned_amount) {
+      toast.error("Veuillez remplir tous les champs obligatoires");
+      return;
+    }
+    try {
+      await budgetAPI.createForecast({
+        ...form,
+        month: selectedMonth,
+        planned_amount: parseFloat(form.planned_amount)
+      });
+      toast.success("Prévision enregistrée");
+      setDialogOpen(false);
+      setForm({ month: selectedMonth, category_id: "", type: "expense", planned_amount: "", description: "" });
+      fetchForecastData();
+    } catch (error) {
+      toast.error("Erreur");
+    }
+  };
+
+  const handleDeleteForecast = async (id) => {
+    if (!window.confirm("Supprimer cette prévision ?")) return;
+    try {
+      await budgetAPI.deleteForecast(id);
+      toast.success("Prévision supprimée");
+      fetchForecastData();
+    } catch (error) {
+      toast.error("Erreur");
+    }
+  };
+
+  const handleCopyForecasts = async () => {
+    if (!targetMonth) {
+      toast.error("Sélectionnez un mois cible");
+      return;
+    }
+    try {
+      const result = await budgetAPI.copyForecast(selectedMonth, targetMonth);
+      toast.success(result.data.message);
+      setCopyDialogOpen(false);
+      setTargetMonth("");
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Erreur");
+    }
+  };
+
+  const getVarianceColor = (variance, type) => {
+    if (type === "expense") {
+      if (variance > 0) return "text-red-600"; // Over budget
+      if (variance < 0) return "text-green-600"; // Under budget
+    } else {
+      if (variance > 0) return "text-green-600"; // Above target
+      if (variance < 0) return "text-red-600"; // Below target
+    }
+    return "text-[#666666]";
+  };
+
+  const allCategories = [...getAllCategories("expense"), ...getAllCategories("income")];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-[#CE0202]" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header with actions */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-[#1A1A1A]">Budget prévisionnel</h3>
+          <p className="text-sm text-[#666666]">Comparez vos prévisions avec le réel</p>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setCopyDialogOpen(true)}
+            disabled={forecasts.length === 0}
+          >
+            <Download className="w-4 h-4 mr-2" /> Copier vers autre mois
+          </Button>
+          <Button 
+            onClick={() => { 
+              setForm({ month: selectedMonth, category_id: "", type: "expense", planned_amount: "", description: "" }); 
+              setDialogOpen(true); 
+            }}
+            className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" /> Ajouter prévision
+          </Button>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      {comparison && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="bg-white border-[#E5E5E5]">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-[#666666]">Revenus prévus</p>
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(comparison.totals.planned_income)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-[#666666]">Réel</p>
+                  <p className="text-lg font-semibold text-[#1A1A1A]">{formatCurrency(comparison.totals.actual_income)}</p>
+                </div>
+              </div>
+              <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-green-500 transition-all"
+                  style={{ width: `${Math.min(100, (comparison.totals.actual_income / comparison.totals.planned_income) * 100 || 0)}%` }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border-[#E5E5E5]">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-[#666666]">Dépenses prévues</p>
+                  <p className="text-2xl font-bold text-red-600">{formatCurrency(comparison.totals.planned_expense)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-[#666666]">Réel</p>
+                  <p className="text-lg font-semibold text-[#1A1A1A]">{formatCurrency(comparison.totals.actual_expense)}</p>
+                </div>
+              </div>
+              <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all ${comparison.totals.actual_expense > comparison.totals.planned_expense ? 'bg-red-500' : 'bg-green-500'}`}
+                  style={{ width: `${Math.min(100, (comparison.totals.actual_expense / comparison.totals.planned_expense) * 100 || 0)}%` }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border-[#E5E5E5]">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-[#666666]">Solde prévu</p>
+                  <p className={`text-2xl font-bold ${comparison.totals.planned_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatCurrency(comparison.totals.planned_balance)}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-[#666666]">Solde réel</p>
+                  <p className={`text-lg font-semibold ${comparison.totals.actual_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatCurrency(comparison.totals.actual_balance)}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Alerts */}
+      {comparison?.alerts?.length > 0 && (
+        <Card className="bg-red-50 border-red-200">
+          <CardContent className="pt-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-red-800">Alertes de dépassement</p>
+                <ul className="mt-2 space-y-1">
+                  {comparison.alerts.map((alert, idx) => {
+                    const cat = getCategoryById(alert.category_id);
+                    return (
+                      <li key={idx} className="text-sm text-red-700">
+                        <strong>{cat?.name || alert.category_id}</strong>: dépassement de {Math.abs(alert.variance_percent).toFixed(0)}% 
+                        ({formatCurrency(alert.actual)} vs {formatCurrency(alert.planned)} prévu)
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Comparison Table */}
+      <Card className="bg-white border-[#E5E5E5]">
+        <CardHeader>
+          <CardTitle className="text-[#1A1A1A] text-lg">Prévu vs Réel par catégorie</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {forecasts.length === 0 ? (
+            <div className="text-center py-8 text-[#666666]">
+              <Target className="w-12 h-12 mx-auto mb-2 opacity-30" />
+              <p>Aucune prévision pour ce mois</p>
+              <p className="text-sm mt-1">Ajoutez des prévisions budgétaires pour suivre vos objectifs</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[#E5E5E5]">
+                    <th className="text-left py-3 px-2 text-[#666666] font-medium text-sm">Catégorie</th>
+                    <th className="text-left py-3 px-2 text-[#666666] font-medium text-sm">Type</th>
+                    <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Prévu</th>
+                    <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Réel</th>
+                    <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Écart</th>
+                    <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">%</th>
+                    <th className="w-10"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {comparison?.comparison?.map((item, idx) => {
+                    const cat = getCategoryById(item.category_id);
+                    return (
+                      <tr key={idx} className="border-b border-[#E5E5E5] hover:bg-[#F8F8F8]">
+                        <td className="py-3 px-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat?.color || "#666" }} />
+                            <span className="text-[#1A1A1A]">{cat?.name || item.category_id}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-2">
+                          <Badge variant="outline" className={item.type === "income" ? "text-green-600 border-green-200" : "text-red-600 border-red-200"}>
+                            {item.type === "income" ? "Revenu" : "Dépense"}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-2 text-right font-mono text-[#1A1A1A]">{formatCurrency(item.planned)}</td>
+                        <td className="py-3 px-2 text-right font-mono text-[#1A1A1A]">{formatCurrency(item.actual)}</td>
+                        <td className={`py-3 px-2 text-right font-mono ${getVarianceColor(item.variance, item.type)}`}>
+                          {item.variance > 0 ? "+" : ""}{formatCurrency(item.variance)}
+                        </td>
+                        <td className={`py-3 px-2 text-right font-mono ${getVarianceColor(item.variance, item.type)}`}>
+                          {item.variance > 0 ? "+" : ""}{item.variance_percent}%
+                        </td>
+                        <td className="py-3 px-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-red-500 h-7 w-7 p-0"
+                            onClick={() => {
+                              const forecast = forecasts.find(f => f.category_id === item.category_id);
+                              if (forecast) handleDeleteForecast(forecast.id);
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Add Forecast Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="bg-white border-[#E5E5E5] max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-[#1A1A1A]">Nouvelle prévision</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select value={form.type} onValueChange={(v) => setForm({...form, type: v, category_id: ""})}>
+                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="expense">Dépense</SelectItem>
+                  <SelectItem value="income">Revenu</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Catégorie *</Label>
+              <Select value={form.category_id} onValueChange={(v) => setForm({...form, category_id: v})}>
+                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                  <SelectValue placeholder="Sélectionner une catégorie" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  {getAllCategories(form.type).map(cat => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
+                        {cat.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Montant prévu (€) *</Label>
+              <Input
+                type="number"
+                value={form.planned_amount}
+                onChange={(e) => setForm({...form, planned_amount: e.target.value})}
+                placeholder="0.00"
+                className="bg-[#F8F8F8] border-[#E5E5E5]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input
+                value={form.description}
+                onChange={(e) => setForm({...form, description: e.target.value})}
+                placeholder="Ex: Budget marketing mensuel"
+                className="bg-[#F8F8F8] border-[#E5E5E5]"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
+            <Button onClick={handleSaveForecast} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+              Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Copy Dialog */}
+      <Dialog open={copyDialogOpen} onOpenChange={setCopyDialogOpen}>
+        <DialogContent className="bg-white border-[#E5E5E5] max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-[#1A1A1A]">Copier les prévisions</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <p className="text-sm text-[#666666]">
+              Copier les prévisions de {selectedMonth} vers :
+            </p>
+            <Input
+              type="month"
+              value={targetMonth}
+              onChange={(e) => setTargetMonth(e.target.value)}
+              className="bg-[#F8F8F8] border-[#E5E5E5]"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCopyDialogOpen(false)}>Annuler</Button>
+            <Button onClick={handleCopyForecasts} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+              Copier
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
 const BudgetPage = () => {
   // Core state
   const [activeTab, setActiveTab] = useState("overview");
