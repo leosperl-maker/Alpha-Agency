@@ -6017,13 +6017,6 @@ async def disconnect_meta_account(current_user: dict = Depends(get_current_user)
     return {"message": "Compte Meta déconnecté"}
 
 
-    # Initialize backup system
-    global backup_manager
-    backup_manager = BackupManager(db)
-    backup_scheduler.set_backup_manager(backup_manager)
-    backup_scheduler.start()
-    logger.info("Backup scheduler started")
-
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
