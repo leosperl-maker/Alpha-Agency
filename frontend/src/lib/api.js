@@ -293,7 +293,16 @@ export const budgetAPI = {
   // Auto-categorization rules
   getRules: () => api.get('/budget/rules'),
   createRule: (data) => api.post('/budget/rules', data),
+  updateRule: (id, data) => api.put(`/budget/rules/${id}`, data),
   deleteRule: (id) => api.delete(`/budget/rules/${id}`),
+  applyRules: (month) => api.post('/budget/rules/apply', null, { params: { month } }),
+  // Forecast (Prévisionnel)
+  getForecasts: (params) => api.get('/budget/forecast', { params }),
+  createForecast: (data) => api.post('/budget/forecast', data),
+  updateForecast: (id, data) => api.put(`/budget/forecast/${id}`, data),
+  deleteForecast: (id) => api.delete(`/budget/forecast/${id}`),
+  getForecastComparison: (month) => api.get('/budget/forecast/comparison', { params: { month } }),
+  copyForecast: (sourceMonth, targetMonth) => api.post('/budget/forecast/copy', null, { params: { source_month: sourceMonth, target_month: targetMonth } }),
 };
 
 // Backup API
