@@ -733,71 +733,74 @@ const TasksPage = () => {
             </Button>
           <Button 
             onClick={() => { resetForm(); setDialogOpen(true); }} 
-            className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+            className="bg-[#CE0202] hover:bg-[#B00202] text-white flex-1 sm:flex-none text-sm"
           >
-            <Plus className="w-4 h-4 mr-2" /> Nouvelle tâche
+            <Plus className="w-4 h-4 mr-1 sm:mr-2" /> 
+            <span className="hidden sm:inline">Nouvelle tâche</span>
+            <span className="sm:hidden">Ajouter</span>
           </Button>
         </div>
       </div>
+      </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 mb-4 sm:mb-6">
         <Card className="bg-white border-[#E5E5E5]">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gray-100">
-                <Clock className="w-5 h-5 text-gray-600" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-gray-100">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#1A1A1A]">{stats.todo || 0}</p>
-                <p className="text-xs text-[#666666]">À faire</p>
+                <p className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">{stats.todo || 0}</p>
+                <p className="text-[10px] sm:text-xs text-[#666666]">À faire</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="bg-white border-[#E5E5E5]">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-100">
-                <Clock className="w-5 h-5 text-blue-600" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-blue-100">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#1A1A1A]">{stats.in_progress || 0}</p>
-                <p className="text-xs text-[#666666]">En cours</p>
+                <p className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">{stats.in_progress || 0}</p>
+                <p className="text-[10px] sm:text-xs text-[#666666]">En cours</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="bg-white border-[#E5E5E5]">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-100">
-                <CheckCircle className="w-5 h-5 text-green-600" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-green-100">
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#1A1A1A]">{stats.done || 0}</p>
-                <p className="text-xs text-[#666666]">Terminées</p>
+                <p className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">{stats.done || 0}</p>
+                <p className="text-[10px] sm:text-xs text-[#666666]">Terminées</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="bg-white border-[#E5E5E5]">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-red-100">
-                <AlertCircle className="w-5 h-5 text-red-600" />
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-red-100">
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#1A1A1A]">{overdueCount}</p>
-                <p className="text-xs text-[#666666]">En retard</p>
+                <p className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">{overdueCount}</p>
+                <p className="text-[10px] sm:text-xs text-[#666666]">En retard</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="bg-white border-[#E5E5E5]">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-[#CE0202]/10">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-[#CE0202]/10">
                 <CheckCircle className="w-5 h-5 text-[#CE0202]" />
               </div>
               <div>
