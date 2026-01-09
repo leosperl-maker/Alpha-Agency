@@ -3843,6 +3843,409 @@ async def clear_news_topic(topic_id: str, current_user: dict = Depends(get_curre
     result = await db.news_articles.delete_many({"topic_id": topic_id})
     return {"message": f"{result.deleted_count} articles supprimés"}
 
+# ==================== SOCIAL MEDIA MANAGER ====================
+# Architecture for social media management (Agorapulse-style)
+
+# Models
+class SocialAccount(BaseModel):
+    platform: str  # facebook, instagram
+    account_id: str
+    account_name: str
+    access_token: Optional[str] = None
+    page_id: Optional[str] = None  # For Facebook pages
+    is_active: bool = True
+
+class ScheduledPost(BaseModel):
+    content: str
+    media_urls: Optional[List[str]] = []
+    post_type: str = "text"  # text, image, carousel, reel, story
+    platforms: List[str] = []  # ['facebook', 'instagram']
+    account_ids: List[str] = []
+    scheduled_at: str  # ISO datetime
+    hashtags: Optional[List[str]] = []
+    link_url: Optional[str] = None
+    status: str = "scheduled"  # scheduled, published, failed, draft
+
+class ScheduledPostUpdate(BaseModel):
+    content: Optional[str] = None
+    media_urls: Optional[List[str]] = None
+    post_type: Optional[str] = None
+    platforms: Optional[List[str]] = None
+    account_ids: Optional[List[str]] = None
+    scheduled_at: Optional[str] = None
+    hashtags: Optional[List[str]] = None
+    link_url: Optional[str] = None
+    status: Optional[str] = None
+
+class SocialMessage(BaseModel):
+    platform: str
+    account_id: str
+    sender_id: str
+    sender_name: str
+    message_type: str = "comment"  # comment, dm, mention
+    content: str
+    post_id: Optional[str] = None
+    status: str = "unread"  # unread, read, replied, archived
+    priority: str = "normal"  # low, normal, high, urgent
+
+class AIReplyRequest(BaseModel):
+    message_id: str
+    conversation_context: Optional[str] = None
+
+# Social Accounts Management
+@api_router.get("/social/accounts", response_model=List[dict])
+async def get_social_accounts(current_user: dict = Depends(get_current_user)):
+    """Get all connected social media accounts"""
+    accounts = await db.social_accounts.find(
+        {"user_id": current_user["user_id"]},
+        {"_id": 0}
+    ).to_list(100)
+    return accounts
+
+@api_router.post("/social/accounts", response_model=dict)
+async def add_social_account(account: SocialAccount, current_user: dict = Depends(get_current_user)):
+    """Add a social media account"""
+    account_dict = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user["user_id"],
+        **account.dict(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.social_accounts.insert_one(account_dict)
+    return {k: v for k, v in account_dict.items() if k != "_id"}
+
+@api_router.delete("/social/accounts/{account_id}")
+async def delete_social_account(account_id: str, current_user: dict = Depends(get_current_user)):
+    """Remove a social media account"""
+    result = await db.social_accounts.delete_one({
+        "id": account_id,
+        "user_id": current_user["user_id"]
+    })
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Compte non trouvé")
+    return {"message": "Compte supprimé"}
+
+# Scheduled Posts Management
+@api_router.get("/social/posts", response_model=List[dict])
+async def get_scheduled_posts(
+    status: Optional[str] = None,
+    platform: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get scheduled posts with optional filters"""
+    query = {"user_id": current_user["user_id"]}
+    
+    if status:
+        query["status"] = status
+    if platform:
+        query["platforms"] = platform
+    if start_date:
+        query["scheduled_at"] = {"$gte": start_date}
+    if end_date:
+        if "scheduled_at" in query:
+            query["scheduled_at"]["$lte"] = end_date
+        else:
+            query["scheduled_at"] = {"$lte": end_date}
+    
+    posts = await db.scheduled_posts.find(query, {"_id": 0}).sort("scheduled_at", 1).to_list(1000)
+    return posts
+
+@api_router.post("/social/posts", response_model=dict)
+async def create_scheduled_post(post: ScheduledPost, current_user: dict = Depends(get_current_user)):
+    """Create a new scheduled post"""
+    post_dict = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user["user_id"],
+        **post.dict(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "published_at": None,
+        "error_message": None
+    }
+    await db.scheduled_posts.insert_one(post_dict)
+    return {k: v for k, v in post_dict.items() if k != "_id"}
+
+@api_router.get("/social/posts/{post_id}", response_model=dict)
+async def get_scheduled_post(post_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific scheduled post"""
+    post = await db.scheduled_posts.find_one(
+        {"id": post_id, "user_id": current_user["user_id"]},
+        {"_id": 0}
+    )
+    if not post:
+        raise HTTPException(status_code=404, detail="Post non trouvé")
+    return post
+
+@api_router.put("/social/posts/{post_id}", response_model=dict)
+async def update_scheduled_post(post_id: str, post: ScheduledPostUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a scheduled post"""
+    update_data = {k: v for k, v in post.dict().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    result = await db.scheduled_posts.update_one(
+        {"id": post_id, "user_id": current_user["user_id"]},
+        {"$set": update_data}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Post non trouvé")
+    
+    updated = await db.scheduled_posts.find_one({"id": post_id}, {"_id": 0})
+    return updated
+
+@api_router.delete("/social/posts/{post_id}")
+async def delete_scheduled_post(post_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a scheduled post"""
+    result = await db.scheduled_posts.delete_one({
+        "id": post_id,
+        "user_id": current_user["user_id"]
+    })
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Post non trouvé")
+    return {"message": "Post supprimé"}
+
+# Social Inbox (Messages/Comments)
+@api_router.get("/social/inbox", response_model=List[dict])
+async def get_social_inbox(
+    status: Optional[str] = None,
+    platform: Optional[str] = None,
+    priority: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get social media messages and comments"""
+    query = {"user_id": current_user["user_id"]}
+    
+    if status:
+        query["status"] = status
+    if platform:
+        query["platform"] = platform
+    if priority:
+        query["priority"] = priority
+    
+    messages = await db.social_messages.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+    return messages
+
+@api_router.post("/social/inbox", response_model=dict)
+async def add_social_message(message: SocialMessage, current_user: dict = Depends(get_current_user)):
+    """Add a social message (for webhook or manual entry)"""
+    msg_dict = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user["user_id"],
+        **message.dict(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "replied_at": None,
+        "reply_content": None
+    }
+    await db.social_messages.insert_one(msg_dict)
+    return {k: v for k, v in msg_dict.items() if k != "_id"}
+
+@api_router.put("/social/inbox/{message_id}/status")
+async def update_message_status(message_id: str, status: str, current_user: dict = Depends(get_current_user)):
+    """Update message status"""
+    valid_statuses = ["unread", "read", "replied", "archived", "important"]
+    if status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Statut invalide. Valeurs autorisées: {valid_statuses}")
+    
+    result = await db.social_messages.update_one(
+        {"id": message_id, "user_id": current_user["user_id"]},
+        {"$set": {"status": status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Message non trouvé")
+    return {"message": "Statut mis à jour"}
+
+@api_router.put("/social/inbox/{message_id}/priority")
+async def update_message_priority(message_id: str, priority: str, current_user: dict = Depends(get_current_user)):
+    """Update message priority"""
+    valid_priorities = ["low", "normal", "high", "urgent"]
+    if priority not in valid_priorities:
+        raise HTTPException(status_code=400, detail=f"Priorité invalide. Valeurs autorisées: {valid_priorities}")
+    
+    result = await db.social_messages.update_one(
+        {"id": message_id, "user_id": current_user["user_id"]},
+        {"$set": {"priority": priority, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Message non trouvé")
+    return {"message": "Priorité mise à jour"}
+
+@api_router.post("/social/inbox/{message_id}/reply")
+async def reply_to_message(message_id: str, reply_content: str, current_user: dict = Depends(get_current_user)):
+    """Save reply to a social message (actual sending via Meta API to be implemented)"""
+    result = await db.social_messages.update_one(
+        {"id": message_id, "user_id": current_user["user_id"]},
+        {"$set": {
+            "status": "replied",
+            "reply_content": reply_content,
+            "replied_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Message non trouvé")
+    return {"message": "Réponse enregistrée", "note": "Envoi via API Meta à implémenter"}
+
+# AI-Powered Reply Suggestions
+@api_router.post("/social/inbox/{message_id}/suggest-reply", response_model=dict)
+async def suggest_ai_replies(message_id: str, context: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Generate AI-powered reply suggestions using Perplexity"""
+    
+    # Get the message
+    message = await db.social_messages.find_one(
+        {"id": message_id, "user_id": current_user["user_id"]},
+        {"_id": 0}
+    )
+    if not message:
+        raise HTTPException(status_code=404, detail="Message non trouvé")
+    
+    if not PERPLEXITY_API_KEY:
+        raise HTTPException(status_code=503, detail="API Perplexity non configurée")
+    
+    # Build prompt for suggestions
+    system_prompt = """Tu es l'assistant de communication d'Alpha Agency, une agence de communication en Guadeloupe.
+Tu dois proposer 3 réponses différentes à un message reçu sur les réseaux sociaux.
+Chaque réponse doit être:
+- Professionnelle mais chaleureuse (style caribéen)
+- Courte (1-2 phrases max)
+- Adaptée au contexte du message
+
+Réponds au format JSON:
+{"suggestions": ["réponse 1", "réponse 2", "réponse 3"]}"""
+    
+    user_prompt = f"""Message reçu de {message.get('sender_name', 'un utilisateur')} sur {message.get('platform', 'les réseaux sociaux')}:
+"{message.get('content', '')}"
+
+Type de message: {message.get('message_type', 'commentaire')}
+{f"Contexte additionnel: {context}" if context else ""}
+
+Propose 3 réponses adaptées."""
+    
+    try:
+        response = requests.post(
+            "https://api.perplexity.ai/chat/completions",
+            headers={
+                "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "llama-3.1-sonar-small-128k-online",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                "temperature": 0.7,
+                "max_tokens": 500
+            },
+            timeout=30
+        )
+        response.raise_for_status()
+        data = response.json()
+        ai_response = data["choices"][0]["message"]["content"]
+        
+        # Try to parse JSON from response
+        import json
+        try:
+            # Extract JSON from response
+            json_match = re.search(r'\{[^}]+\}', ai_response, re.DOTALL)
+            if json_match:
+                suggestions = json.loads(json_match.group())
+                return suggestions
+            else:
+                # Fallback: return raw response as single suggestion
+                return {"suggestions": [ai_response.strip()]}
+        except:
+            return {"suggestions": [ai_response.strip()]}
+            
+    except Exception as e:
+        logging.error(f"AI suggestion error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la génération des suggestions")
+
+# Calendar View Data
+@api_router.get("/social/calendar", response_model=dict)
+async def get_social_calendar(
+    month: int,
+    year: int,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get calendar view data for scheduled posts"""
+    # Calculate date range for the month
+    start_date = f"{year}-{month:02d}-01T00:00:00"
+    if month == 12:
+        end_date = f"{year + 1}-01-01T00:00:00"
+    else:
+        end_date = f"{year}-{month + 1:02d}-01T00:00:00"
+    
+    posts = await db.scheduled_posts.find({
+        "user_id": current_user["user_id"],
+        "scheduled_at": {"$gte": start_date, "$lt": end_date}
+    }, {"_id": 0}).to_list(500)
+    
+    # Group by date
+    calendar_data = {}
+    for post in posts:
+        date_key = post["scheduled_at"][:10]  # YYYY-MM-DD
+        if date_key not in calendar_data:
+            calendar_data[date_key] = []
+        calendar_data[date_key].append(post)
+    
+    return {
+        "month": month,
+        "year": year,
+        "posts_by_date": calendar_data,
+        "total_posts": len(posts)
+    }
+
+# Social Stats
+@api_router.get("/social/stats", response_model=dict)
+async def get_social_stats(current_user: dict = Depends(get_current_user)):
+    """Get social media management statistics"""
+    
+    # Count scheduled posts by status
+    scheduled = await db.scheduled_posts.count_documents({
+        "user_id": current_user["user_id"],
+        "status": "scheduled"
+    })
+    published = await db.scheduled_posts.count_documents({
+        "user_id": current_user["user_id"],
+        "status": "published"
+    })
+    drafts = await db.scheduled_posts.count_documents({
+        "user_id": current_user["user_id"],
+        "status": "draft"
+    })
+    
+    # Count messages by status
+    unread = await db.social_messages.count_documents({
+        "user_id": current_user["user_id"],
+        "status": "unread"
+    })
+    pending_reply = await db.social_messages.count_documents({
+        "user_id": current_user["user_id"],
+        "status": "read"
+    })
+    
+    # Connected accounts
+    accounts = await db.social_accounts.count_documents({
+        "user_id": current_user["user_id"],
+        "is_active": True
+    })
+    
+    return {
+        "posts": {
+            "scheduled": scheduled,
+            "published": published,
+            "drafts": drafts
+        },
+        "inbox": {
+            "unread": unread,
+            "pending_reply": pending_reply
+        },
+        "accounts": accounts
+    }
+
 # ==================== BUDGET CATEGORIES (CUSTOM) ====================
 
 class BudgetCategoryCreate(BaseModel):
