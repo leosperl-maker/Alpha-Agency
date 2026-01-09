@@ -1065,27 +1065,6 @@ const PipelinePage = () => {
             </SortableContext>
           </div>
           
-          {/* Visible Horizontal Scrollbar Indicator */}
-          <div className="relative -mx-6 px-6 mt-2">
-            <div className="h-3 bg-[#F0F0F0] rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-[#CE0202] to-[#B00202] rounded-full cursor-pointer hover:from-[#B00202] hover:to-[#900202] transition-colors"
-                style={{ 
-                  width: '30%', 
-                  marginLeft: '0%',
-                }}
-                onClick={() => {
-                  if (scrollContainerRef.current) {
-                    scrollContainerRef.current.scrollLeft += 300;
-                  }
-                }}
-              />
-            </div>
-            <p className="text-xs text-[#999999] text-center mt-1">
-              ← Faites défiler pour voir plus de colonnes →
-            </p>
-          </div>
-          
           {/* Drag Overlay for visual feedback */}
           <DragOverlay>
             {activeItem && activeId && (
@@ -1109,7 +1088,46 @@ const PipelinePage = () => {
             )}
           </DragOverlay>
         </DndContext>
-      )}
+        
+        {/* Custom Horizontal Scrollbar */}
+        <div className="mt-4 -mx-6 px-6">
+          <div className="relative h-3 bg-[#E5E5E5] rounded-full overflow-hidden">
+            <div 
+              id="pipeline-custom-scrollbar"
+              className="absolute h-full w-[30%] bg-gradient-to-r from-[#CE0202] to-[#B00202] rounded-full cursor-pointer hover:from-[#B00202] hover:to-[#900202] transition-all"
+              style={{ marginLeft: '0%' }}
+              onMouseDown={(e) => {
+                const container = scrollContainerRef.current;
+                if (!container) return;
+                
+                const startX = e.clientX;
+                const track = e.target.parentElement;
+                const trackWidth = track.offsetWidth;
+                const thumbWidth = e.target.offsetWidth;
+                const maxScroll = container.scrollWidth - container.clientWidth;
+                const startScrollLeft = container.scrollLeft;
+                
+                const onMouseMove = (moveEvent) => {
+                  const deltaX = moveEvent.clientX - startX;
+                  const scrollRatio = deltaX / (trackWidth - thumbWidth);
+                  container.scrollLeft = startScrollLeft + scrollRatio * maxScroll;
+                };
+                
+                const onMouseUp = () => {
+                  document.removeEventListener('mousemove', onMouseMove);
+                  document.removeEventListener('mouseup', onMouseUp);
+                };
+                
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+              }}
+            />
+          </div>
+          <p className="text-xs text-[#999999] text-center mt-1">
+            ← Faites défiler horizontalement pour voir toutes les colonnes →
+          </p>
+        </div>
+      </div>
 
       {/* Column Dialog */}
       <Dialog open={columnDialogOpen} onOpenChange={setColumnDialogOpen}>
