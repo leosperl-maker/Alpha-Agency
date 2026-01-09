@@ -3,7 +3,7 @@ import {
   Calendar, Send, MessageSquare, Settings, Plus, Clock, CheckCircle, 
   AlertCircle, Facebook, Instagram, Image, Video, FileText, Sparkles,
   ChevronLeft, ChevronRight, MoreVertical, Trash2, Edit, Eye, Filter,
-  Inbox, Archive, Star, Reply, Bot, Loader2, RefreshCw
+  Inbox, Archive, Star, Reply, Bot, Loader2, RefreshCw, List, Grid
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
