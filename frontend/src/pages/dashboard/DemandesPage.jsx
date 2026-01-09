@@ -132,12 +132,12 @@ const DemandesPage = () => {
   };
 
   return (
-    <div data-testid="demandes-page" className="space-y-6">
+    <div data-testid="demandes-page" className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Demandes</h1>
-          <p className="text-[#666666]">Gérez les demandes reçues via le formulaire de contact</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Demandes</h1>
+          <p className="text-[#666666] text-xs sm:text-sm">Gérez les demandes via le formulaire</p>
         </div>
         <Badge className="bg-[#CE0202]/10 text-[#CE0202] border-[#CE0202]/20">
           {demandes.length} demande{demandes.length > 1 ? 's' : ''}
@@ -145,9 +145,9 @@ const DemandesPage = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
         <Card className="bg-white border-[#E5E5E5]">
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-[#CE0202]/10">
                 <Inbox className="w-5 h-5 text-[#CE0202]" />
