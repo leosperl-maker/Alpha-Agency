@@ -99,14 +99,21 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [x] Section description et audio sous les images
 - [x] Bouton fermeture bien positionné
 
-### Section Actualités (News) ✅ COMPLETE (2026-01-09)
-- [x] **Interface NewsPage.jsx** avec grille de cartes ✅
-- [x] **12 topics** configurés (géographiques + business) ✅
-- [x] **Filtres par thématique** dans l'UI ✅
-- [x] **Récupération via Perplexity AI** (bouton Actualiser) ✅
-- [x] **Suppression d'articles** individuelle ✅
-- [x] Badges colorés par catégorie
-- [x] Sources avec liens externes
+### Section Actualités (News) ✅ REFONTE COMPLETE (2026-01-09 - Style Perplexity Discover)
+- [x] **Design style Perplexity Discover** ✅ NEW
+- [x] **Grand titre "Les actualités du jour"** en haut ✅ NEW
+- [x] **Article principal en vedette** (image large à droite, titre + chapeau à gauche) ✅ NEW
+- [x] **Cartes d'articles** avec image, titre, résumé, date/heure, source ✅ NEW
+- [x] **7 filtres par catégorie** (Toutes, Général, Business, Tech, Science, Santé, Sports, Divertissement) ✅ NEW
+- [x] **Sélecteur de région** (France, États-Unis, Royaume-Uni, Allemagne) ✅ NEW
+- [x] **Intégration NewsAPI.org** - Actualités avec images de qualité ✅ NEW
+- [x] **Modal plein écran** au clic sur article (pas de navigation vers nouvelle page) ✅ NEW
+  - Image hero en haut
+  - Boutons "Retour aux actualités" et X pour fermer
+  - Source avec bouton "Lire sur le site"
+  - Section "Découvrir aussi" avec 4 articles liés
+- [x] **Bouton Actualiser** pour rafraîchir les actualités
+- [x] **Suppression d'articles** individuelle
 
 ### Social Media Manager (style Agorapulse) ✅ REFONTE UI COMPLETE (2026-01-09)
 - [x] **Architecture backend complète** (endpoints CRUD) ✅
