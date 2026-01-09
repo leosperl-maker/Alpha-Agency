@@ -19,6 +19,290 @@ BREVO_API_URL = "https://api.brevo.com/v3"
 
 router = APIRouter()
 
+# ==================== EMAIL TEMPLATES ====================
+
+EMAIL_TEMPLATES = {
+    "newsletter": {
+        "id": "newsletter",
+        "name": "Newsletter",
+        "description": "Newsletter mensuelle avec actualités et offres",
+        "preview_image": "https://images.unsplash.com/photo-1557200134-90327ee9fafa?w=400",
+        "subject_template": "📬 Newsletter {{month}} - Les dernières nouveautés",
+        "html_content": """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+        .header { background: linear-gradient(135deg, #CE0202 0%, #8B0000 100%); padding: 40px 20px; text-align: center; }
+        .header img { max-width: 150px; margin-bottom: 15px; }
+        .header h1 { color: #ffffff; font-size: 28px; margin: 0; }
+        .content { padding: 30px 20px; }
+        .intro { font-size: 16px; color: #333333; line-height: 1.6; margin-bottom: 25px; }
+        .section-title { font-size: 20px; color: #CE0202; margin: 25px 0 15px; border-bottom: 2px solid #CE0202; padding-bottom: 8px; }
+        .article { background: #f9f9f9; border-radius: 8px; padding: 20px; margin-bottom: 15px; }
+        .article h3 { color: #1a1a1a; margin: 0 0 10px; font-size: 18px; }
+        .article p { color: #666666; font-size: 14px; line-height: 1.5; margin: 0; }
+        .cta-button { display: inline-block; background: #CE0202; color: #ffffff; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-weight: bold; margin: 20px 0; }
+        .footer { background: #1a1a1a; color: #999999; padding: 25px 20px; text-align: center; font-size: 12px; }
+        .footer a { color: #CE0202; text-decoration: none; }
+        .social-links { margin: 15px 0; }
+        .social-links a { margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="{{logo_url}}" alt="Logo">
+            <h1>Newsletter {{month}}</h1>
+        </div>
+        <div class="content">
+            <p class="intro">Bonjour {{first_name}},<br><br>Découvrez les dernières actualités et offres exclusives de ce mois-ci.</p>
+            
+            <h2 class="section-title">📰 À la une</h2>
+            <div class="article">
+                <h3>{{article_1_title}}</h3>
+                <p>{{article_1_description}}</p>
+            </div>
+            <div class="article">
+                <h3>{{article_2_title}}</h3>
+                <p>{{article_2_description}}</p>
+            </div>
+            
+            <h2 class="section-title">🎁 Offre du mois</h2>
+            <div class="article">
+                <h3>{{offer_title}}</h3>
+                <p>{{offer_description}}</p>
+            </div>
+            
+            <center>
+                <a href="{{cta_url}}" class="cta-button">{{cta_text}}</a>
+            </center>
+        </div>
+        <div class="footer">
+            <p>© {{year}} {{company_name}} - Tous droits réservés</p>
+            <p>{{company_address}}</p>
+            <p><a href="{{unsubscribe_url}}">Se désabonner</a></p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+    },
+    "promotion": {
+        "id": "promotion",
+        "name": "Promotion",
+        "description": "Email promotionnel avec offre spéciale",
+        "preview_image": "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=400",
+        "subject_template": "🔥 -{{discount}}% sur {{product}} - Offre limitée !",
+        "html_content": """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #1a1a1a; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+        .banner { background: linear-gradient(135deg, #CE0202 0%, #FF4444 100%); padding: 50px 20px; text-align: center; }
+        .banner h1 { color: #ffffff; font-size: 48px; margin: 0; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .banner .subtitle { color: #ffffff; font-size: 24px; margin-top: 10px; opacity: 0.9; }
+        .discount-badge { display: inline-block; background: #FFD700; color: #1a1a1a; font-size: 60px; font-weight: 800; padding: 20px 40px; border-radius: 10px; margin: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .content { padding: 30px 20px; text-align: center; }
+        .product-name { font-size: 24px; color: #1a1a1a; margin: 20px 0 10px; }
+        .original-price { font-size: 18px; color: #999999; text-decoration: line-through; }
+        .new-price { font-size: 36px; color: #CE0202; font-weight: bold; margin: 10px 0; }
+        .description { font-size: 16px; color: #666666; line-height: 1.6; margin: 20px 0; }
+        .urgency { background: #FFF3CD; border: 1px solid #FFE69C; color: #856404; padding: 15px; border-radius: 6px; margin: 20px 0; font-weight: 500; }
+        .cta-button { display: inline-block; background: #CE0202; color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 50px; font-weight: bold; font-size: 18px; margin: 20px 0; box-shadow: 0 4px 15px rgba(206,2,2,0.4); }
+        .footer { background: #1a1a1a; color: #999999; padding: 25px 20px; text-align: center; font-size: 12px; }
+        .footer a { color: #CE0202; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="banner">
+            <h1>OFFRE FLASH</h1>
+            <div class="subtitle">Durée limitée !</div>
+            <div class="discount-badge">-{{discount}}%</div>
+        </div>
+        <div class="content">
+            <h2 class="product-name">{{product_name}}</h2>
+            <p class="original-price">Prix habituel : {{original_price}}€</p>
+            <p class="new-price">{{new_price}}€</p>
+            <p class="description">{{product_description}}</p>
+            <div class="urgency">⏰ Offre valable jusqu'au {{end_date}} - Plus que {{remaining_spots}} places !</div>
+            <a href="{{cta_url}}" class="cta-button">J'EN PROFITE →</a>
+        </div>
+        <div class="footer">
+            <p>© {{year}} {{company_name}}</p>
+            <p><a href="{{unsubscribe_url}}">Se désabonner</a></p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+    },
+    "relance": {
+        "id": "relance",
+        "name": "Relance",
+        "description": "Email de relance pour prospects inactifs",
+        "preview_image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400",
+        "subject_template": "{{first_name}}, vous nous manquez ! 💼",
+        "html_content": """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+        .header { background: #1a1a1a; padding: 30px 20px; text-align: center; }
+        .header img { max-width: 120px; }
+        .content { padding: 40px 30px; }
+        .greeting { font-size: 24px; color: #1a1a1a; margin-bottom: 20px; }
+        .message { font-size: 16px; color: #555555; line-height: 1.8; margin-bottom: 25px; }
+        .highlight-box { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-left: 4px solid #CE0202; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0; }
+        .highlight-box h3 { color: #CE0202; margin: 0 0 10px; font-size: 18px; }
+        .highlight-box ul { color: #555555; margin: 0; padding-left: 20px; }
+        .highlight-box li { margin: 8px 0; }
+        .cta-section { text-align: center; padding: 30px 0; }
+        .cta-button { display: inline-block; background: #CE0202; color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 6px; font-weight: bold; font-size: 16px; }
+        .signature { border-top: 1px solid #eeeeee; margin-top: 30px; padding-top: 20px; }
+        .signature img { width: 60px; height: 60px; border-radius: 50%; margin-bottom: 10px; }
+        .signature .name { font-weight: bold; color: #1a1a1a; }
+        .signature .title { font-size: 14px; color: #888888; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #888888; }
+        .footer a { color: #CE0202; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="{{logo_url}}" alt="Logo">
+        </div>
+        <div class="content">
+            <h1 class="greeting">Bonjour {{first_name}},</h1>
+            <p class="message">Cela fait un moment que nous n'avons pas eu de vos nouvelles, et nous espérons que tout va bien de votre côté !</p>
+            <p class="message">Nous avons remarqué que vous aviez montré de l'intérêt pour nos services. Nous serions ravis de vous accompagner dans votre projet.</p>
+            
+            <div class="highlight-box">
+                <h3>Ce que nous pouvons faire pour vous :</h3>
+                <ul>
+                    <li>{{benefit_1}}</li>
+                    <li>{{benefit_2}}</li>
+                    <li>{{benefit_3}}</li>
+                </ul>
+            </div>
+            
+            <p class="message">N'hésitez pas à nous contacter si vous avez des questions ou si vous souhaitez planifier un appel découverte gratuit.</p>
+            
+            <div class="cta-section">
+                <a href="{{cta_url}}" class="cta-button">Prendre rendez-vous</a>
+            </div>
+            
+            <div class="signature">
+                <p class="name">{{sender_name}}</p>
+                <p class="title">{{sender_title}}<br>{{company_name}}</p>
+            </div>
+        </div>
+        <div class="footer">
+            <p>{{company_address}}</p>
+            <p><a href="{{unsubscribe_url}}">Se désabonner</a></p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+    },
+    "bienvenue": {
+        "id": "bienvenue",
+        "name": "Bienvenue",
+        "description": "Email de bienvenue pour nouveaux abonnés",
+        "preview_image": "https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?w=400",
+        "subject_template": "🎉 Bienvenue chez {{company_name}}, {{first_name}} !",
+        "html_content": """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+        .header { background: linear-gradient(135deg, #CE0202 0%, #FF6B6B 100%); padding: 50px 20px; text-align: center; }
+        .header img { max-width: 100px; margin-bottom: 20px; }
+        .header h1 { color: #ffffff; font-size: 32px; margin: 0; }
+        .header p { color: rgba(255,255,255,0.9); font-size: 18px; margin-top: 10px; }
+        .content { padding: 40px 30px; }
+        .welcome-text { font-size: 16px; color: #555555; line-height: 1.8; margin-bottom: 30px; }
+        .steps { margin: 30px 0; }
+        .step { display: flex; align-items: flex-start; margin-bottom: 25px; }
+        .step-number { width: 40px; height: 40px; background: #CE0202; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; flex-shrink: 0; }
+        .step-content h4 { color: #1a1a1a; margin: 0 0 5px; font-size: 16px; }
+        .step-content p { color: #666666; margin: 0; font-size: 14px; }
+        .cta-button { display: block; background: #CE0202; color: #ffffff; text-decoration: none; padding: 16px 30px; border-radius: 6px; font-weight: bold; text-align: center; margin: 30px auto; max-width: 250px; }
+        .footer { background: #1a1a1a; color: #999999; padding: 25px 20px; text-align: center; font-size: 12px; }
+        .footer a { color: #CE0202; }
+        .social-links { margin: 15px 0; }
+        .social-links a { margin: 0 10px; color: #ffffff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="{{logo_url}}" alt="Logo">
+            <h1>Bienvenue {{first_name}} ! 🎉</h1>
+            <p>Nous sommes ravis de vous compter parmi nous</p>
+        </div>
+        <div class="content">
+            <p class="welcome-text">Merci de nous avoir rejoint ! Vous faites désormais partie de notre communauté et nous sommes impatients de vous accompagner dans votre réussite.</p>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Complétez votre profil</h4>
+                        <p>Personnalisez votre expérience en ajoutant vos informations</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Découvrez nos services</h4>
+                        <p>Explorez tout ce que nous avons à vous offrir</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Contactez-nous</h4>
+                        <p>Notre équipe est là pour répondre à toutes vos questions</p>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="{{cta_url}}" class="cta-button">Commencer maintenant</a>
+        </div>
+        <div class="footer">
+            <div class="social-links">
+                <a href="#">Facebook</a> | <a href="#">Instagram</a> | <a href="#">LinkedIn</a>
+            </div>
+            <p>© {{year}} {{company_name}}</p>
+            <p><a href="{{unsubscribe_url}}">Se désabonner</a></p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+    }
+}
+
+
 # ==================== PYDANTIC MODELS ====================
 
 class EmailCampaignCreate(BaseModel):
