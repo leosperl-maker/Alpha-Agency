@@ -464,6 +464,9 @@ const BudgetPage = () => {
           <TabsTrigger value="rules" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             <Settings2 className="w-4 h-4 mr-2" /> Règles auto
           </TabsTrigger>
+          <TabsTrigger value="forecast" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+            <Target className="w-4 h-4 mr-2" /> Prévisionnel
+          </TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
