@@ -502,10 +502,6 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                         <Hash className="w-5 h-5" />
                       </Button>
                     </div>
-                    <Button variant="outline" size="sm" className="text-[#FF6B35] border-[#FF6B35]">
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Writing Assistant
-                    </Button>
                   </div>
 
                   {/* Draft Toggle */}
