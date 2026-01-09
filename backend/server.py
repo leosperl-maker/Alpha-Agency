@@ -1678,54 +1678,211 @@ async def create_blog_post(post: BlogPostCreate, current_user: dict = Depends(ge
     return {"id": post_id, "message": "Article créé"}
 
 @api_router.get("/blog", response_model=List[dict])
-async def get_blog_posts(published_only: bool = True):
-    query = {"published": True} if published_only else {}
-    posts = await db.blog_posts.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+async def get_blog_posts(published_only: bool = True, tag: Optional[str] = None, category: Optional[str] = None):
+    query = {}
+    if published_only:
+        query["status"] = "published"
+    if tag:
+        query["tags"] = tag
+    if category:
+        query["category"] = category
+    posts = await db.blog_posts.find(query, {"_id": 0}).sort("published_at", -1).to_list(100)
     return posts
 
 @api_router.get("/blog/{slug}", response_model=dict)
 async def get_blog_post(slug: str):
-    post = await db.blog_posts.find_one({"slug": slug}, {"_id": 0})
+    post = await db.blog_posts.find_one({"$or": [{"slug": slug}, {"id": slug}]}, {"_id": 0})
     if not post:
         raise HTTPException(status_code=404, detail="Article non trouvé")
     return post
 
-# ==================== PORTFOLIO ROUTES ====================
+@api_router.post("/blog", response_model=dict)
+async def create_blog_article(article: BlogArticleCreate, current_user: dict = Depends(get_current_user)):
+    """Create a new blog article with rich content"""
+    article_id = str(uuid.uuid4())
+    slug = article.slug or article.title.lower().replace(" ", "-").replace("'", "")
+    
+    # Make slug unique
+    existing = await db.blog_posts.find_one({"slug": slug})
+    if existing:
+        slug = f"{slug}-{article_id[:8]}"
+    
+    article_doc = {
+        "id": article_id,
+        "slug": slug,
+        "title": article.title,
+        "excerpt": article.excerpt,
+        "featured_image": article.featured_image,
+        "content_blocks": [b.model_dump() for b in article.content_blocks] if article.content_blocks else [],
+        "tags": article.tags or [],
+        "category": article.category,
+        "status": article.status or "draft",
+        "published_at": article.published_at or (datetime.now(timezone.utc).isoformat() if article.status == "published" else None),
+        "seo_title": article.seo_title or article.title,
+        "seo_description": article.seo_description or article.excerpt,
+        "author_id": current_user["user_id"],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.blog_posts.insert_one(article_doc)
+    return {"id": article_id, "slug": slug, "message": "Article créé"}
+
+@api_router.put("/blog/{article_id}", response_model=dict)
+async def update_blog_article(article_id: str, article: BlogArticleUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a blog article"""
+    existing = await db.blog_posts.find_one({"$or": [{"id": article_id}, {"slug": article_id}]})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Article non trouvé")
+    
+    update_data = {k: v for k, v in article.model_dump().items() if v is not None}
+    if "content_blocks" in update_data:
+        update_data["content_blocks"] = [b if isinstance(b, dict) else b.model_dump() for b in update_data["content_blocks"]]
+    
+    # Handle publishing
+    if article.status == "published" and existing.get("status") != "published":
+        update_data["published_at"] = datetime.now(timezone.utc).isoformat()
+    
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.blog_posts.update_one({"id": existing["id"]}, {"$set": update_data})
+    return {"message": "Article mis à jour"}
+
+@api_router.delete("/blog/{article_id}", response_model=dict)
+async def delete_blog_article(article_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a blog article"""
+    result = await db.blog_posts.delete_one({"$or": [{"id": article_id}, {"slug": article_id}]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Article non trouvé")
+    return {"message": "Article supprimé"}
+
+# ==================== PORTFOLIO ROUTES (Enhanced) ====================
 
 @api_router.post("/portfolio", response_model=dict)
-async def create_portfolio_item(item: PortfolioCreate, current_user: dict = Depends(get_current_user)):
+async def create_portfolio_item(item: PortfolioItemCreate, current_user: dict = Depends(get_current_user)):
+    """Create a portfolio item with rich content"""
     item_id = str(uuid.uuid4())
+    slug = item.slug or item.title.lower().replace(" ", "-").replace("'", "")
+    
+    # Make slug unique
+    existing = await db.portfolio.find_one({"slug": slug})
+    if existing:
+        slug = f"{slug}-{item_id[:8]}"
+    
     item_doc = {
         "id": item_id,
-        **item.model_dump(),
-        "created_at": datetime.now(timezone.utc).isoformat()
+        "slug": slug,
+        "title": item.title,
+        "subtitle": item.subtitle,
+        "category": item.category,
+        "tags": item.tags or [],
+        "featured_image": item.featured_image,
+        "gallery_images": item.gallery_images or [],
+        "content_blocks": [b.model_dump() for b in item.content_blocks] if item.content_blocks else [],
+        "audio_url": item.audio_url,
+        "video_url": item.video_url,
+        "status": item.status or "draft",
+        "seo_title": item.seo_title or item.title,
+        "seo_description": item.seo_description or item.subtitle,
+        "created_by": current_user["user_id"],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
     }
     await db.portfolio.insert_one(item_doc)
-    return {"id": item_id, "message": "Réalisation ajoutée"}
+    return {"id": item_id, "slug": slug, "message": "Réalisation ajoutée"}
 
 @api_router.get("/portfolio", response_model=List[dict])
-async def get_portfolio(category: Optional[str] = None):
+async def get_portfolio(category: Optional[str] = None, tag: Optional[str] = None, status: Optional[str] = None):
     query = {}
     if category:
         query["category"] = category
+    if tag:
+        query["tags"] = tag
+    if status:
+        query["status"] = status
     items = await db.portfolio.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
     return items
 
-@api_router.put("/portfolio/{item_id}", response_model=dict)
-async def update_portfolio_item(item_id: str, item: PortfolioCreate, current_user: dict = Depends(get_current_user)):
-    update_data = item.model_dump()
-    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
-    result = await db.portfolio.update_one({"id": item_id}, {"$set": update_data})
-    if result.matched_count == 0:
+@api_router.get("/portfolio/{item_id}", response_model=dict)
+async def get_portfolio_item(item_id: str):
+    """Get a single portfolio item by ID or slug"""
+    item = await db.portfolio.find_one({"$or": [{"id": item_id}, {"slug": item_id}]}, {"_id": 0})
+    if not item:
         raise HTTPException(status_code=404, detail="Réalisation non trouvée")
+    return item
+
+@api_router.put("/portfolio/{item_id}", response_model=dict)
+async def update_portfolio_item(item_id: str, item: PortfolioItemUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a portfolio item"""
+    existing = await db.portfolio.find_one({"$or": [{"id": item_id}, {"slug": item_id}]})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Réalisation non trouvée")
+    
+    update_data = {k: v for k, v in item.model_dump().items() if v is not None}
+    if "content_blocks" in update_data:
+        update_data["content_blocks"] = [b if isinstance(b, dict) else b.model_dump() for b in update_data["content_blocks"]]
+    
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.portfolio.update_one({"id": existing["id"]}, {"$set": update_data})
     return {"message": "Réalisation mise à jour"}
 
 @api_router.delete("/portfolio/{item_id}", response_model=dict)
 async def delete_portfolio_item(item_id: str, current_user: dict = Depends(get_current_user)):
-    result = await db.portfolio.delete_one({"id": item_id})
+    result = await db.portfolio.delete_one({"$or": [{"id": item_id}, {"slug": item_id}]})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Réalisation non trouvée")
     return {"message": "Réalisation supprimée"}
+
+# ==================== TAGS MANAGEMENT ====================
+
+@api_router.get("/tags", response_model=List[dict])
+async def get_tags(type: Optional[str] = None):
+    """Get all tags, optionally filtered by type (portfolio, blog)"""
+    query = {}
+    if type:
+        query["type"] = type
+    tags = await db.tags.find(query, {"_id": 0}).sort("name", 1).to_list(200)
+    return tags
+
+@api_router.post("/tags", response_model=dict)
+async def create_tag(tag: TagCreate, current_user: dict = Depends(get_current_user)):
+    """Create a new tag"""
+    tag_id = str(uuid.uuid4())
+    slug = tag.slug or tag.name.lower().replace(" ", "-")
+    
+    # Check if tag already exists
+    existing = await db.tags.find_one({"slug": slug, "type": tag.type})
+    if existing:
+        raise HTTPException(status_code=400, detail="Ce tag existe déjà")
+    
+    tag_doc = {
+        "id": tag_id,
+        "name": tag.name,
+        "slug": slug,
+        "type": tag.type,
+        "color": tag.color,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.tags.insert_one(tag_doc)
+    return {"id": tag_id, "message": "Tag créé"}
+
+@api_router.put("/tags/{tag_id}", response_model=dict)
+async def update_tag(tag_id: str, name: str, color: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Update a tag"""
+    update_data = {"name": name, "slug": name.lower().replace(" ", "-"), "updated_at": datetime.now(timezone.utc).isoformat()}
+    if color:
+        update_data["color"] = color
+    
+    result = await db.tags.update_one({"id": tag_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Tag non trouvé")
+    return {"message": "Tag mis à jour"}
+
+@api_router.delete("/tags/{tag_id}", response_model=dict)
+async def delete_tag(tag_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a tag"""
+    result = await db.tags.delete_one({"id": tag_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Tag non trouvé")
+    return {"message": "Tag supprimé"}
 
 # ==================== LEAD FORM (PUBLIC) ====================
 
