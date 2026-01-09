@@ -260,6 +260,9 @@ class PortfolioItemCreate(BaseModel):
     status: Optional[str] = "draft"  # draft, published
     seo_title: Optional[str] = None
     seo_description: Optional[str] = None
+    client_name: Optional[str] = None
+    project_date: Optional[str] = None
+    project_url: Optional[str] = None
 
 class PortfolioItemUpdate(BaseModel):
     title: Optional[str] = None
@@ -275,6 +278,9 @@ class PortfolioItemUpdate(BaseModel):
     status: Optional[str] = None
     seo_title: Optional[str] = None
     seo_description: Optional[str] = None
+    client_name: Optional[str] = None
+    project_date: Optional[str] = None
+    project_url: Optional[str] = None
 
 # Blog Article Model
 class BlogArticleCreate(BaseModel):
