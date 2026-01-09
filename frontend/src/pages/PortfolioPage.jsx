@@ -5,6 +5,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Dialog, DialogContent } from "../components/ui/dialog";
 import { portfolioAPI } from "../lib/api";
+import RichContentRenderer from "../components/RichContentRenderer";
 
 const PortfolioPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
