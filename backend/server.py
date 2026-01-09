@@ -2016,6 +2016,17 @@ async def get_portfolio(category: Optional[str] = None, tag: Optional[str] = Non
     items = await db.portfolio.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
     return items
 
+@api_router.get("/portfolio/by-slug/{slug}", response_model=dict)
+async def get_portfolio_item_by_slug(slug: str):
+    """Get a single portfolio item by slug"""
+    item = await db.portfolio.find_one({"slug": slug}, {"_id": 0})
+    if not item:
+        # Try by ID as fallback
+        item = await db.portfolio.find_one({"id": slug}, {"_id": 0})
+    if not item:
+        raise HTTPException(status_code=404, detail="Réalisation non trouvée")
+    return item
+
 @api_router.get("/portfolio/{item_id}", response_model=dict)
 async def get_portfolio_item(item_id: str):
     """Get a single portfolio item by ID or slug"""
