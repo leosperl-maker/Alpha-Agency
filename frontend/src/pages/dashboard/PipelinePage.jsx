@@ -1008,34 +1008,12 @@ const PipelinePage = () => {
         >
           <div 
             ref={scrollContainerRef}
-            className="overflow-x-auto pb-4 -mx-6 px-6 scrollbar-visible"
+            className="pipeline-scroll -mx-6 px-6"
             style={{ 
               WebkitOverflowScrolling: 'touch',
             }}
             data-pipeline-scroll="true"
           >
-            <style>{`
-              .scrollbar-visible::-webkit-scrollbar {
-                height: 12px;
-                background: #F8F8F8;
-              }
-              .scrollbar-visible::-webkit-scrollbar-track {
-                background: #F8F8F8;
-                border-radius: 6px;
-              }
-              .scrollbar-visible::-webkit-scrollbar-thumb {
-                background: #CE0202;
-                border-radius: 6px;
-                border: 2px solid #F8F8F8;
-              }
-              .scrollbar-visible::-webkit-scrollbar-thumb:hover {
-                background: #B00202;
-              }
-              .scrollbar-visible {
-                scrollbar-width: auto;
-                scrollbar-color: #CE0202 #F8F8F8;
-              }
-            `}</style>
             <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
               <div className="flex gap-4" style={{ width: 'fit-content', minWidth: '100%' }}>
                 {columns.map((column) => {
