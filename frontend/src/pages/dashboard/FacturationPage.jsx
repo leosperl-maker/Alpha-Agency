@@ -24,7 +24,8 @@ import {
   PiggyBank,
   ArrowRightLeft,
   Send,
-  Check
+  Check,
+  Package
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
