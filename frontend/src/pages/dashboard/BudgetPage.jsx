@@ -1410,7 +1410,23 @@ const BudgetPage = () => {
           
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Si le libellé contient *</Label>
+              <Label>Type de correspondance</Label>
+              <Select value={ruleForm.match_type || "contains"} onValueChange={(v) => setRuleForm({...ruleForm, match_type: v})}>
+                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="contains">Contient</SelectItem>
+                  <SelectItem value="starts_with">Commence par</SelectItem>
+                  <SelectItem value="ends_with">Finit par</SelectItem>
+                  <SelectItem value="exact">Est exactement</SelectItem>
+                  <SelectItem value="regex">Expression régulière</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Texte à rechercher *</Label>
               <Input
                 value={ruleForm.pattern}
                 onChange={(e) => setRuleForm({...ruleForm, pattern: e.target.value})}
@@ -1418,6 +1434,20 @@ const BudgetPage = () => {
                 className="bg-[#F8F8F8] border-[#E5E5E5] font-mono"
               />
               <p className="text-xs text-[#666666]">La recherche n'est pas sensible à la casse</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Appliquer aux</Label>
+              <Select value={ruleForm.apply_to_type || ""} onValueChange={(v) => setRuleForm({...ruleForm, apply_to_type: v})}>
+                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                  <SelectValue placeholder="Toutes les transactions" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="">Toutes les transactions</SelectItem>
+                  <SelectItem value="credit">Revenus uniquement</SelectItem>
+                  <SelectItem value="debit">Dépenses uniquement</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">
