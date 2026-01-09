@@ -138,9 +138,9 @@ async def refresh_news(
     region: Optional[str] = "guadeloupe",
     current_user: dict = Depends(get_current_user)
 ):
-    """Refresh news using NewsAPI.org"""
-    if not NEWSAPI_KEY:
-        raise HTTPException(status_code=503, detail="Clé API NewsAPI non configurée")
+    """Refresh news using NewsAPI.org with multiple API keys"""
+    if not NEWSAPI_KEYS:
+        raise HTTPException(status_code=503, detail="Aucune clé API NewsAPI configurée")
     
     # Only fetch standard NewsAPI categories, marketing categories use custom queries
     standard_categories = ["general", "business", "technology", "science", "health", "sports", "entertainment"]
@@ -155,6 +155,7 @@ async def refresh_news(
     
     articles_created = 0
     errors = []
+    keys_exhausted = set()
     
     # Category to search query mapping
     category_queries = {
@@ -188,6 +189,17 @@ async def refresh_news(
     
     async with httpx.AsyncClient(timeout=30.0) as client:
         for cat in categories_to_fetch:
+            # Try with different API keys if one is rate limited
+            api_key = None
+            for key in NEWSAPI_KEYS:
+                if key not in keys_exhausted:
+                    api_key = key
+                    break
+            
+            if not api_key:
+                errors.append("Toutes les clés API sont épuisées")
+                break
+            
             try:
                 if region_code in ["guadeloupe", "martinique", "saint-martin", "saint-barth", "guyane", "fr"]:
                     url = "https://newsapi.org/v2/everything"
@@ -196,29 +208,29 @@ async def refresh_news(
                     search_query = f"{base_query} {region_suffix}".strip()
                     
                     params = {
-                        "apiKey": NEWSAPI_KEY,
+                        "apiKey": api_key,
                         "q": search_query,
                         "language": "fr",
                         "sortBy": "publishedAt",
-                        "pageSize": 15
+                        "pageSize": 20  # Increased for more articles
                     }
                 else:
                     if cat in marketing_categories:
                         url = "https://newsapi.org/v2/everything"
                         params = {
-                            "apiKey": NEWSAPI_KEY,
+                            "apiKey": api_key,
                             "q": category_queries.get(cat, "marketing"),
                             "language": "en" if region_code in ["us", "gb"] else "de",
                             "sortBy": "publishedAt",
-                            "pageSize": 8
+                            "pageSize": 12
                         }
                     else:
                         url = "https://newsapi.org/v2/top-headlines"
                         params = {
-                            "apiKey": NEWSAPI_KEY,
+                            "apiKey": api_key,
                             "category": cat,
                             "country": region_code,
-                            "pageSize": 8
+                            "pageSize": 12
                         }
                 
                 response = await client.get(url, params=params)
@@ -254,11 +266,13 @@ async def refresh_news(
                     else:
                         error_msg = data.get('message', 'Unknown error')
                         if "too many requests" in error_msg.lower() or "rate" in error_msg.lower():
-                            errors.append(f"RATE_LIMIT: {error_msg}")
+                            keys_exhausted.add(api_key)
+                            errors.append(f"Clé API épuisée, changement de clé...")
                         else:
                             errors.append(f"NewsAPI error for {cat}: {error_msg}")
                 elif response.status_code == 429:
-                    errors.append("RATE_LIMIT: Trop de requêtes, veuillez réessayer plus tard")
+                    keys_exhausted.add(api_key)
+                    errors.append(f"Limite atteinte pour une clé, tentative avec une autre...")
                 else:
                     errors.append(f"HTTP {response.status_code} for {cat}")
                     
@@ -267,23 +281,27 @@ async def refresh_news(
                 errors.append(f"Exception for {cat}: {str(e)}")
                 continue
     
-    rate_limit_hit = any("RATE_LIMIT" in err for err in errors) if errors else False
+    all_keys_exhausted = len(keys_exhausted) >= len(NEWSAPI_KEYS)
     
-    if rate_limit_hit and articles_created == 0:
+    if all_keys_exhausted and articles_created == 0:
         return {
-            "message": "⚠️ Limite NewsAPI atteinte (100 requêtes/24h). Réessayez dans quelques heures.",
+            "message": f"⚠️ Toutes les clés NewsAPI ont atteint leur limite. {len(NEWSAPI_KEYS)} clés utilisées.",
             "categories_processed": len(categories_to_fetch),
             "region": region_code,
             "errors": errors,
-            "rate_limited": True
+            "rate_limited": True,
+            "keys_used": len(NEWSAPI_KEYS),
+            "keys_exhausted": len(keys_exhausted)
         }
     
     return {
-        "message": f"{articles_created} nouveaux articles récupérés",
+        "message": f"✅ {articles_created} nouveaux articles récupérés",
         "categories_processed": len(categories_to_fetch),
         "region": region_code,
         "errors": errors if errors else None,
-        "rate_limited": rate_limit_hit
+        "rate_limited": all_keys_exhausted,
+        "keys_used": len(NEWSAPI_KEYS),
+        "keys_exhausted": len(keys_exhausted)
     }
 
 
