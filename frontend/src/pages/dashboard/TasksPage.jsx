@@ -713,21 +713,24 @@ const TasksPage = () => {
   }
 
   return (
-    <div className="p-6 bg-[#F8F8F8] min-h-screen" data-testid="tasks-page">
+    <div className="bg-[#F8F8F8] min-h-screen -m-3 sm:-m-4 md:-m-6 p-3 sm:p-4 md:p-6" data-testid="tasks-page">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Tâches</h1>
-          <p className="text-[#666666]">Gérez vos tâches et projets</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button 
-            variant="outline" 
-            onClick={() => openColumnDialog()} 
-            className="border-[#CE0202] text-[#CE0202]"
-          >
-            <Settings2 className="w-4 h-4 mr-2" /> Colonnes
-          </Button>
+      <div className="flex flex-col gap-3 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Tâches</h1>
+            <p className="text-[#666666] text-xs sm:text-sm">Gérez vos tâches et projets</p>
+          </div>
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <Button 
+              variant="outline" 
+              onClick={() => openColumnDialog()} 
+              className="border-[#CE0202] text-[#CE0202] flex-1 sm:flex-none text-sm"
+            >
+              <Settings2 className="w-4 h-4 mr-1 sm:mr-2" /> 
+              <span className="hidden sm:inline">Colonnes</span>
+              <span className="sm:hidden">Config</span>
+            </Button>
           <Button 
             onClick={() => { resetForm(); setDialogOpen(true); }} 
             className="bg-[#CE0202] hover:bg-[#B00202] text-white"
