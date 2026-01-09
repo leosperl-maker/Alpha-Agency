@@ -198,6 +198,21 @@ Modèle appliqué : Pages "Vue d'ensemble" et "Demandes" utilisées comme réfé
 ### Blocked
 - ⚠️ **Intégration Brevo (e-mails)** - En attente activation du compte
 
+## 3rd Party Integrations
+
+### ✅ Intégrées et fonctionnelles
+- **Perplexity AI** : Assistant IA pour le dashboard
+- **NewsAPI.org** : Actualités avec images (style Perplexity Discover)
+- **Brevo (ex-Sendinblue)** : Emails transactionnels (NEW - 2026-01-09)
+  - Clé API configurée et testée ✅
+  - Notifications nouveaux leads
+  - Envoi de devis aux clients
+  - Réinitialisation mot de passe
+
+### En attente / Planifiées
+- **Meta API (Facebook/Instagram)** : Publication posts - Interface prête, intégration en attente
+- **Google Agenda** : Synchronisation calendrier - Planifié
+
 ## API Credentials
 - **Admin Login**: admin@alphagency.fr / superpassword
 - **Admin URL**: /alpha-admin-2024
