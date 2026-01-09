@@ -2839,6 +2839,193 @@ async def get_monthly_chart_data(year: Optional[int] = None, current_user: dict 
     
     return months_data
 
+# ==================== BUDGET FORECAST (PRÉVISIONNEL) ====================
+
+class BudgetForecastCreate(BaseModel):
+    month: str  # Format: YYYY-MM
+    category_id: str
+    type: str  # income or expense
+    planned_amount: float
+    description: Optional[str] = ""
+
+class BudgetForecastUpdate(BaseModel):
+    planned_amount: Optional[float] = None
+    description: Optional[str] = None
+
+@api_router.get("/budget/forecast", response_model=List[dict])
+async def get_budget_forecast(
+    month: Optional[str] = None,
+    year: Optional[int] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get budget forecasts (prévisionnel)"""
+    query = {}
+    if month:
+        query["month"] = month
+    elif year:
+        query["month"] = {"$regex": f"^{year}"}
+    
+    forecasts = await db.budget_forecasts.find(query, {"_id": 0}).sort("month", -1).to_list(1000)
+    return forecasts
+
+@api_router.post("/budget/forecast", response_model=dict)
+async def create_budget_forecast(forecast: BudgetForecastCreate, current_user: dict = Depends(get_current_user)):
+    """Create a budget forecast entry"""
+    # Check if forecast already exists for this month/category
+    existing = await db.budget_forecasts.find_one({
+        "month": forecast.month,
+        "category_id": forecast.category_id
+    })
+    
+    if existing:
+        # Update existing
+        await db.budget_forecasts.update_one(
+            {"id": existing["id"]},
+            {"$set": {
+                "planned_amount": forecast.planned_amount,
+                "description": forecast.description,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        return {"id": existing["id"], "message": "Prévision mise à jour"}
+    
+    forecast_id = str(uuid.uuid4())
+    forecast_doc = {
+        "id": forecast_id,
+        **forecast.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.budget_forecasts.insert_one(forecast_doc)
+    return {"id": forecast_id, "message": "Prévision créée"}
+
+@api_router.put("/budget/forecast/{forecast_id}", response_model=dict)
+async def update_budget_forecast(forecast_id: str, update: BudgetForecastUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a budget forecast"""
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
+    
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    result = await db.budget_forecasts.update_one({"id": forecast_id}, {"$set": update_data})
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Prévision non trouvée")
+    return {"message": "Prévision mise à jour"}
+
+@api_router.delete("/budget/forecast/{forecast_id}", response_model=dict)
+async def delete_budget_forecast(forecast_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a budget forecast"""
+    result = await db.budget_forecasts.delete_one({"id": forecast_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Prévision non trouvée")
+    return {"message": "Prévision supprimée"}
+
+@api_router.get("/budget/forecast/comparison", response_model=dict)
+async def get_forecast_vs_actual(
+    month: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Compare forecast vs actual for a given month (Prévu vs Réel)"""
+    # Get forecasts for the month
+    forecasts = await db.budget_forecasts.find({"month": month}, {"_id": 0}).to_list(1000)
+    
+    # Get actual transactions for the month
+    transactions = await db.bank_transactions.find(
+        {"date": {"$regex": f"^{month}"}},
+        {"_id": 0}
+    ).to_list(10000)
+    
+    # Group actual by category
+    actual_by_category = {}
+    for t in transactions:
+        cat_id = t.get("category_id") or "uncategorized"
+        trans_type = t.get("type", "debit")
+        key = f"{cat_id}_{trans_type}"
+        if key not in actual_by_category:
+            actual_by_category[key] = {"amount": 0, "count": 0}
+        actual_by_category[key]["amount"] += t["amount"]
+        actual_by_category[key]["count"] += 1
+    
+    # Build comparison data
+    comparison = []
+    for forecast in forecasts:
+        key = f"{forecast['category_id']}_{forecast['type']}"
+        actual = actual_by_category.get(key, {"amount": 0, "count": 0})
+        
+        planned = forecast["planned_amount"]
+        real = actual["amount"]
+        variance = real - planned
+        variance_percent = (variance / planned * 100) if planned > 0 else 0
+        
+        comparison.append({
+            "category_id": forecast["category_id"],
+            "type": forecast["type"],
+            "description": forecast.get("description", ""),
+            "planned": planned,
+            "actual": real,
+            "variance": variance,
+            "variance_percent": round(variance_percent, 1),
+            "status": "over" if variance > 0 and forecast["type"] == "expense" else "under" if variance < 0 else "on_track"
+        })
+    
+    # Calculate totals
+    total_planned_income = sum(f["planned_amount"] for f in forecasts if f["type"] == "income")
+    total_planned_expense = sum(f["planned_amount"] for f in forecasts if f["type"] == "expense")
+    total_actual_income = sum(t["amount"] for t in transactions if t["type"] == "credit")
+    total_actual_expense = sum(t["amount"] for t in transactions if t["type"] == "debit")
+    
+    return {
+        "month": month,
+        "comparison": comparison,
+        "totals": {
+            "planned_income": total_planned_income,
+            "planned_expense": total_planned_expense,
+            "planned_balance": total_planned_income - total_planned_expense,
+            "actual_income": total_actual_income,
+            "actual_expense": total_actual_expense,
+            "actual_balance": total_actual_income - total_actual_expense
+        },
+        "alerts": [
+            item for item in comparison 
+            if item["status"] == "over" and abs(item["variance_percent"]) > 20
+        ]
+    }
+
+@api_router.post("/budget/forecast/copy", response_model=dict)
+async def copy_forecast_to_month(
+    source_month: str,
+    target_month: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Copy forecasts from one month to another"""
+    forecasts = await db.budget_forecasts.find({"month": source_month}, {"_id": 0}).to_list(1000)
+    
+    if not forecasts:
+        raise HTTPException(status_code=404, detail="Aucune prévision trouvée pour ce mois")
+    
+    copied = 0
+    for forecast in forecasts:
+        # Check if already exists in target month
+        existing = await db.budget_forecasts.find_one({
+            "month": target_month,
+            "category_id": forecast["category_id"]
+        })
+        
+        if not existing:
+            new_forecast = {
+                "id": str(uuid.uuid4()),
+                "month": target_month,
+                "category_id": forecast["category_id"],
+                "type": forecast["type"],
+                "planned_amount": forecast["planned_amount"],
+                "description": forecast.get("description", ""),
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.budget_forecasts.insert_one(new_forecast)
+            copied += 1
+    
+    return {"message": f"{copied} prévisions copiées vers {target_month}"}
+
 # ==================== BUDGET CATEGORIES (CUSTOM) ====================
 
 class BudgetCategoryCreate(BaseModel):
