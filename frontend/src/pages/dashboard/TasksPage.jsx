@@ -1,16 +1,404 @@
 import { useState, useEffect } from "react";
-import { Plus, CheckCircle, Clock, AlertCircle, Calendar, MoreVertical, Trash2, Edit, Flag, ChevronDown, Search, Filter, User } from "lucide-react";
+import { 
+  Plus, CheckCircle, Clock, AlertCircle, Calendar, MoreVertical, Trash2, Edit, 
+  Flag, Search, User, GripVertical, Settings2, Target, Eye
+} from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import { Badge } from "../../components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "../../components/ui/dropdown-menu";
+import { Card, CardContent } from "../../components/ui/card";
+import { 
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter 
+} from "../../components/ui/dialog";
+import { 
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
+} from "../../components/ui/select";
+import { 
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator 
+} from "../../components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "../../components/ui/sheet";
 import { Label } from "../../components/ui/label";
 import { toast } from "sonner";
 import { tasksAPI, contactsAPI } from "../../lib/api";
+
+// Drag and drop imports
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  useDroppable,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  horizontalListSortingStrategy,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// Default task columns
+const DEFAULT_TASK_COLUMNS = [
+  { id: "todo", label: "À faire", color: "#6B7280" },
+  { id: "in_progress", label: "En cours", color: "#3B82F6" },
+  { id: "done", label: "Terminé", color: "#10B981" }
+];
+
+const priorityConfig = {
+  low: { label: "Basse", color: "bg-gray-100 text-gray-600" },
+  medium: { label: "Moyenne", color: "bg-yellow-100 text-yellow-700" },
+  high: { label: "Haute", color: "bg-orange-100 text-orange-700" },
+  urgent: { label: "Urgente", color: "bg-red-100 text-red-700" }
+};
+
+const categories = [
+  { value: "general", label: "Général" },
+  { value: "client", label: "Client" },
+  { value: "projet", label: "Projet" },
+  { value: "admin", label: "Administratif" },
+  { value: "marketing", label: "Marketing" },
+  { value: "dev", label: "Développement" }
+];
+
+// Sortable Task Card Component
+const SortableTaskCard = ({ task, onEdit, onDelete, onStatusChange, onViewDetails, contacts, columns }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ 
+    id: task.id,
+    data: { type: 'task', task }
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 1,
+  };
+
+  const priority = priorityConfig[task.priority] || priorityConfig.medium;
+  const isOverdue = task.due_date && task.due_date !== "" && new Date(task.due_date) < new Date() && task.status !== "done";
+  
+  const getContactName = (contactId) => {
+    if (!contactId) return null;
+    const contact = contacts.find(c => c.id === contactId);
+    if (!contact) return null;
+    return `${contact.first_name} ${contact.last_name}${contact.company ? ` (${contact.company})` : ''}`;
+  };
+
+  return (
+    <div 
+      ref={setNodeRef}
+      style={style}
+      className={`bg-white border border-[#E5E5E5] rounded-lg p-3 hover:shadow-md transition-all ${
+        isDragging ? 'shadow-xl ring-2 ring-[#CE0202]' : ''
+      } ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}
+      data-testid={`task-${task.id}`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start gap-2 flex-1 min-w-0">
+          {/* Drag Handle */}
+          <div 
+            {...attributes}
+            {...listeners}
+            className="drag-handle cursor-grab active:cursor-grabbing p-1 -ml-1 mt-0.5 hover:bg-[#F8F8F8] rounded flex-shrink-0"
+            data-testid={`drag-handle-task-${task.id}`}
+          >
+            <GripVertical className="w-4 h-4 text-[#999999]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className={`font-medium text-[#1A1A1A] text-sm ${task.status === 'done' ? 'line-through text-[#666666]' : ''}`}>
+              {task.title}
+            </p>
+            {task.description && (
+              <p className="text-xs text-[#666666] mt-1 line-clamp-2">{task.description}</p>
+            )}
+          </div>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" data-testid={`task-menu-${task.id}`}>
+              <MoreVertical className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="bg-white" align="end">
+            <DropdownMenuItem onClick={() => onEdit(task)} data-testid={`task-edit-${task.id}`}>
+              <Edit className="w-4 h-4 mr-2" /> Modifier
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onViewDetails(task)} data-testid={`task-view-${task.id}`}>
+              <Eye className="w-4 h-4 mr-2" /> Voir détails
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {columns.filter(c => c.id !== task.status).map(col => (
+              <DropdownMenuItem 
+                key={col.id}
+                onClick={() => onStatusChange(task.id, col.id)}
+              >
+                <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: col.color }} />
+                {col.label}
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => onDelete(task.id)} className="text-red-600" data-testid={`task-delete-${task.id}`}>
+              <Trash2 className="w-4 h-4 mr-2" /> Supprimer
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
+      <div className="flex items-center gap-2 mt-2 flex-wrap">
+        <Badge className={`${priority.color} border-none text-xs`}>
+          <Flag className="w-3 h-3 mr-1" />
+          {priority.label}
+        </Badge>
+        {task.category && (
+          <Badge variant="outline" className="text-xs">
+            {categories.find(c => c.value === task.category)?.label || task.category}
+          </Badge>
+        )}
+        {task.due_date && (
+          <Badge className={`${isOverdue ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'} border-none text-xs`}>
+            <Calendar className="w-3 h-3 mr-1" />
+            {new Date(task.due_date).toLocaleDateString('fr-FR')}
+          </Badge>
+        )}
+      </div>
+      {/* Contact associé */}
+      {task.contact_id && getContactName(task.contact_id) && (
+        <div className="mt-2 pt-2 border-t border-[#E5E5E5]">
+          <p className="text-xs text-[#666666] flex items-center gap-1">
+            <User className="w-3 h-3" />
+            {getContactName(task.contact_id)}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Droppable Column Component
+const DroppableTaskColumn = ({ column, children, onEdit, onDelete, tasksCount, tasks }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setSortableRef,
+    transform,
+    transition,
+    isDragging: isColumnDragging,
+  } = useSortable({ 
+    id: column.id,
+    data: { type: 'column', column }
+  });
+
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: `column-${column.id}`,
+    data: { type: 'column', columnId: column.id }
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isColumnDragging ? 0.5 : 1,
+  };
+
+  const statusIcons = {
+    todo: Clock,
+    in_progress: Clock,
+    done: CheckCircle
+  };
+  const StatusIcon = statusIcons[column.id] || Clock;
+
+  return (
+    <div
+      ref={(node) => {
+        setSortableRef(node);
+        setDroppableRef(node);
+      }}
+      style={style}
+      data-testid={`task-column-${column.id}`}
+      className={`flex-shrink-0 w-full md:w-[340px] ${isOver ? 'ring-2 ring-[#CE0202] ring-opacity-50' : ''}`}
+    >
+      <div className={`bg-white rounded-xl border shadow-sm h-full transition-all ${
+        isOver ? 'border-[#CE0202] bg-[#CE0202]/5' : 'border-[#E5E5E5]'
+      }`}>
+        <div className="p-4 border-b border-[#E5E5E5]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                {...attributes}
+                {...listeners}
+                className="cursor-grab active:cursor-grabbing p-1 hover:bg-[#F8F8F8] rounded"
+              >
+                <GripVertical className="w-4 h-4 text-[#666666]" />
+              </button>
+              <div 
+                className={`p-1.5 rounded-lg`}
+                style={{ backgroundColor: `${column.color}20` }}
+              >
+                <StatusIcon className="w-4 h-4" style={{ color: column.color }} />
+              </div>
+              <span className="text-[#1A1A1A] text-sm font-semibold">
+                {column.label}
+              </span>
+              <Badge variant="secondary" className="bg-[#F8F8F8] text-[#666666] text-xs">
+                {tasksCount}
+              </Badge>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                  <MoreVertical className="w-4 h-4 text-[#666666]" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white border-[#E5E5E5]">
+                <DropdownMenuItem onClick={() => onEdit(column)}>
+                  <Edit className="w-4 h-4 mr-2" /> Modifier
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onDelete(column.id)} className="text-red-600">
+                  <Trash2 className="w-4 h-4 mr-2" /> Supprimer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+        <div className="p-3 space-y-3 max-h-[calc(100vh-420px)] overflow-y-auto">
+          <SortableContext 
+            items={tasks.map(t => t.id)} 
+            strategy={verticalListSortingStrategy}
+          >
+            {children}
+          </SortableContext>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Task Detail Sheet Component
+const TaskDetailSheet = ({ task, open, onOpenChange, onEdit, contacts, columns }) => {
+  if (!task) return null;
+  
+  const priority = priorityConfig[task.priority] || priorityConfig.medium;
+  const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== "done";
+  const contact = contacts?.find(c => c.id === task.contact_id);
+  const column = columns.find(c => c.id === task.status);
+  
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="bg-white w-full sm:max-w-lg overflow-y-auto">
+        <SheetHeader className="pb-4 border-b border-[#E5E5E5]">
+          <div className="flex items-start justify-between">
+            <div>
+              <SheetTitle className={`text-xl text-[#1A1A1A] ${task.status === 'done' ? 'line-through' : ''}`}>
+                {task.title}
+              </SheetTitle>
+            </div>
+            <Badge 
+              className="text-xs"
+              style={{ backgroundColor: `${column?.color}20`, color: column?.color, border: `1px solid ${column?.color}40` }}
+            >
+              {column?.label || task.status}
+            </Badge>
+          </div>
+        </SheetHeader>
+        
+        <div className="py-6 space-y-6">
+          {/* Priority and Category */}
+          <div className="flex flex-wrap gap-2">
+            <Badge className={`${priority.color} border-none`}>
+              <Flag className="w-3 h-3 mr-1" />
+              {priority.label}
+            </Badge>
+            {task.category && (
+              <Badge variant="outline">
+                {categories.find(c => c.value === task.category)?.label || task.category}
+              </Badge>
+            )}
+            {isOverdue && (
+              <Badge className="bg-red-100 text-red-700">
+                <AlertCircle className="w-3 h-3 mr-1" /> En retard
+              </Badge>
+            )}
+          </div>
+
+          {/* Description */}
+          {task.description && (
+            <div>
+              <h3 className="text-sm font-semibold text-[#1A1A1A] mb-2">Description</h3>
+              <p className="text-sm text-[#666666] whitespace-pre-wrap">{task.description}</p>
+            </div>
+          )}
+
+          {/* Due Date */}
+          {task.due_date && (
+            <div className="flex items-center gap-3">
+              <Calendar className={`w-5 h-5 ${isOverdue ? 'text-red-500' : 'text-[#666666]'}`} />
+              <div>
+                <p className="text-xs text-[#666666]">Date d'échéance</p>
+                <p className={`text-sm font-medium ${isOverdue ? 'text-red-600' : 'text-[#1A1A1A]'}`}>
+                  {new Date(task.due_date).toLocaleDateString('fr-FR', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Contact */}
+          {contact && (
+            <div className="flex items-center gap-3">
+              <User className="w-5 h-5 text-[#666666]" />
+              <div>
+                <p className="text-xs text-[#666666]">Contact associé</p>
+                <p className="text-sm font-medium text-[#1A1A1A]">
+                  {contact.first_name} {contact.last_name}
+                  {contact.company && <span className="text-[#666666]"> • {contact.company}</span>}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Created date */}
+          {task.created_at && (
+            <div className="text-xs text-[#666666]">
+              Créée le {new Date(task.created_at).toLocaleDateString('fr-FR')}
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="pt-4 border-t border-[#E5E5E5]">
+          <Button
+            onClick={() => { onOpenChange(false); onEdit(task); }}
+            className="w-full bg-[#CE0202] hover:bg-[#B00202] text-white"
+          >
+            <Edit className="w-4 h-4 mr-2" /> Modifier
+          </Button>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+};
 
 const TasksPage = () => {
   const [tasks, setTasks] = useState([]);
@@ -19,9 +407,16 @@ const TasksPage = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
-  const [filterStatus, setFilterStatus] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [columns, setColumns] = useState(DEFAULT_TASK_COLUMNS);
+  const [columnDialogOpen, setColumnDialogOpen] = useState(false);
+  const [editingColumn, setEditingColumn] = useState(null);
+  const [columnForm, setColumnForm] = useState({ id: "", label: "", color: "#3B82F6" });
+  const [activeId, setActiveId] = useState(null);
+  const [activeItem, setActiveItem] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [detailSheetOpen, setDetailSheetOpen] = useState(false);
   
   const [formData, setFormData] = useState({
     title: "",
@@ -33,27 +428,33 @@ const TasksPage = () => {
     contact_id: ""
   });
 
-  const statusConfig = {
-    todo: { label: "À faire", color: "bg-gray-100 text-gray-700", icon: Clock },
-    in_progress: { label: "En cours", color: "bg-blue-100 text-blue-700", icon: Clock },
-    done: { label: "Terminé", color: "bg-green-100 text-green-700", icon: CheckCircle }
-  };
-
-  const priorityConfig = {
-    low: { label: "Basse", color: "bg-gray-100 text-gray-600" },
-    medium: { label: "Moyenne", color: "bg-yellow-100 text-yellow-700" },
-    high: { label: "Haute", color: "bg-orange-100 text-orange-700" },
-    urgent: { label: "Urgente", color: "bg-red-100 text-red-700" }
-  };
-
-  const categories = [
-    { value: "general", label: "Général" },
-    { value: "client", label: "Client" },
-    { value: "projet", label: "Projet" },
-    { value: "admin", label: "Administratif" },
-    { value: "marketing", label: "Marketing" },
-    { value: "dev", label: "Développement" }
+  const columnColors = [
+    "#6B7280", "#3B82F6", "#10B981", "#F59E0B", "#EF4444",
+    "#8B5CF6", "#EC4899", "#06B6D4", "#84CC16", "#F97316"
   ];
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  // Load saved columns from localStorage
+  useEffect(() => {
+    const savedColumns = localStorage.getItem('task_columns');
+    if (savedColumns) {
+      try {
+        setColumns(JSON.parse(savedColumns));
+      } catch (e) {
+        setColumns(DEFAULT_TASK_COLUMNS);
+      }
+    }
+  }, []);
+
+  // Save columns to localStorage when they change
+  const saveColumns = (newColumns) => {
+    setColumns(newColumns);
+    localStorage.setItem('task_columns', JSON.stringify(newColumns));
+  };
 
   useEffect(() => {
     fetchData();
@@ -84,18 +485,77 @@ const TasksPage = () => {
     }
   };
 
-  // Get contact name by ID
-  const getContactName = (contactId) => {
-    if (!contactId) return null;
-    const contact = contacts.find(c => c.id === contactId);
-    if (!contact) return null;
-    return `${contact.first_name} ${contact.last_name}${contact.company ? ` (${contact.company})` : ''}`;
+  // Find which column contains a task
+  const findColumnForTask = (taskId) => {
+    const task = tasks.find(t => t.id === taskId);
+    return task?.status || null;
+  };
+
+  const handleDragStart = (event) => {
+    const { active } = event;
+    setActiveId(active.id);
+    
+    if (active.data.current?.type === 'task') {
+      setActiveItem(active.data.current.task);
+    } else if (active.data.current?.type === 'column') {
+      setActiveItem(active.data.current.column);
+    }
+  };
+
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    setActiveId(null);
+    setActiveItem(null);
+
+    if (!over) return;
+
+    const activeData = active.data.current;
+    const overData = over.data.current;
+
+    // Handle column reordering
+    if (activeData?.type === 'column' && columns.some(c => c.id === over.id)) {
+      if (active.id !== over.id) {
+        const oldIndex = columns.findIndex((col) => col.id === active.id);
+        const newIndex = columns.findIndex((col) => col.id === over.id);
+        const newColumns = arrayMove(columns, oldIndex, newIndex);
+        saveColumns(newColumns);
+        toast.success("Ordre des colonnes mis à jour");
+      }
+      return;
+    }
+
+    // Handle task movement
+    if (activeData?.type === 'task') {
+      const taskId = active.id;
+      let targetColumnId = null;
+
+      if (overData?.type === 'column') {
+        targetColumnId = overData.columnId?.replace('column-', '') || over.id.replace('column-', '');
+      } else if (overData?.type === 'task') {
+        targetColumnId = findColumnForTask(over.id);
+      } else {
+        targetColumnId = over.id.startsWith('column-') ? over.id.replace('column-', '') : null;
+      }
+
+      if (!targetColumnId) return;
+
+      const sourceColumnId = findColumnForTask(taskId);
+      
+      if (sourceColumnId && targetColumnId && sourceColumnId !== targetColumnId) {
+        try {
+          await tasksAPI.update(taskId, { status: targetColumnId });
+          toast.success("Tâche déplacée");
+          fetchData();
+        } catch (error) {
+          toast.error("Erreur lors du déplacement");
+        }
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Prepare data - don't send empty contact_id
       const dataToSend = { ...formData };
       if (!dataToSend.contact_id) {
         delete dataToSend.contact_id;
@@ -164,115 +624,117 @@ const TasksPage = () => {
     setDialogOpen(true);
   };
 
+  const openViewDetails = (task) => {
+    setSelectedTask(task);
+    setDetailSheetOpen(true);
+  };
+
+  // Column management
+  const openColumnDialog = (column = null) => {
+    if (column) {
+      setEditingColumn(column);
+      setColumnForm({ id: column.id, label: column.label, color: column.color });
+    } else {
+      setEditingColumn(null);
+      setColumnForm({ id: "", label: "", color: "#3B82F6" });
+    }
+    setColumnDialogOpen(true);
+  };
+
+  const handleSaveColumn = () => {
+    if (!columnForm.label.trim()) {
+      toast.error("Nom requis");
+      return;
+    }
+
+    let newColumns;
+    if (editingColumn) {
+      newColumns = columns.map(col => 
+        col.id === editingColumn.id 
+          ? { ...col, label: columnForm.label, color: columnForm.color }
+          : col
+      );
+      toast.success("Colonne mise à jour");
+    } else {
+      const newId = columnForm.label.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_|_$/g, "");
+      
+      if (columns.some(c => c.id === newId)) {
+        toast.error("Une colonne avec ce nom existe déjà");
+        return;
+      }
+      
+      newColumns = [...columns, { id: newId, label: columnForm.label, color: columnForm.color }];
+      toast.success("Colonne créée");
+    }
+    
+    saveColumns(newColumns);
+    setColumnDialogOpen(false);
+  };
+
+  const handleDeleteColumn = (columnId) => {
+    const column = columns.find(c => c.id === columnId);
+    const tasksInColumn = tasks.filter(t => t.status === columnId);
+    
+    if (tasksInColumn.length > 0) {
+      toast.error(`Impossible de supprimer: ${tasksInColumn.length} tâche(s) dans cette colonne`);
+      return;
+    }
+    
+    if (!window.confirm(`Supprimer la colonne "${column?.label}" ?`)) return;
+    
+    const newColumns = columns.filter(c => c.id !== columnId);
+    saveColumns(newColumns);
+    toast.success("Colonne supprimée");
+  };
+
   // Filter tasks
   const filteredTasks = tasks.filter(task => {
-    if (filterStatus !== "all" && task.status !== filterStatus) return false;
     if (filterPriority !== "all" && task.priority !== filterPriority) return false;
     if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
 
-  // Group tasks by status for kanban view
-  const tasksByStatus = {
-    todo: filteredTasks.filter(t => t.status === "todo"),
-    in_progress: filteredTasks.filter(t => t.status === "in_progress"),
-    done: filteredTasks.filter(t => t.status === "done")
+  // Group tasks by status
+  const getTasksByColumn = (columnId) => {
+    return filteredTasks.filter(t => t.status === columnId);
   };
 
-  const TaskCard = ({ task }) => {
-    const priority = priorityConfig[task.priority] || priorityConfig.medium;
-    const isOverdue = task.due_date && task.due_date !== "" && new Date(task.due_date) < new Date() && task.status !== "done";
-    
-    return (
-      <div className={`bg-white border border-[#E5E5E5] rounded-lg p-3 mb-2 hover:shadow-md transition-shadow ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}>
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <p className={`font-medium text-[#1A1A1A] text-sm ${task.status === 'done' ? 'line-through text-[#666666]' : ''}`}>
-              {task.title}
-            </p>
-            {task.description && (
-              <p className="text-xs text-[#666666] mt-1 line-clamp-2">{task.description}</p>
-            )}
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-white">
-              <DropdownMenuItem onClick={() => openEditDialog(task)}>
-                <Edit className="w-4 h-4 mr-2" /> Modifier
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {task.status !== "todo" && (
-                <DropdownMenuItem onClick={() => handleStatusChange(task.id, "todo")}>
-                  À faire
-                </DropdownMenuItem>
-              )}
-              {task.status !== "in_progress" && (
-                <DropdownMenuItem onClick={() => handleStatusChange(task.id, "in_progress")}>
-                  En cours
-                </DropdownMenuItem>
-              )}
-              {task.status !== "done" && (
-                <DropdownMenuItem onClick={() => handleStatusChange(task.id, "done")}>
-                  Terminé
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleDelete(task.id)} className="text-red-600">
-                <Trash2 className="w-4 h-4 mr-2" /> Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        
-        <div className="flex items-center gap-2 mt-2 flex-wrap">
-          <Badge className={`${priority.color} border-none text-xs`}>
-            <Flag className="w-3 h-3 mr-1" />
-            {priority.label}
-          </Badge>
-          {task.category && (
-            <Badge variant="outline" className="text-xs">
-              {categories.find(c => c.value === task.category)?.label || task.category}
-            </Badge>
-          )}
-          {task.due_date && (
-            <Badge className={`${isOverdue ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'} border-none text-xs`}>
-              <Calendar className="w-3 h-3 mr-1" />
-              {new Date(task.due_date).toLocaleDateString('fr-FR')}
-            </Badge>
-          )}
-        </div>
-        {/* Contact associé */}
-        {task.contact_id && getContactName(task.contact_id) && (
-          <div className="mt-2 pt-2 border-t border-[#E5E5E5]">
-            <p className="text-xs text-[#666666] flex items-center gap-1">
-              <User className="w-3 h-3" />
-              {getContactName(task.contact_id)}
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  };
+  // Calculate overdue count
+  const overdueCount = tasks.filter(t => 
+    t.due_date && new Date(t.due_date) < new Date() && t.status !== "done"
+  ).length;
 
   if (loading) {
     return <div className="flex items-center justify-center h-64">Chargement...</div>;
   }
 
   return (
-    <div className="p-6 bg-[#F8F8F8] min-h-screen">
+    <div className="p-6 bg-[#F8F8F8] min-h-screen" data-testid="tasks-page">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-[#1A1A1A]">Tâches</h1>
           <p className="text-[#666666]">Gérez vos tâches et projets</p>
         </div>
-        <Button onClick={() => { resetForm(); setDialogOpen(true); }} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
-          <Plus className="w-4 h-4 mr-2" /> Nouvelle tâche
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => openColumnDialog()} 
+            className="border-[#CE0202] text-[#CE0202]"
+          >
+            <Settings2 className="w-4 h-4 mr-2" /> Colonnes
+          </Button>
+          <Button 
+            onClick={() => { resetForm(); setDialogOpen(true); }} 
+            className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" /> Nouvelle tâche
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -323,7 +785,7 @@ const TasksPage = () => {
                 <AlertCircle className="w-5 h-5 text-red-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#1A1A1A]">{stats.overdue || 0}</p>
+                <p className="text-2xl font-bold text-[#1A1A1A]">{overdueCount}</p>
                 <p className="text-xs text-[#666666]">En retard</p>
               </div>
             </div>
@@ -345,92 +807,107 @@ const TasksPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="flex flex-wrap gap-3 items-center mb-6">
+        <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
           <Input
-            placeholder="Rechercher..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Rechercher..."
             className="pl-9 bg-white border-[#E5E5E5]"
           />
         </div>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[140px] bg-white border-[#E5E5E5]">
-            <SelectValue placeholder="Statut" />
-          </SelectTrigger>
-          <SelectContent className="bg-white">
-            <SelectItem value="all">Tous les statuts</SelectItem>
-            <SelectItem value="todo">À faire</SelectItem>
-            <SelectItem value="in_progress">En cours</SelectItem>
-            <SelectItem value="done">Terminé</SelectItem>
-          </SelectContent>
-        </Select>
         <Select value={filterPriority} onValueChange={setFilterPriority}>
-          <SelectTrigger className="w-[140px] bg-white border-[#E5E5E5]">
+          <SelectTrigger className="w-40 bg-white border-[#E5E5E5]">
             <SelectValue placeholder="Priorité" />
           </SelectTrigger>
           <SelectContent className="bg-white">
             <SelectItem value="all">Toutes priorités</SelectItem>
-            <SelectItem value="urgent">Urgente</SelectItem>
-            <SelectItem value="high">Haute</SelectItem>
-            <SelectItem value="medium">Moyenne</SelectItem>
-            <SelectItem value="low">Basse</SelectItem>
+            {Object.entries(priorityConfig).map(([key, config]) => (
+              <SelectItem key={key} value={key}>{config.label}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
 
       {/* Kanban Board */}
-      <div className="overflow-x-auto -mx-6 px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-w-[900px] md:min-w-0">
-        {Object.entries(statusConfig).map(([status, config]) => {
-          const StatusIcon = config.icon;
-          const statusTasks = tasksByStatus[status] || [];
-          
-          return (
-            <div key={status} className="bg-white rounded-lg border border-[#E5E5E5] p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Badge className={`${config.color} border-none`}>
-                    <StatusIcon className="w-3 h-3 mr-1" />
-                    {config.label}
-                  </Badge>
-                  <span className="text-sm text-[#666666]">{statusTasks.length}</span>
-                </div>
-              </div>
-              
-              <div className="space-y-2 min-h-[200px]">
-                {statusTasks.length === 0 ? (
-                  <p className="text-sm text-[#666666] text-center py-8">Aucune tâche</p>
-                ) : (
-                  statusTasks.map(task => <TaskCard key={task.id} task={task} />)
-                )}
-              </div>
+      <DndContext 
+        sensors={sensors} 
+        collisionDetection={closestCenter} 
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <div 
+          className="overflow-x-auto pb-4 -mx-4 px-4"
+          style={{ 
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#CE0202 #E5E5E5'
+          }}
+        >
+          <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
+            <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
+              {columns.map((column) => {
+                const columnTasks = getTasksByColumn(column.id);
+                
+                return (
+                  <DroppableTaskColumn
+                    key={column.id}
+                    column={column}
+                    onEdit={openColumnDialog}
+                    onDelete={handleDeleteColumn}
+                    tasksCount={columnTasks.length}
+                    tasks={columnTasks}
+                  >
+                    {columnTasks.map((task) => (
+                      <SortableTaskCard
+                        key={task.id}
+                        task={task}
+                        onEdit={openEditDialog}
+                        onDelete={handleDelete}
+                        onStatusChange={handleStatusChange}
+                        onViewDetails={openViewDetails}
+                        contacts={contacts}
+                        columns={columns}
+                      />
+                    ))}
+                    {columnTasks.length === 0 && (
+                      <div className="text-center py-8 text-[#666666]">
+                        <Target className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                        <p className="text-xs">Aucune tâche</p>
+                      </div>
+                    )}
+                  </DroppableTaskColumn>
+                );
+              })}
             </div>
-          );
-        })}
+          </SortableContext>
         </div>
-      </div>
+        
+        {/* Drag Overlay */}
+        <DragOverlay>
+          {activeItem && activeId && (
+            <div className="opacity-90">
+              {activeItem.label ? (
+                <div className="w-80 bg-white rounded-xl border-2 border-[#CE0202] shadow-xl p-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: activeItem.color }} />
+                    <span className="text-[#1A1A1A] text-sm font-semibold">{activeItem.label}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-72 bg-white rounded-lg border-2 border-[#CE0202] shadow-xl p-3">
+                  <p className="font-medium text-[#1A1A1A] text-sm">{activeItem.title}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </DragOverlay>
+      </DndContext>
 
-      {/* Overdue Tasks Section */}
-      {tasks.filter(t => t.due_date && t.due_date !== "" && new Date(t.due_date) < new Date() && t.status !== "done").length > 0 && (
-        <div className="bg-red-50 rounded-lg border border-red-200 p-4 mt-6">
-          <div className="flex items-center gap-2 mb-4">
-            <AlertCircle className="w-5 h-5 text-red-600" />
-            <h3 className="font-semibold text-red-700">Tâches en retard ({tasks.filter(t => t.due_date && t.due_date !== "" && new Date(t.due_date) < new Date() && t.status !== "done").length})</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {tasks
-              .filter(t => t.due_date && t.due_date !== "" && new Date(t.due_date) < new Date() && t.status !== "done")
-              .map(task => <TaskCard key={`overdue-${task.id}`} task={task} />)
-            }
-          </div>
-        </div>
-      )}
-
-      {/* Dialog for Create/Edit */}
+      {/* Task Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-white max-w-md">
+        <DialogContent className="bg-white max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-[#1A1A1A]">
               {editingTask ? "Modifier la tâche" : "Nouvelle tâche"}
@@ -489,6 +966,25 @@ const TasksPage = () => {
                 </Select>
               </div>
             </div>
+
+            <div className="space-y-2">
+              <Label className="text-[#1A1A1A]">Statut</Label>
+              <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
+                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  {columns.map(col => (
+                    <SelectItem key={col.id} value={col.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: col.color }} />
+                        {col.label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             
             <div className="space-y-2">
               <Label className="text-[#1A1A1A]">Date d'échéance</Label>
@@ -500,7 +996,6 @@ const TasksPage = () => {
               />
             </div>
 
-            {/* Contact associé (facultatif) */}
             <div className="space-y-2">
               <Label className="text-[#1A1A1A] flex items-center gap-1">
                 <User className="w-3 h-3" />
@@ -525,22 +1020,6 @@ const TasksPage = () => {
               </Select>
             </div>
             
-            {editingTask && (
-              <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Statut</Label>
-                <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
-                  <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    {Object.entries(statusConfig).map(([key, config]) => (
-                      <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            
             <div className="flex gap-3 pt-4">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
                 Annuler
@@ -552,6 +1031,65 @@ const TasksPage = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Column Dialog */}
+      <Dialog open={columnDialogOpen} onOpenChange={setColumnDialogOpen}>
+        <DialogContent className="bg-white border-[#E5E5E5] max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingColumn ? "Modifier la colonne" : "Nouvelle colonne"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Nom *</Label>
+              <Input 
+                value={columnForm.label} 
+                onChange={(e) => setColumnForm({...columnForm, label: e.target.value})} 
+                placeholder="Ex: En revue" 
+                className="bg-[#F8F8F8] border-[#E5E5E5]" 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Couleur</Label>
+              <div className="flex flex-wrap gap-2">
+                {columnColors.map(color => (
+                  <button 
+                    key={color} 
+                    type="button" 
+                    onClick={() => setColumnForm({...columnForm, color})} 
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${
+                      columnForm.color === color ? 'border-[#1A1A1A] scale-110' : 'border-transparent'
+                    }`} 
+                    style={{ backgroundColor: color }} 
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="p-4 bg-[#F8F8F8] rounded-lg">
+              <p className="text-xs text-[#666666] mb-2">Aperçu</p>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: columnForm.color }} />
+                <span className="text-sm font-medium">{columnForm.label || "Nom de la colonne"}</span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setColumnDialogOpen(false)}>Annuler</Button>
+            <Button onClick={handleSaveColumn} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+              {editingColumn ? "Mettre à jour" : "Créer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Task Detail Sheet */}
+      <TaskDetailSheet
+        task={selectedTask}
+        open={detailSheetOpen}
+        onOpenChange={setDetailSheetOpen}
+        onEdit={openEditDialog}
+        contacts={contacts}
+        columns={columns}
+      />
     </div>
   );
 };
