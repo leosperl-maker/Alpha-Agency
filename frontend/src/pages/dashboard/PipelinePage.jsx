@@ -201,8 +201,8 @@ const SortableColumn = ({ column, children, onEdit, onDelete, oppsCount, totalAm
   );
 };
 
-// Deal Card Component (Pipedrive style)
-const DealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDelete, onStatusChange }) => {
+// Draggable Deal Card Component (Pipedrive style)
+const DealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDelete, onStatusChange, onViewDetails, isDragging: isDraggingProp }) => {
   const isOverdue = opp.expected_close_date && new Date(opp.expected_close_date) < new Date() && !['gagne', 'perdu'].includes(opp.status);
   const daysUntilClose = opp.expected_close_date 
     ? Math.ceil((new Date(opp.expected_close_date) - new Date()) / (1000 * 60 * 60 * 24))
@@ -211,51 +211,62 @@ const DealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDelete, onSt
   return (
     <div
       data-testid={`opportunity-${opp.id}`}
-      className={`bg-white rounded-lg border transition-all hover:shadow-md cursor-pointer ${
+      className={`bg-white rounded-lg border transition-all hover:shadow-md ${
+        isDraggingProp ? 'shadow-xl ring-2 ring-[#CE0202] opacity-90' : ''
+      } ${
         opp.archived ? 'opacity-60 border-[#E5E5E5]' : 
         isOverdue ? 'border-red-300 bg-red-50/50' : 'border-[#E5E5E5]'
       }`}
     >
-      {/* Card Header */}
+      {/* Card Header with Drag Handle */}
       <div className="p-3 border-b border-[#E5E5E5]">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <h4 className="text-[#1A1A1A] font-semibold text-sm truncate">{opp.title}</h4>
-            <div className="flex items-center gap-1.5 mt-1">
-              <User className="w-3 h-3 text-[#666666]" />
-              <span className="text-xs text-[#666666] truncate">
-                {opp.contact?.first_name} {opp.contact?.last_name}
-              </span>
-              {opp.contact?.company && (
-                <span className="text-xs text-[#999999]">• {opp.contact?.company}</span>
-              )}
+          <div className="flex items-start gap-2 flex-1 min-w-0">
+            {/* Drag Handle */}
+            <div 
+              className="drag-handle cursor-grab active:cursor-grabbing p-1 -ml-1 mt-0.5 hover:bg-[#F8F8F8] rounded flex-shrink-0"
+              data-testid={`drag-handle-${opp.id}`}
+            >
+              <GripVertical className="w-4 h-4 text-[#999999]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-[#1A1A1A] font-semibold text-sm truncate">{opp.title}</h4>
+              <div className="flex items-center gap-1.5 mt-1">
+                <User className="w-3 h-3 text-[#666666]" />
+                <span className="text-xs text-[#666666] truncate">
+                  {opp.contact?.first_name} {opp.contact?.last_name}
+                </span>
+                {opp.contact?.company && (
+                  <span className="text-xs text-[#999999]">• {opp.contact?.company}</span>
+                )}
+              </div>
             </div>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-6 w-6 p-0 -mr-1 -mt-1">
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0 -mr-1 -mt-1" data-testid={`opp-menu-${opp.id}`}>
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-white border-[#E5E5E5]">
-              <DropdownMenuItem onClick={() => onEdit(opp)}>
+            <DropdownMenuContent className="bg-white border-[#E5E5E5]" align="end">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(opp); }} data-testid={`opp-edit-${opp.id}`}>
                 <Edit className="w-4 h-4 mr-2" /> Modifier
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onViewDetails(opp); }} data-testid={`opp-view-${opp.id}`}>
                 <Eye className="w-4 h-4 mr-2" /> Voir détails
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               {opp.archived ? (
-                <DropdownMenuItem onClick={() => onUnarchive(opp.id)}>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onUnarchive(opp.id); }} data-testid={`opp-restore-${opp.id}`}>
                   <Archive className="w-4 h-4 mr-2" /> Restaurer
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem onClick={() => onArchive(opp.id)}>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onArchive(opp.id); }} data-testid={`opp-archive-${opp.id}`}>
                   <Archive className="w-4 h-4 mr-2" /> Archiver
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onDelete(opp.id)} className="text-red-600">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete(opp.id); }} className="text-red-600" data-testid={`opp-delete-${opp.id}`}>
                 <Trash2 className="w-4 h-4 mr-2" /> Supprimer
               </DropdownMenuItem>
             </DropdownMenuContent>
