@@ -4104,52 +4104,99 @@ async def get_news_article(article_id: str, current_user: dict = Depends(get_cur
 @api_router.post("/news/refresh", response_model=dict)
 async def refresh_news(
     category: Optional[str] = None,
-    region: Optional[str] = "fr",
+    region: Optional[str] = "guadeloupe",
     current_user: dict = Depends(get_current_user)
 ):
     """Refresh news using NewsAPI.org"""
     if not NEWSAPI_KEY:
         raise HTTPException(status_code=503, detail="Clé API NewsAPI non configurée")
     
-    categories_to_fetch = [c["id"] for c in NEWS_CATEGORIES if c["id"] == category] if category else [c["id"] for c in NEWS_CATEGORIES]
-    region_code = region if region else "fr"
+    # Only fetch standard NewsAPI categories, marketing categories use custom queries
+    standard_categories = ["general", "business", "technology", "science", "health", "sports", "entertainment"]
+    marketing_categories = ["ads", "social", "growth", "crm", "local", "design"]
+    
+    if category:
+        categories_to_fetch = [category]
+    else:
+        categories_to_fetch = standard_categories + marketing_categories
+    
+    region_code = region if region else "guadeloupe"
     
     articles_created = 0
     errors = []
     
-    # Category to search query mapping for 'everything' endpoint
+    # Category to search query mapping
     category_queries = {
-        "general": "actualités France",
+        # Standard news categories
+        "general": "actualités",
         "business": "économie entreprise business",
-        "technology": "technologie numérique innovation",
+        "technology": "technologie numérique innovation tech",
         "science": "science recherche découverte",
         "health": "santé médecine",
         "sports": "sport football rugby",
-        "entertainment": "cinéma musique culture"
+        "entertainment": "cinéma musique culture",
+        # Marketing categories
+        "ads": "Meta Ads Google Ads TikTok Ads publicité en ligne",
+        "social": "réseaux sociaux community management Instagram Facebook",
+        "growth": "growth hacking acquisition funnels marketing",
+        "crm": "CRM vente prospection commercial",
+        "local": "TPE PME business local commerce",
+        "design": "design branding identité visuelle logo"
+    }
+    
+    # Region to search query suffix mapping
+    region_queries = {
+        "guadeloupe": "Guadeloupe Antilles",
+        "martinique": "Martinique Antilles",
+        "saint-martin": "Saint-Martin Antilles",
+        "saint-barth": "Saint-Barthélemy Antilles",
+        "guyane": "Guyane française",
+        "fr": "France",
+        "us": "",  # Use NewsAPI country filter
+        "gb": "",  # Use NewsAPI country filter
+        "de": ""   # Use NewsAPI country filter
     }
     
     async with httpx.AsyncClient(timeout=30.0) as client:
         for cat in categories_to_fetch:
             try:
-                # For French news, use 'everything' endpoint with query search
-                # For other regions, use 'top-headlines' endpoint
-                if region_code == "fr":
+                # DOM-TOM and French regions use 'everything' endpoint with query search
+                # Other regions use 'top-headlines' endpoint
+                if region_code in ["guadeloupe", "martinique", "saint-martin", "saint-barth", "guyane", "fr"]:
                     url = "https://newsapi.org/v2/everything"
+                    
+                    # Build search query
+                    base_query = category_queries.get(cat, "actualités")
+                    region_suffix = region_queries.get(region_code, "")
+                    search_query = f"{base_query} {region_suffix}".strip()
+                    
                     params = {
                         "apiKey": NEWSAPI_KEY,
-                        "q": category_queries.get(cat, "France actualités"),
+                        "q": search_query,
                         "language": "fr",
                         "sortBy": "publishedAt",
-                        "pageSize": 10
+                        "pageSize": 8
                     }
                 else:
-                    url = "https://newsapi.org/v2/top-headlines"
-                    params = {
-                        "apiKey": NEWSAPI_KEY,
-                        "category": cat,
-                        "country": region_code,
-                        "pageSize": 10
-                    }
+                    # US, GB, DE use top-headlines with country filter
+                    # Only works with standard categories
+                    if cat in marketing_categories:
+                        url = "https://newsapi.org/v2/everything"
+                        params = {
+                            "apiKey": NEWSAPI_KEY,
+                            "q": category_queries.get(cat, "marketing"),
+                            "language": "en" if region_code in ["us", "gb"] else "de",
+                            "sortBy": "publishedAt",
+                            "pageSize": 8
+                        }
+                    else:
+                        url = "https://newsapi.org/v2/top-headlines"
+                        params = {
+                            "apiKey": NEWSAPI_KEY,
+                            "category": cat,
+                            "country": region_code,
+                            "pageSize": 8
+                        }
                 
                 response = await client.get(url, params=params)
                 
