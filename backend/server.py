@@ -2940,17 +2940,42 @@ async def get_forecast_vs_actual(
     # Get forecasts for the month
     forecasts = await db.budget_forecasts.find({"month": month}, {"_id": 0}).to_list(1000)
     
-    # Get actual transactions for the month
-    transactions = await db.bank_transactions.find(
+    # Get actual from bank_transactions
+    bank_transactions = await db.bank_transactions.find(
         {"date": {"$regex": f"^{month}"}},
         {"_id": 0}
     ).to_list(10000)
     
+    # Also get actual from budget entries (manual entries)
+    budget_entries = await db.budget.find(
+        {"date": {"$regex": f"^{month}"}},
+        {"_id": 0}
+    ).to_list(10000)
+    
+    # Combine transactions: bank_transactions + budget entries
+    all_transactions = []
+    
+    # Add bank transactions
+    for t in bank_transactions:
+        all_transactions.append({
+            "amount": t["amount"],
+            "type": "income" if t.get("type") == "credit" else "expense",
+            "category_id": t.get("category_id") or "uncategorized"
+        })
+    
+    # Add budget entries
+    for b in budget_entries:
+        all_transactions.append({
+            "amount": b["amount"],
+            "type": b["type"],
+            "category_id": b.get("category") or "uncategorized"
+        })
+    
     # Group actual by category
     actual_by_category = {}
-    for t in transactions:
+    for t in all_transactions:
         cat_id = t.get("category_id") or "uncategorized"
-        trans_type = t.get("type", "debit")
+        trans_type = t.get("type", "expense")
         key = f"{cat_id}_{trans_type}"
         if key not in actual_by_category:
             actual_by_category[key] = {"amount": 0, "count": 0}
@@ -2979,11 +3004,11 @@ async def get_forecast_vs_actual(
             "status": "over" if variance > 0 and forecast["type"] == "expense" else "under" if variance < 0 else "on_track"
         })
     
-    # Calculate totals
+    # Calculate totals from all transactions
+    total_actual_income = sum(t["amount"] for t in all_transactions if t["type"] == "income")
+    total_actual_expense = sum(t["amount"] for t in all_transactions if t["type"] == "expense")
     total_planned_income = sum(f["planned_amount"] for f in forecasts if f["type"] == "income")
     total_planned_expense = sum(f["planned_amount"] for f in forecasts if f["type"] == "expense")
-    total_actual_income = sum(t["amount"] for t in transactions if t["type"] == "credit")
-    total_actual_expense = sum(t["amount"] for t in transactions if t["type"] == "debit")
     
     return {
         "month": month,
