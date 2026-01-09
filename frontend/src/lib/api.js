@@ -90,6 +90,16 @@ export const opportunitiesAPI = {
   delete: (id) => api.delete(`/opportunities/${id}`),
 };
 
+// Pipeline Columns API
+export const pipelineColumnsAPI = {
+  getAll: () => api.get('/pipeline/columns'),
+  create: (data) => api.post('/pipeline/columns', data),
+  update: (id, data) => api.put(`/pipeline/columns/${id}`, data),
+  delete: (id) => api.delete(`/pipeline/columns/${id}`),
+  reorder: (columnIds) => api.put('/pipeline/columns/reorder', columnIds),
+  initialize: () => api.post('/pipeline/columns/initialize'),
+};
+
 // Quotes API
 export const quotesAPI = {
   getAll: (params) => api.get('/quotes', { params }),
