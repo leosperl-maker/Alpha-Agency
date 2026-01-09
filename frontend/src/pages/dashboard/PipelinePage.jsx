@@ -72,7 +72,7 @@ const PipelineStats = ({ pipeline, columns }) => {
   const avgDealValue = totalDeals > 0 ? totalValue / totalDeals : 0;
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
       <Card className="bg-white border-[#E5E5E5]">
         <CardContent className="p-3 sm:pt-4 sm:pb-3">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -115,7 +115,7 @@ const PipelineStats = ({ pipeline, columns }) => {
         </CardContent>
       </Card>
       
-      <Card className="bg-white border-[#E5E5E5] hidden sm:block">
+      <Card className="bg-white border-[#E5E5E5]">
         <CardContent className="p-3 sm:pt-4 sm:pb-3">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
