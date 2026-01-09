@@ -481,8 +481,8 @@ class TestBudgetForecastPhase3(TestAuth):
         )
         assert response.status_code == 200
         data = response.json()
-        assert "copied" in data
-        print(f"✓ POST /api/budget/forecast/copy - Copied {data['copied']} forecasts from 2025-04 to 2025-05")
+        assert "message" in data  # Response contains "message" with count info
+        print(f"✓ POST /api/budget/forecast/copy - {data['message']}")
         
         # Verify copy
         response = requests.get(
