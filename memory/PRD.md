@@ -104,11 +104,15 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [x] **Grand titre "Les actualités du jour"** en haut ✅ NEW
 - [x] **Article principal en vedette** (image large à droite, titre + chapeau à gauche) ✅ NEW
 - [x] **Cartes d'articles** avec image, titre, résumé, date/heure, source ✅ NEW
-- [x] **7 filtres par catégorie** (Toutes, Général, Business, Tech, Science, Santé, Sports, Divertissement) ✅ NEW
-- [x] **Sélecteur de région** (France, États-Unis, Royaume-Uni, Allemagne) ✅ NEW
-- [x] **Intégration NewsAPI.org** - Actualités avec images de qualité ✅ NEW
-- [x] **Modal plein écran** au clic sur article (pas de navigation vers nouvelle page) ✅ NEW
-  - Image hero en haut
+- [x] **13 filtres par catégorie** ✅ UPDATED
+  - Standard : Toutes, Général, Business, Tech, Science, Santé, Sports, Divertissement
+  - Marketing : Publicité en ligne, Réseaux sociaux, Growth & Funnels, CRM & Vente, Business Local, Design & Branding
+- [x] **9 régions DOM-TOM prioritaires** ✅ UPDATED
+  - Guadeloupe (défaut), Martinique, Saint-Martin, Saint-Barthélemy, Guyane
+  - France, États-Unis, Royaume-Uni, Allemagne
+- [x] **Intégration NewsAPI.org** - Actualités avec images de qualité ✅
+- [x] **Modal plein écran** au clic sur article (pas de navigation vers nouvelle page) ✅
+  - Image hero en haut (sans chevauchement avec titre)
   - Boutons "Retour aux actualités" et X pour fermer
   - Source avec bouton "Lire sur le site"
   - Section "Découvrir aussi" avec 4 articles liés
