@@ -119,6 +119,7 @@ const InvoicesPage = () => {
   useEffect(() => {
     const action = searchParams.get('action');
     const type = searchParams.get('type');
+    const id = searchParams.get('id');
     
     if (action === 'new') {
       setDocumentType(type === 'devis' ? 'devis' : 'facture');
@@ -128,6 +129,23 @@ const InvoicesPage = () => {
     } else if (action === 'services') {
       setServicesDialogOpen(true);
       setSearchParams({});
+    } else if (action === 'view' && id) {
+      // Find the invoice/quote by id and open view dialog
+      const findAndView = async () => {
+        try {
+          const response = await invoicesAPI.getAll();
+          const allDocs = response.data;
+          const doc = allDocs.find(d => d.id === id);
+          if (doc) {
+            setSelectedInvoice(doc);
+            setViewDialogOpen(true);
+          }
+        } catch (error) {
+          console.error("Error loading document:", error);
+        }
+        setSearchParams({});
+      };
+      findAndView();
     }
   }, [searchParams, setSearchParams]);
 
