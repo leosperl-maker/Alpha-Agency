@@ -18,7 +18,8 @@ import {
   CheckSquare,
   Wallet,
   Database,
-  UserCog
+  UserCog,
+  Bot
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 
