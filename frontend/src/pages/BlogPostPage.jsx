@@ -186,10 +186,17 @@ const BlogPostPage = () => {
               '--tw-prose-bullets': '#6A0F1A',
             }}
           >
-            <div 
-              dangerouslySetInnerHTML={{ __html: post.content }}
-              className="text-[#A1A1AA] leading-relaxed [&>h2]:text-white [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mt-8 [&>h2]:mb-4 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>li]:mb-2"
-            />
+            {/* Support both new content_blocks format and legacy HTML content */}
+            {post.content_blocks && post.content_blocks.length > 0 ? (
+              <div className="text-[#A1A1AA] [&_.rich-content]:text-[#A1A1AA] [&_h2]:text-white [&_h3]:text-white">
+                <RichContentRenderer blocks={post.content_blocks} />
+              </div>
+            ) : (
+              <div 
+                dangerouslySetInnerHTML={{ __html: post.content }}
+                className="text-[#A1A1AA] leading-relaxed [&>h2]:text-white [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mt-8 [&>h2]:mb-4 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>li]:mb-2"
+              />
+            )}
           </motion.div>
         </div>
       </section>
