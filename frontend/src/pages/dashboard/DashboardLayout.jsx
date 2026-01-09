@@ -72,6 +72,7 @@ const DashboardLayout = () => {
     { path: "/admin/actualites", icon: Newspaper, label: "Actualités" },
     { path: "/admin/blog", icon: FileText, label: "Blog" },
     { path: "/admin/social-media", icon: Share2, label: "Social Media" },
+    { path: "/admin/campagnes", icon: Mail, label: "Campagnes" },
   ];
 
   // Add Users management for super_admin only
