@@ -1594,33 +1594,162 @@ const SocialMediaPage = () => {
 
         {/* Accounts Tab */}
         <TabsContent value="accounts" className="mt-4">
-          <Card className="bg-white border-[#E5E5E5]">
-            <CardHeader>
-              <CardTitle className="text-lg">Comptes connectés</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <Settings className="w-12 h-12 mx-auto mb-4 text-[#E5E5E5]" />
-                <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Connectez vos réseaux sociaux</h3>
-                <p className="text-[#666666] mb-6 max-w-md mx-auto">
-                  Connectez vos pages Facebook et comptes Instagram pour commencer à programmer vos publications.
-                </p>
-                <div className="flex gap-3 justify-center">
-                  <Button className="bg-[#1877F2] hover:bg-[#166FE5] text-white">
-                    <Facebook className="w-4 h-4 mr-2" />
-                    Connecter Facebook
-                  </Button>
-                  <Button className="bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] hover:opacity-90 text-white">
-                    <Instagram className="w-4 h-4 mr-2" />
-                    Connecter Instagram
-                  </Button>
+          <div className="space-y-6">
+            {/* Meta Connection Card */}
+            <Card className="bg-white border-[#E5E5E5]">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1877F2] to-[#E4405F] flex items-center justify-center">
+                      <Facebook className="w-4 h-4 text-white" />
+                    </div>
+                    Connexion Meta (Facebook & Instagram)
+                  </CardTitle>
+                  {metaConnected && (
+                    <Badge className="bg-green-100 text-green-700 border-0">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Connecté
+                    </Badge>
+                  )}
                 </div>
-                <p className="text-xs text-[#999999] mt-4">
-                  Note: L'intégration Meta API sera activée prochainement avec les credentials fournis.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent>
+                {metaLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-[#1877F2]" />
+                    <span className="ml-3 text-[#666666]">Connexion en cours...</span>
+                  </div>
+                ) : metaConnected ? (
+                  <div className="space-y-4">
+                    {/* Connected Pages */}
+                    <div>
+                      <h4 className="text-sm font-medium text-[#1A1A1A] mb-3">Pages connectées ({metaPages.length})</h4>
+                      <div className="grid gap-3">
+                        {metaPages.map((page) => (
+                          <div 
+                            key={page.page_id}
+                            className="flex items-center gap-3 p-3 bg-[#F8F8F8] rounded-lg border border-[#E5E5E5]"
+                          >
+                            {page.picture_url ? (
+                              <img src={page.picture_url} alt={page.page_name} className="w-10 h-10 rounded-full" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center">
+                                <Facebook className="w-5 h-5 text-white" />
+                              </div>
+                            )}
+                            <div className="flex-1">
+                              <p className="font-medium text-[#1A1A1A]">{page.page_name}</p>
+                              <div className="flex items-center gap-2 text-xs text-[#666666]">
+                                <span>{page.category}</span>
+                                {page.has_instagram && (
+                                  <Badge className="bg-pink-100 text-pink-700 border-0 text-xs">
+                                    <Instagram className="w-3 h-3 mr-1" />
+                                    Instagram lié
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+                              onClick={() => {
+                                setSelectedPage(page);
+                                setPublishModalOpen(true);
+                              }}
+                            >
+                              <Send className="w-4 h-4 mr-1" />
+                              Publier
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Actions */}
+                    <div className="flex gap-3 pt-4 border-t border-[#E5E5E5]">
+                      <Button
+                        variant="outline"
+                        onClick={fetchMetaPages}
+                        disabled={metaLoading}
+                      >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${metaLoading ? 'animate-spin' : ''}`} />
+                        Rafraîchir les pages
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={handleDisconnectMeta}
+                      >
+                        Déconnecter
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#1877F2] to-[#E4405F] flex items-center justify-center">
+                      <Facebook className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Connectez vos réseaux sociaux</h3>
+                    <p className="text-[#666666] mb-6 max-w-md mx-auto">
+                      Connectez vos pages Facebook et comptes Instagram Business pour publier directement depuis Alpha Agency CRM.
+                    </p>
+                    <Button
+                      onClick={handleConnectMeta}
+                      className="bg-[#1877F2] hover:bg-[#166FE5] text-white"
+                      disabled={metaLoading}
+                    >
+                      {metaLoading ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Facebook className="w-4 h-4 mr-2" />
+                      )}
+                      Connecter Facebook & Instagram
+                    </Button>
+                    <p className="text-xs text-[#999999] mt-4 max-w-sm mx-auto">
+                      Vous serez redirigé vers Facebook pour autoriser l'accès à vos pages.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Published Posts History */}
+            {metaConnected && publishedPosts.length > 0 && (
+              <Card className="bg-white border-[#E5E5E5]">
+                <CardHeader>
+                  <CardTitle className="text-lg">Historique des publications</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {publishedPosts.slice(0, 10).map((post) => (
+                      <div 
+                        key={post.id}
+                        className="flex items-start gap-3 p-3 bg-[#F8F8F8] rounded-lg"
+                      >
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          post.platform === 'facebook' ? 'bg-[#1877F2]' : 'bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737]'
+                        }`}>
+                          {post.platform === 'facebook' ? (
+                            <Facebook className="w-4 h-4 text-white" />
+                          ) : (
+                            <Instagram className="w-4 h-4 text-white" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-[#1A1A1A] line-clamp-2">{post.content || post.caption}</p>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-[#666666]">
+                            <span>{post.page_name}</span>
+                            <span>•</span>
+                            <span>{new Date(post.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700 border-0 text-xs">Publié</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
 
