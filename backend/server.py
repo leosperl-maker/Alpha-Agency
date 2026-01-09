@@ -235,8 +235,8 @@ class PortfolioCreate(BaseModel):
 
 # Enhanced Portfolio Model for Rich Content
 class ContentBlock(BaseModel):
-    id: str
-    type: str  # 'text', 'heading', 'image', 'gallery', 'audio', 'video', 'quote'
+    id: Optional[str] = None
+    type: str  # 'text', 'heading', 'image', 'gallery', 'audio', 'video', 'quote', etc.
     content: Optional[str] = None  # For text/heading/quote
     level: Optional[int] = None  # For headings (h2, h3)
     url: Optional[str] = None  # For media
@@ -245,6 +245,27 @@ class ContentBlock(BaseModel):
     alignment: Optional[str] = "center"  # left, center, right, full
     rounded: Optional[bool] = True
     size: Optional[str] = "medium"  # small, medium, large, full
+    # Advanced block fields
+    images: Optional[List[dict]] = None  # For gallery blocks with captions
+    items: Optional[List[dict]] = None  # For stats, accordion, list blocks
+    columns: Optional[int] = None  # For gallery, stats layout
+    layout: Optional[str] = None  # For gallery: grid, masonry, carousel
+    ordered: Optional[bool] = None  # For list blocks
+    author: Optional[str] = None  # For quote blocks
+    role: Optional[str] = None  # For quote blocks
+    style: Optional[str] = None  # For divider, cta
+    color: Optional[str] = None  # For divider, section
+    backgroundColor: Optional[str] = None  # For section
+    textColor: Optional[str] = None  # For section
+    padding: Optional[str] = None  # For section
+    height: Optional[str] = None  # For spacer
+    text: Optional[str] = None  # For CTA button text
+    shadow: Optional[bool] = None  # For image
+    before: Optional[str] = None  # For before/after
+    after: Optional[str] = None  # For before/after
+    code: Optional[str] = None  # For code blocks
+    language: Optional[str] = None  # For code blocks
+    blocks: Optional[List[dict]] = None  # For nested blocks in section
 
 class PortfolioItemCreate(BaseModel):
     title: str
