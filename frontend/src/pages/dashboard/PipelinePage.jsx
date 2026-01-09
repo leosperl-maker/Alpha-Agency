@@ -942,7 +942,6 @@ const PipelinePage = () => {
                 </form>
               </DialogContent>
             </Dialog>
-          </div>
         </div>
       </div>
 
