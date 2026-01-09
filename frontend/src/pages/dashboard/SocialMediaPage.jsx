@@ -907,10 +907,18 @@ const SocialMediaPage = () => {
     
     return (
       <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
-        {/* Days header */}
-        <div className="grid grid-cols-7 bg-[#FAFAFA] border-b border-[#E5E5E5]">
+        {/* Days header - Desktop */}
+        <div className="hidden sm:grid grid-cols-7 bg-[#FAFAFA] border-b border-[#E5E5E5]">
           {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => (
             <div key={d} className="text-center py-3 text-sm font-medium text-[#666666]">
+              {d}
+            </div>
+          ))}
+        </div>
+        {/* Days header - Mobile */}
+        <div className="sm:hidden grid grid-cols-7 bg-[#FAFAFA] border-b border-[#E5E5E5]">
+          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
+            <div key={i} className="text-center py-2 text-xs font-medium text-[#666666]">
               {d}
             </div>
           ))}
