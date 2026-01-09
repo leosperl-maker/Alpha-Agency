@@ -1015,124 +1015,85 @@ const PipelinePage = () => {
             <div 
               ref={scrollContainerRef}
               className="pipeline-scroll -mx-6 px-6"
-              style={{ 
-                WebkitOverflowScrolling: 'touch',
-              }}
+              style={{ WebkitOverflowScrolling: 'touch' }}
               data-pipeline-scroll="true"
-              onScroll={(e) => {
-                const target = e.target;
-                const scrollPercent = target.scrollLeft / (target.scrollWidth - target.clientWidth) * 100;
-                const scrollbar = document.getElementById('pipeline-custom-scrollbar');
-                if (scrollbar) {
-                  scrollbar.style.marginLeft = `${scrollPercent * 0.7}%`;
-                }
-              }}
             >
               <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
                 <div className="flex gap-4" style={{ width: 'fit-content', minWidth: '100%' }}>
-                {columns.map((column) => {
-                  const columnOpps = filterOpportunities(pipeline[column.id] || []);
-                  const totalAmount = columnOpps.reduce((sum, opp) => sum + (opp.amount || 0), 0);
-                  
-                  return (
-                    <DroppableColumn
-                      key={column.id}
-                      column={column}
-                      onEdit={openColumnDialog}
-                      onDelete={handleDeleteColumn}
-                      oppsCount={columnOpps.length}
-                      totalAmount={totalAmount}
-                      opportunities={columnOpps}
-                    >
-                      {columnOpps.map((opp) => (
-                        <SortableDealCard
-                          key={opp.id}
-                          opp={opp}
-                          columns={columns}
-                          onEdit={openEditDialog}
-                          onArchive={handleArchive}
-                          onUnarchive={handleUnarchive}
-                          onDelete={handleDelete}
-                          onStatusChange={handleStatusChange}
-                          onViewDetails={openViewDetails}
-                        />
-                      ))}
-                      {columnOpps.length === 0 && (
-                        <div className="text-center py-8 text-[#666666]">
-                          <Target className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                          <p className="text-xs">Aucune affaire</p>
-                        </div>
-                      )}
-                  </DroppableColumn>
-                  );
-                })}
+                  {columns.map((column) => {
+                    const columnOpps = filterOpportunities(pipeline[column.id] || []);
+                    const totalAmount = columnOpps.reduce((sum, opp) => sum + (opp.amount || 0), 0);
+                    
+                    return (
+                      <DroppableColumn
+                        key={column.id}
+                        column={column}
+                        onEdit={openColumnDialog}
+                        onDelete={handleDeleteColumn}
+                        oppsCount={columnOpps.length}
+                        totalAmount={totalAmount}
+                        opportunities={columnOpps}
+                      >
+                        {columnOpps.map((opp) => (
+                          <SortableDealCard
+                            key={opp.id}
+                            opp={opp}
+                            columns={columns}
+                            onEdit={openEditDialog}
+                            onArchive={handleArchive}
+                            onUnarchive={handleUnarchive}
+                            onDelete={handleDelete}
+                            onStatusChange={handleStatusChange}
+                            onViewDetails={openViewDetails}
+                          />
+                        ))}
+                        {columnOpps.length === 0 && (
+                          <div className="text-center py-8 text-[#666666]">
+                            <Target className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                            <p className="text-xs">Aucune affaire</p>
+                          </div>
+                        )}
+                      </DroppableColumn>
+                    );
+                  })}
                 </div>
               </SortableContext>
             </div>
           
-            {/* Drag Overlay for visual feedback */}
             <DragOverlay>
-            {activeItem && activeId && (
-              <div className="opacity-90">
-                {activeItem.label ? (
-                  // Column overlay
-                  <div className="w-80 bg-white rounded-xl border-2 border-[#CE0202] shadow-xl p-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: activeItem.color }} />
-                      <span className="text-[#1A1A1A] text-sm font-semibold">{activeItem.label}</span>
+              {activeItem && activeId && (
+                <div className="opacity-90">
+                  {activeItem.label ? (
+                    <div className="w-80 bg-white rounded-xl border-2 border-[#CE0202] shadow-xl p-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: activeItem.color }} />
+                        <span className="text-[#1A1A1A] text-sm font-semibold">{activeItem.label}</span>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  // Card overlay
-                  <div className="w-72 bg-white rounded-lg border-2 border-[#CE0202] shadow-xl p-3">
-                    <h4 className="text-[#1A1A1A] font-semibold text-sm truncate">{activeItem.title}</h4>
-                    <p className="text-[#CE0202] font-bold mt-2">{activeItem.amount?.toLocaleString()}€</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </DragOverlay>
-        </DndContext>
+                  ) : (
+                    <div className="w-72 bg-white rounded-lg border-2 border-[#CE0202] shadow-xl p-3">
+                      <h4 className="text-[#1A1A1A] font-semibold text-sm truncate">{activeItem.title}</h4>
+                      <p className="text-[#CE0202] font-bold mt-2">{activeItem.amount?.toLocaleString()}€</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </DragOverlay>
+          </DndContext>
         
-        {/* Custom Horizontal Scrollbar */}
-        <div className="mt-4 -mx-6 px-6">
-          <div className="relative h-3 bg-[#E5E5E5] rounded-full overflow-hidden">
-            <div 
-              id="pipeline-custom-scrollbar"
-              className="absolute h-full w-[30%] bg-gradient-to-r from-[#CE0202] to-[#B00202] rounded-full cursor-pointer hover:from-[#B00202] hover:to-[#900202] transition-all"
-              style={{ marginLeft: '0%' }}
-              onMouseDown={(e) => {
-                const container = scrollContainerRef.current;
-                if (!container) return;
-                
-                const startX = e.clientX;
-                const track = e.target.parentElement;
-                const trackWidth = track.offsetWidth;
-                const thumbWidth = e.target.offsetWidth;
-                const maxScroll = container.scrollWidth - container.clientWidth;
-                const startScrollLeft = container.scrollLeft;
-                
-                const onMouseMove = (moveEvent) => {
-                  const deltaX = moveEvent.clientX - startX;
-                  const scrollRatio = deltaX / (trackWidth - thumbWidth);
-                  container.scrollLeft = startScrollLeft + scrollRatio * maxScroll;
-                };
-                
-                const onMouseUp = () => {
-                  document.removeEventListener('mousemove', onMouseMove);
-                  document.removeEventListener('mouseup', onMouseUp);
-                };
-                
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
-              }}
-            />
+          <div className="mt-4 -mx-6 px-6">
+            <div className="relative h-3 bg-[#E5E5E5] rounded-full overflow-hidden">
+              <div 
+                id="pipeline-custom-scrollbar"
+                className="absolute h-full w-[30%] bg-gradient-to-r from-[#CE0202] to-[#B00202] rounded-full cursor-pointer"
+                style={{ marginLeft: '0%' }}
+              />
+            </div>
+            <p className="text-xs text-[#999999] text-center mt-1">
+              ← Faites défiler horizontalement pour voir toutes les colonnes →
+            </p>
           </div>
-          <p className="text-xs text-[#999999] text-center mt-1">
-            ← Faites défiler horizontalement pour voir toutes les colonnes →
-          </p>
         </div>
-      </div>
       )}
 
       {/* Column Dialog */}
