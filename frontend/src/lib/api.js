@@ -403,4 +403,22 @@ export const socialAPI = {
   getStats: () => api.get('/social/stats'),
 };
 
+// Meta API (Facebook/Instagram)
+export const metaAPI = {
+  // OAuth
+  getAuthUrl: () => api.get('/meta/auth-url'),
+  exchangeToken: (code, redirectUri) => api.post('/meta/exchange-token', { code, redirect_uri: redirectUri }),
+  
+  // Pages & Accounts
+  getPages: () => api.get('/meta/pages'),
+  disconnect: () => api.delete('/meta/disconnect'),
+  
+  // Publishing
+  publishFacebook: (data) => api.post('/meta/publish/facebook', data),
+  publishInstagram: (data) => api.post('/meta/publish/instagram', data),
+  
+  // History
+  getPublishedPosts: (platform, limit = 50) => api.get('/meta/published-posts', { params: { platform, limit } }),
+};
+
 export default api;
