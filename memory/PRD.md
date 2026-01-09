@@ -219,6 +219,23 @@ Modèle appliqué : Pages "Vue d'ensemble" et "Demandes" utilisées comme réfé
 
 ### P4 - Améliorations futures
 - [ ] Audio player for portfolio
+- [ ] Intégration Google Agenda
+
+### P4 - Suggestions de tags IA ✅ COMPLETE (2026-01-09)
+- [x] **Endpoint `/api/tags/suggest`** avec Perplexity AI ✅
+- [x] **Bouton "Suggérer via IA"** dans PortfolioManagePage ✅
+- [x] **Bouton "Suggérer via IA"** dans BlogAdminPage ✅
+- [x] Suggestions basées sur le titre et le contenu ✅
+- [x] Affichage des nouveaux tags suggérés avec création en 1 clic ✅
+
+### P4 - Notifications email automatiques ✅ COMPLETE (2026-01-09)
+- [x] **Onglet "Notifications" dans Paramètres** ✅
+- [x] **Rappels de tâches** : Configurable (X jours avant échéance) ✅
+- [x] **Rappels de factures impayées** : Configurable (7, 14, 30, 60 jours) ✅
+- [x] **Notifications nouveaux leads** : Toggle ON/OFF ✅
+- [x] **Email de test** pour vérifier la configuration Brevo ✅
+- [x] **Boutons d'envoi manuel** des rappels ✅
+- [x] Templates HTML professionnels pour chaque type d'email ✅
 - [ ] Enhanced reporting and analytics
 - [ ] Email templates management
 
