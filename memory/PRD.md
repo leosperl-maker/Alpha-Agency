@@ -18,7 +18,22 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - **PDF**: ReportLab
 - **Storage**: Cloudinary (images), Dropbox (backups)
 
-## Core Features Implemented
+## Latest Updates (2026-01-09)
+
+### Bugs Corrigés ✅
+- [x] **Suppression devis** - Route DELETE ajoutée, fonctionne maintenant ✅
+- [x] **Budget & Trésorerie** - Cashflow utilise maintenant les entrées budget + bank_transactions ✅
+- [x] **Budget prévisionnel** - Le "réel" s'affiche correctement (combine budget + transactions) ✅
+- [x] **Assistant IA** - Fonctionnel (erreur était côté authentification frontend)
+
+### Module Blog/Actualités ✅ NEW (2026-01-09)
+- [x] **Page /admin/blog** avec liste des articles
+- [x] **Éditeur riche** avec blocs de contenu (texte, titres H2/H3, images, galeries, citations, audio, vidéo)
+- [x] **Gestion des tags** (créer, supprimer)
+- [x] **Filtres** par statut (brouillon/publié) et par tag
+- [x] **CRUD complet** pour les articles
+
+### Core Features Implemented
 
 ### Pipeline / Opportunities ✅ COMPLETE (Updated 2026-01-09)
 - [x] Kanban-style pipeline view style Pipedrive
