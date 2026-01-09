@@ -6514,9 +6514,14 @@ async def disconnect_meta_account(current_user: dict = Depends(get_current_user)
 # Include routers after all routes are defined
 app.include_router(api_router)
 
-# Include campaigns router from routes module
+# Include modular routers from routes module
 from routes.campaigns import router as campaigns_router
+from routes.news import router as news_router
+from routes.meta import router as meta_router
+
 app.include_router(campaigns_router, prefix="/api/campaigns", tags=["campaigns"])
+app.include_router(news_router, prefix="/api/news", tags=["news"])
+app.include_router(meta_router, prefix="/api/meta", tags=["meta"])
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
