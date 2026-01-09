@@ -238,10 +238,14 @@ const BudgetPage = () => {
       return;
     }
     try {
-      await budgetAPI.createRule(ruleForm);
+      await budgetAPI.createRule({
+        ...ruleForm,
+        match_type: ruleForm.match_type || "contains",
+        apply_to_type: ruleForm.apply_to_type || null
+      });
       toast.success("Règle créée");
       setRuleDialogOpen(false);
-      setRuleForm({ pattern: "", category_id: "", subcategory_id: "" });
+      setRuleForm({ pattern: "", category_id: "", match_type: "contains", apply_to_type: "" });
       fetchData();
     } catch (error) {
       toast.error("Erreur");
@@ -255,6 +259,16 @@ const BudgetPage = () => {
       fetchData();
     } catch (error) {
       toast.error("Erreur");
+    }
+  };
+
+  const handleApplyRules = async () => {
+    try {
+      const result = await budgetAPI.applyRules(selectedMonth);
+      toast.success(result.data.message || `${result.data.categorized} transactions catégorisées`);
+      fetchData();
+    } catch (error) {
+      toast.error("Erreur lors de l'application des règles");
     }
   };
 
