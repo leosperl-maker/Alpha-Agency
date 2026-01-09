@@ -3445,6 +3445,142 @@ async def get_ai_history(limit: int = 20, current_user: dict = Depends(get_curre
     
     return conversations
 
+# ==================== NEWS/ACTUALITÉS (PERPLEXITY DISCOVER) ====================
+
+NEWS_TOPICS = [
+    {"id": "guadeloupe", "label": "Actu Guadeloupe", "query": "actualités Guadeloupe aujourd'hui"},
+    {"id": "martinique", "label": "Actu Martinique", "query": "actualités Martinique aujourd'hui"},
+    {"id": "france", "label": "Actu France", "query": "actualités France aujourd'hui"},
+    {"id": "usa", "label": "Actu États-Unis", "query": "actualités États-Unis aujourd'hui"},
+    {"id": "monde", "label": "Actu Monde", "query": "actualités monde aujourd'hui"},
+    {"id": "marketing", "label": "Marketing Digital", "query": "tendances marketing digital 2025"},
+    {"id": "ads", "label": "Publicité en ligne", "query": "Meta Ads Google Ads TikTok Ads actualités"},
+    {"id": "social", "label": "Réseaux sociaux", "query": "tendances réseaux sociaux community management"},
+    {"id": "growth", "label": "Growth & Acquisition", "query": "growth hacking acquisition funnels"},
+    {"id": "crm", "label": "CRM & Vente", "query": "CRM vente prospection tendances"},
+    {"id": "local", "label": "Business Local", "query": "TPE PME business local tendances"},
+    {"id": "design", "label": "Design & Branding", "query": "design branding tendances 2025"},
+]
+
+class NewsArticle(BaseModel):
+    id: str
+    topic_id: str
+    title: str
+    summary: str
+    sources: List[str] = []
+    image_url: Optional[str] = None
+    created_at: str
+
+@api_router.get("/news/topics", response_model=List[dict])
+async def get_news_topics(current_user: dict = Depends(get_current_user)):
+    """Get available news topics"""
+    return NEWS_TOPICS
+
+@api_router.get("/news", response_model=List[dict])
+async def get_news(
+    topic_id: Optional[str] = None,
+    limit: int = 20,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get news articles from database"""
+    query = {}
+    if topic_id:
+        query["topic_id"] = topic_id
+    
+    articles = await db.news_articles.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    return articles
+
+@api_router.post("/news/refresh", response_model=dict)
+async def refresh_news(
+    topic_id: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Refresh news for a specific topic or all topics using Perplexity"""
+    if not PERPLEXITY_API_KEY:
+        raise HTTPException(status_code=503, detail="Clé API Perplexity non configurée")
+    
+    topics_to_refresh = [t for t in NEWS_TOPICS if t["id"] == topic_id] if topic_id else NEWS_TOPICS
+    
+    articles_created = 0
+    
+    for topic in topics_to_refresh:
+        try:
+            # Call Perplexity API to get news
+            response = requests.post(
+                "https://api.perplexity.ai/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "sonar",
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "Tu es un assistant qui génère des résumés d'actualités en français. Pour chaque actualité, donne un titre accrocheur et un résumé de 2-3 phrases. Format: JSON array avec title, summary, sources (array of URLs)."
+                        },
+                        {
+                            "role": "user",
+                            "content": f"Donne-moi les 3 dernières actualités importantes sur: {topic['query']}. Réponds uniquement en JSON: [{{'title': '...', 'summary': '...', 'sources': ['url1', 'url2']}}]"
+                        }
+                    ],
+                    "temperature": 0.5,
+                    "max_tokens": 1500
+                },
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                content = result["choices"][0]["message"]["content"]
+                
+                # Try to parse JSON from response
+                import json
+                import re
+                
+                # Extract JSON array from response
+                json_match = re.search(r'\[.*\]', content, re.DOTALL)
+                if json_match:
+                    try:
+                        articles = json.loads(json_match.group())
+                        for article in articles:
+                            article_doc = {
+                                "id": str(uuid.uuid4()),
+                                "topic_id": topic["id"],
+                                "title": article.get("title", ""),
+                                "summary": article.get("summary", ""),
+                                "sources": article.get("sources", []),
+                                "image_url": None,
+                                "created_at": datetime.now(timezone.utc).isoformat()
+                            }
+                            await db.news_articles.insert_one(article_doc)
+                            articles_created += 1
+                    except json.JSONDecodeError:
+                        logging.warning(f"Could not parse JSON for topic {topic['id']}")
+                        
+        except Exception as e:
+            logging.error(f"Error refreshing news for topic {topic['id']}: {str(e)}")
+            continue
+    
+    return {
+        "message": f"{articles_created} articles créés",
+        "topics_processed": len(topics_to_refresh)
+    }
+
+@api_router.delete("/news/{article_id}", response_model=dict)
+async def delete_news_article(article_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a news article"""
+    result = await db.news_articles.delete_one({"id": article_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Article non trouvé")
+    return {"message": "Article supprimé"}
+
+@api_router.delete("/news/clear/{topic_id}", response_model=dict)
+async def clear_news_topic(topic_id: str, current_user: dict = Depends(get_current_user)):
+    """Clear all news for a topic"""
+    result = await db.news_articles.delete_many({"topic_id": topic_id})
+    return {"message": f"{result.deleted_count} articles supprimés"}
+
 # ==================== BUDGET CATEGORIES (CUSTOM) ====================
 
 class BudgetCategoryCreate(BaseModel):
