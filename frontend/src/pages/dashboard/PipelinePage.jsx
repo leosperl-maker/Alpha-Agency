@@ -72,58 +72,58 @@ const PipelineStats = ({ pipeline, columns }) => {
   const avgDealValue = totalDeals > 0 ? totalValue / totalDeals : 0;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
       <Card className="bg-white border-[#E5E5E5]">
-        <CardContent className="pt-4 pb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-blue-600" />
+        <CardContent className="p-3 sm:pt-4 sm:pb-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
             </div>
-            <div>
-              <p className="text-xs text-[#666666]">Valeur pipeline</p>
-              <p className="text-lg font-bold text-[#1A1A1A]">{totalValue.toLocaleString()}€</p>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs text-[#666666]">Valeur pipeline</p>
+              <p className="text-sm sm:text-lg font-bold text-[#1A1A1A] truncate">{totalValue.toLocaleString()}€</p>
             </div>
           </div>
         </CardContent>
       </Card>
       
       <Card className="bg-white border-[#E5E5E5]">
-        <CardContent className="pt-4 pb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-              <Target className="w-5 h-5 text-purple-600" />
+        <CardContent className="p-3 sm:pt-4 sm:pb-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
             </div>
-            <div>
-              <p className="text-xs text-[#666666]">Affaires actives</p>
-              <p className="text-lg font-bold text-[#1A1A1A]">{totalDeals}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card className="bg-white border-[#E5E5E5]">
-        <CardContent className="pt-4 pb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-xs text-[#666666]">Taux conversion</p>
-              <p className="text-lg font-bold text-[#1A1A1A]">{conversionRate}%</p>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs text-[#666666]">Affaires actives</p>
+              <p className="text-sm sm:text-lg font-bold text-[#1A1A1A]">{totalDeals}</p>
             </div>
           </div>
         </CardContent>
       </Card>
       
       <Card className="bg-white border-[#E5E5E5]">
-        <CardContent className="pt-4 pb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-              <BarChart3 className="w-5 h-5 text-orange-600" />
+        <CardContent className="p-3 sm:pt-4 sm:pb-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
             </div>
-            <div>
-              <p className="text-xs text-[#666666]">Valeur moyenne</p>
-              <p className="text-lg font-bold text-[#1A1A1A]">{Math.round(avgDealValue).toLocaleString()}€</p>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs text-[#666666]">Taux conversion</p>
+              <p className="text-sm sm:text-lg font-bold text-[#1A1A1A]">{conversionRate}%</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card className="bg-white border-[#E5E5E5] hidden sm:block">
+        <CardContent className="p-3 sm:pt-4 sm:pb-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs text-[#666666]">Valeur moyenne</p>
+              <p className="text-sm sm:text-lg font-bold text-[#1A1A1A] truncate">{Math.round(avgDealValue).toLocaleString()}€</p>
             </div>
           </div>
         </CardContent>
