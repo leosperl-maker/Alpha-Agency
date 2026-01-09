@@ -236,8 +236,21 @@ Modèle appliqué : Pages "Vue d'ensemble" et "Demandes" utilisées comme réfé
 - [x] **Email de test** pour vérifier la configuration Brevo ✅
 - [x] **Boutons d'envoi manuel** des rappels ✅
 - [x] Templates HTML professionnels pour chaque type d'email ✅
+
+### P0 - Module Campagnes Email & SMS ✅ COMPLETE (2026-01-09) NEW
+- [x] **Backend `/api/campaigns/`** avec routes Brevo complètes ✅
+  - CRUD campagnes email (créer, lister, détails, envoyer, programmer, supprimer)
+  - CRUD campagnes SMS (créer, lister, envoyer, supprimer)
+  - Gestion contacts Brevo (créer, modifier, lister, supprimer, import bulk)
+  - Gestion listes de contacts (créer, lister, supprimer, ajouter/retirer contacts)
+  - Statistiques email et SMS
+- [x] **Page `/admin/campagnes`** avec interface complète ✅
+  - Onglet Email : Création avec HTML, envoi immédiat ou programmé
+  - Onglet SMS : Création avec limite 160 caractères
+  - Onglet Contacts : Affichage listes + contacts Brevo avec CRUD
+  - Onglet Statistiques : Vue des métriques (envois, ouvertures, clics)
+- [x] **Lien "Campagnes" ajouté au menu** du dashboard ✅
 - [ ] Enhanced reporting and analytics
-- [ ] Email templates management
 
 ### Blocked
 - ⚠️ **Intégration Brevo (e-mails)** - En attente activation du compte
