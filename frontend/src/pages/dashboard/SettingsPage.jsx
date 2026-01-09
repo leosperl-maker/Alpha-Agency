@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { Save, Building, Key, Share2, FileText, Database, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { Save, Building, Key, Share2, FileText, Database, Trash2, AlertTriangle, Loader2, Bell, Mail, Send } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { settingsAPI } from "../../lib/api";
+import { Switch } from "../../components/ui/switch";
+import { settingsAPI, notificationsAPI } from "../../lib/api";
 import { toast } from "sonner";
 import api from "../../lib/api";
 
@@ -46,6 +47,80 @@ const SettingsPage = () => {
 
   const [dataStats, setDataStats] = useState(null);
   const [deletingData, setDeletingData] = useState(false);
+
+  // Notification settings
+  const [notifSettings, setNotifSettings] = useState({
+    task_reminders: true,
+    task_reminder_days: 1,
+    invoice_reminders: true,
+    invoice_reminder_days: [7, 14, 30],
+    new_lead_notifications: true,
+    admin_email: ""
+  });
+  const [savingNotif, setSavingNotif] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
+  const [sendingReminders, setSendingReminders] = useState(false);
+
+  useEffect(() => {
+    fetchNotificationSettings();
+  }, []);
+
+  const fetchNotificationSettings = async () => {
+    try {
+      const res = await notificationsAPI.getSettings();
+      setNotifSettings(res.data);
+    } catch (error) {
+      console.error("Error fetching notification settings:", error);
+    }
+  };
+
+  const handleSaveNotifications = async () => {
+    setSavingNotif(true);
+    try {
+      await notificationsAPI.updateSettings(notifSettings);
+      toast.success("Paramètres de notifications sauvegardés");
+    } catch (error) {
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setSavingNotif(false);
+    }
+  };
+
+  const handleTestEmail = async () => {
+    setSendingTest(true);
+    try {
+      const res = await notificationsAPI.testEmail();
+      toast.success(res.data.message);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Erreur lors de l'envoi");
+    } finally {
+      setSendingTest(false);
+    }
+  };
+
+  const handleSendTaskReminders = async () => {
+    setSendingReminders(true);
+    try {
+      const res = await notificationsAPI.sendTaskReminders();
+      toast.success(res.data.message);
+    } catch (error) {
+      toast.error("Erreur lors de l'envoi des rappels");
+    } finally {
+      setSendingReminders(false);
+    }
+  };
+
+  const handleSendInvoiceReminders = async () => {
+    setSendingReminders(true);
+    try {
+      const res = await notificationsAPI.sendInvoiceReminders();
+      toast.success(res.data.message);
+    } catch (error) {
+      toast.error("Erreur lors de l'envoi des rappels");
+    } finally {
+      setSendingReminders(false);
+    }
+  };
 
   useEffect(() => {
     fetchSettings();
