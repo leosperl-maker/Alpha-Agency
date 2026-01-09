@@ -84,6 +84,7 @@ const EmailCampaignsTab = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showTemplatesDialog, setShowTemplatesDialog] = useState(false);
+  const [showEditorDialog, setShowEditorDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [formData, setFormData] = useState({
@@ -95,6 +96,18 @@ const EmailCampaignsTab = () => {
   });
   const [creating, setCreating] = useState(false);
   const [sending, setSending] = useState(false);
+
+  // Handle email editor export
+  const handleEditorExport = (html, blocks) => {
+    setFormData({
+      ...formData,
+      html_content: html,
+      name: formData.name || `Email personnalisé - ${new Date().toLocaleDateString('fr-FR')}`
+    });
+    setShowEditorDialog(false);
+    setShowCreateDialog(true);
+    toast.success("Design importé ! Personnalisez les détails et créez votre campagne.");
+  };
 
   useEffect(() => {
     fetchCampaigns();
