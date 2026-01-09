@@ -170,11 +170,9 @@ const SortableDealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDele
         isOverdue ? 'border-red-300 bg-red-50/50' : 'border-[#E5E5E5]'
       }`}
     >
-      {/* Card Header with Drag Handle */}
       <div className="p-3 border-b border-[#E5E5E5]">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-start gap-2 flex-1 min-w-0">
-            {/* Drag Handle */}
             <div 
               {...attributes}
               {...listeners}
@@ -228,9 +226,7 @@ const SortableDealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDele
         </div>
       </div>
 
-      {/* Card Body */}
       <div className="p-3">
-        {/* Amount and Probability */}
         <div className="flex items-center justify-between mb-3">
           <span className="text-[#CE0202] font-bold text-lg">
             {opp.amount?.toLocaleString()}€
@@ -246,7 +242,6 @@ const SortableDealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDele
           </div>
         </div>
 
-        {/* Tags / Info */}
         <div className="flex flex-wrap gap-1.5 mb-3">
           {opp.offer_type && (
             <Badge variant="outline" className="text-xs bg-[#F8F8F8] border-[#E5E5E5]">
@@ -265,7 +260,6 @@ const SortableDealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDele
           )}
         </div>
 
-        {/* Date and Next Action */}
         <div className="space-y-2">
           {opp.expected_close_date && (
             <div className={`flex items-center gap-2 text-xs ${isOverdue ? 'text-red-600' : 'text-[#666666]'}`}>
@@ -413,7 +407,6 @@ const OpportunityDetailSheet = ({ opp, open, onOpenChange, columns, onEdit, cont
         </SheetHeader>
         
         <div className="py-6 space-y-6">
-          {/* Amount */}
           <div className="bg-[#F8F8F8] rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -433,7 +426,6 @@ const OpportunityDetailSheet = ({ opp, open, onOpenChange, columns, onEdit, cont
             </div>
           </div>
 
-          {/* Contact Info */}
           {contact && (
             <div>
               <h3 className="text-sm font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
@@ -466,7 +458,6 @@ const OpportunityDetailSheet = ({ opp, open, onOpenChange, columns, onEdit, cont
             </div>
           )}
 
-          {/* Details */}
           <div>
             <h3 className="text-sm font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
               <FileText className="w-4 h-4" /> Détails
@@ -505,7 +496,6 @@ const OpportunityDetailSheet = ({ opp, open, onOpenChange, columns, onEdit, cont
             </div>
           </div>
 
-          {/* Next Action */}
           {opp.next_action && (
             <div>
               <h3 className="text-sm font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
@@ -517,7 +507,6 @@ const OpportunityDetailSheet = ({ opp, open, onOpenChange, columns, onEdit, cont
             </div>
           )}
 
-          {/* Notes */}
           {opp.notes && (
             <div>
               <h3 className="text-sm font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
@@ -530,7 +519,6 @@ const OpportunityDetailSheet = ({ opp, open, onOpenChange, columns, onEdit, cont
           )}
         </div>
 
-        {/* Actions */}
         <div className="pt-4 border-t border-[#E5E5E5] flex gap-3">
           <Button
             onClick={() => { onOpenChange(false); onEdit(opp); }}
@@ -615,7 +603,6 @@ const PipelinePage = () => {
     fetchData();
   }, []);
 
-  // Find which column contains an opportunity
   const findColumnForOpp = (oppId) => {
     for (const [columnId, opps] of Object.entries(pipeline)) {
       if (opps.some(o => o.id === oppId)) {
@@ -629,7 +616,6 @@ const PipelinePage = () => {
     const { active } = event;
     setActiveId(active.id);
     
-    // Check if it's a card or column
     if (active.data.current?.type === 'card') {
       setActiveItem(active.data.current.opp);
     } else if (active.data.current?.type === 'column') {
@@ -647,7 +633,6 @@ const PipelinePage = () => {
     const activeData = active.data.current;
     const overData = over.data.current;
 
-    // Handle column reordering
     if (activeData?.type === 'column' && columns.some(c => c.id === over.id)) {
       if (active.id !== over.id) {
         const oldIndex = columns.findIndex((col) => col.id === active.id);
@@ -666,19 +651,15 @@ const PipelinePage = () => {
       return;
     }
 
-    // Handle card movement
     if (activeData?.type === 'card') {
       const oppId = active.id;
       let targetColumnId = null;
 
-      // Determine target column
       if (overData?.type === 'column') {
         targetColumnId = overData.columnId?.replace('column-', '') || over.id.replace('column-', '');
       } else if (overData?.type === 'card') {
-        // Dropped on another card - find its column
         targetColumnId = findColumnForOpp(over.id);
       } else {
-        // Check if over.id is a column ID
         targetColumnId = over.id.startsWith('column-') ? over.id.replace('column-', '') : null;
       }
 
@@ -687,7 +668,6 @@ const PipelinePage = () => {
       const sourceColumnId = findColumnForOpp(oppId);
       
       if (sourceColumnId && targetColumnId && sourceColumnId !== targetColumnId) {
-        // Move card to different column
         try {
           await opportunitiesAPI.update(oppId, { status: targetColumnId });
           toast.success("Affaire déplacée");
@@ -843,7 +823,6 @@ const PipelinePage = () => {
     }
   };
 
-  // Filter opportunities
   const filterOpportunities = (opps) => {
     return opps.filter(opp => {
       if (!showArchived && opp.archived) return false;
@@ -881,92 +860,93 @@ const PipelinePage = () => {
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-white border-[#E5E5E5] max-w-lg max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-[#1A1A1A]">
-                  {editingOpp ? "Modifier l'affaire" : "Nouvelle affaire"}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Contact *</Label>
-                  <Select value={formData.contact_id} onValueChange={(v) => setFormData({...formData, contact_id: v})} required>
-                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
-                      <SelectValue placeholder="Sélectionner" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      {contacts.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Titre *</Label>
-                  <Input value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required placeholder="Ex: Site web vitrine" className="bg-[#F8F8F8] border-[#E5E5E5]" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+                <DialogHeader>
+                  <DialogTitle className="text-[#1A1A1A]">
+                    {editingOpp ? "Modifier l'affaire" : "Nouvelle affaire"}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Montant (€) *</Label>
-                    <Input type="number" value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} required placeholder="1000" className="bg-[#F8F8F8] border-[#E5E5E5]" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Probabilité (%)</Label>
-                    <Input type="number" min="0" max="100" value={formData.probability} onChange={(e) => setFormData({...formData, probability: parseInt(e.target.value) || 0})} className="bg-[#F8F8F8] border-[#E5E5E5]" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Type d'offre</Label>
-                    <Select value={formData.offer_type} onValueChange={(v) => setFormData({...formData, offer_type: v})}>
-                      <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                    <Label>Contact *</Label>
+                    <Select value={formData.contact_id} onValueChange={(v) => setFormData({...formData, contact_id: v})} required>
+                      <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
                       <SelectContent className="bg-white">
-                        <SelectItem value="site_web">Site Web</SelectItem>
-                        <SelectItem value="cm">Community Management</SelectItem>
-                        <SelectItem value="photo">Photographie</SelectItem>
-                        <SelectItem value="video">Vidéographie</SelectItem>
-                        <SelectItem value="ads">Publicité Digitale</SelectItem>
-                        <SelectItem value="pack_360">Pack 360°</SelectItem>
+                        {contacts.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Date de clôture</Label>
-                    <Input type="date" value={formData.expected_close_date} onChange={(e) => setFormData({...formData, expected_close_date: e.target.value})} className="bg-[#F8F8F8] border-[#E5E5E5]" />
+                    <Label>Titre *</Label>
+                    <Input value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required placeholder="Ex: Site web vitrine" className="bg-[#F8F8F8] border-[#E5E5E5]" />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Statut</Label>
-                  <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
-                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      {columns.map((col) => (
-                        <SelectItem key={col.id} value={col.id}>
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: col.color }} />
-                            {col.label}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Prochaine action</Label>
-                  <Input value={formData.next_action} onChange={(e) => setFormData({...formData, next_action: e.target.value})} placeholder="Ex: Appeler pour suivi" className="bg-[#F8F8F8] border-[#E5E5E5]" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Notes</Label>
-                  <Textarea value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="bg-[#F8F8F8] border-[#E5E5E5]" rows={2} />
-                </div>
-                <div className="flex justify-end gap-3 pt-4">
-                  <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>Annuler</Button>
-                  <Button type="submit" className="bg-[#CE0202] hover:bg-[#B00202] text-white">{editingOpp ? "Mettre à jour" : "Créer"}</Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Montant (€) *</Label>
+                      <Input type="number" value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} required placeholder="1000" className="bg-[#F8F8F8] border-[#E5E5E5]" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Probabilité (%)</Label>
+                      <Input type="number" min="0" max="100" value={formData.probability} onChange={(e) => setFormData({...formData, probability: parseInt(e.target.value) || 0})} className="bg-[#F8F8F8] border-[#E5E5E5]" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Type d'offre</Label>
+                      <Select value={formData.offer_type} onValueChange={(v) => setFormData({...formData, offer_type: v})}>
+                        <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
+                        <SelectContent className="bg-white">
+                          <SelectItem value="site_web">Site Web</SelectItem>
+                          <SelectItem value="cm">Community Management</SelectItem>
+                          <SelectItem value="photo">Photographie</SelectItem>
+                          <SelectItem value="video">Vidéographie</SelectItem>
+                          <SelectItem value="ads">Publicité Digitale</SelectItem>
+                          <SelectItem value="pack_360">Pack 360°</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Date de clôture</Label>
+                      <Input type="date" value={formData.expected_close_date} onChange={(e) => setFormData({...formData, expected_close_date: e.target.value})} className="bg-[#F8F8F8] border-[#E5E5E5]" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Statut</Label>
+                    <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
+                      <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        {columns.map((col) => (
+                          <SelectItem key={col.id} value={col.id}>
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: col.color }} />
+                              {col.label}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Prochaine action</Label>
+                    <Input value={formData.next_action} onChange={(e) => setFormData({...formData, next_action: e.target.value})} placeholder="Ex: Appeler pour suivi" className="bg-[#F8F8F8] border-[#E5E5E5]" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Notes</Label>
+                    <Textarea value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="bg-[#F8F8F8] border-[#E5E5E5]" rows={2} />
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4">
+                    <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>Annuler</Button>
+                    <Button type="submit" className="bg-[#CE0202] hover:bg-[#B00202] text-white">{editingOpp ? "Mettre à jour" : "Créer"}</Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
 
@@ -995,7 +975,7 @@ const PipelinePage = () => {
         </Button>
       </div>
 
-      {/* Pipeline Board - Scrollable horizontally */}
+      {/* Pipeline Board */}
       {loading ? (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {[1,2,3,4,5,6,7].map((i) => (
@@ -1014,9 +994,8 @@ const PipelinePage = () => {
           >
             <div 
               ref={scrollContainerRef}
-              className="pipeline-scroll -mx-6 px-6"
+              className="overflow-x-auto pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6"
               style={{ WebkitOverflowScrolling: 'touch' }}
-              data-pipeline-scroll="true"
             >
               <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
                 <div className="flex gap-4" style={{ width: 'fit-content', minWidth: '100%' }}>
@@ -1081,18 +1060,9 @@ const PipelinePage = () => {
             </DragOverlay>
           </DndContext>
         
-          <div className="mt-4 -mx-6 px-6">
-            <div className="relative h-3 bg-[#E5E5E5] rounded-full overflow-hidden">
-              <div 
-                id="pipeline-custom-scrollbar"
-                className="absolute h-full w-[30%] bg-gradient-to-r from-[#CE0202] to-[#B00202] rounded-full cursor-pointer"
-                style={{ marginLeft: '0%' }}
-              />
-            </div>
-            <p className="text-xs text-[#999999] text-center mt-1">
-              Faites défiler horizontalement pour voir toutes les colonnes
-            </p>
-          </div>
+          <p className="text-xs text-[#999999] text-center mt-2">
+            Faites défiler horizontalement pour voir toutes les colonnes
+          </p>
         </div>
       )}
 
