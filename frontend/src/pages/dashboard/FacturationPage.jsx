@@ -398,37 +398,37 @@ const FacturationPage = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-          <TabsList className="bg-[#F8F8F8] p-1">
+        <div className="flex flex-col gap-3 mb-4">
+          <TabsList className="bg-[#F8F8F8] p-1 w-full sm:w-auto">
             <TabsTrigger 
               value="devis" 
-              className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white"
+              className="flex-1 sm:flex-none data-[state=active]:bg-[#CE0202] data-[state=active]:text-white text-xs sm:text-sm"
             >
-              <FileText className="w-4 h-4 mr-2" />
+              <FileText className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               Devis ({quotes.length})
             </TabsTrigger>
             <TabsTrigger 
               value="factures"
-              className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white"
+              className="flex-1 sm:flex-none data-[state=active]:bg-[#CE0202] data-[state=active]:text-white text-xs sm:text-sm"
             >
-              <Receipt className="w-4 h-4 mr-2" />
+              <Receipt className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               Factures ({invoices.length})
             </TabsTrigger>
           </TabsList>
 
           {/* Search and Filter */}
-          <div className="flex gap-2">
-            <div className="relative flex-1 sm:w-64">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
               <Input
                 placeholder="Rechercher..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white border-[#E5E5E5]"
+                className="pl-10 bg-white border-[#E5E5E5] w-full"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40 bg-white border-[#E5E5E5]">
+              <SelectTrigger className="w-full sm:w-32 bg-white border-[#E5E5E5]">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Statut" />
               </SelectTrigger>
