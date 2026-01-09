@@ -1864,6 +1864,16 @@ async def create_pipeline_column(column: PipelineColumnCreate, current_user: dic
     await db.pipeline_columns.insert_one(column_doc)
     return {"id": column.id, "message": "Colonne créée"}
 
+@api_router.put("/pipeline/columns/reorder", response_model=dict)
+async def reorder_pipeline_columns(data: PipelineColumnReorder, current_user: dict = Depends(get_current_user)):
+    """Reorder pipeline columns"""
+    for i, column_id in enumerate(data.column_ids):
+        await db.pipeline_columns.update_one(
+            {"id": column_id},
+            {"$set": {"order": i, "updated_at": datetime.now(timezone.utc).isoformat()}}
+        )
+    return {"message": "Colonnes réorganisées"}
+
 @api_router.put("/pipeline/columns/{column_id}", response_model=dict)
 async def update_pipeline_column(column_id: str, update: PipelineColumnUpdate, current_user: dict = Depends(get_current_user)):
     """Update a pipeline column"""
