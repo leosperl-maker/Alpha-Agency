@@ -138,18 +138,9 @@ async def refresh_news(
     region: Optional[str] = "guadeloupe",
     current_user: dict = Depends(get_current_user)
 ):
-    """Refresh news using NewsAPI.org with multiple API keys"""
+    """Refresh news using NewsAPI.org with multiple API keys - LOCAL NEWS FOCUS"""
     if not NEWSAPI_KEYS:
         raise HTTPException(status_code=503, detail="Aucune clé API NewsAPI configurée")
-    
-    # Only fetch standard NewsAPI categories, marketing categories use custom queries
-    standard_categories = ["general", "business", "technology", "science", "health", "sports", "entertainment"]
-    marketing_categories = ["ads", "social", "growth", "crm", "local", "design"]
-    
-    if category:
-        categories_to_fetch = [category]
-    else:
-        categories_to_fetch = standard_categories + marketing_categories
     
     region_code = region if region else "guadeloupe"
     
@@ -157,38 +148,103 @@ async def refresh_news(
     errors = []
     keys_exhausted = set()
     
-    # Category to search query mapping
-    category_queries = {
-        "general": "actualités",
-        "business": "économie entreprise business",
-        "technology": "technologie numérique innovation tech",
-        "science": "science recherche découverte",
-        "health": "santé médecine",
-        "sports": "sport football rugby",
-        "entertainment": "cinéma musique culture",
-        "ads": "Meta Ads Google Ads TikTok Ads publicité en ligne",
-        "social": "réseaux sociaux community management Instagram Facebook",
-        "growth": "growth hacking acquisition funnels marketing",
-        "crm": "CRM vente prospection commercial",
-        "local": "TPE PME business local commerce",
-        "design": "design branding identité visuelle logo"
+    # LOCAL SEARCH QUERIES - Very specific to each region
+    # These queries search for the exact location name to get truly local news
+    local_search_queries = {
+        "guadeloupe": [
+            '"Guadeloupe"',  # Exact match
+            '"Pointe-à-Pitre"',
+            '"Basse-Terre" Guadeloupe',
+            '"Les Abymes"',
+            '"Sainte-Anne" Guadeloupe',
+            '"France-Antilles" Guadeloupe',
+            '"Guadeloupe La 1ère"',
+            'cyclone Guadeloupe',
+            'préfet Guadeloupe',
+            'CHU Guadeloupe',
+            '"région Guadeloupe"',
+        ],
+        "martinique": [
+            '"Martinique"',
+            '"Fort-de-France"',
+            '"Le Lamentin" Martinique',
+            '"Sainte-Anne" Martinique',
+            '"France-Antilles" Martinique',
+            '"Martinique La 1ère"',
+            'préfet Martinique',
+            'montagne Pelée',
+            '"collectivité territoriale" Martinique',
+        ],
+        "saint-martin": [
+            '"Saint-Martin" île',
+            '"Marigot" Saint-Martin',
+            '"Grand Case"',
+            '"Sint Maarten"',
+            'préfète Saint-Martin',
+            '"collectivité de Saint-Martin"',
+        ],
+        "saint-barth": [
+            '"Saint-Barthélemy"',
+            '"Gustavia"',
+            '"Saint-Barth"',
+            'collectivité Saint-Barthélemy',
+        ],
+        "guyane": [
+            '"Guyane française"',
+            '"Cayenne"',
+            '"Kourou"',
+            '"Saint-Laurent-du-Maroni"',
+            'Centre spatial Guyane',
+            'Ariane Kourou',
+            '"Guyane La 1ère"',
+            'préfet Guyane',
+            'forêt amazonienne Guyane',
+        ],
+        "fr": [
+            'France actualité',
+            'gouvernement français',
+            'Assemblée nationale',
+            'économie France',
+        ],
+        "us": [
+            'United States news',
+            'US economy',
+            'Washington DC',
+        ],
+        "gb": [
+            'United Kingdom news',
+            'UK economy',
+            'London news',
+        ],
+        "de": [
+            'Deutschland Nachrichten',
+            'German economy',
+            'Berlin news',
+        ],
     }
     
-    # Region to search query suffix mapping
-    region_queries = {
-        "guadeloupe": "(Guadeloupe OR Antilles OR Caraïbes OR Outre-mer)",
-        "martinique": "(Martinique OR Antilles OR Caraïbes OR Outre-mer)",
-        "saint-martin": "(Saint-Martin OR Antilles OR Caraïbes OR Outre-mer)",
-        "saint-barth": "(Saint-Barthélemy OR Antilles OR Caraïbes OR Outre-mer)",
-        "guyane": "(Guyane OR Amazonie OR Outre-mer OR Cayenne)",
-        "fr": "France",
-        "us": "",
-        "gb": "",
-        "de": ""
-    }
+    # Get search queries for the selected region
+    search_queries = local_search_queries.get(region_code, [f'"{region_code}"'])
+    
+    # Also add category-specific local searches if a category is selected
+    if category and category not in ["general", "all"]:
+        category_terms = {
+            "business": ["économie", "entreprise", "commerce", "emploi"],
+            "technology": ["numérique", "tech", "startup", "innovation"],
+            "science": ["science", "recherche", "université"],
+            "health": ["santé", "hôpital", "médecin", "CHU"],
+            "sports": ["sport", "football", "handball", "athlétisme"],
+            "entertainment": ["culture", "musique", "festival", "concert"],
+        }
+        
+        terms = category_terms.get(category, [])
+        if terms and region_code in ["guadeloupe", "martinique", "guyane", "saint-martin", "saint-barth"]:
+            region_name = region_code.replace("-", " ").title()
+            for term in terms[:2]:  # Add 2 category-specific queries
+                search_queries.append(f'{term} "{region_name}"')
     
     async with httpx.AsyncClient(timeout=30.0) as client:
-        for cat in categories_to_fetch:
+        for search_query in search_queries:
             # Try with different API keys if one is rate limited
             api_key = None
             for key in NEWSAPI_KEYS:
@@ -198,6 +254,125 @@ async def refresh_news(
             
             if not api_key:
                 errors.append("Toutes les clés API sont épuisées")
+                break
+            
+            try:
+                # Use 'everything' endpoint with exact search
+                url = "https://newsapi.org/v2/everything"
+                params = {
+                    "apiKey": api_key,
+                    "q": search_query,
+                    "language": "fr",
+                    "sortBy": "publishedAt",
+                    "pageSize": 10  # Smaller batches for more queries
+                }
+                
+                response = await client.get(url, params=params)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    if data.get("status") == "ok":
+                        for article in data.get("articles", []):
+                            if not article.get("title") or article.get("title") == "[Removed]":
+                                continue
+                            
+                            # FILTER: Only accept articles that mention the region in title or description
+                            title = (article.get("title") or "").lower()
+                            desc = (article.get("description") or "").lower()
+                            content_check = title + " " + desc
+                            
+                            # Check if article is really about this region
+                            region_keywords = {
+                                "guadeloupe": ["guadeloupe", "pointe-à-pitre", "basse-terre", "les abymes", "antilles"],
+                                "martinique": ["martinique", "fort-de-france", "lamentin", "antilles"],
+                                "saint-martin": ["saint-martin", "marigot", "sint maarten"],
+                                "saint-barth": ["saint-barth", "gustavia"],
+                                "guyane": ["guyane", "cayenne", "kourou", "maroni"],
+                                "fr": ["france", "français", "paris", "gouvernement"],
+                                "us": ["united states", "us ", "america"],
+                                "gb": ["uk ", "britain", "london", "england"],
+                                "de": ["germany", "german", "deutschland"],
+                            }
+                            
+                            keywords = region_keywords.get(region_code, [region_code])
+                            is_relevant = any(kw in content_check for kw in keywords)
+                            
+                            if not is_relevant:
+                                continue  # Skip non-relevant articles
+                            
+                            # Check if article already exists (by URL)
+                            existing = await db.news_articles.find_one({"source_url": article.get("url")})
+                            if existing:
+                                continue
+                            
+                            # Determine category based on content
+                            article_category = "general"
+                            if category and category != "all":
+                                article_category = category
+                            else:
+                                # Auto-detect category from content
+                                if any(w in content_check for w in ["économie", "entreprise", "commerce", "emploi", "business"]):
+                                    article_category = "business"
+                                elif any(w in content_check for w in ["tech", "numérique", "startup", "digital"]):
+                                    article_category = "technology"
+                                elif any(w in content_check for w in ["sport", "football", "rugby", "match"]):
+                                    article_category = "sports"
+                                elif any(w in content_check for w in ["santé", "hôpital", "médecin", "covid"]):
+                                    article_category = "health"
+                                elif any(w in content_check for w in ["culture", "musique", "festival", "art"]):
+                                    article_category = "entertainment"
+                            
+                            article_doc = {
+                                "id": str(uuid.uuid4()),
+                                "title": article.get("title", ""),
+                                "description": article.get("description", ""),
+                                "content": article.get("content", ""),
+                                "image_url": article.get("urlToImage"),
+                                "source_url": article.get("url", ""),
+                                "source_name": article.get("source", {}).get("name", ""),
+                                "published_at": article.get("publishedAt", datetime.now(timezone.utc).isoformat()),
+                                "category": article_category,
+                                "region": region_code,
+                                "search_query": search_query,  # Track which query found this
+                                "created_at": datetime.now(timezone.utc).isoformat()
+                            }
+                            
+                            await db.news_articles.insert_one(article_doc)
+                            articles_created += 1
+                    else:
+                        error_msg = data.get('message', 'Unknown error')
+                        if "too many requests" in error_msg.lower() or "rate" in error_msg.lower():
+                            keys_exhausted.add(api_key)
+                        else:
+                            errors.append(f"NewsAPI error: {error_msg[:50]}")
+                elif response.status_code == 429:
+                    keys_exhausted.add(api_key)
+                else:
+                    errors.append(f"HTTP {response.status_code}")
+                    
+            except Exception as e:
+                logger.error(f"Error fetching news for query '{search_query}': {str(e)}")
+                continue
+    
+    all_keys_exhausted = len(keys_exhausted) >= len(NEWSAPI_KEYS)
+    
+    if all_keys_exhausted and articles_created == 0:
+        return {
+            "message": f"⚠️ Limite API atteinte. {len(NEWSAPI_KEYS)} clés utilisées.",
+            "region": region_code,
+            "queries_tried": len(search_queries),
+            "errors": errors[:3],
+            "rate_limited": True
+        }
+    
+    return {
+        "message": f"✅ {articles_created} articles locaux récupérés pour {region_code.replace('-', ' ').title()}",
+        "region": region_code,
+        "queries_tried": len(search_queries),
+        "errors": errors[:3] if errors else None,
+        "rate_limited": all_keys_exhausted
+    }
                 break
             
             try:
