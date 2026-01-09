@@ -877,14 +877,15 @@ const SocialMediaPage = () => {
       days.push(
         <div 
           key={day} 
-          className={`h-28 border border-[#E5E5E5] p-2 overflow-hidden transition-colors hover:bg-[#FAFAFA] ${
+          className={`h-16 sm:h-28 border border-[#E5E5E5] p-1 sm:p-2 overflow-hidden transition-colors hover:bg-[#FAFAFA] ${
             isToday ? 'bg-orange-50 border-[#FF6B35]' : 'bg-white'
           }`}
         >
-          <div className={`text-sm font-medium mb-1 ${isToday ? 'text-[#FF6B35]' : 'text-[#666666]'}`}>
+          <div className={`text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 ${isToday ? 'text-[#FF6B35]' : 'text-[#666666]'}`}>
             {day}
           </div>
-          <div className="space-y-1">
+          {/* Desktop: show post details */}
+          <div className="hidden sm:block space-y-1">
             {dayPosts.slice(0, 2).map((post, idx) => (
               <div 
                 key={idx}
@@ -901,6 +902,12 @@ const SocialMediaPage = () => {
               <div className="text-xs text-[#666666]">+{dayPosts.length - 2} autre(s)</div>
             )}
           </div>
+          {/* Mobile: just show dot indicator */}
+          {dayPosts.length > 0 && (
+            <div className="sm:hidden flex justify-center mt-1">
+              <div className="w-2 h-2 rounded-full bg-[#FF6B35]" />
+            </div>
+          )}
         </div>
       );
     }
