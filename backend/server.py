@@ -1781,7 +1781,19 @@ async def update_kpis(kpis: KPIUpdate, current_user: dict = Depends(get_current_
 
 @api_router.get("/dashboard/pipeline", response_model=dict)
 async def get_pipeline(current_user: dict = Depends(get_current_user)):
-    statuses = ["nouveau", "qualifié", "devis_envoyé", "gagné", "perdu"]
+    # Get custom columns or use defaults
+    columns = await db.pipeline_columns.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    if not columns:
+        # Default columns
+        columns = [
+            {"id": "nouveau", "label": "Nouveau", "color": "#3B82F6", "order": 0},
+            {"id": "qualifié", "label": "Qualifié", "color": "#8B5CF6", "order": 1},
+            {"id": "devis_envoyé", "label": "Devis envoyé", "color": "#F59E0B", "order": 2},
+            {"id": "gagné", "label": "Gagné", "color": "#10B981", "order": 3},
+            {"id": "perdu", "label": "Perdu", "color": "#EF4444", "order": 4}
+        ]
+    
+    statuses = [col["id"] for col in columns]
     pipeline = {}
     
     for status in statuses:
@@ -1793,6 +1805,135 @@ async def get_pipeline(current_user: dict = Depends(get_current_user)):
         pipeline[status] = opps
     
     return pipeline
+
+# ==================== PIPELINE COLUMNS ROUTES ====================
+
+class PipelineColumnCreate(BaseModel):
+    id: str
+    label: str
+    color: str = "#3B82F6"
+    order: Optional[int] = None
+
+class PipelineColumnUpdate(BaseModel):
+    label: Optional[str] = None
+    color: Optional[str] = None
+    order: Optional[int] = None
+
+@api_router.get("/pipeline/columns", response_model=List[dict])
+async def get_pipeline_columns(current_user: dict = Depends(get_current_user)):
+    """Get all pipeline columns"""
+    columns = await db.pipeline_columns.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    if not columns:
+        # Return default columns
+        default_columns = [
+            {"id": "nouveau", "label": "Nouveau", "color": "#3B82F6", "order": 0, "is_default": True},
+            {"id": "qualifié", "label": "Qualifié", "color": "#8B5CF6", "order": 1, "is_default": True},
+            {"id": "devis_envoyé", "label": "Devis envoyé", "color": "#F59E0B", "order": 2, "is_default": True},
+            {"id": "gagné", "label": "Gagné", "color": "#10B981", "order": 3, "is_default": True},
+            {"id": "perdu", "label": "Perdu", "color": "#EF4444", "order": 4, "is_default": True}
+        ]
+        return default_columns
+    return columns
+
+@api_router.post("/pipeline/columns", response_model=dict)
+async def create_pipeline_column(column: PipelineColumnCreate, current_user: dict = Depends(get_current_user)):
+    """Create a new pipeline column"""
+    # Check if column ID already exists
+    existing = await db.pipeline_columns.find_one({"id": column.id})
+    if existing:
+        raise HTTPException(status_code=400, detail="Une colonne avec cet identifiant existe déjà")
+    
+    # Get current max order
+    if column.order is None:
+        max_order = await db.pipeline_columns.count_documents({})
+        column_order = max_order
+    else:
+        column_order = column.order
+    
+    column_doc = {
+        "id": column.id,
+        "label": column.label,
+        "color": column.color,
+        "order": column_order,
+        "is_default": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.pipeline_columns.insert_one(column_doc)
+    return {"id": column.id, "message": "Colonne créée"}
+
+@api_router.put("/pipeline/columns/{column_id}", response_model=dict)
+async def update_pipeline_column(column_id: str, update: PipelineColumnUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a pipeline column"""
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
+    
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    result = await db.pipeline_columns.update_one({"id": column_id}, {"$set": update_data})
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Colonne non trouvée")
+    return {"message": "Colonne mise à jour"}
+
+@api_router.delete("/pipeline/columns/{column_id}", response_model=dict)
+async def delete_pipeline_column(column_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a pipeline column (moves opportunities to first column)"""
+    # Check if column exists
+    column = await db.pipeline_columns.find_one({"id": column_id}, {"_id": 0})
+    if not column:
+        raise HTTPException(status_code=404, detail="Colonne non trouvée")
+    
+    # Get the first column to move opportunities to
+    first_column = await db.pipeline_columns.find_one({}, {"_id": 0}, sort=[("order", 1)])
+    target_status = first_column["id"] if first_column and first_column["id"] != column_id else "nouveau"
+    
+    # Move opportunities from this column to the first column
+    await db.opportunities.update_many(
+        {"status": column_id},
+        {"$set": {"status": target_status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Delete the column
+    await db.pipeline_columns.delete_one({"id": column_id})
+    
+    # Reorder remaining columns
+    remaining_columns = await db.pipeline_columns.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    for i, col in enumerate(remaining_columns):
+        await db.pipeline_columns.update_one({"id": col["id"]}, {"$set": {"order": i}})
+    
+    return {"message": "Colonne supprimée", "moved_to": target_status}
+
+@api_router.put("/pipeline/columns/reorder", response_model=dict)
+async def reorder_pipeline_columns(column_ids: List[str], current_user: dict = Depends(get_current_user)):
+    """Reorder pipeline columns"""
+    for i, column_id in enumerate(column_ids):
+        await db.pipeline_columns.update_one(
+            {"id": column_id},
+            {"$set": {"order": i, "updated_at": datetime.now(timezone.utc).isoformat()}}
+        )
+    return {"message": "Colonnes réorganisées"}
+
+@api_router.post("/pipeline/columns/initialize", response_model=dict)
+async def initialize_pipeline_columns(current_user: dict = Depends(get_current_user)):
+    """Initialize default pipeline columns in database (for customization)"""
+    # Check if columns already exist
+    count = await db.pipeline_columns.count_documents({})
+    if count > 0:
+        return {"message": "Colonnes déjà initialisées", "count": count}
+    
+    default_columns = [
+        {"id": "nouveau", "label": "Nouveau", "color": "#3B82F6", "order": 0, "is_default": True},
+        {"id": "qualifié", "label": "Qualifié", "color": "#8B5CF6", "order": 1, "is_default": True},
+        {"id": "devis_envoyé", "label": "Devis envoyé", "color": "#F59E0B", "order": 2, "is_default": True},
+        {"id": "gagné", "label": "Gagné", "color": "#10B981", "order": 3, "is_default": True},
+        {"id": "perdu", "label": "Perdu", "color": "#EF4444", "order": 4, "is_default": True}
+    ]
+    
+    for col in default_columns:
+        col["created_at"] = datetime.now(timezone.utc).isoformat()
+        await db.pipeline_columns.insert_one(col)
+    
+    return {"message": "Colonnes par défaut initialisées", "count": len(default_columns)}
 
 # ==================== STRIPE PAYMENT ====================
 
