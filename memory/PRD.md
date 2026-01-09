@@ -12,89 +12,81 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - **Backend**: FastAPI (Python)
 - **Frontend**: React + Tailwind CSS + Shadcn UI
 - **Database**: MongoDB
-- **Drag & Drop**: @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities
+- **Drag & Drop**: @dnd-kit/core, @dnd-kit/sortable
 - **Charts**: Recharts
+- **AI**: Perplexity API (model: sonar)
 - **PDF**: ReportLab
-- **Import**: Pandas, OpenPyXL
 - **Storage**: Cloudinary (images), Dropbox (backups)
 
 ## Core Features Implemented
 
 ### Pipeline / Opportunities ✅ COMPLETE
 - [x] Kanban-style pipeline view
-- [x] **Colonnes personnalisables** ✅ DONE 2025-01-09
-  - API CRUD pour les colonnes (GET/POST/PUT/DELETE)
-  - Interface pour ajouter/modifier/supprimer des étapes
-  - Choix de couleur pour chaque colonne
+- [x] Colonnes personnalisables (CRUD)
 - [x] **Drag & Drop des colonnes** ✅ DONE 2025-01-09
-  - Réorganisation par glisser-déposer avec @dnd-kit
-  - Poignées de déplacement (GripVertical) sur chaque colonne
-  - API PUT /api/pipeline/columns/reorder
-  - Mise à jour en temps réel de l'ordre
 
-### Budget & Trésorerie (Module Avancé) ✅ PHASES 1-3 COMPLETE
+### Budget & Trésorerie (Module Avancé) ✅ ALL 4 PHASES COMPLETE
 
-#### Phase 1 ✅ COMPLETE (2025-01-09)
-- [x] Import de transactions bancaires (CSV)
-- [x] Gestion des transactions (CRUD)
-- [x] Catégories personnalisées (revenus/dépenses)
-- [x] Vue d'ensemble avec graphiques
+#### Phase 1 ✅ - Import CSV, Transactions, Catégories
+#### Phase 2 ✅ - Règles auto-catégorisation avancées
+#### Phase 3 ✅ - Budget Prévisionnel (Prévu vs Réel)
+#### Phase 4 ✅ COMPLETE (2025-01-09) - Projection Cashflow Multi-mois
+- [x] **Nouvel onglet "Cashflow"** dans le module Budget
+- [x] **Sélecteur de période** : Mois de départ + durée (3, 6, 12 mois)
+- [x] **Cartes de synthèse** : Revenus totaux, Dépenses totales, Flux net moyen/mois, Solde final projeté
+- [x] **Graphique AreaChart** : Évolution du cashflow avec solde cumulé et flux net mensuel
+- [x] **Tableau détaillé** : Par mois avec type (Réel/Prévu), revenus, dépenses, flux net, solde cumulé
+- [x] **Alertes de trésorerie** : Soldes négatifs et flux sortants importants
+- [x] **API GET /api/budget/cashflow** : Projection multi-mois avec données réelles et prévisionnelles
 
-#### Phase 2 ✅ COMPLETE (2025-01-09) - Règles Auto-catégorisation Avancées
-- [x] **Types de correspondance** : contains, starts_with, ends_with, exact, regex
-- [x] **Filtre par type** : Revenus uniquement, Dépenses uniquement, ou les deux
-- [x] **Bouton "Appliquer les règles"** : Applique automatiquement les règles aux transactions non catégorisées
-- [x] API POST /api/budget/rules/apply avec filtre optionnel par mois
-- [x] API PUT /api/budget/rules/{id} pour modifier une règle existante
-- [x] Interface mise à jour avec nouveaux champs dans le dialogue de création
+### Assistant IA (Perplexity) ✅ COMPLETE (2025-01-09)
+- [x] **Nouvelle page /admin/assistant** accessible via le menu latéral
+- [x] **Intégration Perplexity API** (model: sonar)
+- [x] **Interface de chat** : Messages utilisateur/assistant, indicateur de chargement
+- [x] **Contexte CRM intelligent** :
+  - Général : Stats globales (contacts, opportunités, pipeline, tâches)
+  - Pipeline : Répartition par étape avec montants
+  - Contacts : Détails d'un contact spécifique avec historique
+  - Facturation : Stats des factures en attente
+  - Budget : Revenus/dépenses du mois en cours
+- [x] **Garde-fous de coûts** :
+  - Limite de 50 requêtes/jour/utilisateur
+  - Limite de 2000 caractères/message
+  - Compteur de requêtes restantes visible
+  - Toggle pour activer/désactiver (AI_ENABLED)
+- [x] **Historique des conversations** : Enregistré en base de données
+- [x] **Prompts suggérés** : Pour guider les utilisateurs
+- [x] **API complètes** :
+  - GET /api/ai/status - Statut et usage
+  - POST /api/ai/chat - Envoi de messages
+  - GET /api/ai/history - Historique des conversations
 
-#### Phase 3 ✅ COMPLETE (2025-01-09) - Budget Prévisionnel
-- [x] **Nouvel onglet "Prévisionnel"** dans le module Budget
-- [x] **Cartes de synthèse** : Revenus prévus vs Réel, Dépenses prévues vs Réel, Solde prévu vs Réel
-- [x] **Barres de progression** visuelles pour suivre l'avancement
-- [x] **Tableau "Prévu vs Réel par catégorie"** avec écarts et pourcentages
-- [x] **Alertes de dépassement** : Affichage automatique des catégories dépassant >20% du budget
-- [x] **Création de prévisions** : Par type (revenu/dépense), catégorie, montant et description
-- [x] **Copie vers autre mois** : Réplication des prévisions d'un mois vers un autre
-- [x] APIs complètes :
-  - GET /api/budget/forecast - Liste des prévisions
-  - POST /api/budget/forecast - Création de prévision
-  - PUT /api/budget/forecast/{id} - Modification
-  - DELETE /api/budget/forecast/{id} - Suppression
-  - GET /api/budget/forecast/comparison - Comparaison prévu vs réel
-  - POST /api/budget/forecast/copy - Copie vers autre mois
+## Configuration Perplexity
 
-### Other Core Features ✅
-- [x] Authentication & Users (JWT)
-- [x] Contacts Management (CRUD + Import)
-- [x] Quotes (Devis) with PDF generation
-- [x] Invoices with payment tracking
-- [x] Dashboard with KPIs and charts
-- [x] Tasks management
-- [x] Subscriptions management
-- [x] Portfolio management
-- [x] Blog/Articles management
-- [x] Document management
-- [x] Backup system (Dropbox)
-- [x] Settings page with data management
+**Variable d'environnement** (dans `/app/backend/.env`) :
+```
+PERPLEXITY_API_KEY=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
+```
+
+**Paramètres de l'IA** (dans `server.py`) :
+```python
+AI_ENABLED = True  # Toggle pour activer/désactiver
+AI_MAX_MESSAGE_LENGTH = 2000  # Max caractères par message
+AI_DAILY_LIMIT = 50  # Max appels par utilisateur par jour
+```
 
 ## Recent Changes (2025-01-09)
 
 ### Session Accomplishments
-1. ✅ **Drag & Drop Pipeline** - Colonnes réorganisables avec @dnd-kit
-2. ✅ **Budget Phase 2** - Règles d'auto-catégorisation avancées (match_type, apply_to_type)
-3. ✅ **Budget Phase 3** - Budget prévisionnel complet avec comparaison prévu vs réel
+1. ✅ **Budget Phase 4** - Projection de cashflow multi-mois
+2. ✅ **Assistant IA Perplexity** - Chat intelligent avec contexte CRM
 
 ### Tests Passed
-- **Backend**: 22/22 tests (100%)
+- **Backend**: 25/25 tests (100%)
 - **Frontend**: 100%
-- Test files: `/app/tests/test_phase2_phase3_features.py`
+- Test files: `/app/tests/test_phase4_ai_cashflow.py`
 
 ## Backlog (Prioritized)
-
-### P2 - Medium Priority
-- [ ] **Module Budget Phase 4** - Vue de cashflow prévisionnel sur plusieurs mois
-- [ ] Graphiques de tendances et prévisions automatiques
 
 ### P3 - Low Priority
 - [ ] **Audio player for portfolio** - Lecteur audio sur page publique
@@ -112,27 +104,29 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - users, contacts, opportunities, quotes, invoices
 - subscriptions, tasks, blog_posts, portfolio
 - settings, services, counters
-- **pipeline_columns** (colonnes personnalisables)
-- **bank_transactions** (Budget module)
-- **budget_categories** (Budget module)
-- **auto_category_rules** (Budget module - règles avancées)
-- **budget_forecasts** (Budget module - prévisionnel)
+- pipeline_columns (colonnes personnalisables)
+- bank_transactions, budget_categories, auto_category_rules, budget_forecasts
+- **ai_conversations** (historique des chats IA)
+- **ai_usage** (compteur quotidien par utilisateur)
 
 ## File Structure
 ```
 /app/
 ├── backend/
-│   ├── server.py          # API server with all routes
+│   ├── server.py          # API server (Budget Cashflow + AI Assistant routes)
+│   ├── .env               # PERPLEXITY_API_KEY configured
 │   └── tests/
-│       └── test_phase2_phase3_features.py  # Phase 2 & 3 tests
+│       ├── test_phase2_phase3_features.py
+│       └── test_phase4_ai_cashflow.py  # NEW: 25 tests
 ├── frontend/
 │   ├── src/
 │   │   ├── pages/dashboard/
-│   │   │   ├── PipelinePage.jsx    # Drag & Drop with @dnd-kit
-│   │   │   └── BudgetPage.jsx      # All phases including ForecastTab
+│   │   │   ├── BudgetPage.jsx      # CashflowTab added
+│   │   │   ├── AIAssistantPage.jsx # NEW: AI chat interface
+│   │   │   └── DashboardLayout.jsx # Assistant IA link in sidebar
 │   │   └── lib/
-│   │       └── api.js              # API client updated
+│   │       └── api.js              # aiAPI and cashflowAPI added
 └── test_reports/
-    ├── iteration_8.json
-    └── iteration_9.json            # Latest (Phase 2 & 3 tests)
+    ├── iteration_9.json
+    └── iteration_10.json           # Latest (Phase 4 + AI tests)
 ```
