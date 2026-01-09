@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { 
   Calendar, Send, MessageSquare, Settings, Plus, Clock, CheckCircle, 
   AlertCircle, Facebook, Instagram, Image, Video, FileText, Sparkles,
   ChevronLeft, ChevronRight, MoreVertical, Trash2, Edit, Eye, Filter,
-  Inbox, Archive, Star, Reply, Bot, Loader2, RefreshCw, List, Grid
+  Inbox, Archive, Star, Reply, Bot, Loader2, RefreshCw, List, Grid,
+  Smile, MapPin, Hash, X, Upload, FolderOpen, ChevronDown, CalendarDays,
+  LayoutList, Rows3, GripVertical
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
@@ -13,6 +15,8 @@ import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import { Label } from "../../components/ui/label";
 import { ScrollArea } from "../../components/ui/scroll-area";
+import { Checkbox } from "../../components/ui/checkbox";
+import { Switch } from "../../components/ui/switch";
 import { 
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter 
 } from "../../components/ui/dialog";
@@ -27,24 +31,16 @@ import {
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { socialAPI } from "../../lib/api";
+import { socialAPI, uploadAPI } from "../../lib/api";
 
-// Platform icons
+// Platform icons component
 const PlatformIcon = ({ platform, className = "w-4 h-4" }) => {
   if (platform === "facebook") return <Facebook className={`${className} text-[#1877F2]`} />;
   if (platform === "instagram") return <Instagram className={`${className} text-[#E4405F]`} />;
   return <MessageSquare className={className} />;
 };
 
-// Post type icons
-const PostTypeIcon = ({ type, className = "w-4 h-4" }) => {
-  if (type === "image") return <Image className={className} />;
-  if (type === "video" || type === "reel") return <Video className={className} />;
-  if (type === "carousel") return <Image className={className} />;
-  return <FileText className={className} />;
-};
-
-// Status badge
+// Status badge component
 const StatusBadge = ({ status }) => {
   const config = {
     scheduled: { label: "Programmé", color: "bg-blue-100 text-blue-700" },
@@ -56,7 +52,7 @@ const StatusBadge = ({ status }) => {
   return <Badge className={`${color} border-none text-xs`}>{label}</Badge>;
 };
 
-// Priority badge
+// Priority badge component
 const PriorityBadge = ({ priority }) => {
   const config = {
     low: { label: "Basse", color: "bg-gray-100 text-gray-600" },
@@ -68,6 +64,508 @@ const PriorityBadge = ({ priority }) => {
   return <Badge className={`${color} border-none text-xs`}>{label}</Badge>;
 };
 
+// ========== AGORAPULSE-STYLE POST CREATION MODAL ==========
+const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess }) => {
+  const [selectedAccounts, setSelectedAccounts] = useState([]);
+  const [content, setContent] = useState("");
+  const [mediaFiles, setMediaFiles] = useState([]);
+  const [mediaUrls, setMediaUrls] = useState([]);
+  const [scheduledAt, setScheduledAt] = useState("");
+  const [isDraft, setIsDraft] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef(null);
+  const dropZoneRef = useRef(null);
+
+  useEffect(() => {
+    if (editingPost) {
+      setContent(editingPost.content || "");
+      setSelectedAccounts(editingPost.platforms || []);
+      setScheduledAt(editingPost.scheduled_at || "");
+      setMediaUrls(editingPost.media_urls || []);
+      setIsDraft(editingPost.status === "draft");
+    } else {
+      resetForm();
+    }
+  }, [editingPost, open]);
+
+  const resetForm = () => {
+    setContent("");
+    setSelectedAccounts([]);
+    setMediaFiles([]);
+    setMediaUrls([]);
+    setScheduledAt("");
+    setIsDraft(false);
+  };
+
+  const toggleAccount = (platform) => {
+    setSelectedAccounts(prev => 
+      prev.includes(platform) 
+        ? prev.filter(p => p !== platform)
+        : [...prev, platform]
+    );
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    dropZoneRef.current?.classList.add("border-[#FF6B35]", "bg-orange-50");
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    dropZoneRef.current?.classList.remove("border-[#FF6B35]", "bg-orange-50");
+  };
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    dropZoneRef.current?.classList.remove("border-[#FF6B35]", "bg-orange-50");
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
+  }, []);
+
+  const handleFileInput = (e) => {
+    const files = Array.from(e.target.files);
+    handleFiles(files);
+  };
+
+  const handleFiles = async (files) => {
+    const validFiles = files.filter(file => {
+      const isImage = file.type.startsWith("image/");
+      const isVideo = file.type.startsWith("video/");
+      const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024; // 100MB video, 10MB image
+      
+      if (!isImage && !isVideo) {
+        toast.error(`${file.name}: Format non supporté`);
+        return false;
+      }
+      if (file.size > maxSize) {
+        toast.error(`${file.name}: Fichier trop volumineux`);
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length === 0) return;
+
+    setUploading(true);
+    try {
+      for (const file of validFiles) {
+        const res = await uploadAPI.image(file);
+        if (res.data?.url) {
+          setMediaUrls(prev => [...prev, res.data.url]);
+        }
+      }
+      toast.success(`${validFiles.length} fichier(s) uploadé(s)`);
+    } catch (error) {
+      toast.error("Erreur lors de l'upload");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeMedia = (index) => {
+    setMediaUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async () => {
+    if (!content.trim()) {
+      toast.error("Le contenu est requis");
+      return;
+    }
+    if (selectedAccounts.length === 0) {
+      toast.error("Sélectionnez au moins un compte");
+      return;
+    }
+    if (!isDraft && !scheduledAt) {
+      toast.error("La date de publication est requise");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const postData = {
+        content,
+        platforms: selectedAccounts,
+        media_urls: mediaUrls,
+        scheduled_at: scheduledAt || new Date().toISOString(),
+        status: isDraft ? "draft" : "scheduled",
+        post_type: mediaUrls.length > 0 ? (mediaUrls.some(u => u.includes("video")) ? "video" : "image") : "text",
+      };
+
+      if (editingPost) {
+        await socialAPI.updatePost(editingPost.id, postData);
+        toast.success("Post mis à jour");
+      } else {
+        await socialAPI.createPost(postData);
+        toast.success(isDraft ? "Brouillon enregistré" : "Post programmé");
+      }
+      
+      onSuccess?.();
+      onOpenChange(false);
+      resetForm();
+    } catch (error) {
+      toast.error("Erreur lors de l'enregistrement");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Preview mockup based on selected platform
+  const getPreviewPlatform = () => selectedAccounts[0] || "facebook";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-white max-w-6xl h-[90vh] p-0 gap-0 overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E5E5]">
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-semibold text-[#1A1A1A]">
+              {editingPost ? "Modifier la publication" : "Créer une publication"}
+            </h2>
+            <Badge variant="outline" className="text-[#FF6B35] border-[#FF6B35]">
+              10 publication(s) restante(s)
+            </Badge>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left Column - Account Selection */}
+          <div className="w-64 border-r border-[#E5E5E5] bg-[#FAFAFA] p-4 flex flex-col">
+            <div className="relative mb-4">
+              <Input 
+                placeholder="Chercher un compte" 
+                className="bg-white border-[#E5E5E5] pl-9"
+              />
+              <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+
+            <label className="flex items-center gap-2 mb-4 cursor-pointer">
+              <Checkbox 
+                checked={selectedAccounts.length === 2}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setSelectedAccounts(["facebook", "instagram"]);
+                  } else {
+                    setSelectedAccounts([]);
+                  }
+                }}
+              />
+              <span className="text-sm text-[#666666]">Sélectionner tout</span>
+            </label>
+
+            <div className="space-y-2 flex-1">
+              {/* Facebook Account */}
+              <div 
+                className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
+                  selectedAccounts.includes("facebook") 
+                    ? "bg-white border-2 border-[#FF6B35]" 
+                    : "bg-white border border-[#E5E5E5] hover:border-[#CCCCCC]"
+                }`}
+                onClick={() => toggleAccount("facebook")}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center">
+                    <Facebook className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-[#1A1A1A]">Alpha Agency</p>
+                    <p className="text-xs text-[#666666]">Facebook Page</p>
+                  </div>
+                </div>
+                {selectedAccounts.includes("facebook") && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); toggleAccount("facebook"); }}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Instagram Account */}
+              <div 
+                className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
+                  selectedAccounts.includes("instagram") 
+                    ? "bg-white border-2 border-[#FF6B35]" 
+                    : "bg-white border border-[#E5E5E5] hover:border-[#CCCCCC]"
+                }`}
+                onClick={() => toggleAccount("instagram")}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center">
+                    <Instagram className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-[#1A1A1A]">Alpha Agency</p>
+                    <p className="text-xs text-[#666666]">Instagram Business</p>
+                  </div>
+                </div>
+                {selectedAccounts.includes("instagram") && (
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); toggleAccount("instagram"); }}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Connect Account Button */}
+            <Button variant="outline" className="mt-4 w-full border-dashed">
+              <Plus className="w-4 h-4 mr-2" />
+              Connecter un compte
+            </Button>
+          </div>
+
+          {/* Center Column - Content Creation */}
+          <div className="flex-1 p-6 overflow-y-auto">
+            <div className="max-w-2xl mx-auto space-y-6">
+              {/* Publication Content Card */}
+              <Card className="border-[#E5E5E5]">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-medium flex items-center gap-2">
+                    <Edit className="w-4 h-4" />
+                    Publication
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Text Area */}
+                  <Textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Rédigez une description avec du texte, des liens..."
+                    rows={6}
+                    className="bg-white border-[#E5E5E5] resize-none text-base"
+                  />
+                  
+                  {/* Toolbar */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm" className="text-[#666666] hover:text-[#FF6B35]">
+                        <Smile className="w-5 h-5" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-[#666666] hover:text-[#FF6B35]">
+                        <MapPin className="w-5 h-5" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-[#666666] hover:text-[#FF6B35]">
+                        <Hash className="w-5 h-5" />
+                      </Button>
+                    </div>
+                    <Button variant="outline" size="sm" className="text-[#FF6B35] border-[#FF6B35]">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Writing Assistant
+                    </Button>
+                  </div>
+
+                  {/* Draft Toggle */}
+                  <div className="flex items-center justify-between pt-2 border-t border-[#E5E5E5]">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={isDraft}
+                        onCheckedChange={setIsDraft}
+                      />
+                      <span className="text-sm text-[#666666]">Ceci est un brouillon</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Media Upload Card */}
+              <Card className="border-[#E5E5E5]">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-medium flex items-center gap-2">
+                    <Image className="w-4 h-4" />
+                    Médias
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* Uploaded Media Preview */}
+                  {mediaUrls.length > 0 && (
+                    <div className="grid grid-cols-4 gap-3 mb-4">
+                      {mediaUrls.map((url, idx) => (
+                        <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden bg-[#F8F8F8]">
+                          <img src={url} alt={`Media ${idx + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            onClick={() => removeMedia(idx)}
+                            className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Drop Zone */}
+                  <div
+                    ref={dropZoneRef}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className="border-2 border-dashed border-[#E5E5E5] rounded-lg p-8 text-center transition-colors"
+                  >
+                    {uploading ? (
+                      <div className="flex flex-col items-center">
+                        <Loader2 className="w-10 h-10 text-[#FF6B35] animate-spin mb-3" />
+                        <p className="text-[#666666]">Upload en cours...</p>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="w-10 h-10 text-[#CCCCCC] mx-auto mb-3" />
+                        <p className="text-[#666666] mb-4">Glissez et déposez les fichiers n'importe où</p>
+                        
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="border-[#E5E5E5]">
+                              Parcourir les fichiers
+                              <ChevronDown className="w-4 h-4 ml-2" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="bg-white border-[#E5E5E5]">
+                            <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                              <Upload className="w-4 h-4 mr-2" />
+                              Choisir depuis l'ordinateur
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <FolderOpen className="w-4 h-4 mr-2" />
+                              Choisir depuis la Librairie
+                              <Star className="w-3 h-3 ml-auto text-[#FF6B35]" />
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*,video/*"
+                          multiple
+                          onChange={handleFileInput}
+                          className="hidden"
+                        />
+                      </>
+                    )}
+                  </div>
+                  
+                  <p className="text-xs text-[#999999] mt-3">
+                    Formats acceptés: JPG, PNG, GIF, MP4, MOV • Max 10MB images, 100MB vidéos
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Schedule Card */}
+              {!isDraft && (
+                <Card className="border-[#E5E5E5]">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base font-medium flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      Programmation
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Input
+                      type="datetime-local"
+                      value={scheduledAt}
+                      onChange={(e) => setScheduledAt(e.target.value)}
+                      className="bg-white border-[#E5E5E5] w-full"
+                    />
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column - Preview */}
+          <div className="w-80 border-l border-[#E5E5E5] bg-[#FAFAFA] p-4 overflow-y-auto">
+            <h3 className="text-base font-semibold text-[#1A1A1A] mb-4">Aperçu</h3>
+            
+            {selectedAccounts.length === 0 || !content ? (
+              <div className="bg-white rounded-lg p-6 text-center">
+                <p className="text-[#666666] text-sm">
+                  Salut ! Sélectionnez un profil et ajoutez du contenu dans le panel de gauche pour commencer.
+                </p>
+                <div className="mt-4 bg-[#F8F8F8] rounded-lg p-4">
+                  <div className="w-10 h-10 rounded-full bg-[#E5E5E5] mx-auto mb-3" />
+                  <div className="h-2 bg-[#E5E5E5] rounded w-24 mx-auto mb-2" />
+                  <div className="h-2 bg-[#E5E5E5] rounded w-32 mx-auto mb-2" />
+                  <div className="h-2 bg-[#E5E5E5] rounded w-20 mx-auto" />
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                {/* Preview Header */}
+                <div className="p-3 border-b border-[#E5E5E5]">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      getPreviewPlatform() === "facebook" ? "bg-[#1877F2]" : "bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737]"
+                    }`}>
+                      {getPreviewPlatform() === "facebook" ? (
+                        <Facebook className="w-4 h-4 text-white" />
+                      ) : (
+                        <Instagram className="w-4 h-4 text-white" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#1A1A1A]">Alpha Agency</p>
+                      <p className="text-xs text-[#666666]">
+                        {scheduledAt ? new Date(scheduledAt).toLocaleDateString('fr-FR') : "Maintenant"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Preview Content */}
+                <div className="p-3">
+                  <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap">{content}</p>
+                </div>
+                
+                {/* Preview Media */}
+                {mediaUrls.length > 0 && (
+                  <div className="aspect-square bg-[#F8F8F8]">
+                    <img src={mediaUrls[0]} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
+                
+                {/* Preview Actions */}
+                <div className="p-3 border-t border-[#E5E5E5] flex items-center gap-4 text-[#666666]">
+                  <span className="text-xs">👍 J'aime</span>
+                  <span className="text-xs">💬 Commenter</span>
+                  <span className="text-xs">↗️ Partager</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#E5E5E5] bg-white">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Annuler
+          </Button>
+          <Button 
+            onClick={handleSubmit}
+            disabled={saving || !content.trim() || selectedAccounts.length === 0}
+            className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white"
+          >
+            {saving ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Send className="w-4 h-4 mr-2" />
+            )}
+            {isDraft ? "Enregistrer le brouillon" : "Programmer"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// ========== MAIN SOCIAL MEDIA PAGE ==========
 const SocialMediaPage = () => {
   const [activeTab, setActiveTab] = useState("calendar");
   const [stats, setStats] = useState(null);
@@ -80,21 +578,11 @@ const SocialMediaPage = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [calendarData, setCalendarData] = useState({});
-  const [calendarViewMode, setCalendarViewMode] = useState("calendar"); // "calendar" or "list"
-  const [allPosts, setAllPosts] = useState([]);
+  const [calendarViewMode, setCalendarViewMode] = useState("month"); // "list", "week", "month"
   
-  // Post dialog
-  const [postDialogOpen, setPostDialogOpen] = useState(false);
+  // Post modal
+  const [postModalOpen, setPostModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
-  const [postForm, setPostForm] = useState({
-    content: "",
-    media_urls: [],
-    post_type: "text",
-    platforms: [],
-    scheduled_at: "",
-    hashtags: [],
-    status: "scheduled"
-  });
   
   // Inbox state
   const [selectedMessage, setSelectedMessage] = useState(null);
@@ -110,7 +598,6 @@ const SocialMediaPage = () => {
   useEffect(() => {
     if (activeTab === "calendar") {
       fetchCalendar();
-      fetchPosts();
     }
   }, [currentMonth, currentYear, activeTab]);
 
@@ -132,49 +619,16 @@ const SocialMediaPage = () => {
     }
   };
 
-  const fetchPosts = async () => {
-    try {
-      const res = await socialAPI.getPosts({ month: currentMonth, year: currentYear });
-      setAllPosts(res.data || []);
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-    }
-  };
-
   const fetchCalendar = async () => {
     try {
       const res = await socialAPI.getCalendar(currentMonth, currentYear);
       setCalendarData(res.data.posts_by_date || {});
+      
+      // Also get posts for list view
+      const postsRes = await socialAPI.getPosts({ month: currentMonth, year: currentYear });
+      setPosts(postsRes.data || []);
     } catch (error) {
       console.error("Error fetching calendar:", error);
-    }
-  };
-
-  const handleCreatePost = async () => {
-    if (!postForm.content.trim()) {
-      toast.error("Le contenu est requis");
-      return;
-    }
-    if (!postForm.scheduled_at) {
-      toast.error("La date de publication est requise");
-      return;
-    }
-    
-    try {
-      if (editingPost) {
-        await socialAPI.updatePost(editingPost.id, postForm);
-        toast.success("Post mis à jour");
-      } else {
-        await socialAPI.createPost(postForm);
-        toast.success("Post programmé");
-      }
-      setPostDialogOpen(false);
-      resetPostForm();
-      fetchCalendar();
-      fetchPosts();
-      fetchData();
-    } catch (error) {
-      toast.error("Erreur lors de l'enregistrement");
     }
   };
 
@@ -184,38 +638,20 @@ const SocialMediaPage = () => {
       await socialAPI.deletePost(postId);
       toast.success("Post supprimé");
       fetchCalendar();
-      fetchPosts();
       fetchData();
     } catch (error) {
       toast.error("Erreur");
     }
   };
 
-  const resetPostForm = () => {
-    setPostForm({
-      content: "",
-      media_urls: [],
-      post_type: "text",
-      platforms: [],
-      scheduled_at: "",
-      hashtags: [],
-      status: "scheduled"
-    });
-    setEditingPost(null);
-  };
-
   const openEditPost = (post) => {
     setEditingPost(post);
-    setPostForm({
-      content: post.content,
-      media_urls: post.media_urls || [],
-      post_type: post.post_type,
-      platforms: post.platforms || [],
-      scheduled_at: post.scheduled_at,
-      hashtags: post.hashtags || [],
-      status: post.status
-    });
-    setPostDialogOpen(true);
+    setPostModalOpen(true);
+  };
+
+  const openNewPost = () => {
+    setEditingPost(null);
+    setPostModalOpen(true);
   };
 
   // Inbox functions
@@ -260,17 +696,19 @@ const SocialMediaPage = () => {
     }
   };
 
-  // Calendar rendering
-  const renderCalendar = () => {
+  const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+                      "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+
+  // Calendar Month View
+  const renderMonthView = () => {
     const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
     const firstDay = new Date(currentYear, currentMonth - 1, 1).getDay();
     const days = [];
-    const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
-                        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
     
-    // Empty cells before first day
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="h-24 bg-[#F8F8F8]" />);
+    // Empty cells before first day (Monday = 0)
+    const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1;
+    for (let i = 0; i < adjustedFirstDay; i++) {
+      days.push(<div key={`empty-${i}`} className="h-28 bg-[#FAFAFA]" />);
     }
     
     // Days of month
@@ -282,25 +720,28 @@ const SocialMediaPage = () => {
       days.push(
         <div 
           key={day} 
-          className={`h-24 border border-[#E5E5E5] p-1 overflow-hidden ${
-            isToday ? 'bg-[#CE0202]/5 border-[#CE0202]' : 'bg-white'
+          className={`h-28 border border-[#E5E5E5] p-2 overflow-hidden transition-colors hover:bg-[#FAFAFA] ${
+            isToday ? 'bg-orange-50 border-[#FF6B35]' : 'bg-white'
           }`}
         >
-          <div className={`text-xs font-medium mb-1 ${isToday ? 'text-[#CE0202]' : 'text-[#666666]'}`}>
+          <div className={`text-sm font-medium mb-1 ${isToday ? 'text-[#FF6B35]' : 'text-[#666666]'}`}>
             {day}
           </div>
-          <div className="space-y-0.5">
-            {dayPosts.slice(0, 3).map((post, idx) => (
+          <div className="space-y-1">
+            {dayPosts.slice(0, 2).map((post, idx) => (
               <div 
                 key={idx}
                 onClick={() => openEditPost(post)}
-                className="text-[10px] bg-[#CE0202]/10 text-[#CE0202] px-1 py-0.5 rounded truncate cursor-pointer hover:bg-[#CE0202]/20"
+                className="flex items-center gap-1 text-xs bg-[#FF6B35]/10 text-[#FF6B35] px-2 py-1 rounded cursor-pointer hover:bg-[#FF6B35]/20 truncate"
               >
-                {post.platforms?.map(p => p === 'facebook' ? 'FB' : 'IG').join('+')} • {post.content.slice(0, 20)}...
+                {post.platforms?.map((p, i) => (
+                  <PlatformIcon key={i} platform={p} className="w-3 h-3 flex-shrink-0" />
+                ))}
+                <span className="truncate">{post.content?.slice(0, 20)}...</span>
               </div>
             ))}
-            {dayPosts.length > 3 && (
-              <div className="text-[10px] text-[#666666]">+{dayPosts.length - 3} autres</div>
+            {dayPosts.length > 2 && (
+              <div className="text-xs text-[#666666]">+{dayPosts.length - 2} autre(s)</div>
             )}
           </div>
         </div>
@@ -308,56 +749,29 @@ const SocialMediaPage = () => {
     }
     
     return (
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <Button variant="outline" size="sm" onClick={() => {
-            if (currentMonth === 1) {
-              setCurrentMonth(12);
-              setCurrentYear(currentYear - 1);
-            } else {
-              setCurrentMonth(currentMonth - 1);
-            }
-          }}>
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <h3 className="text-lg font-semibold text-[#1A1A1A]">
-            {monthNames[currentMonth - 1]} {currentYear}
-          </h3>
-          <Button variant="outline" size="sm" onClick={() => {
-            if (currentMonth === 12) {
-              setCurrentMonth(1);
-              setCurrentYear(currentYear + 1);
-            } else {
-              setCurrentMonth(currentMonth + 1);
-            }
-          }}>
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-7 gap-0 border border-[#E5E5E5] rounded-lg overflow-hidden">
-          {['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'].map(d => (
-            <div key={d} className="bg-[#F8F8F8] text-center py-2 text-xs font-medium text-[#666666] border-b border-[#E5E5E5]">
+      <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
+        {/* Days header */}
+        <div className="grid grid-cols-7 bg-[#FAFAFA] border-b border-[#E5E5E5]">
+          {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => (
+            <div key={d} className="text-center py-3 text-sm font-medium text-[#666666]">
               {d}
             </div>
           ))}
+        </div>
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7">
           {days}
         </div>
       </div>
     );
   };
 
-  // List view rendering
+  // Calendar List View
   const renderListView = () => {
-    const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
-                        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-    
-    // Sort posts by scheduled date
-    const sortedPosts = [...allPosts].sort((a, b) => 
+    const sortedPosts = [...posts].sort((a, b) => 
       new Date(a.scheduled_at) - new Date(b.scheduled_at)
     );
     
-    // Group posts by date
     const groupedPosts = sortedPosts.reduce((acc, post) => {
       const date = post.scheduled_at?.split('T')[0] || 'Sans date';
       if (!acc[date]) acc[date] = [];
@@ -365,148 +779,115 @@ const SocialMediaPage = () => {
       return acc;
     }, {});
 
-    return (
-      <div>
-        {/* Month navigation */}
-        <div className="flex items-center justify-between mb-6">
-          <Button variant="outline" size="sm" onClick={() => {
-            if (currentMonth === 1) {
-              setCurrentMonth(12);
-              setCurrentYear(currentYear - 1);
-            } else {
-              setCurrentMonth(currentMonth - 1);
-            }
-          }}>
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <h3 className="text-lg font-semibold text-[#1A1A1A]">
-            {monthNames[currentMonth - 1]} {currentYear}
-          </h3>
-          <Button variant="outline" size="sm" onClick={() => {
-            if (currentMonth === 12) {
-              setCurrentMonth(1);
-              setCurrentYear(currentYear + 1);
-            } else {
-              setCurrentMonth(currentMonth + 1);
-            }
-          }}>
-            <ChevronRight className="w-4 h-4" />
+    if (Object.keys(groupedPosts).length === 0) {
+      return (
+        <div className="bg-white rounded-xl border border-[#E5E5E5] p-12 text-center">
+          <Calendar className="w-12 h-12 mx-auto mb-4 text-[#E5E5E5]" />
+          <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Aucune publication programmée</h3>
+          <p className="text-[#666666] mb-4">Commencez par créer votre premier post</p>
+          <Button onClick={openNewPost} className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white">
+            <Plus className="w-4 h-4 mr-2" />
+            Créer un post
           </Button>
         </div>
+      );
+    }
 
-        {/* Posts list */}
-        {Object.keys(groupedPosts).length === 0 ? (
-          <div className="text-center py-12">
-            <Calendar className="w-12 h-12 mx-auto mb-4 text-[#E5E5E5]" />
-            <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Aucun post programmé</h3>
-            <p className="text-[#666666] mb-4">Créez votre premier post pour ce mois</p>
-            <Button
-              onClick={() => { resetPostForm(); setPostDialogOpen(true); }}
-              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nouveau post
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {Object.entries(groupedPosts).map(([date, datePosts]) => {
-              const dateObj = new Date(date);
-              const isToday = new Date().toISOString().startsWith(date);
-              const isPast = dateObj < new Date() && !isToday;
-              
-              return (
-                <div key={date}>
-                  {/* Date header */}
-                  <div className={`flex items-center gap-3 mb-3 ${isToday ? 'text-[#CE0202]' : 'text-[#666666]'}`}>
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold ${
-                      isToday ? 'bg-[#CE0202] text-white' : isPast ? 'bg-gray-100' : 'bg-[#F8F8F8]'
-                    }`}>
-                      {dateObj.getDate()}
-                    </div>
-                    <div>
-                      <p className="font-medium text-[#1A1A1A]">
-                        {dateObj.toLocaleDateString('fr-FR', { weekday: 'long' })}
-                        {isToday && <Badge className="ml-2 bg-[#CE0202] text-white text-xs">Aujourd'hui</Badge>}
-                      </p>
-                      <p className="text-xs text-[#666666]">
-                        {dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Posts for this date */}
-                  <div className="ml-[52px] space-y-3">
-                    {datePosts.map((post) => (
-                      <Card 
-                        key={post.id} 
-                        className={`bg-white border-[#E5E5E5] hover:shadow-md transition-shadow ${
-                          isPast && post.status !== 'published' ? 'opacity-60' : ''
-                        }`}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between gap-4">
-                            {/* Left: Time and platforms */}
-                            <div className="flex items-center gap-3">
-                              <div className="text-center">
-                                <p className="text-lg font-bold text-[#1A1A1A]">
-                                  {new Date(post.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                                </p>
-                                <div className="flex gap-1 justify-center mt-1">
-                                  {post.platforms?.map((p, idx) => (
-                                    <PlatformIcon key={idx} platform={p} className="w-4 h-4" />
-                                  ))}
-                                </div>
-                              </div>
-                              
-                              {/* Content preview */}
-                              <div className="border-l border-[#E5E5E5] pl-4">
-                                <p className="text-sm text-[#1A1A1A] line-clamp-2">{post.content}</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                  <StatusBadge status={post.status} />
-                                  <PostTypeIcon type={post.post_type} className="w-3 h-3 text-[#666666]" />
-                                  {post.hashtags?.length > 0 && (
-                                    <span className="text-xs text-[#999999]">
-                                      {post.hashtags.slice(0, 2).join(' ')}
-                                      {post.hashtags.length > 2 && ` +${post.hashtags.length - 2}`}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {/* Right: Actions */}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                  <MoreVertical className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-white">
-                                <DropdownMenuItem onClick={() => openEditPost(post)}>
-                                  <Edit className="w-4 h-4 mr-2" />
-                                  Modifier
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem 
-                                  onClick={() => handleDeletePost(post.id)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="w-4 h-4 mr-2" />
-                                  Supprimer
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+    return (
+      <div className="space-y-4">
+        {Object.entries(groupedPosts).map(([date, datePosts]) => {
+          const dateObj = new Date(date);
+          const isToday = new Date().toISOString().startsWith(date);
+          
+          return (
+            <div key={date} className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
+              {/* Date Header */}
+              <div className={`px-4 py-3 border-b border-[#E5E5E5] flex items-center gap-3 ${
+                isToday ? 'bg-orange-50' : 'bg-[#FAFAFA]'
+              }`}>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold ${
+                  isToday ? 'bg-[#FF6B35] text-white' : 'bg-white text-[#1A1A1A]'
+                }`}>
+                  {dateObj.getDate()}
                 </div>
-              );
-            })}
-          </div>
-        )}
+                <div>
+                  <p className="font-medium text-[#1A1A1A] capitalize">
+                    {dateObj.toLocaleDateString('fr-FR', { weekday: 'long' })}
+                    {isToday && <Badge className="ml-2 bg-[#FF6B35] text-white text-xs">Aujourd'hui</Badge>}
+                  </p>
+                  <p className="text-xs text-[#666666]">
+                    {dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Posts */}
+              <div className="divide-y divide-[#E5E5E5]">
+                {datePosts.map((post) => (
+                  <div key={post.id} className="p-4 hover:bg-[#FAFAFA] transition-colors">
+                    <div className="flex items-start gap-4">
+                      {/* Time & Platforms */}
+                      <div className="text-center w-16 flex-shrink-0">
+                        <p className="text-lg font-bold text-[#1A1A1A]">
+                          {new Date(post.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <div className="flex gap-1 justify-center mt-1">
+                          {post.platforms?.map((p, idx) => (
+                            <PlatformIcon key={idx} platform={p} className="w-4 h-4" />
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-[#1A1A1A] line-clamp-2">{post.content}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <StatusBadge status={post.status} />
+                          {post.media_urls?.length > 0 && (
+                            <Badge variant="outline" className="text-xs">
+                              <Image className="w-3 h-3 mr-1" />
+                              {post.media_urls.length} média(s)
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Media Preview */}
+                      {post.media_urls?.length > 0 && (
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-[#F8F8F8] flex-shrink-0">
+                          <img src={post.media_urls[0]} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      
+                      {/* Actions */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-white">
+                          <DropdownMenuItem onClick={() => openEditPost(post)}>
+                            <Edit className="w-4 h-4 mr-2" />
+                            Modifier
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => handleDeletePost(post.id)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Supprimer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -522,24 +903,19 @@ const SocialMediaPage = () => {
 
   return (
     <div data-testid="social-media-page" className="space-y-6">
-      {/* Header */}
+      {/* Header - Agorapulse Style */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[#1A1A1A]">Social Media</h1>
-          <p className="text-[#666666]">Gérez vos réseaux sociaux (style Agorapulse)</p>
+          <p className="text-[#666666] text-sm">Gérez vos réseaux sociaux (style Agorapulse)</p>
         </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => { resetPostForm(); setPostDialogOpen(true); }}
-            className="bg-[#CE0202] hover:bg-[#B00202] text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nouveau post
-          </Button>
-        </div>
+        <Button onClick={openNewPost} className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white">
+          <Plus className="w-4 h-4 mr-2" />
+          Créer un post
+        </Button>
       </div>
 
-      {/* Stats */}
+      {/* Stats - Agorapulse Orange Theme */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Card className="bg-white border-[#E5E5E5]">
@@ -584,8 +960,8 @@ const SocialMediaPage = () => {
           <Card className="bg-white border-[#E5E5E5]">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-red-100">
-                  <Inbox className="w-5 h-5 text-red-600" />
+                <div className="p-2 rounded-lg bg-orange-100">
+                  <Inbox className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-[#1A1A1A]">{stats.inbox?.unread || 0}</p>
@@ -612,19 +988,19 @@ const SocialMediaPage = () => {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="bg-[#F8F8F8] p-1">
-          <TabsTrigger value="calendar" className="data-[state=active]:bg-white data-[state=active]:text-[#CE0202]">
+        <TabsList className="bg-white border border-[#E5E5E5] p-1 rounded-xl">
+          <TabsTrigger value="calendar" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg">
             <Calendar className="w-4 h-4 mr-2" />
             Calendrier
           </TabsTrigger>
-          <TabsTrigger value="inbox" className="data-[state=active]:bg-white data-[state=active]:text-[#CE0202]">
+          <TabsTrigger value="inbox" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg">
             <Inbox className="w-4 h-4 mr-2" />
             Boîte de réception
             {stats?.inbox?.unread > 0 && (
-              <Badge className="ml-2 bg-[#CE0202] text-white text-xs">{stats.inbox.unread}</Badge>
+              <Badge className="ml-2 bg-red-500 text-white text-xs">{stats.inbox.unread}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="accounts" className="data-[state=active]:bg-white data-[state=active]:text-[#CE0202]">
+          <TabsTrigger value="accounts" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg">
             <Settings className="w-4 h-4 mr-2" />
             Comptes
           </TabsTrigger>
@@ -632,40 +1008,72 @@ const SocialMediaPage = () => {
 
         {/* Calendar Tab */}
         <TabsContent value="calendar" className="mt-4">
-          <Card className="bg-white border-[#E5E5E5]">
-            <CardHeader className="pb-3 border-b border-[#E5E5E5]">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-medium">Publications programmées</CardTitle>
-                <div className="flex items-center gap-1 bg-[#F8F8F8] rounded-lg p-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setCalendarViewMode("calendar")}
-                    className={calendarViewMode === "calendar" 
-                      ? "bg-white shadow-sm text-[#CE0202] hover:bg-white" 
-                      : "text-[#666666] hover:text-[#1A1A1A]"}
-                  >
-                    <Grid className="w-4 h-4 mr-1" />
-                    Calendrier
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setCalendarViewMode("list")}
-                    className={calendarViewMode === "list" 
-                      ? "bg-white shadow-sm text-[#CE0202] hover:bg-white" 
-                      : "text-[#666666] hover:text-[#1A1A1A]"}
-                  >
-                    <List className="w-4 h-4 mr-1" />
-                    Liste
-                  </Button>
-                </div>
+          {/* Calendar Header with Controls */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => {
+                const today = new Date();
+                setCurrentMonth(today.getMonth() + 1);
+                setCurrentYear(today.getFullYear());
+              }}>
+                Aujourd'hui
+              </Button>
+              <div className="flex items-center">
+                <Button variant="ghost" size="sm" onClick={() => {
+                  if (currentMonth === 1) {
+                    setCurrentMonth(12);
+                    setCurrentYear(currentYear - 1);
+                  } else {
+                    setCurrentMonth(currentMonth - 1);
+                  }
+                }}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  if (currentMonth === 12) {
+                    setCurrentMonth(1);
+                    setCurrentYear(currentYear + 1);
+                  } else {
+                    setCurrentMonth(currentMonth + 1);
+                  }
+                }}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
               </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              {calendarViewMode === "calendar" ? renderCalendar() : renderListView()}
-            </CardContent>
-          </Card>
+              <span className="text-lg font-semibold text-[#1A1A1A] ml-2">
+                {monthNames[currentMonth - 1]} {currentYear}
+              </span>
+            </div>
+            
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-[#F8F8F8] rounded-lg p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCalendarViewMode("list")}
+                className={calendarViewMode === "list" 
+                  ? "bg-white shadow-sm text-[#FF6B35]" 
+                  : "text-[#666666]"}
+              >
+                <LayoutList className="w-4 h-4 mr-1" />
+                Liste
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCalendarViewMode("month")}
+                className={calendarViewMode === "month" 
+                  ? "bg-white shadow-sm text-[#FF6B35]" 
+                  : "text-[#666666]"}
+              >
+                <CalendarDays className="w-4 h-4 mr-1" />
+                Mois
+              </Button>
+            </div>
+          </div>
+
+          {/* Calendar Content */}
+          {calendarViewMode === "month" ? renderMonthView() : renderListView()}
         </TabsContent>
 
         {/* Inbox Tab */}
@@ -703,7 +1111,7 @@ const SocialMediaPage = () => {
                         onClick={() => { setSelectedMessage(msg); setAiSuggestions([]); }}
                         className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                           selectedMessage?.id === msg.id 
-                            ? 'border-[#CE0202] bg-[#CE0202]/5'
+                            ? 'border-[#FF6B35] bg-orange-50'
                             : 'border-[#E5E5E5] hover:bg-[#F8F8F8]'
                         } ${msg.status === 'unread' ? 'bg-blue-50/50' : ''}`}
                       >
@@ -715,7 +1123,7 @@ const SocialMediaPage = () => {
                                 {msg.sender_name}
                               </p>
                               {msg.status === 'unread' && (
-                                <div className="w-2 h-2 bg-[#CE0202] rounded-full" />
+                                <div className="w-2 h-2 bg-[#FF6B35] rounded-full" />
                               )}
                             </div>
                             <p className="text-xs text-[#666666] truncate mt-0.5">{msg.content}</p>
@@ -753,23 +1161,6 @@ const SocialMediaPage = () => {
                         >
                           <Archive className="w-4 h-4" />
                         </Button>
-                        <Select 
-                          value={selectedMessage.priority} 
-                          onValueChange={(v) => {
-                            socialAPI.updateMessagePriority(selectedMessage.id, v);
-                            setSelectedMessage({ ...selectedMessage, priority: v });
-                          }}
-                        >
-                          <SelectTrigger className="w-28 h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white">
-                            <SelectItem value="low">Basse</SelectItem>
-                            <SelectItem value="normal">Normal</SelectItem>
-                            <SelectItem value="high">Haute</SelectItem>
-                            <SelectItem value="urgent">Urgent</SelectItem>
-                          </SelectContent>
-                        </Select>
                       </div>
                     </div>
                   </CardHeader>
@@ -784,8 +1175,8 @@ const SocialMediaPage = () => {
 
                     {/* Previous Reply */}
                     {selectedMessage.reply_content && (
-                      <div className="bg-[#CE0202]/5 rounded-lg p-4 mb-4 border-l-4 border-[#CE0202]">
-                        <p className="text-xs text-[#CE0202] font-medium mb-1">Votre réponse</p>
+                      <div className="bg-orange-50 rounded-lg p-4 mb-4 border-l-4 border-[#FF6B35]">
+                        <p className="text-xs text-[#FF6B35] font-medium mb-1">Votre réponse</p>
                         <p className="text-[#1A1A1A]">{selectedMessage.reply_content}</p>
                       </div>
                     )}
@@ -797,12 +1188,12 @@ const SocialMediaPage = () => {
                         size="sm"
                         onClick={handleGetAISuggestions}
                         disabled={loadingAI}
-                        className="mb-3"
+                        className="mb-3 border-[#FF6B35] text-[#FF6B35]"
                       >
                         {loadingAI ? (
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         ) : (
-                          <Sparkles className="w-4 h-4 mr-2 text-[#CE0202]" />
+                          <Sparkles className="w-4 h-4 mr-2" />
                         )}
                         Suggestions IA
                       </Button>
@@ -835,7 +1226,7 @@ const SocialMediaPage = () => {
                       <Button
                         onClick={handleReply}
                         disabled={!replyContent.trim()}
-                        className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+                        className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white"
                       >
                         <Reply className="w-4 h-4 mr-2" />
                         Répondre
@@ -862,173 +1253,42 @@ const SocialMediaPage = () => {
               <CardTitle className="text-lg">Comptes connectés</CardTitle>
             </CardHeader>
             <CardContent>
-              {accounts.length === 0 ? (
-                <div className="text-center py-12">
-                  <Settings className="w-12 h-12 mx-auto mb-4 text-[#E5E5E5]" />
-                  <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Aucun compte connecté</h3>
-                  <p className="text-[#666666] mb-4">
-                    Connectez vos comptes Facebook et Instagram pour commencer à publier.
-                  </p>
-                  <div className="flex gap-3 justify-center">
-                    <Button variant="outline" className="border-[#1877F2] text-[#1877F2]">
-                      <Facebook className="w-4 h-4 mr-2" />
-                      Connecter Facebook
-                    </Button>
-                    <Button variant="outline" className="border-[#E4405F] text-[#E4405F]">
-                      <Instagram className="w-4 h-4 mr-2" />
-                      Connecter Instagram
-                    </Button>
-                  </div>
-                  <p className="text-xs text-[#666666] mt-4">
-                    Note: L'intégration Meta API sera activée prochainement.
-                  </p>
+              <div className="text-center py-12">
+                <Settings className="w-12 h-12 mx-auto mb-4 text-[#E5E5E5]" />
+                <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Connectez vos réseaux sociaux</h3>
+                <p className="text-[#666666] mb-6 max-w-md mx-auto">
+                  Connectez vos pages Facebook et comptes Instagram pour commencer à programmer vos publications.
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <Button className="bg-[#1877F2] hover:bg-[#166FE5] text-white">
+                    <Facebook className="w-4 h-4 mr-2" />
+                    Connecter Facebook
+                  </Button>
+                  <Button className="bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] hover:opacity-90 text-white">
+                    <Instagram className="w-4 h-4 mr-2" />
+                    Connecter Instagram
+                  </Button>
                 </div>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {accounts.map((account) => (
-                    <div key={account.id} className="flex items-center justify-between p-4 border border-[#E5E5E5] rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <PlatformIcon platform={account.platform} className="w-8 h-8" />
-                        <div>
-                          <p className="font-medium text-[#1A1A1A]">{account.account_name}</p>
-                          <p className="text-xs text-[#666666]">{account.platform}</p>
-                        </div>
-                      </div>
-                      <Badge className={account.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}>
-                        {account.is_active ? 'Actif' : 'Inactif'}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              )}
+                <p className="text-xs text-[#999999] mt-4">
+                  Note: L'intégration Meta API sera activée prochainement avec les credentials fournis.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Create/Edit Post Dialog */}
-      <Dialog open={postDialogOpen} onOpenChange={setPostDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingPost ? "Modifier le post" : "Nouveau post"}</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            {/* Content */}
-            <div className="space-y-2">
-              <Label>Contenu *</Label>
-              <Textarea
-                value={postForm.content}
-                onChange={(e) => setPostForm({ ...postForm, content: e.target.value })}
-                placeholder="Écrivez votre publication..."
-                rows={4}
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
-              />
-              <p className="text-xs text-[#666666]">{postForm.content.length}/2200 caractères</p>
-            </div>
-
-            {/* Platforms */}
-            <div className="space-y-2">
-              <Label>Plateformes *</Label>
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant={postForm.platforms.includes('facebook') ? 'default' : 'outline'}
-                  onClick={() => {
-                    const platforms = postForm.platforms.includes('facebook')
-                      ? postForm.platforms.filter(p => p !== 'facebook')
-                      : [...postForm.platforms, 'facebook'];
-                    setPostForm({ ...postForm, platforms });
-                  }}
-                  className={postForm.platforms.includes('facebook') ? 'bg-[#1877F2]' : ''}
-                >
-                  <Facebook className="w-4 h-4 mr-2" />
-                  Facebook
-                </Button>
-                <Button
-                  type="button"
-                  variant={postForm.platforms.includes('instagram') ? 'default' : 'outline'}
-                  onClick={() => {
-                    const platforms = postForm.platforms.includes('instagram')
-                      ? postForm.platforms.filter(p => p !== 'instagram')
-                      : [...postForm.platforms, 'instagram'];
-                    setPostForm({ ...postForm, platforms });
-                  }}
-                  className={postForm.platforms.includes('instagram') ? 'bg-[#E4405F]' : ''}
-                >
-                  <Instagram className="w-4 h-4 mr-2" />
-                  Instagram
-                </Button>
-              </div>
-            </div>
-
-            {/* Post Type */}
-            <div className="space-y-2">
-              <Label>Type de post</Label>
-              <Select value={postForm.post_type} onValueChange={(v) => setPostForm({ ...postForm, post_type: v })}>
-                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectItem value="text">Texte</SelectItem>
-                  <SelectItem value="image">Image</SelectItem>
-                  <SelectItem value="carousel">Carrousel</SelectItem>
-                  <SelectItem value="reel">Reel / Vidéo courte</SelectItem>
-                  <SelectItem value="story">Story</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Schedule */}
-            <div className="space-y-2">
-              <Label>Date et heure de publication *</Label>
-              <Input
-                type="datetime-local"
-                value={postForm.scheduled_at}
-                onChange={(e) => setPostForm({ ...postForm, scheduled_at: e.target.value })}
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
-              />
-            </div>
-
-            {/* Hashtags */}
-            <div className="space-y-2">
-              <Label>Hashtags (séparés par des virgules)</Label>
-              <Input
-                value={postForm.hashtags.join(', ')}
-                onChange={(e) => setPostForm({ 
-                  ...postForm, 
-                  hashtags: e.target.value.split(',').map(t => t.trim()).filter(Boolean)
-                })}
-                placeholder="#marketing, #guadeloupe"
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
-              />
-            </div>
-
-            {/* Status */}
-            <div className="space-y-2">
-              <Label>Statut</Label>
-              <Select value={postForm.status} onValueChange={(v) => setPostForm({ ...postForm, status: v })}>
-                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectItem value="scheduled">Programmé</SelectItem>
-                  <SelectItem value="draft">Brouillon</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter className="mt-6">
-            <Button variant="outline" onClick={() => setPostDialogOpen(false)}>
-              Annuler
-            </Button>
-            <Button onClick={handleCreatePost} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
-              {editingPost ? "Mettre à jour" : "Programmer"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Create/Edit Post Modal - Agorapulse Style */}
+      <CreatePostModal
+        open={postModalOpen}
+        onOpenChange={setPostModalOpen}
+        accounts={accounts}
+        editingPost={editingPost}
+        onSuccess={() => {
+          fetchCalendar();
+          fetchData();
+        }}
+      />
     </div>
   );
 };
