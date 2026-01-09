@@ -361,4 +361,33 @@ export const cashflowAPI = {
   getProjection: (startMonth, months = 6) => api.get('/budget/cashflow', { params: { start_month: startMonth, months } }),
 };
 
+// Social Media Manager API
+export const socialAPI = {
+  // Accounts
+  getAccounts: () => api.get('/social/accounts'),
+  addAccount: (data) => api.post('/social/accounts', data),
+  deleteAccount: (id) => api.delete(`/social/accounts/${id}`),
+  
+  // Scheduled Posts
+  getPosts: (params) => api.get('/social/posts', { params }),
+  getPost: (id) => api.get(`/social/posts/${id}`),
+  createPost: (data) => api.post('/social/posts', data),
+  updatePost: (id, data) => api.put(`/social/posts/${id}`, data),
+  deletePost: (id) => api.delete(`/social/posts/${id}`),
+  
+  // Calendar
+  getCalendar: (month, year) => api.get('/social/calendar', { params: { month, year } }),
+  
+  // Inbox
+  getInbox: (params) => api.get('/social/inbox', { params }),
+  addMessage: (data) => api.post('/social/inbox', data),
+  updateMessageStatus: (id, status) => api.put(`/social/inbox/${id}/status`, null, { params: { status } }),
+  updateMessagePriority: (id, priority) => api.put(`/social/inbox/${id}/priority`, null, { params: { priority } }),
+  replyToMessage: (id, replyContent) => api.post(`/social/inbox/${id}/reply`, null, { params: { reply_content: replyContent } }),
+  suggestReply: (id, context) => api.post(`/social/inbox/${id}/suggest-reply`, null, { params: { context } }),
+  
+  // Stats
+  getStats: () => api.get('/social/stats'),
+};
+
 export default api;
