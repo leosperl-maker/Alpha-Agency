@@ -990,8 +990,8 @@ const PipelinePage = () => {
           >
             <div 
               ref={scrollContainerRef}
-              className="overflow-x-auto pb-4 px-3 sm:px-4 md:px-6 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
-              style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'thin', scrollbarColor: '#9CA3AF #F3F4F6' }}
+              className="pipeline-scroll overflow-x-auto pb-4 px-3 sm:px-4 md:px-6"
+              style={{ WebkitOverflowScrolling: 'touch' }}
             >
               <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
                 <div className="flex gap-3 sm:gap-4" style={{ width: 'fit-content' }}>
