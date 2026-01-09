@@ -287,6 +287,10 @@ const SettingsPage = () => {
           <TabsTrigger value="legal" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             Pages légales
           </TabsTrigger>
+          <TabsTrigger value="api-keys" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+            <Key className="w-4 h-4 mr-2" />
+            API
+          </TabsTrigger>
           <TabsTrigger value="integrations" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             Intégrations
           </TabsTrigger>
@@ -295,6 +299,118 @@ const SettingsPage = () => {
             Données
           </TabsTrigger>
         </TabsList>
+
+        {/* API Keys Tab */}
+        <TabsContent value="api-keys">
+          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
+                    <Key className="w-5 h-5 text-[#CE0202]" />
+                    Clés API connectées
+                  </CardTitle>
+                  <CardDescription>
+                    État de toutes les intégrations API de votre application
+                  </CardDescription>
+                </div>
+                <Button variant="outline" size="sm" onClick={fetchApiKeys} disabled={loadingApiKeys}>
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loadingApiKeys ? "animate-spin" : ""}`} />
+                  Actualiser
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {loadingApiKeys ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#CE0202]" />
+                </div>
+              ) : apiKeys ? (
+                <div className="space-y-4">
+                  {/* Summary */}
+                  <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                    <div className="text-center">
+                      <p className="text-3xl font-bold text-[#CE0202]">{apiKeys.total_configured}</p>
+                      <p className="text-sm text-[#666666]">sur {apiKeys.total_available} configurées</p>
+                    </div>
+                    <div className="flex-1">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-[#CE0202] h-2 rounded-full" 
+                          style={{ width: `${(apiKeys.total_configured / apiKeys.total_available) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* API Keys List */}
+                  <div className="space-y-3">
+                    {Object.entries(apiKeys.api_keys).map(([key, config]) => (
+                      <div key={key} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${config.configured ? "bg-green-100" : "bg-gray-100"}`}>
+                            {config.configured ? (
+                              <CheckCircle className="w-5 h-5 text-green-600" />
+                            ) : (
+                              <XCircle className="w-5 h-5 text-gray-400" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium text-[#1A1A1A]">{config.name}</p>
+                            <p className="text-sm text-[#666666]">{config.description}</p>
+                            {config.configured && config.masked && (
+                              <code className="text-xs bg-gray-100 px-2 py-0.5 rounded mt-1 inline-block">
+                                {config.masked}
+                              </code>
+                            )}
+                            {key === "newsapi" && config.count && (
+                              <Badge className="ml-2 bg-blue-100 text-blue-700">{config.count} clés</Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {config.configured && ["brevo", "newsapi", "perplexity", "cloudinary"].includes(key) && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleTestApiKey(key)}
+                              disabled={testingService === key}
+                            >
+                              {testingService === key ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                "Tester"
+                              )}
+                            </Button>
+                          )}
+                          <a 
+                            href={config.doc_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-[#CE0202] hover:underline text-sm flex items-center gap-1"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            Docs
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Info */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                    <p className="text-sm text-blue-700">
+                      <strong>Note :</strong> Les clés API sont configurées dans les fichiers d'environnement du serveur. 
+                      Pour modifier une clé, contactez l'administrateur système ou mettez à jour le fichier <code className="bg-blue-100 px-1 rounded">.env</code>.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-center text-[#666666] py-8">Impossible de charger les informations</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Notifications Tab */}
         <TabsContent value="notifications">
