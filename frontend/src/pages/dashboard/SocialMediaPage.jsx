@@ -32,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { socialAPI, uploadAPI } from "../../lib/api";
+import { socialAPI, uploadAPI, metaAPI } from "../../lib/api";
 
 // Platform icons component
 const PlatformIcon = ({ platform, className = "w-4 h-4" }) => {
