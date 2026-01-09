@@ -4532,7 +4532,14 @@ async def refresh_news(
                             await db.news_articles.insert_one(article_doc)
                             articles_created += 1
                     else:
-                        errors.append(f"NewsAPI error for {cat}: {data.get('message', 'Unknown error')}")
+                        error_msg = data.get('message', 'Unknown error')
+                        # Check for rate limit error
+                        if "too many requests" in error_msg.lower() or "rate" in error_msg.lower():
+                            errors.append(f"RATE_LIMIT: {error_msg}")
+                        else:
+                            errors.append(f"NewsAPI error for {cat}: {error_msg}")
+                elif response.status_code == 429:
+                    errors.append("RATE_LIMIT: Trop de requêtes, veuillez réessayer plus tard")
                 else:
                     errors.append(f"HTTP {response.status_code} for {cat}")
                     
@@ -4541,11 +4548,24 @@ async def refresh_news(
                 errors.append(f"Exception for {cat}: {str(e)}")
                 continue
     
+    # Check if we hit rate limit
+    rate_limit_hit = any("RATE_LIMIT" in err for err in errors) if errors else False
+    
+    if rate_limit_hit and articles_created == 0:
+        return {
+            "message": "⚠️ Limite NewsAPI atteinte (100 requêtes/24h). Réessayez dans quelques heures.",
+            "categories_processed": len(categories_to_fetch),
+            "region": region_code,
+            "errors": errors,
+            "rate_limited": True
+        }
+    
     return {
         "message": f"{articles_created} nouveaux articles récupérés",
         "categories_processed": len(categories_to_fetch),
         "region": region_code,
-        "errors": errors if errors else None
+        "errors": errors if errors else None,
+        "rate_limited": rate_limit_hit
     }
 
 @api_router.get("/news/related/{article_id}", response_model=List[dict])
