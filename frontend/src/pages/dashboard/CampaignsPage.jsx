@@ -79,8 +79,11 @@ const formatDate = (dateString) => {
 
 const EmailCampaignsTab = () => {
   const [campaigns, setCampaigns] = useState([]);
+  const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -94,6 +97,7 @@ const EmailCampaignsTab = () => {
 
   useEffect(() => {
     fetchCampaigns();
+    fetchTemplates();
   }, []);
 
   const fetchCampaigns = async () => {
@@ -106,6 +110,33 @@ const EmailCampaignsTab = () => {
       toast.error("Erreur lors du chargement des campagnes");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTemplates = async () => {
+    try {
+      const res = await campaignsAPI.getTemplates();
+      setTemplates(res.data || []);
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+    }
+  };
+
+  const handleSelectTemplate = async (templateId) => {
+    try {
+      const res = await campaignsAPI.getTemplate(templateId);
+      const template = res.data;
+      setSelectedTemplate(template);
+      setFormData({
+        ...formData,
+        subject: template.subject_template,
+        html_content: template.html_content,
+        name: `Campagne ${template.name} - ${new Date().toLocaleDateString('fr-FR')}`
+      });
+      setShowTemplatesDialog(false);
+      setShowCreateDialog(true);
+    } catch (error) {
+      toast.error("Erreur lors du chargement du template");
     }
   };
 
@@ -127,6 +158,7 @@ const EmailCampaignsTab = () => {
         sender_email: "contact@alphagency.fr",
         sender_name: "Alpha Agency",
       });
+      setSelectedTemplate(null);
       fetchCampaigns();
     } catch (error) {
       toast.error(error.response?.data?.detail || "Erreur lors de la création");
