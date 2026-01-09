@@ -1,5 +1,6 @@
 """
 News/Actualités Routes - NewsAPI.org Integration (Style Perplexity Discover)
+Multi-API Key Support for better coverage
 """
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
@@ -9,13 +10,28 @@ import httpx
 import uuid
 import logging
 import os
+import random
 
 from .database import db, get_current_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-NEWSAPI_KEY = os.environ.get('NEWSAPI_KEY', '')
+# Multiple NewsAPI keys for better rate limit distribution
+NEWSAPI_KEYS = [
+    os.environ.get('NEWSAPI_KEY', ''),
+    '667902bcf7be4181a61b2836c3f09685',
+    '0f54d162b8ad409caea021a4fe481a81',
+    'af790e1e76ff48a3ae24180f77951d4b'
+]
+# Filter out empty keys
+NEWSAPI_KEYS = [k for k in NEWSAPI_KEYS if k]
+
+def get_random_api_key():
+    """Get a random API key to distribute load"""
+    if not NEWSAPI_KEYS:
+        return None
+    return random.choice(NEWSAPI_KEYS)
 
 # Categories available - News + Marketing categories
 NEWS_CATEGORIES = [
