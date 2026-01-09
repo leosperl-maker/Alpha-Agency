@@ -89,47 +89,32 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [x] Backup system (Dropbox integration)
 - [x] Settings page
 
-## Recent Changes (2025-01-08)
+## Recent Changes (2025-01-09)
 
-### Payment Tracking System
-- Added `payments` array to Invoice model
-- New API routes:
-  - `POST /api/invoices/{id}/payments` - Add payment
-  - `GET /api/invoices/{id}/payments` - List payments
-  - `DELETE /api/invoices/{id}/payments/{payment_id}` - Delete payment
-- Automatic status updates based on payments
-- Frontend UI:
-  - "Payé" column in invoice table
-  - Progress bar for partial payments
-  - "+ Paiement" button (hidden for paid/draft invoices)
-  - Payment dialog with amount, date, method, notes
-  - Payments section in invoice detail view
+### Bug Fixes P0
+- ✅ **Tâches en retard** - Correction de la détection (exclusion des dates vides)
+- ✅ **Section tâches en retard** - Affichage en bas de la page TasksPage avec fond rouge
+- ✅ **Responsive mobile Pipeline/Tâches** - Scroll horizontal amélioré avec `-mx-6 px-6` et `min-w-max`
 
-### Quote to Invoice Conversion
-- Fixed API endpoint URL (`/quotes/{id}/convert-to-invoice`)
-- Added "Facturer" button for sent quotes
-- Navigation to invoices page after conversion
-- Quote status updated to "accepté" after conversion
+### Pipeline Improvements P1
+- ✅ **Menu actions sur les cartes** - Modifier, Archiver, Supprimer
+- ✅ **Archivage** - Bouton "Afficher/Masquer les archivées"
+- ✅ **Édition d'opportunité** - Dialogue de modification
+- ✅ **Scroll horizontal** - Amélioration du swipe sur mobile
 
-### Contact History View (NEW)
-- New API route: `GET /api/contacts/{id}/history`
-  - Returns quotes, invoices, tasks, opportunities
-  - Summary with totals (quoted, invoiced, paid, remaining)
-- New component: `ContactDetailSheet.jsx`
-  - Slide-over panel from right side
-  - Header with contact info, status, score
-  - Summary cards with financial KPIs
-  - Tabbed interface for Quotes, Invoices, Tasks, Notes
-- Integration in ContactsPage with Eye (View) button
+### Data Management P1
+- ✅ **Onglet Données** dans Paramètres
+- ✅ **Statistiques des collections** (contacts, opportunities, quotes, invoices, tasks)
+- ✅ **Suppression par collection** (Leads, Projets, Factures)
+- ✅ **Suppression globale** avec double confirmation
 
-### Unified Billing Interface (NEW)
-- [x] **Facturation Module** ✅ DONE 2025-01-08
-  - Single "Facturation" entry in sidebar (replaces Devis + Factures)
-  - Stats cards: Devis count, Factures count, Encaissé, À encaisser
-  - Tabbed interface for Quotes and Invoices
-  - Unified search and filter by status
-  - Quick actions: Convert quote to invoice, Add payment
-  - URL parameter support for tab persistence (?tab=devis|factures)
+### Previous Changes (2025-01-08)
+- Payment tracking on invoices
+- Quote to Invoice conversion
+- Contact history view
+- Unified Facturation module
+- Google Analytics 4 integration
+- Brevo email integration (pending activation)
 
 ## Backlog (Prioritized)
 
