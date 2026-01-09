@@ -62,12 +62,13 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [x] Limite 50 requêtes/jour avec compteur visible
 - [x] Prompts suggérés
 
-### Bulle de Chat IA Flottante ✅ COMPLETE (2026-01-09)
+### Bulle de Chat IA Flottante ✅ COMPLETE (Updated 2026-01-09)
 - [x] **Visible sur toutes les pages admin** sauf /admin/assistant ✅
-- [x] **Draggable** avec position persistante ✅
+- [x] **Design amélioré** : panneau bien formaté, aligné, responsive ✅ FIXED
+- [x] **Fermeture propre** : redevient bulle immédiatement ✅ FIXED
 - [x] **Historique synchronisé** avec la page principale ✅
-- [x] Mini interface de chat fonctionnelle
-- [x] Bouton Historique pour voir les conversations
+- [x] Mini interface de chat fonctionnelle avec compteur
+- [x] Position fixe en bas à droite
 
 ### Budget & Trésorerie (Module Avancé) ✅ ALL 4 PHASES COMPLETE
 - Phase 1 ✅ - Import CSV, Transactions, Catégories
