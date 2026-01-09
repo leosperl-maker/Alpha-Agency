@@ -174,7 +174,7 @@ const DashboardLayout = () => {
         </header>
 
         {/* Page content */}
-        <div className="p-6 bg-[#F8F8F8] min-h-[calc(100vh-4rem)]">
+        <div className="p-6 bg-[#F8F8F8] min-h-[calc(100vh-4rem)] overflow-x-auto">
           <Outlet />
         </div>
       </main>
