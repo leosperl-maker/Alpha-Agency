@@ -1091,66 +1091,66 @@ const SocialMediaPage = () => {
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
           <Card className="bg-white border-[#E5E5E5]">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-2 rounded-lg bg-blue-100">
-                  <Clock className="w-5 h-5 text-blue-600" />
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-blue-100 flex-shrink-0">
+                  <Clock className="w-4 h-4 text-blue-600" />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-[#1A1A1A]">{stats.posts?.scheduled || 0}</p>
-                  <p className="text-xs text-[#666666]">Programmés</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white border-[#E5E5E5]">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-100">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-[#1A1A1A]">{stats.posts?.published || 0}</p>
-                  <p className="text-xs text-[#666666]">Publiés</p>
+                <div className="min-w-0">
+                  <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.posts?.scheduled || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-[#666666]">Programmés</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="bg-white border-[#E5E5E5]">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gray-100">
-                  <FileText className="w-5 h-5 text-gray-600" />
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-green-100 flex-shrink-0">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-[#1A1A1A]">{stats.posts?.drafts || 0}</p>
-                  <p className="text-xs text-[#666666]">Brouillons</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white border-[#E5E5E5]">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-orange-100">
-                  <Inbox className="w-5 h-5 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-[#1A1A1A]">{stats.inbox?.unread || 0}</p>
-                  <p className="text-xs text-[#666666]">Non lus</p>
+                <div className="min-w-0">
+                  <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.posts?.published || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-[#666666]">Publiés</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="bg-white border-[#E5E5E5]">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-purple-100">
-                  <MessageSquare className="w-5 h-5 text-purple-600" />
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-gray-100 flex-shrink-0">
+                  <FileText className="w-4 h-4 text-gray-600" />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-[#1A1A1A]">{stats.inbox?.pending_reply || 0}</p>
-                  <p className="text-xs text-[#666666]">À répondre</p>
+                <div className="min-w-0">
+                  <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.posts?.drafts || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-[#666666]">Brouillons</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border-[#E5E5E5]">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-orange-100 flex-shrink-0">
+                  <Inbox className="w-4 h-4 text-orange-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.inbox?.unread || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-[#666666]">Non lus</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border-[#E5E5E5] col-span-2 sm:col-span-1">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-purple-100 flex-shrink-0">
+                  <MessageSquare className="w-4 h-4 text-purple-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.inbox?.pending_reply || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-[#666666]">À répondre</p>
                 </div>
               </div>
             </CardContent>
