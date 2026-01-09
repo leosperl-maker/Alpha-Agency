@@ -96,7 +96,7 @@ export const pipelineColumnsAPI = {
   create: (data) => api.post('/pipeline/columns', data),
   update: (id, data) => api.put(`/pipeline/columns/${id}`, data),
   delete: (id) => api.delete(`/pipeline/columns/${id}`),
-  reorder: (columnIds) => api.put('/pipeline/columns/reorder', columnIds),
+  reorder: (columnIds) => api.put('/pipeline/columns/reorder', { column_ids: columnIds }),
   initialize: () => api.post('/pipeline/columns/initialize'),
 };
 
