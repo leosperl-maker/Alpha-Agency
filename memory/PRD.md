@@ -190,17 +190,23 @@ Modèle appliqué : Pages "Vue d'ensemble" et "Demandes" utilisées comme réfé
 - [ ] Endpoints backend pour OAuth2
 - [ ] Page /admin/agenda avec calendrier
 
-### P3 - Social Media Manager - Intégration Meta API ✅ BACKEND COMPLETE (2026-01-09)
-- [x] **OAuth 2.0 Flow** : Routes pour connecter Facebook/Instagram ✅
+### P3 - Social Media Manager - Intégration Meta API ✅ COMPLETE (2026-01-09)
+- [x] **Backend - OAuth 2.0 Flow** ✅
   - GET /api/meta/auth-url - URL d'autorisation OAuth
   - POST /api/meta/exchange-token - Échange code contre token long-lived (60 jours)
-- [x] **Publication Facebook** : POST /api/meta/publish/facebook ✅
-  - Support texte, images, liens
-- [x] **Publication Instagram** : POST /api/meta/publish/instagram ✅
-  - Création container média + publication
-- [x] **Gestion des pages** : GET /api/meta/pages ✅
-- [x] **Historique publications** : GET /api/meta/published-posts ✅
-- [ ] **Frontend** : Intégrer les appels API dans SocialMediaPage.jsx (à faire)
+- [x] **Backend - Publication** ✅
+  - POST /api/meta/publish/facebook - Publication Facebook (texte + image)
+  - POST /api/meta/publish/instagram - Publication Instagram (image obligatoire)
+- [x] **Backend - Gestion** ✅
+  - GET /api/meta/pages - Lister pages Facebook & comptes Instagram liés
+  - GET /api/meta/published-posts - Historique des publications
+  - DELETE /api/meta/disconnect - Déconnecter le compte
+- [x] **Frontend - Interface complète** ✅ NEW
+  - Onglet "Comptes" dans Social Media Manager
+  - Bouton "Connecter Facebook & Instagram" avec OAuth redirect
+  - Affichage des pages connectées avec badges Instagram
+  - Modal de publication directe (Facebook + Instagram)
+  - Historique des posts publiés
 
 ### P4 - Améliorations futures
 - [ ] Audio player for portfolio
