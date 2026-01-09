@@ -3345,8 +3345,6 @@ async def get_ai_conversations(limit: int = 50, current_user: dict = Depends(get
     all_conversations.sort(key=lambda x: x.get("updated_at") or x.get("created_at") or "", reverse=True)
     
     return all_conversations[:limit]
-    
-    return conversations
 
 @api_router.post("/ai/conversations", response_model=dict)
 async def create_ai_conversation(data: ConversationCreate, current_user: dict = Depends(get_current_user)):
