@@ -8,7 +8,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import HomePage from "./pages/HomePage";
 import AgencyPage from "./pages/AgencyPage";
 import OffersPage from "./pages/OffersPage";
-import PortfolioPage from "./pages/PortfolioPage";
+import PortfolioPageNew from "./pages/PortfolioPageNew";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import ContactPage from "./pages/ContactPage";
@@ -63,7 +63,8 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/agence" element={<AgencyPage />} />
             <Route path="/offres" element={<OffersPage />} />
-            <Route path="/realisations" element={<PortfolioPage />} />
+            <Route path="/realisations" element={<PortfolioPageNew />} />
+            <Route path="/realisations/:slug" element={<PortfolioPageNew />} />
             <Route path="/actualites" element={<BlogPage />} />
             <Route path="/actualites/:slug" element={<BlogPostPage />} />
             <Route path="/contact" element={<ContactPage />} />
