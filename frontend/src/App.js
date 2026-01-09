@@ -35,6 +35,7 @@ import UsersPage from "./pages/dashboard/UsersPage";
 import AIAssistantPage from "./pages/dashboard/AIAssistantPage";
 import NewsPage from "./pages/dashboard/NewsPage";
 import SocialMediaPage from "./pages/dashboard/SocialMediaPage";
+import BlogAdminPage from "./pages/dashboard/BlogAdminPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 // Layout
