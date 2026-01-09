@@ -92,6 +92,7 @@ function App() {
             <Route path="utilisateurs" element={<UsersPage />} />
             <Route path="assistant" element={<AIAssistantPage />} />
             <Route path="actualites" element={<NewsPage />} />
+            <Route path="blog" element={<BlogAdminPage />} />
             <Route path="social-media" element={<SocialMediaPage />} />
             <Route path="parametres" element={<SettingsPage />} />
           </Route>
