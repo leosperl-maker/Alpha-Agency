@@ -58,7 +58,7 @@ const AIAssistantPage = () => {
     try {
       const response = await aiAPI.chat({
         messages: newMessages.map(m => ({ role: m.role, content: m.content })),
-        context_type: contextType || null,
+        context_type: contextType === "general" ? null : contextType,
         context_id: null
       });
 
