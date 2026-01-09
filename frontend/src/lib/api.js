@@ -193,9 +193,18 @@ export const leadAPI = {
 // Portfolio API
 export const portfolioAPI = {
   getAll: (params) => api.get('/portfolio', { params }),
+  getOne: (id) => api.get(`/portfolio/${id}`),
   create: (data) => api.post('/portfolio', data),
   update: (id, data) => api.put(`/portfolio/${id}`, data),
   delete: (id) => api.delete(`/portfolio/${id}`),
+};
+
+// Tags API
+export const tagsAPI = {
+  getAll: (type) => api.get('/tags', { params: { type } }),
+  create: (data) => api.post('/tags', data),
+  update: (id, name, color) => api.put(`/tags/${id}`, null, { params: { name, color } }),
+  delete: (id) => api.delete(`/tags/${id}`),
 };
 
 // Settings API
