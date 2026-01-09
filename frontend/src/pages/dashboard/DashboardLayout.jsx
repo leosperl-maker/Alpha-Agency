@@ -21,7 +21,8 @@ import {
   UserCog,
   Bot,
   Newspaper,
-  CalendarDays
+  CalendarDays,
+  Share2
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import FloatingAIChat from "../../components/FloatingAIChat";
@@ -66,6 +67,7 @@ const DashboardLayout = () => {
     { path: "/admin/sauvegardes", icon: Database, label: "Sauvegardes" },
     { path: "/admin/assistant", icon: Bot, label: "Assistant IA" },
     { path: "/admin/actualites", icon: Newspaper, label: "Actualités" },
+    { path: "/admin/social-media", icon: Share2, label: "Social Media" },
   ];
 
   // Add Users management for super_admin only
