@@ -412,6 +412,213 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
   );
 };
 
+// CashflowTab Component for Budget Cashflow (Phase 4)
+const CashflowTab = ({ formatCurrency }) => {
+  const [cashflowData, setCashflowData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [startMonth, setStartMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [monthsToShow, setMonthsToShow] = useState(6);
+
+  const fetchCashflowData = async () => {
+    setLoading(true);
+    try {
+      const res = await cashflowAPI.getProjection(startMonth, monthsToShow);
+      setCashflowData(res.data);
+    } catch (error) {
+      console.error("Error fetching cashflow:", error);
+      toast.error("Erreur lors du chargement du cashflow");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCashflowData();
+  }, [startMonth, monthsToShow]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-[#CE0202]" />
+      </div>
+    );
+  }
+
+  const chartData = cashflowData?.data || [];
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h3 className="text-lg font-semibold text-[#1A1A1A]">Projection de trésorerie</h3>
+          <p className="text-sm text-[#666666]">Visualisez l'évolution de votre cashflow sur plusieurs mois</p>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            type="month"
+            value={startMonth}
+            onChange={(e) => setStartMonth(e.target.value)}
+            className="bg-[#F8F8F8] border-[#E5E5E5] w-40"
+          />
+          <Select value={monthsToShow.toString()} onValueChange={(v) => setMonthsToShow(parseInt(v))}>
+            <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-white">
+              <SelectItem value="3">3 mois</SelectItem>
+              <SelectItem value="6">6 mois</SelectItem>
+              <SelectItem value="12">12 mois</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      {cashflowData?.summary && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="bg-white border-[#E5E5E5]">
+            <CardContent className="pt-6">
+              <p className="text-sm text-[#666666]">Revenus totaux</p>
+              <p className="text-2xl font-bold text-green-600">{formatCurrency(cashflowData.summary.total_income)}</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border-[#E5E5E5]">
+            <CardContent className="pt-6">
+              <p className="text-sm text-[#666666]">Dépenses totales</p>
+              <p className="text-2xl font-bold text-red-600">{formatCurrency(cashflowData.summary.total_expense)}</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border-[#E5E5E5]">
+            <CardContent className="pt-6">
+              <p className="text-sm text-[#666666]">Flux net moyen/mois</p>
+              <p className={`text-2xl font-bold ${cashflowData.summary.avg_monthly_flow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {formatCurrency(cashflowData.summary.avg_monthly_flow)}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white border-[#E5E5E5]">
+            <CardContent className="pt-6">
+              <p className="text-sm text-[#666666]">Solde final projeté</p>
+              <p className={`text-2xl font-bold ${cashflowData.summary.ending_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {formatCurrency(cashflowData.summary.ending_balance)}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Alerts */}
+      {cashflowData?.alerts?.length > 0 && (
+        <Card className="bg-red-50 border-red-200">
+          <CardContent className="pt-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-red-800">Alertes de trésorerie</p>
+                <ul className="mt-2 space-y-1">
+                  {cashflowData.alerts.map((alert, idx) => (
+                    <li key={idx} className="text-sm text-red-700">{alert.message}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Cashflow Chart */}
+      <Card className="bg-white border-[#E5E5E5]">
+        <CardHeader>
+          <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-[#CE0202]" />
+            Évolution du cashflow
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={350}>
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#CE0202" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#CE0202" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E5E5" />
+              <XAxis dataKey="label" tick={{ fill: '#666666', fontSize: 12 }} />
+              <YAxis tick={{ fill: '#666666', fontSize: 12 }} tickFormatter={(v) => `${(v/1000).toFixed(0)}k€`} />
+              <Tooltip 
+                formatter={(value, name) => [formatCurrency(value), name === "cumulative_balance" ? "Solde cumulé" : name === "net_flow" ? "Flux net" : name]}
+                contentStyle={{ backgroundColor: '#fff', border: '1px solid #E5E5E5', borderRadius: '8px' }} 
+              />
+              <Legend formatter={(value) => value === "cumulative_balance" ? "Solde cumulé" : value === "net_flow" ? "Flux net mensuel" : value} />
+              <Area 
+                type="monotone" 
+                dataKey="cumulative_balance" 
+                name="cumulative_balance"
+                stroke="#CE0202" 
+                fillOpacity={1} 
+                fill="url(#colorCumulative)" 
+              />
+              <Line 
+                type="monotone" 
+                dataKey="net_flow" 
+                name="net_flow"
+                stroke="#10B981" 
+                strokeWidth={2}
+                dot={{ fill: '#10B981' }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Monthly Details Table */}
+      <Card className="bg-white border-[#E5E5E5]">
+        <CardHeader>
+          <CardTitle className="text-[#1A1A1A] text-lg">Détails mensuels</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[#E5E5E5]">
+                  <th className="text-left py-3 px-2 text-[#666666] font-medium text-sm">Mois</th>
+                  <th className="text-center py-3 px-2 text-[#666666] font-medium text-sm">Type</th>
+                  <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Revenus</th>
+                  <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Dépenses</th>
+                  <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Flux net</th>
+                  <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Solde cumulé</th>
+                </tr>
+              </thead>
+              <tbody>
+                {chartData.map((row, idx) => (
+                  <tr key={idx} className="border-b border-[#E5E5E5] hover:bg-[#F8F8F8]">
+                    <td className="py-3 px-2 text-[#1A1A1A] font-medium">{row.label}</td>
+                    <td className="py-3 px-2 text-center">
+                      <Badge variant="outline" className={row.data_type === "forecast" ? "text-blue-600 border-blue-200" : "text-green-600 border-green-200"}>
+                        {row.data_type === "forecast" ? "Prévu" : "Réel"}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-2 text-right font-mono text-green-600">{formatCurrency(row.income)}</td>
+                    <td className="py-3 px-2 text-right font-mono text-red-600">{formatCurrency(row.expense)}</td>
+                    <td className={`py-3 px-2 text-right font-mono ${row.net_flow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {row.net_flow >= 0 ? "+" : ""}{formatCurrency(row.net_flow)}
+                    </td>
+                    <td className={`py-3 px-2 text-right font-mono font-bold ${row.cumulative_balance >= 0 ? 'text-[#1A1A1A]' : 'text-red-600'}`}>
+                      {formatCurrency(row.cumulative_balance)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 const BudgetPage = () => {
   // Core state
   const [activeTab, setActiveTab] = useState("overview");
