@@ -1000,20 +1000,29 @@ const PipelinePage = () => {
           ))}
         </div>
       ) : (
-        <DndContext 
-          sensors={sensors} 
-          collisionDetection={closestCenter} 
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <div 
-            ref={scrollContainerRef}
-            className="pipeline-scroll -mx-6 px-6"
-            style={{ 
-              WebkitOverflowScrolling: 'touch',
-            }}
-            data-pipeline-scroll="true"
+        <div className="relative">
+          <DndContext 
+            sensors={sensors} 
+            collisionDetection={closestCenter} 
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
           >
+            <div 
+              ref={scrollContainerRef}
+              className="pipeline-scroll -mx-6 px-6"
+              style={{ 
+                WebkitOverflowScrolling: 'touch',
+              }}
+              data-pipeline-scroll="true"
+              onScroll={(e) => {
+                const target = e.target;
+                const scrollPercent = target.scrollLeft / (target.scrollWidth - target.clientWidth) * 100;
+                const scrollbar = document.getElementById('pipeline-custom-scrollbar');
+                if (scrollbar) {
+                  scrollbar.style.marginLeft = `${scrollPercent * 0.7}%`;
+                }
+              }}
+            >
             <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
               <div className="flex gap-4" style={{ width: 'fit-content', minWidth: '100%' }}>
                 {columns.map((column) => {
