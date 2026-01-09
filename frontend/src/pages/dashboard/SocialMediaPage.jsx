@@ -110,6 +110,7 @@ const SocialMediaPage = () => {
   useEffect(() => {
     if (activeTab === "calendar") {
       fetchCalendar();
+      fetchPosts();
     }
   }, [currentMonth, currentYear, activeTab]);
 
@@ -128,6 +129,15 @@ const SocialMediaPage = () => {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPosts = async () => {
+    try {
+      const res = await socialAPI.getPosts({ month: currentMonth, year: currentYear });
+      setAllPosts(res.data || []);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
     }
   };
 
