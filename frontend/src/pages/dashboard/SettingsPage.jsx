@@ -490,6 +490,107 @@ const SettingsPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Data Management Tab */}
+        <TabsContent value="data">
+          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
+                <Database className="w-5 h-5 text-[#CE0202]" />
+                Gestion des données
+              </CardTitle>
+              <CardDescription>
+                Gérez les données de test et de démonstration
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {dataStats && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{dataStats.leads || 0}</div>
+                    <div className="text-sm text-blue-800">Leads</div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{dataStats.projects || 0}</div>
+                    <div className="text-sm text-green-800">Projets</div>
+                  </div>
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">{dataStats.invoices || 0}</div>
+                    <div className="text-sm text-purple-800">Factures</div>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border border-orange-200 rounded-lg bg-orange-50">
+                  <div>
+                    <h3 className="font-medium text-orange-800">Données de test - Leads</h3>
+                    <p className="text-sm text-orange-600">Supprimer tous les leads de démonstration</p>
+                  </div>
+                  <Button
+                    onClick={() => handleDeleteTestData('leads')}
+                    disabled={deletingData}
+                    variant="outline"
+                    className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                  >
+                    {deletingData ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border border-orange-200 rounded-lg bg-orange-50">
+                  <div>
+                    <h3 className="font-medium text-orange-800">Données de test - Projets</h3>
+                    <p className="text-sm text-orange-600">Supprimer tous les projets de démonstration</p>
+                  </div>
+                  <Button
+                    onClick={() => handleDeleteTestData('projects')}
+                    disabled={deletingData}
+                    variant="outline"
+                    className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                  >
+                    {deletingData ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border border-orange-200 rounded-lg bg-orange-50">
+                  <div>
+                    <h3 className="font-medium text-orange-800">Données de test - Factures</h3>
+                    <p className="text-sm text-orange-600">Supprimer toutes les factures de démonstration</p>
+                  </div>
+                  <Button
+                    onClick={() => handleDeleteTestData('invoices')}
+                    disabled={deletingData}
+                    variant="outline"
+                    className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                  >
+                    {deletingData ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
+                <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
+                  <div>
+                    <h3 className="font-medium text-red-800 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      Supprimer toutes les données de test
+                    </h3>
+                    <p className="text-sm text-red-600">⚠️ Action irréversible - Supprime toutes les données de démonstration</p>
+                  </div>
+                  <Button
+                    onClick={handleClearAllTestData}
+                    disabled={deletingData}
+                    variant="destructive"
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    {deletingData ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                    Tout supprimer
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
