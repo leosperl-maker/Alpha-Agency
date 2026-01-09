@@ -380,16 +380,32 @@ const PortfolioPage = () => {
 
                 {/* Content Section */}
                 <div className="p-6 bg-white">
-                  {/* Description */}
-                  {selectedItem.description && (
+                  {/* Subtitle / Chapeau */}
+                  {selectedItem.subtitle && (
                     <div className="mb-6">
-                      <h3 className="text-sm font-semibold text-[#1A1A1A] mb-2 uppercase tracking-wide">Description</h3>
-                      <p className="text-[#666666] leading-relaxed">{selectedItem.description}</p>
+                      <p className="text-lg text-[#333333] leading-relaxed font-medium">
+                        {selectedItem.subtitle}
+                      </p>
                     </div>
                   )}
 
-                  {/* Audio Player */}
-                  {selectedItem.audio_url && (
+                  {/* Rich Content Blocks (new format) */}
+                  {selectedItem.content_blocks && selectedItem.content_blocks.length > 0 ? (
+                    <RichContentRenderer blocks={selectedItem.content_blocks} className="mb-6" />
+                  ) : (
+                    <>
+                      {/* Legacy Description */}
+                      {selectedItem.description && (
+                        <div className="mb-6">
+                          <h3 className="text-sm font-semibold text-[#1A1A1A] mb-2 uppercase tracking-wide">Description</h3>
+                          <p className="text-[#666666] leading-relaxed">{selectedItem.description}</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Audio Player (legacy format) */}
+                  {selectedItem.audio_url && !selectedItem.content_blocks?.some(b => b.type === 'audio') && (
                     <div className="mb-6">
                       <h3 className="text-sm font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2 uppercase tracking-wide">
                         <Volume2 className="w-4 h-4 text-[#CE0202]" />
