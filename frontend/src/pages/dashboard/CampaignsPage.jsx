@@ -203,6 +203,52 @@ const EmailCampaignsTab = () => {
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
             Actualiser
           </Button>
+          
+          {/* Templates Dialog */}
+          <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202]/5">
+                <FileText className="w-4 h-4 mr-2" />
+                Templates
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-[#CE0202]" />
+                  Templates prédéfinis
+                </DialogTitle>
+                <DialogDescription>
+                  Choisissez un template pour démarrer rapidement votre campagne
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-4 py-4">
+                {templates.map((template) => (
+                  <Card
+                    key={template.id}
+                    className="cursor-pointer hover:border-[#CE0202] hover:shadow-md transition-all group"
+                    onClick={() => handleSelectTemplate(template.id)}
+                  >
+                    <div className="aspect-video relative overflow-hidden rounded-t-lg">
+                      <img
+                        src={template.preview_image}
+                        alt={template.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      <Badge className="absolute bottom-2 left-2 bg-white text-[#1A1A1A]">
+                        {template.name}
+                      </Badge>
+                    </div>
+                    <CardContent className="p-3">
+                      <p className="text-sm text-[#666666] line-clamp-2">{template.description}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+          
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
             <DialogTrigger asChild>
               <Button className="bg-[#CE0202] hover:bg-[#B00202]">
@@ -212,11 +258,21 @@ const EmailCampaignsTab = () => {
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Créer une campagne email</DialogTitle>
+                <DialogTitle>
+                  {selectedTemplate ? `Créer depuis "${selectedTemplate.name}"` : "Créer une campagne email"}
+                </DialogTitle>
                 <DialogDescription>
-                  Configurez votre nouvelle campagne email marketing
+                  {selectedTemplate 
+                    ? "Personnalisez le template sélectionné"
+                    : "Configurez votre nouvelle campagne email marketing"}
                 </DialogDescription>
               </DialogHeader>
+              {selectedTemplate && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2 text-sm text-green-700">
+                  <CheckCircle className="w-4 h-4" />
+                  Template "{selectedTemplate.name}" chargé. Personnalisez les variables {{variable}}.
+                </div>
+              )}
               <div className="space-y-4 py-4">
                 <div>
                   <label className="text-sm font-medium">Nom de la campagne *</label>
