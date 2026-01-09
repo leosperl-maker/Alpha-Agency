@@ -3167,6 +3167,61 @@ async def startup_db_client():
     # Create initial super admin if no users exist
     await create_initial_super_admin()
     
+
+# ==================== DATA MANAGEMENT ====================
+
+@api_router.get("/admin/data-stats", response_model=dict)
+async def get_data_stats(current_user: dict = Depends(get_current_user)):
+    """Get counts for all collections"""
+    stats = {
+        "contacts": await db.contacts.count_documents({}),
+        "opportunities": await db.opportunities.count_documents({}),
+        "quotes": await db.quotes.count_documents({}),
+        "invoices": await db.invoices.count_documents({}),
+        "tasks": await db.tasks.count_documents({}),
+        "leads": await db.leads.count_documents({}),
+        "subscriptions": await db.subscriptions.count_documents({}),
+        "portfolio": await db.portfolio.count_documents({}),
+        "blog_posts": await db.blog_posts.count_documents({}),
+    }
+    return stats
+
+@api_router.delete("/admin/test-data/{collection}", response_model=dict)
+async def delete_test_data(collection: str, current_user: dict = Depends(get_current_user)):
+    """Delete all data from a specific collection (except users and settings)"""
+    if current_user.get('role') != 'super_admin':
+        raise HTTPException(status_code=403, detail="Accès réservé aux super administrateurs")
+    
+    protected_collections = ['users', 'settings', 'counters']
+    if collection in protected_collections:
+        raise HTTPException(status_code=400, detail=f"La collection {collection} est protégée")
+    
+    valid_collections = ['contacts', 'opportunities', 'quotes', 'invoices', 'tasks', 'leads', 'subscriptions', 'portfolio', 'blog_posts', 'documents']
+    if collection not in valid_collections:
+        raise HTTPException(status_code=400, detail=f"Collection invalide: {collection}")
+    
+    result = await db[collection].delete_many({})
+    return {"message": f"{result.deleted_count} documents supprimés de {collection}"}
+
+@api_router.delete("/admin/test-data/all", response_model=dict)
+async def delete_all_test_data(current_user: dict = Depends(get_current_user)):
+    """Delete all test data from all collections"""
+    if current_user.get('role') != 'super_admin':
+        raise HTTPException(status_code=403, detail="Accès réservé aux super administrateurs")
+    
+    collections_to_clear = ['contacts', 'opportunities', 'quotes', 'invoices', 'tasks', 'leads', 'subscriptions', 'portfolio', 'blog_posts', 'documents']
+    
+    total_deleted = 0
+    for coll in collections_to_clear:
+        result = await db[coll].delete_many({})
+        total_deleted += result.deleted_count
+    
+    # Reset counters
+    await db.counters.update_many({}, {"$set": {"value": 0}})
+    
+    return {"message": f"Toutes les données de test supprimées ({total_deleted} documents)"}
+
+
     # Initialize backup system
     global backup_manager
     backup_manager = BackupManager(db)
