@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   Newspaper, RefreshCw, Loader2, ExternalLink, Trash2, X,
-  Globe, MapPin, Briefcase, Cpu, Heart, Trophy, Film, Flask,
+  Globe, MapPin, Briefcase, Cpu, Heart, Trophy, Film, FlaskConical,
   Clock, ChevronLeft, ChevronRight, ArrowLeft, BookOpen
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
