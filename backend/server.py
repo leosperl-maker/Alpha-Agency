@@ -5555,7 +5555,7 @@ async def get_backup_history(limit: int = 20, current_user: dict = Depends(get_c
 
 # ==================== MAIN APP CONFIG ====================
 
-app.include_router(api_router)
+# Router will be included after all routes are defined
 
 app.add_middleware(
     CORSMiddleware,
