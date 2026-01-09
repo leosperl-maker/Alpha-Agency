@@ -20,6 +20,15 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 
 ## Latest Updates (2026-01-09)
 
+### Éditeur d'Email Visuel (Drag & Drop) ✅ NEW (2026-01-09)
+- [x] **Composant `EmailEditor.jsx`** - Éditeur complet sans code
+- [x] **10 types de blocs** : En-tête, Texte, Titre, Image, Bouton CTA, Séparateur, 2 Colonnes, Espace, Réseaux sociaux, Footer
+- [x] **Éditeur par bloc** : Couleurs, alignement, contenu, URL
+- [x] **3 modes de vue** : Éditer, Aperçu, Code HTML
+- [x] **Variables dynamiques** : {{first_name}}, {{company_name}}, {{logo_url}}, etc.
+- [x] **Export HTML** : Génération automatique du code email responsive
+- [x] **Intégration Campagnes** : Bouton "Utiliser ce design" → création de campagne
+
 ### Refactorisation Backend ✅ NEW
 - [x] **Extraction du module News** vers `/routes/news.py` - Code plus maintenable
 - [x] **Extraction du module Meta** vers `/routes/meta.py` - Facebook/Instagram
