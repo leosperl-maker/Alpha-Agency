@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 
 // Components
@@ -83,7 +83,7 @@ function App() {
             <Route path="contacts" element={<ContactsPage />} />
             <Route path="pipeline" element={<PipelinePage />} />
             <Route path="facturation" element={<FacturationPage />} />
-            <Route path="devis" element={<QuotesPage />} />
+            <Route path="devis" element={<Navigate to="/admin/facturation?tab=devis" replace />} />
             <Route path="factures" element={<InvoicesPage />} />
             <Route path="abonnements" element={<SubscriptionsPage />} />
             <Route path="realisations" element={<PortfolioManagePage />} />
