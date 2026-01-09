@@ -190,11 +190,17 @@ Modèle appliqué : Pages "Vue d'ensemble" et "Demandes" utilisées comme réfé
 - [ ] Endpoints backend pour OAuth2
 - [ ] Page /admin/agenda avec calendrier
 
-### P3 - Social Media Manager - Intégration Meta API
-- [ ] Connexion OAuth Facebook/Instagram
-- [ ] Publication réelle des posts programmés
-- [ ] Récupération des commentaires/messages réels
-- [ ] Meta API integration (App ID: 4389601981285980)
+### P3 - Social Media Manager - Intégration Meta API ✅ BACKEND COMPLETE (2026-01-09)
+- [x] **OAuth 2.0 Flow** : Routes pour connecter Facebook/Instagram ✅
+  - GET /api/meta/auth-url - URL d'autorisation OAuth
+  - POST /api/meta/exchange-token - Échange code contre token long-lived (60 jours)
+- [x] **Publication Facebook** : POST /api/meta/publish/facebook ✅
+  - Support texte, images, liens
+- [x] **Publication Instagram** : POST /api/meta/publish/instagram ✅
+  - Création container média + publication
+- [x] **Gestion des pages** : GET /api/meta/pages ✅
+- [x] **Historique publications** : GET /api/meta/published-posts ✅
+- [ ] **Frontend** : Intégrer les appels API dans SocialMediaPage.jsx (à faire)
 
 ### P4 - Améliorations futures
 - [ ] Audio player for portfolio
