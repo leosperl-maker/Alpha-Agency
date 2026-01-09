@@ -276,30 +276,29 @@ const ArticleDetailModal = ({ article, relatedArticles, onClose, onArticleClick 
               <Icon className="w-20 h-20 text-white opacity-50" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         </div>
         
-        {/* Content */}
-        <div className="p-6 lg:p-10 -mt-20 relative">
+        {/* Content - Clean layout without overlap */}
+        <div className="p-6 lg:p-10">
           {/* Category & Date */}
           <div className="flex items-center gap-3 mb-4">
             <Badge className={`${colors.bg} ${colors.text} border-0`}>
               <Icon className="w-3 h-3 mr-1" />
               {article.category}
             </Badge>
-            <span className="text-sm text-white lg:text-[#666666] flex items-center gap-1">
+            <span className="text-sm text-[#666666] flex items-center gap-1">
               <Clock className="w-4 h-4" />
               {formatDate(article.published_at)}
             </span>
           </div>
           
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white lg:text-[#1A1A1A] mb-6 leading-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-6 leading-tight">
             {article.title}
           </h1>
           
           {/* Source */}
-          <div className="flex items-center gap-4 mb-8 pb-6 border-b border-[#E5E5E5]">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8 pb-6 border-b border-[#E5E5E5]">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center">
                 <Globe className="w-5 h-5 text-[#666666]" />
@@ -313,7 +312,7 @@ const ArticleDetailModal = ({ article, relatedArticles, onClose, onArticleClick 
               href={article.source_url} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="ml-auto"
+              className="sm:ml-auto"
             >
               <Button variant="outline" size="sm" className="text-[#CE0202] border-[#CE0202] hover:bg-[#CE0202] hover:text-white">
                 <ExternalLink className="w-4 h-4 mr-2" />
