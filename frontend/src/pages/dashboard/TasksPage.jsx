@@ -811,22 +811,22 @@ const TasksPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center mb-6">
-        <div className="relative flex-1 max-w-xs">
+      <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher..."
-            className="pl-9 bg-white border-[#E5E5E5]"
+            className="pl-9 bg-white border-[#E5E5E5] w-full"
           />
         </div>
         <Select value={filterPriority} onValueChange={setFilterPriority}>
-          <SelectTrigger className="w-40 bg-white border-[#E5E5E5]">
+          <SelectTrigger className="w-full sm:w-36 bg-white border-[#E5E5E5]">
             <SelectValue placeholder="Priorité" />
           </SelectTrigger>
           <SelectContent className="bg-white">
-            <SelectItem value="all">Toutes priorités</SelectItem>
+            <SelectItem value="all">Toutes</SelectItem>
             {Object.entries(priorityConfig).map(([key, config]) => (
               <SelectItem key={key} value={key}>{config.label}</SelectItem>
             ))}
@@ -841,16 +841,13 @@ const TasksPage = () => {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div 
-          className="overflow-x-auto pb-4 -mx-4 px-4"
-          style={{ 
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#CE0202 #E5E5E5'
-          }}
-        >
-          <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
-            <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
+        <div className="-mx-3 sm:-mx-4 md:-mx-6">
+          <div 
+            className="overflow-x-auto pb-4 px-3 sm:px-4 md:px-6"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
+              <div className="flex gap-3 sm:gap-4" style={{ width: 'fit-content' }}>
               {columns.map((column) => {
                 const columnTasks = getTasksByColumn(column.id);
                 
