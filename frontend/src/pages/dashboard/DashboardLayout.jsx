@@ -19,9 +19,12 @@ import {
   Wallet,
   Database,
   UserCog,
-  Bot
+  Bot,
+  Newspaper,
+  CalendarDays
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
+import FloatingAIChat from "../../components/FloatingAIChat";
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
