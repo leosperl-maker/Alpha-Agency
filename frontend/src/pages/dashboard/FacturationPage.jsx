@@ -319,9 +319,17 @@ const FacturationPage = () => {
           <h1 className="text-2xl font-bold text-[#1A1A1A]">Facturation</h1>
           <p className="text-[#666666]">Gérez vos devis et factures</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
-            onClick={() => navigate('/admin/devis')}
+            onClick={() => navigate('/admin/factures?action=services')}
+            variant="outline"
+            className="border-[#E5E5E5] text-[#666666] hover:bg-[#F8F8F8]"
+          >
+            <Package className="w-4 h-4 mr-2" />
+            Services
+          </Button>
+          <Button
+            onClick={() => navigate('/admin/factures?action=new&type=devis')}
             variant="outline"
             className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202]/10"
           >
@@ -329,7 +337,7 @@ const FacturationPage = () => {
             Nouveau devis
           </Button>
           <Button
-            onClick={() => navigate('/admin/factures')}
+            onClick={() => navigate('/admin/factures?action=new&type=facture')}
             className="bg-[#CE0202] hover:bg-[#B00202] text-white"
           >
             <Receipt className="w-4 h-4 mr-2" />
