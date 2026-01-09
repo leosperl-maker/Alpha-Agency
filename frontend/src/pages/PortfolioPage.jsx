@@ -443,91 +443,11 @@ const PortfolioPage = () => {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-[#CE0202] hover:underline font-medium"
                     >
-                >
-                  <X className="w-4 h-4 text-[#1A1A1A]" />
-                </button>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {selectedItem.tags?.map((tag, i) => (
-                    <Badge key={i} className="bg-[#CE0202]/10 text-[#CE0202] border-none text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
+                      Voir le projet en ligne
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
                 </div>
-
-                {/* Title & Meta */}
-                <h2 className="text-xl lg:text-2xl font-bold text-[#1A1A1A] mb-2">{selectedItem.title}</h2>
-                <div className="flex items-center gap-3 text-sm text-[#666666] mb-4">
-                  {selectedItem.client && <span>Client: {selectedItem.client}</span>}
-                  {selectedItem.date && <span>• {selectedItem.date}</span>}
-                </div>
-
-                {/* Description */}
-                <div className="mb-6">
-                  <p className="text-sm text-[#666666] leading-relaxed">{selectedItem.description}</p>
-                </div>
-
-                {/* Audio Player */}
-                {selectedItem.audio_url && (
-                  <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-[#1A1A1A] mb-2 flex items-center gap-2">
-                      <Volume2 className="w-4 h-4 text-[#CE0202]" />
-                      Écouter la réalisation audio
-                    </h3>
-                    <div className="bg-[#F8F8F8] p-3 rounded-lg border border-[#E5E5E5]">
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={toggleAudio}
-                          className="w-10 h-10 bg-[#CE0202] hover:bg-[#B00202] text-white rounded-full flex items-center justify-center transition-colors"
-                        >
-                          {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
-                        </button>
-                        <div className="flex-1">
-                          <p className="text-[#1A1A1A] font-medium text-sm">Spot publicitaire radio</p>
-                          <p className="text-xs text-[#666666]">Cliquez pour écouter</p>
-                        </div>
-                      </div>
-                      <audio id="portfolio-audio" src={selectedItem.audio_url} onEnded={() => setIsPlaying(false)} />
-                    </div>
-                  </div>
-                )}
-
-                {/* Documents */}
-                {selectedItem.documents && selectedItem.documents.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-sm font-semibold text-[#1A1A1A] mb-2 flex items-center gap-2">
-                      <Download className="w-4 h-4 text-[#CE0202]" />
-                      Documents téléchargeables
-                    </h3>
-                    <div className="space-y-2">
-                      {selectedItem.documents.map((doc, i) => (
-                        <a
-                          key={i}
-                          href={doc.url}
-                          download
-                          className="flex items-center gap-2 p-2 bg-[#F8F8F8] rounded-lg border border-[#E5E5E5] hover:border-[#CE0202] transition-colors group text-sm"
-                        >
-                          <Download className="w-4 h-4 text-[#666666] group-hover:text-[#CE0202]" />
-                          <span className="text-[#1A1A1A] group-hover:text-[#CE0202]">{doc.name}</span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* External Link */}
-                {selectedItem.link && (
-                  <a
-                    href={selectedItem.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-[#CE0202] hover:underline font-medium text-sm"
-                  >
-                    Voir le projet en ligne
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                )}
               </div>
             </div>
           )}
