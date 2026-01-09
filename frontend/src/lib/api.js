@@ -340,6 +340,15 @@ export const aiAPI = {
   getHistory: (limit = 20) => api.get('/ai/history', { params: { limit } }),
 };
 
+// News/Actualités API
+export const newsAPI = {
+  getTopics: () => api.get('/news/topics'),
+  getArticles: (topicId, limit = 20) => api.get('/news', { params: { topic_id: topicId, limit } }),
+  refresh: (topicId) => api.post('/news/refresh', null, { params: { topic_id: topicId } }),
+  delete: (articleId) => api.delete(`/news/${articleId}`),
+  clearTopic: (topicId) => api.delete(`/news/clear/${topicId}`),
+};
+
 // Budget Cashflow API (Phase 4)
 export const cashflowAPI = {
   getProjection: (startMonth, months = 6) => api.get('/budget/cashflow', { params: { start_month: startMonth, months } }),
