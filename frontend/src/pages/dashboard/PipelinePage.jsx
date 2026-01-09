@@ -880,7 +880,7 @@ const PipelinePage = () => {
                   <span className="sm:hidden">Ajouter</span>
                 </Button>
               </DialogTrigger>
-            <DialogContent className="bg-white border-[#E5E5E5] max-w-lg max-h-[90vh] overflow-y-auto">
+              <DialogContent className="bg-white border-[#E5E5E5] max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-[#1A1A1A]">
                   {editingOpp ? "Modifier l'affaire" : "Nouvelle affaire"}
