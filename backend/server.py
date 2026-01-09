@@ -3532,7 +3532,7 @@ async def get_budget_summary(month: Optional[str] = None, current_user: dict = D
 
 @api_router.get("/budget/monthly-chart", response_model=list)
 async def get_monthly_chart_data(year: Optional[int] = None, current_user: dict = Depends(get_current_user)):
-    """Get monthly income/expense data for charts"""
+    """Get monthly income/expense data for charts - combines budget entries and bank transactions"""
     if not year:
         year = datetime.now().year
     
@@ -3541,20 +3541,38 @@ async def get_monthly_chart_data(year: Optional[int] = None, current_user: dict 
     
     for month in range(1, 13):
         month_str = f"{year}-{str(month).zfill(2)}"
-        entries = await db.budget.find(
+        
+        # Get budget entries (manual entries)
+        budget_entries = await db.budget.find(
             {"date": {"$regex": f"^{month_str}"}},
             {"_id": 0}
         ).to_list(1000)
         
-        income = sum(e["amount"] for e in entries if e["type"] == "income")
-        expense = sum(e["amount"] for e in entries if e["type"] == "expense")
+        # Get bank transactions (imported transactions)
+        bank_transactions = await db.bank_transactions.find(
+            {"date": {"$regex": f"^{month_str}"}},
+            {"_id": 0}
+        ).to_list(1000)
+        
+        # Calculate income and expense from budget entries
+        budget_income = sum(e["amount"] for e in budget_entries if e.get("type") == "income")
+        budget_expense = sum(e["amount"] for e in budget_entries if e.get("type") == "expense")
+        
+        # Calculate income and expense from bank transactions
+        # credit = income, debit = expense
+        bank_income = sum(t["amount"] for t in bank_transactions if t.get("type") == "credit")
+        bank_expense = sum(t["amount"] for t in bank_transactions if t.get("type") == "debit")
+        
+        # Combine both sources
+        total_income = budget_income + bank_income
+        total_expense = budget_expense + bank_expense
         
         months_data.append({
             "name": month_names[month - 1],
             "month": month_str,
-            "income": income,
-            "expense": expense,
-            "balance": income - expense
+            "income": total_income,
+            "expense": total_expense,
+            "balance": total_income - total_expense
         })
     
     return months_data
