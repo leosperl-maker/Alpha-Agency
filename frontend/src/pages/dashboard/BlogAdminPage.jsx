@@ -4,7 +4,7 @@ import {
   FileText, Calendar, Tag, Clock, CheckCircle, Archive,
   Image, Video, Music, X, GripVertical, Bold, Italic,
   Heading1, Heading2, List, Quote, Link2, AlignLeft, 
-  AlignCenter, AlignRight, Maximize
+  AlignCenter, AlignRight, Maximize, Loader2, Sparkles
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
