@@ -974,15 +974,15 @@ const PipelinePage = () => {
 
       {/* Pipeline Board */}
       {loading ? (
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {[1,2,3,4,5,6,7].map((i) => (
-            <div key={i} className="flex-shrink-0 w-80">
-              <div className="h-96 bg-[#E5E5E5] animate-pulse rounded-xl" />
+        <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4">
+          {[1,2,3].map((i) => (
+            <div key={i} className="flex-shrink-0 w-64 sm:w-80">
+              <div className="h-80 sm:h-96 bg-[#E5E5E5] animate-pulse rounded-xl" />
             </div>
           ))}
         </div>
       ) : (
-        <div className="relative">
+        <div className="relative -mx-3 sm:-mx-4 md:-mx-6">
           <DndContext 
             sensors={sensors} 
             collisionDetection={closestCenter} 
@@ -991,11 +991,11 @@ const PipelinePage = () => {
           >
             <div 
               ref={scrollContainerRef}
-              className="overflow-x-auto pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6"
+              className="overflow-x-auto pb-4 px-3 sm:px-4 md:px-6"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
               <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
-                <div className="flex gap-4" style={{ width: 'fit-content', minWidth: '100%' }}>
+                <div className="flex gap-3 sm:gap-4" style={{ width: 'fit-content' }}>
                   {columns.map((column) => {
                     const columnOpps = filterOpportunities(pipeline[column.id] || []);
                     const totalAmount = columnOpps.reduce((sum, opp) => sum + (opp.amount || 0), 0);
