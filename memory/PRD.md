@@ -20,6 +20,31 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 
 ## Latest Updates (2026-01-09)
 
+### Refactorisation Backend ✅ NEW
+- [x] **Extraction du module News** vers `/routes/news.py` - Code plus maintenable
+- [x] **Extraction du module Meta** vers `/routes/meta.py` - Facebook/Instagram
+- [x] **Module Campagnes** dans `/routes/campaigns.py` - Email & SMS marketing
+- [x] **Module Database** partagé `/routes/database.py` - Connexion MongoDB centralisée
+- [x] **server.py réduit** de 6400 à 6236 lignes
+
+### Gestion des clés API ✅ NEW
+- [x] **Onglet "API"** dans les paramètres - Vue d'ensemble de toutes les clés
+- [x] **6 intégrations configurées** : Brevo, NewsAPI (4 clés), Perplexity, Cloudinary, Meta, Stripe
+- [x] **Bouton "Tester"** pour vérifier le fonctionnement des clés
+- [x] **Liens vers la documentation** de chaque service
+
+### Templates d'email prédéfinis ✅ NEW
+- [x] **4 templates professionnels** : Newsletter, Promotion, Relance, Bienvenue
+- [x] **Prévisualisation avec images**
+- [x] **Contenu HTML complet** avec variables personnalisables ({{first_name}}, {{company_name}}, etc.)
+- [x] **Intégration dans la création de campagne** - Un clic pour charger le template
+
+### NewsAPI Multi-clés ✅ NEW
+- [x] **4 clés API NewsAPI** pour éviter les limites de taux
+- [x] **Distribution automatique** des requêtes entre les clés
+- [x] **246 articles** récupérés pour les régions DOM-TOM et France
+- [x] **Gestion intelligente** des clés épuisées (bascule sur la suivante)
+
 ### Bugs Corrigés ✅
 - [x] **Suppression devis** - Route DELETE ajoutée, fonctionne maintenant ✅
 - [x] **Budget & Trésorerie** - Cashflow utilise maintenant les entrées budget + bank_transactions ✅
