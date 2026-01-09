@@ -3029,6 +3029,422 @@ async def copy_forecast_to_month(
     
     return {"message": f"{copied} prévisions copiées vers {target_month}"}
 
+# ==================== BUDGET CASHFLOW (PHASE 4) ====================
+
+@api_router.get("/budget/cashflow", response_model=dict)
+async def get_cashflow_projection(
+    start_month: str,
+    months: int = 6,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get cashflow projection for multiple months (Phase 4)"""
+    from dateutil.relativedelta import relativedelta
+    
+    # Parse start month
+    start_date = datetime.strptime(start_month, "%Y-%m")
+    
+    cashflow_data = []
+    cumulative_balance = 0
+    
+    # Get initial balance from previous transactions
+    prev_month = (start_date - relativedelta(months=1)).strftime("%Y-%m")
+    prev_transactions = await db.bank_transactions.find(
+        {"date": {"$lt": f"{start_month}-01"}},
+        {"_id": 0}
+    ).to_list(100000)
+    
+    for t in prev_transactions:
+        if t["type"] == "credit":
+            cumulative_balance += t["amount"]
+        else:
+            cumulative_balance -= t["amount"]
+    
+    # Generate projection for each month
+    for i in range(months):
+        current_month = (start_date + relativedelta(months=i)).strftime("%Y-%m")
+        month_label = (start_date + relativedelta(months=i)).strftime("%b %Y")
+        
+        # Get actual transactions for this month
+        transactions = await db.bank_transactions.find(
+            {"date": {"$regex": f"^{current_month}"}},
+            {"_id": 0}
+        ).to_list(10000)
+        
+        actual_income = sum(t["amount"] for t in transactions if t["type"] == "credit")
+        actual_expense = sum(t["amount"] for t in transactions if t["type"] == "debit")
+        
+        # Get forecasts for this month
+        forecasts = await db.budget_forecasts.find(
+            {"month": current_month},
+            {"_id": 0}
+        ).to_list(1000)
+        
+        planned_income = sum(f["planned_amount"] for f in forecasts if f["type"] == "income")
+        planned_expense = sum(f["planned_amount"] for f in forecasts if f["type"] == "expense")
+        
+        # Use actual if available, otherwise use forecast
+        is_future = current_month > datetime.now().strftime("%Y-%m")
+        
+        if is_future:
+            # Future month: use forecasts
+            income = planned_income
+            expense = planned_expense
+            data_type = "forecast"
+        else:
+            # Past/current month: use actual data
+            income = actual_income
+            expense = actual_expense
+            data_type = "actual"
+        
+        net_flow = income - expense
+        cumulative_balance += net_flow
+        
+        cashflow_data.append({
+            "month": current_month,
+            "label": month_label,
+            "income": income,
+            "expense": expense,
+            "net_flow": net_flow,
+            "cumulative_balance": cumulative_balance,
+            "planned_income": planned_income,
+            "planned_expense": planned_expense,
+            "actual_income": actual_income,
+            "actual_expense": actual_expense,
+            "data_type": data_type,
+            "variance": (actual_income - actual_expense) - (planned_income - planned_expense) if not is_future else 0
+        })
+    
+    # Calculate summary
+    total_income = sum(m["income"] for m in cashflow_data)
+    total_expense = sum(m["expense"] for m in cashflow_data)
+    avg_monthly_flow = (total_income - total_expense) / months if months > 0 else 0
+    
+    # Detect potential cash issues
+    alerts = []
+    for m in cashflow_data:
+        if m["cumulative_balance"] < 0:
+            alerts.append({
+                "month": m["month"],
+                "type": "negative_balance",
+                "message": f"Solde négatif prévu en {m['label']}: {m['cumulative_balance']:.2f}€"
+            })
+        if m["net_flow"] < -5000:
+            alerts.append({
+                "month": m["month"],
+                "type": "high_outflow",
+                "message": f"Flux sortant important en {m['label']}: {m['net_flow']:.2f}€"
+            })
+    
+    return {
+        "start_month": start_month,
+        "months_count": months,
+        "data": cashflow_data,
+        "summary": {
+            "total_income": total_income,
+            "total_expense": total_expense,
+            "net_flow": total_income - total_expense,
+            "avg_monthly_flow": avg_monthly_flow,
+            "ending_balance": cumulative_balance
+        },
+        "alerts": alerts
+    }
+
+# ==================== AI ASSISTANT (PERPLEXITY) ====================
+
+PERPLEXITY_API_KEY = os.environ.get('PERPLEXITY_API_KEY', '')
+AI_ENABLED = True  # Toggle to enable/disable AI
+AI_MAX_MESSAGE_LENGTH = 2000  # Max characters per message
+AI_DAILY_LIMIT = 50  # Max calls per user per day
+
+class AIMessage(BaseModel):
+    role: str  # user or assistant
+    content: str
+
+class AIChatRequest(BaseModel):
+    messages: List[AIMessage]
+    context_type: Optional[str] = None  # contacts, pipeline, invoices, etc.
+    context_id: Optional[str] = None  # specific ID if needed
+
+@api_router.get("/ai/status", response_model=dict)
+async def get_ai_status(current_user: dict = Depends(get_current_user)):
+    """Get AI assistant status and usage"""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    
+    # Get usage for today
+    usage = await db.ai_usage.find_one({
+        "user_id": current_user["id"],
+        "date": today
+    })
+    
+    calls_today = usage["calls"] if usage else 0
+    
+    return {
+        "enabled": AI_ENABLED and bool(PERPLEXITY_API_KEY),
+        "calls_today": calls_today,
+        "daily_limit": AI_DAILY_LIMIT,
+        "remaining": max(0, AI_DAILY_LIMIT - calls_today),
+        "max_message_length": AI_MAX_MESSAGE_LENGTH
+    }
+
+@api_router.post("/ai/chat", response_model=dict)
+async def ai_chat(request: AIChatRequest, current_user: dict = Depends(get_current_user)):
+    """Chat with AI assistant powered by Perplexity"""
+    
+    # Check if AI is enabled
+    if not AI_ENABLED:
+        raise HTTPException(status_code=503, detail="L'assistant IA est temporairement désactivé")
+    
+    if not PERPLEXITY_API_KEY:
+        raise HTTPException(status_code=503, detail="Clé API Perplexity non configurée")
+    
+    # Check daily limit
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    usage = await db.ai_usage.find_one({
+        "user_id": current_user["id"],
+        "date": today
+    })
+    
+    calls_today = usage["calls"] if usage else 0
+    if calls_today >= AI_DAILY_LIMIT:
+        raise HTTPException(status_code=429, detail=f"Limite quotidienne atteinte ({AI_DAILY_LIMIT} requêtes/jour)")
+    
+    # Validate message length
+    if request.messages and len(request.messages[-1].content) > AI_MAX_MESSAGE_LENGTH:
+        raise HTTPException(status_code=400, detail=f"Message trop long (max {AI_MAX_MESSAGE_LENGTH} caractères)")
+    
+    # Build context from database
+    context_data = await build_ai_context(request.context_type, request.context_id, current_user)
+    
+    # Build system prompt
+    system_prompt = build_system_prompt(context_data)
+    
+    # Prepare messages for Perplexity
+    perplexity_messages = [
+        {"role": "system", "content": system_prompt}
+    ]
+    
+    for msg in request.messages:
+        perplexity_messages.append({
+            "role": msg.role,
+            "content": msg.content
+        })
+    
+    try:
+        # Call Perplexity API
+        response = requests.post(
+            "https://api.perplexity.ai/chat/completions",
+            headers={
+                "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "llama-3.1-sonar-small-128k-online",
+                "messages": perplexity_messages,
+                "temperature": 0.7,
+                "max_tokens": 1024
+            },
+            timeout=30
+        )
+        
+        if response.status_code != 200:
+            logging.error(f"Perplexity API error: {response.text}")
+            raise HTTPException(status_code=502, detail="Erreur de l'API Perplexity")
+        
+        result = response.json()
+        assistant_message = result["choices"][0]["message"]["content"]
+        
+        # Update usage counter
+        await db.ai_usage.update_one(
+            {"user_id": current_user["id"], "date": today},
+            {"$inc": {"calls": 1}, "$set": {"updated_at": datetime.now(timezone.utc).isoformat()}},
+            upsert=True
+        )
+        
+        # Log the conversation
+        await db.ai_conversations.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": current_user["id"],
+            "user_message": request.messages[-1].content if request.messages else "",
+            "assistant_message": assistant_message,
+            "context_type": request.context_type,
+            "context_id": request.context_id,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {
+            "message": assistant_message,
+            "usage": {
+                "calls_today": calls_today + 1,
+                "remaining": AI_DAILY_LIMIT - calls_today - 1
+            }
+        }
+        
+    except requests.exceptions.Timeout:
+        raise HTTPException(status_code=504, detail="Timeout de l'API Perplexity")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Perplexity request error: {str(e)}")
+        raise HTTPException(status_code=502, detail="Erreur de connexion à l'API Perplexity")
+
+async def build_ai_context(context_type: Optional[str], context_id: Optional[str], current_user: dict) -> dict:
+    """Build context data from database for AI assistant"""
+    context = {
+        "agency": {
+            "name": "Alpha Agency",
+            "location": "Guadeloupe",
+            "services": ["Sites web", "Community Management", "Photographie", "Vidéographie", "Publicité digitale"]
+        },
+        "stats": {},
+        "specific_data": None
+    }
+    
+    # Get general stats
+    context["stats"]["contacts_count"] = await db.contacts.count_documents({})
+    context["stats"]["opportunities_count"] = await db.opportunities.count_documents({})
+    context["stats"]["invoices_count"] = await db.invoices.count_documents({})
+    context["stats"]["tasks_pending"] = await db.tasks.count_documents({"status": {"$ne": "done"}})
+    
+    # Get pipeline value
+    pipeline_opps = await db.opportunities.find({"status": {"$nin": ["gagné", "perdu"]}}, {"_id": 0, "amount": 1}).to_list(1000)
+    context["stats"]["pipeline_value"] = sum(opp.get("amount", 0) for opp in pipeline_opps)
+    
+    # Get specific context based on type
+    if context_type == "contact" and context_id:
+        contact = await db.contacts.find_one({"id": context_id}, {"_id": 0})
+        if contact:
+            # Get related data
+            quotes = await db.quotes.find({"contact_id": context_id}, {"_id": 0, "status": 1, "total": 1}).to_list(100)
+            invoices = await db.invoices.find({"contact_id": context_id}, {"_id": 0, "status": 1, "total": 1}).to_list(100)
+            tasks = await db.tasks.find({"contact_id": context_id}, {"_id": 0, "title": 1, "status": 1}).to_list(100)
+            
+            context["specific_data"] = {
+                "type": "contact",
+                "contact": contact,
+                "quotes_count": len(quotes),
+                "quotes_total": sum(q.get("total", 0) for q in quotes),
+                "invoices_count": len(invoices),
+                "invoices_total": sum(i.get("total", 0) for i in invoices),
+                "pending_tasks": len([t for t in tasks if t.get("status") != "done"])
+            }
+    
+    elif context_type == "pipeline":
+        # Get pipeline overview
+        columns = await db.pipeline_columns.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+        pipeline_data = []
+        for col in columns:
+            opps = await db.opportunities.find({"status": col["id"]}, {"_id": 0, "title": 1, "amount": 1}).to_list(100)
+            pipeline_data.append({
+                "stage": col["label"],
+                "count": len(opps),
+                "value": sum(o.get("amount", 0) for o in opps)
+            })
+        context["specific_data"] = {"type": "pipeline", "stages": pipeline_data}
+    
+    elif context_type == "invoices":
+        # Get invoice stats
+        invoices = await db.invoices.find({}, {"_id": 0, "status": 1, "total": 1, "payments": 1}).to_list(1000)
+        pending = [i for i in invoices if i.get("status") in ["en_attente", "envoyée"]]
+        context["specific_data"] = {
+            "type": "invoices",
+            "total_count": len(invoices),
+            "pending_count": len(pending),
+            "pending_amount": sum(i.get("total", 0) for i in pending)
+        }
+    
+    elif context_type == "budget":
+        # Get budget overview
+        current_month = datetime.now().strftime("%Y-%m")
+        transactions = await db.bank_transactions.find(
+            {"date": {"$regex": f"^{current_month}"}},
+            {"_id": 0}
+        ).to_list(10000)
+        
+        income = sum(t["amount"] for t in transactions if t["type"] == "credit")
+        expense = sum(t["amount"] for t in transactions if t["type"] == "debit")
+        
+        context["specific_data"] = {
+            "type": "budget",
+            "current_month": current_month,
+            "income": income,
+            "expense": expense,
+            "balance": income - expense
+        }
+    
+    return context
+
+def build_system_prompt(context: dict) -> str:
+    """Build the system prompt for the AI assistant"""
+    
+    prompt = f"""Tu es l'assistant IA interne d'Alpha Agency, une agence de communication basée en Guadeloupe.
+
+INFORMATIONS SUR L'AGENCE:
+- Nom: {context['agency']['name']}
+- Localisation: {context['agency']['location']}
+- Services: {', '.join(context['agency']['services'])}
+
+STATISTIQUES ACTUELLES DU CRM:
+- Contacts: {context['stats']['contacts_count']}
+- Opportunités en cours: {context['stats']['opportunities_count']}
+- Valeur du pipeline: {context['stats']['pipeline_value']}€
+- Factures: {context['stats']['invoices_count']}
+- Tâches en attente: {context['stats']['tasks_pending']}
+
+"""
+    
+    if context.get("specific_data"):
+        data = context["specific_data"]
+        if data["type"] == "contact":
+            prompt += f"""
+CONTEXTE - FICHE CLIENT:
+- Nom: {data['contact'].get('first_name', '')} {data['contact'].get('last_name', '')}
+- Entreprise: {data['contact'].get('company', 'N/A')}
+- Email: {data['contact'].get('email', 'N/A')}
+- Devis: {data['quotes_count']} (Total: {data['quotes_total']}€)
+- Factures: {data['invoices_count']} (Total: {data['invoices_total']}€)
+- Tâches en cours: {data['pending_tasks']}
+"""
+        elif data["type"] == "pipeline":
+            prompt += "\nCONTEXTE - PIPELINE COMMERCIAL:\n"
+            for stage in data["stages"]:
+                prompt += f"- {stage['stage']}: {stage['count']} opportunités ({stage['value']}€)\n"
+        
+        elif data["type"] == "invoices":
+            prompt += f"""
+CONTEXTE - FACTURATION:
+- Total factures: {data['total_count']}
+- Factures en attente: {data['pending_count']}
+- Montant en attente: {data['pending_amount']}€
+"""
+        elif data["type"] == "budget":
+            prompt += f"""
+CONTEXTE - BUDGET ({data['current_month']}):
+- Revenus: {data['income']}€
+- Dépenses: {data['expense']}€
+- Solde: {data['balance']}€
+"""
+
+    prompt += """
+INSTRUCTIONS:
+- Réponds toujours en français
+- Sois professionnel mais amical
+- Donne des conseils pratiques et actionnables
+- Si tu ne connais pas une information spécifique, dis-le clairement
+- Tu peux suggérer des actions à faire dans le CRM
+- Aide à analyser les données et à prendre des décisions commerciales
+
+Tu es là pour aider l'équipe d'Alpha Agency à être plus efficace dans leur gestion commerciale et leur relation client."""
+
+    return prompt
+
+@api_router.get("/ai/history", response_model=List[dict])
+async def get_ai_history(limit: int = 20, current_user: dict = Depends(get_current_user)):
+    """Get AI conversation history for current user"""
+    conversations = await db.ai_conversations.find(
+        {"user_id": current_user["id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    return conversations
+
 # ==================== BUDGET CATEGORIES (CUSTOM) ====================
 
 class BudgetCategoryCreate(BaseModel):
