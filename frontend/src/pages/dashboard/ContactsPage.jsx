@@ -458,14 +458,69 @@ const ContactsPage = () => {
           <p className="text-[#666666]">Aucun contact trouvé</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {filteredContacts.map((contact) => (
             <div 
               key={contact.id}
               data-testid={`contact-${contact.id}`}
-              className="bg-white rounded-lg border border-[#E5E5E5] p-4 hover:border-[#CE0202]/30 transition-colors"
+              className="bg-white rounded-lg border border-[#E5E5E5] p-3 sm:p-4 hover:border-[#CE0202]/30 transition-colors"
             >
-              <div className="flex items-center justify-between">
+              {/* Mobile Layout */}
+              <div className="flex flex-col sm:hidden gap-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[#CE0202]/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-[#CE0202] font-bold text-sm">
+                        {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-[#1A1A1A] font-semibold text-sm truncate">
+                        {contact.first_name} {contact.last_name}
+                      </h3>
+                      <p className="text-xs text-[#666666] truncate">{contact.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedContactId(contact.id);
+                        setDetailSheetOpen(true);
+                      }}
+                      className="text-[#CE0202] hover:text-[#CE0202] hover:bg-[#CE0202]/10 h-8 w-8 p-0"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openEditDialog(contact)}
+                      className="text-[#666666] hover:text-[#1A1A1A] h-8 w-8 p-0"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge className={`${getStatusBadge(contact.status)} text-xs`}>
+                    {contact.status}
+                  </Badge>
+                  <Badge className={`${getScoreBadge(contact.score)} text-xs`}>
+                    {contact.score}
+                  </Badge>
+                  {contact.company && (
+                    <Badge variant="outline" className="text-xs">
+                      <Building className="w-3 h-3 mr-1" />
+                      {contact.company}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              {/* Desktop Layout */}
+              <div className="hidden sm:flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-[#CE0202]/10 rounded-full flex items-center justify-center">
                     <span className="text-[#CE0202] font-bold">
