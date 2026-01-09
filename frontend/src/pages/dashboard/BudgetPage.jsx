@@ -1438,12 +1438,12 @@ const BudgetPage = () => {
 
             <div className="space-y-2">
               <Label>Appliquer aux</Label>
-              <Select value={ruleForm.apply_to_type || ""} onValueChange={(v) => setRuleForm({...ruleForm, apply_to_type: v})}>
+              <Select value={ruleForm.apply_to_type || "all"} onValueChange={(v) => setRuleForm({...ruleForm, apply_to_type: v === "all" ? "" : v})}>
                 <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
                   <SelectValue placeholder="Toutes les transactions" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
-                  <SelectItem value="">Toutes les transactions</SelectItem>
+                  <SelectItem value="all">Toutes les transactions</SelectItem>
                   <SelectItem value="credit">Revenus uniquement</SelectItem>
                   <SelectItem value="debit">Dépenses uniquement</SelectItem>
                 </SelectContent>
