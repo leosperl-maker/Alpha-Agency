@@ -4445,13 +4445,13 @@ async def refresh_news(
         "design": "design branding identité visuelle logo"
     }
     
-    # Region to search query suffix mapping
+    # Region to search query suffix mapping - Use broader terms for DOM-TOM to get more results
     region_queries = {
-        "guadeloupe": "Guadeloupe Antilles",
-        "martinique": "Martinique Antilles",
-        "saint-martin": "Saint-Martin Antilles",
-        "saint-barth": "Saint-Barthélemy Antilles",
-        "guyane": "Guyane française",
+        "guadeloupe": "(Guadeloupe OR Antilles OR Caraïbes OR Outre-mer)",
+        "martinique": "(Martinique OR Antilles OR Caraïbes OR Outre-mer)",
+        "saint-martin": "(Saint-Martin OR Antilles OR Caraïbes OR Outre-mer)",
+        "saint-barth": "(Saint-Barthélemy OR Antilles OR Caraïbes OR Outre-mer)",
+        "guyane": "(Guyane OR Amazonie OR Outre-mer OR Cayenne)",
         "fr": "France",
         "us": "",  # Use NewsAPI country filter
         "gb": "",  # Use NewsAPI country filter
@@ -4476,7 +4476,7 @@ async def refresh_news(
                         "q": search_query,
                         "language": "fr",
                         "sortBy": "publishedAt",
-                        "pageSize": 8
+                        "pageSize": 15  # Increased from 8 to get more articles
                     }
                 else:
                     # US, GB, DE use top-headlines with country filter
