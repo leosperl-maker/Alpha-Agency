@@ -1481,6 +1481,11 @@ const BudgetPage = () => {
             formatCurrency={formatCurrency}
           />
         </TabsContent>
+
+        {/* Cashflow Tab (Phase 4) */}
+        <TabsContent value="cashflow" className="space-y-6">
+          <CashflowTab formatCurrency={formatCurrency} />
+        </TabsContent>
       </Tabs>
 
       {/* Import Dialog */}
