@@ -87,6 +87,7 @@ function App() {
             <Route path="budget" element={<BudgetPage />} />
             <Route path="sauvegardes" element={<BackupPage />} />
             <Route path="utilisateurs" element={<UsersPage />} />
+            <Route path="assistant" element={<AIAssistantPage />} />
             <Route path="parametres" element={<SettingsPage />} />
           </Route>
         </Routes>
