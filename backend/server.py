@@ -3324,6 +3324,93 @@ async def delete_auto_category_rule(rule_id: str, current_user: dict = Depends(g
         raise HTTPException(status_code=404, detail="Règle non trouvée")
     return {"message": "Règle supprimée"}
 
+@api_router.put("/budget/rules/{rule_id}", response_model=dict)
+async def update_auto_category_rule(rule_id: str, update: AutoCategoryRuleUpdate, current_user: dict = Depends(get_current_user)):
+    """Update an auto-categorization rule"""
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
+    
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    result = await db.auto_category_rules.update_one({"id": rule_id}, {"$set": update_data})
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Règle non trouvée")
+    return {"message": "Règle mise à jour"}
+
+@api_router.post("/budget/rules/apply", response_model=dict)
+async def apply_auto_categorization_rules(
+    month: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Apply auto-categorization rules to uncategorized transactions"""
+    import re
+    
+    # Get active rules sorted by priority
+    rules = await db.auto_category_rules.find(
+        {"is_active": {"$ne": False}},
+        {"_id": 0}
+    ).sort("priority", -1).to_list(100)
+    
+    if not rules:
+        return {"categorized": 0, "message": "Aucune règle active"}
+    
+    # Get uncategorized transactions
+    query = {"$or": [{"category_id": None}, {"category_id": ""}]}
+    if month:
+        query["date"] = {"$regex": f"^{month}"}
+    
+    transactions = await db.bank_transactions.find(query, {"_id": 0}).to_list(10000)
+    
+    categorized = 0
+    for trans in transactions:
+        label = trans.get("label", "").lower()
+        trans_type = trans.get("type")
+        
+        for rule in rules:
+            # Check if rule applies to this transaction type
+            rule_type = rule.get("apply_to_type")
+            if rule_type and rule_type != trans_type:
+                continue
+            
+            pattern = rule["pattern"].lower()
+            match_type = rule.get("match_type", "contains")
+            
+            matched = False
+            if match_type == "contains":
+                matched = pattern in label
+            elif match_type == "starts_with":
+                matched = label.startswith(pattern)
+            elif match_type == "ends_with":
+                matched = label.endswith(pattern)
+            elif match_type == "exact":
+                matched = label == pattern
+            elif match_type == "regex":
+                try:
+                    matched = bool(re.search(rule["pattern"], trans.get("label", ""), re.IGNORECASE))
+                except:
+                    matched = False
+            
+            if matched:
+                await db.bank_transactions.update_one(
+                    {"id": trans["id"]},
+                    {"$set": {
+                        "category_id": rule["category_id"],
+                        "subcategory_id": rule.get("subcategory_id"),
+                        "auto_categorized": True,
+                        "categorized_by_rule": rule["id"],
+                        "updated_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                categorized += 1
+                break
+    
+    return {
+        "categorized": categorized,
+        "total_uncategorized": len(transactions),
+        "message": f"{categorized} transactions catégorisées automatiquement"
+    }
+
 @api_router.get("/budget/transactions/summary", response_model=dict)
 async def get_transactions_summary(
     month: Optional[str] = None,
