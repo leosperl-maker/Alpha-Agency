@@ -792,9 +792,18 @@ const BudgetPage = () => {
                 <CardTitle className="text-[#1A1A1A] text-lg">Règles d'auto-catégorisation</CardTitle>
                 <p className="text-sm text-[#666666]">Catégorisez automatiquement vos transactions importées</p>
               </div>
-              <Button onClick={() => { setRuleForm({ pattern: "", category_id: "", subcategory_id: "" }); setRuleDialogOpen(true); }} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
-                <Plus className="w-4 h-4 mr-2" /> Nouvelle règle
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={handleApplyRules}
+                  className="border-[#CE0202] text-[#CE0202]"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" /> Appliquer les règles
+                </Button>
+                <Button onClick={() => { setRuleForm({ pattern: "", category_id: "", match_type: "contains", apply_to_type: "" }); setRuleDialogOpen(true); }} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+                  <Plus className="w-4 h-4 mr-2" /> Nouvelle règle
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {rules.length === 0 ? (
@@ -807,11 +816,23 @@ const BudgetPage = () => {
                 <div className="space-y-2">
                   {rules.map(rule => {
                     const category = getCategoryById(rule.category_id);
+                    const matchTypeLabels = {
+                      contains: "contient",
+                      starts_with: "commence par",
+                      ends_with: "finit par",
+                      exact: "est exactement",
+                      regex: "correspond au pattern"
+                    };
                     return (
                       <div key={rule.id} className="flex items-center justify-between p-3 rounded-lg bg-[#F8F8F8] border border-[#E5E5E5]">
-                        <div className="flex items-center gap-3">
-                          <div className="text-sm text-[#666666]">Si libellé contient</div>
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <div className="text-sm text-[#666666]">Si libellé {matchTypeLabels[rule.match_type] || "contient"}</div>
                           <Badge variant="outline" className="font-mono">&quot;{rule.pattern}&quot;</Badge>
+                          {rule.apply_to_type && (
+                            <Badge variant="secondary" className="text-xs">
+                              {rule.apply_to_type === "credit" ? "Revenus" : "Dépenses"} uniquement
+                            </Badge>
+                          )}
                           <ChevronRight className="w-4 h-4 text-[#666666]" />
                           {category && (
                             <Badge style={{ backgroundColor: category.color + "20", color: category.color, borderColor: category.color }}>
@@ -829,6 +850,17 @@ const BudgetPage = () => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Forecast Tab (Prévisionnel) */}
+        <TabsContent value="forecast" className="space-y-6">
+          <ForecastTab 
+            selectedMonth={selectedMonth}
+            categories={categories}
+            getCategoryById={getCategoryById}
+            getAllCategories={getAllCategories}
+            formatCurrency={formatCurrency}
+          />
         </TabsContent>
       </Tabs>
 
