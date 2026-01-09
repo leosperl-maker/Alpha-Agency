@@ -253,7 +253,8 @@ Modèle appliqué : Pages "Vue d'ensemble" et "Demandes" utilisées comme réfé
 - [ ] Enhanced reporting and analytics
 
 ### Blocked
-- ⚠️ **Intégration Brevo (e-mails)** - En attente activation du compte
+- ⚠️ **Publication Meta (Facebook/Instagram)** - En attente test OAuth par l'utilisateur
+- ⚠️ **NewsAPI.org** - Limite de 100 requêtes/24h atteinte sur le compte gratuit (message d'erreur affiché à l'utilisateur)
 
 ## 3rd Party Integrations
 
