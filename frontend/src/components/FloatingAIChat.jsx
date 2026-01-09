@@ -124,8 +124,11 @@ const FloatingAIChat = () => {
     setLoading(true);
 
     try {
+      // Build messages - ensure last message is from user
+      const chatMessages = newMessages.filter(m => m.role === "user" || m.role === "assistant");
+      
       const response = await aiAPI.chat({
-        messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+        messages: chatMessages.map(m => ({ role: m.role, content: m.content })),
         context_type: null,
         context_id: null
       });
