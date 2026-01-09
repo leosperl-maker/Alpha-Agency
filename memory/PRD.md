@@ -84,6 +84,27 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [x] Section description et audio sous les images
 - [x] Bouton fermeture bien positionné
 
+### Section Actualités (News) ✅ COMPLETE (2026-01-09)
+- [x] **Interface NewsPage.jsx** avec grille de cartes ✅
+- [x] **12 topics** configurés (géographiques + business) ✅
+- [x] **Filtres par thématique** dans l'UI ✅
+- [x] **Récupération via Perplexity AI** (bouton Actualiser) ✅
+- [x] **Suppression d'articles** individuelle ✅
+- [x] Badges colorés par catégorie
+- [x] Sources avec liens externes
+
+### Social Media Manager (style Agorapulse) ✅ UI COMPLETE (2026-01-09)
+- [x] **Architecture backend complète** (endpoints CRUD) ✅
+- [x] **Page /admin/social-media** ✅
+- [x] **Vue Calendrier mensuel** ✅
+- [x] **Vue Liste chronologique** (toggle Calendrier/Liste) ✅
+- [x] **Création/modification de posts programmés** ✅
+- [x] **Boîte de réception** avec filtres (Tous/Non lus/Répondus/Archivés) ✅
+- [x] **Onglet Comptes** pour connecter Facebook/Instagram ✅
+- [x] **Suggestions IA** pour réponses (Perplexity) ✅
+- [x] Stats en haut (Programmés, Publiés, Brouillons, Non lus, À répondre)
+- [ ] ⚠️ **Publication réelle** sur Meta - En attente OAuth integration
+
 ## Backlog / Upcoming Tasks
 
 ### P1 - Amélioration Fiche Contact (style Pipedrive)
