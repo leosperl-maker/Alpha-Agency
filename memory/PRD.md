@@ -100,11 +100,16 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [x] **Vue Liste chronologique** (toggle Liste/Mois) ✅
 - [x] **NOUVELLE Modale de création de post 3 colonnes** ✅
   - Colonne gauche: Sélection comptes FB/IG
-  - Colonne centrale: Rédaction + toolbar (emoji, localisation, hashtags, Writing Assistant)
+  - Colonne centrale: Rédaction + toolbar (emoji, localisation, hashtags)
   - Zone médias: Drag & drop + parcourir fichiers
   - Colonne droite: Aperçu en temps réel du post
   - Toggle brouillon, Bouton Programmer orange #FF6B35
+- [x] **Preview réaliste Facebook** (avatar, nom, texte, réactions, boutons J'aime/Commenter/Partager) ✅
+- [x] **Preview réaliste Instagram** (avatar gradient, image carrée, icônes, 127 J'aime) ✅
+- [x] **Sélecteur de preview** (dropdown Facebook Feed / Instagram Feed) ✅
+- [x] **Toggle Desktop/Mobile** pour taille de preview ✅
 - [x] **Upload de médias** (photos/vidéos) pour posts programmés ✅
+- [x] **Bouton Writing Assistant SUPPRIMÉ** (sera géré via Assistant IA interne) ✅
 - [x] **Boîte de réception** avec filtres (Tous/Non lus/Répondus/Archivés) ✅
 - [x] **Onglet Comptes** pour connecter Facebook/Instagram ✅
 - [x] **Suggestions IA** pour réponses (Perplexity) ✅
