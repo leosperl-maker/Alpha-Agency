@@ -421,7 +421,7 @@ const ContactsPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
           <Input
@@ -429,16 +429,16 @@ const ContactsPage = () => {
             placeholder="Rechercher un contact..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white border-[#E5E5E5] text-[#1A1A1A]"
+            className="pl-10 bg-white border-[#E5E5E5] text-[#1A1A1A] w-full"
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full sm:w-48 bg-white border-[#E5E5E5] text-[#1A1A1A]">
+          <SelectTrigger className="w-full sm:w-40 bg-white border-[#E5E5E5] text-[#1A1A1A]">
             <Filter className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Filtrer par statut" />
+            <SelectValue placeholder="Statut" />
           </SelectTrigger>
           <SelectContent className="bg-white border-[#E5E5E5]">
-            <SelectItem value="all">Tous les statuts</SelectItem>
+            <SelectItem value="all">Tous</SelectItem>
             <SelectItem value="nouveau">Nouveau</SelectItem>
             <SelectItem value="qualifie">Qualifié</SelectItem>
             <SelectItem value="en_discussion">En discussion</SelectItem>
