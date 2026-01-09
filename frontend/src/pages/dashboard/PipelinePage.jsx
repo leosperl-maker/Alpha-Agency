@@ -318,36 +318,36 @@ const DroppableColumn = ({ column, children, onEdit, onDelete, oppsCount, totalA
       }}
       style={style}
       data-testid={`pipeline-column-${column.id}`}
-      className={`flex-shrink-0 w-[300px] md:w-80 ${isOver ? 'ring-2 ring-[#CE0202] ring-opacity-50' : ''}`}
+      className={`flex-shrink-0 w-[260px] sm:w-[300px] md:w-80 ${isOver ? 'ring-2 ring-[#CE0202] ring-opacity-50' : ''}`}
     >
       <div className={`bg-white rounded-xl border shadow-sm h-full transition-all ${
         isOver ? 'border-[#CE0202] bg-[#CE0202]/5' : 'border-[#E5E5E5]'
       }`}>
-        <div className="p-4 border-b border-[#E5E5E5]">
+        <div className="p-3 sm:p-4 border-b border-[#E5E5E5]">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
               <button
                 {...attributes}
                 {...listeners}
-                className="cursor-grab active:cursor-grabbing p-1 hover:bg-[#F8F8F8] rounded"
+                className="cursor-grab active:cursor-grabbing p-1 hover:bg-[#F8F8F8] rounded flex-shrink-0"
               >
-                <GripVertical className="w-4 h-4 text-[#666666]" />
+                <GripVertical className="w-3 h-3 sm:w-4 sm:h-4 text-[#666666]" />
               </button>
               <div 
-                className="w-3 h-3 rounded-full"
+                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
                 style={{ backgroundColor: column.color }}
               />
-              <span className="text-[#1A1A1A] text-sm font-semibold">
+              <span className="text-[#1A1A1A] text-xs sm:text-sm font-semibold truncate">
                 {column.label}
               </span>
-              <Badge variant="secondary" className="bg-[#F8F8F8] text-[#666666] text-xs">
+              <Badge variant="secondary" className="bg-[#F8F8F8] text-[#666666] text-[10px] sm:text-xs flex-shrink-0">
                 {oppsCount}
               </Badge>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                  <MoreVertical className="w-4 h-4 text-[#666666]" />
+                <Button variant="ghost" size="sm" className="h-6 w-6 sm:h-7 sm:w-7 p-0 flex-shrink-0">
+                  <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4 text-[#666666]" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-white border-[#E5E5E5]">
@@ -362,12 +362,12 @@ const DroppableColumn = ({ column, children, onEdit, onDelete, oppsCount, totalA
             </DropdownMenu>
           </div>
           <div className="flex items-center justify-between mt-2">
-            <span className="text-[#CE0202] font-bold text-lg">
+            <span className="text-[#CE0202] font-bold text-base sm:text-lg">
               {totalAmount.toLocaleString()}€
             </span>
           </div>
         </div>
-        <div className="p-3 space-y-3 max-h-[calc(100vh-380px)] overflow-y-auto">
+        <div className="p-2 sm:p-3 space-y-2 sm:space-y-3 max-h-[calc(100vh-380px)] overflow-y-auto">
           <SortableContext 
             items={opportunities.map(o => o.id)} 
             strategy={verticalListSortingStrategy}
