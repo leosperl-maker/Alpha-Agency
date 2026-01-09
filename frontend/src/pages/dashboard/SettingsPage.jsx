@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Save, Building, Key, Share2, FileText, Database, Trash2, AlertTriangle, Loader2, Bell, Mail, Send } from "lucide-react";
+import { Save, Building, Key, Share2, FileText, Database, Trash2, AlertTriangle, Loader2, Bell, Mail, Send, CheckCircle, XCircle, RefreshCw, ExternalLink } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -7,7 +7,8 @@ import { Textarea } from "../../components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Switch } from "../../components/ui/switch";
-import { settingsAPI, notificationsAPI } from "../../lib/api";
+import { Badge } from "../../components/ui/badge";
+import { settingsAPI, notificationsAPI, apiKeysAPI } from "../../lib/api";
 import { toast } from "sonner";
 import api from "../../lib/api";
 
