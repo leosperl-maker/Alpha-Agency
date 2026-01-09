@@ -3104,6 +3104,17 @@ class AutoCategoryRule(BaseModel):
     category_id: str
     subcategory_id: Optional[str] = None
     is_active: bool = True
+    match_type: str = "contains"  # contains, starts_with, ends_with, exact, regex
+    priority: int = 0  # Higher priority rules are applied first
+    apply_to_type: Optional[str] = None  # credit, debit, or None for both
+
+class AutoCategoryRuleUpdate(BaseModel):
+    pattern: Optional[str] = None
+    category_id: Optional[str] = None
+    is_active: Optional[bool] = None
+    match_type: Optional[str] = None
+    priority: Optional[int] = None
+    apply_to_type: Optional[str] = None
 
 @api_router.get("/budget/transactions", response_model=List[dict])
 async def get_bank_transactions(
