@@ -175,6 +175,9 @@ const DashboardLayout = () => {
           <Outlet />
         </div>
       </main>
+      
+      {/* Floating AI Chat Bubble */}
+      <FloatingAIChat />
     </div>
   );
 };
