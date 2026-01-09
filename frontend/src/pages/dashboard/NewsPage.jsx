@@ -409,7 +409,7 @@ const NewsPage = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedRegion, setSelectedRegion] = useState("fr");
+  const [selectedRegion, setSelectedRegion] = useState("guadeloupe"); // Default to Guadeloupe
   
   // Modal state
   const [selectedArticle, setSelectedArticle] = useState(null);
