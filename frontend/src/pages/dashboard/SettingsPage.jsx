@@ -62,9 +62,43 @@ const SettingsPage = () => {
   const [sendingTest, setSendingTest] = useState(false);
   const [sendingReminders, setSendingReminders] = useState(false);
 
+  // API Keys state
+  const [apiKeys, setApiKeys] = useState(null);
+  const [loadingApiKeys, setLoadingApiKeys] = useState(false);
+  const [testingService, setTestingService] = useState(null);
+
   useEffect(() => {
     fetchNotificationSettings();
+    fetchApiKeys();
   }, []);
+
+  const fetchApiKeys = async () => {
+    setLoadingApiKeys(true);
+    try {
+      const res = await apiKeysAPI.getStatus();
+      setApiKeys(res.data);
+    } catch (error) {
+      console.error("Error fetching API keys:", error);
+    } finally {
+      setLoadingApiKeys(false);
+    }
+  };
+
+  const handleTestApiKey = async (service) => {
+    setTestingService(service);
+    try {
+      const res = await apiKeysAPI.testKey(service);
+      if (res.data.success) {
+        toast.success(res.data.message);
+      } else {
+        toast.error(res.data.message);
+      }
+    } catch (error) {
+      toast.error("Erreur lors du test");
+    } finally {
+      setTestingService(null);
+    }
+  };
 
   const fetchNotificationSettings = async () => {
     try {
