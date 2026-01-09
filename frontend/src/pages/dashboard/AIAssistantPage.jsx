@@ -71,12 +71,14 @@ const AIAssistantPage = () => {
       const res = await aiAPI.getConversation(conversationId);
       setCurrentConversationId(conversationId);
       // Convert stored messages to the format we need
-      setMessages(res.data.messages.map(m => ({
+      const msgs = res.data.messages || [];
+      setMessages(msgs.map(m => ({
         role: m.role,
         content: m.content
       })));
       setContextType(res.data.context_type || "general");
     } catch (error) {
+      console.error("Error loading conversation:", error);
       toast.error("Erreur lors du chargement de la conversation");
     }
   };
