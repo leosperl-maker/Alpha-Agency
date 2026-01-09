@@ -242,6 +242,10 @@ const SettingsPage = () => {
           <TabsTrigger value="company" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             Entreprise
           </TabsTrigger>
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+            <Bell className="w-4 h-4 mr-2" />
+            Notifications
+          </TabsTrigger>
           <TabsTrigger value="social" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
             Réseaux sociaux
           </TabsTrigger>
@@ -256,6 +260,160 @@ const SettingsPage = () => {
             Données
           </TabsTrigger>
         </TabsList>
+
+        {/* Notifications Tab */}
+        <TabsContent value="notifications">
+          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
+                <Bell className="w-5 h-5 text-[#CE0202]" />
+                Notifications par email
+              </CardTitle>
+              <CardDescription>
+                Configurez les notifications automatiques par email (via Brevo)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Test Email */}
+              <div className="flex items-center justify-between p-4 bg-[#F8F8F8] rounded-lg">
+                <div>
+                  <p className="font-medium text-[#1A1A1A]">Tester la configuration</p>
+                  <p className="text-sm text-[#666666]">Envoyer un email de test à votre adresse</p>
+                </div>
+                <Button
+                  onClick={handleTestEmail}
+                  disabled={sendingTest}
+                  variant="outline"
+                  className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202] hover:text-white"
+                >
+                  {sendingTest ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4 mr-2" />
+                  )}
+                  Envoyer un test
+                </Button>
+              </div>
+
+              <div className="border-t border-[#E5E5E5] pt-6 space-y-4">
+                {/* Task Reminders */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-[#1A1A1A]">Rappels de tâches</p>
+                    <p className="text-sm text-[#666666]">Recevoir un email pour les tâches à échéance proche</p>
+                  </div>
+                  <Switch
+                    checked={notifSettings.task_reminders}
+                    onCheckedChange={(checked) => setNotifSettings(prev => ({ ...prev, task_reminders: checked }))}
+                  />
+                </div>
+
+                {notifSettings.task_reminders && (
+                  <div className="ml-4 flex items-center gap-2">
+                    <Label className="text-sm text-[#666666]">Rappeler</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="7"
+                      value={notifSettings.task_reminder_days}
+                      onChange={(e) => setNotifSettings(prev => ({ ...prev, task_reminder_days: parseInt(e.target.value) || 1 }))}
+                      className="w-16 bg-white border-[#E5E5E5]"
+                    />
+                    <Label className="text-sm text-[#666666]">jour(s) avant l'échéance</Label>
+                  </div>
+                )}
+
+                {/* Invoice Reminders */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-[#1A1A1A]">Rappels de factures impayées</p>
+                    <p className="text-sm text-[#666666]">Envoyer des rappels aux clients pour les factures en retard</p>
+                  </div>
+                  <Switch
+                    checked={notifSettings.invoice_reminders}
+                    onCheckedChange={(checked) => setNotifSettings(prev => ({ ...prev, invoice_reminders: checked }))}
+                  />
+                </div>
+
+                {notifSettings.invoice_reminders && (
+                  <div className="ml-4">
+                    <p className="text-sm text-[#666666] mb-2">Envoyer un rappel après :</p>
+                    <div className="flex gap-2">
+                      {[7, 14, 30, 60].map((days) => (
+                        <Button
+                          key={days}
+                          variant={notifSettings.invoice_reminder_days.includes(days) ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => {
+                            setNotifSettings(prev => ({
+                              ...prev,
+                              invoice_reminder_days: prev.invoice_reminder_days.includes(days)
+                                ? prev.invoice_reminder_days.filter(d => d !== days)
+                                : [...prev.invoice_reminder_days, days].sort((a, b) => a - b)
+                            }));
+                          }}
+                          className={notifSettings.invoice_reminder_days.includes(days) 
+                            ? "bg-[#CE0202] text-white" 
+                            : "border-[#E5E5E5]"}
+                        >
+                          {days} jours
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* New Lead Notifications */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-[#1A1A1A]">Nouveaux leads</p>
+                    <p className="text-sm text-[#666666]">Recevoir un email pour chaque nouvelle demande de contact</p>
+                  </div>
+                  <Switch
+                    checked={notifSettings.new_lead_notifications}
+                    onCheckedChange={(checked) => setNotifSettings(prev => ({ ...prev, new_lead_notifications: checked }))}
+                  />
+                </div>
+              </div>
+
+              {/* Save Button */}
+              <div className="flex justify-between items-center pt-4 border-t border-[#E5E5E5]">
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSendTaskReminders}
+                    disabled={sendingReminders}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {sendingReminders ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                    Envoyer rappels tâches
+                  </Button>
+                  <Button
+                    onClick={handleSendInvoiceReminders}
+                    disabled={sendingReminders}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {sendingReminders ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                    Envoyer rappels factures
+                  </Button>
+                </div>
+                <Button
+                  onClick={handleSaveNotifications}
+                  disabled={savingNotif}
+                  className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+                >
+                  {savingNotif ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-2" />
+                  )}
+                  Sauvegarder
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Company Tab */}
         <TabsContent value="company">
