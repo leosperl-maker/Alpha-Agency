@@ -375,6 +375,15 @@ export const cashflowAPI = {
   getProjection: (startMonth, months = 6) => api.get('/budget/cashflow', { params: { start_month: startMonth, months } }),
 };
 
+// Notifications API
+export const notificationsAPI = {
+  getSettings: () => api.get('/notifications/settings'),
+  updateSettings: (settings) => api.put('/notifications/settings', settings),
+  sendTaskReminders: () => api.post('/notifications/send-task-reminders'),
+  sendInvoiceReminders: () => api.post('/notifications/send-invoice-reminders'),
+  testEmail: () => api.post('/notifications/test-email'),
+};
+
 // Social Media Manager API
 export const socialAPI = {
   // Accounts
