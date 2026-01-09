@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Inbox, Eye, Trash2, Mail, Phone, Building, Calendar, MessageSquare, ChevronRight } from "lucide-react";
+import { 
+  Inbox, Eye, Trash2, Mail, Phone, Building, Calendar, MessageSquare, 
+  ChevronRight, Search, Filter, Clock, CheckCircle, AlertCircle, User
+} from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Card, CardContent } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
+import { Input } from "../../components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../components/ui/dialog";
 import { contactsAPI } from "../../lib/api";
 import { toast } from "sonner";
@@ -13,6 +18,17 @@ const DemandesPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDemande, setSelectedDemande] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  // Status configuration
+  const statusConfig = {
+    nouveau: { label: "Non traité", color: "bg-blue-100 text-blue-700", icon: Clock },
+    contacté: { label: "Contacté", color: "bg-yellow-100 text-yellow-700", icon: Phone },
+    qualifié: { label: "Qualifié", color: "bg-purple-100 text-purple-700", icon: CheckCircle },
+    converti: { label: "Converti", color: "bg-green-100 text-green-700", icon: CheckCircle },
+    perdu: { label: "Perdu", color: "bg-red-100 text-red-700", icon: AlertCircle }
+  };
 
   useEffect(() => {
     fetchDemandes();
@@ -30,6 +46,32 @@ const DemandesPage = () => {
     }
   };
 
+  // Filter demandes
+  const filteredDemandes = demandes.filter(demande => {
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesName = `${demande.first_name} ${demande.last_name}`.toLowerCase().includes(query);
+      const matchesEmail = demande.email?.toLowerCase().includes(query);
+      const matchesCompany = demande.company?.toLowerCase().includes(query);
+      if (!matchesName && !matchesEmail && !matchesCompany) return false;
+    }
+    
+    // Status filter
+    if (statusFilter !== "all" && demande.status !== statusFilter) return false;
+    
+    return true;
+  });
+
+  // Calculate stats
+  const stats = {
+    total: demandes.length,
+    nonTraite: demandes.filter(d => d.status === "nouveau" || !d.status).length,
+    contacte: demandes.filter(d => d.status === "contacté").length,
+    qualifie: demandes.filter(d => d.status === "qualifié").length,
+    converti: demandes.filter(d => d.status === "converti").length
+  };
+
   const handleViewDemande = (demande) => {
     setSelectedDemande(demande);
     setDialogOpen(true);
@@ -43,6 +85,19 @@ const DemandesPage = () => {
       fetchDemandes();
     } catch (error) {
       toast.error("Erreur lors de la suppression");
+    }
+  };
+
+  const handleStatusUpdate = async (id, newStatus) => {
+    try {
+      await contactsAPI.update(id, { status: newStatus });
+      toast.success("Statut mis à jour");
+      fetchDemandes();
+      if (selectedDemande?.id === id) {
+        setSelectedDemande({ ...selectedDemande, status: newStatus });
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour");
     }
   };
 
@@ -72,26 +127,118 @@ const DemandesPage = () => {
   };
 
   const getStatusBadge = (status) => {
-    const styles = {
-      nouveau: "bg-blue-100 text-blue-700 border-blue-200",
-      contacté: "bg-yellow-100 text-yellow-700 border-yellow-200",
-      qualifié: "bg-purple-100 text-purple-700 border-purple-200",
-      converti: "bg-green-100 text-green-700 border-green-200"
-    };
-    return styles[status] || styles.nouveau;
+    const config = statusConfig[status] || statusConfig.nouveau;
+    return config.color;
   };
 
   return (
     <div data-testid="demandes-page" className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#1A1A1A]">Demandes</h1>
+          <h1 className="text-2xl font-bold text-[#1A1A1A]">Demandes</h1>
           <p className="text-[#666666]">Gérez les demandes reçues via le formulaire de contact</p>
         </div>
         <Badge className="bg-[#CE0202]/10 text-[#CE0202] border-[#CE0202]/20">
           {demandes.length} demande{demandes.length > 1 ? 's' : ''}
         </Badge>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <Card className="bg-white border-[#E5E5E5]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#CE0202]/10">
+                <Inbox className="w-5 h-5 text-[#CE0202]" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1A1A1A]">{stats.total}</p>
+                <p className="text-xs text-[#666666]">Total</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white border-[#E5E5E5]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-100">
+                <Clock className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1A1A1A]">{stats.nonTraite}</p>
+                <p className="text-xs text-[#666666]">Non traité</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white border-[#E5E5E5]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-yellow-100">
+                <Phone className="w-5 h-5 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1A1A1A]">{stats.contacte}</p>
+                <p className="text-xs text-[#666666]">Contacté</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white border-[#E5E5E5]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-100">
+                <CheckCircle className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1A1A1A]">{stats.qualifie}</p>
+                <p className="text-xs text-[#666666]">Qualifié</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white border-[#E5E5E5]">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-100">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#1A1A1A]">{stats.converti}</p>
+                <p className="text-xs text-[#666666]">Converti</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Rechercher par nom, email ou entreprise..."
+            className="pl-10 bg-white border-[#E5E5E5]"
+            data-testid="search-demandes"
+          />
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-48 bg-white border-[#E5E5E5]" data-testid="filter-status">
+            <Filter className="w-4 h-4 mr-2" />
+            <SelectValue placeholder="Tous les statuts" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border-[#E5E5E5]">
+            <SelectItem value="all">Tous les statuts</SelectItem>
+            <SelectItem value="nouveau">Non traité</SelectItem>
+            <SelectItem value="contacté">Contacté</SelectItem>
+            <SelectItem value="qualifié">Qualifié</SelectItem>
+            <SelectItem value="converti">Converti</SelectItem>
+            <SelectItem value="perdu">Perdu</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Demandes List */}
@@ -101,19 +248,24 @@ const DemandesPage = () => {
             <div key={i} className="h-24 bg-white animate-pulse rounded-lg" />
           ))}
         </div>
-      ) : demandes.length === 0 ? (
+      ) : filteredDemandes.length === 0 ? (
         <Card className="bg-white border border-[#E5E5E5]">
           <CardContent className="py-16 text-center">
             <Inbox className="w-12 h-12 text-[#A1A1AA] mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Aucune demande</h3>
+            <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">
+              {searchQuery || statusFilter !== "all" ? "Aucun résultat" : "Aucune demande"}
+            </h3>
             <p className="text-[#666666]">
-              Les demandes soumises via le formulaire de contact apparaîtront ici.
+              {searchQuery || statusFilter !== "all" 
+                ? "Essayez de modifier vos filtres"
+                : "Les demandes soumises via le formulaire de contact apparaîtront ici."
+              }
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {demandes.map((demande, index) => (
+          {filteredDemandes.map((demande, index) => (
             <motion.div
               key={demande.id}
               initial={{ opacity: 0, y: 20 }}
@@ -123,6 +275,7 @@ const DemandesPage = () => {
               <Card 
                 className="bg-white border border-[#E5E5E5] cursor-pointer hover:border-[#CE0202]/50 transition-colors shadow-sm"
                 onClick={() => handleViewDemande(demande)}
+                data-testid={`demande-${demande.id}`}
               >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
@@ -132,7 +285,7 @@ const DemandesPage = () => {
                           {demande.first_name} {demande.last_name}
                         </h3>
                         <Badge className={getStatusBadge(demande.status)}>
-                          {demande.status || "nouveau"}
+                          {statusConfig[demande.status]?.label || "Non traité"}
                         </Badge>
                       </div>
                       <div className="flex flex-wrap items-center gap-4 text-sm text-[#666666]">
@@ -172,6 +325,7 @@ const DemandesPage = () => {
                           handleDeleteDemande(demande.id);
                         }}
                         className="text-[#666666] hover:text-red-500 hover:bg-red-50"
+                        data-testid={`delete-demande-${demande.id}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -187,9 +341,10 @@ const DemandesPage = () => {
 
       {/* Detail Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] text-[#1A1A1A] max-w-2xl">
+        <DialogContent className="bg-white border-[#E5E5E5] text-[#1A1A1A] max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl">
+            <DialogTitle className="text-2xl flex items-center gap-3">
+              <User className="w-6 h-6" />
               {selectedDemande?.first_name} {selectedDemande?.last_name}
             </DialogTitle>
             <DialogDescription className="text-[#666666]">
@@ -199,6 +354,28 @@ const DemandesPage = () => {
           
           {selectedDemande && (
             <div className="space-y-6 mt-4">
+              {/* Status Selector */}
+              <div className="bg-[#F8F8F8] rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-[#1A1A1A]">Statut</span>
+                  <Select 
+                    value={selectedDemande.status || "nouveau"} 
+                    onValueChange={(v) => handleStatusUpdate(selectedDemande.id, v)}
+                  >
+                    <SelectTrigger className="w-40 bg-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      <SelectItem value="nouveau">Non traité</SelectItem>
+                      <SelectItem value="contacté">Contacté</SelectItem>
+                      <SelectItem value="qualifié">Qualifié</SelectItem>
+                      <SelectItem value="converti">Converti</SelectItem>
+                      <SelectItem value="perdu">Perdu</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <p className="text-xs text-[#666666] uppercase">Email</p>
