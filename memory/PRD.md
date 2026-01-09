@@ -31,12 +31,23 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [x] Contact import from CSV/Excel (3-step wizard)
 - [x] Status and score tracking
 - [x] Tags system
+- [x] **Contact History View** ✅ DONE 2025-01-08
+  - Slide-over panel with contact details
+  - Summary cards (quotes, invoices, paid, due)
+  - Tabs for Quotes, Invoices, Tasks, Notes
+  - Financial totals and history
 
 ### Pipeline / Opportunities
 - [x] Kanban-style pipeline view
-- [x] Opportunity stages (nouveau, qualifié, devis_envoyé, gagné, perdu)
+- [x] Opportunity stages (dynamiques depuis la base de données)
 - [x] Drag & drop support
 - [x] Amount and probability tracking
+- [x] **Colonnes personnalisables** ✅ DONE 2025-01-09
+  - API CRUD pour les colonnes (GET/POST/PUT/DELETE)
+  - Interface pour ajouter/modifier/supprimer des étapes
+  - Choix de couleur pour chaque colonne
+  - Réorganisation des colonnes
+  - Initialisation automatique des colonnes par défaut
 
 ### Quotes (Devis)
 - [x] Quote creation with line items (title + description)
@@ -56,18 +67,6 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
   - Payment summary (total, paid, remaining)
 - [x] Download PDF functionality
 
-### Contacts Management
-- [x] Full CRUD operations
-- [x] Extended contact model (poste, note, infos_sup, budget, city)
-- [x] Contact import from CSV/Excel (3-step wizard)
-- [x] Status and score tracking
-- [x] Tags system
-- [x] **Contact History View** ✅ DONE 2025-01-08
-  - Slide-over panel with contact details
-  - Summary cards (quotes, invoices, paid, due)
-  - Tabs for Quotes, Invoices, Tasks, Notes
-  - Financial totals and history
-
 ### Dashboard
 - [x] KPI cards (contacts, pipeline, MRR, conversion rate)
 - [x] Charts (leads evolution, pipeline distribution)
@@ -79,68 +78,81 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [x] Due dates and status tracking
 - [x] Optional contact linking
 - [x] Task statistics
+- [x] **Tâches en retard** - Section dédiée avec indicateurs visuels
+
+### Budget & Trésorerie (Module Avancé) ✅ Phase 1 COMPLETE 2025-01-09
+- [x] Import de transactions bancaires (CSV)
+- [x] Gestion des transactions (CRUD)
+- [x] Catégories personnalisées (revenus/dépenses)
+- [x] Règles d'auto-catégorisation
+- [x] Vue d'ensemble avec graphiques
+  - Évolution mensuelle (revenus/dépenses)
+  - Répartition des dépenses par catégorie (pie chart)
+  - Top dépenses par catégorie (barres de progression)
+- [x] Filtres (mois, type, catégorie, recherche)
+- [x] Résumé financier (revenus, dépenses, résultat, non catégorisé)
 
 ### Other Modules
-- [x] Budget tracking
 - [x] Subscriptions management
 - [x] Portfolio management
 - [x] Blog/Articles management
 - [x] Document management
 - [x] Backup system (Dropbox integration)
 - [x] Settings page
+- [x] **Gestion des données de test** ✅ DONE 2025-01-08
 
 ## Recent Changes (2025-01-09)
 
-### Bug Fixes P0
-- ✅ **Tâches en retard** - Correction de la détection (exclusion des dates vides)
-- ✅ **Section tâches en retard** - Affichage en bas de la page TasksPage avec fond rouge
-- ✅ **Responsive mobile Pipeline/Tâches** - Scroll horizontal amélioré avec `-mx-6 px-6` et `min-w-max`
+### Bug Fixes P0 ✅ VERIFIED
+- ✅ **Responsive mobile Pipeline/Tâches** - Scroll horizontal fonctionne (vérifié à 400px viewport)
+- ✅ **Tâches en retard** - Détection correcte (exclusion des dates vides) avec section dédiée
 
-### Pipeline Improvements P1
+### Pipeline Improvements P1 ✅ IMPLEMENTED
+- ✅ **Colonnes personnalisables du Pipeline**
+  - API Routes: GET/POST/PUT/DELETE /api/pipeline/columns
+  - API Route: PUT /api/pipeline/columns/reorder (réorganisation)
+  - API Route: POST /api/pipeline/columns/initialize (initialisation)
+  - Interface: Bouton "Ajouter une étape"
+  - Interface: Menu de colonne (Modifier, Supprimer)
+  - Interface: Dialogue de création avec palette de couleurs
+  - Interface: Aperçu en temps réel
 - ✅ **Menu actions sur les cartes** - Modifier, Archiver, Supprimer
 - ✅ **Archivage** - Bouton "Afficher/Masquer les archivées"
-- ✅ **Édition d'opportunité** - Dialogue de modification
-- ✅ **Scroll horizontal** - Amélioration du swipe sur mobile
 
-### Data Management P1
+### Data Management P1 ✅ IMPLEMENTED (2025-01-08)
 - ✅ **Onglet Données** dans Paramètres
-- ✅ **Statistiques des collections** (contacts, opportunities, quotes, invoices, tasks)
-- ✅ **Suppression par collection** (Leads, Projets, Factures)
+- ✅ **Statistiques des collections**
+- ✅ **Suppression par collection**
 - ✅ **Suppression globale** avec double confirmation
 
-### Previous Changes (2025-01-08)
-- Payment tracking on invoices
-- Quote to Invoice conversion
-- Contact history view
-- Unified Facturation module
-- Google Analytics 4 integration
-- Brevo email integration (pending activation)
+### Budget Module Phase 1 ✅ VERIFIED
+- ✅ Toutes les API fonctionnelles (22/22 tests passés)
+- ✅ Interface utilisateur complète avec 4 onglets
 
 ## Backlog (Prioritized)
 
 ### P2 - Medium Priority
-- [ ] **Activer compte Brevo SMTP** : Contacter contact@brevo.com pour activer l'envoi d'emails transactionnels
-- [ ] **Audio player for portfolio**: Frontend player for uploaded audio files
-- [ ] **E2E test fix**: Contact form dropdown test (recurring issue)
+- [ ] **Module Budget Phase 2** - Règles d'auto-catégorisation avancées + graphiques additionnels
+- [ ] **Module Budget Phase 3** - Budget prévisionnel (Prévu vs Réel)
+- [ ] **Module Budget Phase 4** - Vue de cashflow prévisionnel
+- [ ] **Activer compte Brevo SMTP** - En attente activation par utilisateur
+- [ ] **Audio player for portfolio** - Lecteur audio sur page publique
 
 ### P3 - Low Priority
 - [ ] Enhanced reporting and analytics
 - [ ] Email templates management
 - [ ] Bulk operations on contacts
-- [ ] Cascade delete for orphaned references (quotes with deleted contacts)
+- [ ] E2E test fix for contact form dropdown (recurring issue)
 
 ## Known Issues
 
 ### Fixed in This Session
-- ✅ Dashboard showing zeros (fixed - uses real data)
-- ✅ Mobile responsive issues (fixed)
-- ✅ Tasks/Pipeline not displaying (fixed)
-- ✅ PDF download issues (fixed)
-- ✅ Login issues in production (fixed - password reset at startup)
+- ✅ Mobile responsive issues (verified)
+- ✅ Pipeline columns hardcoded (now dynamic)
 
 ### Still Pending
 - ⚠️ E2E test for contact form dropdown (Shadcn Select component)
-- ⚠️ Email functionality is mocked (needs Resend integration)
+- ⚠️ Email functionality via Brevo (needs account activation by user)
 
 ## API Credentials
 - **Admin Login**: admin@alphagency.fr / superpassword
@@ -150,7 +162,7 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 ```
 /app/
 ├── backend/
-│   ├── server.py          # Main API server
+│   ├── server.py          # Main API server (Pipeline columns routes added)
 │   └── utils/
 │       ├── backup_manager.py
 │       └── backup_scheduler.py
@@ -158,14 +170,16 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 │   ├── src/
 │   │   ├── components/    # Reusable components
 │   │   ├── pages/
-│   │   │   ├── dashboard/ # Admin pages
+│   │   │   ├── dashboard/ # Admin pages (PipelinePage updated)
 │   │   │   └── auth/      # Auth pages
 │   │   └── lib/
-│   │       └── api.js     # API client
+│   │       └── api.js     # API client (pipelineColumnsAPI added)
 ├── tests/
-│   └── test_invoice_payments.py
+│   └── test_pipeline_budget.py  # NEW: Pipeline & Budget tests (22 tests)
 └── test_reports/
-    └── iteration_6.json   # Latest test report
+    ├── iteration_6.json
+    ├── iteration_7.json
+    └── iteration_8.json   # Latest test report (all passed)
 ```
 
 ## Database Collections
@@ -181,3 +195,7 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - settings
 - services
 - counters
+- **pipeline_columns** (NEW - pour les colonnes personnalisables)
+- **bank_transactions** (Budget module)
+- **budget_categories** (Budget module)
+- **auto_category_rules** (Budget module - règles d'auto-catégorisation)
