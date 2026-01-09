@@ -336,7 +336,7 @@ const AIAssistantPage = () => {
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                           <Clock className="w-3 h-3 text-[#999999]" />
-                          <span className="text-xs text-[#666666]">{formatDate(conv.updated_at)}</span>
+                          <span className="text-xs text-[#666666]">{formatDate(conv.updated_at || conv.created_at)}</span>
                           {conv.messages?.length > 0 && (
                             <span className="text-xs text-[#999999]">
                               • {conv.messages.length} msg
