@@ -165,3 +165,4 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - `/app/test_reports/iteration_11.json` - Phase 1 corrections (95% success)
 - `/app/test_reports/pytest/pytest_news_social.xml` - Tests API News & Social (15/19 pass)
 - `/app/test_reports/iteration_12.json` - Refonte Social Media Agorapulse + Pipeline scroll (100% success)
+- `/app/test_reports/iteration_13.json` - Preview FB/IG réaliste + Writing Assistant supprimé (100% success)
