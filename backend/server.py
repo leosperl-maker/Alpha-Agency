@@ -3172,7 +3172,7 @@ async def get_ai_status(current_user: dict = Depends(get_current_user)):
     
     # Get usage for today
     usage = await db.ai_usage.find_one({
-        "user_id": current_user["id"],
+        "user_id": current_user["user_id"],
         "date": today
     })
     
@@ -3200,7 +3200,7 @@ async def ai_chat(request: AIChatRequest, current_user: dict = Depends(get_curre
     # Check daily limit
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     usage = await db.ai_usage.find_one({
-        "user_id": current_user["id"],
+        "user_id": current_user["user_id"],
         "date": today
     })
     
@@ -3255,7 +3255,7 @@ async def ai_chat(request: AIChatRequest, current_user: dict = Depends(get_curre
         
         # Update usage counter
         await db.ai_usage.update_one(
-            {"user_id": current_user["id"], "date": today},
+            {"user_id": current_user["user_id"], "date": today},
             {"$inc": {"calls": 1}, "$set": {"updated_at": datetime.now(timezone.utc).isoformat()}},
             upsert=True
         )
@@ -3263,7 +3263,7 @@ async def ai_chat(request: AIChatRequest, current_user: dict = Depends(get_curre
         # Log the conversation
         await db.ai_conversations.insert_one({
             "id": str(uuid.uuid4()),
-            "user_id": current_user["id"],
+            "user_id": current_user["user_id"],
             "user_message": request.messages[-1].content if request.messages else "",
             "assistant_message": assistant_message,
             "context_type": request.context_type,
@@ -3439,7 +3439,7 @@ Tu es là pour aider l'équipe d'Alpha Agency à être plus efficace dans leur g
 async def get_ai_history(limit: int = 20, current_user: dict = Depends(get_current_user)):
     """Get AI conversation history for current user"""
     conversations = await db.ai_conversations.find(
-        {"user_id": current_user["id"]},
+        {"user_id": current_user["user_id"]},
         {"_id": 0}
     ).sort("created_at", -1).limit(limit).to_list(limit)
     
