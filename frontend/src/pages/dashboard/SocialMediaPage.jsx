@@ -622,64 +622,80 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
           </div>
 
           {/* Right Column - Preview */}
-          <div className="w-80 border-l border-[#E5E5E5] bg-[#FAFAFA] p-4 overflow-y-auto">
-            <h3 className="text-base font-semibold text-[#1A1A1A] mb-4">Aperçu</h3>
-            
-            {selectedAccounts.length === 0 || !content ? (
-              <div className="bg-white rounded-lg p-6 text-center">
-                <p className="text-[#666666] text-sm">
-                  Salut ! Sélectionnez un profil et ajoutez du contenu dans le panel de gauche pour commencer.
-                </p>
-                <div className="mt-4 bg-[#F8F8F8] rounded-lg p-4">
-                  <div className="w-10 h-10 rounded-full bg-[#E5E5E5] mx-auto mb-3" />
-                  <div className="h-2 bg-[#E5E5E5] rounded w-24 mx-auto mb-2" />
-                  <div className="h-2 bg-[#E5E5E5] rounded w-32 mx-auto mb-2" />
-                  <div className="h-2 bg-[#E5E5E5] rounded w-20 mx-auto" />
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                {/* Preview Header */}
-                <div className="p-3 border-b border-[#E5E5E5]">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      getPreviewPlatform() === "facebook" ? "bg-[#1877F2]" : "bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737]"
-                    }`}>
-                      {getPreviewPlatform() === "facebook" ? (
-                        <Facebook className="w-4 h-4 text-white" />
+          <div className="w-96 border-l border-[#E5E5E5] bg-[#F0F2F5] p-4 overflow-y-auto">
+            {/* Preview Header with Selector */}
+            <div className="flex items-center justify-between mb-4">
+              <Select value={previewPlatform} onValueChange={setPreviewPlatform}>
+                <SelectTrigger className="w-[200px] bg-white border-[#E5E5E5]">
+                  <SelectValue>
+                    <div className="flex items-center gap-2">
+                      {previewPlatform === "facebook" ? (
+                        <>
+                          <Facebook className="w-4 h-4 text-[#1877F2]" />
+                          <span>Facebook Feed preview</span>
+                        </>
                       ) : (
-                        <Instagram className="w-4 h-4 text-white" />
+                        <>
+                          <Instagram className="w-4 h-4 text-[#E4405F]" />
+                          <span>Instagram feed preview</span>
+                        </>
                       )}
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#1A1A1A]">Alpha Agency</p>
-                      <p className="text-xs text-[#666666]">
-                        {scheduledAt ? new Date(scheduledAt).toLocaleDateString('fr-FR') : "Maintenant"}
-                      </p>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="facebook">
+                    <div className="flex items-center gap-2">
+                      <Facebook className="w-4 h-4 text-[#1877F2]" />
+                      <span>Facebook Feed preview</span>
                     </div>
-                  </div>
-                </div>
-                
-                {/* Preview Content */}
-                <div className="p-3">
-                  <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap">{content}</p>
-                </div>
-                
-                {/* Preview Media */}
-                {mediaUrls.length > 0 && (
-                  <div className="aspect-square bg-[#F8F8F8]">
-                    <img src={mediaUrls[0]} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
-                )}
-                
-                {/* Preview Actions */}
-                <div className="p-3 border-t border-[#E5E5E5] flex items-center gap-4 text-[#666666]">
-                  <span className="text-xs">👍 J'aime</span>
-                  <span className="text-xs">💬 Commenter</span>
-                  <span className="text-xs">↗️ Partager</span>
-                </div>
+                  </SelectItem>
+                  <SelectItem value="instagram">
+                    <div className="flex items-center gap-2">
+                      <Instagram className="w-4 h-4 text-[#E4405F]" />
+                      <span>Instagram feed preview</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              
+              {/* Device Toggle */}
+              <div className="flex items-center gap-1 bg-white rounded-lg border border-[#E5E5E5] p-0.5">
+                <button
+                  onClick={() => setPreviewDevice("desktop")}
+                  className={`p-1.5 rounded ${previewDevice === "desktop" ? "bg-[#F0F2F5]" : ""}`}
+                >
+                  <Monitor className={`w-4 h-4 ${previewDevice === "desktop" ? "text-[#FF6B35]" : "text-[#666666]"}`} />
+                </button>
+                <button
+                  onClick={() => setPreviewDevice("mobile")}
+                  className={`p-1.5 rounded ${previewDevice === "mobile" ? "bg-[#F0F2F5]" : ""}`}
+                >
+                  <Smartphone className={`w-4 h-4 ${previewDevice === "mobile" ? "text-[#FF6B35]" : "text-[#666666]"}`} />
+                </button>
               </div>
-            )}
+            </div>
+            
+            {/* Preview Content */}
+            <div className={previewDevice === "mobile" ? "max-w-[320px] mx-auto" : ""}>
+              {selectedAccounts.length === 0 && !content ? (
+                <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                  <p className="text-[#666666] text-sm mb-4">
+                    Sélectionnez un profil et ajoutez du contenu pour voir l'aperçu.
+                  </p>
+                  <div className="bg-[#F8F8F8] rounded-lg p-6">
+                    <div className="w-10 h-10 rounded-full bg-[#E5E5E5] mx-auto mb-3" />
+                    <div className="h-2 bg-[#E5E5E5] rounded w-24 mx-auto mb-2" />
+                    <div className="h-16 bg-[#E5E5E5] rounded mx-auto mb-2" />
+                    <div className="h-2 bg-[#E5E5E5] rounded w-32 mx-auto" />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {previewPlatform === "facebook" ? <FacebookPreview /> : <InstagramPreview />}
+                </>
+              )}
+            </div>
           </div>
         </div>
 
