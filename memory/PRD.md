@@ -166,14 +166,16 @@ Modèle appliqué : Pages "Vue d'ensemble" et "Demandes" utilisées comme réfé
 
 ## Backlog / Upcoming Tasks
 
-### P0 - Refonte Réalisations (Portfolio) - IN PROGRESS
-- [ ] **Page de gestion admin** avec éditeur de contenu riche (comme Blog)
-- [ ] **Page publique** affichage style "cas client premium"
-- [ ] Gestion avancée des tags (créer/renommer/supprimer)
+### P0 - Refonte Réalisations (Portfolio) ✅ COMPLETE (2026-01-09)
+- [x] **Page de gestion admin** avec éditeur de contenu riche (comme Blog) ✅
+- [x] **Page publique** avec support du contenu riche (content_blocks) ✅
+- [x] **Composant RichContentRenderer** créé et réutilisable ✅
 
-### P1 - Affichage public Blog & Portfolio
-- [ ] Composants React pour afficher le contenu riche sur site vitrine
-- [ ] Design "cas client premium" pour les réalisations
+### P1 - Affichage public Blog & Portfolio ✅ COMPLETE (2026-01-09)
+- [x] Composant `RichContentRenderer.jsx` pour afficher le contenu riche ✅
+- [x] Page Portfolio publique mise à jour pour supporter `content_blocks` ✅
+- [x] Page Blog publique mise à jour pour supporter `content_blocks` ✅
+- [x] Support des blocs : texte, titre, image, galerie, audio, vidéo, citation ✅
 
 ### P1 - Amélioration Fiche Contact (style Pipedrive) ✅ COMPLETE (2026-01-09)
 - [x] Timeline d'interactions ✅
