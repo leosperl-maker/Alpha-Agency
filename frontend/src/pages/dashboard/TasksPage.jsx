@@ -884,6 +884,7 @@ const TasksPage = () => {
             </div>
           </SortableContext>
         </div>
+        </div>
         
         {/* Drag Overlay */}
         <DragOverlay>
