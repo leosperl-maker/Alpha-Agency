@@ -431,4 +431,43 @@ export const metaAPI = {
   getPublishedPosts: (platform, limit = 50) => api.get('/meta/published-posts', { params: { platform, limit } }),
 };
 
+// Campaigns API (Brevo - Email & SMS Marketing)
+export const campaignsAPI = {
+  // Email Campaigns
+  createEmailCampaign: (data) => api.post('/campaigns/email/create', data),
+  getEmailCampaigns: (params) => api.get('/campaigns/email/list', { params }),
+  getEmailCampaign: (id) => api.get(`/campaigns/email/${id}`),
+  sendEmailCampaignNow: (id) => api.post(`/campaigns/email/${id}/send-now`),
+  scheduleEmailCampaign: (id, scheduledAt) => api.post(`/campaigns/email/${id}/schedule`, null, { params: { scheduled_at: scheduledAt } }),
+  sendTestEmail: (id, emails) => api.post(`/campaigns/email/${id}/test`, emails),
+  deleteEmailCampaign: (id) => api.delete(`/campaigns/email/${id}`),
+  
+  // SMS Campaigns
+  createSMSCampaign: (data) => api.post('/campaigns/sms/create', data),
+  getSMSCampaigns: (params) => api.get('/campaigns/sms/list', { params }),
+  getSMSCampaign: (id) => api.get(`/campaigns/sms/${id}`),
+  sendSMSCampaignNow: (id) => api.post(`/campaigns/sms/${id}/send-now`),
+  deleteSMSCampaign: (id) => api.delete(`/campaigns/sms/${id}`),
+  
+  // Contacts
+  createContact: (data, listIds) => api.post('/campaigns/contacts/create', data, { params: { list_ids: listIds } }),
+  updateContact: (email, data) => api.put(`/campaigns/contacts/${email}`, data),
+  getContacts: (params) => api.get('/campaigns/contacts/list', { params }),
+  getContact: (identifier) => api.get(`/campaigns/contacts/${identifier}`),
+  deleteContact: (identifier) => api.delete(`/campaigns/contacts/${identifier}`),
+  importContacts: (data) => api.post('/campaigns/contacts/import', data),
+  
+  // Contact Lists
+  getLists: (params) => api.get('/campaigns/lists', { params }),
+  createList: (data) => api.post('/campaigns/lists/create', data),
+  getList: (id) => api.get(`/campaigns/lists/${id}`),
+  deleteList: (id) => api.delete(`/campaigns/lists/${id}`),
+  addContactsToList: (listId, emails) => api.post(`/campaigns/lists/${listId}/contacts/add`, emails),
+  removeContactsFromList: (listId, emails) => api.post(`/campaigns/lists/${listId}/contacts/remove`, emails),
+  
+  // Statistics
+  getEmailStatistics: (params) => api.get('/campaigns/statistics/email', { params }),
+  getSMSStatistics: (params) => api.get('/campaigns/statistics/sms', { params }),
+};
+
 export default api;
