@@ -3238,7 +3238,7 @@ async def ai_chat(request: AIChatRequest, current_user: dict = Depends(get_curre
                 "Content-Type": "application/json"
             },
             json={
-                "model": "llama-3.1-sonar-small-128k-online",
+                "model": "sonar",
                 "messages": perplexity_messages,
                 "temperature": 0.7,
                 "max_tokens": 1024
