@@ -79,6 +79,7 @@ const COMPANY_INFO = {
 };
 
 const InvoicesPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [invoices, setInvoices] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [savedServices, setSavedServices] = useState([]);
@@ -113,6 +114,22 @@ const InvoicesPage = () => {
     conditions: "Paiement par virement bancaire ou chèque à l'ordre de Alpha Agency.\nEn cas de retard de paiement, des pénalités de 3 fois le taux d'intérêt légal seront appliquées.",
     bank_details: "IBAN: FR76 XXXX XXXX XXXX XXXX XXXX XXX\nBIC: XXXXXXXX\nBanque: Crédit Agricole Guadeloupe"
   });
+
+  // Handle URL parameters for opening dialogs
+  useEffect(() => {
+    const action = searchParams.get('action');
+    const type = searchParams.get('type');
+    
+    if (action === 'new') {
+      setDocumentType(type === 'devis' ? 'devis' : 'facture');
+      setSheetOpen(true);
+      // Clear URL params after opening
+      setSearchParams({});
+    } else if (action === 'services') {
+      setServicesDialogOpen(true);
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
   const statusConfig = {
     brouillon: { label: "Brouillon", color: "bg-gray-100 text-gray-700", icon: FileText },
