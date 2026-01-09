@@ -337,7 +337,14 @@ export const paymentsAPI = {
 export const aiAPI = {
   getStatus: () => api.get('/ai/status'),
   chat: (data) => api.post('/ai/chat', data),
+  chatWithConversation: (data) => api.post('/ai/chat/conversation', data),
   getHistory: (limit = 20) => api.get('/ai/history', { params: { limit } }),
+  // Conversations
+  getConversations: (limit = 50) => api.get('/ai/conversations', { params: { limit } }),
+  createConversation: (data) => api.post('/ai/conversations', data),
+  getConversation: (id) => api.get(`/ai/conversations/${id}`),
+  updateConversation: (id, title) => api.put(`/ai/conversations/${id}`, null, { params: { title } }),
+  deleteConversation: (id) => api.delete(`/ai/conversations/${id}`),
 };
 
 // News/Actualités API
