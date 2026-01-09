@@ -3304,11 +3304,47 @@ class AIChatWithConversation(BaseModel):
 
 @api_router.get("/ai/conversations", response_model=List[dict])
 async def get_ai_conversations(limit: int = 50, current_user: dict = Depends(get_current_user)):
-    """Get all conversations for current user"""
-    conversations = await db.ai_conversations.find(
+    """Get all conversations for current user - combines new format and legacy format"""
+    
+    # Get new format conversations
+    new_conversations = await db.ai_conversations.find(
         {"user_id": current_user["user_id"]},
         {"_id": 0}
     ).sort("updated_at", -1).limit(limit).to_list(limit)
+    
+    # Also get legacy ai_history entries and convert them
+    legacy_entries = await db.ai_history.find(
+        {"user_id": current_user["user_id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # Convert legacy entries to conversation format
+    legacy_conversations = []
+    for entry in legacy_entries:
+        # Use user_message as title (truncated)
+        title = entry.get("user_message", "Conversation")[:50]
+        if len(entry.get("user_message", "")) > 50:
+            title += "..."
+        
+        legacy_conversations.append({
+            "id": entry.get("id"),
+            "user_id": entry.get("user_id"),
+            "title": title,
+            "context_type": entry.get("context_type"),
+            "messages": [
+                {"role": "user", "content": entry.get("user_message", ""), "timestamp": entry.get("created_at")},
+                {"role": "assistant", "content": entry.get("assistant_message", ""), "timestamp": entry.get("created_at")}
+            ],
+            "created_at": entry.get("created_at"),
+            "updated_at": entry.get("created_at"),
+            "_legacy": True
+        })
+    
+    # Combine and sort by date
+    all_conversations = new_conversations + legacy_conversations
+    all_conversations.sort(key=lambda x: x.get("updated_at") or x.get("created_at") or "", reverse=True)
+    
+    return all_conversations[:limit]
     
     return conversations
 
