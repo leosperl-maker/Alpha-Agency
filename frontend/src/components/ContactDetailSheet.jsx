@@ -8,6 +8,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
+import { ScrollArea } from "./ui/scroll-area";
 import { 
   Mail, 
   Phone, 
@@ -24,7 +26,20 @@ import {
   Briefcase,
   StickyNote,
   Clock,
-  AlertCircle
+  AlertCircle,
+  MessageSquare,
+  ChevronRight,
+  Pencil,
+  Plus,
+  History,
+  DollarSign,
+  Target,
+  Activity,
+  Send,
+  Eye,
+  Download,
+  MoreVertical,
+  Star
 } from "lucide-react";
 import { contactsAPI, quotesAPI, invoicesAPI } from "../lib/api";
 import { toast } from "sonner";
@@ -35,6 +50,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
   const [contact, setContact] = useState(null);
   const [history, setHistory] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     if (open && contactId) {
@@ -62,8 +78,19 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString('fr-FR', {
       day: '2-digit',
-      month: '2-digit',
+      month: 'short',
       year: 'numeric'
+    });
+  };
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -72,19 +99,21 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
   };
 
   const statusColors = {
-    nouveau: "bg-blue-100 text-blue-700",
-    contacté: "bg-purple-100 text-purple-700",
-    qualifié: "bg-yellow-100 text-yellow-700",
-    proposition: "bg-orange-100 text-orange-700",
-    négociation: "bg-pink-100 text-pink-700",
-    gagné: "bg-green-100 text-green-700",
-    perdu: "bg-red-100 text-red-700"
+    nouveau: { bg: "bg-blue-100", text: "text-blue-700", dot: "bg-blue-500" },
+    contacté: { bg: "bg-purple-100", text: "text-purple-700", dot: "bg-purple-500" },
+    qualifié: { bg: "bg-yellow-100", text: "text-yellow-700", dot: "bg-yellow-500" },
+    proposition: { bg: "bg-orange-100", text: "text-orange-700", dot: "bg-orange-500" },
+    négociation: { bg: "bg-pink-100", text: "text-pink-700", dot: "bg-pink-500" },
+    en_discussion: { bg: "bg-indigo-100", text: "text-indigo-700", dot: "bg-indigo-500" },
+    client: { bg: "bg-green-100", text: "text-green-700", dot: "bg-green-500" },
+    gagné: { bg: "bg-green-100", text: "text-green-700", dot: "bg-green-500" },
+    perdu: { bg: "bg-red-100", text: "text-red-700", dot: "bg-red-500" }
   };
 
   const scoreColors = {
-    froid: "bg-blue-100 text-blue-700",
-    tiède: "bg-yellow-100 text-yellow-700",
-    chaud: "bg-red-100 text-red-700"
+    froid: { bg: "bg-blue-100", text: "text-blue-700", icon: "❄️" },
+    tiède: { bg: "bg-yellow-100", text: "text-yellow-700", icon: "🌤️" },
+    chaud: { bg: "bg-red-100", text: "text-red-700", icon: "🔥" }
   };
 
   const quoteStatusColors = {
@@ -105,12 +134,6 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
     annulee: "bg-gray-100 text-gray-500"
   };
 
-  const taskPriorityColors = {
-    low: "bg-gray-100 text-gray-700",
-    medium: "bg-yellow-100 text-yellow-700",
-    high: "bg-red-100 text-red-700"
-  };
-
   const handleDownloadQuotePDF = async (quote) => {
     try {
       await quotesAPI.downloadPDF(quote.id, quote.quote_number);
@@ -129,330 +152,468 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
     }
   };
 
+  // Generate timeline items from history
+  const getTimelineItems = () => {
+    if (!history) return [];
+    
+    const items = [];
+    
+    // Add quotes to timeline
+    history.quotes?.forEach(quote => {
+      items.push({
+        type: 'quote',
+        date: quote.created_at,
+        title: `Devis ${quote.quote_number}`,
+        subtitle: formatCurrency(quote.total_ttc),
+        status: quote.status,
+        icon: FileText,
+        color: 'blue',
+        data: quote
+      });
+    });
+    
+    // Add invoices to timeline
+    history.invoices?.forEach(invoice => {
+      items.push({
+        type: 'invoice',
+        date: invoice.created_at,
+        title: `Facture ${invoice.invoice_number}`,
+        subtitle: formatCurrency(invoice.total_ttc),
+        status: invoice.status,
+        icon: Receipt,
+        color: 'purple',
+        data: invoice
+      });
+    });
+    
+    // Add tasks to timeline
+    history.tasks?.forEach(task => {
+      items.push({
+        type: 'task',
+        date: task.created_at,
+        title: task.title,
+        subtitle: task.status === 'done' ? 'Terminée' : 'En cours',
+        status: task.status,
+        icon: CheckSquare,
+        color: task.status === 'done' ? 'green' : 'yellow',
+        data: task
+      });
+    });
+    
+    // Add opportunities to timeline
+    history.opportunities?.forEach(opp => {
+      items.push({
+        type: 'opportunity',
+        date: opp.created_at,
+        title: opp.title,
+        subtitle: formatCurrency(opp.amount),
+        status: opp.stage,
+        icon: Target,
+        color: 'orange',
+        data: opp
+      });
+    });
+    
+    // Sort by date descending
+    return items.sort((a, b) => new Date(b.date) - new Date(a.date));
+  };
+
   if (!open) return null;
+
+  const statusConfig = statusColors[contact?.status] || statusColors.nouveau;
+  const scoreConfig = scoreColors[contact?.score] || scoreColors.froid;
+  const timeline = getTimelineItems();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-[600px] p-0 bg-white overflow-hidden">
+      <SheetContent 
+        side="right" 
+        className="w-full sm:max-w-[500px] md:max-w-[600px] p-0 bg-white overflow-hidden"
+      >
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#CE0202]"></div>
           </div>
         ) : contact ? (
           <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-[#CE0202] to-[#a00000] text-white p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold">
+            {/* Header - Pipedrive Style */}
+            <div className="relative bg-gradient-to-br from-[#CE0202] via-[#b00202] to-[#8a0000] text-white p-4 sm:p-6">
+              {/* Quick Actions */}
+              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex gap-1">
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="text-white/80 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
+                >
+                  <Star className="w-4 h-4" />
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="text-white/80 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
+                  onClick={() => navigate(`/admin/contacts?edit=${contact.id}`)}
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold flex-shrink-0">
                   {contact.first_name?.[0]}{contact.last_name?.[0]}
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold">{contact.first_name} {contact.last_name}</h2>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg sm:text-xl font-bold truncate">
+                    {contact.first_name} {contact.last_name}
+                  </h2>
                   {contact.company && (
-                    <p className="text-white/80 flex items-center gap-1 mt-1">
-                      <Building className="w-4 h-4" />
-                      {contact.company}
+                    <p className="text-white/80 flex items-center gap-1.5 mt-0.5 text-sm">
+                      <Building className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="truncate">{contact.company}</span>
                     </p>
                   )}
-                  <div className="flex gap-2 mt-2">
-                    <Badge className={statusColors[contact.status] || "bg-gray-100 text-gray-700"}>
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    <Badge className={`${statusConfig.bg} ${statusConfig.text} text-xs`}>
                       {contact.status}
                     </Badge>
-                    <Badge className={scoreColors[contact.score] || "bg-gray-100 text-gray-700"}>
-                      {contact.score}
+                    <Badge className={`${scoreConfig.bg} ${scoreConfig.text} text-xs`}>
+                      {scoreConfig.icon} {contact.score}
                     </Badge>
                   </div>
                 </div>
               </div>
+
+              {/* Quick Contact Actions - Mobile Friendly */}
+              <div className="flex gap-2 mt-4">
+                {contact.email && (
+                  <a 
+                    href={`mailto:${contact.email}`}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm"
+                  >
+                    <Mail className="w-4 h-4" />
+                    <span className="hidden sm:inline">Email</span>
+                  </a>
+                )}
+                {contact.phone && (
+                  <a 
+                    href={`tel:${contact.phone}`}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm"
+                  >
+                    <Phone className="w-4 h-4" />
+                    <span className="hidden sm:inline">Appeler</span>
+                  </a>
+                )}
+                <Button
+                  size="sm"
+                  className="flex-1 bg-white text-[#CE0202] hover:bg-white/90 text-sm"
+                  onClick={() => navigate(`/admin/factures?action=new&type=devis&contact=${contact.id}`)}
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  <span className="hidden sm:inline">Nouveau devis</span>
+                  <span className="sm:hidden">Devis</span>
+                </Button>
+              </div>
             </div>
 
-            {/* Contact Info */}
-            <div className="px-6 py-4 border-b border-[#E5E5E5] grid grid-cols-2 gap-4 bg-[#F8F8F8]">
-              {contact.email && (
-                <a href={`mailto:${contact.email}`} className="flex items-center gap-2 text-sm text-[#666666] hover:text-[#CE0202]">
-                  <Mail className="w-4 h-4" />
-                  {contact.email}
-                </a>
-              )}
-              {contact.phone && (
-                <a href={`tel:${contact.phone}`} className="flex items-center gap-2 text-sm text-[#666666] hover:text-[#CE0202]">
-                  <Phone className="w-4 h-4" />
-                  {contact.phone}
-                </a>
-              )}
-              {contact.city && (
-                <div className="flex items-center gap-2 text-sm text-[#666666]">
-                  <MapPin className="w-4 h-4" />
-                  {contact.city}
-                </div>
-              )}
-              {contact.poste && (
-                <div className="flex items-center gap-2 text-sm text-[#666666]">
-                  <Briefcase className="w-4 h-4" />
-                  {contact.poste}
-                </div>
-              )}
-            </div>
-
-            {/* Summary Cards */}
+            {/* Summary Stats */}
             {history?.summary && (
-              <div className="px-6 py-4 grid grid-cols-4 gap-3 border-b border-[#E5E5E5]">
-                <div className="text-center p-3 bg-blue-50 rounded-lg">
-                  <p className="text-2xl font-bold text-blue-600">{history.summary.total_quotes}</p>
-                  <p className="text-xs text-blue-600">Devis</p>
+              <div className="grid grid-cols-4 gap-2 p-3 sm:p-4 bg-[#F8F8F8] border-b border-[#E5E5E5]">
+                <div className="text-center">
+                  <p className="text-lg sm:text-xl font-bold text-[#1A1A1A]">{history.summary.quotes || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-[#666666]">Devis</p>
                 </div>
-                <div className="text-center p-3 bg-purple-50 rounded-lg">
-                  <p className="text-2xl font-bold text-purple-600">{history.summary.total_invoices}</p>
-                  <p className="text-xs text-purple-600">Factures</p>
+                <div className="text-center">
+                  <p className="text-lg sm:text-xl font-bold text-[#1A1A1A]">{history.summary.invoices || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-[#666666]">Factures</p>
                 </div>
-                <div className="text-center p-3 bg-green-50 rounded-lg">
-                  <p className="text-lg font-bold text-green-600">{formatCurrency(history.summary.total_paid)}</p>
-                  <p className="text-xs text-green-600">Payé</p>
+                <div className="text-center">
+                  <p className="text-lg sm:text-xl font-bold text-[#CE0202]">{formatCurrency(history.summary.total_revenue || 0).replace('€', '')}</p>
+                  <p className="text-[10px] sm:text-xs text-[#666666]">CA</p>
                 </div>
-                <div className="text-center p-3 bg-orange-50 rounded-lg">
-                  <p className="text-lg font-bold text-orange-600">{formatCurrency(history.summary.total_remaining)}</p>
-                  <p className="text-xs text-orange-600">Dû</p>
+                <div className="text-center">
+                  <p className="text-lg sm:text-xl font-bold text-[#1A1A1A]">{history.summary.tasks || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-[#666666]">Tâches</p>
                 </div>
               </div>
             )}
 
-            {/* Tabs for History */}
-            <div className="flex-1 overflow-hidden">
-              <Tabs defaultValue="quotes" className="h-full flex flex-col">
-                <TabsList className="px-6 py-2 bg-white border-b border-[#E5E5E5] justify-start gap-2">
-                  <TabsTrigger value="quotes" className="data-[state=active]:bg-[#CE0202]/10 data-[state=active]:text-[#CE0202]">
-                    <FileText className="w-4 h-4 mr-1" />
-                    Devis ({history?.quotes?.length || 0})
-                  </TabsTrigger>
-                  <TabsTrigger value="invoices" className="data-[state=active]:bg-[#CE0202]/10 data-[state=active]:text-[#CE0202]">
-                    <Receipt className="w-4 h-4 mr-1" />
-                    Factures ({history?.invoices?.length || 0})
-                  </TabsTrigger>
-                  <TabsTrigger value="tasks" className="data-[state=active]:bg-[#CE0202]/10 data-[state=active]:text-[#CE0202]">
-                    <CheckSquare className="w-4 h-4 mr-1" />
-                    Tâches ({history?.tasks?.length || 0})
-                  </TabsTrigger>
-                  <TabsTrigger value="info" className="data-[state=active]:bg-[#CE0202]/10 data-[state=active]:text-[#CE0202]">
-                    <StickyNote className="w-4 h-4 mr-1" />
-                    Notes
-                  </TabsTrigger>
-                </TabsList>
+            {/* Tabs - Pipedrive Style */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+              <TabsList className="grid grid-cols-4 mx-3 sm:mx-4 mt-3 bg-[#F8F8F8] h-9">
+                <TabsTrigger value="overview" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
+                  <User className="w-3.5 h-3.5 sm:mr-1" />
+                  <span className="hidden sm:inline">Profil</span>
+                </TabsTrigger>
+                <TabsTrigger value="timeline" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
+                  <History className="w-3.5 h-3.5 sm:mr-1" />
+                  <span className="hidden sm:inline">Activité</span>
+                </TabsTrigger>
+                <TabsTrigger value="deals" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
+                  <DollarSign className="w-3.5 h-3.5 sm:mr-1" />
+                  <span className="hidden sm:inline">Affaires</span>
+                </TabsTrigger>
+                <TabsTrigger value="docs" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
+                  <FileText className="w-3.5 h-3.5 sm:mr-1" />
+                  <span className="hidden sm:inline">Docs</span>
+                </TabsTrigger>
+              </TabsList>
 
-                {/* Quotes Tab */}
-                <TabsContent value="quotes" className="flex-1 overflow-y-auto p-4 space-y-3">
-                  {history?.quotes?.length === 0 ? (
-                    <div className="text-center py-8 text-[#666666]">
-                      <FileText className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                      <p>Aucun devis pour ce contact</p>
-                      <Button 
-                        variant="outline" 
-                        className="mt-4"
-                        onClick={() => { onOpenChange(false); navigate('/admin/devis'); }}
-                      >
-                        Créer un devis
-                      </Button>
-                    </div>
-                  ) : (
-                    history?.quotes?.map((quote) => (
-                      <div key={quote.id} className="p-4 bg-[#F8F8F8] rounded-lg hover:bg-[#F0F0F0] transition-colors">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <p className="font-mono font-medium text-[#1A1A1A]">{quote.quote_number}</p>
-                            <p className="text-sm text-[#666666] flex items-center gap-1 mt-1">
-                              <Calendar className="w-3 h-3" />
-                              {formatDate(quote.created_at)}
+              {/* Overview Tab */}
+              <TabsContent value="overview" className="flex-1 overflow-hidden mt-0 px-3 sm:px-4 pb-4">
+                <ScrollArea className="h-full">
+                  <div className="space-y-4 pt-3">
+                    {/* Contact Details Card */}
+                    <Card className="border-[#E5E5E5]">
+                      <CardContent className="p-3 sm:p-4 space-y-3">
+                        <h3 className="font-semibold text-sm text-[#1A1A1A] flex items-center gap-2">
+                          <User className="w-4 h-4 text-[#CE0202]" />
+                          Informations
+                        </h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {contact.email && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Mail className="w-4 h-4 text-[#666666] flex-shrink-0" />
+                              <span className="text-[#1A1A1A] truncate">{contact.email}</span>
+                            </div>
+                          )}
+                          {contact.phone && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className="w-4 h-4 text-[#666666] flex-shrink-0" />
+                              <span className="text-[#1A1A1A]">{contact.phone}</span>
+                            </div>
+                          )}
+                          {contact.city && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <MapPin className="w-4 h-4 text-[#666666] flex-shrink-0" />
+                              <span className="text-[#1A1A1A]">{contact.city}</span>
+                            </div>
+                          )}
+                          {contact.poste && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Briefcase className="w-4 h-4 text-[#666666] flex-shrink-0" />
+                              <span className="text-[#1A1A1A]">{contact.poste}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="w-4 h-4 text-[#666666] flex-shrink-0" />
+                            <span className="text-[#666666]">Créé le {formatDate(contact.created_at)}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Notes Card */}
+                    {contact.note && (
+                      <Card className="border-[#E5E5E5]">
+                        <CardContent className="p-3 sm:p-4">
+                          <h3 className="font-semibold text-sm text-[#1A1A1A] flex items-center gap-2 mb-2">
+                            <StickyNote className="w-4 h-4 text-[#CE0202]" />
+                            Notes
+                          </h3>
+                          <p className="text-sm text-[#666666] whitespace-pre-wrap">{contact.note}</p>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Project Type Card */}
+                    {contact.project_type && (
+                      <Card className="border-[#E5E5E5]">
+                        <CardContent className="p-3 sm:p-4">
+                          <h3 className="font-semibold text-sm text-[#1A1A1A] flex items-center gap-2 mb-2">
+                            <Target className="w-4 h-4 text-[#CE0202]" />
+                            Projet
+                          </h3>
+                          <Badge variant="outline">{contact.project_type}</Badge>
+                          {contact.budget && (
+                            <p className="text-sm text-[#666666] mt-2">
+                              Budget: <span className="font-semibold text-[#CE0202]">{contact.budget}</span>
                             </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-mono font-bold text-[#1A1A1A]">{formatCurrency(quote.total)}</p>
-                            <Badge className={`mt-1 ${quoteStatusColors[quote.status] || "bg-gray-100"}`}>
-                              {quote.status}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 mt-3">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleDownloadQuotePDF(quote)}
-                          >
-                            <ExternalLink className="w-3 h-3 mr-1" />
-                            PDF
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </TabsContent>
-
-                {/* Invoices Tab */}
-                <TabsContent value="invoices" className="flex-1 overflow-y-auto p-4 space-y-3">
-                  {history?.invoices?.length === 0 ? (
-                    <div className="text-center py-8 text-[#666666]">
-                      <Receipt className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                      <p>Aucune facture pour ce contact</p>
-                      <Button 
-                        variant="outline" 
-                        className="mt-4"
-                        onClick={() => { onOpenChange(false); navigate('/admin/factures'); }}
-                      >
-                        Créer une facture
-                      </Button>
-                    </div>
-                  ) : (
-                    history?.invoices?.map((invoice) => (
-                      <div key={invoice.id} className="p-4 bg-[#F8F8F8] rounded-lg hover:bg-[#F0F0F0] transition-colors">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <p className="font-mono font-medium text-[#1A1A1A]">{invoice.invoice_number}</p>
-                            <p className="text-sm text-[#666666] flex items-center gap-1 mt-1">
-                              <Calendar className="w-3 h-3" />
-                              {formatDate(invoice.created_at)}
-                            </p>
-                            {invoice.due_date && (
-                              <p className="text-xs text-[#666666] mt-1">
-                                Échéance: {formatDate(invoice.due_date)}
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <p className="font-mono font-bold text-[#1A1A1A]">{formatCurrency(invoice.total)}</p>
-                            {invoice.total_paid > 0 && (
-                              <p className="text-xs text-green-600 font-mono">
-                                Payé: {formatCurrency(invoice.total_paid)}
-                              </p>
-                            )}
-                            <Badge className={`mt-1 ${invoiceStatusColors[invoice.status] || "bg-gray-100"}`}>
-                              {invoice.status === "payée" || invoice.status === "payee" ? "Payée" : 
-                               invoice.status === "partiellement_payée" ? "Partiel" : 
-                               invoice.status}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 mt-3">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleDownloadInvoicePDF(invoice)}
-                          >
-                            <ExternalLink className="w-3 h-3 mr-1" />
-                            PDF
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </TabsContent>
-
-                {/* Tasks Tab */}
-                <TabsContent value="tasks" className="flex-1 overflow-y-auto p-4 space-y-3">
-                  {history?.tasks?.length === 0 ? (
-                    <div className="text-center py-8 text-[#666666]">
-                      <CheckSquare className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                      <p>Aucune tâche pour ce contact</p>
-                      <Button 
-                        variant="outline" 
-                        className="mt-4"
-                        onClick={() => { onOpenChange(false); navigate('/admin/taches'); }}
-                      >
-                        Créer une tâche
-                      </Button>
-                    </div>
-                  ) : (
-                    history?.tasks?.map((task) => (
-                      <div key={task.id} className="p-4 bg-[#F8F8F8] rounded-lg hover:bg-[#F0F0F0] transition-colors">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <p className="font-medium text-[#1A1A1A]">{task.title}</p>
-                            {task.description && (
-                              <p className="text-sm text-[#666666] mt-1 line-clamp-2">{task.description}</p>
-                            )}
-                            {task.due_date && (
-                              <p className="text-xs text-[#666666] mt-2 flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                Échéance: {formatDate(task.due_date)}
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-right ml-3">
-                            <Badge className={taskPriorityColors[task.priority] || "bg-gray-100"}>
-                              {task.priority === 'high' ? 'Haute' : task.priority === 'medium' ? 'Moyenne' : 'Basse'}
-                            </Badge>
-                            <Badge className={`mt-1 ${task.status === 'done' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                              {task.status === 'done' ? 'Terminée' : task.status === 'in_progress' ? 'En cours' : 'À faire'}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </TabsContent>
-
-                {/* Info/Notes Tab */}
-                <TabsContent value="info" className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {contact.note && (
-                    <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                      <p className="text-sm font-medium text-yellow-800 mb-2 flex items-center gap-2">
-                        <StickyNote className="w-4 h-4" />
-                        Notes
-                      </p>
-                      <p className="text-sm text-yellow-700 whitespace-pre-wrap">{contact.note}</p>
-                    </div>
-                  )}
-                  
-                  {contact.infos_sup && (
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-sm font-medium text-blue-800 mb-2 flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4" />
-                        Informations supplémentaires
-                      </p>
-                      <p className="text-sm text-blue-700 whitespace-pre-wrap">{contact.infos_sup}</p>
-                    </div>
-                  )}
-
-                  {contact.budget && (
-                    <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                      <p className="text-sm font-medium text-green-800 mb-2 flex items-center gap-2">
-                        <Euro className="w-4 h-4" />
-                        Budget
-                      </p>
-                      <p className="text-sm text-green-700">{contact.budget}</p>
-                    </div>
-                  )}
-
-                  {contact.project_type && (
-                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
-                      <p className="text-sm font-medium text-purple-800 mb-2 flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4" />
-                        Type de projet
-                      </p>
-                      <p className="text-sm text-purple-700">{contact.project_type}</p>
-                    </div>
-                  )}
-
-                  {!contact.note && !contact.infos_sup && !contact.budget && !contact.project_type && (
-                    <div className="text-center py-8 text-[#666666]">
-                      <StickyNote className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                      <p>Aucune note ou information supplémentaire</p>
-                    </div>
-                  )}
-
-                  <div className="p-4 bg-[#F8F8F8] rounded-lg">
-                    <p className="text-xs text-[#666666]">
-                      Contact créé le {formatDate(contact.created_at)}
-                      {contact.updated_at && ` • Dernière mise à jour: ${formatDate(contact.updated_at)}`}
-                    </p>
-                    {contact.source && (
-                      <p className="text-xs text-[#666666] mt-1">Source: {contact.source}</p>
+                          )}
+                        </CardContent>
+                      </Card>
                     )}
                   </div>
-                </TabsContent>
-              </Tabs>
-            </div>
+                </ScrollArea>
+              </TabsContent>
+
+              {/* Timeline Tab - Pipedrive Style */}
+              <TabsContent value="timeline" className="flex-1 overflow-hidden mt-0 px-3 sm:px-4 pb-4">
+                <ScrollArea className="h-full">
+                  <div className="pt-3">
+                    {timeline.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Activity className="w-10 h-10 mx-auto text-[#E5E5E5] mb-3" />
+                        <p className="text-[#666666] text-sm">Aucune activité</p>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        {/* Timeline line */}
+                        <div className="absolute left-[19px] top-2 bottom-2 w-0.5 bg-[#E5E5E5]" />
+                        
+                        <div className="space-y-4">
+                          {timeline.map((item, idx) => {
+                            const IconComponent = item.icon;
+                            return (
+                              <div key={idx} className="flex gap-3 relative">
+                                {/* Icon dot */}
+                                <div className={`w-10 h-10 rounded-full bg-${item.color}-100 flex items-center justify-center flex-shrink-0 z-10 border-2 border-white shadow-sm`}>
+                                  <IconComponent className={`w-4 h-4 text-${item.color}-600`} />
+                                </div>
+                                
+                                {/* Content */}
+                                <div className="flex-1 min-w-0 pb-2">
+                                  <div className="bg-white rounded-lg border border-[#E5E5E5] p-3 hover:shadow-sm transition-shadow">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="min-w-0">
+                                        <p className="font-medium text-sm text-[#1A1A1A] truncate">{item.title}</p>
+                                        <p className="text-xs text-[#666666]">{item.subtitle}</p>
+                                      </div>
+                                      {item.status && (
+                                        <Badge className="text-[10px] flex-shrink-0">
+                                          {item.status}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <p className="text-[10px] text-[#999999] mt-2">
+                                      {formatDateTime(item.date)}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+
+              {/* Deals Tab */}
+              <TabsContent value="deals" className="flex-1 overflow-hidden mt-0 px-3 sm:px-4 pb-4">
+                <ScrollArea className="h-full">
+                  <div className="space-y-4 pt-3">
+                    {/* Opportunities */}
+                    <div>
+                      <h3 className="font-semibold text-sm text-[#1A1A1A] flex items-center gap-2 mb-3">
+                        <Target className="w-4 h-4 text-[#CE0202]" />
+                        Opportunités
+                      </h3>
+                      {history?.opportunities?.length > 0 ? (
+                        <div className="space-y-2">
+                          {history.opportunities.map((opp) => (
+                            <Card key={opp.id} className="border-[#E5E5E5] cursor-pointer hover:border-[#CE0202]/30 transition-colors">
+                              <CardContent className="p-3 flex items-center justify-between">
+                                <div className="min-w-0">
+                                  <p className="font-medium text-sm text-[#1A1A1A] truncate">{opp.title}</p>
+                                  <p className="text-xs text-[#666666]">{opp.stage}</p>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                  <p className="font-bold text-[#CE0202]">{formatCurrency(opp.amount)}</p>
+                                  <p className="text-[10px] text-[#666666]">{opp.probability}%</p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-[#666666] text-center py-4">Aucune opportunité</p>
+                      )}
+                    </div>
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+
+              {/* Documents Tab */}
+              <TabsContent value="docs" className="flex-1 overflow-hidden mt-0 px-3 sm:px-4 pb-4">
+                <ScrollArea className="h-full">
+                  <div className="space-y-4 pt-3">
+                    {/* Quotes */}
+                    <div>
+                      <h3 className="font-semibold text-sm text-[#1A1A1A] flex items-center gap-2 mb-3">
+                        <FileText className="w-4 h-4 text-blue-600" />
+                        Devis ({history?.quotes?.length || 0})
+                      </h3>
+                      {history?.quotes?.length > 0 ? (
+                        <div className="space-y-2">
+                          {history.quotes.map((quote) => (
+                            <Card key={quote.id} className="border-[#E5E5E5]">
+                              <CardContent className="p-3">
+                                <div className="flex items-center justify-between">
+                                  <div className="min-w-0">
+                                    <p className="font-medium text-sm text-[#1A1A1A]">{quote.quote_number}</p>
+                                    <p className="text-xs text-[#666666]">{formatDate(quote.created_at)}</p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge className={quoteStatusColors[quote.status] || "bg-gray-100 text-gray-700"}>
+                                      {quote.status}
+                                    </Badge>
+                                    <span className="font-bold text-sm text-[#1A1A1A]">{formatCurrency(quote.total_ttc)}</span>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-8 w-8 p-0"
+                                      onClick={() => handleDownloadQuotePDF(quote)}
+                                    >
+                                      <Download className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-[#666666] text-center py-4">Aucun devis</p>
+                      )}
+                    </div>
+
+                    {/* Invoices */}
+                    <div>
+                      <h3 className="font-semibold text-sm text-[#1A1A1A] flex items-center gap-2 mb-3">
+                        <Receipt className="w-4 h-4 text-purple-600" />
+                        Factures ({history?.invoices?.length || 0})
+                      </h3>
+                      {history?.invoices?.length > 0 ? (
+                        <div className="space-y-2">
+                          {history.invoices.map((invoice) => (
+                            <Card key={invoice.id} className="border-[#E5E5E5]">
+                              <CardContent className="p-3">
+                                <div className="flex items-center justify-between">
+                                  <div className="min-w-0">
+                                    <p className="font-medium text-sm text-[#1A1A1A]">{invoice.invoice_number}</p>
+                                    <p className="text-xs text-[#666666]">{formatDate(invoice.created_at)}</p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge className={invoiceStatusColors[invoice.status] || "bg-gray-100 text-gray-700"}>
+                                      {invoice.status}
+                                    </Badge>
+                                    <span className="font-bold text-sm text-[#1A1A1A]">{formatCurrency(invoice.total_ttc)}</span>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-8 w-8 p-0"
+                                      onClick={() => handleDownloadInvoicePDF(invoice)}
+                                    >
+                                      <Download className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-[#666666] text-center py-4">Aucune facture</p>
+                      )}
+                    </div>
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-full text-[#666666]">
-            Contact non trouvé
+          <div className="flex items-center justify-center h-full">
+            <p className="text-[#666666]">Contact non trouvé</p>
           </div>
         )}
       </SheetContent>
