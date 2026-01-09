@@ -22,7 +22,7 @@ const categoryIcons = {
   general: Newspaper,
   business: Briefcase,
   technology: Cpu,
-  science: Flask,
+  science: FlaskConical,
   health: Heart,
   sports: Trophy,
   entertainment: Film,
