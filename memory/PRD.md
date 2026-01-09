@@ -51,10 +51,11 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [x] **Bouton Services** ajouté dans l'en-tête ✅
 - [x] Boutons "Nouveau devis" et "Nouvelle facture" redirigent vers la nouvelle interface
 
-### Assistant IA (Perplexity) ✅ COMPLETE (2026-01-09)
+### Assistant IA (Perplexity) ✅ COMPLETE (Updated 2026-01-09)
 - [x] **Page /admin/assistant** avec interface de chat
 - [x] **Sidebar d'historique** des conversations ✅
 - [x] **Persistance backend** des messages ✅
+- [x] **Chargement des conversations** depuis l'historique ✅ FIXED
 - [x] **CRUD conversations** (créer, lire, modifier titre, supprimer) ✅
 - [x] **Conversion format legacy** automatique ✅
 - [x] Contexte CRM intelligent (Général, Pipeline, Contacts, Facturation, Budget)
