@@ -950,24 +950,25 @@ const PipelinePage = () => {
       {!loading && <PipelineStats pipeline={pipeline} columns={columns} />}
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+      <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher une affaire..."
-            className="pl-9 bg-white border-[#E5E5E5]"
+            placeholder="Rechercher..."
+            className="pl-9 bg-white border-[#E5E5E5] w-full"
           />
         </div>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setShowArchived(!showArchived)}
-          className={`${showArchived ? "bg-[#F8F8F8]" : ""} w-full sm:w-auto`}
+          className={`${showArchived ? "bg-[#F8F8F8]" : ""} w-full sm:w-auto text-sm`}
         >
-          <Archive className="w-4 h-4 mr-2" />
-          {showArchived ? "Masquer archivées" : "Voir archivées"}
+          <Archive className="w-4 h-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">{showArchived ? "Masquer archivées" : "Voir archivées"}</span>
+          <span className="sm:hidden">{showArchived ? "Masquer" : "Archivées"}</span>
         </Button>
       </div>
 
