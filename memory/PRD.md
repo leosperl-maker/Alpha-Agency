@@ -144,6 +144,11 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - bank_transactions, budget_categories, auto_category_rules, budget_forecasts
 - **ai_conversations** (historique des chats IA - supporte ancien et nouveau format)
 - **ai_usage** (compteur quotidien par utilisateur)
+- **news_articles** (actualités récupérées via Perplexity)
+- **social_accounts** (comptes Facebook/Instagram connectés)
+- **social_posts** (posts programmés)
+- **social_inbox** (messages/commentaires à modérer)
 
 ## Test Reports
 - `/app/test_reports/iteration_11.json` - Phase 1 corrections (95% success)
+- `/app/test_reports/pytest/pytest_news_social.xml` - Tests API News & Social (15/19 pass)
