@@ -247,8 +247,15 @@ Modèle appliqué : Pages "Vue d'ensemble" et "Demandes" utilisées comme réfé
 ### ✅ Intégrées et fonctionnelles
 - **Perplexity AI** : Assistant IA pour le dashboard
 - **NewsAPI.org** : Actualités avec images (style Perplexity Discover)
-- **Brevo (ex-Sendinblue)** : Emails transactionnels (NEW - 2026-01-09)
-  - Clé API configurée et testée ✅
+- **Brevo (ex-Sendinblue)** : 
+  - Emails transactionnels ✅
+  - **Module Campagnes Email & SMS** ✅ NEW (2026-01-09)
+    - Création de campagnes email avec contenu HTML
+    - Création de campagnes SMS (max 160 caractères)
+    - Gestion des contacts Brevo (création, import, suppression)
+    - Gestion des listes de contacts
+    - Statistiques des campagnes (envois, ouvertures, clics)
+    - Interface complète avec onglets Email/SMS/Contacts/Statistiques
   - Notifications nouveaux leads
   - Envoi de devis aux clients
   - Réinitialisation mot de passe
