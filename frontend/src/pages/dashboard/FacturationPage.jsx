@@ -349,48 +349,48 @@ const FacturationPage = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-3 sm:p-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+      <div className="grid grid-cols-2 gap-2 sm:gap-4">
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 flex-shrink-0 bg-blue-100 rounded-lg flex items-center justify-center">
+              <FileText className="w-4 h-4 text-blue-600" />
             </div>
-            <div>
-              <p className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">{stats.totalQuotes}</p>
-              <p className="text-[10px] sm:text-xs text-[#666666]">Devis ({stats.pendingQuotes} en att.)</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-3 sm:p-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Receipt className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-[#1A1A1A]">{stats.totalInvoices}</p>
-              <p className="text-xs text-[#666666]">Factures ({stats.pendingInvoices} en cours)</p>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.totalQuotes}</p>
+              <p className="text-[10px] sm:text-xs text-[#666666] truncate">Devis ({stats.pendingQuotes} en att.)</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 text-green-600" />
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 flex-shrink-0 bg-purple-100 rounded-lg flex items-center justify-center">
+              <Receipt className="w-4 h-4 text-purple-600" />
             </div>
-            <div>
-              <p className="text-lg font-bold text-green-600">{formatCurrency(stats.totalPaid)}</p>
-              <p className="text-xs text-[#666666]">Encaissé</p>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.totalInvoices}</p>
+              <p className="text-[10px] sm:text-xs text-[#666666] truncate">Factures ({stats.pendingInvoices} en cours)</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-              <Clock className="w-5 h-5 text-orange-600" />
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 flex-shrink-0 bg-green-100 rounded-lg flex items-center justify-center">
+              <CheckCircle className="w-4 h-4 text-green-600" />
             </div>
-            <div>
-              <p className="text-lg font-bold text-orange-600">{formatCurrency(stats.totalDue)}</p>
-              <p className="text-xs text-[#666666]">À encaisser</p>
+            <div className="min-w-0">
+              <p className="text-sm sm:text-lg font-bold text-green-600 truncate">{formatCurrency(stats.totalPaid)}</p>
+              <p className="text-[10px] sm:text-xs text-[#666666]">Encaissé</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg border border-[#E5E5E5] p-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 flex-shrink-0 bg-orange-100 rounded-lg flex items-center justify-center">
+              <Clock className="w-4 h-4 text-orange-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm sm:text-lg font-bold text-orange-600 truncate">{formatCurrency(stats.totalDue)}</p>
+              <p className="text-[10px] sm:text-xs text-[#666666]">À encaisser</p>
             </div>
           </div>
         </div>
