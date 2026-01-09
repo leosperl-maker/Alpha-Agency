@@ -1,66 +1,44 @@
 <analysis>**original_problem_statement:**
-L'utilisateur a initié une session avec une longue liste de corrections de bugs et de nouvelles fonctionnalités pour son CRM Alpha Agency. Les demandes les plus récentes et prioritaires sont :
-- **Bugs P0 :**
-    - Les tâches en retard ne s'affichent pas correctement.
-    - Les pages Pipeline et Tâches ont des problèmes de responsive design, notamment un manque de défilement horizontal sur mobile, coupant le contenu.
-- **Améliorations P1 :**
-    - **Pipeline :** Pouvoir archiver/supprimer des cartes, et surtout, pouvoir ajouter/personnaliser les colonnes (étapes du pipeline).
-    - **Données de test :** Ajouter un bouton dans les paramètres pour supprimer les données de test et basculer vers les données live.
-- **Nouvelle fonctionnalité majeure P2 (Module Budget Avancé) :**
-    - Transformer la section Budget existante en un outil de pilotage financier complet, inspiré d'Indy, avec les fonctionnalités suivantes :
-        1.  Import de transactions bancaires (CSV/OFX).
-        2.  Édition détaillée des transactions avec catégories, tags, et liaison client/facture.
-        3.  Règles d'auto-catégorisation.
-        4.  Gestion personnalisée des catégories (CRUD, couleurs, icônes).
-        5.  Vues graphiques (revenus/dépenses, répartition par catégorie).
-        6.  Budget prévisionnel (prévu vs réel).
-        7.  Intégration avec les factures (création automatique de transactions de revenu).
-        8.  Vue de cashflow prévisionnel.
-- **Autres intégrations :**
-    - Intégrer Google Analytics.
-    - Intégrer un service d'envoi d'e-mails (Brevo/Resend) pour les notifications et la réinitialisation de mot de passe.
+L'utilisateur a demandé l'implémentation de plusieurs fonctionnalités majeures :
+1.  **Assistant IA en bulle flottante :** Réutiliser l'agent IA Perplexity existant dans une bulle de chat flottante, draggable et visible sur toutes les pages de l'admin, sauf sur la page principale de l'assistant.
+2.  **Amélioration du CRM (style Pipedrive) :**
+    *   **Vue pipeline :** Réorganiser la vue avec des colonnes spécifiques (, , , , , , ), des cartes d'affaires enrichies, et des indicateurs de performance.
+    *   **Fiches contacts :** Améliorer l'ergonomie des fiches contacts avec une timeline des interactions, les opportunités liées, et des accès rapides pour ajouter des notes ou tâches.
+3.  **Intégration Google Agenda :** Ajouter une nouvelle page Agenda dans l'admin avec une vue calendrier pour gérer les événements (CRUD) via OAuth. L'utilisateur a besoin d'être guidé pour la configuration du projet Google Cloud.
+4.  **Section Actualités (style Perplexity Discover) :**
+    *   Créer une nouvelle page Actualités affichant des articles (titre, résumé, sources) sous forme de grille de cartes.
+    *   Le backend doit récupérer périodiquement ces actualités via l'API Perplexity sur des thématiques configurables et les stocker en base de données.
+    *   **Thématiques demandées :** Actu Guadeloupe/Martinique/France/USA/Monde, Marketing digital, Publicité en ligne, Réseaux sociaux, Growth/acquisition, CRM/vente, Business local, Design/branding.
+
+**Priorités définies par l'utilisateur :**
+1.  (P0) Bulle de chat IA flottante & Amélioration CRM (pipeline + fiches contacts).
+2.  (P1) Intégration Google Agenda.
+3.  (P2) Section Actualités.
 
 **User's preferred language**: Français
 
 **what currently exists?**
-Une application CRM full-stack (React, FastAPI, MongoDB). La session actuelle a permis d'implémenter plusieurs fonctionnalités majeures et de corriger des bugs critiques.
-- **Fonctionnalités complétées :**
-    - Suivi des paiements sur les factures.
-    - Conversion d'un devis en facture.
-    - Panneau de détails d'un contact affichant son historique (devis, factures, tâches).
-    - Interface unifiée Facturation remplaçant les pages séparées Devis/Factures.
-    - Intégration du script Google Analytics.
-    - **Gestion des données de test** via un nouvel onglet dans les paramètres.
-- **Bugs corrigés :**
-    - Le bug des tâches en retard fantômes a été résolu. La détection est maintenant correcte.
-    - Des actions (modifier, archiver, supprimer) et un défilement horizontal ont été ajoutés à la page Pipeline.
+Une application CRM full-stack (React, FastAPI, MongoDB) fonctionnelle.
+- **Fonctionnalités Clés :**
+    - Un module de budget avancé (transactions, catégories, règles, prévisions, cashflow).
+    - Un pipeline de vente avec des colonnes personnalisables et réorganisables par glisser-déposer.
+    - Une page dédiée à un assistant IA utilisant l'API Perplexity, avec un suivi de l'utilisation.
+- **Travaux Récents :**
+    - L'assistant IA a été rendu accessible via une bulle de chat flottante sur toutes les pages de l'admin.
+    - La vue pipeline a été améliorée pour ressembler à Pipedrive, avec de nouvelles colonnes et des cartes d'affaires plus détaillées.
+    - Les bases (fichiers, routes backend, fonctions API frontend) pour la future section Actualités ont été créées.
 
 **Last working item**:
--   **Last item agent was working:** L'agent a commencé l'implémentation de la **Phase 1 du nouveau module Budget avancé**. Il a défini les modèles Pydantic et créé les routes API de base dans  pour gérer les transactions () et les catégories (). Il a également commencé à ajouter les fonctions correspondantes dans le client API frontend ().
+-   **Last item agent was working:** L'agent a initié l'implémentation de la section **Actualités (News)**. Il a ajouté les routes API backend (, ) dans , les fonctions correspondantes dans , et créé le fichier vide  pour l'interface utilisateur.
 -   **Status:** IN PROGRESS
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** both. D'abord, tester les nouvelles routes backend avec . Une fois l'interface utilisateur construite, utiliser l'agent de test frontend pour valider le flux d'import et de gestion des transactions.
+-   **Which testing method agent to use?** both. D'abord, tester les nouvelles routes backend avec . Ensuite, une fois l'interface construite, utiliser l'agent de test frontend pour valider l'affichage des actualités.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1 (P0): Responsive mobile des pages Pipeline et Tâches.**
-    -   **Attempted fixes:** L'agent a ajouté des classes CSS () pour permettre le défilement horizontal. Cependant, la correction n'a été vérifiée que sur un affichage desktop.
-    -   **Next debug checklist:**
-        1.  Utiliser l'outil de capture d'écran avec une résolution mobile (ex: largeur de 400px).
-        2.  Naviguer vers  et .
-        3.  Vérifier que le tableau de bord Kanban peut être entièrement parcouru horizontalement.
-    -   **Why fix this issue and what will be achieved with the fix?** C'est un bug P0 signalé par l'utilisateur qui empêche l'utilisation de l'application sur mobile.
-    -   **Status:** USER VERIFICATION PENDING
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue:** None
-
--   **Issue 2 (P2): Échec récurrent du test E2E du formulaire de contact.**
-    -   **Attempted fixes:** Aucune correction tentée dans cette session.
-    -   **Next debug checklist:**
-        1.  Analyser le dernier rapport de test Playwright pour identifier l'erreur exacte.
-        2.  Inspecter le composant  de Shadcn et le script de test.
-        3.  Ajouter des attributs  aux éléments du  (déclencheur, contenu, options) pour stabiliser le sélecteur.
+-   **Issue 1 (P2): Échec récurrent du test E2E du formulaire de contact.**
+    -   **Attempted fixes:** Aucune. Ce problème est hérité des forks précédents.
+    -   **Next debug checklist:** Analyser le rapport de test Playwright, inspecter le composant  de Shadcn et ajouter des  pour stabiliser les sélecteurs.
     -   **Why fix this issue and what will be achieved with the fix?** Assurer une suite de tests E2E fiable pour éviter les régressions.
     -   **Status:** NOT STARTED
     -   **Is recurring issue?** Y
@@ -68,50 +46,51 @@ Une application CRM full-stack (React, FastAPI, MongoDB). La session actuelle a 
     -   **Blocked on other issue:** None
 
 **In progress Task List**:
--   **Task 1: Finaliser la Phase 1 du module Budget avancé (P2)**
-    -   **Where to resume:** Le backend et les API clients sont initiés. La prochaine étape est de refondre complètement la page  pour implémenter l'interface utilisateur de la Phase 1, qui inclut :
-        1.  Un bouton Importer des transactions et le dialogue d'upload de fichier CSV.
-        2.  La logique de parsing du CSV et l'envoi des données au backend.
-        3.  Un tableau pour lister les transactions importées.
-        4.  Une interface simple (dans un onglet ou un dialogue) pour gérer les catégories (CRUD).
-    -   **What will be achieved with this?** L'utilisateur pourra importer ses transactions bancaires et les catégoriser, ce qui constitue la base du nouveau module financier.
+-   **Task 1: Améliorer la Fiche Contact (style Pipedrive) (P0)**
+    -   **Where to resume:** Le fichier  existe mais doit être entièrement révisé. Il faut y intégrer une timeline des interactions (notes, tâches, etc.), des accès rapides aux actions courantes, et une meilleure organisation visuelle des informations.
+    -   **What will be achieved with this?** Rendre la gestion des contacts plus efficace et intuitive pour un commercial.
+    -   **Status:** NOT STARTED
+    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Blocked on something:** None
+
+-   **Task 2: Finaliser la page Actualités (P2)**
+    -   **Where to resume:** Le backend et l'API client sont prêts. Il faut maintenant implémenter l'interface utilisateur dans  pour afficher les cartes d'articles et les filtres par thématique. Il faut également implémenter la logique de récupération périodique des actualités côté backend (probablement via un background task).
+    -   **What will be achieved with this?** Fournir à l'utilisateur un flux d'actualités personnalisé directement dans son dashboard.
     -   **Status:** IN PROGRESS
     -   **Should Test frontend/backend/both after fix?** Both
     -   **Blocked on something:** None
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **P1: Pipeline - Colonnes personnalisées :** Implémenter la logique backend et l'interface utilisateur pour permettre à l'utilisateur d'ajouter, renommer, réorganiser et supprimer les colonnes (étapes) du pipeline.
-    -   **P2: Module Budget Avancé (Phase 2) :** Implémenter les règles d'auto-catégorisation et les premiers graphiques (répartition des dépenses, évolution mensuelle).
+    -   **P1: Intégration de Google Agenda :**
+        1.  **Guider l'utilisateur :** Fournir des instructions claires et étape par étape pour créer un projet sur Google Cloud, activer l'API Google Calendar et générer les credentials OAuth (Client ID, Client Secret).
+        2.  **Implémenter le backend :** Ajouter les routes pour l'authentification OAuth2 et les opérations CRUD sur l'agenda.
+        3.  **Implémenter le frontend :** Créer une nouvelle page  avec un composant calendrier (ex: FullCalendar ou équivalent) pour afficher et gérer les événements.
 
 -   **Future Tasks:**
-    -   **P2: Module Budget Avancé (Phases 3 & 4) :** Intégrer le budget prévisionnel (Prévu vs Réel) et une vue de cashflow prévisionnel.
-    -   **P4: Lecteur audio pour le portfolio :** Intégrer un composant lecteur audio sur la page publique du portfolio.
+    -   **P4: Lecteur audio pour le portfolio :** Une tâche de fond héritée d'un fork précédent qui n'est plus prioritaire.
 
 **Completed work in this session**
--   **Suivi des paiements sur les factures :** Implémentation complète du backend et du frontend.
--   **Conversion Devis → Facture :** Fonctionnalité implémentée et testée.
--   **Interface Facturation unifiée :** Création de  qui combine Devis et Factures avec des onglets et des statistiques.
--   **Panneau d'historique du contact :** Création du composant .
--   **Intégration de Google Analytics 4 :** Le script de suivi a été ajouté à .
--   **Bug P0 - Tâches en retard :** La logique de détection des tâches en retard a été corrigée côté backend et frontend.
--   **Amélioration P1 - Actions du Pipeline :** Des menus pour modifier, archiver et supprimer des opportunités ont été ajoutés aux cartes du pipeline.
--   **Amélioration P1 - Gestion des données de test :** Un onglet Données a été ajouté dans les paramètres pour permettre la suppression des données de test.
+-   **Assistant IA Flottant :** Intégration d'une bulle de chat flottante et draggable () qui réutilise le backend de l'assistant IA existant. La bulle est masquée sur la page principale de l'assistant.
+-   **Amélioration du Pipeline (style Pipedrive) :**
+    -   La page  a été entièrement remaniée.
+    -   Mise à jour des colonnes du pipeline selon les spécifications de l'utilisateur.
+    -   Ajout de cartes de KPI (valeur du pipeline, affaires actives, taux de conversion).
+    -   Les cartes d'opportunités ont été enrichies avec plus de détails (montant, statut, tags, probabilité).
+-   **Budget Phase 4 (Cashflow) :** Implémentation de la vue de projection de trésorerie sur plusieurs mois, avec graphiques et cartes de synthèse, dans l'onglet Cashflow de la page Budget.
+-   **Intégration IA Perplexity :** L'assistant IA a été implémenté avec succès, incluant la gestion du contexte CRM dans les prompts et le suivi des quotas d'utilisation. Le modèle Perplexity utilisé a été corrigé pour .
+-   **Colonnes de Pipeline personnalisables (CRUD + D&D) :** Les fonctionnalités complètes pour créer, modifier, supprimer et réorganiser les colonnes du pipeline ont été finalisées et testées.
+-   **Correction de Bug P0 :** Le problème de responsive design sur les pages Pipeline et Tâches a été vérifié et confirmé comme étant résolu.
 
 **Earlier issues found/mentioned but not fixed**
 -   **Issue 1: Intégration de Brevo (e-mails) bloquée.**
-    -   **Debug checklist:** L'intégration est codée (API et SMTP), mais les appels échouent avec une erreur  ou . Le problème vient du compte Brevo de l'utilisateur qui n'est pas encore activé pour l'envoi d'e-mails transactionnels.
-    -   **Why to solve this issue and what will be achieved with this?** Permettre l'envoi d'e-mails réels pour la réinitialisation de mot de passe et les notifications.
-    -   **Should Test frontend/backend/both after fix:** Backend (en testant le point de terminaison de réinitialisation de mot de passe).
-    -   **Is recurring issue?** N. (Bloqué par une dépendance externe).
--   **Issue 2: Fonctionnalité de colonnes personnalisées du Pipeline non implémentée.**
-    -   **Debug checklist:** L'utilisateur a demandé à ajouter des colonnes. L'agent a implémenté des actions sur les cartes mais pas la gestion des colonnes elles-mêmes. Il faut créer les routes API et l'interface pour le CRUD des colonnes du pipeline.
-    -   **Why to solve this issue and what will be achieved with this?** C'est une demande P1 de l'utilisateur pour rendre le pipeline plus flexible.
-    -   **Should Test frontend/backend/both after fix:** Both.
-    -   **Is recurring issue?** N.
+    -   **Debug checklist:** Le problème persiste et est externe. Il est lié à l'activation du compte Brevo de l'utilisateur. Aucune action n'est possible côté code.
+    -   **Why to solve this issue and what will be achieved with this?** Permettre l'envoi d'e-mails pour la réinitialisation de mot de passe et les notifications.
+    -   **Should Test frontend/backend/both after fix:** Backend.
+    -   **Is recurring issue?** N. (Bloqué).
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** Les tests Playwright échouent de manière intermittente sur les composants UI complexes comme les  de Shadcn.
+-   **Issue recurrence in previous fork:** Les tests E2E avec Playwright échouent de manière intermittente sur les composants UI complexes comme les  de Shadcn.
 -   **Recurrence count:** 5+
 -   **Status:** NOT STARTED
 
@@ -119,65 +98,86 @@ Une application CRM full-stack (React, FastAPI, MongoDB). La session actuelle a 
 
 
 **Key Technical Concepts**
-- **Backend:** FastAPI, Pydantic, MongoDB (AsyncIOMotorClient).
-- **Frontend:** React, Tailwind CSS, Shadcn UI, Recharts, .
-- **Intégrations:** Google Analytics (implémenté), Brevo (codé mais bloqué).
+- **Backend:** FastAPI, Pydantic, MongoDB, .
+- **Frontend:** React, Tailwind CSS, Shadcn UI, Recharts, , , .
+- **Intégrations:** Perplexity AI (via ), Google Analytics.
 
 **key DB schema**
--   **Transaction (Nouveau modèle initié) :** 
--   **BudgetCategory (Nouveau modèle initié) :** 
--   **Invoice :** Le champ  (liste de paiements) a été ajouté et est fonctionnel.
--   **Opportunity :** Un champ  a été ajouté.
+-   **NewsArticle (Nouveau modèle) :** 
+-   **NewsTopic (Nouveau modèle) :** 
+-   **User :** Le suivi des appels API est géré via  (dictionnaire stocké dans la collection ).
+-   **PipelineColumn :** Le modèle de colonne du pipeline est maintenant utilisé pour un pipeline dynamique.
 
 **changes in tech stack**
--   Aucune nouvelle dépendance majeure ajoutée, mais le code a été structuré pour utiliser Brevo (via  et ).
+-   **Ajout de dépendances frontend :** yarn add v1.22.22
+[1/4] Resolving packages...
+[2/4] Fetching packages...
+[3/4] Linking dependencies...
+[4/4] Building fresh packages...
+success Saved lockfile.
+success Saved 4 new dependencies.
+info Direct dependencies
+├─ @dnd-kit/core@6.3.1
+├─ @dnd-kit/sortable@10.0.0
+└─ @dnd-kit/utilities@3.2.2
+info All dependencies
+├─ @dnd-kit/accessibility@3.1.1
+├─ @dnd-kit/core@6.3.1
+├─ @dnd-kit/sortable@10.0.0
+└─ @dnd-kit/utilities@3.2.2
+Done in 1.04s. pour le glisser-déposer.
 
 **All files of reference**
 *   : Cœur du backend, contient toute la logique métier.
-*   : Fichier à transformer pour le nouveau module financier.
-*   : Récemment modifié pour le scroll et les actions.
-*   : Récemment modifié pour le bug des tâches en retard.
-*   : Récemment modifié pour la gestion des données.
-*   : La nouvelle page unifiée de facturation.
-*   : Fichier central pour les appels API du frontend.
+*   : Récemment réécrit pour l'UI style Pipedrive.
+*   : Nouveau composant pour la bulle de chat.
+*   : Layout principal intégrant la bulle de chat.
+*   : Fichier à construire pour l'interface des actualités.
+*   : Fichier central pour les appels API.
+*   : Contient la nouvelle variable .
 
 **Critical Info for New Agent**
 -   **Langue :** La communication avec l'utilisateur doit être exclusivement en **français**.
--   **Priorités :** Suivre l'ordre validé par l'utilisateur : d'abord valider les bugs P0 (responsive mobile), puis implémenter les améliorations P1 (colonnes du pipeline), et enfin continuer le développement du module Budget P2 par phases.
--   **Intégration Brevo :** L'envoi d'e-mails est **BLOQUÉ** à cause d'une activation requise sur le compte Brevo de l'utilisateur. Ne pas perdre de temps à déboguer le code. Informer l'utilisateur que l'action est de son côté et passer à une autre tâche.
--   **Module Budget :** L'utilisateur a explicitement demandé une implémentation progressive par phases. Continuer sur la Phase 1 (import CSV, gestion des catégories).
+-   **Priorités :** L'agent doit se concentrer sur les tâches dans l'ordre de priorité défini par l'utilisateur : 1) Améliorer la fiche contact, 2) Intégrer Google Agenda (en guidant l'utilisateur pour les credentials), 3) Finaliser la section Actualités.
+-   **Guide Google Cloud :** L'utilisateur a explicitement demandé un guide pas à pas pour configurer son projet Google Cloud et obtenir les clés OAuth pour l'API Calendar. Cette étape est un prérequis avant de pouvoir coder l'intégration.
 
 **documents and test reports created in this job**
--    (créé et mis à jour plusieurs fois)
+-    (mis à jour plusieurs fois)
+-   
 -   
 -   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User (message 314):** Valide le plan de l'agent, confirme l'ordre de priorité (Bugs P0 > Améliorations P1 > Module Budget P2) et approuve une implémentation par phases pour le module Budget. **(PLAN VALIDÉ)**
-2.  **User (message 311):** Signale les bugs sur les tâches/pipeline, le responsive mobile, et fournit un cahier des charges très détaillé pour le nouveau module Budget et d'autres améliorations. **(SOURCE DE VÉRITÉ ACTUELLE)**
-3.  **User:** Fournit une clé SMTP Brevo. **(TRAITÉ)**
-4.  **User:** Fournit une clé API Brevo. **(TRAITÉ)**
-5.  **User:** Fournit le tag Google Analytics. **(TRAITÉ)**
-6.  **User (multiples):** poursuit - Donne son accord pour continuer. **(TRAITÉ)**
+1.  **User (message 286):** Confirme la réception du plan de l'agent et l'encourage à commencer. **(TRAITÉ)**
+2.  **User (message 285):** Fournit des détails cruciaux et des clarifications sur les demandes :
+    *   Liste les étapes exactes pour le pipeline CRM.
+    *   Liste les thématiques pour la section Actualités.
+    *   Confirme avoir besoin d'aide pour créer le projet Google Cloud et les credentials OAuth.
+    *   Valide l'ordre de priorité proposé par l'agent (Phases 1-4) et précise que la bulle de chat et le CRM sont la priorité absolue. **(PLAN VALIDÉ)**
+3.  **User (message 284):** Propose un plan d'action détaillé en 4 phases pour implémenter toutes les nouvelles fonctionnalités. **(TRAITÉ)**
+4.  **User (message 282):** Envoie une demande très détaillée pour quatre nouvelles fonctionnalités majeures : une bulle de chat IA flottante, une refonte du CRM inspirée de Pipedrive, une intégration Google Agenda, et une section Actualités inspirée de Perplexity Discover. **(SOURCE DE VÉRITÉ ACTUELLE)**
+5.  **User (message 281):** Approuve la fin de la session précédente et fournit le prompt pour la nouvelle demande. **(TRAITÉ)**
 
 **Project Health Check:**
 -   **Broken:**
     -   L'intégration d'e-mails avec Brevo est non fonctionnelle (bloquée par une activation de compte externe).
-    -   Le test E2E du formulaire de contact est toujours en échec.
+    -   Le test E2E du formulaire de contact est toujours en échec de manière intermittente.
 -   **Mocked/Untested:**
-    -   Les nouvelles routes API pour le module Budget sont entièrement non testées.
-    -   Le lecteur audio du portfolio n'a pas été implémenté.
+    -   La nouvelle section Actualités est entièrement non testée (backend et frontend).
 
 **3rd Party Integrations**
+-   **Perplexity AI:** Intégrée et fonctionnelle (utilisée par l'assistant IA).
 -   **Cloudinary:** Intégré et fonctionnel.
 -   **Dropbox:** Intégré et fonctionnel.
--   **Brevo (ex-Sendinblue):** Intégration codée mais **non fonctionnelle et bloquée**, en attente d'activation du compte par l'utilisateur.
+-   **Brevo (ex-Sendinblue):** Intégration codée mais **non fonctionnelle et bloquée**.
 -   **Google Analytics 4:** Intégration **complétée** et fonctionnelle.
+-   **Google Calendar:** **Non implémentée**, en attente de la configuration des credentials par l'utilisateur (avec l'aide de l'agent).
 
 **Testing status**
--   **Testing agent used after significant changes:** YES. L'agent de test a été utilisé pour valider le suivi des paiements et l'historique du contact.
+-   **Testing agent used after significant changes:** YES. L'agent de test a été utilisé avec succès à plusieurs reprises pour valider les nouvelles fonctionnalités (Budget, Pipeline, IA).
 -   **Troubleshoot agent used after agent stuck in loop:** NO
 -   **Test files created:**
+    -   
     -   
     -   
 -   **Known regressions:** Le test E2E du formulaire de contact avec le composant .
@@ -188,6 +188,5 @@ Une application CRM full-stack (React, FastAPI, MongoDB). La session actuelle a 
 -   **URL de connexion:** 
 
 **What agent forgot to execute**
--   N'a pas implémenté la fonctionnalité de **gestion des colonnes du Pipeline** (CRUD des étapes), qui faisait partie de la demande P1 de l'utilisateur.
--   N'a pas vérifié la correction du **responsive mobile** pour le Pipeline et les Tâches avec une capture d'écran de taille mobile.
--   N'a pas commencé l'implémentation du **lecteur audio** pour le portfolio, une tâche héritée du fork précédent.</analysis>
+-   L'agent n'a pas encore commencé l'amélioration de la **fiche contact (ContactDetailSheet.jsx)**, qui est une partie de la priorité P0 définie par l'utilisateur.
+-   L'agent n'a pas encore fourni le **guide pour la configuration de Google Cloud** à l'utilisateur, ce qui bloque la tâche P1 (Google Agenda).</analysis>
