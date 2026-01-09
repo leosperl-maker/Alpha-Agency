@@ -198,7 +198,11 @@ const AIAssistantPage = () => {
   };
 
   const formatDate = (dateStr) => {
+    if (!dateStr) return "—";
+    
     const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "—";
+    
     const now = new Date();
     const diffMs = now - date;
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
