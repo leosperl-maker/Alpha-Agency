@@ -349,6 +349,47 @@ const PortfolioEditor = ({ item, onSave, onCancel, tags: availableTags, categori
     status: item?.status || 'draft'
   });
   const [saving, setSaving] = useState(false);
+  const [suggestingTags, setSuggestingTags] = useState(false);
+  const [suggestedNewTags, setSuggestedNewTags] = useState([]);
+
+  const handleSuggestTags = async () => {
+    // Build content from blocks
+    const contentText = formData.content_blocks
+      .filter(b => b.type === 'text' || b.type === 'heading')
+      .map(b => b.content)
+      .join('\n');
+    
+    if (!formData.title && !contentText) {
+      toast.error("Ajoutez un titre ou du contenu pour suggérer des tags");
+      return;
+    }
+    
+    setSuggestingTags(true);
+    try {
+      const res = await tagsAPI.suggest(contentText, formData.title, 'portfolio');
+      
+      if (res.data.suggested_tags && res.data.suggested_tags.length > 0) {
+        // Auto-select suggested existing tags
+        const newTags = [...new Set([...formData.tags, ...res.data.suggested_tags])];
+        setFormData(prev => ({ ...prev, tags: newTags }));
+        toast.success(`${res.data.suggested_tags.length} tag(s) suggéré(s) et ajouté(s)`);
+      }
+      
+      if (res.data.new_tags && res.data.new_tags.length > 0) {
+        setSuggestedNewTags(res.data.new_tags);
+        toast.info(`${res.data.new_tags.length} nouveau(x) tag(s) proposé(s)`);
+      }
+      
+      if (!res.data.suggested_tags?.length && !res.data.new_tags?.length) {
+        toast.info("Aucune suggestion de tag pour ce contenu");
+      }
+    } catch (error) {
+      console.error("Error suggesting tags:", error);
+      toast.error("Erreur lors de la suggestion de tags");
+    } finally {
+      setSuggestingTags(false);
+    }
+  };
 
   const addBlock = (type) => {
     const newBlock = {
