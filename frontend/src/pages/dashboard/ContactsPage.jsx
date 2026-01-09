@@ -419,7 +419,7 @@ const ContactsPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
           <Input
@@ -431,7 +431,7 @@ const ContactsPage = () => {
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-48 bg-white border-[#E5E5E5] text-[#1A1A1A]">
+          <SelectTrigger className="w-full sm:w-48 bg-white border-[#E5E5E5] text-[#1A1A1A]">
             <Filter className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Filtrer par statut" />
           </SelectTrigger>
