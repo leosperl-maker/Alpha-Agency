@@ -974,8 +974,8 @@ const PipelinePage = () => {
       {!loading && <PipelineStats pipeline={pipeline} columns={columns} />}
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 max-w-xs">
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
           <Input
             value={searchQuery}
@@ -988,7 +988,7 @@ const PipelinePage = () => {
           variant="outline"
           size="sm"
           onClick={() => setShowArchived(!showArchived)}
-          className={showArchived ? "bg-[#F8F8F8]" : ""}
+          className={`${showArchived ? "bg-[#F8F8F8]" : ""} w-full sm:w-auto`}
         >
           <Archive className="w-4 h-4 mr-2" />
           {showArchived ? "Masquer archivées" : "Voir archivées"}
