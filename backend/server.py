@@ -4102,18 +4102,39 @@ async def refresh_news(
     articles_created = 0
     errors = []
     
+    # Category to search query mapping for 'everything' endpoint
+    category_queries = {
+        "general": "actualités France",
+        "business": "économie entreprise business",
+        "technology": "technologie numérique innovation",
+        "science": "science recherche découverte",
+        "health": "santé médecine",
+        "sports": "sport football rugby",
+        "entertainment": "cinéma musique culture"
+    }
+    
     async with httpx.AsyncClient(timeout=30.0) as client:
         for cat in categories_to_fetch:
             try:
-                # Use top-headlines endpoint for category-based news
-                url = "https://newsapi.org/v2/top-headlines"
-                params = {
-                    "apiKey": NEWSAPI_KEY,
-                    "category": cat,
-                    "country": region_code,
-                    "pageSize": 10,
-                    "language": "fr" if region_code == "fr" else "en"
-                }
+                # For French news, use 'everything' endpoint with query search
+                # For other regions, use 'top-headlines' endpoint
+                if region_code == "fr":
+                    url = "https://newsapi.org/v2/everything"
+                    params = {
+                        "apiKey": NEWSAPI_KEY,
+                        "q": category_queries.get(cat, "France actualités"),
+                        "language": "fr",
+                        "sortBy": "publishedAt",
+                        "pageSize": 10
+                    }
+                else:
+                    url = "https://newsapi.org/v2/top-headlines"
+                    params = {
+                        "apiKey": NEWSAPI_KEY,
+                        "category": cat,
+                        "country": region_code,
+                        "pageSize": 10
+                    }
                 
                 response = await client.get(url, params=params)
                 
