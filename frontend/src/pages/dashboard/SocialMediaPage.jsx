@@ -638,19 +638,23 @@ const SocialMediaPage = () => {
                 <CardTitle className="text-base font-medium">Publications programmées</CardTitle>
                 <div className="flex items-center gap-1 bg-[#F8F8F8] rounded-lg p-1">
                   <Button
-                    variant={calendarViewMode === "calendar" ? "default" : "ghost"}
+                    variant="ghost"
                     size="sm"
                     onClick={() => setCalendarViewMode("calendar")}
-                    className={calendarViewMode === "calendar" ? "bg-white shadow-sm" : ""}
+                    className={calendarViewMode === "calendar" 
+                      ? "bg-white shadow-sm text-[#CE0202] hover:bg-white" 
+                      : "text-[#666666] hover:text-[#1A1A1A]"}
                   >
                     <Grid className="w-4 h-4 mr-1" />
                     Calendrier
                   </Button>
                   <Button
-                    variant={calendarViewMode === "list" ? "default" : "ghost"}
+                    variant="ghost"
                     size="sm"
                     onClick={() => setCalendarViewMode("list")}
-                    className={calendarViewMode === "list" ? "bg-white shadow-sm" : ""}
+                    className={calendarViewMode === "list" 
+                      ? "bg-white shadow-sm text-[#CE0202] hover:bg-white" 
+                      : "text-[#666666] hover:text-[#1A1A1A]"}
                   >
                     <List className="w-4 h-4 mr-1" />
                     Liste
