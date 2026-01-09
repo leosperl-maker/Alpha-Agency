@@ -98,7 +98,7 @@ const AIAssistantPage = () => {
   };
 
   const contextOptions = [
-    { value: "", label: "Général", icon: MessageSquare },
+    { value: "general", label: "Général", icon: MessageSquare },
     { value: "contacts", label: "Contacts", icon: Users },
     { value: "pipeline", label: "Pipeline", icon: PieChart },
     { value: "invoices", label: "Facturation", icon: FileText },
