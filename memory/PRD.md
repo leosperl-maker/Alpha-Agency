@@ -117,14 +117,26 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [x] **Design orange Agorapulse** (#FF6B35) appliqué
 - [ ] ⚠️ **Publication réelle** sur Meta - En attente OAuth integration
 
-## Responsive Design ✅ AMÉLIORATION SIGNIFICATIVE (2026-01-09)
-- [x] **Pipeline Page** - Statistiques 2 cols mobile / 4 cols desktop, colonnes Kanban 260px mobile, cartes compactes ✅
-- [x] **Facturation Page** - Stats 2x2 compactes, onglets flexibles, recherche pleine largeur ✅
-- [x] **Dashboard Overview** - KPIs adaptatifs ✅
-- [x] **Contacts Page** - Cartes responsives ✅
-- [x] **Tâches Page** - Colonnes responsives ✅
-- [x] **Navigation Mobile** - Menu hamburger fonctionnel ✅
-- [x] **ContactDetailSheet** - Style Pipedrive avec header gradient ✅
+## Responsive Design ✅ REFONTE COMPLÈTE (2026-01-09)
+Modèle appliqué : Pages "Vue d'ensemble" et "Demandes" utilisées comme référence
+
+### Patterns appliqués à toutes les pages :
+- **Container principal** : `space-y-4 sm:space-y-6 overflow-hidden`
+- **Header** : `flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3`
+- **Stats cards** : `grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4`
+- **Card content** : `p-3` avec `flex items-center gap-2`
+- **Icônes** : `w-4 h-4` avec `flex-shrink-0`
+- **Texte stats** : `text-lg sm:text-2xl` pour chiffres, `text-[10px] sm:text-xs` pour labels
+- **Filtres** : `flex flex-col sm:flex-row gap-2`
+- **Recherche** : `flex-1 w-full`
+- **Boutons** : `flex-1 sm:flex-none text-sm` avec `hidden sm:inline` pour texte desktop
+
+### Pages corrigées :
+- [x] **Pipeline** - Stats 2x2, colonnes 260px mobile, cartes compactes ✅
+- [x] **Facturation** - Stats 2x2, onglets flexibles, table scrollable ✅
+- [x] **Contacts** - Header restructuré, filtres empilés ✅
+- [x] **Tâches** - Stats 2x2+1, Kanban scrollable ✅
+- [x] **Social Media** - Stats 2x2+1, calendrier compact, onglets icônes seuls ✅
 
 ## Backlog / Upcoming Tasks
 
