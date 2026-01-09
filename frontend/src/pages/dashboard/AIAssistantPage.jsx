@@ -24,7 +24,7 @@ const AIAssistantPage = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null);
-  const [contextType, setContextType] = useState("");
+  const [contextType, setContextType] = useState("general");
   const messagesEndRef = useRef(null);
 
   // Fetch AI status on mount
