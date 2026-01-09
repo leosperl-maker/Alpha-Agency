@@ -3,7 +3,7 @@ import {
   Mail, MessageSquare, Users, BarChart3, Plus, Send, Calendar,
   Loader2, Trash2, Eye, Clock, CheckCircle, AlertCircle, RefreshCw,
   ChevronRight, Inbox, List, Settings2, Search, Filter, MoreVertical,
-  Edit, Copy, ExternalLink, PhoneCall, FileText, Sparkles
+  Edit, Copy, ExternalLink, PhoneCall, FileText, Sparkles, Paintbrush
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -44,6 +44,7 @@ import {
 } from "../../components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { campaignsAPI } from "../../lib/api";
+import EmailEditor from "../../components/EmailEditor";
 
 // Status badge colors
 const statusColors = {
