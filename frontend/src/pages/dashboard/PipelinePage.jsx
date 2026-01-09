@@ -858,7 +858,7 @@ const PipelinePage = () => {
   };
 
   return (
-    <div data-testid="pipeline-page" className="space-y-6 h-full">
+    <div data-testid="pipeline-page" className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
