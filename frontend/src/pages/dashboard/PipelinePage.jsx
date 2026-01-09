@@ -1028,8 +1028,8 @@ const PipelinePage = () => {
                 }
               }}
             >
-            <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
-              <div className="flex gap-4" style={{ width: 'fit-content', minWidth: '100%' }}>
+              <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
+                <div className="flex gap-4" style={{ width: 'fit-content', minWidth: '100%' }}>
                 {columns.map((column) => {
                   const columnOpps = filterOpportunities(pipeline[column.id] || []);
                   const totalAmount = columnOpps.reduce((sum, opp) => sum + (opp.amount || 0), 0);
