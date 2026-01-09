@@ -93,16 +93,23 @@ Application CRM full-stack pour Alpha Agency (agence de communication en Guadelo
 - [x] Badges colorés par catégorie
 - [x] Sources avec liens externes
 
-### Social Media Manager (style Agorapulse) ✅ UI COMPLETE (2026-01-09)
+### Social Media Manager (style Agorapulse) ✅ REFONTE UI COMPLETE (2026-01-09)
 - [x] **Architecture backend complète** (endpoints CRUD) ✅
-- [x] **Page /admin/social-media** ✅
-- [x] **Vue Calendrier mensuel** ✅
-- [x] **Vue Liste chronologique** (toggle Calendrier/Liste) ✅
-- [x] **Création/modification de posts programmés** ✅
+- [x] **Page /admin/social-media** style Agorapulse ✅
+- [x] **Vue Calendrier mensuel** avec posts par jour ✅
+- [x] **Vue Liste chronologique** (toggle Liste/Mois) ✅
+- [x] **NOUVELLE Modale de création de post 3 colonnes** ✅
+  - Colonne gauche: Sélection comptes FB/IG
+  - Colonne centrale: Rédaction + toolbar (emoji, localisation, hashtags, Writing Assistant)
+  - Zone médias: Drag & drop + parcourir fichiers
+  - Colonne droite: Aperçu en temps réel du post
+  - Toggle brouillon, Bouton Programmer orange #FF6B35
+- [x] **Upload de médias** (photos/vidéos) pour posts programmés ✅
 - [x] **Boîte de réception** avec filtres (Tous/Non lus/Répondus/Archivés) ✅
 - [x] **Onglet Comptes** pour connecter Facebook/Instagram ✅
 - [x] **Suggestions IA** pour réponses (Perplexity) ✅
 - [x] Stats en haut (Programmés, Publiés, Brouillons, Non lus, À répondre)
+- [x] **Design orange Agorapulse** (#FF6B35) appliqué
 - [ ] ⚠️ **Publication réelle** sur Meta - En attente OAuth integration
 
 ## Backlog / Upcoming Tasks
