@@ -16,7 +16,7 @@ import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { toast } from "sonner";
-import { budgetAPI, contactsAPI, invoicesAPI } from "../../lib/api";
+import { budgetAPI, contactsAPI, invoicesAPI, cashflowAPI } from "../../lib/api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from "recharts";
 import { useDropzone } from "react-dropzone";
 
