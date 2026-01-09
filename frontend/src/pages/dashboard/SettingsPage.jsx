@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Save, Building, Key, Share2, FileText } from "lucide-react";
+import { Save, Building, Key, Share2, FileText, Database, Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../..
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { settingsAPI } from "../../lib/api";
 import { toast } from "sonner";
+import api from "../../lib/api";
 
 const SettingsPage = () => {
   const [loading, setLoading] = useState(false);
