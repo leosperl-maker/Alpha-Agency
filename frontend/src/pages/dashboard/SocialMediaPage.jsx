@@ -1059,14 +1059,14 @@ const SocialMediaPage = () => {
   });
 
   return (
-    <div data-testid="social-media-page" className="space-y-6">
+    <div data-testid="social-media-page" className="space-y-4 sm:space-y-6">
       {/* Header - Agorapulse Style */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Social Media</h1>
-          <p className="text-[#666666] text-sm">Gérez vos réseaux sociaux (style Agorapulse)</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Social Media</h1>
+          <p className="text-[#666666] text-xs sm:text-sm">Gérez vos réseaux sociaux</p>
         </div>
-        <Button onClick={openNewPost} className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white">
+        <Button onClick={openNewPost} className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
           Créer un post
         </Button>
@@ -1074,10 +1074,10 @@ const SocialMediaPage = () => {
 
       {/* Stats - Agorapulse Orange Theme */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
           <Card className="bg-white border-[#E5E5E5]">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <div className="p-2 rounded-lg bg-blue-100">
                   <Clock className="w-5 h-5 text-blue-600" />
                 </div>
