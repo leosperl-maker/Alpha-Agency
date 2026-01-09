@@ -2698,6 +2698,330 @@ async def get_monthly_chart_data(year: Optional[int] = None, current_user: dict 
     
     return months_data
 
+# ==================== BUDGET CATEGORIES (CUSTOM) ====================
+
+class BudgetCategoryCreate(BaseModel):
+    name: str
+    type: str  # income or expense
+    color: str = "#6B7280"
+    icon: str = "tag"
+    parent_id: Optional[str] = None  # For subcategories
+
+class BudgetCategoryUpdate(BaseModel):
+    name: Optional[str] = None
+    color: Optional[str] = None
+    icon: Optional[str] = None
+    parent_id: Optional[str] = None
+
+@api_router.get("/budget/categories", response_model=List[dict])
+async def get_budget_categories(current_user: dict = Depends(get_current_user)):
+    """Get all custom budget categories"""
+    categories = await db.budget_categories.find({}, {"_id": 0}).sort("order", 1).to_list(1000)
+    return categories
+
+@api_router.post("/budget/categories", response_model=dict)
+async def create_budget_category(category: BudgetCategoryCreate, current_user: dict = Depends(get_current_user)):
+    """Create a custom budget category"""
+    cat_dict = {
+        "id": str(uuid.uuid4()),
+        "name": category.name,
+        "type": category.type,
+        "color": category.color,
+        "icon": category.icon,
+        "parent_id": category.parent_id,
+        "order": await db.budget_categories.count_documents({"type": category.type}),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.budget_categories.insert_one(cat_dict)
+    return {"id": cat_dict["id"], "message": "Catégorie créée"}
+
+@api_router.put("/budget/categories/{category_id}", response_model=dict)
+async def update_budget_category(category_id: str, update: BudgetCategoryUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a budget category"""
+    update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
+    
+    result = await db.budget_categories.update_one({"id": category_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Catégorie non trouvée")
+    return {"message": "Catégorie mise à jour"}
+
+@api_router.delete("/budget/categories/{category_id}", response_model=dict)
+async def delete_budget_category(category_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a budget category"""
+    result = await db.budget_categories.delete_one({"id": category_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Catégorie non trouvée")
+    return {"message": "Catégorie supprimée"}
+
+# ==================== BANK TRANSACTIONS IMPORT ====================
+
+class BankTransaction(BaseModel):
+    date: str
+    label: str
+    amount: float
+    type: str  # credit or debit
+    account: Optional[str] = None
+    category_id: Optional[str] = None
+    subcategory_id: Optional[str] = None
+    tags: List[str] = []
+    invoice_id: Optional[str] = None
+    contact_id: Optional[str] = None
+    notes: Optional[str] = None
+    bank_reference: Optional[str] = None
+
+class AutoCategoryRule(BaseModel):
+    pattern: str  # Text pattern to match in label
+    category_id: str
+    subcategory_id: Optional[str] = None
+    is_active: bool = True
+
+@api_router.get("/budget/transactions", response_model=List[dict])
+async def get_bank_transactions(
+    month: Optional[str] = None,
+    category_id: Optional[str] = None,
+    type: Optional[str] = None,
+    search: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get bank transactions with filters"""
+    query = {}
+    
+    if month:
+        query["date"] = {"$regex": f"^{month}"}
+    if category_id:
+        query["category_id"] = category_id
+    if type and type in ["credit", "debit"]:
+        query["type"] = type
+    if search:
+        query["label"] = {"$regex": search, "$options": "i"}
+    
+    transactions = await db.bank_transactions.find(query, {"_id": 0}).sort("date", -1).to_list(1000)
+    return transactions
+
+@api_router.post("/budget/transactions", response_model=dict)
+async def create_bank_transaction(transaction: BankTransaction, current_user: dict = Depends(get_current_user)):
+    """Create a manual bank transaction"""
+    trans_dict = transaction.model_dump()
+    trans_dict["id"] = str(uuid.uuid4())
+    trans_dict["source"] = "manual"
+    trans_dict["created_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.bank_transactions.insert_one(trans_dict)
+    return {"id": trans_dict["id"], "message": "Transaction créée"}
+
+@api_router.put("/budget/transactions/{transaction_id}", response_model=dict)
+async def update_bank_transaction(transaction_id: str, update: dict, current_user: dict = Depends(get_current_user)):
+    """Update a bank transaction (category, tags, notes, etc.)"""
+    allowed_fields = ["category_id", "subcategory_id", "tags", "invoice_id", "contact_id", "notes"]
+    update_data = {k: v for k, v in update.items() if k in allowed_fields}
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
+    
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    result = await db.bank_transactions.update_one({"id": transaction_id}, {"$set": update_data})
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Transaction non trouvée")
+    return {"message": "Transaction mise à jour"}
+
+@api_router.delete("/budget/transactions/{transaction_id}", response_model=dict)
+async def delete_bank_transaction(transaction_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a bank transaction"""
+    result = await db.bank_transactions.delete_one({"id": transaction_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Transaction non trouvée")
+    return {"message": "Transaction supprimée"}
+
+@api_router.post("/budget/transactions/import", response_model=dict)
+async def import_bank_transactions(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Import bank transactions from CSV file"""
+    if not file.filename.endswith(('.csv', '.CSV')):
+        raise HTTPException(status_code=400, detail="Seuls les fichiers CSV sont acceptés")
+    
+    try:
+        content = await file.read()
+        # Try different encodings
+        for encoding in ['utf-8', 'latin-1', 'cp1252']:
+            try:
+                text = content.decode(encoding)
+                break
+            except:
+                continue
+        
+        # Parse CSV
+        import csv
+        from io import StringIO
+        
+        reader = csv.DictReader(StringIO(text), delimiter=';')
+        
+        # Get auto-categorization rules
+        rules = await db.auto_category_rules.find({"is_active": True}, {"_id": 0}).to_list(100)
+        
+        imported = 0
+        duplicates = 0
+        errors = []
+        
+        for row in reader:
+            try:
+                # Try to extract data from common CSV formats
+                date = row.get('Date') or row.get('date') or row.get('DATE') or row.get('Date de l\'opération') or row.get('Date opération') or ''
+                label = row.get('Libellé') or row.get('libelle') or row.get('LIBELLE') or row.get('Description') or row.get('Label') or ''
+                
+                # Handle amount - could be single column or credit/debit columns
+                amount_str = row.get('Montant') or row.get('montant') or row.get('MONTANT') or row.get('Amount') or ''
+                credit_str = row.get('Crédit') or row.get('Credit') or row.get('CREDIT') or ''
+                debit_str = row.get('Débit') or row.get('Debit') or row.get('DEBIT') or ''
+                
+                if amount_str:
+                    amount_str = amount_str.replace(',', '.').replace(' ', '').replace('€', '')
+                    amount = float(amount_str) if amount_str else 0
+                    trans_type = "credit" if amount > 0 else "debit"
+                    amount = abs(amount)
+                elif credit_str or debit_str:
+                    credit = float(credit_str.replace(',', '.').replace(' ', '')) if credit_str else 0
+                    debit = float(debit_str.replace(',', '.').replace(' ', '')) if debit_str else 0
+                    if credit > 0:
+                        amount = credit
+                        trans_type = "credit"
+                    else:
+                        amount = debit
+                        trans_type = "debit"
+                else:
+                    continue
+                
+                if not date or not label or amount == 0:
+                    continue
+                
+                # Normalize date format
+                for fmt in ['%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y', '%d.%m.%Y']:
+                    try:
+                        parsed_date = datetime.strptime(date.strip(), fmt)
+                        date = parsed_date.strftime('%Y-%m-%d')
+                        break
+                    except:
+                        continue
+                
+                # Check for duplicates
+                existing = await db.bank_transactions.find_one({
+                    "date": date,
+                    "amount": amount,
+                    "label": label
+                })
+                
+                if existing:
+                    duplicates += 1
+                    continue
+                
+                # Apply auto-categorization rules
+                category_id = None
+                subcategory_id = None
+                for rule in rules:
+                    if rule["pattern"].lower() in label.lower():
+                        category_id = rule["category_id"]
+                        subcategory_id = rule.get("subcategory_id")
+                        break
+                
+                # Create transaction
+                trans_dict = {
+                    "id": str(uuid.uuid4()),
+                    "date": date,
+                    "label": label,
+                    "amount": amount,
+                    "type": trans_type,
+                    "account": row.get('Compte') or row.get('Account') or None,
+                    "bank_reference": row.get('Référence') or row.get('Reference') or None,
+                    "category_id": category_id,
+                    "subcategory_id": subcategory_id,
+                    "tags": [],
+                    "source": "import",
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                
+                await db.bank_transactions.insert_one(trans_dict)
+                imported += 1
+                
+            except Exception as e:
+                errors.append(str(e))
+        
+        return {
+            "imported": imported,
+            "duplicates": duplicates,
+            "errors": len(errors),
+            "message": f"{imported} transactions importées, {duplicates} doublons ignorés"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Erreur lors de l'import: {str(e)}")
+
+# ==================== AUTO-CATEGORIZATION RULES ====================
+
+@api_router.get("/budget/rules", response_model=List[dict])
+async def get_auto_category_rules(current_user: dict = Depends(get_current_user)):
+    """Get all auto-categorization rules"""
+    rules = await db.auto_category_rules.find({}, {"_id": 0}).to_list(100)
+    return rules
+
+@api_router.post("/budget/rules", response_model=dict)
+async def create_auto_category_rule(rule: AutoCategoryRule, current_user: dict = Depends(get_current_user)):
+    """Create an auto-categorization rule"""
+    rule_dict = rule.model_dump()
+    rule_dict["id"] = str(uuid.uuid4())
+    rule_dict["created_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.auto_category_rules.insert_one(rule_dict)
+    return {"id": rule_dict["id"], "message": "Règle créée"}
+
+@api_router.delete("/budget/rules/{rule_id}", response_model=dict)
+async def delete_auto_category_rule(rule_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete an auto-categorization rule"""
+    result = await db.auto_category_rules.delete_one({"id": rule_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Règle non trouvée")
+    return {"message": "Règle supprimée"}
+
+@api_router.get("/budget/transactions/summary", response_model=dict)
+async def get_transactions_summary(
+    month: Optional[str] = None,
+    year: Optional[int] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get transactions summary with totals"""
+    query = {}
+    
+    if month:
+        query["date"] = {"$regex": f"^{month}"}
+    elif year:
+        query["date"] = {"$regex": f"^{year}"}
+    
+    transactions = await db.bank_transactions.find(query, {"_id": 0}).to_list(10000)
+    
+    total_credit = sum(t["amount"] for t in transactions if t["type"] == "credit")
+    total_debit = sum(t["amount"] for t in transactions if t["type"] == "debit")
+    
+    # Group by category
+    by_category = {}
+    for t in transactions:
+        cat_id = t.get("category_id") or "uncategorized"
+        if cat_id not in by_category:
+            by_category[cat_id] = {"credit": 0, "debit": 0, "count": 0}
+        by_category[cat_id][t["type"]] += t["amount"]
+        by_category[cat_id]["count"] += 1
+    
+    return {
+        "total_credit": total_credit,
+        "total_debit": total_debit,
+        "balance": total_credit - total_debit,
+        "transactions_count": len(transactions),
+        "by_category": by_category,
+        "uncategorized_count": len([t for t in transactions if not t.get("category_id")])
+    }
+
 # ==================== ENHANCED INVOICE PDF ====================
 
 def generate_professional_invoice_pdf(invoice: dict, contact: dict) -> BytesIO:
