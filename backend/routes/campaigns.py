@@ -11,6 +11,8 @@ import uuid
 import logging
 import os
 
+from .database import db, get_current_user
+
 logger = logging.getLogger(__name__)
 
 # Brevo API Configuration
