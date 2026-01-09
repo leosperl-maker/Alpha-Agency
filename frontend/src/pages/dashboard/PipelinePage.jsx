@@ -1128,6 +1128,7 @@ const PipelinePage = () => {
           </p>
         </div>
       </div>
+      )}
 
       {/* Column Dialog */}
       <Dialog open={columnDialogOpen} onOpenChange={setColumnDialogOpen}>
