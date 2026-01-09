@@ -3079,32 +3079,59 @@ async def get_cashflow_projection(
     cashflow_data = []
     cumulative_balance = 0
     
-    # Get initial balance from previous transactions
+    # Get initial balance from previous transactions (both bank_transactions and budget)
     prev_month = (start_date - relativedelta(months=1)).strftime("%Y-%m")
-    prev_transactions = await db.bank_transactions.find(
+    
+    # Bank transactions before start month
+    prev_bank_transactions = await db.bank_transactions.find(
         {"date": {"$lt": f"{start_month}-01"}},
         {"_id": 0}
     ).to_list(100000)
     
-    for t in prev_transactions:
+    for t in prev_bank_transactions:
         if t["type"] == "credit":
             cumulative_balance += t["amount"]
         else:
             cumulative_balance -= t["amount"]
+    
+    # Budget entries before start month
+    prev_budget_entries = await db.budget.find(
+        {"date": {"$lt": f"{start_month}-01"}},
+        {"_id": 0}
+    ).to_list(100000)
+    
+    for b in prev_budget_entries:
+        if b["type"] == "income":
+            cumulative_balance += b["amount"]
+        else:
+            cumulative_balance -= b["amount"]
     
     # Generate projection for each month
     for i in range(months):
         current_month = (start_date + relativedelta(months=i)).strftime("%Y-%m")
         month_label = (start_date + relativedelta(months=i)).strftime("%b %Y")
         
-        # Get actual transactions for this month
-        transactions = await db.bank_transactions.find(
+        # Get actual bank transactions for this month
+        bank_transactions = await db.bank_transactions.find(
             {"date": {"$regex": f"^{current_month}"}},
             {"_id": 0}
         ).to_list(10000)
         
-        actual_income = sum(t["amount"] for t in transactions if t["type"] == "credit")
-        actual_expense = sum(t["amount"] for t in transactions if t["type"] == "debit")
+        bank_income = sum(t["amount"] for t in bank_transactions if t["type"] == "credit")
+        bank_expense = sum(t["amount"] for t in bank_transactions if t["type"] == "debit")
+        
+        # Get budget entries for this month (manual entries)
+        budget_entries = await db.budget.find(
+            {"date": {"$regex": f"^{current_month}"}},
+            {"_id": 0}
+        ).to_list(10000)
+        
+        budget_income = sum(b["amount"] for b in budget_entries if b["type"] == "income")
+        budget_expense = sum(b["amount"] for b in budget_entries if b["type"] == "expense")
+        
+        # Combine actual data
+        actual_income = bank_income + budget_income
+        actual_expense = bank_expense + budget_expense
         
         # Get forecasts for this month
         forecasts = await db.budget_forecasts.find(
@@ -3117,14 +3144,15 @@ async def get_cashflow_projection(
         
         # Use actual if available, otherwise use forecast
         is_future = current_month > datetime.now().strftime("%Y-%m")
+        has_actual_data = actual_income > 0 or actual_expense > 0
         
-        if is_future:
-            # Future month: use forecasts
+        if is_future and not has_actual_data:
+            # Future month without actual data: use forecasts
             income = planned_income
             expense = planned_expense
             data_type = "forecast"
         else:
-            # Past/current month: use actual data
+            # Past/current month or has actual data: use actual data
             income = actual_income
             expense = actual_expense
             data_type = "actual"
@@ -3144,7 +3172,7 @@ async def get_cashflow_projection(
             "actual_income": actual_income,
             "actual_expense": actual_expense,
             "data_type": data_type,
-            "variance": (actual_income - actual_expense) - (planned_income - planned_expense) if not is_future else 0
+            "variance": (actual_income - actual_expense) - (planned_income - planned_expense) if has_actual_data else 0
         })
     
     # Calculate summary
