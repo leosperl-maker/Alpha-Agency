@@ -95,6 +95,7 @@ function App() {
             <Route path="actualites" element={<NewsPage />} />
             <Route path="blog" element={<BlogAdminPage />} />
             <Route path="social-media" element={<SocialMediaPage />} />
+            <Route path="tags" element={<TagsManagePage />} />
             <Route path="parametres" element={<SettingsPage />} />
           </Route>
         </Routes>
