@@ -3363,7 +3363,7 @@ async def create_ai_conversation(data: ConversationCreate, current_user: dict = 
 
 @api_router.get("/ai/conversations/{conversation_id}", response_model=dict)
 async def get_ai_conversation(conversation_id: str, current_user: dict = Depends(get_current_user)):
-    """Get a specific conversation with all messages"""
+    """Get a specific conversation with all messages - handles both old and new formats"""
     conversation = await db.ai_conversations.find_one(
         {"id": conversation_id, "user_id": current_user["user_id"]},
         {"_id": 0}
@@ -3371,6 +3371,26 @@ async def get_ai_conversation(conversation_id: str, current_user: dict = Depends
     
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation non trouvée")
+    
+    # Check if it's the old format and convert if necessary
+    if "user_message" in conversation and "messages" not in conversation:
+        title = conversation.get("user_message", "Conversation")[:50]
+        if len(conversation.get("user_message", "")) > 50:
+            title += "..."
+        
+        return {
+            "id": conversation.get("id"),
+            "user_id": conversation.get("user_id"),
+            "title": title,
+            "context_type": conversation.get("context_type"),
+            "messages": [
+                {"role": "user", "content": conversation.get("user_message", ""), "timestamp": conversation.get("created_at")},
+                {"role": "assistant", "content": conversation.get("assistant_message", ""), "timestamp": conversation.get("created_at")}
+            ],
+            "created_at": conversation.get("created_at"),
+            "updated_at": conversation.get("updated_at") or conversation.get("created_at"),
+            "_legacy": True
+        }
     
     return conversation
 
