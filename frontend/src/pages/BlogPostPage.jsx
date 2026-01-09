@@ -5,6 +5,7 @@ import { Calendar, Clock, ArrowLeft, Share2, Linkedin, Facebook, Twitter } from 
 import { blogAPI } from "../lib/api";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
+import RichContentRenderer from "../components/RichContentRenderer";
 
 const BlogPostPage = () => {
   const { slug } = useParams();
