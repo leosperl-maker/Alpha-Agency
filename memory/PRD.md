@@ -189,12 +189,27 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Badge "Context-Aware" visible dans l'interface
   - Suggestions contextuelles ("Quelles factures sont impayées?", etc.)
   - L'IA peut répondre à des questions comme "Quelles tâches sont en retard?" avec des données réelles
+- ✅ **NOUVEAU: Assistant IA avec Actions**
+  - L'IA peut maintenant exécuter des actions dans le CRM
+  - Actions disponibles : Créer tâche, Marquer tâche terminée, Modifier contact, Créer devis
+  - Toggle "Actions ON/OFF" dans l'interface
+  - Badge "Action exécutée" sur les messages avec actions
+  - Notifications toast pour les actions réussies
+- ✅ **NOUVEAU: Module Gestionnaire de Fichiers**
+  - Backend complet avec routes `/api/file-manager`
+  - Gestion de dossiers (création, suppression, arborescence)
+  - Upload de fichiers (tous types: PDF, Word, Excel, Images, ZIP, etc.)
+  - Interface type explorateur (vue grille/liste)
+  - Breadcrumb de navigation
+  - Sélection multiple et actions groupées (déplacer, supprimer)
+  - Prévisualisation des fichiers
+  - Statistiques de stockage
 
 ## Pending Tasks
 
 ### P1 - Priorité haute
-- [ ] **Module Documents** - Gestionnaire de fichiers complet (dossiers, upload, téléchargement)
 - [ ] **Toggle Thème Clair/Sombre** - Switch entre glassmorphique sombre et thème clair
+- [ ] **Intégrer Documents dans l'assistant IA** - Permettre à l'IA d'accéder aux fichiers du module Documents
 - [ ] Appliquer le design glassmorphique aux pages restantes (Contacts, Pipeline, Facturation, etc.)
 
 ### P2 - Priorité moyenne
