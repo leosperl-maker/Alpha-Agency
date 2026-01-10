@@ -470,7 +470,7 @@ async def enhanced_chat(request: ChatRequest, current_user: dict = Depends(get_c
         conversation_id = request.conversation_id or str(uuid.uuid4())
         session_id = f"alpha-{user_id}-{conversation_id}"
         
-        # Build context-aware system message
+        # Build context-aware system message with actions capability
         base_system_message = """Tu es l'assistant IA d'Alpha Agency, une agence de communication digitale en Guadeloupe.
 Tu aides l'équipe avec leurs tâches quotidiennes: analyse de données, rédaction, conseils marketing, etc.
 Tu peux analyser des images si l'utilisateur en envoie.
@@ -478,12 +478,43 @@ Réponds toujours en français, de manière professionnelle mais amicale.
 
 IMPORTANT: Tu as accès aux données en temps réel de l'application CRM. Utilise ces informations pour répondre aux questions sur les factures, contacts, tâches, pipeline, budget, etc.
 Quand on te pose des questions comme "quelles factures sont impayées?" ou "quel contact attend une proposition?", consulte les données ci-dessous pour répondre de manière précise."""
+
+        # Add action capabilities if enabled
+        action_instructions = ""
+        if request.enable_actions:
+            action_instructions = """
+
+🔧 CAPACITÉS D'ACTION:
+Tu peux effectuer des actions dans le CRM si l'utilisateur te le demande. Quand tu détectes une demande d'action, inclus un bloc JSON d'action à la FIN de ta réponse dans ce format exact:
+
+[ACTION]
+{"action_type": "type", "params": {...}}
+[/ACTION]
+
+Actions disponibles:
+1. create_task - Créer une tâche
+   Params: title (requis), description, priority (low/medium/high/urgent), due_date (YYYY-MM-DD), contact_id
+   
+2. mark_task_done - Marquer une tâche comme terminée
+   Params: task_title OU task_id
+   
+3. update_contact - Modifier un contact
+   Params: contact_name OU contact_id, updates: {phone, email, company, notes, type, tags}
+   
+4. create_quote - Créer un devis
+   Params: client_name (requis), client_email, services: [{title, description, quantity, unit_price}], notes
+
+Exemples:
+- "Crée une tâche pour rappeler Jean demain" → Inclure [ACTION]{"action_type": "create_task", "params": {"title": "Rappeler Jean", "due_date": "2026-01-12", "priority": "medium"}}[/ACTION]
+- "Marque la tâche 'Appeler client' comme terminée" → [ACTION]{"action_type": "mark_task_done", "params": {"task_title": "Appeler client"}}[/ACTION]
+
+IMPORTANT: N'exécute une action que si l'utilisateur le demande explicitement. Demande confirmation pour les actions irréversibles."""
         
         # Fetch app context if enabled
         context_data = ""
         if request.include_context:
             context_data = await get_app_context()
-            system_message = f"""{base_system_message}
+            system_message = f"""{base_system_message}{action_instructions}
 
 ═══════════════════════════════════════════════
 📊 DONNÉES ACTUELLES DE L'APPLICATION (mis à jour en temps réel):
@@ -494,7 +525,7 @@ Quand on te pose des questions comme "quelles factures sont impayées?" ou "quel
 ═══════════════════════════════════════════════
 Utilise ces données pour répondre aux questions de l'utilisateur. Si l'utilisateur demande des informations non disponibles dans le contexte, indique-le clairement."""
         else:
-            system_message = base_system_message
+            system_message = base_system_message + action_instructions
         
         # Initialize chat
         chat = LlmChat(
