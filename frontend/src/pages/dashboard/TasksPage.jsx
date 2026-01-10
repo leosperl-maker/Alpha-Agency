@@ -909,58 +909,96 @@ const TasksPage = () => {
 
       {/* Task Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-white">
-              {editingTask ? "Modifier la tâche" : "Nouvelle tâche"}
+        <DialogContent className="bg-[#0a0a14] border-white/10 max-w-lg max-h-[90vh] overflow-y-auto p-0">
+          {/* Header with gradient */}
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-lg">
+            <DialogTitle className="text-white text-xl font-bold flex items-center gap-3">
+              {editingTask ? (
+                <>
+                  <Edit className="w-5 h-5" />
+                  Modifier la tâche
+                </>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5" />
+                  Nouvelle tâche
+                </>
+              )}
             </DialogTitle>
-          </DialogHeader>
+            <p className="text-white/70 text-sm mt-1">
+              {editingTask ? "Modifiez les détails ci-dessous" : "Créez une nouvelle tâche pour votre équipe"}
+            </p>
+          </div>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5 p-6">
+            {/* Title */}
             <div className="space-y-2">
-              <Label className="text-white">Titre *</Label>
+              <Label className="text-white font-medium flex items-center gap-2">
+                <Target className="w-4 h-4 text-indigo-400" />
+                Titre de la tâche *
+              </Label>
               <Input
                 value={formData.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
-                placeholder="Titre de la tâche"
+                placeholder="Ex: Finaliser le design du site web"
                 required
-                className="bg-white/5 border-white/10"
+                className="bg-white/5 border-white/10 h-11 text-white placeholder:text-white/40"
               />
             </div>
             
+            {/* Description */}
             <div className="space-y-2">
-              <Label className="text-white">Description</Label>
+              <Label className="text-white font-medium flex items-center gap-2">
+                <Edit className="w-4 h-4 text-indigo-400" />
+                Description
+              </Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                placeholder="Description détaillée..."
+                placeholder="Ajoutez des détails, des notes ou des instructions..."
                 rows={3}
-                className="bg-white/5 border-white/10"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none"
               />
             </div>
             
+            {/* Priority & Category */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white">Priorité</Label>
+                <Label className="text-white font-medium flex items-center gap-2">
+                  <Flag className="w-4 h-4 text-amber-400" />
+                  Priorité
+                </Label>
                 <Select value={formData.priority} onValueChange={(v) => setFormData({...formData, priority: v})}>
-                  <SelectTrigger className="bg-white/5 border-white/10">
+                  <SelectTrigger className="bg-white/5 border-white/10 h-11">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1a1a2e]">
+                  <SelectContent className="bg-[#1a1a2e] border-white/10">
                     {Object.entries(priorityConfig).map(([key, config]) => (
-                      <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                      <SelectItem key={key} value={key}>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${
+                            key === 'urgent' ? 'bg-red-500' :
+                            key === 'high' ? 'bg-orange-500' :
+                            key === 'medium' ? 'bg-amber-500' : 'bg-gray-500'
+                          }`} />
+                          {config.label}
+                        </div>
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="space-y-2">
-                <Label className="text-white">Catégorie</Label>
+                <Label className="text-white font-medium flex items-center gap-2">
+                  <Settings2 className="w-4 h-4 text-purple-400" />
+                  Catégorie
+                </Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v})}>
-                  <SelectTrigger className="bg-white/5 border-white/10">
+                  <SelectTrigger className="bg-white/5 border-white/10 h-11">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1a1a2e]">
+                  <SelectContent className="bg-[#1a1a2e] border-white/10">
                     {categories.map(cat => (
                       <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                     ))}
@@ -969,17 +1007,21 @@ const TasksPage = () => {
               </div>
             </div>
 
+            {/* Status */}
             <div className="space-y-2">
-              <Label className="text-white">Statut</Label>
+              <Label className="text-white font-medium flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-400" />
+                Statut
+              </Label>
               <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
-                <SelectTrigger className="bg-white/5 border-white/10">
+                <SelectTrigger className="bg-white/5 border-white/10 h-11">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e]">
+                <SelectContent className="bg-[#1a1a2e] border-white/10">
                   {columns.map(col => (
                     <SelectItem key={col.id} value={col.id}>
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: col.color }} />
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: col.color }} />
                         {col.label}
                       </div>
                     </SelectItem>
@@ -988,46 +1030,60 @@ const TasksPage = () => {
               </Select>
             </div>
             
-            <div className="space-y-2">
-              <Label className="text-white">Date d'échéance</Label>
-              <Input
-                type="date"
-                value={formData.due_date}
-                onChange={(e) => setFormData({...formData, due_date: e.target.value})}
-                className="bg-white/5 border-white/10"
-              />
-            </div>
+            {/* Due Date & Contact */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-white font-medium flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-blue-400" />
+                  Date d'échéance
+                </Label>
+                <Input
+                  type="date"
+                  value={formData.due_date}
+                  onChange={(e) => setFormData({...formData, due_date: e.target.value})}
+                  className="bg-white/5 border-white/10 h-11 text-white"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label className="text-white flex items-center gap-1">
-                <User className="w-3 h-3" />
-                Contact associé (facultatif)
-              </Label>
-              <Select 
-                value={formData.contact_id || "none"} 
-                onValueChange={(v) => setFormData({...formData, contact_id: v === "none" ? "" : v})}
-              >
-                <SelectTrigger className="bg-white/5 border-white/10">
-                  <SelectValue placeholder="Aucun contact" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e] max-h-60">
-                  <SelectItem value="none">— Aucun contact —</SelectItem>
-                  {contacts.map(contact => (
-                    <SelectItem key={contact.id} value={contact.id}>
-                      {contact.first_name} {contact.last_name}
-                      {contact.company && <span className="text-white/60 ml-1">({contact.company})</span>}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Label className="text-white font-medium flex items-center gap-2">
+                  <User className="w-4 h-4 text-cyan-400" />
+                  Contact associé
+                </Label>
+                <Select 
+                  value={formData.contact_id || "none"} 
+                  onValueChange={(v) => setFormData({...formData, contact_id: v === "none" ? "" : v})}
+                >
+                  <SelectTrigger className="bg-white/5 border-white/10 h-11">
+                    <SelectValue placeholder="Aucun" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#1a1a2e] border-white/10 max-h-60">
+                    <SelectItem value="none">— Aucun —</SelectItem>
+                    {contacts.map(contact => (
+                      <SelectItem key={contact.id} value={contact.id}>
+                        {contact.first_name} {contact.last_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
-            <div className="flex gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
+            {/* Actions */}
+            <div className="flex gap-3 pt-4 border-t border-white/10">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setDialogOpen(false)} 
+                className="flex-1 border-white/20 text-white/80 hover:bg-white/10 h-11"
+              >
                 Annuler
               </Button>
-              <Button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white">
-                {editingTask ? "Mettre à jour" : "Créer"}
+              <Button 
+                type="submit" 
+                className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white h-11 font-medium shadow-lg shadow-indigo-500/25"
+              >
+                {editingTask ? "Mettre à jour" : "Créer la tâche"}
               </Button>
             </div>
           </form>
