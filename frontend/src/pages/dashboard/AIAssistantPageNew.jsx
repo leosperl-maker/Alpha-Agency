@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { 
   Bot, Send, Loader2, Sparkles, User, Image as ImageIcon,
-  MessageSquare, Trash2, Plus, History, X, Upload, Wand2,
-  ChevronLeft, Settings2, Zap, Camera, Download
+  MessageSquare, Trash2, Plus, X, Upload, Wand2,
+  ChevronLeft, Camera, Download, Zap
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -11,7 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from "../../components/ui/select";
 import { toast } from "sonner";
-import { aiEnhancedAPI } from "../../lib/api";
+import { aiEnhancedAPI, aiAPI } from "../../lib/api";
 
 const AIAssistantPageNew = () => {
   const [messages, setMessages] = useState([]);
@@ -26,7 +26,7 @@ const AIAssistantPageNew = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatedImage, setGeneratedImage] = useState(null);
-  const [mode, setMode] = useState("chat"); // chat, analyze, generate
+  const [mode, setMode] = useState("chat");
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -110,30 +110,54 @@ const AIAssistantPageNew = () => {
     setInput("");
     setLoading(true);
     
-    const tempImage = imagePreview;
     removeAttachedImage();
 
     try {
-      const res = await aiEnhancedAPI.chat({
-        messages: [...messages, userMessage],
-        conversation_id: currentConversationId,
-        model: selectedModel
-      });
+      // Use Perplexity for text-only, enhanced API for vision
+      let response;
+      
+      if (selectedModel === "perplexity" && !userMessage.image_url) {
+        // Use legacy Perplexity API
+        response = await aiAPI.chat({
+          messages: [...messages, { role: "user", content: userContent }],
+          context_type: "general"
+        });
+        
+        const assistantMessage = {
+          role: "assistant",
+          content: response.data.message
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        
+        if (response.data.usage) {
+          setStatus(prev => ({
+            ...prev,
+            remaining: response.data.usage.remaining
+          }));
+        }
+      } else {
+        // Use enhanced API for GPT-4o / Gemini
+        response = await aiEnhancedAPI.chat({
+          messages: [...messages, userMessage],
+          conversation_id: currentConversationId,
+          model: selectedModel
+        });
 
-      const assistantMessage = {
-        role: "assistant",
-        content: res.data.message
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
-      setCurrentConversationId(res.data.conversation_id);
-      
-      if (res.data.usage) {
-        setStatus(prev => ({
-          ...prev,
-          remaining: res.data.usage.remaining,
-          calls_today: res.data.usage.calls_today
-        }));
+        const assistantMessage = {
+          role: "assistant",
+          content: response.data.message
+        };
+        
+        setMessages(prev => [...prev, assistantMessage]);
+        setCurrentConversationId(response.data.conversation_id);
+        
+        if (response.data.usage) {
+          setStatus(prev => ({
+            ...prev,
+            remaining: response.data.usage.remaining,
+            calls_today: response.data.usage.calls_today
+          }));
+        }
       }
       
       fetchConversations();
@@ -191,134 +215,183 @@ const AIAssistantPageNew = () => {
     }
   };
 
-  return (
-    <div className="admin-body h-[calc(100vh-4rem)] flex relative z-10">
-      {/* Sidebar - Conversations */}
-      <aside className={`glass-sidebar w-72 flex-shrink-0 flex flex-col transition-all duration-300 ${sidebarOpen ? '' : '-ml-72'}`}>
-        <div className="p-4 border-b border-white/5">
-          <Button 
-            onClick={startNewConversation}
-            className="w-full btn-neon flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Nouvelle conversation
-          </Button>
-        </div>
-        
-        <ScrollArea className="flex-1 p-3">
-          <div className="space-y-1">
-            {conversations.map(conv => (
-              <div
-                key={conv.id}
-                onClick={() => loadConversation(conv.id)}
-                className={`group p-3 rounded-xl cursor-pointer transition-all ${
-                  currentConversationId === conv.id 
-                    ? 'bg-indigo-500/20 border border-indigo-500/30' 
-                    : 'hover:bg-white/5'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm text-white/80 line-clamp-2">{conv.title}</p>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); handleDeleteConversation(conv.id); }}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-white/10 text-white/40 hover:text-red-400 transition-all"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-                <p className="text-xs text-white/40 mt-1">
-                  {new Date(conv.updated_at || conv.created_at).toLocaleDateString('fr-FR')}
-                </p>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
+  // Model options with descriptions
+  const modelOptions = [
+    { value: "gpt-4o", label: "GPT-4o", description: "Vision + Texte", icon: "🤖" },
+    { value: "gemini-3-flash-preview", label: "Gemini 3 Flash", description: "Rapide", icon: "⚡" },
+    { value: "perplexity", label: "Perplexity", description: "Recherche web", icon: "🔍" },
+  ];
 
-        {/* Status */}
-        <div className="p-4 border-t border-white/5">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-white/50">Requêtes restantes</span>
-            <span className={`font-semibold ${status?.remaining > 50 ? 'neon-green' : status?.remaining > 10 ? 'neon-orange' : 'text-red-400'}`}>
-              {status?.remaining || 0}/{status?.daily_limit || 200}
-            </span>
+  return (
+    <div className="h-[calc(100vh-4rem)] flex bg-[#0a0a12] relative overflow-hidden">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/30 via-transparent to-purple-950/20 pointer-events-none" />
+      
+      {/* Sidebar - Conversations */}
+      <aside className={`
+        relative z-10 flex-shrink-0 flex flex-col transition-all duration-300 
+        bg-black/40 backdrop-blur-xl border-r border-white/10
+        ${sidebarOpen ? 'w-72' : 'w-0 -ml-1'}
+        md:relative fixed inset-y-0 left-0
+      `}>
+        <div className={`${sidebarOpen ? 'opacity-100' : 'opacity-0'} transition-opacity flex flex-col h-full`}>
+          {/* New conversation button */}
+          <div className="p-4 border-b border-white/10">
+            <Button 
+              onClick={startNewConversation}
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nouvelle conversation
+            </Button>
+          </div>
+          
+          {/* Conversations list */}
+          <ScrollArea className="flex-1 p-3">
+            <div className="space-y-2">
+              {conversations.map(conv => (
+                <div
+                  key={conv.id}
+                  onClick={() => loadConversation(conv.id)}
+                  className={`
+                    group p-3 rounded-xl cursor-pointer transition-all duration-200
+                    ${currentConversationId === conv.id 
+                      ? 'bg-indigo-600/20 border border-indigo-500/40 shadow-lg shadow-indigo-500/10' 
+                      : 'bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10'}
+                  `}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm text-white/90 line-clamp-2 font-medium">{conv.title}</p>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleDeleteConversation(conv.id); }}
+                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-500/20 text-white/40 hover:text-red-400 transition-all"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-white/40 mt-1.5">
+                    {new Date(conv.updated_at || conv.created_at).toLocaleDateString('fr-FR')}
+                  </p>
+                </div>
+              ))}
+              {conversations.length === 0 && (
+                <p className="text-center text-white/30 text-sm py-8">Aucune conversation</p>
+              )}
+            </div>
+          </ScrollArea>
+
+          {/* Status footer */}
+          <div className="p-4 border-t border-white/10 bg-black/20">
+            <div className="flex items-center justify-between">
+              <span className="text-white/50 text-sm">Requêtes</span>
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${status?.remaining > 50 ? 'bg-green-500' : status?.remaining > 10 ? 'bg-yellow-500' : 'bg-red-500'}`} />
+                <span className="text-white font-semibold text-sm">
+                  {status?.remaining || 0}/{status?.daily_limit || 200}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </aside>
 
-      {/* Toggle Sidebar */}
+      {/* Toggle Sidebar Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-50 bg-indigo-600 p-1.5 rounded-r-lg text-white hover:bg-indigo-500 transition-all"
-        style={{ left: sidebarOpen ? '288px' : '0' }}
+        className={`
+          absolute z-20 top-1/2 -translate-y-1/2 
+          bg-indigo-600 hover:bg-indigo-500 p-1.5 rounded-r-lg text-white 
+          transition-all duration-300 shadow-lg
+          ${sidebarOpen ? 'left-72' : 'left-0'}
+        `}
       >
-        <ChevronLeft className={`w-4 h-4 transition-transform ${sidebarOpen ? '' : 'rotate-180'}`} />
+        <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${sidebarOpen ? '' : 'rotate-180'}`} />
       </button>
 
       {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 relative z-10">
         {/* Header */}
-        <header className="glass-topbar px-6 py-4 flex items-center justify-between">
+        <header className="px-4 md:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-black/30 backdrop-blur-xl border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center animate-pulse-neon">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-white">Assistant IA Alpha</h1>
-              <p className="text-xs text-white/50">Propulsé par GPT-4o & Gemini</p>
+              <h1 className="text-lg font-bold text-white">Assistant IA Alpha</h1>
+              <p className="text-xs text-white/50">GPT-4o • Gemini • Perplexity</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {/* Mode Toggle */}
-            <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
+            <div className="flex items-center bg-white/5 rounded-xl p-1 border border-white/10">
               <button
                 onClick={() => setMode("chat")}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${mode === "chat" ? "bg-indigo-600 text-white" : "text-white/60 hover:text-white"}`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                  mode === "chat" 
+                    ? "bg-indigo-600 text-white shadow-lg" 
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                }`}
               >
-                <MessageSquare className="w-4 h-4 inline mr-1" />
-                Chat
+                <MessageSquare className="w-4 h-4" />
+                <span className="hidden sm:inline">Chat</span>
               </button>
               <button
                 onClick={() => setMode("generate")}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${mode === "generate" ? "bg-purple-600 text-white" : "text-white/60 hover:text-white"}`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                  mode === "generate" 
+                    ? "bg-purple-600 text-white shadow-lg" 
+                    : "text-white/60 hover:text-white hover:bg-white/5"
+                }`}
               >
-                <Wand2 className="w-4 h-4 inline mr-1" />
-                Générer
+                <Wand2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Générer</span>
               </button>
             </div>
 
             {/* Model Select */}
             <Select value={selectedModel} onValueChange={setSelectedModel}>
-              <SelectTrigger className="w-44 input-neon">
-                <SelectValue />
+              <SelectTrigger className="w-48 bg-white/5 border-white/10 text-white hover:bg-white/10">
+                <SelectValue placeholder="Choisir un modèle" />
               </SelectTrigger>
-              <SelectContent className="bg-[#1a1a2e] border-white/10">
-                <SelectItem value="gpt-4o">GPT-4o (Vision)</SelectItem>
-                <SelectItem value="gemini-3-flash-preview">Gemini 3 Flash</SelectItem>
+              <SelectContent className="bg-[#1a1a2e] border-white/20 shadow-xl">
+                {modelOptions.map(model => (
+                  <SelectItem 
+                    key={model.value} 
+                    value={model.value}
+                    className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>{model.icon}</span>
+                      <span className="font-medium">{model.label}</span>
+                      <span className="text-white/50 text-xs">({model.description})</span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </header>
 
         {/* Messages Area */}
-        <ScrollArea className="flex-1 p-6">
+        <ScrollArea className="flex-1 p-4 md:p-6">
           {mode === "chat" ? (
             <div className="max-w-4xl mx-auto space-y-6">
               {messages.length === 0 ? (
-                <div className="text-center py-20 animate-fade-in">
-                  <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-600/20 border border-indigo-500/30 flex items-center justify-center mb-6">
+                <div className="text-center py-12 md:py-20">
+                  <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-600/20 border border-indigo-500/30 flex items-center justify-center mb-6 shadow-xl shadow-indigo-500/10">
                     <Bot className="w-10 h-10 text-indigo-400" />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-2">Comment puis-je vous aider ?</h2>
-                  <p className="text-white/50 max-w-md mx-auto">
+                  <h2 className="text-xl md:text-2xl font-bold text-white mb-2">Comment puis-je vous aider ?</h2>
+                  <p className="text-white/50 max-w-md mx-auto text-sm md:text-base">
                     Posez une question, envoyez une image à analyser, ou demandez-moi de générer du contenu.
                   </p>
                   <div className="flex flex-wrap justify-center gap-2 mt-6">
-                    {["Résume mes ventes du mois", "Analyse cette image", "Rédige un email client", "Suggère des tags"].map((suggestion, i) => (
+                    {["Résume mes ventes", "Analyse cette image", "Rédige un email", "Idées marketing"].map((suggestion, i) => (
                       <button
                         key={i}
                         onClick={() => setInput(suggestion)}
-                        className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:border-indigo-500/50 transition-all"
+                        className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:bg-white/10 hover:border-indigo-500/50 hover:text-white transition-all"
                       >
                         {suggestion}
                       </button>
@@ -329,28 +402,27 @@ const AIAssistantPageNew = () => {
                 messages.map((msg, idx) => (
                   <div
                     key={idx}
-                    className={`flex gap-4 animate-slide-up ${msg.role === "user" ? "justify-end" : ""}`}
-                    style={{ animationDelay: `${idx * 50}ms` }}
+                    className={`flex gap-3 md:gap-4 ${msg.role === "user" ? "justify-end" : ""}`}
                   >
                     {msg.role === "assistant" && (
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg">
                         <Sparkles className="w-4 h-4 text-white" />
                       </div>
                     )}
-                    <div className={`max-w-2xl ${msg.role === "user" ? "order-first" : ""}`}>
+                    <div className={`max-w-[85%] md:max-w-2xl ${msg.role === "user" ? "order-first" : ""}`}>
                       <div className={`rounded-2xl p-4 ${
                         msg.role === "user" 
-                          ? "bg-indigo-600/80 text-white ml-auto" 
-                          : "glass-panel text-white/90"
+                          ? "bg-indigo-600 text-white ml-auto" 
+                          : "bg-white/5 backdrop-blur-sm border border-white/10 text-white/90"
                       }`}>
                         {msg.image_url && (
-                          <img src={msg.image_url} alt="Attached" className="max-w-xs rounded-lg mb-3" />
+                          <img src={msg.image_url} alt="Attached" className="max-w-full md:max-w-xs rounded-lg mb-3" />
                         )}
-                        <p className="whitespace-pre-wrap">{msg.content}</p>
+                        <p className="whitespace-pre-wrap text-sm md:text-base">{msg.content}</p>
                       </div>
                     </div>
                     {msg.role === "user" && (
-                      <div className="w-8 h-8 rounded-lg bg-cyan-600 flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-cyan-600 flex items-center justify-center flex-shrink-0 shadow-lg">
                         <User className="w-4 h-4 text-white" />
                       </div>
                     )}
@@ -358,14 +430,14 @@ const AIAssistantPageNew = () => {
                 ))
               )}
               {loading && (
-                <div className="flex gap-4 animate-slide-up">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center animate-pulse">
+                <div className="flex gap-4">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center animate-pulse shadow-lg">
                     <Sparkles className="w-4 h-4 text-white" />
                   </div>
-                  <div className="glass-panel rounded-2xl p-4">
+                  <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
                     <div className="flex items-center gap-2 text-white/60">
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Réflexion en cours...
+                      <span className="text-sm">Réflexion en cours...</span>
                     </div>
                   </div>
                 </div>
@@ -374,17 +446,17 @@ const AIAssistantPageNew = () => {
             </div>
           ) : (
             /* Image Generation Mode */
-            <div className="max-w-2xl mx-auto py-10 animate-fade-in">
+            <div className="max-w-2xl mx-auto py-6 md:py-10">
               <div className="text-center mb-8">
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-600/20 border border-purple-500/30 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-600/20 border border-purple-500/30 flex items-center justify-center mb-4 shadow-xl">
                   <Wand2 className="w-8 h-8 text-purple-400" />
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-2">Générateur d'images IA</h2>
-                <p className="text-white/50">Décrivez l'image que vous souhaitez créer</p>
+                <h2 className="text-xl md:text-2xl font-bold text-white mb-2">Générateur d'images IA</h2>
+                <p className="text-white/50 text-sm">Décrivez l'image que vous souhaitez créer</p>
               </div>
 
               {generatedImage && (
-                <div className="mb-6 glass-panel p-4 rounded-2xl">
+                <div className="mb-6 bg-white/5 backdrop-blur-sm border border-white/10 p-4 rounded-2xl">
                   <img src={generatedImage} alt="Generated" className="w-full rounded-xl mb-4" />
                   <div className="flex justify-center gap-3">
                     <Button onClick={downloadGeneratedImage} variant="outline" className="border-white/20 text-white hover:bg-white/10">
@@ -398,19 +470,22 @@ const AIAssistantPageNew = () => {
                 </div>
               )}
 
-              <div className="glass-panel rounded-2xl p-6">
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 md:p-6">
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ex: Un logo moderne pour une agence digitale, style minimaliste, couleurs bleu et violet..."
-                  className="w-full h-32 bg-transparent border-none resize-none text-white placeholder-white/30 focus:outline-none"
+                  className="w-full h-32 bg-transparent border-none resize-none text-white placeholder-white/30 focus:outline-none text-sm md:text-base"
                 />
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-                  <p className="text-xs text-white/40">Gemini Nano Banana</p>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 pt-4 border-t border-white/10">
+                  <p className="text-xs text-white/40 flex items-center gap-2">
+                    <Zap className="w-3 h-3" />
+                    Gemini Nano Banana
+                  </p>
                   <Button 
                     onClick={handleGenerateImage}
                     disabled={!input.trim() || generatingImage}
-                    className="btn-neon bg-gradient-to-r from-purple-600 to-pink-600"
+                    className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium"
                   >
                     {generatingImage ? (
                       <>
@@ -420,7 +495,7 @@ const AIAssistantPageNew = () => {
                     ) : (
                       <>
                         <Wand2 className="w-4 h-4 mr-2" />
-                        Générer
+                        Générer l'image
                       </>
                     )}
                   </Button>
@@ -432,16 +507,16 @@ const AIAssistantPageNew = () => {
 
         {/* Input Area (Chat Mode) */}
         {mode === "chat" && (
-          <div className="p-4 border-t border-white/5">
+          <div className="p-4 border-t border-white/10 bg-black/30 backdrop-blur-xl">
             <div className="max-w-4xl mx-auto">
               {/* Image Preview */}
               {imagePreview && (
                 <div className="mb-3 flex items-start gap-2">
                   <div className="relative">
-                    <img src={imagePreview} alt="Preview" className="h-20 rounded-lg border border-white/20" />
+                    <img src={imagePreview} alt="Preview" className="h-16 md:h-20 rounded-lg border border-white/20" />
                     <button
                       onClick={removeAttachedImage}
-                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white hover:bg-red-600"
+                      className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white hover:bg-red-600 shadow-lg"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -449,7 +524,7 @@ const AIAssistantPageNew = () => {
                 </div>
               )}
 
-              <div className="flex items-end gap-3">
+              <div className="flex items-end gap-2 md:gap-3">
                 <input
                   type="file"
                   accept="image/*"
@@ -459,19 +534,19 @@ const AIAssistantPageNew = () => {
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="p-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white hover:border-indigo-500/50 transition-all"
+                  className="p-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white hover:border-indigo-500/50 transition-all flex-shrink-0"
                   title="Joindre une image"
                 >
                   <Camera className="w-5 h-5" />
                 </button>
 
-                <div className="flex-1 relative">
+                <div className="flex-1">
                   <Input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                     placeholder={attachedImage ? "Décrivez ce que vous voulez savoir sur cette image..." : "Posez votre question..."}
-                    className="input-neon pr-12 py-6"
+                    className="bg-white/5 border-white/10 text-white placeholder-white/30 py-6 focus:border-indigo-500/50"
                     disabled={loading}
                   />
                 </div>
@@ -479,7 +554,7 @@ const AIAssistantPageNew = () => {
                 <Button
                   onClick={handleSend}
                   disabled={loading || (!input.trim() && !attachedImage)}
-                  className="btn-neon h-12 px-6"
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 h-12 px-4 md:px-6 flex-shrink-0"
                 >
                   {loading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
