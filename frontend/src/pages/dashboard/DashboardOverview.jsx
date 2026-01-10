@@ -455,35 +455,35 @@ const DashboardOverview = () => {
         </Card>
 
         {/* Budget Summary */}
-        <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
-              <Wallet className="w-5 h-5 text-[#8B5CF6]" />
+            <CardTitle className="text-white text-lg flex items-center gap-2">
+              <Wallet className="w-5 h-5 text-purple-400" />
               Budget du mois
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-3 bg-green-50 rounded-lg">
-                <div className="flex items-center justify-center gap-1 text-green-600 mb-1">
+              <div className="text-center p-3 bg-green-500/10 border border-green-500/20 rounded-xl">
+                <div className="flex items-center justify-center gap-1 text-green-400 mb-1">
                   <ArrowUp className="w-4 h-4" />
                   <span className="text-xs">Revenus</span>
                 </div>
-                <p className="text-lg font-bold text-green-700">{formatCurrency(budgetSummary?.total_income || 0)}</p>
+                <p className="text-lg font-bold text-green-400">{formatCurrency(budgetSummary?.total_income || 0)}</p>
               </div>
-              <div className="text-center p-3 bg-red-50 rounded-lg">
-                <div className="flex items-center justify-center gap-1 text-red-600 mb-1">
+              <div className="text-center p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <div className="flex items-center justify-center gap-1 text-red-400 mb-1">
                   <ArrowDown className="w-4 h-4" />
                   <span className="text-xs">Dépenses</span>
                 </div>
-                <p className="text-lg font-bold text-red-700">{formatCurrency(budgetSummary?.total_expense || 0)}</p>
+                <p className="text-lg font-bold text-red-400">{formatCurrency(budgetSummary?.total_expense || 0)}</p>
               </div>
-              <div className={`text-center p-3 rounded-lg ${(budgetSummary?.balance || 0) >= 0 ? 'bg-blue-50' : 'bg-orange-50'}`}>
-                <div className={`flex items-center justify-center gap-1 mb-1 ${(budgetSummary?.balance || 0) >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+              <div className={`text-center p-3 rounded-xl ${(budgetSummary?.balance || 0) >= 0 ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-orange-500/10 border border-orange-500/20'}`}>
+                <div className={`flex items-center justify-center gap-1 mb-1 ${(budgetSummary?.balance || 0) >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>
                   <Euro className="w-4 h-4" />
                   <span className="text-xs">Solde</span>
                 </div>
-                <p className={`text-lg font-bold ${(budgetSummary?.balance || 0) >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
+                <p className={`text-lg font-bold ${(budgetSummary?.balance || 0) >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>
                   {formatCurrency(budgetSummary?.balance || 0)}
                 </p>
               </div>
