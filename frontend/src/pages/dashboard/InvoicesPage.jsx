@@ -306,15 +306,18 @@ const InvoicesPage = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      const validItems = items.filter(item => item.description && item.unit_price > 0);
+      const validItems = items.filter(item => (item.title || item.description) && item.unit_price > 0);
       const payload = {
         ...formData,
         document_type: documentType,
         items: validItems.map(item => ({
-          description: item.description,
+          title: item.title || "",
+          description: item.description || "",
           quantity: item.quantity,
-          unit_price: parseFloat(item.unit_price)
-        }))
+          unit_price: parseFloat(item.unit_price),
+          discount: parseFloat(item.discount) || 0
+        })),
+        global_discount: globalDiscount
       };
 
       if (editingInvoice) {
