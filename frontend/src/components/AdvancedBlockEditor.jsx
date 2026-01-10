@@ -431,39 +431,190 @@ const GalleryBlockEditor = ({ block, onUpdate }) => {
   );
 };
 
-const VideoBlockEditor = ({ block, onUpdate }) => (
-  <div className="space-y-3">
-    <Select value={block.type || 'youtube'} onValueChange={(v) => onUpdate({ ...block, type: v })}>
-      <SelectTrigger className="w-40 bg-white"><SelectValue /></SelectTrigger>
-      <SelectContent className="bg-white">
-        <SelectItem value="youtube">YouTube</SelectItem>
-        <SelectItem value="vimeo">Vimeo</SelectItem>
-        <SelectItem value="direct">Fichier direct</SelectItem>
-      </SelectContent>
-    </Select>
-    <Input
-      value={block.url || ''}
-      onChange={(e) => onUpdate({ ...block, url: e.target.value })}
-      placeholder={block.type === 'youtube' ? 'URL YouTube (ex: https://youtu.be/xxx)' : 'URL de la vidéo'}
-      className="bg-white"
-    />
-    {block.url && block.type === 'youtube' && (
-      <div className="aspect-video bg-black rounded-lg overflow-hidden">
-        <iframe
-          src={`https://www.youtube.com/embed/${block.url.split('v=')[1]?.split('&')[0] || block.url.split('/').pop()}`}
-          className="w-full h-full"
-          allowFullScreen
-        />
+const VideoBlockEditor = ({ block, onUpdate }) => {
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = async (e) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      if (file.size > 100 * 1024 * 1024) {
+        toast.error("Fichier trop volumineux (max 100MB)");
+        return;
+      }
+      setUploading(true);
+      try {
+        const res = await uploadAPI.video(file);
+        onUpdate({ ...block, url: res.data.url, type: 'direct' });
+        toast.success("Vidéo uploadée");
+      } catch (err) {
+        toast.error("Erreur upload vidéo");
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+
+  const getEmbedUrl = () => {
+    if (!block.url) return null;
+    if (block.type === 'youtube') {
+      const videoId = block.url.includes('v=') 
+        ? block.url.split('v=')[1]?.split('&')[0] 
+        : block.url.split('/').pop()?.split('?')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    if (block.type === 'vimeo') {
+      const videoId = block.url.split('/').pop()?.split('?')[0];
+      return `https://player.vimeo.com/video/${videoId}`;
+    }
+    return null;
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2 flex-wrap">
+        <Select value={block.type || 'youtube'} onValueChange={(v) => onUpdate({ ...block, type: v, url: '' })}>
+          <SelectTrigger className="w-40 bg-white"><SelectValue /></SelectTrigger>
+          <SelectContent className="bg-white">
+            <SelectItem value="youtube">YouTube</SelectItem>
+            <SelectItem value="vimeo">Vimeo</SelectItem>
+            <SelectItem value="direct">Fichier uploadé</SelectItem>
+          </SelectContent>
+        </Select>
+        {block.type === 'direct' && (
+          <label className="cursor-pointer">
+            <Button variant="outline" size="sm" disabled={uploading} asChild>
+              <span>
+                {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                {uploading ? 'Upload...' : 'Uploader vidéo'}
+              </span>
+            </Button>
+            <input type="file" accept="video/*" className="hidden" onChange={handleUpload} />
+          </label>
+        )}
       </div>
-    )}
-    <Input
-      value={block.caption || ''}
-      onChange={(e) => onUpdate({ ...block, caption: e.target.value })}
-      placeholder="Légende (optionnel)"
-      className="bg-white"
-    />
-  </div>
-);
+      
+      {block.type !== 'direct' && (
+        <Input
+          value={block.url || ''}
+          onChange={(e) => onUpdate({ ...block, url: e.target.value })}
+          placeholder={block.type === 'youtube' ? 'URL YouTube (ex: https://youtu.be/xxx)' : 'URL Vimeo'}
+          className="bg-white"
+        />
+      )}
+      
+      {block.url && (
+        <div className="aspect-video bg-black rounded-lg overflow-hidden">
+          {block.type === 'direct' ? (
+            <video src={block.url} controls className="w-full h-full" />
+          ) : (
+            <iframe
+              src={getEmbedUrl()}
+              className="w-full h-full"
+              allowFullScreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            />
+          )}
+        </div>
+      )}
+      
+      <Input
+        value={block.caption || ''}
+        onChange={(e) => onUpdate({ ...block, caption: e.target.value })}
+        placeholder="Légende (optionnel)"
+        className="bg-white"
+      />
+    </div>
+  );
+};
+
+const PDFBlockEditor = ({ block, onUpdate }) => {
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = async (e) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error("Fichier trop volumineux (max 50MB)");
+        return;
+      }
+      setUploading(true);
+      try {
+        const res = await uploadAPI.file(file);
+        onUpdate({ ...block, url: res.data.url, title: file.name });
+        toast.success("PDF uploadé");
+      } catch (err) {
+        toast.error("Erreur upload PDF");
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2 items-center">
+        <label className="cursor-pointer flex-1">
+          <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${block.url ? 'border-green-500 bg-green-50' : 'border-[#E5E5E5] hover:border-[#CE0202]'}`}>
+            {uploading ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="w-6 h-6 animate-spin text-[#CE0202]" />
+                <span>Upload en cours...</span>
+              </div>
+            ) : block.url ? (
+              <div className="flex items-center justify-center gap-2 text-green-700">
+                <Link2 className="w-6 h-6" />
+                <span className="font-medium">{block.title || 'Document PDF'}</span>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-[#666666]">
+                <Upload className="w-8 h-8" />
+                <span>Cliquez pour uploader un PDF</span>
+                <span className="text-xs">(max 50MB)</span>
+              </div>
+            )}
+          </div>
+          <input type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleUpload} />
+        </label>
+      </div>
+      
+      {block.url && (
+        <>
+          <Input
+            value={block.title || ''}
+            onChange={(e) => onUpdate({ ...block, title: e.target.value })}
+            placeholder="Titre du document"
+            className="bg-white"
+          />
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={block.preview !== false} 
+                onChange={(e) => onUpdate({ ...block, preview: e.target.checked })}
+                className="rounded border-gray-300"
+              />
+              <span className="text-sm">Afficher aperçu</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={block.downloadable !== false} 
+                onChange={(e) => onUpdate({ ...block, downloadable: e.target.checked })}
+                className="rounded border-gray-300"
+              />
+              <span className="text-sm">Téléchargeable</span>
+            </label>
+          </div>
+          {block.preview !== false && (
+            <div className="border rounded-lg overflow-hidden bg-gray-100" style={{height: '400px'}}>
+              <iframe src={block.url} className="w-full h-full" title={block.title || 'PDF'} />
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
 
 const BeforeAfterBlockEditor = ({ block, onUpdate }) => {
   const [uploading, setUploading] = useState(null);
