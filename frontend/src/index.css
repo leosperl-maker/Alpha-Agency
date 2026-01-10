@@ -79,63 +79,71 @@ body.dark {
     color: #E1E1E1;
 }
 
-/* Pipeline horizontal scrollbar - ALWAYS visible */
+/* Pipeline horizontal scrollbar - ALWAYS visible custom scrollbar */
 .pipeline-scroll {
-    overflow-x: scroll !important;
+    overflow-x: auto;
     overflow-y: visible;
-    padding-bottom: 20px;
+    padding-bottom: 8px;
     -webkit-overflow-scrolling: touch;
+    position: relative;
 }
 
-/* Force scrollbar to always show - works on macOS/Windows */
-.pipeline-scroll::-webkit-scrollbar {
-    -webkit-appearance: none;
-    height: 14px;
+/* Custom scrollbar track - always visible */
+.pipeline-scroll-track {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
     background: #E5E5E5;
-    border-radius: 7px;
-    display: block !important;
+    border-radius: 5px;
+    margin: 8px 16px 0;
+    z-index: 10;
+}
+
+.pipeline-scroll-thumb {
+    height: 100%;
+    background: #CE0202;
+    border-radius: 5px;
+    cursor: grab;
+    transition: background 0.2s;
+}
+
+.pipeline-scroll-thumb:hover {
+    background: #B00202;
+}
+
+.pipeline-scroll-thumb:active {
+    cursor: grabbing;
+}
+
+/* Native scrollbar styling (backup) */
+.pipeline-scroll::-webkit-scrollbar {
+    height: 10px;
+    background: #E5E5E5;
+    border-radius: 5px;
 }
 
 .pipeline-scroll::-webkit-scrollbar-track {
     background: #E5E5E5;
-    border-radius: 7px;
-    margin: 0 16px;
+    border-radius: 5px;
 }
 
 .pipeline-scroll::-webkit-scrollbar-thumb {
     background: #CE0202;
-    border-radius: 7px;
-    min-width: 80px;
-    border: 3px solid #E5E5E5;
+    border-radius: 5px;
 }
 
 .pipeline-scroll::-webkit-scrollbar-thumb:hover {
     background: #B00202;
 }
 
-/* Firefox scrollbar - always visible */
+/* Firefox */
 @supports (-moz-appearance: none) {
     .pipeline-scroll {
-        scrollbar-width: auto !important;
+        scrollbar-width: thin;
         scrollbar-color: #CE0202 #E5E5E5;
     }
-}
-
-/* Fallback indicator for scroll */
-.pipeline-scroll::after {
-    content: '← Défiler →';
-    position: sticky;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 0;
-    display: block;
-    text-align: center;
-    font-size: 11px;
-    color: #999;
-    padding: 4px 12px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 4px;
-    pointer-events: none;
 }
 
 /* Noise texture overlay - lower z-index to not interfere with dropdowns */
