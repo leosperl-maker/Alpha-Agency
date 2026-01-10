@@ -219,6 +219,7 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 ├── server.py              # Principal (en refactorisation)
 ├── routes/
 │   ├── __init__.py
+│   ├── ai_enhanced.py     # ✅ NOUVEAU - Context-Aware AI
 │   ├── auth.py            # Créé (pas encore migré)
 │   ├── backup.py          # ✅ Actif
 │   ├── blog.py            # ✅ NOUVEAU - Actif
