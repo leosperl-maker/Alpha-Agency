@@ -1,337 +1,147 @@
 # Alpha Agency CRM - Product Requirements Document
 
-## Original Problem Statement
-Application CRM full-stack pour Alpha Agency (agence de communication en Guadeloupe) permettant de gérer les contacts, le pipeline commercial, les devis, les factures, les abonnements, le portfolio et les tâches.
+## Overview
+Application CRM complète pour agence de communication en Guadeloupe (Alpha Agency). Gestion des contacts, leads, facturation, portfolio, blog, actualités locales et campagnes marketing.
 
-## User Personas
-- **Super Admin**: Propriétaire de l'agence, gère tous les aspects du CRM
-- **Admin**: Employés de l'agence avec accès complet sauf gestion des utilisateurs
-- **Clients**: Contacts et prospects dans le CRM
+## Core Features
 
-## Tech Stack
-- **Backend**: FastAPI (Python)
-- **Frontend**: React + Tailwind CSS + Shadcn UI
-- **Database**: MongoDB
-- **Drag & Drop**: @dnd-kit/core, @dnd-kit/sortable
-- **Charts**: Recharts
-- **AI**: Perplexity API (model: llama-3.1-sonar-small-128k-online)
-- **PDF**: ReportLab
-- **Storage**: Cloudinary (images), Dropbox (backups)
+### 1. Dashboard & Analytics
+- KPIs principaux (sessions, leads, taux conversion, MRR)
+- Graphiques d'évolution
+- Notifications et alertes
 
-## Latest Updates (2026-01-09)
+### 2. Contacts Management
+- CRUD contacts avec filtres
+- Import/export
+- Tags et catégorisation
 
-### Éditeur d'Email Visuel (Drag & Drop) ✅ NEW (2026-01-09)
-- [x] **Composant `EmailEditor.jsx`** - Éditeur complet sans code
-- [x] **10 types de blocs** : En-tête, Texte, Titre, Image, Bouton CTA, Séparateur, 2 Colonnes, Espace, Réseaux sociaux, Footer
-- [x] **Éditeur par bloc** : Couleurs, alignement, contenu, URL
-- [x] **3 modes de vue** : Éditer, Aperçu, Code HTML
-- [x] **Variables dynamiques** : {{first_name}}, {{company_name}}, {{logo_url}}, etc.
-- [x] **Export HTML** : Génération automatique du code email responsive
-- [x] **Intégration Campagnes** : Bouton "Utiliser ce design" → création de campagne
+### 3. Pipeline (CRM)
+- Kanban des opportunités
+- Colonnes personnalisables
+- Drag & drop
 
-### Refactorisation Backend ✅ NEW
-- [x] **Extraction du module News** vers `/routes/news.py` - Code plus maintenable
-- [x] **Extraction du module Meta** vers `/routes/meta.py` - Facebook/Instagram
-- [x] **Module Campagnes** dans `/routes/campaigns.py` - Email & SMS marketing
-- [x] **Module Database** partagé `/routes/database.py` - Connexion MongoDB centralisée
-- [x] **server.py réduit** de 6400 à 6236 lignes
+### 4. Facturation ✅ UPDATED 2026-01-10
+- Devis et factures avec prévisualisation PDF
+- **Services avec titre séparé de la description**
+- **Remises par ligne (%)**
+- **Remise globale (% ou montant fixe)**
+- Suivi des paiements
+- TVA 8.5% (Guadeloupe)
 
-### Gestion des clés API ✅ NEW
-- [x] **Onglet "API"** dans les paramètres - Vue d'ensemble de toutes les clés
-- [x] **6 intégrations configurées** : Brevo, NewsAPI (4 clés), Perplexity, Cloudinary, Meta, Stripe
-- [x] **Bouton "Tester"** pour vérifier le fonctionnement des clés
-- [x] **Liens vers la documentation** de chaque service
+### 5. Budget & Trésorerie
+- Graphique évolution mensuelle (combine budget + bank_transactions)
+- Catégories de dépenses
+- Prévisionnel
 
-### Templates d'email prédéfinis ✅ NEW
-- [x] **4 templates professionnels** : Newsletter, Promotion, Relance, Bienvenue
-- [x] **Prévisualisation avec images**
-- [x] **Contenu HTML complet** avec variables personnalisables ({{first_name}}, {{company_name}}, etc.)
-- [x] **Intégration dans la création de campagne** - Un clic pour charger le template
+### 6. Portfolio (Réalisations) ✅ REFONTE COMPLÈTE 2026-01-09
+- **Éditeur de blocs avancé (15 types)**:
+  - Texte, Titre (H1-H4), Liste, Citation
+  - Image, Galerie (lightbox), Vidéo, Avant/Après
+  - Séparateur, Espace, Section couleur
+  - Statistiques, Bouton CTA, Accordéon, Code
+- Page publique haut de gamme avec filtres
+- Page détail avec métadonnées (client, date, lien)
+- Projets similaires en pied de page
 
-### NewsAPI Multi-clés ✅ NEW
-- [x] **4 clés API NewsAPI** pour éviter les limites de taux
-- [x] **Distribution automatique** des requêtes entre les clés
-- [x] **246 articles** récupérés pour les régions DOM-TOM et France
-- [x] **Gestion intelligente** des clés épuisées (bascule sur la suivante)
+### 7. Blog
+- Articles avec éditeur riche
+- Tags et catégories
+- SEO optimisé
 
-### Bugs Corrigés ✅
-- [x] **Suppression devis** - Route DELETE ajoutée, fonctionne maintenant ✅
-- [x] **Budget & Trésorerie** - Cashflow utilise maintenant les entrées budget + bank_transactions ✅
-- [x] **Budget prévisionnel** - Le "réel" s'affiche correctement (combine budget + transactions) ✅
-- [x] **Assistant IA** - Fonctionnel (erreur était côté authentification frontend)
+### 8. Actualités Locales
+- Intégration NewsAPI avec mots-clés locaux
+- Sources: Guadeloupe, Martinique, Antilles
+- Multiple clés API pour éviter rate limits
 
-### Module Blog/Actualités ✅ NEW (2026-01-09)
-- [x] **Page /admin/blog** avec liste des articles
-- [x] **Éditeur riche** avec blocs de contenu (texte, titres H2/H3, images, galeries, citations, audio, vidéo)
-- [x] **Gestion des tags** (créer, supprimer)
-- [x] **Filtres** par statut (brouillon/publié) et par tag
-- [x] **CRUD complet** pour les articles
+### 9. Campagnes Email/SMS
+- Templates prédéfinis
+- Éditeur visuel drag-and-drop (react-email-editor)
+- Intégration Brevo
 
-### Core Features Implemented
+### 10. Intégrations Tierces
+- Perplexity AI (suggestions)
+- NewsAPI.org (actualités)
+- Brevo/Sendinblue (emails)
+- Meta (Facebook/Instagram) - EN COURS
 
-### Pipeline / Opportunities ✅ COMPLETE (Updated 2026-01-09)
-- [x] Kanban-style pipeline view style Pipedrive
-- [x] Colonnes personnalisables (CRUD + réordonnement)
-- [x] **Drag & Drop des colonnes** ✅
-- [x] **Drag & Drop des cartes** avec handles (GripVertical) ✅
-- [x] **Scroll horizontal** fonctionnel (grab cursor, overflow-x-auto) ✅
-- [x] **Menus contextuels** (Modifier/Voir détails/Archiver/Supprimer) ✅
-- [x] **Vue détaillée** des opportunités (Sheet panel) ✅
-- [x] KPIs en haut (Valeur pipeline, Affaires actives, Taux conversion, Valeur moyenne)
+## Architecture
 
-### Tâches ✅ COMPLETE (2026-01-09)
-- [x] Kanban-style task board
-- [x] **Colonnes configurables** (CRUD via bouton "Colonnes") ✅
-- [x] **Drag & Drop des tâches** avec handles ✅
-- [x] **Scroll horizontal** fonctionnel ✅
-- [x] **Menus contextuels** fonctionnels ✅
-- [x] **Vue détaillée** des tâches ✅
-- [x] Persistance colonnes en localStorage
+### Backend (FastAPI)
+```
+/app/backend/
+├── server.py          # Monolithique (en refactorisation)
+├── routes/
+│   ├── campaigns.py   # Module campagnes
+│   ├── database.py    # Utilitaires DB
+│   ├── meta.py        # Intégration Meta
+│   └── news.py        # Actualités locales
+└── requirements.txt
+```
 
-### Demandes ✅ COMPLETE (2026-01-09)
-- [x] **Barre de recherche** par nom, email, entreprise ✅
-- [x] **Filtre par statut** (Non traité, Contacté, Qualifié, Converti, Perdu) ✅
-- [x] **Encarts de résumé** (Total, Non traité, Contacté, Qualifié, Converti) ✅
-- [x] Liste des demandes avec informations complètes
-- [x] Vue détaillée avec actions (email, téléphone)
+### Frontend (React)
+```
+/app/frontend/src/
+├── components/
+│   ├── ui/                      # Shadcn components
+│   ├── AdvancedBlockEditor.jsx  # Éditeur 15 blocs
+│   ├── AdvancedBlockRenderer.jsx # Rendu public
+│   └── EmailEditor.jsx          # Éditeur emails
+├── pages/
+│   ├── dashboard/
+│   │   ├── InvoicesPage.jsx     # Facturation (avec remises)
+│   │   ├── PortfolioManagePageNew.jsx # Gestion portfolio
+│   │   ├── CampaignsPage.jsx    # Campagnes
+│   │   └── ...
+│   ├── PortfolioPageNew.jsx     # Page publique portfolio
+│   └── ...
+└── lib/api.js
+```
 
-### Facturation & Devis ✅ COMPLETE (2026-01-09)
-- [x] Interface double colonne (formulaire + aperçu) pour factures
-- [x] **Bouton Services** ajouté dans l'en-tête ✅
-- [x] Boutons "Nouveau devis" et "Nouvelle facture" redirigent vers la nouvelle interface
+## Completed Work (2026-01-09 / 2026-01-10)
 
-### Assistant IA (Perplexity) ✅ COMPLETE (Updated 2026-01-09)
-- [x] **Page /admin/assistant** avec interface de chat
-- [x] **Sidebar d'historique** des conversations ✅
-- [x] **Persistance backend** des messages ✅
-- [x] **Chargement des conversations** depuis l'historique ✅ FIXED
-- [x] **CRUD conversations** (créer, lire, modifier titre, supprimer) ✅
-- [x] **Conversion format legacy** automatique ✅
-- [x] Contexte CRM intelligent (Général, Pipeline, Contacts, Facturation, Budget)
-- [x] Limite 50 requêtes/jour avec compteur visible
-- [x] Prompts suggérés
+### Session 1 - 2026-01-09
+- ✅ Amélioration actualités locales (mots-clés spécifiques DOM-TOM)
+- ✅ Support multiple clés NewsAPI
+- ✅ Page gestion API dans paramètres
+- ✅ Templates campagne email
+- ✅ Éditeur email visuel drag-and-drop
+- ✅ Début refactorisation server.py (news, meta)
 
-### Bulle de Chat IA Flottante ✅ COMPLETE (Updated 2026-01-09)
-- [x] **Visible sur toutes les pages admin** sauf /admin/assistant ✅
-- [x] **Design amélioré** : panneau bien formaté, aligné, responsive ✅ FIXED
-- [x] **Fermeture propre** : redevient bulle immédiatement ✅ FIXED
-- [x] **Historique synchronisé** avec la page principale ✅
-- [x] Mini interface de chat fonctionnelle avec compteur
-- [x] Position fixe en bas à droite
+### Session 2 - 2026-01-10
+- ✅ Bug Pipeline scrollbar corrigé
+- ✅ Bug Budget graphique vérifié (données réelles)
+- ✅ Bug Facturation redirection corrigé
+- ✅ **REFONTE COMPLÈTE MODULE RÉALISATIONS**
+  - Éditeur 15 types de blocs
+  - Page publique style agence haut de gamme
+  - Suppression anciennes données, 2 projets exemples
+- ✅ **Facturation améliorée**
+  - Titre séparé de description pour services
+  - Remise par ligne (%)
+  - Remise globale (% ou € fixe)
 
-### Budget & Trésorerie (Module Avancé) ✅ ALL 4 PHASES COMPLETE
-- Phase 1 ✅ - Import CSV, Transactions, Catégories
-- Phase 2 ✅ - Règles auto-catégorisation avancées
-- Phase 3 ✅ - Budget Prévisionnel (Prévu vs Réel)
-- Phase 4 ✅ - Projection Cashflow Multi-mois
+## Pending Tasks
 
-### Réalisations (Portfolio Public) ✅ COMPLETE (Updated 2026-01-09)
-- [x] Page publique responsive
-- [x] **Galerie style moderne** avec images en scroll vertical ✅ REDESIGNED
-- [x] Images sur fond noir immersif
-- [x] Compteur d'images (1/2, 2/2, etc.)
-- [x] Section description et audio sous les images
-- [x] Bouton fermeture bien positionné
+### P1 - Priorité haute
+- [ ] Ajouter sources actualités Saint-Martin / Saint-Barth
+- [ ] Continuer refactorisation server.py (auth, contacts, budget, invoices)
 
-### Section Actualités (News) ✅ REFONTE COMPLETE (2026-01-09 - Style Perplexity Discover)
-- [x] **Design style Perplexity Discover** ✅ NEW
-- [x] **Grand titre "Les actualités du jour"** en haut ✅ NEW
-- [x] **Article principal en vedette** (image large à droite, titre + chapeau à gauche) ✅ NEW
-- [x] **Cartes d'articles** avec image, titre, résumé, date/heure, source ✅ NEW
-- [x] **13 filtres par catégorie** ✅ UPDATED
-  - Standard : Toutes, Général, Business, Tech, Science, Santé, Sports, Divertissement
-  - Marketing : Publicité en ligne, Réseaux sociaux, Growth & Funnels, CRM & Vente, Business Local, Design & Branding
-- [x] **9 régions DOM-TOM prioritaires** ✅ UPDATED
-  - Guadeloupe (défaut), Martinique, Saint-Martin, Saint-Barthélemy, Guyane
-  - France, États-Unis, Royaume-Uni, Allemagne
-- [x] **Intégration NewsAPI.org** - Actualités avec images de qualité ✅
-- [x] **Modal plein écran** au clic sur article (pas de navigation vers nouvelle page) ✅
-  - Image hero en haut (sans chevauchement avec titre)
-  - Boutons "Retour aux actualités" et X pour fermer
-  - Source avec bouton "Lire sur le site"
-  - Section "Découvrir aussi" avec 4 articles liés
-- [x] **Bouton Actualiser** pour rafraîchir les actualités
-- [x] **Suppression d'articles** individuelle
-
-### Social Media Manager (style Agorapulse) ✅ REFONTE UI COMPLETE (2026-01-09)
-- [x] **Architecture backend complète** (endpoints CRUD) ✅
-- [x] **Page /admin/social-media** style Agorapulse ✅
-- [x] **Vue Calendrier mensuel** avec posts par jour ✅
-- [x] **Vue Liste chronologique** (toggle Liste/Mois) ✅
-- [x] **NOUVELLE Modale de création de post 3 colonnes** ✅
-  - Colonne gauche: Sélection comptes FB/IG
-  - Colonne centrale: Rédaction + toolbar (emoji, localisation, hashtags)
-  - Zone médias: Drag & drop + parcourir fichiers
-  - Colonne droite: Aperçu en temps réel du post
-  - Toggle brouillon, Bouton Programmer orange #FF6B35
-- [x] **Preview réaliste Facebook** (avatar, nom, texte, réactions, boutons J'aime/Commenter/Partager) ✅
-- [x] **Preview réaliste Instagram** (avatar gradient, image carrée, icônes, 127 J'aime) ✅
-- [x] **Sélecteur de preview** (dropdown Facebook Feed / Instagram Feed) ✅
-- [x] **Toggle Desktop/Mobile** pour taille de preview ✅
-- [x] **Upload de médias** (photos/vidéos) pour posts programmés ✅
-- [x] **Bouton Writing Assistant SUPPRIMÉ** (sera géré via Assistant IA interne) ✅
-- [x] **Boîte de réception** avec filtres (Tous/Non lus/Répondus/Archivés) ✅
-- [x] **Onglet Comptes** pour connecter Facebook/Instagram ✅
-- [x] **Suggestions IA** pour réponses (Perplexity) ✅
-- [x] Stats en haut (Programmés, Publiés, Brouillons, Non lus, À répondre)
-- [x] **Design orange Agorapulse** (#FF6B35) appliqué
-- [ ] ⚠️ **Publication réelle** sur Meta - En attente OAuth integration
-
-## Responsive Design ✅ REFONTE COMPLÈTE (2026-01-09)
-Modèle appliqué : Pages "Vue d'ensemble" et "Demandes" utilisées comme référence
-
-### Patterns appliqués à toutes les pages :
-- **Container principal** : `space-y-4 sm:space-y-6 overflow-hidden`
-- **Header** : `flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3`
-- **Stats cards** : `grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4`
-- **Card content** : `p-3` avec `flex items-center gap-2`
-- **Icônes** : `w-4 h-4` avec `flex-shrink-0`
-- **Texte stats** : `text-lg sm:text-2xl` pour chiffres, `text-[10px] sm:text-xs` pour labels
-- **Filtres** : `flex flex-col sm:flex-row gap-2`
-- **Recherche** : `flex-1 w-full`
-- **Boutons** : `flex-1 sm:flex-none text-sm` avec `hidden sm:inline` pour texte desktop
-
-### Pages corrigées :
-- [x] **Pipeline** - Stats 2x2, colonnes 260px mobile, cartes compactes ✅
-- [x] **Facturation** - Stats 2x2, onglets flexibles, table scrollable ✅
-- [x] **Contacts** - Header restructuré, filtres empilés ✅
-- [x] **Tâches** - Stats 2x2+1, Kanban scrollable ✅
-- [x] **Social Media** - Stats 2x2+1, calendrier compact, onglets icônes seuls ✅
-
-## Backlog / Upcoming Tasks
-
-### P0 - Refonte Réalisations (Portfolio) ✅ COMPLETE (2026-01-09)
-- [x] **Page de gestion admin** avec éditeur de contenu riche (comme Blog) ✅
-- [x] **Page publique** avec support du contenu riche (content_blocks) ✅
-- [x] **Composant RichContentRenderer** créé et réutilisable ✅
-
-### P1 - Affichage public Blog & Portfolio ✅ COMPLETE (2026-01-09)
-- [x] Composant `RichContentRenderer.jsx` pour afficher le contenu riche ✅
-- [x] Page Portfolio publique mise à jour pour supporter `content_blocks` ✅
-- [x] Page Blog publique mise à jour pour supporter `content_blocks` ✅
-- [x] Support des blocs : texte, titre, image, galerie, audio, vidéo, citation ✅
-
-### P1 - Amélioration Fiche Contact (style Pipedrive) ✅ COMPLETE (2026-01-09)
-- [x] Timeline d'interactions ✅
-- [x] Header gradient rouge avec info contact ✅
-- [x] 4 onglets (Profil, Activité, Affaires, Docs) ✅
-- [x] Badges de statut ✅
-- [x] Boutons d'action rapide ✅
-- [x] ContactDetailSheet.jsx entièrement refait ✅
-
-### P2 - Gestion avancée des Tags ✅ COMPLETE (2026-01-09)
-- [x] **Page dédiée `/admin/tags`** ✅
-- [x] **Onglets Portfolio / Blog** avec compteurs ✅
-- [x] **Création de tags** avec nom, couleur (10 couleurs), type ✅
-- [x] **Modification de tags** (nom et couleur) ✅
-- [x] **Suppression de tags** avec confirmation ✅
-- [x] **Aperçu en temps réel** dans la modal ✅
-- [x] **Lien dans le menu** du dashboard ✅
-
-### P2 - Intégration Google Agenda
-- [ ] Guide utilisateur pour Google Cloud Console (OAuth credentials)
-- [ ] Endpoints backend pour OAuth2
-- [ ] Page /admin/agenda avec calendrier
-
-### P3 - Social Media Manager - Intégration Meta API ✅ COMPLETE (2026-01-09)
-- [x] **Backend - OAuth 2.0 Flow** ✅
-  - GET /api/meta/auth-url - URL d'autorisation OAuth
-  - POST /api/meta/exchange-token - Échange code contre token long-lived (60 jours)
-- [x] **Backend - Publication** ✅
-  - POST /api/meta/publish/facebook - Publication Facebook (texte + image)
-  - POST /api/meta/publish/instagram - Publication Instagram (image obligatoire)
-- [x] **Backend - Gestion** ✅
-  - GET /api/meta/pages - Lister pages Facebook & comptes Instagram liés
-  - GET /api/meta/published-posts - Historique des publications
-  - DELETE /api/meta/disconnect - Déconnecter le compte
-- [x] **Frontend - Interface complète** ✅ NEW
-  - Onglet "Comptes" dans Social Media Manager
-  - Bouton "Connecter Facebook & Instagram" avec OAuth redirect
-  - Affichage des pages connectées avec badges Instagram
-  - Modal de publication directe (Facebook + Instagram)
-  - Historique des posts publiés
-
-### P4 - Améliorations futures
-- [ ] Audio player for portfolio
+### P2 - Priorité moyenne
 - [ ] Intégration Google Agenda
+- [ ] Tags sur pages publiques (blog/portfolio) avec filtrage
+- [ ] Finaliser intégration Meta (test publication)
 
-### P4 - Suggestions de tags IA ✅ COMPLETE (2026-01-09)
-- [x] **Endpoint `/api/tags/suggest`** avec Perplexity AI ✅
-- [x] **Bouton "Suggérer via IA"** dans PortfolioManagePage ✅
-- [x] **Bouton "Suggérer via IA"** dans BlogAdminPage ✅
-- [x] Suggestions basées sur le titre et le contenu ✅
-- [x] Affichage des nouveaux tags suggérés avec création en 1 clic ✅
+### P3 - Priorité basse
+- [ ] Médias avancés (vidéo, PDF) dans éditeurs
+- [ ] Test E2E formulaire de contact (récurrent)
 
-### P4 - Notifications email automatiques ✅ COMPLETE (2026-01-09)
-- [x] **Onglet "Notifications" dans Paramètres** ✅
-- [x] **Rappels de tâches** : Configurable (X jours avant échéance) ✅
-- [x] **Rappels de factures impayées** : Configurable (7, 14, 30, 60 jours) ✅
-- [x] **Notifications nouveaux leads** : Toggle ON/OFF ✅
-- [x] **Email de test** pour vérifier la configuration Brevo ✅
-- [x] **Boutons d'envoi manuel** des rappels ✅
-- [x] Templates HTML professionnels pour chaque type d'email ✅
+## Known Issues
+- Test E2E formulaire contact échoue (composant Select)
+- server.py encore monolithique (dette technique)
 
-### P0 - Module Campagnes Email & SMS ✅ COMPLETE (2026-01-09) NEW
-- [x] **Backend `/api/campaigns/`** avec routes Brevo complètes ✅
-  - CRUD campagnes email (créer, lister, détails, envoyer, programmer, supprimer)
-  - CRUD campagnes SMS (créer, lister, envoyer, supprimer)
-  - Gestion contacts Brevo (créer, modifier, lister, supprimer, import bulk)
-  - Gestion listes de contacts (créer, lister, supprimer, ajouter/retirer contacts)
-  - Statistiques email et SMS
-- [x] **Page `/admin/campagnes`** avec interface complète ✅
-  - Onglet Email : Création avec HTML, envoi immédiat ou programmé
-  - Onglet SMS : Création avec limite 160 caractères
-  - Onglet Contacts : Affichage listes + contacts Brevo avec CRUD
-  - Onglet Statistiques : Vue des métriques (envois, ouvertures, clics)
-- [x] **Lien "Campagnes" ajouté au menu** du dashboard ✅
-- [ ] Enhanced reporting and analytics
-
-### Blocked
-- ⚠️ **Publication Meta (Facebook/Instagram)** - En attente test OAuth par l'utilisateur
-- ⚠️ **NewsAPI.org** - Limite de 100 requêtes/24h atteinte sur le compte gratuit (message d'erreur affiché à l'utilisateur)
-
-## 3rd Party Integrations
-
-### ✅ Intégrées et fonctionnelles
-- **Perplexity AI** : Assistant IA pour le dashboard
-- **NewsAPI.org** : Actualités avec images (style Perplexity Discover)
-- **Brevo (ex-Sendinblue)** : 
-  - Emails transactionnels ✅
-  - **Module Campagnes Email & SMS** ✅ NEW (2026-01-09)
-    - Création de campagnes email avec contenu HTML
-    - Création de campagnes SMS (max 160 caractères)
-    - Gestion des contacts Brevo (création, import, suppression)
-    - Gestion des listes de contacts
-    - Statistiques des campagnes (envois, ouvertures, clics)
-    - Interface complète avec onglets Email/SMS/Contacts/Statistiques
-  - Notifications nouveaux leads
-  - Envoi de devis aux clients
-  - Réinitialisation mot de passe
-
-### En attente / Planifiées
-- **Meta API (Facebook/Instagram)** : Publication posts - Interface prête, intégration en attente
-- **Google Agenda** : Synchronisation calendrier - Planifié
-
-## API Credentials
-- **Admin Login**: admin@alphagency.fr / superpassword
-- **Admin URL**: /alpha-admin-2024
-- **Perplexity API**: Configurée dans backend/.env
-
-## Database Collections
-- users, contacts, opportunities, quotes, invoices
-- subscriptions, tasks, portfolio, documents
-- settings, services, counters
-- pipeline_columns (colonnes personnalisables pipeline)
-- bank_transactions, budget_categories, auto_category_rules, budget_forecasts
-- **ai_conversations** (historique des chats IA - supporte ancien et nouveau format)
-- **ai_usage** (compteur quotidien par utilisateur)
-- **news_articles** (actualités récupérées via Perplexity)
-- **social_accounts** (comptes Facebook/Instagram connectés)
-- **social_posts** (posts programmés)
-- **social_inbox** (messages/commentaires à modérer)
-
-## Test Reports
-- `/app/test_reports/iteration_11.json` - Phase 1 corrections (95% success)
-- `/app/test_reports/pytest/pytest_news_social.xml` - Tests API News & Social (15/19 pass)
-- `/app/test_reports/iteration_12.json` - Refonte Social Media Agorapulse + Pipeline scroll (100% success)
-- `/app/test_reports/iteration_13.json` - Preview FB/IG réaliste + Writing Assistant supprimé (100% success)
+## Environment
+- Backend: FastAPI (port 8001)
+- Frontend: React (port 3000)
+- Database: MongoDB
+- Auth: JWT
+- Admin: admin@alphagency.fr / superpassword
