@@ -56,7 +56,7 @@ async def get_budget_entries(
     elif end_date:
         query["date"] = {"$lte": end_date}
     
-    entries = await db.budget_entries.find(query, {"_id": 0}).sort("date", -1).to_list(1000)
+    entries = await db.budget.find(query, {"_id": 0}).sort("date", -1).to_list(1000)
     return entries
 
 
@@ -71,14 +71,14 @@ async def create_budget_entry(entry: BudgetEntryCreate, current_user: dict = Dep
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
-    await db.budget_entries.insert_one(entry_doc)
+    await db.budget.insert_one(entry_doc)
     return {"id": entry_id, "message": "Entrée budgétaire créée"}
 
 
 @router.get("/{entry_id}", response_model=dict)
 async def get_budget_entry(entry_id: str, current_user: dict = Depends(get_current_user)):
     """Get a single budget entry"""
-    entry = await db.budget_entries.find_one({"id": entry_id}, {"_id": 0})
+    entry = await db.budget.find_one({"id": entry_id}, {"_id": 0})
     if not entry:
         raise HTTPException(status_code=404, detail="Entrée budgétaire non trouvée")
     return entry
@@ -89,7 +89,7 @@ async def update_budget_entry(entry_id: str, update: BudgetEntryUpdate, current_
     """Update a budget entry"""
     update_data = {k: v for k, v in update.model_dump().items() if v is not None}
     update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
-    result = await db.budget_entries.update_one({"id": entry_id}, {"$set": update_data})
+    result = await db.budget.update_one({"id": entry_id}, {"$set": update_data})
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Entrée budgétaire non trouvée")
     return {"message": "Entrée budgétaire mise à jour"}
@@ -98,7 +98,7 @@ async def update_budget_entry(entry_id: str, update: BudgetEntryUpdate, current_
 @router.delete("/{entry_id}", response_model=dict)
 async def delete_budget_entry(entry_id: str, current_user: dict = Depends(get_current_user)):
     """Delete a budget entry"""
-    result = await db.budget_entries.delete_one({"id": entry_id})
+    result = await db.budget.delete_one({"id": entry_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Entrée budgétaire non trouvée")
     return {"message": "Entrée budgétaire supprimée"}
@@ -124,7 +124,7 @@ async def get_budget_summary(
         {"$match": {**query, "type": "revenue"}},
         {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
     ]
-    revenue_result = await db.budget_entries.aggregate(revenue_pipeline).to_list(1)
+    revenue_result = await db.budget.aggregate(revenue_pipeline).to_list(1)
     total_revenue = revenue_result[0]["total"] if revenue_result else 0
     
     # Get total expenses
@@ -132,18 +132,18 @@ async def get_budget_summary(
         {"$match": {**query, "type": "expense"}},
         {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
     ]
-    expense_result = await db.budget_entries.aggregate(expense_pipeline).to_list(1)
+    expense_result = await db.budget.aggregate(expense_pipeline).to_list(1)
     total_expense = expense_result[0]["total"] if expense_result else 0
     
     # Get revenue by category
-    revenue_by_category = await db.budget_entries.aggregate([
+    revenue_by_category = await db.budget.aggregate([
         {"$match": {**query, "type": "revenue"}},
         {"$group": {"_id": "$category", "total": {"$sum": "$amount"}}},
         {"$sort": {"total": -1}}
     ]).to_list(100)
     
     # Get expenses by category
-    expense_by_category = await db.budget_entries.aggregate([
+    expense_by_category = await db.budget.aggregate([
         {"$match": {**query, "type": "expense"}},
         {"$group": {"_id": "$category", "total": {"$sum": "$amount"}}},
         {"$sort": {"total": -1}}
@@ -161,8 +161,8 @@ async def get_budget_summary(
 @router.get("/categories/list", response_model=dict)
 async def get_budget_categories(current_user: dict = Depends(get_current_user)):
     """Get all unique budget categories"""
-    revenue_categories = await db.budget_entries.distinct("category", {"type": "revenue"})
-    expense_categories = await db.budget_entries.distinct("category", {"type": "expense"})
+    revenue_categories = await db.budget.distinct("category", {"type": "revenue"})
+    expense_categories = await db.budget.distinct("category", {"type": "expense"})
     
     return {
         "revenue_categories": revenue_categories,
