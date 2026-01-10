@@ -53,7 +53,7 @@ const ListBlock = ({ block }) => {
 
 const QuoteBlock = ({ block }) => (
   <blockquote className="border-l-4 border-[#CE0202] pl-6 py-4 bg-[#F8F8F8] rounded-r-lg my-8">
-    <p className="text-xl md:text-2xl italic text-[#333333] mb-4">"{block.content}"</p>
+    <p className="text-xl md:text-2xl italic text-[#333333] mb-4">&ldquo;{block.content}&rdquo;</p>
     {(block.author || block.role) && (
       <footer className="text-[#666666]">
         {block.author && <span className="font-semibold">{block.author}</span>}
