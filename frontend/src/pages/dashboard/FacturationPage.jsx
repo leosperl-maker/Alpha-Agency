@@ -306,7 +306,7 @@ const FacturationPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-[#CE0202]" />
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
       </div>
     );
   }
@@ -317,15 +317,15 @@ const FacturationPage = () => {
       <div className="flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Facturation</h1>
-            <p className="text-[#666666] text-xs sm:text-sm">Gérez vos devis et factures</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">Facturation</h1>
+            <p className="text-white/60 text-xs sm:text-sm">Gérez vos devis et factures</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
             onClick={() => navigate('/admin/factures?action=services')}
             variant="outline"
-            className="border-[#E5E5E5] text-[#666666] hover:bg-[#F8F8F8] flex-1 sm:flex-none text-sm"
+            className="border-white/10 text-white/60 hover:bg-white/5 flex-1 sm:flex-none text-sm"
           >
             <Package className="w-4 h-4 mr-1 sm:mr-2" />
             Services
@@ -333,14 +333,14 @@ const FacturationPage = () => {
           <Button
             onClick={() => navigate('/admin/factures?action=new&type=devis')}
             variant="outline"
-            className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202]/10 flex-1 sm:flex-none text-sm"
+            className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-600/10 flex-1 sm:flex-none text-sm"
           >
             <FileText className="w-4 h-4 mr-1 sm:mr-2" />
             Devis
           </Button>
           <Button
             onClick={() => navigate('/admin/factures?action=new&type=facture')}
-            className="bg-[#CE0202] hover:bg-[#B00202] text-white flex-1 sm:flex-none text-sm"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white flex-1 sm:flex-none text-sm"
           >
             <Receipt className="w-4 h-4 mr-1 sm:mr-2" />
             Facture
@@ -350,47 +350,47 @@ const FacturationPage = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-2 sm:gap-4">
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-3">
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 flex-shrink-0 bg-blue-100 rounded-lg flex items-center justify-center">
               <FileText className="w-4 h-4 text-blue-600" />
             </div>
             <div className="min-w-0">
-              <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.totalQuotes}</p>
-              <p className="text-[10px] sm:text-xs text-[#666666] truncate">Devis ({stats.pendingQuotes} en att.)</p>
+              <p className="text-lg sm:text-2xl font-bold text-white">{stats.totalQuotes}</p>
+              <p className="text-[10px] sm:text-xs text-white/60 truncate">Devis ({stats.pendingQuotes} en att.)</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-3">
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 flex-shrink-0 bg-purple-100 rounded-lg flex items-center justify-center">
               <Receipt className="w-4 h-4 text-purple-600" />
             </div>
             <div className="min-w-0">
-              <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.totalInvoices}</p>
-              <p className="text-[10px] sm:text-xs text-[#666666] truncate">Factures ({stats.pendingInvoices} en cours)</p>
+              <p className="text-lg sm:text-2xl font-bold text-white">{stats.totalInvoices}</p>
+              <p className="text-[10px] sm:text-xs text-white/60 truncate">Factures ({stats.pendingInvoices} en cours)</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-3">
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 flex-shrink-0 bg-green-100 rounded-lg flex items-center justify-center">
               <CheckCircle className="w-4 h-4 text-green-600" />
             </div>
             <div className="min-w-0">
               <p className="text-sm sm:text-lg font-bold text-green-600 truncate">{formatCurrency(stats.totalPaid)}</p>
-              <p className="text-[10px] sm:text-xs text-[#666666]">Encaissé</p>
+              <p className="text-[10px] sm:text-xs text-white/60">Encaissé</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-3">
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 flex-shrink-0 bg-orange-100 rounded-lg flex items-center justify-center">
               <Clock className="w-4 h-4 text-orange-600" />
             </div>
             <div className="min-w-0">
               <p className="text-sm sm:text-lg font-bold text-orange-600 truncate">{formatCurrency(stats.totalDue)}</p>
-              <p className="text-[10px] sm:text-xs text-[#666666]">À encaisser</p>
+              <p className="text-[10px] sm:text-xs text-white/60">À encaisser</p>
             </div>
           </div>
         </div>
@@ -399,17 +399,17 @@ const FacturationPage = () => {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex flex-col gap-3 mb-4">
-          <TabsList className="bg-[#F8F8F8] p-1 w-full sm:w-auto">
+          <TabsList className="bg-white/5 p-1 w-full sm:w-auto">
             <TabsTrigger 
               value="devis" 
-              className="flex-1 sm:flex-none data-[state=active]:bg-[#CE0202] data-[state=active]:text-white text-xs sm:text-sm"
+              className="flex-1 sm:flex-none data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm"
             >
               <FileText className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               Devis ({quotes.length})
             </TabsTrigger>
             <TabsTrigger 
               value="factures"
-              className="flex-1 sm:flex-none data-[state=active]:bg-[#CE0202] data-[state=active]:text-white text-xs sm:text-sm"
+              className="flex-1 sm:flex-none data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm"
             >
               <Receipt className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               Factures ({invoices.length})
@@ -419,20 +419,20 @@ const FacturationPage = () => {
           {/* Search and Filter */}
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
               <Input
                 placeholder="Rechercher..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white border-[#E5E5E5] w-full"
+                className="pl-10 bg-white/5 backdrop-blur-xl border-white/10 w-full"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-32 bg-white border-[#E5E5E5]">
+              <SelectTrigger className="w-full sm:w-32 bg-white/5 backdrop-blur-xl border-white/10">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Statut" />
               </SelectTrigger>
-              <SelectContent className="bg-white border-[#E5E5E5]">
+              <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
                 <SelectItem value="all">Tous</SelectItem>
                 {activeTab === 'devis' ? (
                   <>
@@ -458,22 +458,22 @@ const FacturationPage = () => {
 
         {/* Quotes Tab */}
         <TabsContent value="devis" className="mt-0">
-          <div className="bg-white rounded-lg border border-[#E5E5E5] overflow-hidden overflow-x-auto">
+          <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 overflow-hidden overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[#F8F8F8] border-b border-[#E5E5E5]">
+              <thead className="bg-white/5 border-b border-white/10">
                 <tr>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase">Numéro</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase">Client</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase hidden md:table-cell">Date</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-[#666666] uppercase">Montant</th>
-                  <th className="text-center px-4 py-3 text-xs font-medium text-[#666666] uppercase">Statut</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-[#666666] uppercase">Actions</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Numéro</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Client</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase hidden md:table-cell">Date</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Montant</th>
+                  <th className="text-center px-4 py-3 text-xs font-medium text-white/60 uppercase">Statut</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5E5]">
                 {filteredQuotes.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-[#666666]">
+                    <td colSpan={6} className="px-4 py-8 text-center text-white/60">
                       Aucun devis trouvé
                     </td>
                   </tr>
@@ -481,23 +481,23 @@ const FacturationPage = () => {
                   filteredQuotes.map((quote) => {
                     const status = quoteStatusConfig[quote.status] || quoteStatusConfig.brouillon;
                     return (
-                      <tr key={quote.id} className="hover:bg-[#F8F8F8] transition-colors">
+                      <tr key={quote.id} className="hover:bg-white/5 transition-colors">
                         <td className="px-4 py-4">
-                          <span className="font-mono font-medium text-[#1A1A1A] text-sm">{quote.quote_number}</span>
+                          <span className="font-mono font-medium text-white text-sm">{quote.quote_number}</span>
                         </td>
                         <td className="px-4 py-4">
                           <div>
-                            <p className="font-medium text-[#1A1A1A] text-sm">{getContactName(quote.contact_id)}</p>
+                            <p className="font-medium text-white text-sm">{getContactName(quote.contact_id)}</p>
                             {getContactCompany(quote.contact_id) && (
-                              <p className="text-xs text-[#666666]">{getContactCompany(quote.contact_id)}</p>
+                              <p className="text-xs text-white/60">{getContactCompany(quote.contact_id)}</p>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-4 text-sm text-[#666666] hidden md:table-cell">
+                        <td className="px-4 py-4 text-sm text-white/60 hidden md:table-cell">
                           {formatDate(quote.created_at)}
                         </td>
                         <td className="px-4 py-4 text-right">
-                          <span className="font-mono font-bold text-[#1A1A1A] text-sm">{formatCurrency(quote.total)}</span>
+                          <span className="font-mono font-bold text-white text-sm">{formatCurrency(quote.total)}</span>
                         </td>
                         <td className="px-4 py-4 text-center">
                           <Badge className={status.color}>{status.label}</Badge>
@@ -521,7 +521,7 @@ const FacturationPage = () => {
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-white border-[#E5E5E5]">
+                              <DropdownMenuContent align="end" className="bg-white/5 backdrop-blur-xl border-white/10">
                                 <DropdownMenuItem onClick={() => navigate(`/admin/factures?action=view&id=${quote.id}&type=devis`)} className="cursor-pointer">
                                   <Eye className="w-4 h-4 mr-2" />
                                   Voir
@@ -571,23 +571,23 @@ const FacturationPage = () => {
 
         {/* Invoices Tab */}
         <TabsContent value="factures" className="mt-0">
-          <div className="bg-white rounded-lg border border-[#E5E5E5] overflow-hidden overflow-x-auto">
+          <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 overflow-hidden overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[#F8F8F8] border-b border-[#E5E5E5]">
+              <thead className="bg-white/5 border-b border-white/10">
                 <tr>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase">Numéro</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase">Client</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase hidden md:table-cell">Date</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-[#666666] uppercase">Montant</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-[#666666] uppercase">Payé</th>
-                  <th className="text-center px-4 py-3 text-xs font-medium text-[#666666] uppercase">Statut</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-[#666666] uppercase">Actions</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Numéro</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Client</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase hidden md:table-cell">Date</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Montant</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Payé</th>
+                  <th className="text-center px-4 py-3 text-xs font-medium text-white/60 uppercase">Statut</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5E5]">
                 {filteredInvoices.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-[#666666]">
+                    <td colSpan={7} className="px-4 py-8 text-center text-white/60">
                       Aucune facture trouvée
                     </td>
                   </tr>
@@ -601,27 +601,27 @@ const FacturationPage = () => {
                     const isPaid = invoice.status === 'payée' || invoice.status === 'payee';
                     
                     return (
-                      <tr key={invoice.id} className="hover:bg-[#F8F8F8] transition-colors">
+                      <tr key={invoice.id} className="hover:bg-white/5 transition-colors">
                         <td className="px-4 py-4">
-                          <span className="font-mono font-medium text-[#1A1A1A] text-sm">{invoice.invoice_number}</span>
+                          <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
                         </td>
                         <td className="px-4 py-4">
                           <div>
-                            <p className="font-medium text-[#1A1A1A] text-sm">{getContactName(invoice.contact_id)}</p>
+                            <p className="font-medium text-white text-sm">{getContactName(invoice.contact_id)}</p>
                             {getContactCompany(invoice.contact_id) && (
-                              <p className="text-xs text-[#666666]">{getContactCompany(invoice.contact_id)}</p>
+                              <p className="text-xs text-white/60">{getContactCompany(invoice.contact_id)}</p>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-4 text-sm text-[#666666] hidden md:table-cell">
+                        <td className="px-4 py-4 text-sm text-white/60 hidden md:table-cell">
                           {formatDate(invoice.created_at)}
                         </td>
                         <td className="px-4 py-4 text-right">
-                          <span className="font-mono font-bold text-[#1A1A1A] text-sm">{formatCurrency(invoice.total)}</span>
+                          <span className="font-mono font-bold text-white text-sm">{formatCurrency(invoice.total)}</span>
                         </td>
                         <td className="px-4 py-4 text-right">
                           <div className="flex flex-col items-end gap-1">
-                            <span className={`font-mono text-sm ${isPaid ? 'text-green-600 font-bold' : 'text-[#666666]'}`}>
+                            <span className={`font-mono text-sm ${isPaid ? 'text-green-600 font-bold' : 'text-white/60'}`}>
                               {formatCurrency(totalPaid)}
                             </span>
                             {invoice.total > 0 && totalPaid > 0 && totalPaid < invoice.total && (
@@ -636,7 +636,7 @@ const FacturationPage = () => {
                               <Button 
                                 size="sm" 
                                 variant="ghost" 
-                                className="h-6 px-2 text-xs text-[#CE0202] hover:text-[#CE0202] hover:bg-[#CE0202]/10"
+                                className="h-6 px-2 text-xs text-indigo-400 hover:text-indigo-400 hover:bg-indigo-600/10"
                                 onClick={() => openPaymentDialog(invoice)}
                               >
                                 <Plus className="w-3 h-3 mr-1" />
@@ -658,7 +658,7 @@ const FacturationPage = () => {
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-white border-[#E5E5E5]">
+                            <DropdownMenuContent align="end" className="bg-white/5 backdrop-blur-xl border-white/10">
                               <DropdownMenuItem onClick={() => navigate(`/admin/factures?action=view&id=${invoice.id}&type=facture`)} className="cursor-pointer">
                                 <Eye className="w-4 h-4 mr-2" />
                                 Voir
@@ -670,7 +670,7 @@ const FacturationPage = () => {
                               {!isPaid && invoice.status !== 'brouillon' && invoice.status !== 'annulee' && (
                                 <DropdownMenuItem 
                                   onClick={() => openPaymentDialog(invoice)}
-                                  className="cursor-pointer text-[#CE0202]"
+                                  className="cursor-pointer text-indigo-400"
                                 >
                                   <CreditCard className="w-4 h-4 mr-2" />
                                   Paiement
@@ -708,10 +708,10 @@ const FacturationPage = () => {
 
       {/* Add Payment Dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-md">
+        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A] flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-[#CE0202]" />
+            <DialogTitle className="text-white flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-indigo-400" />
               Enregistrer un paiement
             </DialogTitle>
           </DialogHeader>
@@ -719,22 +719,22 @@ const FacturationPage = () => {
           {selectedInvoiceForPayment && (
             <div className="space-y-4">
               {/* Invoice Summary */}
-              <div className="bg-[#F8F8F8] rounded-lg p-4 space-y-2">
+              <div className="bg-white/5 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#666666]">Facture</span>
+                  <span className="text-white/60">Facture</span>
                   <span className="font-mono font-medium">{selectedInvoiceForPayment.invoice_number}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#666666]">Total TTC</span>
+                  <span className="text-white/60">Total TTC</span>
                   <span className="font-mono">{formatCurrency(selectedInvoiceForPayment.total)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#666666]">Déjà payé</span>
+                  <span className="text-white/60">Déjà payé</span>
                   <span className="font-mono text-green-600">{formatCurrency(selectedInvoiceForPayment.total_paid || 0)}</span>
                 </div>
-                <div className="flex justify-between text-sm font-bold border-t border-[#E5E5E5] pt-2">
-                  <span className="text-[#1A1A1A]">Reste à payer</span>
-                  <span className="font-mono text-[#CE0202]">
+                <div className="flex justify-between text-sm font-bold border-t border-white/10 pt-2">
+                  <span className="text-white">Reste à payer</span>
+                  <span className="font-mono text-indigo-400">
                     {formatCurrency((selectedInvoiceForPayment.total || 0) - (selectedInvoiceForPayment.total_paid || 0))}
                   </span>
                 </div>
@@ -743,9 +743,9 @@ const FacturationPage = () => {
               {/* Payment Form */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Montant *</Label>
+                  <Label className="text-white">Montant *</Label>
                   <div className="relative">
-                    <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+                    <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
                     <Input
                       type="number"
                       step="0.01"
@@ -753,34 +753,34 @@ const FacturationPage = () => {
                       placeholder="0.00"
                       value={paymentForm.amount}
                       onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-                      className="pl-10 bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A] font-mono"
+                      className="pl-10 bg-white/5 border-white/10 text-white font-mono"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Date du paiement *</Label>
+                  <Label className="text-white">Date du paiement *</Label>
                   <div className="relative">
-                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
                     <Input
                       type="date"
                       value={paymentForm.payment_date}
                       onChange={(e) => setPaymentForm({ ...paymentForm, payment_date: e.target.value })}
-                      className="pl-10 bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                      className="pl-10 bg-white/5 border-white/10 text-white"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Méthode de paiement</Label>
+                  <Label className="text-white">Méthode de paiement</Label>
                   <Select
                     value={paymentForm.payment_method}
                     onValueChange={(value) => setPaymentForm({ ...paymentForm, payment_method: value })}
                   >
-                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-[#E5E5E5]">
+                    <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
                       {Object.entries(paymentMethods).map(([key, method]) => {
                         const Icon = method.icon;
                         return (
@@ -797,12 +797,12 @@ const FacturationPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Notes (optionnel)</Label>
+                  <Label className="text-white">Notes (optionnel)</Label>
                   <Textarea
                     placeholder="Référence de virement, numéro de chèque..."
                     value={paymentForm.notes}
                     onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    className="bg-white/5 border-white/10 text-white"
                     rows={2}
                   />
                 </div>
@@ -815,7 +815,7 @@ const FacturationPage = () => {
                 <Button 
                   onClick={handleAddPayment}
                   disabled={savingPayment || !paymentForm.amount}
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white"
                 >
                   {savingPayment ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
                   Enregistrer

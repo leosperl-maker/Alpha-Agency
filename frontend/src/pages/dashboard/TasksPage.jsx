@@ -106,7 +106,7 @@ const SortableTaskCard = ({ task, onEdit, onDelete, onStatusChange, onViewDetail
     <div 
       ref={setNodeRef}
       style={style}
-      className={`bg-white border border-[#E5E5E5] rounded-lg p-3 hover:shadow-md transition-all ${
+      className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-3 hover:shadow-md transition-all ${
         isDragging ? 'shadow-xl ring-2 ring-[#CE0202]' : ''
       } ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}
       data-testid={`task-${task.id}`}
@@ -117,17 +117,17 @@ const SortableTaskCard = ({ task, onEdit, onDelete, onStatusChange, onViewDetail
           <div 
             {...attributes}
             {...listeners}
-            className="drag-handle cursor-grab active:cursor-grabbing p-1 -ml-1 mt-0.5 hover:bg-[#F8F8F8] rounded flex-shrink-0"
+            className="drag-handle cursor-grab active:cursor-grabbing p-1 -ml-1 mt-0.5 hover:bg-white/5 rounded flex-shrink-0"
             data-testid={`drag-handle-task-${task.id}`}
           >
-            <GripVertical className="w-4 h-4 text-[#999999]" />
+            <GripVertical className="w-4 h-4 text-white/40" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className={`font-medium text-[#1A1A1A] text-sm ${task.status === 'done' ? 'line-through text-[#666666]' : ''}`}>
+            <p className={`font-medium text-white text-sm ${task.status === 'done' ? 'line-through text-white/60' : ''}`}>
               {task.title}
             </p>
             {task.description && (
-              <p className="text-xs text-[#666666] mt-1 line-clamp-2">{task.description}</p>
+              <p className="text-xs text-white/60 mt-1 line-clamp-2">{task.description}</p>
             )}
           </div>
         </div>
@@ -137,7 +137,7 @@ const SortableTaskCard = ({ task, onEdit, onDelete, onStatusChange, onViewDetail
               <MoreVertical className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-white" align="end">
+          <DropdownMenuContent className="bg-white/5 backdrop-blur-xl" align="end">
             <DropdownMenuItem onClick={() => onEdit(task)} data-testid={`task-edit-${task.id}`}>
               <Edit className="w-4 h-4 mr-2" /> Modifier
             </DropdownMenuItem>
@@ -181,8 +181,8 @@ const SortableTaskCard = ({ task, onEdit, onDelete, onStatusChange, onViewDetail
       </div>
       {/* Contact associé */}
       {task.contact_id && getContactName(task.contact_id) && (
-        <div className="mt-2 pt-2 border-t border-[#E5E5E5]">
-          <p className="text-xs text-[#666666] flex items-center gap-1">
+        <div className="mt-2 pt-2 border-t border-white/10">
+          <p className="text-xs text-white/60 flex items-center gap-1">
             <User className="w-3 h-3" />
             {getContactName(task.contact_id)}
           </p>
@@ -234,18 +234,18 @@ const DroppableTaskColumn = ({ column, children, onEdit, onDelete, tasksCount, t
       data-testid={`task-column-${column.id}`}
       className={`flex-shrink-0 w-full md:w-[340px] ${isOver ? 'ring-2 ring-[#CE0202] ring-opacity-50' : ''}`}
     >
-      <div className={`bg-white rounded-xl border shadow-sm h-full transition-all ${
-        isOver ? 'border-[#CE0202] bg-[#CE0202]/5' : 'border-[#E5E5E5]'
+      <div className={`bg-white/5 backdrop-blur-xl rounded-xl border shadow-sm h-full transition-all ${
+        isOver ? 'border-indigo-500/50 bg-indigo-600/5' : 'border-white/10'
       }`}>
-        <div className="p-4 border-b border-[#E5E5E5]">
+        <div className="p-4 border-b border-white/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <button
                 {...attributes}
                 {...listeners}
-                className="cursor-grab active:cursor-grabbing p-1 hover:bg-[#F8F8F8] rounded"
+                className="cursor-grab active:cursor-grabbing p-1 hover:bg-white/5 rounded"
               >
-                <GripVertical className="w-4 h-4 text-[#666666]" />
+                <GripVertical className="w-4 h-4 text-white/60" />
               </button>
               <div 
                 className={`p-1.5 rounded-lg`}
@@ -253,20 +253,20 @@ const DroppableTaskColumn = ({ column, children, onEdit, onDelete, tasksCount, t
               >
                 <StatusIcon className="w-4 h-4" style={{ color: column.color }} />
               </div>
-              <span className="text-[#1A1A1A] text-sm font-semibold">
+              <span className="text-white text-sm font-semibold">
                 {column.label}
               </span>
-              <Badge variant="secondary" className="bg-[#F8F8F8] text-[#666666] text-xs">
+              <Badge variant="secondary" className="bg-white/5 text-white/60 text-xs">
                 {tasksCount}
               </Badge>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                  <MoreVertical className="w-4 h-4 text-[#666666]" />
+                  <MoreVertical className="w-4 h-4 text-white/60" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white border-[#E5E5E5]">
+              <DropdownMenuContent className="bg-white/5 backdrop-blur-xl border-white/10">
                 <DropdownMenuItem onClick={() => onEdit(column)}>
                   <Edit className="w-4 h-4 mr-2" /> Modifier
                 </DropdownMenuItem>
@@ -302,11 +302,11 @@ const TaskDetailSheet = ({ task, open, onOpenChange, onEdit, contacts, columns }
   
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="bg-white w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader className="pb-4 border-b border-[#E5E5E5]">
+      <SheetContent className="bg-white/5 backdrop-blur-xl w-full sm:max-w-lg overflow-y-auto">
+        <SheetHeader className="pb-4 border-b border-white/10">
           <div className="flex items-start justify-between">
             <div>
-              <SheetTitle className={`text-xl text-[#1A1A1A] ${task.status === 'done' ? 'line-through' : ''}`}>
+              <SheetTitle className={`text-xl text-white ${task.status === 'done' ? 'line-through' : ''}`}>
                 {task.title}
               </SheetTitle>
             </div>
@@ -341,18 +341,18 @@ const TaskDetailSheet = ({ task, open, onOpenChange, onEdit, contacts, columns }
           {/* Description */}
           {task.description && (
             <div>
-              <h3 className="text-sm font-semibold text-[#1A1A1A] mb-2">Description</h3>
-              <p className="text-sm text-[#666666] whitespace-pre-wrap">{task.description}</p>
+              <h3 className="text-sm font-semibold text-white mb-2">Description</h3>
+              <p className="text-sm text-white/60 whitespace-pre-wrap">{task.description}</p>
             </div>
           )}
 
           {/* Due Date */}
           {task.due_date && (
             <div className="flex items-center gap-3">
-              <Calendar className={`w-5 h-5 ${isOverdue ? 'text-red-500' : 'text-[#666666]'}`} />
+              <Calendar className={`w-5 h-5 ${isOverdue ? 'text-red-500' : 'text-white/60'}`} />
               <div>
-                <p className="text-xs text-[#666666]">Date d'échéance</p>
-                <p className={`text-sm font-medium ${isOverdue ? 'text-red-600' : 'text-[#1A1A1A]'}`}>
+                <p className="text-xs text-white/60">Date d'échéance</p>
+                <p className={`text-sm font-medium ${isOverdue ? 'text-red-600' : 'text-white'}`}>
                   {new Date(task.due_date).toLocaleDateString('fr-FR', { 
                     weekday: 'long', 
                     year: 'numeric', 
@@ -367,12 +367,12 @@ const TaskDetailSheet = ({ task, open, onOpenChange, onEdit, contacts, columns }
           {/* Contact */}
           {contact && (
             <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-[#666666]" />
+              <User className="w-5 h-5 text-white/60" />
               <div>
-                <p className="text-xs text-[#666666]">Contact associé</p>
-                <p className="text-sm font-medium text-[#1A1A1A]">
+                <p className="text-xs text-white/60">Contact associé</p>
+                <p className="text-sm font-medium text-white">
                   {contact.first_name} {contact.last_name}
-                  {contact.company && <span className="text-[#666666]"> • {contact.company}</span>}
+                  {contact.company && <span className="text-white/60"> • {contact.company}</span>}
                 </p>
               </div>
             </div>
@@ -380,17 +380,17 @@ const TaskDetailSheet = ({ task, open, onOpenChange, onEdit, contacts, columns }
 
           {/* Created date */}
           {task.created_at && (
-            <div className="text-xs text-[#666666]">
+            <div className="text-xs text-white/60">
               Créée le {new Date(task.created_at).toLocaleDateString('fr-FR')}
             </div>
           )}
         </div>
 
         {/* Actions */}
-        <div className="pt-4 border-t border-[#E5E5E5]">
+        <div className="pt-4 border-t border-white/10">
           <Button
             onClick={() => { onOpenChange(false); onEdit(task); }}
-            className="w-full bg-[#CE0202] hover:bg-[#B00202] text-white"
+            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white"
           >
             <Edit className="w-4 h-4 mr-2" /> Modifier
           </Button>
@@ -717,14 +717,14 @@ const TasksPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Tâches</h1>
-          <p className="text-[#666666] text-xs sm:text-sm">Gérez vos tâches et projets</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Tâches</h1>
+          <p className="text-white/60 text-xs sm:text-sm">Gérez vos tâches et projets</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <Button 
             variant="outline" 
             onClick={() => openColumnDialog()} 
-            className="border-[#CE0202] text-[#CE0202] flex-1 sm:flex-none text-sm"
+            className="border-indigo-500/50 text-indigo-400 flex-1 sm:flex-none text-sm"
           >
             <Settings2 className="w-4 h-4 mr-1 sm:mr-2" /> 
             <span className="hidden sm:inline">Colonnes</span>
@@ -732,7 +732,7 @@ const TasksPage = () => {
           </Button>
           <Button 
             onClick={() => { resetForm(); setDialogOpen(true); }} 
-            className="bg-[#CE0202] hover:bg-[#B00202] text-white flex-1 sm:flex-none text-sm"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white flex-1 sm:flex-none text-sm"
           >
             <Plus className="w-4 h-4 mr-1 sm:mr-2" /> 
             <span className="hidden sm:inline">Nouvelle tâche</span>
@@ -743,67 +743,67 @@ const TasksPage = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
-        <Card className="bg-white border-[#E5E5E5]">
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
           <CardContent className="p-3">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-gray-100 flex-shrink-0">
                 <Clock className="w-4 h-4 text-gray-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.todo || 0}</p>
-                <p className="text-[10px] sm:text-xs text-[#666666]">À faire</p>
+                <p className="text-lg sm:text-2xl font-bold text-white">{stats.todo || 0}</p>
+                <p className="text-[10px] sm:text-xs text-white/60">À faire</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white border-[#E5E5E5]">
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
           <CardContent className="p-3">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-blue-100 flex-shrink-0">
                 <Clock className="w-4 h-4 text-blue-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.in_progress || 0}</p>
-                <p className="text-[10px] sm:text-xs text-[#666666]">En cours</p>
+                <p className="text-lg sm:text-2xl font-bold text-white">{stats.in_progress || 0}</p>
+                <p className="text-[10px] sm:text-xs text-white/60">En cours</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white border-[#E5E5E5]">
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
           <CardContent className="p-3">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-green-100 flex-shrink-0">
                 <CheckCircle className="w-4 h-4 text-green-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.done || 0}</p>
-                <p className="text-[10px] sm:text-xs text-[#666666]">Terminées</p>
+                <p className="text-lg sm:text-2xl font-bold text-white">{stats.done || 0}</p>
+                <p className="text-[10px] sm:text-xs text-white/60">Terminées</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white border-[#E5E5E5]">
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
           <CardContent className="p-3">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-red-100 flex-shrink-0">
                 <AlertCircle className="w-4 h-4 text-red-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{overdueCount}</p>
-                <p className="text-[10px] sm:text-xs text-[#666666]">En retard</p>
+                <p className="text-lg sm:text-2xl font-bold text-white">{overdueCount}</p>
+                <p className="text-[10px] sm:text-xs text-white/60">En retard</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white border-[#E5E5E5] col-span-2 sm:col-span-1">
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10 col-span-2 sm:col-span-1">
           <CardContent className="p-3">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-[#CE0202]/10 flex-shrink-0">
-                <CheckCircle className="w-4 h-4 text-[#CE0202]" />
+              <div className="p-1.5 rounded-lg bg-indigo-600/10 flex-shrink-0">
+                <CheckCircle className="w-4 h-4 text-indigo-400" />
               </div>
               <div className="min-w-0">
-                <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.completion_rate || 0}%</p>
-                <p className="text-[10px] sm:text-xs text-[#666666]">Complétion</p>
+                <p className="text-lg sm:text-2xl font-bold text-white">{stats.completion_rate || 0}%</p>
+                <p className="text-[10px] sm:text-xs text-white/60">Complétion</p>
               </div>
             </div>
           </CardContent>
@@ -813,19 +813,19 @@ const TasksPage = () => {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher..."
-            className="pl-9 bg-white border-[#E5E5E5] w-full"
+            className="pl-9 bg-white/5 backdrop-blur-xl border-white/10 w-full"
           />
         </div>
         <Select value={filterPriority} onValueChange={setFilterPriority}>
-          <SelectTrigger className="w-full sm:w-36 bg-white border-[#E5E5E5]">
+          <SelectTrigger className="w-full sm:w-36 bg-white/5 backdrop-blur-xl border-white/10">
             <SelectValue placeholder="Priorité" />
           </SelectTrigger>
-          <SelectContent className="bg-white">
+          <SelectContent className="bg-white/5 backdrop-blur-xl">
             <SelectItem value="all">Toutes</SelectItem>
             {Object.entries(priorityConfig).map(([key, config]) => (
               <SelectItem key={key} value={key}>{config.label}</SelectItem>
@@ -873,7 +873,7 @@ const TasksPage = () => {
                       />
                     ))}
                     {columnTasks.length === 0 && (
-                      <div className="text-center py-8 text-[#666666]">
+                      <div className="text-center py-8 text-white/60">
                         <Target className="w-8 h-8 mx-auto mb-2 opacity-30" />
                         <p className="text-xs">Aucune tâche</p>
                       </div>
@@ -891,15 +891,15 @@ const TasksPage = () => {
           {activeItem && activeId && (
             <div className="opacity-90">
               {activeItem.label ? (
-                <div className="w-80 bg-white rounded-xl border-2 border-[#CE0202] shadow-xl p-4">
+                <div className="w-80 bg-white/5 backdrop-blur-xl rounded-xl border-2 border-indigo-500/50 shadow-xl p-4">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: activeItem.color }} />
-                    <span className="text-[#1A1A1A] text-sm font-semibold">{activeItem.label}</span>
+                    <span className="text-white text-sm font-semibold">{activeItem.label}</span>
                   </div>
                 </div>
               ) : (
-                <div className="w-72 bg-white rounded-lg border-2 border-[#CE0202] shadow-xl p-3">
-                  <p className="font-medium text-[#1A1A1A] text-sm">{activeItem.title}</p>
+                <div className="w-72 bg-white/5 backdrop-blur-xl rounded-lg border-2 border-indigo-500/50 shadow-xl p-3">
+                  <p className="font-medium text-white text-sm">{activeItem.title}</p>
                 </div>
               )}
             </div>
@@ -909,44 +909,44 @@ const TasksPage = () => {
 
       {/* Task Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-white max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-white/5 backdrop-blur-xl max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A]">
+            <DialogTitle className="text-white">
               {editingTask ? "Modifier la tâche" : "Nouvelle tâche"}
             </DialogTitle>
           </DialogHeader>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Titre *</Label>
+              <Label className="text-white">Titre *</Label>
               <Input
                 value={formData.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
                 placeholder="Titre de la tâche"
                 required
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Description</Label>
+              <Label className="text-white">Description</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                 placeholder="Description détaillée..."
                 rows={3}
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Priorité</Label>
+                <Label className="text-white">Priorité</Label>
                 <Select value={formData.priority} onValueChange={(v) => setFormData({...formData, priority: v})}>
-                  <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                  <SelectTrigger className="bg-white/5 border-white/10">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white">
+                  <SelectContent className="bg-white/5 backdrop-blur-xl">
                     {Object.entries(priorityConfig).map(([key, config]) => (
                       <SelectItem key={key} value={key}>{config.label}</SelectItem>
                     ))}
@@ -955,12 +955,12 @@ const TasksPage = () => {
               </div>
               
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Catégorie</Label>
+                <Label className="text-white">Catégorie</Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v})}>
-                  <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                  <SelectTrigger className="bg-white/5 border-white/10">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white">
+                  <SelectContent className="bg-white/5 backdrop-blur-xl">
                     {categories.map(cat => (
                       <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                     ))}
@@ -970,12 +970,12 @@ const TasksPage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Statut</Label>
+              <Label className="text-white">Statut</Label>
               <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
-                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   {columns.map(col => (
                     <SelectItem key={col.id} value={col.id}>
                       <div className="flex items-center gap-2">
@@ -989,17 +989,17 @@ const TasksPage = () => {
             </div>
             
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Date d'échéance</Label>
+              <Label className="text-white">Date d'échéance</Label>
               <Input
                 type="date"
                 value={formData.due_date}
                 onChange={(e) => setFormData({...formData, due_date: e.target.value})}
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A] flex items-center gap-1">
+              <Label className="text-white flex items-center gap-1">
                 <User className="w-3 h-3" />
                 Contact associé (facultatif)
               </Label>
@@ -1007,15 +1007,15 @@ const TasksPage = () => {
                 value={formData.contact_id || "none"} 
                 onValueChange={(v) => setFormData({...formData, contact_id: v === "none" ? "" : v})}
               >
-                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue placeholder="Aucun contact" />
                 </SelectTrigger>
-                <SelectContent className="bg-white max-h-60">
+                <SelectContent className="bg-white/5 backdrop-blur-xl max-h-60">
                   <SelectItem value="none">— Aucun contact —</SelectItem>
                   {contacts.map(contact => (
                     <SelectItem key={contact.id} value={contact.id}>
                       {contact.first_name} {contact.last_name}
-                      {contact.company && <span className="text-[#666666] ml-1">({contact.company})</span>}
+                      {contact.company && <span className="text-white/60 ml-1">({contact.company})</span>}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1026,7 +1026,7 @@ const TasksPage = () => {
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
                 Annuler
               </Button>
-              <Button type="submit" className="flex-1 bg-[#CE0202] hover:bg-[#B00202] text-white">
+              <Button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white">
                 {editingTask ? "Mettre à jour" : "Créer"}
               </Button>
             </div>
@@ -1036,7 +1036,7 @@ const TasksPage = () => {
 
       {/* Column Dialog */}
       <Dialog open={columnDialogOpen} onOpenChange={setColumnDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-md">
+        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
           <DialogHeader>
             <DialogTitle>{editingColumn ? "Modifier la colonne" : "Nouvelle colonne"}</DialogTitle>
           </DialogHeader>
@@ -1047,7 +1047,7 @@ const TasksPage = () => {
                 value={columnForm.label} 
                 onChange={(e) => setColumnForm({...columnForm, label: e.target.value})} 
                 placeholder="Ex: En revue" 
-                className="bg-[#F8F8F8] border-[#E5E5E5]" 
+                className="bg-white/5 border-white/10" 
               />
             </div>
             <div className="space-y-2">
@@ -1066,8 +1066,8 @@ const TasksPage = () => {
                 ))}
               </div>
             </div>
-            <div className="p-4 bg-[#F8F8F8] rounded-lg">
-              <p className="text-xs text-[#666666] mb-2">Aperçu</p>
+            <div className="p-4 bg-white/5 rounded-lg">
+              <p className="text-xs text-white/60 mb-2">Aperçu</p>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: columnForm.color }} />
                 <span className="text-sm font-medium">{columnForm.label || "Nom de la colonne"}</span>
@@ -1076,7 +1076,7 @@ const TasksPage = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setColumnDialogOpen(false)}>Annuler</Button>
-            <Button onClick={handleSaveColumn} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+            <Button onClick={handleSaveColumn} className="bg-indigo-600 hover:bg-indigo-500 text-white">
               {editingColumn ? "Mettre à jour" : "Créer"}
             </Button>
           </DialogFooter>

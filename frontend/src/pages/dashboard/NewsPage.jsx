@@ -101,7 +101,7 @@ const FeaturedArticle = ({ article, onClick }) => {
   
   return (
     <Card 
-      className="bg-white border-[#E5E5E5] overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 group"
+      className="bg-white/5 backdrop-blur-xl border-white/10 overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 group"
       onClick={() => onClick(article)}
       data-testid="featured-article"
     >
@@ -113,23 +113,23 @@ const FeaturedArticle = ({ article, onClick }) => {
               <Icon className="w-3 h-3 mr-1" />
               {article.category}
             </Badge>
-            <span className="text-xs text-[#999999] flex items-center gap-1">
+            <span className="text-xs text-white/40 flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {formatDate(article.published_at)}
             </span>
           </div>
           
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1A1A1A] mb-4 group-hover:text-[#CE0202] transition-colors line-clamp-3">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-4 group-hover:text-indigo-400 transition-colors line-clamp-3">
             {article.title}
           </h2>
           
-          <p className="text-[#666666] text-sm sm:text-base leading-relaxed line-clamp-3 mb-4">
+          <p className="text-white/60 text-sm sm:text-base leading-relaxed line-clamp-3 mb-4">
             {article.description}
           </p>
           
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-[#999999]">{article.source_name}</span>
-            <span className="text-[#CE0202] font-medium flex items-center gap-1">
+            <span className="text-white/40">{article.source_name}</span>
+            <span className="text-indigo-400 font-medium flex items-center gap-1">
               <ExternalLink className="w-3 h-3" />
               Lire l'article
             </span>
@@ -164,7 +164,7 @@ const ArticleCard = ({ article, onClick, onDelete }) => {
   
   return (
     <Card 
-      className="bg-white border-[#E5E5E5] overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 group h-full flex flex-col"
+      className="bg-white/5 backdrop-blur-xl border-white/10 overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 group h-full flex flex-col"
       data-testid="article-card"
     >
       {/* Image */}
@@ -212,16 +212,16 @@ const ArticleCard = ({ article, onClick, onDelete }) => {
         className="p-4 flex-1 flex flex-col"
         onClick={() => onClick(article)}
       >
-        <h3 className="font-semibold text-[#1A1A1A] text-sm sm:text-base mb-2 line-clamp-2 group-hover:text-[#CE0202] transition-colors">
+        <h3 className="font-semibold text-white text-sm sm:text-base mb-2 line-clamp-2 group-hover:text-indigo-400 transition-colors">
           {article.title}
         </h3>
         
-        <p className="text-[#666666] text-xs sm:text-sm leading-relaxed line-clamp-2 mb-3 flex-1">
+        <p className="text-white/60 text-xs sm:text-sm leading-relaxed line-clamp-2 mb-3 flex-1">
           {article.description}
         </p>
         
         {/* Footer */}
-        <div className="flex items-center justify-between text-xs text-[#999999] pt-2 border-t border-[#F5F5F5]">
+        <div className="flex items-center justify-between text-xs text-white/40 pt-2 border-t border-[#F5F5F5]">
           <span className="truncate max-w-[60%]">{article.source_name}</span>
           <span className="flex items-center gap-1 flex-shrink-0">
             <Clock className="w-3 h-3" />
@@ -262,14 +262,14 @@ const ArticleDetailModal = ({ article, relatedArticles, onClose, onArticleClick 
       data-testid="article-modal"
     >
       <div 
-        className="relative w-full max-w-4xl bg-white min-h-screen lg:min-h-0 lg:my-8 lg:rounded-2xl lg:shadow-2xl overflow-hidden"
+        className="relative w-full max-w-4xl bg-white/5 backdrop-blur-xl min-h-screen lg:min-h-0 lg:my-8 lg:rounded-2xl lg:shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <Button 
           variant="ghost" 
           size="sm" 
-          className="absolute top-4 right-4 z-10 h-10 w-10 p-0 bg-white/90 hover:bg-white rounded-full shadow-lg"
+          className="absolute top-4 right-4 z-10 h-10 w-10 p-0 bg-white/5 backdrop-blur-xl/90 hover:bg-white/5 backdrop-blur-xl rounded-full shadow-lg"
           onClick={onClose}
           data-testid="close-modal-btn"
         >
@@ -280,7 +280,7 @@ const ArticleDetailModal = ({ article, relatedArticles, onClose, onArticleClick 
         <Button 
           variant="ghost" 
           size="sm" 
-          className="absolute top-4 left-4 z-10 bg-white/90 hover:bg-white rounded-full shadow-lg"
+          className="absolute top-4 left-4 z-10 bg-white/5 backdrop-blur-xl/90 hover:bg-white/5 backdrop-blur-xl rounded-full shadow-lg"
           onClick={onClose}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -310,26 +310,26 @@ const ArticleDetailModal = ({ article, relatedArticles, onClose, onArticleClick 
               <Icon className="w-3 h-3 mr-1" />
               {article.category}
             </Badge>
-            <span className="text-sm text-[#666666] flex items-center gap-1">
+            <span className="text-sm text-white/60 flex items-center gap-1">
               <Clock className="w-4 h-4" />
               {formatDate(article.published_at)}
             </span>
           </div>
           
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-6 leading-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight">
             {article.title}
           </h1>
           
           {/* Source */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8 pb-6 border-b border-[#E5E5E5]">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8 pb-6 border-b border-white/10">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center">
-                <Globe className="w-5 h-5 text-[#666666]" />
+                <Globe className="w-5 h-5 text-white/60" />
               </div>
               <div>
-                <p className="font-medium text-[#1A1A1A]">{article.source_name}</p>
-                <p className="text-xs text-[#999999]">Source originale</p>
+                <p className="font-medium text-white">{article.source_name}</p>
+                <p className="text-xs text-white/40">Source originale</p>
               </div>
             </div>
             <a 
@@ -338,7 +338,7 @@ const ArticleDetailModal = ({ article, relatedArticles, onClose, onArticleClick 
               rel="noopener noreferrer"
               className="sm:ml-auto"
             >
-              <Button variant="outline" size="sm" className="text-[#CE0202] border-[#CE0202] hover:bg-[#CE0202] hover:text-white">
+              <Button variant="outline" size="sm" className="text-indigo-400 border-indigo-500/50 hover:bg-indigo-600 hover:text-white">
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Lire sur le site
               </Button>
@@ -351,7 +351,7 @@ const ArticleDetailModal = ({ article, relatedArticles, onClose, onArticleClick 
               {article.description}
             </p>
             {article.content && (
-              <div className="text-[#666666] leading-relaxed whitespace-pre-line">
+              <div className="text-white/60 leading-relaxed whitespace-pre-line">
                 {article.content.replace(/\[\+\d+ chars\]$/, '')}
               </div>
             )}
@@ -359,16 +359,16 @@ const ArticleDetailModal = ({ article, relatedArticles, onClose, onArticleClick 
           
           {/* Related Articles */}
           {relatedArticles && relatedArticles.length > 0 && (
-            <div className="mt-10 pt-8 border-t border-[#E5E5E5]">
-              <h3 className="text-xl font-bold text-[#1A1A1A] mb-6 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-[#CE0202]" />
+            <div className="mt-10 pt-8 border-t border-white/10">
+              <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-indigo-400" />
                 Découvrir aussi
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {relatedArticles.map((related) => (
                   <Card 
                     key={related.id}
-                    className="bg-[#F8F8F8] border-0 overflow-hidden cursor-pointer hover:shadow-md transition-all group"
+                    className="bg-white/5 border-0 overflow-hidden cursor-pointer hover:shadow-md transition-all group"
                     onClick={() => onArticleClick(related)}
                   >
                     <div className="aspect-video relative">
@@ -385,10 +385,10 @@ const ArticleDetailModal = ({ article, relatedArticles, onClose, onArticleClick 
                       )}
                     </div>
                     <CardContent className="p-3">
-                      <h4 className="font-medium text-sm text-[#1A1A1A] line-clamp-2 group-hover:text-[#CE0202] transition-colors">
+                      <h4 className="font-medium text-sm text-white line-clamp-2 group-hover:text-indigo-400 transition-colors">
                         {related.title}
                       </h4>
-                      <p className="text-xs text-[#999999] mt-1">{related.source_name}</p>
+                      <p className="text-xs text-white/40 mt-1">{related.source_name}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -521,13 +521,13 @@ const NewsPage = () => {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#CE0202] flex items-center justify-center">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
                 <Newspaper className="w-5 h-5 text-white" />
               </div>
               Les actualités du jour
             </h1>
-            <p className="text-[#666666] text-sm mt-1 ml-13">
+            <p className="text-white/60 text-sm mt-1 ml-13">
               Restez informé avec les dernières nouvelles
             </p>
           </div>
@@ -535,7 +535,7 @@ const NewsPage = () => {
           <Button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white"
             data-testid="refresh-news-btn"
           >
             {refreshing ? (
@@ -551,11 +551,11 @@ const NewsPage = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Region Selector */}
           <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-            <SelectTrigger className="w-full sm:w-40 bg-white border-[#E5E5E5]">
-              <MapPin className="w-4 h-4 mr-2 text-[#666666]" />
+            <SelectTrigger className="w-full sm:w-40 bg-white/5 backdrop-blur-xl border-white/10">
+              <MapPin className="w-4 h-4 mr-2 text-white/60" />
               <SelectValue placeholder="Région" />
             </SelectTrigger>
-            <SelectContent className="bg-white">
+            <SelectContent className="bg-white/5 backdrop-blur-xl">
               {regions.map(region => {
                 const Icon = regionIcons[region.id] || Globe;
                 return (
@@ -611,24 +611,24 @@ const NewsPage = () => {
       {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-10 h-10 animate-spin text-[#CE0202]" />
+          <Loader2 className="w-10 h-10 animate-spin text-indigo-400" />
         </div>
       ) : articles.length === 0 ? (
-        <Card className="bg-white border-[#E5E5E5]">
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
           <CardContent className="py-16 text-center">
             <Newspaper className="w-16 h-16 mx-auto mb-4 text-[#E5E5E5]" />
-            <h3 className="text-xl font-semibold text-[#1A1A1A] mb-2">Aucune actualité</h3>
-            <p className="text-[#666666] mb-2 max-w-md mx-auto">
+            <h3 className="text-xl font-semibold text-white mb-2">Aucune actualité</h3>
+            <p className="text-white/60 mb-2 max-w-md mx-auto">
               Cliquez sur "Actualiser" pour récupérer les dernières actualités depuis NewsAPI
             </p>
-            <p className="text-xs text-[#999999] mb-6 max-w-md mx-auto">
+            <p className="text-xs text-white/40 mb-6 max-w-md mx-auto">
               <strong>Note :</strong> Le compte NewsAPI gratuit est limité à 100 requêtes/24h. 
               Si aucun article n'apparaît, la limite peut avoir été atteinte.
             </p>
             <Button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white"
             >
               {refreshing ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -665,7 +665,7 @@ const NewsPage = () => {
 
       {/* Footer */}
       {articles.length > 0 && (
-        <div className="text-center text-sm text-[#999999] pt-4">
+        <div className="text-center text-sm text-white/40 pt-4">
           <p>
             {articles.length} articles • Propulsé par NewsAPI.org
           </p>

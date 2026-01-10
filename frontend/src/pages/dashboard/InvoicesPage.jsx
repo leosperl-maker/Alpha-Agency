@@ -560,9 +560,9 @@ const InvoicesPage = () => {
     const dueDate = formData.due_date ? formatDate(formData.due_date) : "-";
     
     return (
-      <div className="bg-white border border-[#E5E5E5] rounded-lg shadow-lg overflow-hidden h-full">
-        <div className="bg-[#F8F8F8] px-4 py-2 border-b border-[#E5E5E5] flex items-center justify-between">
-          <span className="text-sm font-medium text-[#666666]">Aperçu</span>
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg shadow-lg overflow-hidden h-full">
+        <div className="bg-white/5 px-4 py-2 border-b border-white/10 flex items-center justify-between">
+          <span className="text-sm font-medium text-white/60">Aperçu</span>
           <Badge variant="outline" className="text-xs">
             {documentType === 'devis' ? 'DEVIS' : 'FACTURE'}
           </Badge>
@@ -572,49 +572,49 @@ const InvoicesPage = () => {
           <div className="flex justify-between items-start mb-6">
             <div>
               <img src={COMPANY_INFO.logo} alt="Alpha Agency" className="h-12 mb-2" />
-              <p className="text-[8px] text-[#666666]">{COMPANY_INFO.tagline}</p>
+              <p className="text-[8px] text-white/60">{COMPANY_INFO.tagline}</p>
             </div>
             <div className="text-right">
-              <h2 className="text-lg font-bold text-[#CE0202] mb-1">
+              <h2 className="text-lg font-bold text-indigo-400 mb-1">
                 {documentType === 'devis' ? 'DEVIS' : 'FACTURE'}
               </h2>
-              <p className="text-[#666666]">N° {editingInvoice?.invoice_number || 'NOUVEAU'}</p>
-              <p className="text-[#666666]">Date: {today}</p>
+              <p className="text-white/60">N° {editingInvoice?.invoice_number || 'NOUVEAU'}</p>
+              <p className="text-white/60">Date: {today}</p>
             </div>
           </div>
 
           {/* Company & Client Info */}
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-[#F8F8F8] p-3 rounded">
-              <p className="font-bold text-[#1A1A1A] mb-1">{COMPANY_INFO.name}</p>
-              <p className="text-[#666666]">{COMPANY_INFO.address}</p>
-              <p className="text-[#666666]">{COMPANY_INFO.city}</p>
-              <p className="text-[#666666]">Tél: {COMPANY_INFO.phone}</p>
-              <p className="text-[#666666]">{COMPANY_INFO.email}</p>
-              <p className="text-[#666666] mt-1">SIRET: {COMPANY_INFO.siret}</p>
+            <div className="bg-white/5 p-3 rounded">
+              <p className="font-bold text-white mb-1">{COMPANY_INFO.name}</p>
+              <p className="text-white/60">{COMPANY_INFO.address}</p>
+              <p className="text-white/60">{COMPANY_INFO.city}</p>
+              <p className="text-white/60">Tél: {COMPANY_INFO.phone}</p>
+              <p className="text-white/60">{COMPANY_INFO.email}</p>
+              <p className="text-white/60 mt-1">SIRET: {COMPANY_INFO.siret}</p>
             </div>
-            <div className="bg-[#F8F8F8] p-3 rounded">
-              <p className="font-bold text-[#666666] mb-1">FACTURER À:</p>
+            <div className="bg-white/5 p-3 rounded">
+              <p className="font-bold text-white/60 mb-1">FACTURER À:</p>
               {contact ? (
                 <>
-                  <p className="font-bold text-[#1A1A1A]">{contact.first_name} {contact.last_name}</p>
-                  {contact.company && <p className="text-[#666666]">{contact.company}</p>}
-                  {contact.email && <p className="text-[#666666]">{contact.email}</p>}
-                  {contact.phone && <p className="text-[#666666]">Tél: {contact.phone}</p>}
+                  <p className="font-bold text-white">{contact.first_name} {contact.last_name}</p>
+                  {contact.company && <p className="text-white/60">{contact.company}</p>}
+                  {contact.email && <p className="text-white/60">{contact.email}</p>}
+                  {contact.phone && <p className="text-white/60">Tél: {contact.phone}</p>}
                 </>
               ) : (
-                <p className="text-[#999999] italic">Sélectionnez un client</p>
+                <p className="text-white/40 italic">Sélectionnez un client</p>
               )}
             </div>
           </div>
 
           {/* Dates */}
           <div className="flex gap-4 mb-4 text-[10px]">
-            <div className="bg-[#CE0202]/10 px-3 py-1 rounded">
-              <span className="text-[#CE0202] font-medium">Date d'émission:</span> {today}
+            <div className="bg-indigo-600/10 px-3 py-1 rounded">
+              <span className="text-indigo-400 font-medium">Date d'émission:</span> {today}
             </div>
-            <div className="bg-[#CE0202]/10 px-3 py-1 rounded">
-              <span className="text-[#CE0202] font-medium">Échéance:</span> {dueDate}
+            <div className="bg-indigo-600/10 px-3 py-1 rounded">
+              <span className="text-indigo-400 font-medium">Échéance:</span> {dueDate}
             </div>
           </div>
 
@@ -631,14 +631,14 @@ const InvoicesPage = () => {
             </thead>
             <tbody>
               {items.filter(i => i.title || i.description).map((item, index) => (
-                <tr key={index} className="border-b border-[#E5E5E5]">
+                <tr key={index} className="border-b border-white/10">
                   <td className="p-2 text-[10px]">
                     {item.title && <div className="font-semibold">{item.title}</div>}
-                    {item.description && <div className="text-[#666666] whitespace-pre-wrap">{item.description}</div>}
+                    {item.description && <div className="text-white/60 whitespace-pre-wrap">{item.description}</div>}
                   </td>
                   <td className="p-2 text-[10px] text-center">{item.quantity}</td>
                   <td className="p-2 text-[10px] text-right">{formatCurrency(item.unit_price)}</td>
-                  <td className="p-2 text-[10px] text-center text-[#CE0202]">
+                  <td className="p-2 text-[10px] text-center text-indigo-400">
                     {item.discount > 0 
                       ? (item.discountType === "fixed" 
                           ? `-${formatCurrency(item.discount)}` 
@@ -650,7 +650,7 @@ const InvoicesPage = () => {
               ))}
               {items.filter(i => i.title || i.description).length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-4 text-center text-[#999999] italic">
+                  <td colSpan={5} className="p-4 text-center text-white/40 italic">
                     Ajoutez des lignes à votre {documentType}
                   </td>
                 </tr>
@@ -662,43 +662,43 @@ const InvoicesPage = () => {
           <div className="flex justify-end mb-4">
             <div className="w-56">
               <div className="flex justify-between py-1 text-[10px]">
-                <span className="text-[#666666]">Sous-total HT</span>
+                <span className="text-white/60">Sous-total HT</span>
                 <span>{formatCurrency(calculateSubtotal())}</span>
               </div>
               {globalDiscount.value > 0 && (
                 <>
-                  <div className="flex justify-between py-1 text-[10px] text-[#CE0202]">
+                  <div className="flex justify-between py-1 text-[10px] text-indigo-400">
                     <span>Remise globale {globalDiscount.type === "percent" ? `(${globalDiscount.value}%)` : ''}</span>
                     <span>-{formatCurrency(calculateGlobalDiscountAmount())}</span>
                   </div>
                   <div className="flex justify-between py-1 text-[10px]">
-                    <span className="text-[#666666]">Sous-total après remise</span>
+                    <span className="text-white/60">Sous-total après remise</span>
                     <span>{formatCurrency(calculateSubtotalAfterDiscount())}</span>
                   </div>
                 </>
               )}
               <div className="flex justify-between py-1 text-[10px]">
-                <span className="text-[#666666]">TVA (8.5%)</span>
+                <span className="text-white/60">TVA (8.5%)</span>
                 <span>{formatCurrency(calculateTVA())}</span>
               </div>
-              <div className="flex justify-between py-2 text-sm font-bold border-t-2 border-[#CE0202] mt-1">
+              <div className="flex justify-between py-2 text-sm font-bold border-t-2 border-indigo-500/50 mt-1">
                 <span>Total TTC</span>
-                <span className="text-[#CE0202]">{formatCurrency(calculateTotal())}</span>
+                <span className="text-indigo-400">{formatCurrency(calculateTotal())}</span>
               </div>
             </div>
           </div>
 
           {/* Notes */}
           {formData.notes && (
-            <div className="bg-[#F8F8F8] p-3 rounded mb-4">
+            <div className="bg-white/5 p-3 rounded mb-4">
               <p className="font-bold text-[10px] mb-1">Notes:</p>
-              <p className="text-[10px] text-[#666666] whitespace-pre-wrap">{formData.notes}</p>
+              <p className="text-[10px] text-white/60 whitespace-pre-wrap">{formData.notes}</p>
             </div>
           )}
 
           {/* Footer */}
-          <div className="border-t border-[#E5E5E5] pt-4 mt-4">
-            <div className="grid grid-cols-2 gap-4 text-[8px] text-[#666666]">
+          <div className="border-t border-white/10 pt-4 mt-4">
+            <div className="grid grid-cols-2 gap-4 text-[8px] text-white/60">
               <div>
                 <p className="font-bold mb-1">Conditions de paiement:</p>
                 <p className="whitespace-pre-wrap">{formData.conditions}</p>
@@ -719,26 +719,26 @@ const InvoicesPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Facturation</h1>
-          <p className="text-[#666666] text-sm">{invoices.length} documents au total</p>
+          <h1 className="text-2xl font-bold text-white">Facturation</h1>
+          <p className="text-white/60 text-sm">{invoices.length} documents au total</p>
         </div>
         <div className="flex gap-2">
           <Button 
             variant="outline"
             onClick={() => setServicesDialogOpen(true)}
-            className="border-[#E5E5E5]"
+            className="border-white/10"
           >
             <Package className="w-4 h-4 mr-2" />
             Services
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+              <Button className="bg-indigo-600 hover:bg-indigo-500 text-white">
                 <Plus className="w-4 h-4 mr-2" />
                 Nouveau document
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-white border-[#E5E5E5]">
+            <DropdownMenuContent className="bg-white/5 backdrop-blur-xl border-white/10">
               <DropdownMenuItem onClick={() => openCreateSheet('facture')} className="cursor-pointer">
                 <Receipt className="w-4 h-4 mr-2" />
                 Facture
@@ -754,47 +754,47 @@ const InvoicesPage = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-4">
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
               <Clock className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-[#666666] text-xs">En attente</p>
-              <p className="text-xl font-bold text-[#1A1A1A] font-mono">{formatCurrency(totalPending)}</p>
+              <p className="text-white/60 text-xs">En attente</p>
+              <p className="text-xl font-bold text-white font-mono">{formatCurrency(totalPending)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-4">
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
               <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-[#666666] text-xs">Payées</p>
-              <p className="text-xl font-bold text-[#1A1A1A] font-mono">{formatCurrency(totalPaid)}</p>
+              <p className="text-white/60 text-xs">Payées</p>
+              <p className="text-xl font-bold text-white font-mono">{formatCurrency(totalPaid)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-4">
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
               <AlertTriangle className="w-5 h-5 text-red-600" />
             </div>
             <div>
-              <p className="text-[#666666] text-xs">En retard</p>
-              <p className="text-xl font-bold text-[#1A1A1A] font-mono">{formatCurrency(totalOverdue)}</p>
+              <p className="text-white/60 text-xs">En retard</p>
+              <p className="text-xl font-bold text-white font-mono">{formatCurrency(totalOverdue)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-[#CE0202]/20 p-4">
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-indigo-500/50/20 p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#CE0202]/10 rounded-lg flex items-center justify-center">
-              <Euro className="w-5 h-5 text-[#CE0202]" />
+            <div className="w-10 h-10 bg-indigo-600/10 rounded-lg flex items-center justify-center">
+              <Euro className="w-5 h-5 text-indigo-400" />
             </div>
             <div>
-              <p className="text-[#666666] text-xs">Total facturé</p>
-              <p className="text-xl font-bold text-[#1A1A1A] font-mono">
+              <p className="text-white/60 text-xs">Total facturé</p>
+              <p className="text-xl font-bold text-white font-mono">
                 {formatCurrency(invoices.reduce((sum, i) => sum + (i.total || 0), 0))}
               </p>
             </div>
@@ -805,20 +805,20 @@ const InvoicesPage = () => {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
           <Input
             placeholder="Rechercher par numéro, client..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white border-[#E5E5E5] text-[#1A1A1A]"
+            className="pl-10 bg-white/5 backdrop-blur-xl border-white/10 text-white"
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-48 bg-white border-[#E5E5E5] text-[#1A1A1A]">
+          <SelectTrigger className="w-48 bg-white/5 backdrop-blur-xl border-white/10 text-white">
             <Filter className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Filtrer par statut" />
           </SelectTrigger>
-          <SelectContent className="bg-white border-[#E5E5E5]">
+          <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
             <SelectItem value="all">Tous les statuts</SelectItem>
             {Object.entries(statusConfig).map(([key, config]) => (
               <SelectItem key={key} value={key}>{config.label}</SelectItem>
@@ -835,25 +835,25 @@ const InvoicesPage = () => {
           ))}
         </div>
       ) : filteredInvoices.length === 0 ? (
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-12 text-center">
-          <Receipt className="w-12 h-12 text-[#666666] mx-auto mb-4" />
-          <p className="text-[#666666]">
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-12 text-center">
+          <Receipt className="w-12 h-12 text-white/60 mx-auto mb-4" />
+          <p className="text-white/60">
             {searchQuery || filterStatus !== "all" ? "Aucun document trouvé" : "Aucun document créé"}
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-[#E5E5E5] overflow-hidden overflow-x-auto">
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 overflow-hidden overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#F8F8F8] border-b border-[#E5E5E5]">
+            <thead className="bg-white/5 border-b border-white/10">
               <tr>
-                <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase">Numéro</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase">Client</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase hidden md:table-cell">Date</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-[#666666] uppercase hidden lg:table-cell">Échéance</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-[#666666] uppercase">Montant</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-[#666666] uppercase">Payé</th>
-                <th className="text-center px-4 py-3 text-xs font-medium text-[#666666] uppercase">Statut</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-[#666666] uppercase">Actions</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Numéro</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Client</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase hidden md:table-cell">Date</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase hidden lg:table-cell">Échéance</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Montant</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Payé</th>
+                <th className="text-center px-4 py-3 text-xs font-medium text-white/60 uppercase">Statut</th>
+                <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5E5E5]">
@@ -864,30 +864,30 @@ const InvoicesPage = () => {
                 const remaining = (invoice.total || 0) - totalPaid;
                 const paymentProgress = invoice.total > 0 ? (totalPaid / invoice.total) * 100 : 0;
                 return (
-                  <tr key={invoice.id} className="hover:bg-[#F8F8F8] transition-colors">
+                  <tr key={invoice.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-4 py-4">
-                      <span className="font-mono font-medium text-[#1A1A1A] text-sm">{invoice.invoice_number}</span>
+                      <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
                     </td>
                     <td className="px-4 py-4">
                       <div>
-                        <p className="font-medium text-[#1A1A1A] text-sm">{getContactName(invoice.contact_id)}</p>
+                        <p className="font-medium text-white text-sm">{getContactName(invoice.contact_id)}</p>
                         {getContactCompany(invoice.contact_id) && (
-                          <p className="text-xs text-[#666666]">{getContactCompany(invoice.contact_id)}</p>
+                          <p className="text-xs text-white/60">{getContactCompany(invoice.contact_id)}</p>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-sm text-[#666666] hidden md:table-cell">
+                    <td className="px-4 py-4 text-sm text-white/60 hidden md:table-cell">
                       {formatDate(invoice.created_at)}
                     </td>
-                    <td className="px-4 py-4 text-sm text-[#666666] hidden lg:table-cell">
+                    <td className="px-4 py-4 text-sm text-white/60 hidden lg:table-cell">
                       {formatDate(invoice.due_date)}
                     </td>
                     <td className="px-4 py-4 text-right">
-                      <span className="font-mono font-bold text-[#1A1A1A] text-sm">{formatCurrency(invoice.total)}</span>
+                      <span className="font-mono font-bold text-white text-sm">{formatCurrency(invoice.total)}</span>
                     </td>
                     <td className="px-4 py-4 text-right">
                       <div className="flex flex-col items-end gap-1">
-                        <span className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-green-600 font-bold' : 'text-[#666666]'}`}>
+                        <span className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-green-600 font-bold' : 'text-white/60'}`}>
                           {formatCurrency(totalPaid)}
                         </span>
                         {invoice.total > 0 && totalPaid > 0 && totalPaid < invoice.total && (
@@ -902,7 +902,7 @@ const InvoicesPage = () => {
                           <Button 
                             size="sm" 
                             variant="ghost" 
-                            className="h-6 px-2 text-xs text-[#CE0202] hover:text-[#CE0202] hover:bg-[#CE0202]/10"
+                            className="h-6 px-2 text-xs text-indigo-400 hover:text-indigo-400 hover:bg-indigo-600/10"
                             onClick={() => openPaymentDialog(invoice)}
                           >
                             <Plus className="w-3 h-3 mr-1" />
@@ -922,7 +922,7 @@ const InvoicesPage = () => {
                             <span>{status.label}</span>
                           </div>
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-[#E5E5E5]">
+                        <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
                           {Object.entries(statusConfig).map(([key, config]) => {
                             const Icon = config.icon;
                             return (
@@ -944,7 +944,7 @@ const InvoicesPage = () => {
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white border-[#E5E5E5]">
+                        <DropdownMenuContent align="end" className="bg-white/5 backdrop-blur-xl border-white/10">
                           <DropdownMenuItem onClick={() => openViewDialog(invoice)} className="cursor-pointer">
                             <Eye className="w-4 h-4 mr-2" />
                             Voir
@@ -968,7 +968,7 @@ const InvoicesPage = () => {
                           {invoice.status !== "payée" && invoice.status !== "payee" && invoice.status !== "brouillon" && invoice.status !== "annulee" && (
                             <DropdownMenuItem 
                               onClick={() => openPaymentDialog(invoice)}
-                              className="cursor-pointer text-[#CE0202]"
+                              className="cursor-pointer text-indigo-400"
                             >
                               <CreditCard className="w-4 h-4 mr-2" />
                               Ajouter un paiement
@@ -1022,12 +1022,12 @@ const InvoicesPage = () => {
 
       {/* Create/Edit Sheet with Preview */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-[1400px] p-0 bg-[#F8F8F8] overflow-hidden">
+        <SheetContent side="right" className="w-full sm:max-w-[1400px] p-0 bg-white/5 overflow-hidden">
           <div className="flex h-full">
             {/* Form Side - Full width on mobile, 50% on desktop */}
-            <div className="w-full lg:w-1/2 p-4 sm:p-6 overflow-y-auto bg-white border-r border-[#E5E5E5]">
+            <div className="w-full lg:w-1/2 p-4 sm:p-6 overflow-y-auto bg-white/5 backdrop-blur-xl border-r border-white/10">
               <SheetHeader className="mb-4 sm:mb-6">
-                <SheetTitle className="text-[#1A1A1A] flex items-center gap-2">
+                <SheetTitle className="text-white flex items-center gap-2">
                   {documentType === 'devis' ? <FileText className="w-5 h-5" /> : <Receipt className="w-5 h-5" />}
                   {editingInvoice ? `Modifier ${documentType === 'devis' ? 'le devis' : 'la facture'}` : `Nouvelle ${documentType === 'devis' ? 'devis' : 'facture'}`}
                 </SheetTitle>
@@ -1037,42 +1037,42 @@ const InvoicesPage = () => {
                 {/* Client & Dates */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-[#1A1A1A]">Client *</Label>
+                    <Label className="text-white">Client *</Label>
                     <Select
                       value={formData.contact_id}
                       onValueChange={(value) => setFormData({...formData, contact_id: value})}
                       required
                     >
-                      <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
+                      <SelectTrigger className="bg-white/5 border-white/10 text-white">
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-[#E5E5E5]">
+                      <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
                         {contacts.map((contact) => (
                           <SelectItem key={contact.id} value={contact.id}>
                             {contact.first_name} {contact.last_name}
-                            {contact.company && <span className="text-[#666666] ml-1">({contact.company})</span>}
+                            {contact.company && <span className="text-white/60 ml-1">({contact.company})</span>}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[#1A1A1A]">Échéance</Label>
+                    <Label className="text-white">Échéance</Label>
                     <Input
                       type="date"
                       value={formData.due_date}
                       onChange={(e) => setFormData({...formData, due_date: e.target.value})}
-                      className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                      className="bg-white/5 border-white/10 text-white"
                     />
                   </div>
                 </div>
 
                 {/* Saved Services */}
                 {savedServices.length > 0 && (
-                  <div className="bg-[#F8F8F8] rounded-lg p-4">
+                  <div className="bg-white/5 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <Package className="w-4 h-4 text-[#CE0202]" />
-                      <span className="text-sm font-medium text-[#1A1A1A]">Services enregistrés</span>
+                      <Package className="w-4 h-4 text-indigo-400" />
+                      <span className="text-sm font-medium text-white">Services enregistrés</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {savedServices.map((service) => (
@@ -1088,7 +1088,7 @@ const InvoicesPage = () => {
                           <Plus className="w-3 h-3 mr-1 flex-shrink-0" />
                           <span>
                             <span className="font-bold">{service.title}</span>
-                            <span className="ml-1 text-[#666666]">({formatCurrency(service.price)})</span>
+                            <span className="ml-1 text-white/60">({formatCurrency(service.price)})</span>
                           </span>
                         </Button>
                       ))}
@@ -1099,16 +1099,16 @@ const InvoicesPage = () => {
                 {/* Items */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label className="text-[#1A1A1A] font-semibold">Lignes de facturation</Label>
-                    <Button type="button" variant="ghost" onClick={addItem} className="text-[#CE0202]">
+                    <Label className="text-white font-semibold">Lignes de facturation</Label>
+                    <Button type="button" variant="ghost" onClick={addItem} className="text-indigo-400">
                       <Plus className="w-4 h-4 mr-1" /> Ajouter une ligne
                     </Button>
                   </div>
                   
                   {items.map((item, index) => (
-                    <div key={index} className="bg-[#F8F8F8] rounded-lg p-3 space-y-2">
+                    <div key={index} className="bg-white/5 rounded-lg p-3 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-[#666666]">Ligne {index + 1}</span>
+                        <span className="text-xs text-white/60">Ligne {index + 1}</span>
                         <Button
                           type="button"
                           variant="ghost"
@@ -1124,29 +1124,29 @@ const InvoicesPage = () => {
                         placeholder="Titre du service (ex: Création site web)"
                         value={item.title || ""}
                         onChange={(e) => updateItem(index, "title", e.target.value)}
-                        className="bg-white border-[#E5E5E5] text-[#1A1A1A] font-semibold"
+                        className="bg-white/5 backdrop-blur-xl border-white/10 text-white font-semibold"
                       />
                       <Textarea
                         placeholder="Description détaillée (optionnel)"
                         value={item.description || ""}
                         onChange={(e) => updateItem(index, "description", e.target.value)}
-                        className="bg-white border-[#E5E5E5] text-[#1A1A1A] text-sm"
+                        className="bg-white/5 backdrop-blur-xl border-white/10 text-white text-sm"
                         rows={2}
                       />
                       <div className="grid grid-cols-3 gap-2">
                         <div>
-                          <Label className="text-xs text-[#666666]">Quantité</Label>
+                          <Label className="text-xs text-white/60">Quantité</Label>
                           <Input
                             type="number"
                             min="1"
                             placeholder="1"
                             value={item.quantity}
                             onChange={(e) => updateItem(index, "quantity", e.target.value)}
-                            className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                            className="bg-white/5 backdrop-blur-xl border-white/10 text-white"
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-[#666666]">Prix HT (€)</Label>
+                          <Label className="text-xs text-white/60">Prix HT (€)</Label>
                           <Input
                             type="number"
                             min="0"
@@ -1154,20 +1154,20 @@ const InvoicesPage = () => {
                             placeholder="0.00"
                             value={item.unit_price}
                             onChange={(e) => updateItem(index, "unit_price", e.target.value)}
-                            className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                            className="bg-white/5 backdrop-blur-xl border-white/10 text-white"
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-[#666666]">Remise</Label>
+                          <Label className="text-xs text-white/60">Remise</Label>
                           <div className="flex gap-1">
                             <Select
                               value={item.discountType || "percent"}
                               onValueChange={(v) => updateItem(index, "discountType", v)}
                             >
-                              <SelectTrigger className="w-16 bg-white border-[#E5E5E5] px-2">
+                              <SelectTrigger className="w-16 bg-white/5 backdrop-blur-xl border-white/10 px-2">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-white">
+                              <SelectContent className="bg-white/5 backdrop-blur-xl">
                                 <SelectItem value="percent">%</SelectItem>
                                 <SelectItem value="fixed">€</SelectItem>
                               </SelectContent>
@@ -1179,19 +1179,19 @@ const InvoicesPage = () => {
                               placeholder="0"
                               value={item.discount || 0}
                               onChange={(e) => updateItem(index, "discount", e.target.value)}
-                              className="flex-1 bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                              className="flex-1 bg-white/5 backdrop-blur-xl border-white/10 text-white"
                             />
                           </div>
                         </div>
                       </div>
                       {(item.title || item.description) && item.unit_price > 0 && (
                         <div className="flex justify-between items-center text-sm">
-                          <span className="text-[#CE0202]">
+                          <span className="text-indigo-400">
                             {item.discount > 0 && (
                               <>Remise: -{formatCurrency(calculateLineDiscount(item))} {item.discountType === "percent" ? `(${item.discount}%)` : ''}</>
                             )}
                           </span>
-                          <span className="font-medium text-[#1A1A1A]">
+                          <span className="font-medium text-white">
                             Total ligne: {formatCurrency(calculateLineTotal(item))}
                           </span>
                         </div>
@@ -1203,8 +1203,8 @@ const InvoicesPage = () => {
                 {/* Global Discount */}
                 <div className="bg-gradient-to-r from-[#CE0202]/10 to-[#CE0202]/5 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <Label className="text-[#1A1A1A] font-semibold flex items-center gap-2">
-                      <Percent className="w-4 h-4 text-[#CE0202]" />
+                    <Label className="text-white font-semibold flex items-center gap-2">
+                      <Percent className="w-4 h-4 text-indigo-400" />
                       Remise globale
                     </Label>
                   </div>
@@ -1213,10 +1213,10 @@ const InvoicesPage = () => {
                       value={globalDiscount.type}
                       onValueChange={(v) => setGlobalDiscount({ ...globalDiscount, type: v })}
                     >
-                      <SelectTrigger className="w-32 bg-white border-[#E5E5E5]">
+                      <SelectTrigger className="w-32 bg-white/5 backdrop-blur-xl border-white/10">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-white">
+                      <SelectContent className="bg-white/5 backdrop-blur-xl">
                         <SelectItem value="percent">%</SelectItem>
                         <SelectItem value="fixed">€ fixe</SelectItem>
                       </SelectContent>
@@ -1228,11 +1228,11 @@ const InvoicesPage = () => {
                       placeholder="0"
                       value={globalDiscount.value || ""}
                       onChange={(e) => setGlobalDiscount({ ...globalDiscount, value: parseFloat(e.target.value) || 0 })}
-                      className="flex-1 bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                      className="flex-1 bg-white/5 backdrop-blur-xl border-white/10 text-white"
                     />
                   </div>
                   {globalDiscount.value > 0 && (
-                    <div className="mt-2 text-sm text-[#CE0202] font-medium">
+                    <div className="mt-2 text-sm text-indigo-400 font-medium">
                       Remise appliquée: -{formatCurrency(calculateGlobalDiscountAmount())}
                     </div>
                   )}
@@ -1240,11 +1240,11 @@ const InvoicesPage = () => {
 
                 {/* Notes */}
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Notes</Label>
+                  <Label className="text-white">Notes</Label>
                   <Textarea
                     value={formData.notes}
                     onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    className="bg-white/5 border-white/10 text-white"
                     rows={2}
                     placeholder="Notes visibles sur le document..."
                   />
@@ -1257,7 +1257,7 @@ const InvoicesPage = () => {
                     <span className="font-mono">{formatCurrency(calculateSubtotal())}</span>
                   </div>
                   {globalDiscount.value > 0 && (
-                    <div className="flex justify-between py-1 text-[#CE0202]">
+                    <div className="flex justify-between py-1 text-indigo-400">
                       <span>Remise globale ({globalDiscount.type === "percent" ? `${globalDiscount.value}%` : "fixe"})</span>
                       <span className="font-mono">-{formatCurrency(calculateGlobalDiscountAmount())}</span>
                     </div>
@@ -1274,7 +1274,7 @@ const InvoicesPage = () => {
                   </div>
                   <div className="flex justify-between py-2 text-xl font-bold border-t border-white/20 mt-2">
                     <span>Total TTC</span>
-                    <span className="font-mono text-[#CE0202]">{formatCurrency(calculateTotal())}</span>
+                    <span className="font-mono text-indigo-400">{formatCurrency(calculateTotal())}</span>
                   </div>
                 </div>
 
@@ -1286,7 +1286,7 @@ const InvoicesPage = () => {
                   <Button 
                     type="submit" 
                     disabled={saving || !formData.contact_id}
-                    className="flex-1 bg-[#CE0202] hover:bg-[#B00202] text-white"
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white"
                   >
                     {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                     {editingInvoice ? "Mettre à jour" : "Créer"}
@@ -1305,52 +1305,52 @@ const InvoicesPage = () => {
 
       {/* Services Management Dialog */}
       <Dialog open={servicesDialogOpen} onOpenChange={setServicesDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-2xl">
+        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A] flex items-center gap-2">
-              <Package className="w-5 h-5 text-[#CE0202]" />
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Package className="w-5 h-5 text-indigo-400" />
               Services enregistrés
             </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             {/* Add New Service */}
-            <div className="bg-[#F8F8F8] rounded-lg p-4 space-y-3">
-              <p className="text-sm font-medium text-[#1A1A1A]">Ajouter un nouveau service</p>
+            <div className="bg-white/5 rounded-lg p-4 space-y-3">
+              <p className="text-sm font-medium text-white">Ajouter un nouveau service</p>
               <div className="space-y-3">
                 <div>
-                  <Label className="text-xs text-[#666666]">Titre du service *</Label>
+                  <Label className="text-xs text-white/60">Titre du service *</Label>
                   <Input
                     placeholder="Ex: Site web vitrine, Logo professionnel, Community Management..."
                     value={newService.title}
                     onChange={(e) => setNewService({...newService, title: e.target.value})}
-                    className="bg-white border-[#E5E5E5] font-bold"
+                    className="bg-white/5 backdrop-blur-xl border-white/10 font-bold"
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-[#666666]">Description détaillée</Label>
+                  <Label className="text-xs text-white/60">Description détaillée</Label>
                   <Textarea
                     placeholder="Décrivez en détail ce que comprend ce service : fonctionnalités incluses, livrables, délais, etc."
                     value={newService.description}
                     onChange={(e) => setNewService({...newService, description: e.target.value})}
-                    className="bg-white border-[#E5E5E5] min-h-[100px]"
+                    className="bg-white/5 backdrop-blur-xl border-white/10 min-h-[100px]"
                     rows={4}
                   />
                 </div>
                 <div className="flex gap-3 items-end">
                   <div className="flex-1">
-                    <Label className="text-xs text-[#666666]">Prix HT (€) *</Label>
+                    <Label className="text-xs text-white/60">Prix HT (€) *</Label>
                     <Input
                       type="number"
                       placeholder="0.00"
                       value={newService.price || ""}
                       onChange={(e) => setNewService({...newService, price: parseFloat(e.target.value) || 0})}
-                      className="bg-white border-[#E5E5E5]"
+                      className="bg-white/5 backdrop-blur-xl border-white/10"
                     />
                   </div>
                   <Button 
                     onClick={handleAddService} 
-                    className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white"
                     disabled={!newService.title || !newService.price}
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -1363,37 +1363,37 @@ const InvoicesPage = () => {
             {/* Services List */}
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {savedServices.length === 0 ? (
-                <p className="text-center text-[#666666] py-4">Aucun service enregistré</p>
+                <p className="text-center text-white/60 py-4">Aucun service enregistré</p>
               ) : (
                 savedServices.map((service) => (
-                  <div key={service.id} className="p-4 bg-[#F8F8F8] rounded-lg">
+                  <div key={service.id} className="p-4 bg-white/5 rounded-lg">
                     {editingService?.id === service.id ? (
                       <div className="space-y-3">
                         <div>
-                          <Label className="text-xs text-[#666666]">Titre</Label>
+                          <Label className="text-xs text-white/60">Titre</Label>
                           <Input
                             value={editingService.title}
                             onChange={(e) => setEditingService({...editingService, title: e.target.value})}
-                            className="bg-white border-[#E5E5E5] font-bold"
+                            className="bg-white/5 backdrop-blur-xl border-white/10 font-bold"
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-[#666666]">Description</Label>
+                          <Label className="text-xs text-white/60">Description</Label>
                           <Textarea
                             value={editingService.description || ""}
                             onChange={(e) => setEditingService({...editingService, description: e.target.value})}
-                            className="bg-white border-[#E5E5E5]"
+                            className="bg-white/5 backdrop-blur-xl border-white/10"
                             rows={3}
                           />
                         </div>
                         <div className="flex gap-3 items-end">
                           <div className="flex-1">
-                            <Label className="text-xs text-[#666666]">Prix HT (€)</Label>
+                            <Label className="text-xs text-white/60">Prix HT (€)</Label>
                             <Input
                               type="number"
                               value={editingService.price}
                               onChange={(e) => setEditingService({...editingService, price: parseFloat(e.target.value) || 0})}
-                              className="bg-white border-[#E5E5E5]"
+                              className="bg-white/5 backdrop-blur-xl border-white/10"
                             />
                           </div>
                           <Button size="sm" onClick={handleUpdateService} className="bg-green-600 hover:bg-green-700 text-white">
@@ -1407,11 +1407,11 @@ const InvoicesPage = () => {
                     ) : (
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <p className="font-bold text-[#1A1A1A]">{service.title}</p>
+                          <p className="font-bold text-white">{service.title}</p>
                           {service.description && (
-                            <p className="text-sm text-[#666666] mt-1 whitespace-pre-wrap">{service.description}</p>
+                            <p className="text-sm text-white/60 mt-1 whitespace-pre-wrap">{service.description}</p>
                           )}
-                          <p className="text-lg text-[#CE0202] font-mono mt-2">{formatCurrency(service.price)}</p>
+                          <p className="text-lg text-indigo-400 font-mono mt-2">{formatCurrency(service.price)}</p>
                         </div>
                         <div className="flex gap-1 flex-shrink-0">
                           <Button size="sm" variant="ghost" onClick={() => setEditingService(service)}>
@@ -1433,12 +1433,12 @@ const InvoicesPage = () => {
 
       {/* View Invoice Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-3xl max-h-[90vh] overflow-y-auto">
           {selectedInvoice && (
             <>
               <DialogHeader>
                 <div className="flex items-center justify-between">
-                  <DialogTitle className="text-[#1A1A1A]">
+                  <DialogTitle className="text-white">
                     {selectedInvoice.invoice_number}
                   </DialogTitle>
                   <Badge className={statusConfig[selectedInvoice.status]?.color}>
@@ -1451,38 +1451,38 @@ const InvoicesPage = () => {
                 {/* Header Info */}
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <p className="text-sm text-[#666666]">Client</p>
-                    <p className="font-medium text-[#1A1A1A]">{getContactName(selectedInvoice.contact_id)}</p>
+                    <p className="text-sm text-white/60">Client</p>
+                    <p className="font-medium text-white">{getContactName(selectedInvoice.contact_id)}</p>
                     {getContactCompany(selectedInvoice.contact_id) && (
-                      <p className="text-sm text-[#666666]">{getContactCompany(selectedInvoice.contact_id)}</p>
+                      <p className="text-sm text-white/60">{getContactCompany(selectedInvoice.contact_id)}</p>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-[#666666]">Date d'émission</p>
-                    <p className="font-medium text-[#1A1A1A]">{formatDate(selectedInvoice.created_at)}</p>
-                    <p className="text-sm text-[#666666] mt-2">Échéance</p>
-                    <p className="font-medium text-[#1A1A1A]">{formatDate(selectedInvoice.due_date)}</p>
+                    <p className="text-sm text-white/60">Date d'émission</p>
+                    <p className="font-medium text-white">{formatDate(selectedInvoice.created_at)}</p>
+                    <p className="text-sm text-white/60 mt-2">Échéance</p>
+                    <p className="font-medium text-white">{formatDate(selectedInvoice.due_date)}</p>
                   </div>
                 </div>
 
                 {/* Items Table */}
-                <div className="border border-[#E5E5E5] rounded-lg overflow-hidden">
+                <div className="border border-white/10 rounded-lg overflow-hidden">
                   <table className="w-full">
-                    <thead className="bg-[#F8F8F8]">
+                    <thead className="bg-white/5">
                       <tr>
-                        <th className="text-left px-4 py-2 text-xs font-medium text-[#666666]">Description</th>
-                        <th className="text-center px-4 py-2 text-xs font-medium text-[#666666]">Qté</th>
-                        <th className="text-right px-4 py-2 text-xs font-medium text-[#666666]">Prix unitaire</th>
-                        <th className="text-right px-4 py-2 text-xs font-medium text-[#666666]">Total HT</th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-white/60">Description</th>
+                        <th className="text-center px-4 py-2 text-xs font-medium text-white/60">Qté</th>
+                        <th className="text-right px-4 py-2 text-xs font-medium text-white/60">Prix unitaire</th>
+                        <th className="text-right px-4 py-2 text-xs font-medium text-white/60">Total HT</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E5E5E5]">
                       {selectedInvoice.items?.map((item, index) => (
                         <tr key={index}>
-                          <td className="px-4 py-3 text-[#1A1A1A]">{item.description}</td>
-                          <td className="px-4 py-3 text-center text-[#666666]">{item.quantity}</td>
-                          <td className="px-4 py-3 text-right font-mono text-[#666666]">{formatCurrency(item.unit_price)}</td>
-                          <td className="px-4 py-3 text-right font-mono text-[#1A1A1A]">{formatCurrency(item.quantity * item.unit_price)}</td>
+                          <td className="px-4 py-3 text-white">{item.description}</td>
+                          <td className="px-4 py-3 text-center text-white/60">{item.quantity}</td>
+                          <td className="px-4 py-3 text-right font-mono text-white/60">{formatCurrency(item.unit_price)}</td>
+                          <td className="px-4 py-3 text-right font-mono text-white">{formatCurrency(item.quantity * item.unit_price)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -1493,16 +1493,16 @@ const InvoicesPage = () => {
                 <div className="flex justify-end">
                   <div className="w-64 space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-[#666666]">Sous-total HT</span>
+                      <span className="text-white/60">Sous-total HT</span>
                       <span className="font-mono">{formatCurrency(selectedInvoice.subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-[#666666]">TVA (8.5%)</span>
+                      <span className="text-white/60">TVA (8.5%)</span>
                       <span className="font-mono">{formatCurrency(selectedInvoice.tax)}</span>
                     </div>
-                    <div className="flex justify-between text-lg font-bold border-t border-[#E5E5E5] pt-2">
-                      <span className="text-[#1A1A1A]">Total TTC</span>
-                      <span className="font-mono text-[#CE0202]">{formatCurrency(selectedInvoice.total)}</span>
+                    <div className="flex justify-between text-lg font-bold border-t border-white/10 pt-2">
+                      <span className="text-white">Total TTC</span>
+                      <span className="font-mono text-indigo-400">{formatCurrency(selectedInvoice.total)}</span>
                     </div>
                   </div>
                 </div>
@@ -1511,8 +1511,8 @@ const InvoicesPage = () => {
                 {selectedInvoice.status !== 'brouillon' && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-[#1A1A1A] flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-[#CE0202]" />
+                      <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-indigo-400" />
                         Paiements
                       </h3>
                       {selectedInvoice.status !== 'payée' && selectedInvoice.status !== 'payee' && selectedInvoice.status !== 'annulee' && (
@@ -1523,7 +1523,7 @@ const InvoicesPage = () => {
                             setViewDialogOpen(false);
                             openPaymentDialog(selectedInvoice);
                           }}
-                          className="text-[#CE0202] border-[#CE0202]"
+                          className="text-indigo-400 border-indigo-500/50"
                         >
                           <Plus className="w-3 h-3 mr-1" />
                           Ajouter
@@ -1533,9 +1533,9 @@ const InvoicesPage = () => {
 
                     {/* Payment Summary */}
                     <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-[#F8F8F8] rounded-lg p-3 text-center">
-                        <p className="text-xs text-[#666666]">Total facture</p>
-                        <p className="font-mono font-bold text-[#1A1A1A]">{formatCurrency(selectedInvoice.total)}</p>
+                      <div className="bg-white/5 rounded-lg p-3 text-center">
+                        <p className="text-xs text-white/60">Total facture</p>
+                        <p className="font-mono font-bold text-white">{formatCurrency(selectedInvoice.total)}</p>
                       </div>
                       <div className="bg-green-50 rounded-lg p-3 text-center">
                         <p className="text-xs text-green-600">Payé</p>
@@ -1551,14 +1551,14 @@ const InvoicesPage = () => {
 
                     {/* Payments List */}
                     {selectedInvoice.payments && selectedInvoice.payments.length > 0 ? (
-                      <div className="border border-[#E5E5E5] rounded-lg overflow-hidden">
+                      <div className="border border-white/10 rounded-lg overflow-hidden">
                         <table className="w-full">
-                          <thead className="bg-[#F8F8F8]">
+                          <thead className="bg-white/5">
                             <tr>
-                              <th className="text-left px-4 py-2 text-xs font-medium text-[#666666]">Date</th>
-                              <th className="text-left px-4 py-2 text-xs font-medium text-[#666666]">Méthode</th>
-                              <th className="text-right px-4 py-2 text-xs font-medium text-[#666666]">Montant</th>
-                              <th className="text-right px-4 py-2 text-xs font-medium text-[#666666]">Actions</th>
+                              <th className="text-left px-4 py-2 text-xs font-medium text-white/60">Date</th>
+                              <th className="text-left px-4 py-2 text-xs font-medium text-white/60">Méthode</th>
+                              <th className="text-right px-4 py-2 text-xs font-medium text-white/60">Montant</th>
+                              <th className="text-right px-4 py-2 text-xs font-medium text-white/60">Actions</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-[#E5E5E5]">
@@ -1566,12 +1566,12 @@ const InvoicesPage = () => {
                               const method = paymentMethods[payment.payment_method] || paymentMethods.virement;
                               const MethodIcon = method.icon;
                               return (
-                                <tr key={payment.id} className="hover:bg-[#F8F8F8]">
-                                  <td className="px-4 py-3 text-sm text-[#1A1A1A]">
+                                <tr key={payment.id} className="hover:bg-white/5">
+                                  <td className="px-4 py-3 text-sm text-white">
                                     {formatDate(payment.payment_date)}
                                   </td>
                                   <td className="px-4 py-3">
-                                    <div className="flex items-center gap-2 text-sm text-[#666666]">
+                                    <div className="flex items-center gap-2 text-sm text-white/60">
                                       <MethodIcon className="w-4 h-4" />
                                       {method.label}
                                     </div>
@@ -1596,7 +1596,7 @@ const InvoicesPage = () => {
                         </table>
                       </div>
                     ) : (
-                      <div className="text-center py-6 text-[#666666] bg-[#F8F8F8] rounded-lg">
+                      <div className="text-center py-6 text-white/60 bg-white/5 rounded-lg">
                         <Banknote className="w-8 h-8 mx-auto mb-2 opacity-50" />
                         <p className="text-sm">Aucun paiement enregistré</p>
                       </div>
@@ -1611,7 +1611,7 @@ const InvoicesPage = () => {
                 </Button>
                 <Button 
                   onClick={() => handleDownloadPDF(selectedInvoice)}
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Télécharger PDF
@@ -1624,10 +1624,10 @@ const InvoicesPage = () => {
 
       {/* Add Payment Dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-md">
+        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A] flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-[#CE0202]" />
+            <DialogTitle className="text-white flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-indigo-400" />
               Enregistrer un paiement
             </DialogTitle>
           </DialogHeader>
@@ -1635,22 +1635,22 @@ const InvoicesPage = () => {
           {selectedInvoiceForPayment && (
             <div className="space-y-4">
               {/* Invoice Summary */}
-              <div className="bg-[#F8F8F8] rounded-lg p-4 space-y-2">
+              <div className="bg-white/5 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#666666]">Facture</span>
+                  <span className="text-white/60">Facture</span>
                   <span className="font-mono font-medium">{selectedInvoiceForPayment.invoice_number}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#666666]">Total TTC</span>
+                  <span className="text-white/60">Total TTC</span>
                   <span className="font-mono">{formatCurrency(selectedInvoiceForPayment.total)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#666666]">Déjà payé</span>
+                  <span className="text-white/60">Déjà payé</span>
                   <span className="font-mono text-green-600">{formatCurrency(selectedInvoiceForPayment.total_paid || 0)}</span>
                 </div>
-                <div className="flex justify-between text-sm font-bold border-t border-[#E5E5E5] pt-2">
-                  <span className="text-[#1A1A1A]">Reste à payer</span>
-                  <span className="font-mono text-[#CE0202]">
+                <div className="flex justify-between text-sm font-bold border-t border-white/10 pt-2">
+                  <span className="text-white">Reste à payer</span>
+                  <span className="font-mono text-indigo-400">
                     {formatCurrency((selectedInvoiceForPayment.total || 0) - (selectedInvoiceForPayment.total_paid || 0))}
                   </span>
                 </div>
@@ -1659,9 +1659,9 @@ const InvoicesPage = () => {
               {/* Payment Form */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Montant *</Label>
+                  <Label className="text-white">Montant *</Label>
                   <div className="relative">
-                    <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+                    <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
                     <Input
                       type="number"
                       step="0.01"
@@ -1669,34 +1669,34 @@ const InvoicesPage = () => {
                       placeholder="0.00"
                       value={paymentForm.amount}
                       onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-                      className="pl-10 bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A] font-mono"
+                      className="pl-10 bg-white/5 border-white/10 text-white font-mono"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Date du paiement *</Label>
+                  <Label className="text-white">Date du paiement *</Label>
                   <div className="relative">
-                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
                     <Input
                       type="date"
                       value={paymentForm.payment_date}
                       onChange={(e) => setPaymentForm({ ...paymentForm, payment_date: e.target.value })}
-                      className="pl-10 bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                      className="pl-10 bg-white/5 border-white/10 text-white"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Méthode de paiement</Label>
+                  <Label className="text-white">Méthode de paiement</Label>
                   <Select
                     value={paymentForm.payment_method}
                     onValueChange={(value) => setPaymentForm({ ...paymentForm, payment_method: value })}
                   >
-                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-[#E5E5E5]">
+                    <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
                       {Object.entries(paymentMethods).map(([key, method]) => {
                         const Icon = method.icon;
                         return (
@@ -1713,12 +1713,12 @@ const InvoicesPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Notes (optionnel)</Label>
+                  <Label className="text-white">Notes (optionnel)</Label>
                   <Textarea
                     placeholder="Référence de virement, numéro de chèque..."
                     value={paymentForm.notes}
                     onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    className="bg-white/5 border-white/10 text-white"
                     rows={2}
                   />
                 </div>
@@ -1731,7 +1731,7 @@ const InvoicesPage = () => {
                 <Button 
                   onClick={handleAddPayment}
                   disabled={savingPayment || !paymentForm.amount}
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white"
                 >
                   {savingPayment ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
                   Enregistrer

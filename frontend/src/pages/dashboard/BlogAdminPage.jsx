@@ -36,7 +36,7 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
             value={block.content || ''}
             onChange={(e) => onUpdate({ ...block, content: e.target.value })}
             placeholder="Votre texte ici..."
-            className="min-h-24 bg-white border-[#E5E5E5]"
+            className="min-h-24 bg-white/5 backdrop-blur-xl border-white/10"
           />
         );
       case 'heading':
@@ -47,10 +47,10 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
                 value={String(block.level || 2)} 
                 onValueChange={(v) => onUpdate({ ...block, level: parseInt(v) })}
               >
-                <SelectTrigger className="w-24 bg-white">
+                <SelectTrigger className="w-24 bg-white/5 backdrop-blur-xl">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   <SelectItem value="2">H2</SelectItem>
                   <SelectItem value="3">H3</SelectItem>
                 </SelectContent>
@@ -59,7 +59,7 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
                 value={block.content || ''}
                 onChange={(e) => onUpdate({ ...block, content: e.target.value })}
                 placeholder="Titre de la section"
-                className={`flex-1 bg-white ${block.level === 2 ? 'text-xl font-bold' : 'text-lg font-semibold'}`}
+                className={`flex-1 bg-white/5 backdrop-blur-xl ${block.level === 2 ? 'text-xl font-bold' : 'text-lg font-semibold'}`}
               />
             </div>
           </div>
@@ -72,7 +72,7 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
                 value={block.url || ''}
                 onChange={(e) => onUpdate({ ...block, url: e.target.value })}
                 placeholder="URL de l'image"
-                className="flex-1 bg-white"
+                className="flex-1 bg-white/5 backdrop-blur-xl"
               />
               <label className="cursor-pointer">
                 <Button variant="outline" size="sm" asChild>
@@ -111,10 +111,10 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
                 value={block.alignment || 'center'} 
                 onValueChange={(v) => onUpdate({ ...block, alignment: v })}
               >
-                <SelectTrigger className="w-28 bg-white">
+                <SelectTrigger className="w-28 bg-white/5 backdrop-blur-xl">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   <SelectItem value="left">Gauche</SelectItem>
                   <SelectItem value="center">Centre</SelectItem>
                   <SelectItem value="right">Droite</SelectItem>
@@ -125,10 +125,10 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
                 value={block.size || 'medium'} 
                 onValueChange={(v) => onUpdate({ ...block, size: v })}
               >
-                <SelectTrigger className="w-24 bg-white">
+                <SelectTrigger className="w-24 bg-white/5 backdrop-blur-xl">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   <SelectItem value="small">Petit</SelectItem>
                   <SelectItem value="medium">Moyen</SelectItem>
                   <SelectItem value="large">Grand</SelectItem>
@@ -147,19 +147,19 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
               value={block.caption || ''}
               onChange={(e) => onUpdate({ ...block, caption: e.target.value })}
               placeholder="Légende (optionnel)"
-              className="bg-white"
+              className="bg-white/5 backdrop-blur-xl"
             />
           </div>
         );
       case 'gallery':
         return (
           <div className="space-y-3">
-            <p className="text-sm text-[#666666]">Galerie d'images (URLs séparées par des virgules)</p>
+            <p className="text-sm text-white/60">Galerie d'images (URLs séparées par des virgules)</p>
             <Textarea
               value={(block.urls || []).join(', ')}
               onChange={(e) => onUpdate({ ...block, urls: e.target.value.split(',').map(u => u.trim()).filter(u => u) })}
               placeholder="https://image1.jpg, https://image2.jpg"
-              className="bg-white"
+              className="bg-white/5 backdrop-blur-xl"
             />
             {block.urls?.length > 0 && (
               <div className="flex gap-2 flex-wrap">
@@ -177,7 +177,7 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
               value={block.url || ''}
               onChange={(e) => onUpdate({ ...block, url: e.target.value })}
               placeholder="URL du fichier audio"
-              className="bg-white"
+              className="bg-white/5 backdrop-blur-xl"
             />
             {block.url && (
               <audio controls className="w-full">
@@ -193,29 +193,29 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
               value={block.url || ''}
               onChange={(e) => onUpdate({ ...block, url: e.target.value })}
               placeholder="URL YouTube ou Vimeo"
-              className="bg-white"
+              className="bg-white/5 backdrop-blur-xl"
             />
             {block.url && (
-              <div className="aspect-video bg-[#F8F8F8] rounded-lg flex items-center justify-center">
-                <Video className="w-12 h-12 text-[#666666]" />
+              <div className="aspect-video bg-white/5 rounded-lg flex items-center justify-center">
+                <Video className="w-12 h-12 text-white/60" />
               </div>
             )}
           </div>
         );
       case 'quote':
         return (
-          <div className="space-y-2 border-l-4 border-[#CE0202] pl-4">
+          <div className="space-y-2 border-l-4 border-indigo-500/50 pl-4">
             <Textarea
               value={block.content || ''}
               onChange={(e) => onUpdate({ ...block, content: e.target.value })}
               placeholder="Citation..."
-              className="bg-white italic"
+              className="bg-white/5 backdrop-blur-xl italic"
             />
             <Input
               value={block.caption || ''}
               onChange={(e) => onUpdate({ ...block, caption: e.target.value })}
               placeholder="Auteur (optionnel)"
-              className="bg-white text-sm"
+              className="bg-white/5 backdrop-blur-xl text-sm"
             />
           </div>
         );
@@ -235,10 +235,10 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
   };
 
   return (
-    <div className="bg-[#F8F8F8] rounded-lg p-3 border border-[#E5E5E5] group">
+    <div className="bg-white/5 rounded-lg p-3 border border-white/10 group">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <GripVertical className="w-4 h-4 text-[#999999] cursor-grab" />
+          <GripVertical className="w-4 h-4 text-white/40 cursor-grab" />
           <Badge variant="outline" className="text-xs">
             {blockTypeLabels[block.type] || block.type}
           </Badge>
@@ -373,7 +373,7 @@ const ArticleEditor = ({ article, onSave, onCancel, tags: availableTags }) => {
             value={formData.title}
             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
             placeholder="Titre de l'article"
-            className="bg-white"
+            className="bg-white/5 backdrop-blur-xl"
           />
         </div>
         <div className="space-y-2">
@@ -382,7 +382,7 @@ const ArticleEditor = ({ article, onSave, onCancel, tags: availableTags }) => {
             value={formData.slug}
             onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
             placeholder="mon-article"
-            className="bg-white"
+            className="bg-white/5 backdrop-blur-xl"
           />
         </div>
       </div>
@@ -393,7 +393,7 @@ const ArticleEditor = ({ article, onSave, onCancel, tags: availableTags }) => {
           value={formData.excerpt}
           onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
           placeholder="Courte description de l'article"
-          className="bg-white"
+          className="bg-white/5 backdrop-blur-xl"
           rows={2}
         />
       </div>
@@ -406,7 +406,7 @@ const ArticleEditor = ({ article, onSave, onCancel, tags: availableTags }) => {
               value={formData.featured_image}
               onChange={(e) => setFormData(prev => ({ ...prev, featured_image: e.target.value }))}
               placeholder="URL de l'image"
-              className="flex-1 bg-white"
+              className="flex-1 bg-white/5 backdrop-blur-xl"
             />
             <label className="cursor-pointer">
               <Button variant="outline" size="sm" asChild>
@@ -444,7 +444,7 @@ const ArticleEditor = ({ article, onSave, onCancel, tags: availableTags }) => {
               size="sm"
               onClick={handleSuggestTags}
               disabled={suggestingTags}
-              className="text-[#CE0202] border-[#CE0202] hover:bg-[#CE0202] hover:text-white"
+              className="text-indigo-400 border-indigo-500/50 hover:bg-indigo-600 hover:text-white"
             >
               {suggestingTags ? (
                 <Loader2 className="w-3 h-3 mr-1 animate-spin" />
@@ -540,7 +540,7 @@ const ArticleEditor = ({ article, onSave, onCancel, tags: availableTags }) => {
 
         <div className="space-y-3 min-h-48">
           {formData.content_blocks.length === 0 ? (
-            <div className="text-center py-12 text-[#666666] bg-[#F8F8F8] rounded-lg border-2 border-dashed border-[#E5E5E5]">
+            <div className="text-center py-12 text-white/60 bg-white/5 rounded-lg border-2 border-dashed border-white/10">
               <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>Ajoutez des blocs de contenu avec les boutons ci-dessus</p>
             </div>
@@ -562,15 +562,15 @@ const ArticleEditor = ({ article, onSave, onCancel, tags: availableTags }) => {
       </div>
 
       {/* Status & Actions */}
-      <div className="flex items-center justify-between pt-4 border-t border-[#E5E5E5]">
+      <div className="flex items-center justify-between pt-4 border-t border-white/10">
         <Select 
           value={formData.status} 
           onValueChange={(v) => setFormData(prev => ({ ...prev, status: v }))}
         >
-          <SelectTrigger className="w-40 bg-white">
+          <SelectTrigger className="w-40 bg-white/5 backdrop-blur-xl">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-white">
+          <SelectContent className="bg-white/5 backdrop-blur-xl">
             <SelectItem value="draft">Brouillon</SelectItem>
             <SelectItem value="published">Publié</SelectItem>
           </SelectContent>
@@ -581,7 +581,7 @@ const ArticleEditor = ({ article, onSave, onCancel, tags: availableTags }) => {
           <Button 
             onClick={handleSubmit} 
             disabled={saving}
-            className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white"
           >
             {saving ? "Enregistrement..." : article?.id ? "Mettre à jour" : "Créer"}
           </Button>
@@ -696,7 +696,7 @@ const BlogAdminPage = () => {
             {editingArticle?.id ? "Modifier l'article" : "Nouvel article"}
           </h1>
         </div>
-        <Card className="bg-white">
+        <Card className="bg-white/5 backdrop-blur-xl">
           <CardContent className="p-6">
             <ArticleEditor
               article={editingArticle}
@@ -715,8 +715,8 @@ const BlogAdminPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Blog / Actualités</h1>
-          <p className="text-[#666666] text-xs sm:text-sm">{articles.length} articles</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Blog / Actualités</h1>
+          <p className="text-white/60 text-xs sm:text-sm">{articles.length} articles</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <Dialog open={tagDialogOpen} onOpenChange={setTagDialogOpen}>
@@ -725,7 +725,7 @@ const BlogAdminPage = () => {
                 <Tag className="w-4 h-4 mr-1" /> Tags
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-white">
+            <DialogContent className="bg-white/5 backdrop-blur-xl">
               <DialogHeader>
                 <DialogTitle>Gestion des tags</DialogTitle>
               </DialogHeader>
@@ -737,13 +737,13 @@ const BlogAdminPage = () => {
                     placeholder="Nouveau tag"
                     className="flex-1"
                   />
-                  <Button onClick={handleCreateTag} className="bg-[#CE0202] text-white">
+                  <Button onClick={handleCreateTag} className="bg-indigo-600 text-white">
                     Ajouter
                   </Button>
                 </div>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {tags.map(tag => (
-                    <div key={tag.id} className="flex items-center justify-between p-2 bg-[#F8F8F8] rounded">
+                    <div key={tag.id} className="flex items-center justify-between p-2 bg-white/5 rounded">
                       <Badge variant="outline">{tag.name}</Badge>
                       <Button variant="ghost" size="sm" onClick={() => handleDeleteTag(tag.id)}>
                         <Trash2 className="w-4 h-4 text-red-500" />
@@ -751,7 +751,7 @@ const BlogAdminPage = () => {
                     </div>
                   ))}
                   {tags.length === 0 && (
-                    <p className="text-center text-[#666666] py-4">Aucun tag</p>
+                    <p className="text-center text-white/60 py-4">Aucun tag</p>
                   )}
                 </div>
               </div>
@@ -759,7 +759,7 @@ const BlogAdminPage = () => {
           </Dialog>
           <Button 
             onClick={() => { setEditingArticle(null); setEditorOpen(true); }}
-            className="bg-[#CE0202] hover:bg-[#B00202] text-white flex-1 sm:flex-none text-sm"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white flex-1 sm:flex-none text-sm"
           >
             <Plus className="w-4 h-4 mr-1" /> Nouvel article
           </Button>
@@ -769,29 +769,29 @@ const BlogAdminPage = () => {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher..."
-            className="pl-9 bg-white w-full"
+            className="pl-9 bg-white/5 backdrop-blur-xl w-full"
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full sm:w-32 bg-white">
+          <SelectTrigger className="w-full sm:w-32 bg-white/5 backdrop-blur-xl">
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
-          <SelectContent className="bg-white">
+          <SelectContent className="bg-white/5 backdrop-blur-xl">
             <SelectItem value="all">Tous</SelectItem>
             <SelectItem value="draft">Brouillon</SelectItem>
             <SelectItem value="published">Publié</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterTag} onValueChange={setFilterTag}>
-          <SelectTrigger className="w-full sm:w-32 bg-white">
+          <SelectTrigger className="w-full sm:w-32 bg-white/5 backdrop-blur-xl">
             <SelectValue placeholder="Tag" />
           </SelectTrigger>
-          <SelectContent className="bg-white">
+          <SelectContent className="bg-white/5 backdrop-blur-xl">
             <SelectItem value="all">Tous</SelectItem>
             {tags.map(tag => (
               <SelectItem key={tag.id} value={tag.name}>{tag.name}</SelectItem>
@@ -808,13 +808,13 @@ const BlogAdminPage = () => {
           ))}
         </div>
       ) : filteredArticles.length === 0 ? (
-        <Card className="bg-white">
+        <Card className="bg-white/5 backdrop-blur-xl">
           <CardContent className="py-12 text-center">
-            <FileText className="w-12 h-12 mx-auto mb-3 text-[#666666] opacity-30" />
-            <p className="text-[#666666]">Aucun article</p>
+            <FileText className="w-12 h-12 mx-auto mb-3 text-white/60 opacity-30" />
+            <p className="text-white/60">Aucun article</p>
             <Button 
               onClick={() => { setEditingArticle(null); setEditorOpen(true); }}
-              className="mt-4 bg-[#CE0202] text-white"
+              className="mt-4 bg-indigo-600 text-white"
             >
               <Plus className="w-4 h-4 mr-2" /> Créer un article
             </Button>
@@ -823,7 +823,7 @@ const BlogAdminPage = () => {
       ) : (
         <div className="grid gap-3">
           {filteredArticles.map(article => (
-            <Card key={article.id} className="bg-white hover:shadow-md transition-shadow">
+            <Card key={article.id} className="bg-white/5 backdrop-blur-xl hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start gap-4">
                   {article.featured_image ? (
@@ -833,15 +833,15 @@ const BlogAdminPage = () => {
                       className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#F8F8F8] rounded-lg flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-8 h-8 text-[#666666] opacity-30" />
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/5 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-8 h-8 text-white/60 opacity-30" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <h3 className="font-semibold text-[#1A1A1A] truncate">{article.title}</h3>
-                        <p className="text-sm text-[#666666] line-clamp-2 mt-1">{article.excerpt}</p>
+                        <h3 className="font-semibold text-white truncate">{article.title}</h3>
+                        <p className="text-sm text-white/60 line-clamp-2 mt-1">{article.excerpt}</p>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -849,7 +849,7 @@ const BlogAdminPage = () => {
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="bg-white">
+                        <DropdownMenuContent className="bg-white/5 backdrop-blur-xl">
                           <DropdownMenuItem onClick={() => { setEditingArticle(article); setEditorOpen(true); }}>
                             <Edit className="w-4 h-4 mr-2" /> Modifier
                           </DropdownMenuItem>
@@ -872,12 +872,12 @@ const BlogAdminPage = () => {
                         )}
                       </Badge>
                       {article.tags?.slice(0, 3).map(tag => (
-                        <Badge key={tag} variant="outline" className="text-xs bg-[#F8F8F8]">
+                        <Badge key={tag} variant="outline" className="text-xs bg-white/5">
                           {tag}
                         </Badge>
                       ))}
                       {article.published_at && (
-                        <span className="text-xs text-[#666666] flex items-center gap-1">
+                        <span className="text-xs text-white/60 flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {new Date(article.published_at).toLocaleDateString('fr-FR')}
                         </span>

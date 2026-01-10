@@ -268,33 +268,33 @@ const SettingsPage = () => {
     <div data-testid="settings-page" className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-[#1A1A1A]">Paramètres</h1>
-        <p className="text-[#666666]">Configuration du dashboard et de l'entreprise</p>
+        <h1 className="text-3xl font-bold text-white">Paramètres</h1>
+        <p className="text-white/60">Configuration du dashboard et de l'entreprise</p>
       </div>
 
       <Tabs defaultValue="company" className="space-y-6">
-        <TabsList className="bg-white border border-[#E5E5E5] flex-wrap">
-          <TabsTrigger value="company" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+        <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 flex-wrap">
+          <TabsTrigger value="company" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             Entreprise
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             <Bell className="w-4 h-4 mr-2" />
             Notifications
           </TabsTrigger>
-          <TabsTrigger value="social" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+          <TabsTrigger value="social" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             Réseaux sociaux
           </TabsTrigger>
-          <TabsTrigger value="legal" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+          <TabsTrigger value="legal" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             Pages légales
           </TabsTrigger>
-          <TabsTrigger value="api-keys" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+          <TabsTrigger value="api-keys" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             <Key className="w-4 h-4 mr-2" />
             API
           </TabsTrigger>
-          <TabsTrigger value="integrations" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+          <TabsTrigger value="integrations" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             Intégrations
           </TabsTrigger>
-          <TabsTrigger value="data" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+          <TabsTrigger value="data" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             <Database className="w-4 h-4 mr-2" />
             Données
           </TabsTrigger>
@@ -302,12 +302,12 @@ const SettingsPage = () => {
 
         {/* API Keys Tab */}
         <TabsContent value="api-keys">
-          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
-                    <Key className="w-5 h-5 text-[#CE0202]" />
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Key className="w-5 h-5 text-indigo-400" />
                     Clés API connectées
                   </CardTitle>
                   <CardDescription>
@@ -323,20 +323,20 @@ const SettingsPage = () => {
             <CardContent>
               {loadingApiKeys ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-8 h-8 animate-spin text-[#CE0202]" />
+                  <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
                 </div>
               ) : apiKeys ? (
                 <div className="space-y-4">
                   {/* Summary */}
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-[#CE0202]">{apiKeys.total_configured}</p>
-                      <p className="text-sm text-[#666666]">sur {apiKeys.total_available} configurées</p>
+                      <p className="text-3xl font-bold text-indigo-400">{apiKeys.total_configured}</p>
+                      <p className="text-sm text-white/60">sur {apiKeys.total_available} configurées</p>
                     </div>
                     <div className="flex-1">
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-[#CE0202] h-2 rounded-full" 
+                          className="bg-indigo-600 h-2 rounded-full" 
                           style={{ width: `${(apiKeys.total_configured / apiKeys.total_available) * 100}%` }}
                         />
                       </div>
@@ -356,8 +356,8 @@ const SettingsPage = () => {
                             )}
                           </div>
                           <div>
-                            <p className="font-medium text-[#1A1A1A]">{config.name}</p>
-                            <p className="text-sm text-[#666666]">{config.description}</p>
+                            <p className="font-medium text-white">{config.name}</p>
+                            <p className="text-sm text-white/60">{config.description}</p>
                             {config.configured && config.masked && (
                               <code className="text-xs bg-gray-100 px-2 py-0.5 rounded mt-1 inline-block">
                                 {config.masked}
@@ -387,7 +387,7 @@ const SettingsPage = () => {
                             href={config.doc_url} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-[#CE0202] hover:underline text-sm flex items-center gap-1"
+                            className="text-indigo-400 hover:underline text-sm flex items-center gap-1"
                           >
                             <ExternalLink className="w-3 h-3" />
                             Docs
@@ -406,7 +406,7 @@ const SettingsPage = () => {
                   </div>
                 </div>
               ) : (
-                <p className="text-center text-[#666666] py-8">Impossible de charger les informations</p>
+                <p className="text-center text-white/60 py-8">Impossible de charger les informations</p>
               )}
             </CardContent>
           </Card>
@@ -414,10 +414,10 @@ const SettingsPage = () => {
 
         {/* Notifications Tab */}
         <TabsContent value="notifications">
-          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
-                <Bell className="w-5 h-5 text-[#CE0202]" />
+              <CardTitle className="text-white flex items-center gap-2">
+                <Bell className="w-5 h-5 text-indigo-400" />
                 Notifications par email
               </CardTitle>
               <CardDescription>
@@ -426,16 +426,16 @@ const SettingsPage = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Test Email */}
-              <div className="flex items-center justify-between p-4 bg-[#F8F8F8] rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
                 <div>
-                  <p className="font-medium text-[#1A1A1A]">Tester la configuration</p>
-                  <p className="text-sm text-[#666666]">Envoyer un email de test à votre adresse</p>
+                  <p className="font-medium text-white">Tester la configuration</p>
+                  <p className="text-sm text-white/60">Envoyer un email de test à votre adresse</p>
                 </div>
                 <Button
                   onClick={handleTestEmail}
                   disabled={sendingTest}
                   variant="outline"
-                  className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202] hover:text-white"
+                  className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-600 hover:text-white"
                 >
                   {sendingTest ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -446,12 +446,12 @@ const SettingsPage = () => {
                 </Button>
               </div>
 
-              <div className="border-t border-[#E5E5E5] pt-6 space-y-4">
+              <div className="border-t border-white/10 pt-6 space-y-4">
                 {/* Task Reminders */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-[#1A1A1A]">Rappels de tâches</p>
-                    <p className="text-sm text-[#666666]">Recevoir un email pour les tâches à échéance proche</p>
+                    <p className="font-medium text-white">Rappels de tâches</p>
+                    <p className="text-sm text-white/60">Recevoir un email pour les tâches à échéance proche</p>
                   </div>
                   <Switch
                     checked={notifSettings.task_reminders}
@@ -461,24 +461,24 @@ const SettingsPage = () => {
 
                 {notifSettings.task_reminders && (
                   <div className="ml-4 flex items-center gap-2">
-                    <Label className="text-sm text-[#666666]">Rappeler</Label>
+                    <Label className="text-sm text-white/60">Rappeler</Label>
                     <Input
                       type="number"
                       min="1"
                       max="7"
                       value={notifSettings.task_reminder_days}
                       onChange={(e) => setNotifSettings(prev => ({ ...prev, task_reminder_days: parseInt(e.target.value) || 1 }))}
-                      className="w-16 bg-white border-[#E5E5E5]"
+                      className="w-16 bg-white/5 backdrop-blur-xl border-white/10"
                     />
-                    <Label className="text-sm text-[#666666]">jour(s) avant l'échéance</Label>
+                    <Label className="text-sm text-white/60">jour(s) avant l'échéance</Label>
                   </div>
                 )}
 
                 {/* Invoice Reminders */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-[#1A1A1A]">Rappels de factures impayées</p>
-                    <p className="text-sm text-[#666666]">Envoyer des rappels aux clients pour les factures en retard</p>
+                    <p className="font-medium text-white">Rappels de factures impayées</p>
+                    <p className="text-sm text-white/60">Envoyer des rappels aux clients pour les factures en retard</p>
                   </div>
                   <Switch
                     checked={notifSettings.invoice_reminders}
@@ -488,7 +488,7 @@ const SettingsPage = () => {
 
                 {notifSettings.invoice_reminders && (
                   <div className="ml-4">
-                    <p className="text-sm text-[#666666] mb-2">Envoyer un rappel après :</p>
+                    <p className="text-sm text-white/60 mb-2">Envoyer un rappel après :</p>
                     <div className="flex gap-2">
                       {[7, 14, 30, 60].map((days) => (
                         <Button
@@ -504,8 +504,8 @@ const SettingsPage = () => {
                             }));
                           }}
                           className={notifSettings.invoice_reminder_days.includes(days) 
-                            ? "bg-[#CE0202] text-white" 
-                            : "border-[#E5E5E5]"}
+                            ? "bg-indigo-600 text-white" 
+                            : "border-white/10"}
                         >
                           {days} jours
                         </Button>
@@ -517,8 +517,8 @@ const SettingsPage = () => {
                 {/* New Lead Notifications */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-[#1A1A1A]">Nouveaux leads</p>
-                    <p className="text-sm text-[#666666]">Recevoir un email pour chaque nouvelle demande de contact</p>
+                    <p className="font-medium text-white">Nouveaux leads</p>
+                    <p className="text-sm text-white/60">Recevoir un email pour chaque nouvelle demande de contact</p>
                   </div>
                   <Switch
                     checked={notifSettings.new_lead_notifications}
@@ -528,7 +528,7 @@ const SettingsPage = () => {
               </div>
 
               {/* Save Button */}
-              <div className="flex justify-between items-center pt-4 border-t border-[#E5E5E5]">
+              <div className="flex justify-between items-center pt-4 border-t border-white/10">
                 <div className="flex gap-2">
                   <Button
                     onClick={handleSendTaskReminders}
@@ -552,7 +552,7 @@ const SettingsPage = () => {
                 <Button
                   onClick={handleSaveNotifications}
                   disabled={savingNotif}
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white"
                 >
                   {savingNotif ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -568,10 +568,10 @@ const SettingsPage = () => {
 
         {/* Company Tab */}
         <TabsContent value="company">
-          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
-                <Building className="w-5 h-5 text-[#CE0202]" />
+              <CardTitle className="text-white flex items-center gap-2">
+                <Building className="w-5 h-5 text-indigo-400" />
                 Informations légales
               </CardTitle>
               <CardDescription>
@@ -581,78 +581,78 @@ const SettingsPage = () => {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Raison sociale</Label>
+                  <Label className="text-white">Raison sociale</Label>
                   <Input
                     value={companyInfo.name}
                     onChange={(e) => setCompanyInfo({...companyInfo, name: e.target.value})}
-                    className="bg-white border-[#E5E5E5]"
+                    className="bg-white/5 backdrop-blur-xl border-white/10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Nom commercial</Label>
+                  <Label className="text-white">Nom commercial</Label>
                   <Input
                     value={companyInfo.commercial_name}
                     onChange={(e) => setCompanyInfo({...companyInfo, commercial_name: e.target.value})}
-                    className="bg-white border-[#E5E5E5]"
+                    className="bg-white/5 backdrop-blur-xl border-white/10"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Adresse</Label>
+                <Label className="text-white">Adresse</Label>
                 <Input
                   value={companyInfo.address}
                   onChange={(e) => setCompanyInfo({...companyInfo, address: e.target.value})}
-                  className="bg-white border-[#E5E5E5]"
+                  className="bg-white/5 backdrop-blur-xl border-white/10"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Téléphone</Label>
+                  <Label className="text-white">Téléphone</Label>
                   <Input
                     value={companyInfo.phone}
                     onChange={(e) => setCompanyInfo({...companyInfo, phone: e.target.value})}
-                    className="bg-white border-[#E5E5E5]"
+                    className="bg-white/5 backdrop-blur-xl border-white/10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Email</Label>
+                  <Label className="text-white">Email</Label>
                   <Input
                     type="email"
                     value={companyInfo.email}
                     onChange={(e) => setCompanyInfo({...companyInfo, email: e.target.value})}
-                    className="bg-white border-[#E5E5E5]"
+                    className="bg-white/5 backdrop-blur-xl border-white/10"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">SIREN</Label>
+                  <Label className="text-white">SIREN</Label>
                   <Input
                     value={companyInfo.siren}
                     onChange={(e) => setCompanyInfo({...companyInfo, siren: e.target.value})}
                     placeholder="123 456 789"
-                    className="bg-white border-[#E5E5E5]"
+                    className="bg-white/5 backdrop-blur-xl border-white/10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">SIRET</Label>
+                  <Label className="text-white">SIRET</Label>
                   <Input
                     value={companyInfo.siret}
                     onChange={(e) => setCompanyInfo({...companyInfo, siret: e.target.value})}
                     placeholder="123 456 789 00012"
-                    className="bg-white border-[#E5E5E5]"
+                    className="bg-white/5 backdrop-blur-xl border-white/10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Capital social</Label>
+                  <Label className="text-white">Capital social</Label>
                   <Input
                     value={companyInfo.capital}
                     onChange={(e) => setCompanyInfo({...companyInfo, capital: e.target.value})}
                     placeholder="1 000 €"
-                    className="bg-white border-[#E5E5E5]"
+                    className="bg-white/5 backdrop-blur-xl border-white/10"
                   />
                 </div>
               </div>
@@ -661,7 +661,7 @@ const SettingsPage = () => {
                 <Button 
                   onClick={handleSaveCompany}
                   disabled={loading}
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-white"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -673,10 +673,10 @@ const SettingsPage = () => {
 
         {/* Social Links Tab */}
         <TabsContent value="social">
-          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
-                <Share2 className="w-5 h-5 text-[#CE0202]" />
+              <CardTitle className="text-white flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-indigo-400" />
                 Réseaux sociaux
               </CardTitle>
               <CardDescription>
@@ -686,53 +686,53 @@ const SettingsPage = () => {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">LinkedIn</Label>
+                  <Label className="text-white">LinkedIn</Label>
                   <Input
                     value={socialLinks.linkedin}
                     onChange={(e) => setSocialLinks({...socialLinks, linkedin: e.target.value})}
                     placeholder="https://linkedin.com/company/..."
-                    className="bg-white border-[#E5E5E5]"
+                    className="bg-white/5 backdrop-blur-xl border-white/10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Instagram</Label>
+                  <Label className="text-white">Instagram</Label>
                   <Input
                     value={socialLinks.instagram}
                     onChange={(e) => setSocialLinks({...socialLinks, instagram: e.target.value})}
                     placeholder="https://instagram.com/..."
-                    className="bg-white border-[#E5E5E5]"
+                    className="bg-white/5 backdrop-blur-xl border-white/10"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Facebook</Label>
+                  <Label className="text-white">Facebook</Label>
                   <Input
                     value={socialLinks.facebook}
                     onChange={(e) => setSocialLinks({...socialLinks, facebook: e.target.value})}
                     placeholder="https://facebook.com/..."
-                    className="bg-white border-[#E5E5E5]"
+                    className="bg-white/5 backdrop-blur-xl border-white/10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Twitter / X</Label>
+                  <Label className="text-white">Twitter / X</Label>
                   <Input
                     value={socialLinks.twitter}
                     onChange={(e) => setSocialLinks({...socialLinks, twitter: e.target.value})}
                     placeholder="https://twitter.com/..."
-                    className="bg-white border-[#E5E5E5]"
+                    className="bg-white/5 backdrop-blur-xl border-white/10"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">YouTube</Label>
+                <Label className="text-white">YouTube</Label>
                 <Input
                   value={socialLinks.youtube}
                   onChange={(e) => setSocialLinks({...socialLinks, youtube: e.target.value})}
                   placeholder="https://youtube.com/@..."
-                  className="bg-white border-[#E5E5E5]"
+                  className="bg-white/5 backdrop-blur-xl border-white/10"
                 />
               </div>
 
@@ -740,7 +740,7 @@ const SettingsPage = () => {
                 <Button 
                   onClick={handleSaveSocial}
                   disabled={loading}
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-white"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -752,10 +752,10 @@ const SettingsPage = () => {
 
         {/* Legal Texts Tab */}
         <TabsContent value="legal">
-          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#CE0202]" />
+              <CardTitle className="text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-400" />
                 Textes des pages légales
               </CardTitle>
               <CardDescription>
@@ -764,32 +764,32 @@ const SettingsPage = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Mentions légales (texte complémentaire)</Label>
+                <Label className="text-white">Mentions légales (texte complémentaire)</Label>
                 <Textarea
                   value={legalTexts.mentions_legales}
                   onChange={(e) => setLegalTexts({...legalTexts, mentions_legales: e.target.value})}
                   placeholder="Ajoutez des informations complémentaires pour vos mentions légales..."
-                  className="bg-white border-[#E5E5E5] min-h-[150px]"
+                  className="bg-white/5 backdrop-blur-xl border-white/10 min-h-[150px]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Politique de confidentialité (texte complémentaire)</Label>
+                <Label className="text-white">Politique de confidentialité (texte complémentaire)</Label>
                 <Textarea
                   value={legalTexts.politique_confidentialite}
                   onChange={(e) => setLegalTexts({...legalTexts, politique_confidentialite: e.target.value})}
                   placeholder="Ajoutez des informations complémentaires pour votre politique de confidentialité..."
-                  className="bg-white border-[#E5E5E5] min-h-[150px]"
+                  className="bg-white/5 backdrop-blur-xl border-white/10 min-h-[150px]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Politique de cookies (texte complémentaire)</Label>
+                <Label className="text-white">Politique de cookies (texte complémentaire)</Label>
                 <Textarea
                   value={legalTexts.politique_cookies}
                   onChange={(e) => setLegalTexts({...legalTexts, politique_cookies: e.target.value})}
                   placeholder="Ajoutez des informations complémentaires pour votre politique de cookies..."
-                  className="bg-white border-[#E5E5E5] min-h-[150px]"
+                  className="bg-white/5 backdrop-blur-xl border-white/10 min-h-[150px]"
                 />
               </div>
 
@@ -797,7 +797,7 @@ const SettingsPage = () => {
                 <Button 
                   onClick={handleSaveLegal}
                   disabled={loading}
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-white"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -809,10 +809,10 @@ const SettingsPage = () => {
 
         {/* Integrations Tab */}
         <TabsContent value="integrations">
-          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
-                <Key className="w-5 h-5 text-[#CE0202]" />
+              <CardTitle className="text-white flex items-center gap-2">
+                <Key className="w-5 h-5 text-indigo-400" />
                 Intégrations
               </CardTitle>
               <CardDescription>
@@ -821,42 +821,42 @@ const SettingsPage = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Google Analytics 4 - ID de propriété</Label>
+                <Label className="text-white">Google Analytics 4 - ID de propriété</Label>
                 <Input
                   value={integrations.ga4_id}
                   onChange={(e) => setIntegrations({...integrations, ga4_id: e.target.value})}
                   placeholder="G-XXXXXXXXXX"
-                  className="bg-white border-[#E5E5E5]"
+                  className="bg-white/5 backdrop-blur-xl border-white/10"
                 />
-                <p className="text-xs text-[#666666]">
+                <p className="text-xs text-white/60">
                   Ajoutez votre ID GA4 pour suivre les visites du site
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Resend - Clé API</Label>
+                <Label className="text-white">Resend - Clé API</Label>
                 <Input
                   type="password"
                   value={integrations.resend_api_key}
                   onChange={(e) => setIntegrations({...integrations, resend_api_key: e.target.value})}
                   placeholder="re_xxxxxxxxxxxx"
-                  className="bg-white border-[#E5E5E5]"
+                  className="bg-white/5 backdrop-blur-xl border-white/10"
                 />
-                <p className="text-xs text-[#666666]">
+                <p className="text-xs text-white/60">
                   Pour l'envoi automatique des emails de notification
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Stripe - Clé API secrète</Label>
+                <Label className="text-white">Stripe - Clé API secrète</Label>
                 <Input
                   type="password"
                   value={integrations.stripe_api_key}
                   onChange={(e) => setIntegrations({...integrations, stripe_api_key: e.target.value})}
                   placeholder="sk_xxxxxxxxxxxx"
-                  className="bg-white border-[#E5E5E5]"
+                  className="bg-white/5 backdrop-blur-xl border-white/10"
                 />
-                <p className="text-xs text-[#666666]">
+                <p className="text-xs text-white/60">
                   Pour la gestion des paiements en ligne
                 </p>
               </div>
@@ -865,7 +865,7 @@ const SettingsPage = () => {
                 <Button 
                   onClick={handleSaveIntegrations}
                   disabled={loading}
-                  className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-white"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -877,10 +877,10 @@ const SettingsPage = () => {
 
         {/* Data Management Tab */}
         <TabsContent value="data">
-          <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-[#1A1A1A] flex items-center gap-2">
-                <Database className="w-5 h-5 text-[#CE0202]" />
+              <CardTitle className="text-white flex items-center gap-2">
+                <Database className="w-5 h-5 text-indigo-400" />
                 Gestion des données
               </CardTitle>
               <CardDescription>

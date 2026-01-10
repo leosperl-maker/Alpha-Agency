@@ -105,7 +105,7 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
       if (variance > 0) return "text-green-600"; // Above target
       if (variance < 0) return "text-red-600"; // Below target
     }
-    return "text-[#666666]";
+    return "text-white/60";
   };
 
   const allCategories = [...getAllCategories("expense"), ...getAllCategories("income")];
@@ -113,7 +113,7 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-[#CE0202]" />
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
       </div>
     );
   }
@@ -123,8 +123,8 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
       {/* Header with actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-[#1A1A1A]">Budget prévisionnel</h3>
-          <p className="text-sm text-[#666666]">Comparez vos prévisions avec le réel</p>
+          <h3 className="text-lg font-semibold text-white">Budget prévisionnel</h3>
+          <p className="text-sm text-white/60">Comparez vos prévisions avec le réel</p>
         </div>
         <div className="flex gap-2">
           <Button 
@@ -139,7 +139,7 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
               setForm({ month: selectedMonth, category_id: "", type: "expense", planned_amount: "", description: "" }); 
               setDialogOpen(true); 
             }}
-            className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white"
           >
             <Plus className="w-4 h-4 mr-2" /> Ajouter prévision
           </Button>
@@ -149,16 +149,16 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
       {/* Summary Cards */}
       {comparison && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-[#666666]">Revenus prévus</p>
+                  <p className="text-sm text-white/60">Revenus prévus</p>
                   <p className="text-2xl font-bold text-green-600">{formatCurrency(comparison.totals.planned_income)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-[#666666]">Réel</p>
-                  <p className="text-lg font-semibold text-[#1A1A1A]">{formatCurrency(comparison.totals.actual_income)}</p>
+                  <p className="text-sm text-white/60">Réel</p>
+                  <p className="text-lg font-semibold text-white">{formatCurrency(comparison.totals.actual_income)}</p>
                 </div>
               </div>
               <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -170,16 +170,16 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
             </CardContent>
           </Card>
           
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-[#666666]">Dépenses prévues</p>
+                  <p className="text-sm text-white/60">Dépenses prévues</p>
                   <p className="text-2xl font-bold text-red-600">{formatCurrency(comparison.totals.planned_expense)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-[#666666]">Réel</p>
-                  <p className="text-lg font-semibold text-[#1A1A1A]">{formatCurrency(comparison.totals.actual_expense)}</p>
+                  <p className="text-sm text-white/60">Réel</p>
+                  <p className="text-lg font-semibold text-white">{formatCurrency(comparison.totals.actual_expense)}</p>
                 </div>
               </div>
               <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -191,17 +191,17 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
             </CardContent>
           </Card>
           
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-[#666666]">Solde prévu</p>
+                  <p className="text-sm text-white/60">Solde prévu</p>
                   <p className={`text-2xl font-bold ${comparison.totals.planned_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {formatCurrency(comparison.totals.planned_balance)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-[#666666]">Solde réel</p>
+                  <p className="text-sm text-white/60">Solde réel</p>
                   <p className={`text-lg font-semibold ${comparison.totals.actual_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {formatCurrency(comparison.totals.actual_balance)}
                   </p>
@@ -238,13 +238,13 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
       )}
 
       {/* Comparison Table */}
-      <Card className="bg-white border-[#E5E5E5]">
+      <Card className="bg-white/5 backdrop-blur-xl border-white/10">
         <CardHeader>
-          <CardTitle className="text-[#1A1A1A] text-lg">Prévu vs Réel par catégorie</CardTitle>
+          <CardTitle className="text-white text-lg">Prévu vs Réel par catégorie</CardTitle>
         </CardHeader>
         <CardContent>
           {forecasts.length === 0 ? (
-            <div className="text-center py-8 text-[#666666]">
+            <div className="text-center py-8 text-white/60">
               <Target className="w-12 h-12 mx-auto mb-2 opacity-30" />
               <p>Aucune prévision pour ce mois</p>
               <p className="text-sm mt-1">Ajoutez des prévisions budgétaires pour suivre vos objectifs</p>
@@ -253,13 +253,13 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-[#E5E5E5]">
-                    <th className="text-left py-3 px-2 text-[#666666] font-medium text-sm">Catégorie</th>
-                    <th className="text-left py-3 px-2 text-[#666666] font-medium text-sm">Type</th>
-                    <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Prévu</th>
-                    <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Réel</th>
-                    <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Écart</th>
-                    <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">%</th>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left py-3 px-2 text-white/60 font-medium text-sm">Catégorie</th>
+                    <th className="text-left py-3 px-2 text-white/60 font-medium text-sm">Type</th>
+                    <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Prévu</th>
+                    <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Réel</th>
+                    <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Écart</th>
+                    <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">%</th>
                     <th className="w-10"></th>
                   </tr>
                 </thead>
@@ -267,11 +267,11 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
                   {comparison?.comparison?.map((item, idx) => {
                     const cat = getCategoryById(item.category_id);
                     return (
-                      <tr key={idx} className="border-b border-[#E5E5E5] hover:bg-[#F8F8F8]">
+                      <tr key={idx} className="border-b border-white/10 hover:bg-white/5">
                         <td className="py-3 px-2">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat?.color || "#666" }} />
-                            <span className="text-[#1A1A1A]">{cat?.name || item.category_id}</span>
+                            <span className="text-white">{cat?.name || item.category_id}</span>
                           </div>
                         </td>
                         <td className="py-3 px-2">
@@ -279,8 +279,8 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
                             {item.type === "income" ? "Revenu" : "Dépense"}
                           </Badge>
                         </td>
-                        <td className="py-3 px-2 text-right font-mono text-[#1A1A1A]">{formatCurrency(item.planned)}</td>
-                        <td className="py-3 px-2 text-right font-mono text-[#1A1A1A]">{formatCurrency(item.actual)}</td>
+                        <td className="py-3 px-2 text-right font-mono text-white">{formatCurrency(item.planned)}</td>
+                        <td className="py-3 px-2 text-right font-mono text-white">{formatCurrency(item.actual)}</td>
                         <td className={`py-3 px-2 text-right font-mono ${getVarianceColor(item.variance, item.type)}`}>
                           {item.variance > 0 ? "+" : ""}{formatCurrency(item.variance)}
                         </td>
@@ -312,19 +312,19 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
 
       {/* Add Forecast Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-md">
+        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A]">Nouvelle prévision</DialogTitle>
+            <DialogTitle className="text-white">Nouvelle prévision</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Type</Label>
               <Select value={form.type} onValueChange={(v) => setForm({...form, type: v, category_id: ""})}>
-                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   <SelectItem value="expense">Dépense</SelectItem>
                   <SelectItem value="income">Revenu</SelectItem>
                 </SelectContent>
@@ -334,10 +334,10 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
             <div className="space-y-2">
               <Label>Catégorie *</Label>
               <Select value={form.category_id} onValueChange={(v) => setForm({...form, category_id: v})}>
-                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue placeholder="Sélectionner une catégorie" />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   {getAllCategories(form.type).map(cat => (
                     <SelectItem key={cat.id} value={cat.id}>
                       <div className="flex items-center gap-2">
@@ -357,7 +357,7 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
                 value={form.planned_amount}
                 onChange={(e) => setForm({...form, planned_amount: e.target.value})}
                 placeholder="0.00"
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
 
@@ -367,14 +367,14 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
                 value={form.description}
                 onChange={(e) => setForm({...form, description: e.target.value})}
                 placeholder="Ex: Budget marketing mensuel"
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
-            <Button onClick={handleSaveForecast} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+            <Button onClick={handleSaveForecast} className="bg-indigo-600 hover:bg-indigo-500 text-white">
               Enregistrer
             </Button>
           </DialogFooter>
@@ -383,26 +383,26 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
 
       {/* Copy Dialog */}
       <Dialog open={copyDialogOpen} onOpenChange={setCopyDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-sm">
+        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A]">Copier les prévisions</DialogTitle>
+            <DialogTitle className="text-white">Copier les prévisions</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
-            <p className="text-sm text-[#666666]">
+            <p className="text-sm text-white/60">
               Copier les prévisions de {selectedMonth} vers :
             </p>
             <Input
               type="month"
               value={targetMonth}
               onChange={(e) => setTargetMonth(e.target.value)}
-              className="bg-[#F8F8F8] border-[#E5E5E5]"
+              className="bg-white/5 border-white/10"
             />
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setCopyDialogOpen(false)}>Annuler</Button>
-            <Button onClick={handleCopyForecasts} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+            <Button onClick={handleCopyForecasts} className="bg-indigo-600 hover:bg-indigo-500 text-white">
               Copier
             </Button>
           </DialogFooter>
@@ -439,7 +439,7 @@ const CashflowTab = ({ formatCurrency }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-[#CE0202]" />
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
       </div>
     );
   }
@@ -451,21 +451,21 @@ const CashflowTab = ({ formatCurrency }) => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-[#1A1A1A]">Projection de trésorerie</h3>
-          <p className="text-sm text-[#666666]">Visualisez l'évolution de votre cashflow sur plusieurs mois</p>
+          <h3 className="text-lg font-semibold text-white">Projection de trésorerie</h3>
+          <p className="text-sm text-white/60">Visualisez l'évolution de votre cashflow sur plusieurs mois</p>
         </div>
         <div className="flex gap-2">
           <Input
             type="month"
             value={startMonth}
             onChange={(e) => setStartMonth(e.target.value)}
-            className="bg-[#F8F8F8] border-[#E5E5E5] w-40"
+            className="bg-white/5 border-white/10 w-40"
           />
           <Select value={monthsToShow.toString()} onValueChange={(v) => setMonthsToShow(parseInt(v))}>
-            <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] w-32">
+            <SelectTrigger className="bg-white/5 border-white/10 w-32">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-white">
+            <SelectContent className="bg-white/5 backdrop-blur-xl">
               <SelectItem value="3">3 mois</SelectItem>
               <SelectItem value="6">6 mois</SelectItem>
               <SelectItem value="12">12 mois</SelectItem>
@@ -477,29 +477,29 @@ const CashflowTab = ({ formatCurrency }) => {
       {/* Summary Cards */}
       {cashflowData?.summary && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardContent className="pt-6">
-              <p className="text-sm text-[#666666]">Revenus totaux</p>
+              <p className="text-sm text-white/60">Revenus totaux</p>
               <p className="text-2xl font-bold text-green-600">{formatCurrency(cashflowData.summary.total_income)}</p>
             </CardContent>
           </Card>
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardContent className="pt-6">
-              <p className="text-sm text-[#666666]">Dépenses totales</p>
+              <p className="text-sm text-white/60">Dépenses totales</p>
               <p className="text-2xl font-bold text-red-600">{formatCurrency(cashflowData.summary.total_expense)}</p>
             </CardContent>
           </Card>
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardContent className="pt-6">
-              <p className="text-sm text-[#666666]">Flux net moyen/mois</p>
+              <p className="text-sm text-white/60">Flux net moyen/mois</p>
               <p className={`text-2xl font-bold ${cashflowData.summary.avg_monthly_flow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {formatCurrency(cashflowData.summary.avg_monthly_flow)}
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardContent className="pt-6">
-              <p className="text-sm text-[#666666]">Solde final projeté</p>
+              <p className="text-sm text-white/60">Solde final projeté</p>
               <p className={`text-2xl font-bold ${cashflowData.summary.ending_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {formatCurrency(cashflowData.summary.ending_balance)}
               </p>
@@ -528,10 +528,10 @@ const CashflowTab = ({ formatCurrency }) => {
       )}
 
       {/* Cashflow Chart */}
-      <Card className="bg-white border-[#E5E5E5]">
+      <Card className="bg-white/5 backdrop-blur-xl border-white/10">
         <CardHeader>
-          <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-[#CE0202]" />
+          <CardTitle className="text-white text-lg flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-indigo-400" />
             Évolution du cashflow
           </CardTitle>
         </CardHeader>
@@ -574,27 +574,27 @@ const CashflowTab = ({ formatCurrency }) => {
       </Card>
 
       {/* Monthly Details Table */}
-      <Card className="bg-white border-[#E5E5E5]">
+      <Card className="bg-white/5 backdrop-blur-xl border-white/10">
         <CardHeader>
-          <CardTitle className="text-[#1A1A1A] text-lg">Détails mensuels</CardTitle>
+          <CardTitle className="text-white text-lg">Détails mensuels</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#E5E5E5]">
-                  <th className="text-left py-3 px-2 text-[#666666] font-medium text-sm">Mois</th>
-                  <th className="text-center py-3 px-2 text-[#666666] font-medium text-sm">Type</th>
-                  <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Revenus</th>
-                  <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Dépenses</th>
-                  <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Flux net</th>
-                  <th className="text-right py-3 px-2 text-[#666666] font-medium text-sm">Solde cumulé</th>
+                <tr className="border-b border-white/10">
+                  <th className="text-left py-3 px-2 text-white/60 font-medium text-sm">Mois</th>
+                  <th className="text-center py-3 px-2 text-white/60 font-medium text-sm">Type</th>
+                  <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Revenus</th>
+                  <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Dépenses</th>
+                  <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Flux net</th>
+                  <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Solde cumulé</th>
                 </tr>
               </thead>
               <tbody>
                 {chartData.map((row, idx) => (
-                  <tr key={idx} className="border-b border-[#E5E5E5] hover:bg-[#F8F8F8]">
-                    <td className="py-3 px-2 text-[#1A1A1A] font-medium">{row.label}</td>
+                  <tr key={idx} className="border-b border-white/10 hover:bg-white/5">
+                    <td className="py-3 px-2 text-white font-medium">{row.label}</td>
                     <td className="py-3 px-2 text-center">
                       <Badge variant="outline" className={row.data_type === "forecast" ? "text-blue-600 border-blue-200" : "text-green-600 border-green-200"}>
                         {row.data_type === "forecast" ? "Prévu" : "Réel"}
@@ -605,7 +605,7 @@ const CashflowTab = ({ formatCurrency }) => {
                     <td className={`py-3 px-2 text-right font-mono ${row.net_flow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {row.net_flow >= 0 ? "+" : ""}{formatCurrency(row.net_flow)}
                     </td>
-                    <td className={`py-3 px-2 text-right font-mono font-bold ${row.cumulative_balance >= 0 ? 'text-[#1A1A1A]' : 'text-red-600'}`}>
+                    <td className={`py-3 px-2 text-right font-mono font-bold ${row.cumulative_balance >= 0 ? 'text-white' : 'text-red-600'}`}>
                       {formatCurrency(row.cumulative_balance)}
                     </td>
                   </tr>
@@ -965,37 +965,37 @@ const BudgetPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-[#CE0202]" />
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-6 bg-[#F8F8F8] min-h-screen">
+    <div className="p-4 md:p-6 bg-white/5 min-h-screen">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Budget & Trésorerie</h1>
-          <p className="text-[#666666]">Pilotage financier de votre activité</p>
+          <h1 className="text-2xl font-bold text-white">Budget & Trésorerie</h1>
+          <p className="text-white/60">Pilotage financier de votre activité</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[180px] bg-white border-[#E5E5E5]">
+            <SelectTrigger className="w-[180px] bg-white/5 backdrop-blur-xl border-white/10">
               <Calendar className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-white max-h-60">
+            <SelectContent className="bg-white/5 backdrop-blur-xl max-h-60">
               {months.map(m => (
                 <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           
-          <Button onClick={() => setImportDialogOpen(true)} variant="outline" className="border-[#CE0202] text-[#CE0202]">
+          <Button onClick={() => setImportDialogOpen(true)} variant="outline" className="border-indigo-500/50 text-indigo-400">
             <Upload className="w-4 h-4 mr-2" /> Importer
           </Button>
           
-          <Button onClick={() => { resetTransactionForm(); setTransactionDialogOpen(true); }} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+          <Button onClick={() => { resetTransactionForm(); setTransactionDialogOpen(true); }} className="bg-indigo-600 hover:bg-indigo-500 text-white">
             <Plus className="w-4 h-4 mr-2" /> Transaction
           </Button>
         </div>
@@ -1003,11 +1003,11 @@ const BudgetPage = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="bg-white border-[#E5E5E5]">
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#666666]">Revenus</p>
+                <p className="text-sm text-white/60">Revenus</p>
                 <p className="text-xl md:text-2xl font-bold text-green-600">{formatCurrency(summary.total_credit || 0)}</p>
               </div>
               <div className="p-2 md:p-3 rounded-full bg-green-100">
@@ -1017,11 +1017,11 @@ const BudgetPage = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white border-[#E5E5E5]">
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#666666]">Dépenses</p>
+                <p className="text-sm text-white/60">Dépenses</p>
                 <p className="text-xl md:text-2xl font-bold text-red-600">{formatCurrency(summary.total_debit || 0)}</p>
               </div>
               <div className="p-2 md:p-3 rounded-full bg-red-100">
@@ -1031,11 +1031,11 @@ const BudgetPage = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white border-[#E5E5E5]">
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#666666]">Résultat</p>
+                <p className="text-sm text-white/60">Résultat</p>
                 <p className={`text-xl md:text-2xl font-bold ${(summary.balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {formatCurrency(summary.balance || 0)}
                 </p>
@@ -1047,11 +1047,11 @@ const BudgetPage = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white border-[#E5E5E5]">
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#666666]">Non catégorisé</p>
+                <p className="text-sm text-white/60">Non catégorisé</p>
                 <p className="text-xl md:text-2xl font-bold text-orange-600">{summary.uncategorized_count || 0}</p>
               </div>
               <div className="p-2 md:p-3 rounded-full bg-orange-100">
@@ -1064,23 +1064,23 @@ const BudgetPage = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="bg-white border border-[#E5E5E5] p-1 flex-wrap h-auto">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+        <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-1 flex-wrap h-auto">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             <TrendingUp className="w-4 h-4 mr-2" /> Vue d'ensemble
           </TabsTrigger>
-          <TabsTrigger value="transactions" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+          <TabsTrigger value="transactions" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             <Receipt className="w-4 h-4 mr-2" /> Transactions
           </TabsTrigger>
-          <TabsTrigger value="categories" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+          <TabsTrigger value="categories" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             <Tag className="w-4 h-4 mr-2" /> Catégories
           </TabsTrigger>
-          <TabsTrigger value="rules" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+          <TabsTrigger value="rules" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             <Settings2 className="w-4 h-4 mr-2" /> Règles auto
           </TabsTrigger>
-          <TabsTrigger value="forecast" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+          <TabsTrigger value="forecast" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             <Target className="w-4 h-4 mr-2" /> Prévisionnel
           </TabsTrigger>
-          <TabsTrigger value="cashflow" className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white">
+          <TabsTrigger value="cashflow" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             <TrendingUp className="w-4 h-4 mr-2" /> Cashflow
           </TabsTrigger>
         </TabsList>
@@ -1089,10 +1089,10 @@ const BudgetPage = () => {
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Monthly Evolution Chart */}
-            <Card className="bg-white border-[#E5E5E5]">
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10">
               <CardHeader>
-                <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-[#CE0202]" />
+                <CardTitle className="text-white text-lg flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-indigo-400" />
                   Évolution mensuelle {selectedYear}
                 </CardTitle>
               </CardHeader>
@@ -1122,10 +1122,10 @@ const BudgetPage = () => {
             </Card>
 
             {/* Expense Breakdown Pie */}
-            <Card className="bg-white border-[#E5E5E5]">
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10">
               <CardHeader>
-                <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
-                  <PiggyBank className="w-5 h-5 text-[#CE0202]" />
+                <CardTitle className="text-white text-lg flex items-center gap-2">
+                  <PiggyBank className="w-5 h-5 text-indigo-400" />
                   Répartition des dépenses
                 </CardTitle>
               </CardHeader>
@@ -1152,7 +1152,7 @@ const BudgetPage = () => {
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex items-center justify-center h-[280px] text-[#666666]">
+                  <div className="flex items-center justify-center h-[280px] text-white/60">
                     <div className="text-center">
                       <PiggyBank className="w-12 h-12 mx-auto mb-2 opacity-30" />
                       <p>Aucune dépense ce mois</p>
@@ -1164,9 +1164,9 @@ const BudgetPage = () => {
           </div>
 
           {/* Top Expense Categories */}
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardHeader>
-              <CardTitle className="text-[#1A1A1A] text-lg">Top dépenses par catégorie</CardTitle>
+              <CardTitle className="text-white text-lg">Top dépenses par catégorie</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -1174,7 +1174,7 @@ const BudgetPage = () => {
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-4 h-4 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="text-[#1A1A1A]">{item.name}</span>
+                      <span className="text-white">{item.name}</span>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="w-32 h-2 bg-[#E5E5E5] rounded-full overflow-hidden">
@@ -1186,12 +1186,12 @@ const BudgetPage = () => {
                           }}
                         />
                       </div>
-                      <span className="font-mono font-bold text-[#1A1A1A] w-24 text-right">{formatCurrency(item.value)}</span>
+                      <span className="font-mono font-bold text-white w-24 text-right">{formatCurrency(item.value)}</span>
                     </div>
                   </div>
                 ))}
                 {expensePieData.length === 0 && (
-                  <p className="text-center text-[#666666] py-4">Aucune donnée disponible</p>
+                  <p className="text-center text-white/60 py-4">Aucune donnée disponible</p>
                 )}
               </div>
             </CardContent>
@@ -1203,31 +1203,31 @@ const BudgetPage = () => {
           {/* Filters */}
           <div className="flex flex-wrap gap-3">
             <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
               <Input
                 placeholder="Rechercher..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white border-[#E5E5E5]"
+                className="pl-10 bg-white/5 backdrop-blur-xl border-white/10"
               />
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-[140px] bg-white border-[#E5E5E5]">
+              <SelectTrigger className="w-[140px] bg-white/5 backdrop-blur-xl border-white/10">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white/5 backdrop-blur-xl">
                 <SelectItem value="all">Tout</SelectItem>
                 <SelectItem value="credit">Revenus</SelectItem>
                 <SelectItem value="debit">Dépenses</SelectItem>
               </SelectContent>
             </Select>
             <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-[160px] bg-white border-[#E5E5E5]">
+              <SelectTrigger className="w-[160px] bg-white/5 backdrop-blur-xl border-white/10">
                 <Tag className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Catégorie" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white/5 backdrop-blur-xl">
                 <SelectItem value="all">Toutes</SelectItem>
                 <SelectItem value="uncategorized">Non catégorisé</SelectItem>
                 {getAllCategories().map(cat => (
@@ -1243,10 +1243,10 @@ const BudgetPage = () => {
           </div>
 
           {/* Transactions List */}
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardContent className="p-0">
               {filteredTransactions.length === 0 ? (
-                <div className="text-center py-12 text-[#666666]">
+                <div className="text-center py-12 text-white/60">
                   <Receipt className="w-12 h-12 mx-auto mb-2 opacity-30" />
                   <p>Aucune transaction</p>
                   <Button onClick={() => setImportDialogOpen(true)} variant="outline" className="mt-4">
@@ -1260,7 +1260,7 @@ const BudgetPage = () => {
                     const isCredit = transaction.type === "credit";
                     
                     return (
-                      <div key={transaction.id} className="flex items-center justify-between p-4 hover:bg-[#F8F8F8] transition-colors">
+                      <div key={transaction.id} className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${isCredit ? 'bg-green-100' : 'bg-red-100'}`}>
                             {isCredit ? (
@@ -1270,7 +1270,7 @@ const BudgetPage = () => {
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="font-medium text-[#1A1A1A] truncate">{transaction.label}</p>
+                            <p className="font-medium text-white truncate">{transaction.label}</p>
                             <div className="flex items-center gap-2 flex-wrap">
                               {category ? (
                                 <Badge variant="outline" className="text-xs" style={{ borderColor: category.color, color: category.color }}>
@@ -1282,7 +1282,7 @@ const BudgetPage = () => {
                                     <AlertCircle className="w-3 h-3 mr-1" />
                                     <span>Catégoriser</span>
                                   </SelectTrigger>
-                                  <SelectContent className="bg-white">
+                                  <SelectContent className="bg-white/5 backdrop-blur-xl">
                                     {getAllCategories(isCredit ? "income" : "expense").map(cat => (
                                       <SelectItem key={cat.id} value={cat.id}>
                                         <div className="flex items-center gap-2">
@@ -1294,7 +1294,7 @@ const BudgetPage = () => {
                                   </SelectContent>
                                 </Select>
                               )}
-                              <span className="text-xs text-[#666666]">{formatDate(transaction.date)}</span>
+                              <span className="text-xs text-white/60">{formatDate(transaction.date)}</span>
                             </div>
                           </div>
                         </div>
@@ -1308,7 +1308,7 @@ const BudgetPage = () => {
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="bg-white border-[#E5E5E5]">
+                            <DropdownMenuContent className="bg-white/5 backdrop-blur-xl border-white/10">
                               <DropdownMenuItem onClick={() => openEditTransaction(transaction)}>
                                 <Edit className="w-4 h-4 mr-2" /> Modifier
                               </DropdownMenuItem>
@@ -1331,16 +1331,16 @@ const BudgetPage = () => {
         {/* Categories Tab */}
         <TabsContent value="categories" className="space-y-4">
           <div className="flex justify-end">
-            <Button onClick={() => { setEditingCategory(null); setCategoryForm({ name: "", type: "expense", color: "#CE0202", icon: "tag" }); setCategoryDialogOpen(true); }} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+            <Button onClick={() => { setEditingCategory(null); setCategoryForm({ name: "", type: "expense", color: "#CE0202", icon: "tag" }); setCategoryDialogOpen(true); }} className="bg-indigo-600 hover:bg-indigo-500 text-white">
               <Plus className="w-4 h-4 mr-2" /> Nouvelle catégorie
             </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Income Categories */}
-            <Card className="bg-white border-[#E5E5E5]">
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10">
               <CardHeader className="pb-2">
-                <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
+                <CardTitle className="text-white text-lg flex items-center gap-2">
                   <ArrowUpRight className="w-5 h-5 text-green-600" />
                   Revenus
                 </CardTitle>
@@ -1348,10 +1348,10 @@ const BudgetPage = () => {
               <CardContent>
                 <div className="space-y-2">
                   {getAllCategories("income").map(cat => (
-                    <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg bg-[#F8F8F8] border border-[#E5E5E5]">
+                    <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
                       <div className="flex items-center gap-3">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cat.color }} />
-                        <span className="text-[#1A1A1A]">{cat.name}</span>
+                        <span className="text-white">{cat.name}</span>
                       </div>
                       {!cat.id.startsWith("default_") && (
                         <div className="flex gap-1">
@@ -1370,9 +1370,9 @@ const BudgetPage = () => {
             </Card>
 
             {/* Expense Categories */}
-            <Card className="bg-white border-[#E5E5E5]">
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10">
               <CardHeader className="pb-2">
-                <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
+                <CardTitle className="text-white text-lg flex items-center gap-2">
                   <ArrowDownRight className="w-5 h-5 text-red-600" />
                   Dépenses
                 </CardTitle>
@@ -1380,10 +1380,10 @@ const BudgetPage = () => {
               <CardContent>
                 <div className="space-y-2">
                   {getAllCategories("expense").map(cat => (
-                    <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg bg-[#F8F8F8] border border-[#E5E5E5]">
+                    <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
                       <div className="flex items-center gap-3">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cat.color }} />
-                        <span className="text-[#1A1A1A]">{cat.name}</span>
+                        <span className="text-white">{cat.name}</span>
                       </div>
                       {!cat.id.startsWith("default_") && (
                         <div className="flex gap-1">
@@ -1405,28 +1405,28 @@ const BudgetPage = () => {
 
         {/* Rules Tab */}
         <TabsContent value="rules" className="space-y-4">
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-[#1A1A1A] text-lg">Règles d'auto-catégorisation</CardTitle>
-                <p className="text-sm text-[#666666]">Catégorisez automatiquement vos transactions importées</p>
+                <CardTitle className="text-white text-lg">Règles d'auto-catégorisation</CardTitle>
+                <p className="text-sm text-white/60">Catégorisez automatiquement vos transactions importées</p>
               </div>
               <div className="flex gap-2">
                 <Button 
                   variant="outline"
                   onClick={handleApplyRules}
-                  className="border-[#CE0202] text-[#CE0202]"
+                  className="border-indigo-500/50 text-indigo-400"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" /> Appliquer les règles
                 </Button>
-                <Button onClick={() => { setRuleForm({ pattern: "", category_id: "", match_type: "contains", apply_to_type: "" }); setRuleDialogOpen(true); }} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+                <Button onClick={() => { setRuleForm({ pattern: "", category_id: "", match_type: "contains", apply_to_type: "" }); setRuleDialogOpen(true); }} className="bg-indigo-600 hover:bg-indigo-500 text-white">
                   <Plus className="w-4 h-4 mr-2" /> Nouvelle règle
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               {rules.length === 0 ? (
-                <div className="text-center py-8 text-[#666666]">
+                <div className="text-center py-8 text-white/60">
                   <Settings2 className="w-12 h-12 mx-auto mb-2 opacity-30" />
                   <p>Aucune règle configurée</p>
                   <p className="text-sm mt-1">Les règles permettent de catégoriser automatiquement vos transactions bancaires</p>
@@ -1443,16 +1443,16 @@ const BudgetPage = () => {
                       regex: "correspond au pattern"
                     };
                     return (
-                      <div key={rule.id} className="flex items-center justify-between p-3 rounded-lg bg-[#F8F8F8] border border-[#E5E5E5]">
+                      <div key={rule.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
                         <div className="flex items-center gap-3 flex-wrap">
-                          <div className="text-sm text-[#666666]">Si libellé {matchTypeLabels[rule.match_type] || "contient"}</div>
+                          <div className="text-sm text-white/60">Si libellé {matchTypeLabels[rule.match_type] || "contient"}</div>
                           <Badge variant="outline" className="font-mono">&quot;{rule.pattern}&quot;</Badge>
                           {rule.apply_to_type && (
                             <Badge variant="secondary" className="text-xs">
                               {rule.apply_to_type === "credit" ? "Revenus" : "Dépenses"} uniquement
                             </Badge>
                           )}
-                          <ChevronRight className="w-4 h-4 text-[#666666]" />
+                          <ChevronRight className="w-4 h-4 text-white/60" />
                           {category && (
                             <Badge style={{ backgroundColor: category.color + "20", color: category.color, borderColor: category.color }}>
                               {category.name}
@@ -1490,10 +1490,10 @@ const BudgetPage = () => {
 
       {/* Import Dialog */}
       <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-lg">
+        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A] flex items-center gap-2">
-              <FileSpreadsheet className="w-5 h-5 text-[#CE0202]" />
+            <DialogTitle className="text-white flex items-center gap-2">
+              <FileSpreadsheet className="w-5 h-5 text-indigo-400" />
               Importer des transactions
             </DialogTitle>
           </DialogHeader>
@@ -1502,20 +1502,20 @@ const BudgetPage = () => {
             <div
               {...getRootProps()}
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                isDragActive ? 'border-[#CE0202] bg-[#CE0202]/5' : 'border-[#E5E5E5] hover:border-[#CE0202]'
+                isDragActive ? 'border-indigo-500/50 bg-indigo-600/5' : 'border-white/10 hover:border-indigo-500/50'
               }`}
             >
               <input {...getInputProps()} />
-              <Upload className="w-12 h-12 mx-auto mb-4 text-[#666666]" />
+              <Upload className="w-12 h-12 mx-auto mb-4 text-white/60" />
               {importFile ? (
                 <div>
-                  <p className="text-[#1A1A1A] font-medium">{importFile.name}</p>
-                  <p className="text-sm text-[#666666]">{(importFile.size / 1024).toFixed(1)} Ko</p>
+                  <p className="text-white font-medium">{importFile.name}</p>
+                  <p className="text-sm text-white/60">{(importFile.size / 1024).toFixed(1)} Ko</p>
                 </div>
               ) : (
                 <div>
-                  <p className="text-[#1A1A1A]">Glissez votre fichier CSV ici</p>
-                  <p className="text-sm text-[#666666]">ou cliquez pour sélectionner</p>
+                  <p className="text-white">Glissez votre fichier CSV ici</p>
+                  <p className="text-sm text-white/60">ou cliquez pour sélectionner</p>
                 </div>
               )}
             </div>
@@ -1535,10 +1535,10 @@ const BudgetPage = () => {
               </div>
             )}
 
-            <div className="bg-[#F8F8F8] rounded-lg p-4">
-              <p className="text-sm font-medium text-[#1A1A1A] mb-2">Format attendu</p>
-              <p className="text-xs text-[#666666]">Fichier CSV avec les colonnes: Date, Libellé, Montant (ou Crédit/Débit séparés)</p>
-              <p className="text-xs text-[#666666] mt-1">Formats de date acceptés: JJ/MM/AAAA, AAAA-MM-JJ</p>
+            <div className="bg-white/5 rounded-lg p-4">
+              <p className="text-sm font-medium text-white mb-2">Format attendu</p>
+              <p className="text-xs text-white/60">Fichier CSV avec les colonnes: Date, Libellé, Montant (ou Crédit/Débit séparés)</p>
+              <p className="text-xs text-white/60 mt-1">Formats de date acceptés: JJ/MM/AAAA, AAAA-MM-JJ</p>
             </div>
           </div>
 
@@ -1549,7 +1549,7 @@ const BudgetPage = () => {
             <Button 
               onClick={handleImport} 
               disabled={!importFile || importing}
-              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white"
             >
               {importing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
               Importer
@@ -1560,9 +1560,9 @@ const BudgetPage = () => {
 
       {/* Category Dialog */}
       <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-md">
+        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A]">
+            <DialogTitle className="text-white">
               {editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}
             </DialogTitle>
           </DialogHeader>
@@ -1574,17 +1574,17 @@ const BudgetPage = () => {
                 value={categoryForm.name}
                 onChange={(e) => setCategoryForm({...categoryForm, name: e.target.value})}
                 placeholder="Ex: Marketing digital"
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             
             <div className="space-y-2">
               <Label>Type</Label>
               <Select value={categoryForm.type} onValueChange={(v) => setCategoryForm({...categoryForm, type: v})}>
-                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   <SelectItem value="income">Revenu</SelectItem>
                   <SelectItem value="expense">Dépense</SelectItem>
                 </SelectContent>
@@ -1609,7 +1609,7 @@ const BudgetPage = () => {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setCategoryDialogOpen(false)}>Annuler</Button>
-            <Button onClick={handleSaveCategory} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+            <Button onClick={handleSaveCategory} className="bg-indigo-600 hover:bg-indigo-500 text-white">
               {editingCategory ? "Mettre à jour" : "Créer"}
             </Button>
           </DialogFooter>
@@ -1618,19 +1618,19 @@ const BudgetPage = () => {
 
       {/* Rule Dialog */}
       <Dialog open={ruleDialogOpen} onOpenChange={setRuleDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-md">
+        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A]">Nouvelle règle d'auto-catégorisation</DialogTitle>
+            <DialogTitle className="text-white">Nouvelle règle d'auto-catégorisation</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Type de correspondance</Label>
               <Select value={ruleForm.match_type || "contains"} onValueChange={(v) => setRuleForm({...ruleForm, match_type: v})}>
-                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   <SelectItem value="contains">Contient</SelectItem>
                   <SelectItem value="starts_with">Commence par</SelectItem>
                   <SelectItem value="ends_with">Finit par</SelectItem>
@@ -1646,18 +1646,18 @@ const BudgetPage = () => {
                 value={ruleForm.pattern}
                 onChange={(e) => setRuleForm({...ruleForm, pattern: e.target.value})}
                 placeholder="Ex: META, OVH, AMAZON..."
-                className="bg-[#F8F8F8] border-[#E5E5E5] font-mono"
+                className="bg-white/5 border-white/10 font-mono"
               />
-              <p className="text-xs text-[#666666]">La recherche n'est pas sensible à la casse</p>
+              <p className="text-xs text-white/60">La recherche n'est pas sensible à la casse</p>
             </div>
 
             <div className="space-y-2">
               <Label>Appliquer aux</Label>
               <Select value={ruleForm.apply_to_type || "all"} onValueChange={(v) => setRuleForm({...ruleForm, apply_to_type: v === "all" ? "" : v})}>
-                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue placeholder="Toutes les transactions" />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   <SelectItem value="all">Toutes les transactions</SelectItem>
                   <SelectItem value="credit">Revenus uniquement</SelectItem>
                   <SelectItem value="debit">Dépenses uniquement</SelectItem>
@@ -1668,10 +1668,10 @@ const BudgetPage = () => {
             <div className="space-y-2">
               <Label>Assigner à la catégorie *</Label>
               <Select value={ruleForm.category_id} onValueChange={(v) => setRuleForm({...ruleForm, category_id: v})}>
-                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue placeholder="Sélectionner..." />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   {getAllCategories().map(cat => (
                     <SelectItem key={cat.id} value={cat.id}>
                       <div className="flex items-center gap-2">
@@ -1687,7 +1687,7 @@ const BudgetPage = () => {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setRuleDialogOpen(false)}>Annuler</Button>
-            <Button onClick={handleSaveRule} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+            <Button onClick={handleSaveRule} className="bg-indigo-600 hover:bg-indigo-500 text-white">
               Créer la règle
             </Button>
           </DialogFooter>
@@ -1696,9 +1696,9 @@ const BudgetPage = () => {
 
       {/* Transaction Dialog */}
       <Dialog open={transactionDialogOpen} onOpenChange={setTransactionDialogOpen}>
-        <DialogContent className="bg-white border-[#E5E5E5] max-w-md">
+        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A]">
+            <DialogTitle className="text-white">
               {editingTransaction ? "Modifier la transaction" : "Nouvelle transaction"}
             </DialogTitle>
           </DialogHeader>
@@ -1729,7 +1729,7 @@ const BudgetPage = () => {
                 value={transactionForm.label}
                 onChange={(e) => setTransactionForm({...transactionForm, label: e.target.value})}
                 placeholder="Description de la transaction"
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             
@@ -1741,17 +1741,17 @@ const BudgetPage = () => {
                 value={transactionForm.amount}
                 onChange={(e) => setTransactionForm({...transactionForm, amount: e.target.value})}
                 placeholder="0.00"
-                className="bg-[#F8F8F8] border-[#E5E5E5] font-mono"
+                className="bg-white/5 border-white/10 font-mono"
               />
             </div>
             
             <div className="space-y-2">
               <Label>Catégorie</Label>
               <Select value={transactionForm.category_id} onValueChange={(v) => setTransactionForm({...transactionForm, category_id: v})}>
-                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue placeholder="Sélectionner..." />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   {getAllCategories(transactionForm.type === "credit" ? "income" : "expense").map(cat => (
                     <SelectItem key={cat.id} value={cat.id}>
                       <div className="flex items-center gap-2">
@@ -1770,7 +1770,7 @@ const BudgetPage = () => {
                 type="date"
                 value={transactionForm.date}
                 onChange={(e) => setTransactionForm({...transactionForm, date: e.target.value})}
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             
@@ -1780,7 +1780,7 @@ const BudgetPage = () => {
                 value={transactionForm.notes}
                 onChange={(e) => setTransactionForm({...transactionForm, notes: e.target.value})}
                 placeholder="Notes optionnelles..."
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
                 rows={2}
               />
             </div>
@@ -1788,7 +1788,7 @@ const BudgetPage = () => {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => { setTransactionDialogOpen(false); resetTransactionForm(); }}>Annuler</Button>
-            <Button onClick={handleSaveTransaction} className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+            <Button onClick={handleSaveTransaction} className="bg-indigo-600 hover:bg-indigo-500 text-white">
               {editingTransaction ? "Mettre à jour" : "Créer"}
             </Button>
           </DialogFooter>

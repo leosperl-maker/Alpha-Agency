@@ -191,14 +191,14 @@ const ContactsPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Contacts</h1>
-          <p className="text-[#666666] text-xs sm:text-sm">{contacts.length} contacts au total</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Contacts</h1>
+          <p className="text-white/60 text-xs sm:text-sm">{contacts.length} contacts au total</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <Button 
             variant="outline"
             onClick={() => setImportDialogOpen(true)}
-            className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202]/10 flex-1 sm:flex-none text-sm"
+            className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-600/10 flex-1 sm:flex-none text-sm"
           >
             <Upload className="w-4 h-4 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">Importer</span>
@@ -209,26 +209,26 @@ const ContactsPage = () => {
               <Button 
                 data-testid="add-contact-btn"
                 onClick={resetForm}
-                className="bg-[#CE0202] hover:bg-[#B00202] text-white flex-1 sm:flex-none text-sm"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white flex-1 sm:flex-none text-sm"
               >
                 <Plus className="w-4 h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Nouveau contact</span>
                 <span className="sm:hidden">Ajouter</span>
               </Button>
             </DialogTrigger>
-          <DialogContent className="bg-white border-[#E5E5E5] max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-[#1A1A1A]">
+              <DialogTitle className="text-white">
                 {editingContact ? "Modifier le contact" : "Nouveau contact"}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Date de création (lecture seule) */}
               {editingContact && (
-                <div className="p-3 bg-[#F8F8F8] rounded-lg flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-[#666666]" />
-                  <span className="text-sm text-[#666666]">
-                    Créé le: <strong className="text-[#1A1A1A]">{formatDate(editingContact.created_at)}</strong>
+                <div className="p-3 bg-white/5 rounded-lg flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-white/60" />
+                  <span className="text-sm text-white/60">
+                    Créé le: <strong className="text-white">{formatDate(editingContact.created_at)}</strong>
                   </span>
                 </div>
               )}
@@ -236,53 +236,53 @@ const ContactsPage = () => {
               {/* Prénom / Nom */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Prénom *</Label>
+                  <Label className="text-white">Prénom *</Label>
                   <Input
                     value={formData.first_name}
                     onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                     required
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    className="bg-white/5 border-white/10 text-white"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Nom *</Label>
+                  <Label className="text-white">Nom *</Label>
                   <Input
                     value={formData.last_name}
                     onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                     required
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    className="bg-white/5 border-white/10 text-white"
                   />
                 </div>
               </div>
 
               {/* Email */}
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Email *</Label>
+                <Label className="text-white">Email *</Label>
                 <Input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   required
-                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                  className="bg-white/5 border-white/10 text-white"
                 />
               </div>
 
               {/* Téléphone / Entreprise */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Téléphone</Label>
+                  <Label className="text-white">Téléphone</Label>
                   <Input
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    className="bg-white/5 border-white/10 text-white"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Entreprise</Label>
+                  <Label className="text-white">Entreprise</Label>
                   <Input
                     value={formData.company}
                     onChange={(e) => setFormData({...formData, company: e.target.value})}
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    className="bg-white/5 border-white/10 text-white"
                   />
                 </div>
               </div>
@@ -290,7 +290,7 @@ const ContactsPage = () => {
               {/* Poste / Ville */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A] flex items-center gap-1">
+                  <Label className="text-white flex items-center gap-1">
                     <Briefcase className="w-3 h-3" />
                     Poste
                   </Label>
@@ -298,22 +298,22 @@ const ContactsPage = () => {
                     value={formData.poste}
                     onChange={(e) => setFormData({...formData, poste: e.target.value})}
                     placeholder="Ex: Directeur commercial"
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    className="bg-white/5 border-white/10 text-white"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Ville</Label>
+                  <Label className="text-white">Ville</Label>
                   <Input
                     value={formData.city}
                     onChange={(e) => setFormData({...formData, city: e.target.value})}
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    className="bg-white/5 border-white/10 text-white"
                   />
                 </div>
               </div>
 
               {/* Budget */}
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A] flex items-center gap-1">
+                <Label className="text-white flex items-center gap-1">
                   <DollarSign className="w-3 h-3" />
                   Budget
                 </Label>
@@ -321,22 +321,22 @@ const ContactsPage = () => {
                   value={formData.budget}
                   onChange={(e) => setFormData({...formData, budget: e.target.value})}
                   placeholder="Ex: 5 000 € - 10 000 €"
-                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                  className="bg-white/5 border-white/10 text-white"
                 />
               </div>
 
               {/* Statut / Score */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Statut</Label>
+                  <Label className="text-white">Statut</Label>
                   <Select
                     value={formData.status}
                     onValueChange={(value) => setFormData({...formData, status: value})}
                   >
-                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-[#E5E5E5]">
+                    <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
                       <SelectItem value="nouveau">Nouveau</SelectItem>
                       <SelectItem value="prospect">Prospect</SelectItem>
                       <SelectItem value="qualifie">Qualifié</SelectItem>
@@ -349,15 +349,15 @@ const ContactsPage = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Score</Label>
+                  <Label className="text-white">Score</Label>
                   <Select
                     value={formData.score}
                     onValueChange={(value) => setFormData({...formData, score: value})}
                   >
-                    <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-[#E5E5E5]">
+                    <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
                       <SelectItem value="chaud">Chaud</SelectItem>
                       <SelectItem value="tiède">Tiède</SelectItem>
                       <SelectItem value="froid">Froid</SelectItem>
@@ -368,7 +368,7 @@ const ContactsPage = () => {
 
               {/* Note */}
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A] flex items-center gap-1">
+                <Label className="text-white flex items-center gap-1">
                   <FileText className="w-3 h-3" />
                   Note
                 </Label>
@@ -377,13 +377,13 @@ const ContactsPage = () => {
                   onChange={(e) => setFormData({...formData, note: e.target.value})}
                   placeholder="Notes sur ce contact..."
                   rows={3}
-                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A] resize-none"
+                  className="bg-white/5 border-white/10 text-white resize-none"
                 />
               </div>
 
               {/* Informations supplémentaires */}
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A] flex items-center gap-1">
+                <Label className="text-white flex items-center gap-1">
                   <Info className="w-3 h-3" />
                   Informations supplémentaires
                 </Label>
@@ -392,7 +392,7 @@ const ContactsPage = () => {
                   onChange={(e) => setFormData({...formData, infos_sup: e.target.value})}
                   placeholder="Informations diverses..."
                   rows={3}
-                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A] resize-none"
+                  className="bg-white/5 border-white/10 text-white resize-none"
                 />
               </div>
 
@@ -400,7 +400,7 @@ const ContactsPage = () => {
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Annuler
                 </Button>
-                <Button type="submit" className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+                <Button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white">
                   {editingContact ? "Mettre à jour" : "Créer"}
                 </Button>
               </div>
@@ -423,21 +423,21 @@ const ContactsPage = () => {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
           <Input
             data-testid="search-contacts"
             placeholder="Rechercher un contact..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white border-[#E5E5E5] text-[#1A1A1A] w-full"
+            className="pl-10 bg-white/5 backdrop-blur-xl border-white/10 text-white w-full"
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full sm:w-40 bg-white border-[#E5E5E5] text-[#1A1A1A]">
+          <SelectTrigger className="w-full sm:w-40 bg-white/5 backdrop-blur-xl border-white/10 text-white">
             <Filter className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
-          <SelectContent className="bg-white border-[#E5E5E5]">
+          <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
             <SelectItem value="all">Tous</SelectItem>
             <SelectItem value="nouveau">Nouveau</SelectItem>
             <SelectItem value="qualifie">Qualifié</SelectItem>
@@ -456,8 +456,8 @@ const ContactsPage = () => {
           ))}
         </div>
       ) : filteredContacts.length === 0 ? (
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-12 text-center">
-          <p className="text-[#666666]">Aucun contact trouvé</p>
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-12 text-center">
+          <p className="text-white/60">Aucun contact trouvé</p>
         </div>
       ) : (
         <div className="space-y-3 sm:space-y-4">
@@ -465,22 +465,22 @@ const ContactsPage = () => {
             <div 
               key={contact.id}
               data-testid={`contact-${contact.id}`}
-              className="bg-white rounded-lg border border-[#E5E5E5] p-3 sm:p-4 hover:border-[#CE0202]/30 transition-colors"
+              className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-3 sm:p-4 hover:border-indigo-500/50/30 transition-colors"
             >
               {/* Mobile Layout */}
               <div className="flex flex-col sm:hidden gap-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#CE0202]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-[#CE0202] font-bold text-sm">
+                    <div className="w-10 h-10 bg-indigo-600/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-indigo-400 font-bold text-sm">
                         {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
                       </span>
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-[#1A1A1A] font-semibold text-sm truncate">
+                      <h3 className="text-white font-semibold text-sm truncate">
                         {contact.first_name} {contact.last_name}
                       </h3>
-                      <p className="text-xs text-[#666666] truncate">{contact.email}</p>
+                      <p className="text-xs text-white/60 truncate">{contact.email}</p>
                     </div>
                   </div>
                   <div className="flex gap-1">
@@ -491,7 +491,7 @@ const ContactsPage = () => {
                         setSelectedContactId(contact.id);
                         setDetailSheetOpen(true);
                       }}
-                      className="text-[#CE0202] hover:text-[#CE0202] hover:bg-[#CE0202]/10 h-8 w-8 p-0"
+                      className="text-indigo-400 hover:text-indigo-400 hover:bg-indigo-600/10 h-8 w-8 p-0"
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
@@ -499,7 +499,7 @@ const ContactsPage = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => openEditDialog(contact)}
-                      className="text-[#666666] hover:text-[#1A1A1A] h-8 w-8 p-0"
+                      className="text-white/60 hover:text-white h-8 w-8 p-0"
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -524,16 +524,16 @@ const ContactsPage = () => {
               {/* Desktop Layout */}
               <div className="hidden sm:flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#CE0202]/10 rounded-full flex items-center justify-center">
-                    <span className="text-[#CE0202] font-bold">
+                  <div className="w-12 h-12 bg-indigo-600/10 rounded-full flex items-center justify-center">
+                    <span className="text-indigo-400 font-bold">
                       {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-[#1A1A1A] font-semibold">
+                    <h3 className="text-white font-semibold">
                       {contact.first_name} {contact.last_name}
                     </h3>
-                    <div className="flex items-center gap-4 text-sm text-[#666666]">
+                    <div className="flex items-center gap-4 text-sm text-white/60">
                       <span className="flex items-center gap-1">
                         <Mail className="w-3 h-3" />
                         {contact.email}
@@ -570,7 +570,7 @@ const ContactsPage = () => {
                         setSelectedContactId(contact.id);
                         setDetailSheetOpen(true);
                       }}
-                      className="text-[#CE0202] hover:text-[#CE0202] hover:bg-[#CE0202]/10"
+                      className="text-indigo-400 hover:text-indigo-400 hover:bg-indigo-600/10"
                       title="Voir les détails"
                     >
                       <Eye className="w-4 h-4" />
@@ -579,7 +579,7 @@ const ContactsPage = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => openEditDialog(contact)}
-                      className="text-[#666666] hover:text-[#1A1A1A]"
+                      className="text-white/60 hover:text-white"
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -587,7 +587,7 @@ const ContactsPage = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(contact.id)}
-                      className="text-[#666666] hover:text-red-500"
+                      className="text-white/60 hover:text-red-500"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

@@ -209,8 +209,8 @@ const EmailCampaignsTab = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-semibold text-[#1A1A1A]">Campagnes Email</h3>
-          <p className="text-sm text-[#666666]">Créez et gérez vos campagnes d'emailing</p>
+          <h3 className="text-lg font-semibold text-white">Campagnes Email</h3>
+          <p className="text-sm text-white/60">Créez et gérez vos campagnes d'emailing</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={fetchCampaigns} disabled={loading}>
@@ -245,7 +245,7 @@ const EmailCampaignsTab = () => {
           {/* Templates Dialog */}
           <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202]/5">
+              <Button variant="outline" className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-600/5">
                 <FileText className="w-4 h-4 mr-2" />
                 Templates
               </Button>
@@ -253,7 +253,7 @@ const EmailCampaignsTab = () => {
             <DialogContent className="max-w-3xl">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-[#CE0202]" />
+                  <Sparkles className="w-5 h-5 text-indigo-400" />
                   Templates prédéfinis
                 </DialogTitle>
                 <DialogDescription>
@@ -264,7 +264,7 @@ const EmailCampaignsTab = () => {
                 {templates.map((template) => (
                   <Card
                     key={template.id}
-                    className="cursor-pointer hover:border-[#CE0202] hover:shadow-md transition-all group"
+                    className="cursor-pointer hover:border-indigo-500/50 hover:shadow-md transition-all group"
                     onClick={() => handleSelectTemplate(template.id)}
                   >
                     <div className="aspect-video relative overflow-hidden rounded-t-lg">
@@ -274,12 +274,12 @@ const EmailCampaignsTab = () => {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                      <Badge className="absolute bottom-2 left-2 bg-white text-[#1A1A1A]">
+                      <Badge className="absolute bottom-2 left-2 bg-white/5 backdrop-blur-xl text-white">
                         {template.name}
                       </Badge>
                     </div>
                     <CardContent className="p-3">
-                      <p className="text-sm text-[#666666] line-clamp-2">{template.description}</p>
+                      <p className="text-sm text-white/60 line-clamp-2">{template.description}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -289,7 +289,7 @@ const EmailCampaignsTab = () => {
           
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
             <DialogTrigger asChild>
-              <Button className="bg-[#CE0202] hover:bg-[#B00202]">
+              <Button className="bg-indigo-600 hover:bg-indigo-500">
                 <Plus className="w-4 h-4 mr-2" />
                 Nouvelle campagne
               </Button>
@@ -353,7 +353,7 @@ const EmailCampaignsTab = () => {
                     rows={10}
                     className="font-mono text-sm"
                   />
-                  <p className="text-xs text-[#999999] mt-1">
+                  <p className="text-xs text-white/40 mt-1">
                     Collez votre code HTML ou utilisez un outil comme Stripo, Unlayer, etc.
                   </p>
                 </div>
@@ -362,7 +362,7 @@ const EmailCampaignsTab = () => {
                 <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
                   Annuler
                 </Button>
-                <Button onClick={handleCreate} disabled={creating} className="bg-[#CE0202] hover:bg-[#B00202]">
+                <Button onClick={handleCreate} disabled={creating} className="bg-indigo-600 hover:bg-indigo-500">
                   {creating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Créer la campagne
                 </Button>
@@ -375,15 +375,15 @@ const EmailCampaignsTab = () => {
       {/* Campaigns List */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-[#CE0202]" />
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
         </div>
       ) : campaigns.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <Mail className="w-12 h-12 mx-auto mb-4 text-[#E5E5E5]" />
-            <h4 className="text-lg font-medium text-[#1A1A1A] mb-2">Aucune campagne</h4>
-            <p className="text-[#666666] mb-4">Créez votre première campagne email</p>
-            <Button onClick={() => setShowCreateDialog(true)} className="bg-[#CE0202] hover:bg-[#B00202]">
+            <h4 className="text-lg font-medium text-white mb-2">Aucune campagne</h4>
+            <p className="text-white/60 mb-4">Créez votre première campagne email</p>
+            <Button onClick={() => setShowCreateDialog(true)} className="bg-indigo-600 hover:bg-indigo-500">
               <Plus className="w-4 h-4 mr-2" />
               Nouvelle campagne
             </Button>
@@ -408,8 +408,8 @@ const EmailCampaignsTab = () => {
                   <TableRow key={campaign.id}>
                     <TableCell>
                       <div>
-                        <p className="font-medium text-[#1A1A1A]">{campaign.name}</p>
-                        <p className="text-sm text-[#666666]">{campaign.subject}</p>
+                        <p className="font-medium text-white">{campaign.name}</p>
+                        <p className="text-sm text-white/60">{campaign.subject}</p>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -417,7 +417,7 @@ const EmailCampaignsTab = () => {
                         {statusLabels[status] || status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-[#666666]">
+                    <TableCell className="text-white/60">
                       {formatDate(campaign.createdAt)}
                     </TableCell>
                     <TableCell className="text-right">
@@ -545,8 +545,8 @@ const SMSCampaignsTab = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-semibold text-[#1A1A1A]">Campagnes SMS</h3>
-          <p className="text-sm text-[#666666]">Envoyez des SMS marketing à vos contacts</p>
+          <h3 className="text-lg font-semibold text-white">Campagnes SMS</h3>
+          <p className="text-sm text-white/60">Envoyez des SMS marketing à vos contacts</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={fetchCampaigns} disabled={loading}>
@@ -555,7 +555,7 @@ const SMSCampaignsTab = () => {
           </Button>
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
             <DialogTrigger asChild>
-              <Button className="bg-[#CE0202] hover:bg-[#B00202]">
+              <Button className="bg-indigo-600 hover:bg-indigo-500">
                 <Plus className="w-4 h-4 mr-2" />
                 Nouvelle campagne SMS
               </Button>
@@ -606,7 +606,7 @@ const SMSCampaignsTab = () => {
                 <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
                   Annuler
                 </Button>
-                <Button onClick={handleCreate} disabled={creating} className="bg-[#CE0202] hover:bg-[#B00202]">
+                <Button onClick={handleCreate} disabled={creating} className="bg-indigo-600 hover:bg-indigo-500">
                   {creating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Créer la campagne
                 </Button>
@@ -619,15 +619,15 @@ const SMSCampaignsTab = () => {
       {/* SMS Campaigns List */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-[#CE0202]" />
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
         </div>
       ) : campaigns.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <MessageSquare className="w-12 h-12 mx-auto mb-4 text-[#E5E5E5]" />
-            <h4 className="text-lg font-medium text-[#1A1A1A] mb-2">Aucune campagne SMS</h4>
-            <p className="text-[#666666] mb-4">Créez votre première campagne SMS</p>
-            <Button onClick={() => setShowCreateDialog(true)} className="bg-[#CE0202] hover:bg-[#B00202]">
+            <h4 className="text-lg font-medium text-white mb-2">Aucune campagne SMS</h4>
+            <p className="text-white/60 mb-4">Créez votre première campagne SMS</p>
+            <Button onClick={() => setShowCreateDialog(true)} className="bg-indigo-600 hover:bg-indigo-500">
               <Plus className="w-4 h-4 mr-2" />
               Nouvelle campagne SMS
             </Button>
@@ -653,17 +653,17 @@ const SMSCampaignsTab = () => {
                   <TableRow key={campaign.id}>
                     <TableCell>
                       <div>
-                        <p className="font-medium text-[#1A1A1A]">{campaign.name}</p>
-                        <p className="text-sm text-[#666666] truncate max-w-xs">{campaign.content}</p>
+                        <p className="font-medium text-white">{campaign.name}</p>
+                        <p className="text-sm text-white/60 truncate max-w-xs">{campaign.content}</p>
                       </div>
                     </TableCell>
-                    <TableCell className="text-[#666666]">{campaign.sender}</TableCell>
+                    <TableCell className="text-white/60">{campaign.sender}</TableCell>
                     <TableCell>
                       <Badge className={`${colors.bg} ${colors.text} border-0`}>
                         {statusLabels[status] || status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-[#666666]">
+                    <TableCell className="text-white/60">
                       {formatDate(campaign.createdAt)}
                     </TableCell>
                     <TableCell className="text-right">
@@ -807,8 +807,8 @@ const ContactsTab = () => {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-semibold text-[#1A1A1A]">Listes de contacts</h3>
-            <p className="text-sm text-[#666666]">Organisez vos contacts en listes</p>
+            <h3 className="text-lg font-semibold text-white">Listes de contacts</h3>
+            <p className="text-sm text-white/60">Organisez vos contacts en listes</p>
           </div>
           <Dialog open={showListDialog} onOpenChange={setShowListDialog}>
             <DialogTrigger asChild>
@@ -835,7 +835,7 @@ const ContactsTab = () => {
                 <Button variant="outline" onClick={() => setShowListDialog(false)}>
                   Annuler
                 </Button>
-                <Button onClick={handleCreateList} disabled={creating} className="bg-[#CE0202] hover:bg-[#B00202]">
+                <Button onClick={handleCreateList} disabled={creating} className="bg-indigo-600 hover:bg-indigo-500">
                   {creating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Créer
                 </Button>
@@ -851,12 +851,12 @@ const ContactsTab = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-[#CE0202]/10 flex items-center justify-center">
-                        <List className="w-5 h-5 text-[#CE0202]" />
+                      <div className="w-10 h-10 rounded-lg bg-indigo-600/10 flex items-center justify-center">
+                        <List className="w-5 h-5 text-indigo-400" />
                       </div>
                       <div>
-                        <p className="font-medium text-[#1A1A1A]">{list.name}</p>
-                        <p className="text-sm text-[#666666]">{list.uniqueSubscribers || 0} contacts</p>
+                        <p className="font-medium text-white">{list.name}</p>
+                        <p className="text-sm text-white/60">{list.uniqueSubscribers || 0} contacts</p>
                       </div>
                     </div>
                     <Button
@@ -874,7 +874,7 @@ const ContactsTab = () => {
           </div>
         ) : (
           <Card>
-            <CardContent className="py-8 text-center text-[#666666]">
+            <CardContent className="py-8 text-center text-white/60">
               Aucune liste créée
             </CardContent>
           </Card>
@@ -885,8 +885,8 @@ const ContactsTab = () => {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-semibold text-[#1A1A1A]">Contacts Brevo</h3>
-            <p className="text-sm text-[#666666]">Gérez vos contacts marketing</p>
+            <h3 className="text-lg font-semibold text-white">Contacts Brevo</h3>
+            <p className="text-sm text-white/60">Gérez vos contacts marketing</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={fetchData} disabled={loading}>
@@ -895,7 +895,7 @@ const ContactsTab = () => {
             </Button>
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
               <DialogTrigger asChild>
-                <Button className="bg-[#CE0202] hover:bg-[#B00202]">
+                <Button className="bg-indigo-600 hover:bg-indigo-500">
                   <Plus className="w-4 h-4 mr-2" />
                   Ajouter un contact
                 </Button>
@@ -950,7 +950,7 @@ const ContactsTab = () => {
                   <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
                     Annuler
                   </Button>
-                  <Button onClick={handleCreateContact} disabled={creating} className="bg-[#CE0202] hover:bg-[#B00202]">
+                  <Button onClick={handleCreateContact} disabled={creating} className="bg-indigo-600 hover:bg-indigo-500">
                     {creating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                     Ajouter
                   </Button>
@@ -962,15 +962,15 @@ const ContactsTab = () => {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-[#CE0202]" />
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
           </div>
         ) : contacts.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <Users className="w-12 h-12 mx-auto mb-4 text-[#E5E5E5]" />
-              <h4 className="text-lg font-medium text-[#1A1A1A] mb-2">Aucun contact</h4>
-              <p className="text-[#666666] mb-4">Ajoutez vos premiers contacts Brevo</p>
-              <Button onClick={() => setShowCreateDialog(true)} className="bg-[#CE0202] hover:bg-[#B00202]">
+              <h4 className="text-lg font-medium text-white mb-2">Aucun contact</h4>
+              <p className="text-white/60 mb-4">Ajoutez vos premiers contacts Brevo</p>
+              <Button onClick={() => setShowCreateDialog(true)} className="bg-indigo-600 hover:bg-indigo-500">
                 <Plus className="w-4 h-4 mr-2" />
                 Ajouter un contact
               </Button>
@@ -995,7 +995,7 @@ const ContactsTab = () => {
                       {contact.attributes?.PRENOM || contact.attributes?.FIRSTNAME || ""}{" "}
                       {contact.attributes?.NOM || contact.attributes?.LASTNAME || ""}
                     </TableCell>
-                    <TableCell className="text-[#666666]">
+                    <TableCell className="text-white/60">
                       {contact.attributes?.SMS || contact.attributes?.PHONE || "-"}
                     </TableCell>
                     <TableCell className="text-right">
@@ -1043,13 +1043,13 @@ const StatisticsTab = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-[#1A1A1A]">Statistiques des campagnes</h3>
-        <p className="text-sm text-[#666666]">Suivez les performances de vos campagnes</p>
+        <h3 className="text-lg font-semibold text-white">Statistiques des campagnes</h3>
+        <p className="text-sm text-white/60">Suivez les performances de vos campagnes</p>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-[#CE0202]" />
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1057,8 +1057,8 @@ const StatisticsTab = () => {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-[#666666]">Emails envoyés</p>
-                  <p className="text-2xl font-bold text-[#1A1A1A]">
+                  <p className="text-sm text-white/60">Emails envoyés</p>
+                  <p className="text-2xl font-bold text-white">
                     {emailStats?.requests || 0}
                   </p>
                 </div>
@@ -1073,8 +1073,8 @@ const StatisticsTab = () => {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-[#666666]">Délivrés</p>
-                  <p className="text-2xl font-bold text-[#1A1A1A]">
+                  <p className="text-sm text-white/60">Délivrés</p>
+                  <p className="text-2xl font-bold text-white">
                     {emailStats?.delivered || 0}
                   </p>
                 </div>
@@ -1089,8 +1089,8 @@ const StatisticsTab = () => {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-[#666666]">Ouvertures</p>
-                  <p className="text-2xl font-bold text-[#1A1A1A]">
+                  <p className="text-sm text-white/60">Ouvertures</p>
+                  <p className="text-2xl font-bold text-white">
                     {emailStats?.opens || 0}
                   </p>
                 </div>
@@ -1105,8 +1105,8 @@ const StatisticsTab = () => {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-[#666666]">Clics</p>
-                  <p className="text-2xl font-bold text-[#1A1A1A]">
+                  <p className="text-sm text-white/60">Clics</p>
+                  <p className="text-2xl font-bold text-white">
                     {emailStats?.clicks || 0}
                   </p>
                 </div>
@@ -1124,7 +1124,7 @@ const StatisticsTab = () => {
           <CardTitle className="text-base">Conseils pour améliorer vos campagnes</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-2 text-sm text-[#666666]">
+          <ul className="space-y-2 text-sm text-white/60">
             <li className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
               <span>Personnalisez vos objets d'email pour augmenter le taux d'ouverture</span>
@@ -1159,13 +1159,13 @@ const CampaignsPage = () => {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#CE0202] flex items-center justify-center">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
                 <Mail className="w-5 h-5 text-white" />
               </div>
               Campagnes Marketing
             </h1>
-            <p className="text-[#666666] text-sm mt-1 ml-13">
+            <p className="text-white/60 text-sm mt-1 ml-13">
               Créez et gérez vos campagnes Email et SMS via Brevo
             </p>
           </div>
@@ -1174,31 +1174,31 @@ const CampaignsPage = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="bg-white border border-[#E5E5E5] p-1 w-full sm:w-auto">
+        <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-1 w-full sm:w-auto">
           <TabsTrigger
             value="email"
-            className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white px-4"
+            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4"
           >
             <Mail className="w-4 h-4 mr-2" />
             Email
           </TabsTrigger>
           <TabsTrigger
             value="sms"
-            className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white px-4"
+            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4"
           >
             <MessageSquare className="w-4 h-4 mr-2" />
             SMS
           </TabsTrigger>
           <TabsTrigger
             value="contacts"
-            className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white px-4"
+            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4"
           >
             <Users className="w-4 h-4 mr-2" />
             Contacts
           </TabsTrigger>
           <TabsTrigger
             value="stats"
-            className="data-[state=active]:bg-[#CE0202] data-[state=active]:text-white px-4"
+            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4"
           >
             <BarChart3 className="w-4 h-4 mr-2" />
             Statistiques
