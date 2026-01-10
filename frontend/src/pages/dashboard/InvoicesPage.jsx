@@ -1154,23 +1154,38 @@ const InvoicesPage = () => {
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-[#666666]">Remise (%)</Label>
-                          <Input
-                            type="number"
-                            min="0"
-                            max="100"
-                            step="1"
-                            placeholder="0"
-                            value={item.discount || 0}
-                            onChange={(e) => updateItem(index, "discount", e.target.value)}
-                            className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
-                          />
+                          <Label className="text-xs text-[#666666]">Remise</Label>
+                          <div className="flex gap-1">
+                            <Select
+                              value={item.discountType || "percent"}
+                              onValueChange={(v) => updateItem(index, "discountType", v)}
+                            >
+                              <SelectTrigger className="w-16 bg-white border-[#E5E5E5] px-2">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="bg-white">
+                                <SelectItem value="percent">%</SelectItem>
+                                <SelectItem value="fixed">€</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Input
+                              type="number"
+                              min="0"
+                              step={item.discountType === "fixed" ? "0.01" : "1"}
+                              placeholder="0"
+                              value={item.discount || 0}
+                              onChange={(e) => updateItem(index, "discount", e.target.value)}
+                              className="flex-1 bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                            />
+                          </div>
                         </div>
                       </div>
                       {(item.title || item.description) && item.unit_price > 0 && (
                         <div className="flex justify-between items-center text-sm">
-                          <span className="text-[#666666]">
-                            {item.discount > 0 && `(-${item.discount}%)`}
+                          <span className="text-[#CE0202]">
+                            {item.discount > 0 && (
+                              <>Remise: -{formatCurrency(calculateLineDiscount(item))} {item.discountType === "percent" ? `(${item.discount}%)` : ''}</>
+                            )}
                           </span>
                           <span className="font-medium text-[#1A1A1A]">
                             Total ligne: {formatCurrency(calculateLineTotal(item))}
