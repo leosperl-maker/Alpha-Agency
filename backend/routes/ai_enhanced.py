@@ -60,23 +60,27 @@ async def get_app_context() -> str:
     context_parts = []
     today = datetime.now(timezone.utc)
     
-    def parse_date(date_str):
-        """Safely parse date string to datetime"""
-        if not date_str:
-            return None
+    def is_past_due(date_val):
+        """Check if a date is in the past, handling various formats"""
+        if not date_val:
+            return False
         try:
-            if isinstance(date_str, datetime):
-                if date_str.tzinfo is None:
-                    return date_str.replace(tzinfo=timezone.utc)
-                return date_str
-            # Handle ISO format
-            if "Z" in date_str:
-                date_str = date_str.replace("Z", "+00:00")
-            if "+" not in date_str and "T" in date_str:
-                date_str = date_str + "+00:00"
-            return datetime.fromisoformat(date_str)
-        except:
-            return None
+            if isinstance(date_val, datetime):
+                dt = date_val if date_val.tzinfo else date_val.replace(tzinfo=timezone.utc)
+            elif isinstance(date_val, str):
+                # Clean up the string
+                date_str = date_val.replace("Z", "+00:00")
+                if "+" not in date_str and "-" in date_str and "T" in date_str:
+                    date_str = date_str + "+00:00"
+                elif "T" not in date_str:
+                    # Just a date without time
+                    date_str = date_str + "T00:00:00+00:00"
+                dt = datetime.fromisoformat(date_str)
+            else:
+                return False
+            return dt < today
+        except Exception:
+            return False
     
     try:
         # 1. Invoices Summary
@@ -85,8 +89,7 @@ async def get_app_context() -> str:
             pending_invoices = [i for i in invoices if i.get("status") in ["pending", "sent"]]
             overdue_invoices = []
             for i in invoices:
-                due = parse_date(i.get("due_date"))
-                if i.get("status") == "overdue" or (due and due < today and i.get("status") not in ["paid", "cancelled"]):
+                if i.get("status") == "overdue" or (is_past_due(i.get("due_date")) and i.get("status") not in ["paid", "cancelled"]):
                     overdue_invoices.append(i)
             paid_invoices = [i for i in invoices if i.get("status") == "paid"]
             
