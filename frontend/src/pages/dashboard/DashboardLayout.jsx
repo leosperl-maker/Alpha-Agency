@@ -17,6 +17,19 @@ const DashboardLayout = () => {
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Topbar states
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [profileOpen, setProfileOpen] = useState(false);
+  
+  // Refs for click outside
+  const searchRef = useRef(null);
+  const notifRef = useRef(null);
+  const profileRef = useRef(null);
 
   useEffect(() => {
     const token = localStorage.getItem("alpha_token");
