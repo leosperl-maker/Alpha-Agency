@@ -6283,10 +6283,14 @@ app.include_router(api_router)
 from routes.campaigns import router as campaigns_router
 from routes.news import router as news_router
 from routes.meta import router as meta_router
+from routes.invoices import router as invoices_router
+from routes.budget import router as budget_router
 
 app.include_router(campaigns_router, prefix="/api/campaigns", tags=["campaigns"])
 app.include_router(news_router, prefix="/api/news", tags=["news"])
 app.include_router(meta_router, prefix="/api/meta", tags=["meta"])
+app.include_router(invoices_router, prefix="/api", tags=["invoices"])
+app.include_router(budget_router, prefix="/api", tags=["budget"])
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
