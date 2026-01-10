@@ -75,9 +75,11 @@ const getDefaultBlockContent = (type) => {
     case 'gallery':
       return { images: [], layout: 'grid', columns: 3, gap: 'md', rounded: true };
     case 'video':
-      return { url: '', type: 'youtube', caption: '' };
+      return { url: '', type: 'youtube', caption: '', autoplay: false };
     case 'audio':
       return { url: '', title: '' };
+    case 'pdf':
+      return { url: '', title: '', downloadable: true, preview: true };
     case 'beforeAfter':
       return { before: '', after: '', caption: '' };
     case 'columns':
