@@ -6382,6 +6382,10 @@ app.include_router(tags_router, prefix="/api", tags=["tags"])
 from routes.ai_enhanced import router as ai_enhanced_router
 app.include_router(ai_enhanced_router, prefix="/api", tags=["ai-enhanced"])
 
+# Documents Manager
+from routes.documents import router as documents_router
+app.include_router(documents_router, prefix="/api", tags=["documents"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
