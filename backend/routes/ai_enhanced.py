@@ -1,6 +1,7 @@
 """
 AI Assistant Routes - Enhanced with image analysis and generation
 Uses Emergent LLM Key for GPT-4o Vision, GPT Image 1, and Gemini Nano Banana
+NOW CONTEXT-AWARE: Can access and reason about app data (invoices, contacts, tasks, etc.)
 """
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 from pydantic import BaseModel
@@ -8,8 +9,9 @@ from typing import Optional, List
 import uuid
 import base64
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import logging
+import json
 
 from .database import db, get_current_user
 
@@ -40,11 +42,136 @@ class ChatRequest(BaseModel):
     messages: List[ChatMessage]
     conversation_id: Optional[str] = None
     model: Optional[str] = "gpt-4o"  # gpt-4o, gemini-3-flash-preview
+    include_context: Optional[bool] = True  # Include app data context
     
 class ImageGenerateRequest(BaseModel):
     prompt: str
     model: Optional[str] = "gemini-3-pro-image-preview"  # gemini-3-pro-image-preview, gpt-image-1
     size: Optional[str] = "1024x1024"
+
+
+# ==================== CONTEXT HELPERS ====================
+
+async def get_app_context() -> str:
+    """
+    Fetch relevant data from the application to provide context to the AI.
+    Returns a formatted string with current data summary.
+    """
+    context_parts = []
+    today = datetime.now(timezone.utc)
+    
+    try:
+        # 1. Invoices Summary
+        invoices = await db.invoices.find({}, {"_id": 0, "id": 1, "number": 1, "status": 1, "total": 1, "client_name": 1, "due_date": 1}).to_list(100)
+        if invoices:
+            pending_invoices = [i for i in invoices if i.get("status") in ["pending", "sent"]]
+            overdue_invoices = [i for i in invoices if i.get("status") == "overdue" or (i.get("due_date") and datetime.fromisoformat(i["due_date"].replace("Z", "+00:00")) < today and i.get("status") not in ["paid", "cancelled"])]
+            paid_invoices = [i for i in invoices if i.get("status") == "paid"]
+            
+            total_pending = sum(i.get("total", 0) for i in pending_invoices)
+            total_overdue = sum(i.get("total", 0) for i in overdue_invoices)
+            total_paid = sum(i.get("total", 0) for i in paid_invoices)
+            
+            context_parts.append(f"""📄 FACTURES:
+- {len(pending_invoices)} factures en attente (total: {total_pending:.2f}€)
+- {len(overdue_invoices)} factures en retard (total: {total_overdue:.2f}€)
+- {len(paid_invoices)} factures payées (total: {total_paid:.2f}€)""")
+            
+            if overdue_invoices:
+                overdue_list = "\n".join([f"  • {i.get('number', 'N/A')} - {i.get('client_name', 'N/A')}: {i.get('total', 0):.2f}€" for i in overdue_invoices[:5]])
+                context_parts.append(f"Factures en retard:\n{overdue_list}")
+        
+        # 2. Contacts Summary
+        contacts = await db.contacts.find({}, {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "company": 1, "type": 1, "email": 1}).to_list(200)
+        if contacts:
+            leads = [c for c in contacts if c.get("type") == "lead"]
+            clients = [c for c in contacts if c.get("type") == "client"]
+            prospects = [c for c in contacts if c.get("type") == "prospect"]
+            
+            context_parts.append(f"""👥 CONTACTS:
+- {len(leads)} leads
+- {len(prospects)} prospects
+- {len(clients)} clients
+- Total: {len(contacts)} contacts""")
+            
+            if leads:
+                recent_leads = leads[:5]
+                leads_list = "\n".join([f"  • {l.get('first_name', '')} {l.get('last_name', '')} ({l.get('company', 'N/A')})" for l in recent_leads])
+                context_parts.append(f"Leads récents:\n{leads_list}")
+        
+        # 3. Tasks Summary
+        tasks = await db.tasks.find({}, {"_id": 0, "id": 1, "title": 1, "status": 1, "priority": 1, "due_date": 1}).to_list(100)
+        if tasks:
+            todo_tasks = [t for t in tasks if t.get("status") == "todo"]
+            in_progress = [t for t in tasks if t.get("status") == "in_progress"]
+            overdue_tasks = [t for t in tasks if t.get("due_date") and datetime.fromisoformat(t["due_date"].replace("Z", "+00:00")) < today and t.get("status") not in ["done", "cancelled"]]
+            urgent_tasks = [t for t in tasks if t.get("priority") == "urgent" and t.get("status") not in ["done", "cancelled"]]
+            
+            context_parts.append(f"""✅ TÂCHES:
+- {len(todo_tasks)} à faire
+- {len(in_progress)} en cours
+- {len(overdue_tasks)} en retard
+- {len(urgent_tasks)} urgentes""")
+            
+            if urgent_tasks or overdue_tasks:
+                priority_tasks = (urgent_tasks + overdue_tasks)[:5]
+                tasks_list = "\n".join([f"  • {t.get('title', 'N/A')} (Priorité: {t.get('priority', 'N/A')})" for t in priority_tasks])
+                context_parts.append(f"Tâches prioritaires:\n{tasks_list}")
+        
+        # 4. Pipeline/Opportunities Summary
+        opportunities = await db.opportunities.find({}, {"_id": 0, "id": 1, "title": 1, "stage": 1, "value": 1, "contact_name": 1}).to_list(100)
+        if opportunities:
+            by_stage = {}
+            for opp in opportunities:
+                stage = opp.get("stage", "unknown")
+                if stage not in by_stage:
+                    by_stage[stage] = {"count": 0, "value": 0}
+                by_stage[stage]["count"] += 1
+                by_stage[stage]["value"] += opp.get("value", 0)
+            
+            total_pipeline = sum(opp.get("value", 0) for opp in opportunities)
+            context_parts.append(f"""🎯 PIPELINE:
+- Valeur totale: {total_pipeline:.2f}€
+- {len(opportunities)} opportunités""")
+            
+            for stage, data in by_stage.items():
+                context_parts.append(f"  • {stage}: {data['count']} ({data['value']:.2f}€)")
+        
+        # 5. Budget Summary (current month)
+        current_month = today.strftime("%Y-%m")
+        budget_entries = await db.budget.find({"month": {"$regex": f"^{current_month[:7]}"}}, {"_id": 0}).to_list(200)
+        if budget_entries:
+            income = sum(e.get("amount", 0) for e in budget_entries if e.get("type") == "income")
+            expense = sum(e.get("amount", 0) for e in budget_entries if e.get("type") == "expense")
+            balance = income - expense
+            
+            context_parts.append(f"""💰 BUDGET (ce mois):
+- Revenus: {income:.2f}€
+- Dépenses: {expense:.2f}€
+- Solde: {balance:.2f}€""")
+        
+        # 6. Quotes Summary
+        quotes = await db.quotes.find({}, {"_id": 0, "id": 1, "number": 1, "status": 1, "total": 1, "client_name": 1}).to_list(50)
+        if quotes:
+            pending_quotes = [q for q in quotes if q.get("status") in ["pending", "sent", "brouillon"]]
+            accepted_quotes = [q for q in quotes if q.get("status") == "accepted"]
+            
+            context_parts.append(f"""📋 DEVIS:
+- {len(pending_quotes)} devis en attente
+- {len(accepted_quotes)} devis acceptés""")
+            
+            if pending_quotes:
+                quotes_list = "\n".join([f"  • {q.get('number', 'N/A')} - {q.get('client_name', 'N/A')}: {q.get('total', 0):.2f}€" for q in pending_quotes[:5]])
+                context_parts.append(f"Devis en cours:\n{quotes_list}")
+        
+    except Exception as e:
+        logger.error(f"Error fetching context: {str(e)}")
+        context_parts.append(f"(Erreur lors de la récupération de certaines données: {str(e)})")
+    
+    if not context_parts:
+        return "Aucune donnée disponible dans l'application."
+    
+    return "\n\n".join(context_parts)
 
 
 # ==================== HELPERS ====================
