@@ -16,7 +16,7 @@ import io
 
 from .database import db, get_current_user
 
-router = APIRouter(prefix="/documents", tags=["Documents"])
+router = APIRouter(prefix="/file-manager", tags=["File Manager"])
 logger = logging.getLogger(__name__)
 
 # Storage configuration - using Cloudinary or local storage

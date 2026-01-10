@@ -394,36 +394,36 @@ export const aiEnhancedAPI = {
   deleteConversation: (id) => api.delete(`/ai-enhanced/conversations/${id}`),
 };
 
-// Documents Manager API
+// Documents Manager API (File Manager)
 export const documentsAPI = {
   // Folders
-  getFolders: (parentId) => api.get('/documents/folders', { params: { parent_id: parentId } }),
-  getFolderTree: () => api.get('/documents/folders/tree'),
-  createFolder: (data) => api.post('/documents/folders', data),
-  updateFolder: (id, data) => api.put(`/documents/folders/${id}`, data),
-  deleteFolder: (id, force = false) => api.delete(`/documents/folders/${id}`, { params: { force } }),
+  getFolders: (parentId) => api.get('/file-manager/folders', { params: { parent_id: parentId } }),
+  getFolderTree: () => api.get('/file-manager/folders/tree'),
+  createFolder: (data) => api.post('/file-manager/folders', data),
+  updateFolder: (id, data) => api.put(`/file-manager/folders/${id}`, data),
+  deleteFolder: (id, force = false) => api.delete(`/file-manager/folders/${id}`, { params: { force } }),
   
   // Documents
-  getAll: (params) => api.get('/documents', { params }),
-  getStats: () => api.get('/documents/stats'),
-  getOne: (id) => api.get(`/documents/${id}`),
+  getAll: (params) => api.get('/file-manager', { params }),
+  getStats: () => api.get('/file-manager/stats'),
+  getOne: (id) => api.get(`/file-manager/${id}`),
   upload: (file, folderId, tags) => {
     const formData = new FormData();
     formData.append('file', file);
     if (folderId) formData.append('folder_id', folderId);
     if (tags) formData.append('tags', tags);
-    return api.post('/documents/upload', formData, {
+    return api.post('/file-manager/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
-  update: (id, data) => api.put(`/documents/${id}`, data),
-  delete: (id) => api.delete(`/documents/${id}`),
-  bulkDelete: (ids) => api.post('/documents/bulk-delete', ids),
+  update: (id, data) => api.put(`/file-manager/${id}`, data),
+  delete: (id) => api.delete(`/file-manager/${id}`),
+  bulkDelete: (ids) => api.post('/file-manager/bulk-delete', ids),
   move: (docIds, folderId) => {
     const formData = new FormData();
     docIds.forEach(id => formData.append('doc_ids', id));
     if (folderId) formData.append('folder_id', folderId);
-    return api.post('/documents/move', formData, {
+    return api.post('/file-manager/move', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
