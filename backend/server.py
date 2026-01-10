@@ -4059,7 +4059,7 @@ async def get_cashflow_projection(
 PERPLEXITY_API_KEY = os.environ.get('PERPLEXITY_API_KEY', '')
 AI_ENABLED = True  # Toggle to enable/disable AI
 AI_MAX_MESSAGE_LENGTH = 2000  # Max characters per message
-AI_DAILY_LIMIT = 50  # Max calls per user per day
+AI_DAILY_LIMIT = 200  # Max calls per user per day (increased from 50)
 
 class AIMessage(BaseModel):
     role: str  # user or assistant
