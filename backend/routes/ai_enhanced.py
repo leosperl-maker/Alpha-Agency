@@ -60,12 +60,34 @@ async def get_app_context() -> str:
     context_parts = []
     today = datetime.now(timezone.utc)
     
+    def parse_date(date_str):
+        """Safely parse date string to datetime"""
+        if not date_str:
+            return None
+        try:
+            if isinstance(date_str, datetime):
+                if date_str.tzinfo is None:
+                    return date_str.replace(tzinfo=timezone.utc)
+                return date_str
+            # Handle ISO format
+            if "Z" in date_str:
+                date_str = date_str.replace("Z", "+00:00")
+            if "+" not in date_str and "T" in date_str:
+                date_str = date_str + "+00:00"
+            return datetime.fromisoformat(date_str)
+        except:
+            return None
+    
     try:
         # 1. Invoices Summary
         invoices = await db.invoices.find({}, {"_id": 0, "id": 1, "number": 1, "status": 1, "total": 1, "client_name": 1, "due_date": 1}).to_list(100)
         if invoices:
             pending_invoices = [i for i in invoices if i.get("status") in ["pending", "sent"]]
-            overdue_invoices = [i for i in invoices if i.get("status") == "overdue" or (i.get("due_date") and datetime.fromisoformat(i["due_date"].replace("Z", "+00:00")) < today and i.get("status") not in ["paid", "cancelled"])]
+            overdue_invoices = []
+            for i in invoices:
+                due = parse_date(i.get("due_date"))
+                if i.get("status") == "overdue" or (due and due < today and i.get("status") not in ["paid", "cancelled"]):
+                    overdue_invoices.append(i)
             paid_invoices = [i for i in invoices if i.get("status") == "paid"]
             
             total_pending = sum(i.get("total", 0) for i in pending_invoices)
@@ -104,7 +126,11 @@ async def get_app_context() -> str:
         if tasks:
             todo_tasks = [t for t in tasks if t.get("status") == "todo"]
             in_progress = [t for t in tasks if t.get("status") == "in_progress"]
-            overdue_tasks = [t for t in tasks if t.get("due_date") and datetime.fromisoformat(t["due_date"].replace("Z", "+00:00")) < today and t.get("status") not in ["done", "cancelled"]]
+            overdue_tasks = []
+            for t in tasks:
+                due = parse_date(t.get("due_date"))
+                if due and due < today and t.get("status") not in ["done", "cancelled"]:
+                    overdue_tasks.append(t)
             urgent_tasks = [t for t in tasks if t.get("priority") == "urgent" and t.get("status") not in ["done", "cancelled"]]
             
             context_parts.append(f"""✅ TÂCHES:
