@@ -607,24 +607,31 @@ const InvoicesPage = () => {
           <table className="w-full mb-4">
             <thead>
               <tr className="bg-[#1A1A1A] text-white">
-                <th className="text-left p-2 text-[10px]">Description</th>
-                <th className="text-center p-2 text-[10px] w-16">Qté</th>
-                <th className="text-right p-2 text-[10px] w-20">P.U. HT</th>
-                <th className="text-right p-2 text-[10px] w-24">Total HT</th>
+                <th className="text-left p-2 text-[10px]">Désignation</th>
+                <th className="text-center p-2 text-[10px] w-12">Qté</th>
+                <th className="text-right p-2 text-[10px] w-16">P.U. HT</th>
+                <th className="text-center p-2 text-[10px] w-12">Rem.</th>
+                <th className="text-right p-2 text-[10px] w-20">Total HT</th>
               </tr>
             </thead>
             <tbody>
-              {items.filter(i => i.description).map((item, index) => (
+              {items.filter(i => i.title || i.description).map((item, index) => (
                 <tr key={index} className="border-b border-[#E5E5E5]">
-                  <td className="p-2 text-[10px] whitespace-pre-wrap">{item.description}</td>
+                  <td className="p-2 text-[10px]">
+                    {item.title && <div className="font-semibold">{item.title}</div>}
+                    {item.description && <div className="text-[#666666] whitespace-pre-wrap">{item.description}</div>}
+                  </td>
                   <td className="p-2 text-[10px] text-center">{item.quantity}</td>
                   <td className="p-2 text-[10px] text-right">{formatCurrency(item.unit_price)}</td>
-                  <td className="p-2 text-[10px] text-right font-medium">{formatCurrency(item.quantity * item.unit_price)}</td>
+                  <td className="p-2 text-[10px] text-center text-[#CE0202]">
+                    {item.discount > 0 ? `-${item.discount}%` : '-'}
+                  </td>
+                  <td className="p-2 text-[10px] text-right font-medium">{formatCurrency(calculateLineTotal(item))}</td>
                 </tr>
               ))}
-              {items.filter(i => i.description).length === 0 && (
+              {items.filter(i => i.title || i.description).length === 0 && (
                 <tr>
-                  <td colSpan={4} className="p-4 text-center text-[#999999] italic">
+                  <td colSpan={5} className="p-4 text-center text-[#999999] italic">
                     Ajoutez des lignes à votre {documentType}
                   </td>
                 </tr>
