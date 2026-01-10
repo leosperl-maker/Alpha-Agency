@@ -641,11 +641,23 @@ const InvoicesPage = () => {
 
           {/* Totals */}
           <div className="flex justify-end mb-4">
-            <div className="w-48">
+            <div className="w-56">
               <div className="flex justify-between py-1 text-[10px]">
                 <span className="text-[#666666]">Sous-total HT</span>
                 <span>{formatCurrency(calculateSubtotal())}</span>
               </div>
+              {globalDiscount.value > 0 && (
+                <>
+                  <div className="flex justify-between py-1 text-[10px] text-[#CE0202]">
+                    <span>Remise globale {globalDiscount.type === "percent" ? `(${globalDiscount.value}%)` : ''}</span>
+                    <span>-{formatCurrency(calculateGlobalDiscountAmount())}</span>
+                  </div>
+                  <div className="flex justify-between py-1 text-[10px]">
+                    <span className="text-[#666666]">Sous-total après remise</span>
+                    <span>{formatCurrency(calculateSubtotalAfterDiscount())}</span>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between py-1 text-[10px]">
                 <span className="text-[#666666]">TVA (8.5%)</span>
                 <span>{formatCurrency(calculateTVA())}</span>
