@@ -86,6 +86,10 @@ async def execute_action(action_type: str, params: dict, user_id: str) -> dict:
             return await update_contact_action(params)
         elif action_type == "create_quote":
             return await create_quote_action(params, user_id)
+        elif action_type == "get_document":
+            return await get_document_action(params)
+        elif action_type == "list_documents":
+            return await list_documents_action(params)
         else:
             return {"success": False, "error": f"Action inconnue: {action_type}"}
     except Exception as e:
