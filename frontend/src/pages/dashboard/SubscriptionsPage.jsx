@@ -86,10 +86,10 @@ const SubscriptionsPage = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      actif: { class: "bg-green-100 text-green-700", icon: CheckCircle },
-      suspendu: { class: "bg-yellow-100 text-yellow-700", icon: PauseCircle },
-      annulé: { class: "bg-red-100 text-red-700", icon: XCircle },
-      expiré: { class: "bg-gray-100 text-gray-600", icon: XCircle }
+      actif: { class: "bg-green-500/20 text-green-400", icon: CheckCircle },
+      suspendu: { class: "bg-amber-500/20 text-amber-400", icon: PauseCircle },
+      annulé: { class: "bg-red-500/20 text-red-400", icon: XCircle },
+      expiré: { class: "bg-white/10 text-white/60", icon: XCircle }
     };
     return styles[status] || styles.actif;
   };
@@ -119,36 +119,36 @@ const SubscriptionsPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Abonnements</h1>
-          <p className="text-[#666666] text-sm">{subscriptions.length} abonnements au total</p>
+          <h1 className="text-2xl font-bold text-white">Abonnements</h1>
+          <p className="text-white/60 text-sm">{subscriptions.length} abonnements au total</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button 
               data-testid="add-subscription-btn"
               onClick={resetForm}
-              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white"
             >
               <Plus className="w-4 h-4 mr-2" />
               Nouvel abonnement
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-white border-[#E5E5E5]">
+          <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10">
             <DialogHeader>
-              <DialogTitle className="text-[#1A1A1A]">Nouvel abonnement</DialogTitle>
+              <DialogTitle className="text-white">Nouvel abonnement</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Contact *</Label>
+                <Label className="text-white">Contact *</Label>
                 <Select
                   value={formData.contact_id}
                   onValueChange={(value) => setFormData({...formData, contact_id: value})}
                   required
                 >
-                  <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
                     <SelectValue placeholder="Sélectionner un contact" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-[#E5E5E5]">
+                  <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
                     {contacts.map((contact) => (
                       <SelectItem key={contact.id} value={contact.id}>
                         {contact.first_name} {contact.last_name}
@@ -159,7 +159,7 @@ const SubscriptionsPage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Plan *</Label>
+                <Label className="text-white">Plan *</Label>
                 <Select
                   value={formData.plan_name}
                   onValueChange={(value) => {
@@ -171,10 +171,10 @@ const SubscriptionsPage = () => {
                     });
                   }}
                 >
-                  <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-[#E5E5E5]">
+                  <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
                     {plans.map((plan) => (
                       <SelectItem key={plan.name} value={plan.name}>
                         {plan.name} - {plan.amount}€/mois
@@ -186,21 +186,21 @@ const SubscriptionsPage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Montant (€/mois)</Label>
+                  <Label className="text-white">Montant (€/mois)</Label>
                   <Input
                     type="number"
                     value={formData.amount}
                     onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    className="bg-white/5 border-white/10 text-white"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[#1A1A1A]">Date de début</Label>
+                  <Label className="text-white">Date de début</Label>
                   <Input
                     type="date"
                     value={formData.start_date}
                     onChange={(e) => setFormData({...formData, start_date: e.target.value})}
-                    className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]"
+                    className="bg-white/5 border-white/10 text-white"
                   />
                 </div>
               </div>
@@ -209,7 +209,7 @@ const SubscriptionsPage = () => {
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                   Annuler
                 </Button>
-                <Button type="submit" className="bg-[#CE0202] hover:bg-[#B00202] text-white">
+                <Button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white">
                   Créer
                 </Button>
               </div>
@@ -219,17 +219,17 @@ const SubscriptionsPage = () => {
       </div>
 
       {/* MRR Card */}
-      <div className="bg-white rounded-lg border border-[#CE0202]/20 p-6">
+      <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-[#CE0202]/20 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[#666666] text-sm">Revenus Récurrents Mensuels (MRR)</p>
-            <p className="text-4xl font-bold text-[#1A1A1A] font-mono">{mrr.toLocaleString()}€</p>
-            <p className="text-[#666666] text-sm mt-1">
+            <p className="text-white/60 text-sm">Revenus Récurrents Mensuels (MRR)</p>
+            <p className="text-4xl font-bold text-white font-mono">{mrr.toLocaleString()}€</p>
+            <p className="text-white/60 text-sm mt-1">
               {activeCount} abonnement{activeCount > 1 ? 's' : ''} actif{activeCount > 1 ? 's' : ''}
             </p>
           </div>
-          <div className="w-16 h-16 bg-[#CE0202]/10 rounded-full flex items-center justify-center">
-            <CreditCard className="w-8 h-8 text-[#CE0202]" />
+          <div className="w-16 h-16 bg-indigo-600/10 rounded-full flex items-center justify-center">
+            <CreditCard className="w-8 h-8 text-indigo-400" />
           </div>
         </div>
       </div>
@@ -242,9 +242,9 @@ const SubscriptionsPage = () => {
           ))}
         </div>
       ) : subscriptions.length === 0 ? (
-        <div className="bg-white rounded-lg border border-[#E5E5E5] p-12 text-center">
-          <CreditCard className="w-12 h-12 text-[#666666] mx-auto mb-4" />
-          <p className="text-[#666666]">Aucun abonnement créé</p>
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-12 text-center">
+          <CreditCard className="w-12 h-12 text-white/60 mx-auto mb-4" />
+          <p className="text-white/60">Aucun abonnement créé</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -254,22 +254,22 @@ const SubscriptionsPage = () => {
               <div 
                 key={sub.id}
                 data-testid={`subscription-${sub.id}`}
-                className="bg-white rounded-lg border border-[#E5E5E5] p-4 hover:border-[#CE0202]/30 transition-colors"
+                className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-4 hover:border-[#CE0202]/30 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[#CE0202]/10 rounded-lg flex items-center justify-center">
-                      <CreditCard className="w-6 h-6 text-[#CE0202]" />
+                    <div className="w-12 h-12 bg-indigo-600/10 rounded-lg flex items-center justify-center">
+                      <CreditCard className="w-6 h-6 text-indigo-400" />
                     </div>
                     <div>
-                      <h3 className="text-[#1A1A1A] font-semibold">
+                      <h3 className="text-white font-semibold">
                         {sub.plan_name}
                       </h3>
-                      <div className="flex items-center gap-2 text-sm text-[#666666]">
+                      <div className="flex items-center gap-2 text-sm text-white/60">
                         <User className="w-3 h-3" />
                         <span>{getContactName(sub.contact_id)}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-[#666666]">
+                      <div className="flex items-center gap-2 text-xs text-white/60">
                         <Calendar className="w-3 h-3" />
                         <span>
                           Prochaine facturation : {sub.next_billing_date ? new Date(sub.next_billing_date).toLocaleDateString('fr-FR') : 'Non définie'}
@@ -279,8 +279,8 @@ const SubscriptionsPage = () => {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-xl font-bold text-[#1A1A1A] font-mono">
-                        {sub.amount?.toLocaleString()}€<span className="text-sm text-[#666666]">/mois</span>
+                      <p className="text-xl font-bold text-white font-mono">
+                        {sub.amount?.toLocaleString()}€<span className="text-sm text-white/60">/mois</span>
                       </p>
                       <Badge className={statusInfo.class}>
                         {sub.status}
@@ -290,10 +290,10 @@ const SubscriptionsPage = () => {
                       value={sub.status}
                       onValueChange={(value) => handleStatusUpdate(sub.id, value)}
                     >
-                      <SelectTrigger className="w-32 h-8 text-xs bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A]">
+                      <SelectTrigger className="w-32 h-8 text-xs bg-white/5 border-white/10 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-[#E5E5E5]">
+                      <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
                         <SelectItem value="actif">Actif</SelectItem>
                         <SelectItem value="suspendu">Suspendu</SelectItem>
                         <SelectItem value="annulé">Annulé</SelectItem>

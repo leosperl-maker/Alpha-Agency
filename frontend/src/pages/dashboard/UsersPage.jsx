@@ -228,14 +228,14 @@ export default function UsersPage() {
   const getRoleBadge = (role) => {
     if (role === "super_admin") {
       return (
-        <Badge className="bg-[#CE0202] text-white">
+        <Badge className="bg-indigo-600 text-white">
           <ShieldCheck className="w-3 h-3 mr-1" />
           Super Admin
         </Badge>
       );
     }
     return (
-      <Badge variant="secondary" className="bg-[#E5E5E5] text-[#666666]">
+      <Badge variant="secondary" className="bg-[#E5E5E5] text-white/60">
         <Shield className="w-3 h-3 mr-1" />
         Admin
       </Badge>
@@ -253,15 +253,15 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 bg-[#F8F8F8]">
+    <div className="p-4 sm:p-6 space-y-6 bg-white/5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] flex items-center gap-2">
-            <UserCog className="w-7 h-7 text-[#CE0202]" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+            <UserCog className="w-7 h-7 text-indigo-400" />
             Gestion des utilisateurs
           </h1>
-          <p className="text-[#666666] mt-1">
+          <p className="text-white/60 mt-1">
             Gérez les accès administrateurs de votre plateforme
           </p>
         </div>
@@ -269,14 +269,14 @@ export default function UsersPage() {
           <Button
             onClick={() => setShowPasswordDialog(true)}
             variant="outline"
-            className="border-[#CE0202] text-[#CE0202] hover:bg-[#CE0202]/10"
+            className="border-[#CE0202] text-indigo-400 hover:bg-indigo-600/10"
           >
             <Key className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Mon mot de passe</span>
           </Button>
           <Button
             onClick={() => setShowAddDialog(true)}
-            className="bg-[#CE0202] hover:bg-[#CE0202]/90 text-white"
+            className="bg-indigo-600 hover:bg-indigo-600/90 text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Nouvel admin</span>
@@ -286,45 +286,45 @@ export default function UsersPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <Card className="bg-white border border-[#E5E5E5]">
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#CE0202]/10 rounded-lg flex items-center justify-center">
-                <Users className="w-5 h-5 text-[#CE0202]" />
+              <div className="w-10 h-10 bg-indigo-600/10 rounded-lg flex items-center justify-center">
+                <Users className="w-5 h-5 text-indigo-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#1A1A1A]">{users.length}</p>
-                <p className="text-sm text-[#666666]">Total utilisateurs</p>
+                <p className="text-2xl font-bold text-white">{users.length}</p>
+                <p className="text-sm text-white/60">Total utilisateurs</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white border border-[#E5E5E5]">
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                 <ShieldCheck className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#1A1A1A]">
+                <p className="text-2xl font-bold text-white">
                   {users.filter((u) => u.role === "super_admin").length}
                 </p>
-                <p className="text-sm text-[#666666]">Super admins</p>
+                <p className="text-sm text-white/60">Super admins</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white border border-[#E5E5E5] col-span-2 sm:col-span-1">
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 col-span-2 sm:col-span-1">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Shield className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-[#1A1A1A]">
+                <p className="text-2xl font-bold text-white">
                   {users.filter((u) => u.role === "admin").length}
                 </p>
-                <p className="text-sm text-[#666666]">Admins</p>
+                <p className="text-sm text-white/60">Admins</p>
               </div>
             </div>
           </CardContent>
@@ -332,29 +332,29 @@ export default function UsersPage() {
       </div>
 
       {/* Users Table */}
-      <Card className="bg-white border border-[#E5E5E5]">
-        <CardHeader className="border-b border-[#E5E5E5]">
-          <CardTitle className="text-[#1A1A1A]">Liste des utilisateurs</CardTitle>
+      <Card className="bg-white/5 backdrop-blur-xl border border-white/10">
+        <CardHeader className="border-b border-white/10">
+          <CardTitle className="text-white">Liste des utilisateurs</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center p-8">
-              <Loader2 className="w-6 h-6 animate-spin text-[#CE0202]" />
+              <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
             </div>
           ) : users.length === 0 ? (
-            <div className="text-center p-8 text-[#666666]">
+            <div className="text-center p-8 text-white/60">
               Aucun utilisateur trouvé
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-[#F8F8F8]">
-                    <TableHead className="text-[#666666]">Nom</TableHead>
-                    <TableHead className="text-[#666666]">Email</TableHead>
-                    <TableHead className="text-[#666666]">Rôle</TableHead>
-                    <TableHead className="text-[#666666] hidden sm:table-cell">Créé le</TableHead>
-                    <TableHead className="text-[#666666] text-right">Actions</TableHead>
+                  <TableRow className="bg-white/5">
+                    <TableHead className="text-white/60">Nom</TableHead>
+                    <TableHead className="text-white/60">Email</TableHead>
+                    <TableHead className="text-white/60">Rôle</TableHead>
+                    <TableHead className="text-white/60 hidden sm:table-cell">Créé le</TableHead>
+                    <TableHead className="text-white/60 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -363,12 +363,12 @@ export default function UsersPage() {
                       key={user.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="border-b border-[#E5E5E5] hover:bg-[#F8F8F8]/50"
+                      className="border-b border-white/10 hover:bg-white/5/50"
                     >
-                      <TableCell className="font-medium text-[#1A1A1A]">
+                      <TableCell className="font-medium text-white">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-[#CE0202]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-[#CE0202] font-bold text-sm">
+                          <div className="w-8 h-8 bg-indigo-600/10 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-indigo-400 font-bold text-sm">
                               {user.full_name?.charAt(0) || "?"}
                             </span>
                           </div>
@@ -377,13 +377,13 @@ export default function UsersPage() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-[#666666]">
+                      <TableCell className="text-white/60">
                         <span className="truncate max-w-[120px] sm:max-w-none block">
                           {user.email}
                         </span>
                       </TableCell>
                       <TableCell>{getRoleBadge(user.role)}</TableCell>
-                      <TableCell className="text-[#666666] hidden sm:table-cell">
+                      <TableCell className="text-white/60 hidden sm:table-cell">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {formatDate(user.created_at)}
@@ -395,7 +395,7 @@ export default function UsersPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => openEditDialog(user)}
-                            className="text-[#666666] hover:text-[#1A1A1A]"
+                            className="text-white/60 hover:text-white"
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -422,40 +422,40 @@ export default function UsersPage() {
 
       {/* Add User Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="bg-white sm:max-w-[425px]">
+        <DialogContent className="bg-white/5 backdrop-blur-xl sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A] flex items-center gap-2">
-              <Plus className="w-5 h-5 text-[#CE0202]" />
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Plus className="w-5 h-5 text-indigo-400" />
               Ajouter un administrateur
             </DialogTitle>
-            <DialogDescription className="text-[#666666]">
+            <DialogDescription className="text-white/60">
               Créez un nouveau compte administrateur pour accéder au dashboard.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAddUser} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Nom complet *</Label>
+              <Label className="text-white">Nom complet *</Label>
               <Input
                 value={newUser.full_name}
                 onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
                 placeholder="Jean Dupont"
                 required
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Email *</Label>
+              <Label className="text-white">Email *</Label>
               <Input
                 type="email"
                 value={newUser.email}
                 onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                 placeholder="jean@example.com"
                 required
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Mot de passe *</Label>
+              <Label className="text-white">Mot de passe *</Label>
               <Input
                 type="password"
                 value={newUser.password}
@@ -463,19 +463,19 @@ export default function UsersPage() {
                 placeholder="Minimum 8 caractères"
                 required
                 minLength={8}
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Rôle</Label>
+              <Label className="text-white">Rôle</Label>
               <Select
                 value={newUser.role}
                 onValueChange={(value) => setNewUser({ ...newUser, role: value })}
               >
-                <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="super_admin">Super Admin</SelectItem>
                 </SelectContent>
@@ -486,14 +486,14 @@ export default function UsersPage() {
                 type="button"
                 variant="outline"
                 onClick={() => setShowAddDialog(false)}
-                className="border-[#E5E5E5]"
+                className="border-white/10"
               >
                 Annuler
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-[#CE0202] hover:bg-[#CE0202]/90"
+                className="bg-indigo-600 hover:bg-indigo-600/90"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Créer
@@ -505,44 +505,44 @@ export default function UsersPage() {
 
       {/* Edit User Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="bg-white sm:max-w-[425px]">
+        <DialogContent className="bg-white/5 backdrop-blur-xl sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A] flex items-center gap-2">
-              <Edit className="w-5 h-5 text-[#CE0202]" />
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Edit className="w-5 h-5 text-indigo-400" />
               Modifier l'utilisateur
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEditUser} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Nom complet</Label>
+              <Label className="text-white">Nom complet</Label>
               <Input
                 value={editUser.full_name}
                 onChange={(e) => setEditUser({ ...editUser, full_name: e.target.value })}
                 placeholder="Jean Dupont"
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Email</Label>
+              <Label className="text-white">Email</Label>
               <Input
                 type="email"
                 value={editUser.email}
                 onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
                 placeholder="jean@example.com"
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             {selectedUser?.role !== "super_admin" && (
               <div className="space-y-2">
-                <Label className="text-[#1A1A1A]">Rôle</Label>
+                <Label className="text-white">Rôle</Label>
                 <Select
                   value={editUser.role}
                   onValueChange={(value) => setEditUser({ ...editUser, role: value })}
                 >
-                  <SelectTrigger className="bg-[#F8F8F8] border-[#E5E5E5]">
+                  <SelectTrigger className="bg-white/5 border-white/10">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white">
+                  <SelectContent className="bg-white/5 backdrop-blur-xl">
                     <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="super_admin">Super Admin</SelectItem>
                   </SelectContent>
@@ -554,14 +554,14 @@ export default function UsersPage() {
                 type="button"
                 variant="outline"
                 onClick={() => setShowEditDialog(false)}
-                className="border-[#E5E5E5]"
+                className="border-white/10"
               >
                 Annuler
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-[#CE0202] hover:bg-[#CE0202]/90"
+                className="bg-indigo-600 hover:bg-indigo-600/90"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Enregistrer
@@ -573,19 +573,19 @@ export default function UsersPage() {
 
       {/* Delete User Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-white">
+        <AlertDialogContent className="bg-white/5 backdrop-blur-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#1A1A1A]">
+            <AlertDialogTitle className="text-white">
               Supprimer cet utilisateur ?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#666666]">
+            <AlertDialogDescription className="text-white/60">
               Cette action est irréversible. L'utilisateur{" "}
               <strong>{selectedUser?.full_name}</strong> ({selectedUser?.email}) ne pourra
               plus accéder au dashboard.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-[#E5E5E5]">Annuler</AlertDialogCancel>
+            <AlertDialogCancel className="border-white/10">Annuler</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteUser}
               disabled={submitting}
@@ -600,19 +600,19 @@ export default function UsersPage() {
 
       {/* Change Password Dialog */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent className="bg-white sm:max-w-[425px]">
+        <DialogContent className="bg-white/5 backdrop-blur-xl sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-[#1A1A1A] flex items-center gap-2">
-              <Key className="w-5 h-5 text-[#CE0202]" />
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Key className="w-5 h-5 text-indigo-400" />
               Changer mon mot de passe
             </DialogTitle>
-            <DialogDescription className="text-[#666666]">
+            <DialogDescription className="text-white/60">
               Entrez votre mot de passe actuel et le nouveau mot de passe.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Mot de passe actuel *</Label>
+              <Label className="text-white">Mot de passe actuel *</Label>
               <Input
                 type="password"
                 value={passwordForm.current_password}
@@ -620,11 +620,11 @@ export default function UsersPage() {
                   setPasswordForm({ ...passwordForm, current_password: e.target.value })
                 }
                 required
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Nouveau mot de passe *</Label>
+              <Label className="text-white">Nouveau mot de passe *</Label>
               <Input
                 type="password"
                 value={passwordForm.new_password}
@@ -634,11 +634,11 @@ export default function UsersPage() {
                 required
                 minLength={8}
                 placeholder="Minimum 8 caractères"
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-[#1A1A1A]">Confirmer le nouveau mot de passe *</Label>
+              <Label className="text-white">Confirmer le nouveau mot de passe *</Label>
               <Input
                 type="password"
                 value={passwordForm.confirm_password}
@@ -647,7 +647,7 @@ export default function UsersPage() {
                 }
                 required
                 minLength={8}
-                className="bg-[#F8F8F8] border-[#E5E5E5]"
+                className="bg-white/5 border-white/10"
               />
             </div>
             <DialogFooter>
@@ -655,14 +655,14 @@ export default function UsersPage() {
                 type="button"
                 variant="outline"
                 onClick={() => setShowPasswordDialog(false)}
-                className="border-[#E5E5E5]"
+                className="border-white/10"
               >
                 Annuler
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-[#CE0202] hover:bg-[#CE0202]/90"
+                className="bg-indigo-600 hover:bg-indigo-600/90"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Modifier

@@ -44,10 +44,10 @@ const PlatformIcon = ({ platform, className = "w-4 h-4" }) => {
 // Status badge component
 const StatusBadge = ({ status }) => {
   const config = {
-    scheduled: { label: "Programmé", color: "bg-blue-100 text-blue-700" },
-    published: { label: "Publié", color: "bg-green-100 text-green-700" },
-    failed: { label: "Échec", color: "bg-red-100 text-red-700" },
-    draft: { label: "Brouillon", color: "bg-gray-100 text-gray-700" },
+    scheduled: { label: "Programmé", color: "bg-blue-500/20 text-blue-400" },
+    published: { label: "Publié", color: "bg-green-500/20 text-green-400" },
+    failed: { label: "Échec", color: "bg-red-500/20 text-red-400" },
+    draft: { label: "Brouillon", color: "bg-white/10 text-white/80" },
   };
   const { label, color } = config[status] || config.draft;
   return <Badge className={`${color} border-none text-xs`}>{label}</Badge>;
@@ -56,10 +56,10 @@ const StatusBadge = ({ status }) => {
 // Priority badge component
 const PriorityBadge = ({ priority }) => {
   const config = {
-    low: { label: "Basse", color: "bg-gray-100 text-gray-600" },
-    normal: { label: "Normal", color: "bg-blue-100 text-blue-700" },
+    low: { label: "Basse", color: "bg-white/10 text-white/60" },
+    normal: { label: "Normal", color: "bg-blue-500/20 text-blue-400" },
     high: { label: "Haute", color: "bg-orange-100 text-orange-700" },
-    urgent: { label: "Urgent", color: "bg-red-100 text-red-700" },
+    urgent: { label: "Urgent", color: "bg-red-500/20 text-red-400" },
   };
   const { label, color } = config[priority] || config.normal;
   return <Badge className={`${color} border-none text-xs`}>{label}</Badge>;
@@ -222,7 +222,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
 
   // Facebook Preview Component
   const FacebookPreview = () => (
-    <div className="bg-white rounded-lg shadow-sm border border-[#DADDE1] overflow-hidden">
+    <div className="bg-white/5 backdrop-blur-xl rounded-lg shadow-sm border border-[#DADDE1] overflow-hidden">
       {/* Facebook Header */}
       <div className="p-3 flex items-start gap-3">
         <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center flex-shrink-0">
@@ -297,12 +297,12 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
 
   // Instagram Preview Component
   const InstagramPreview = () => (
-    <div className="bg-white rounded-lg shadow-sm border border-[#DBDBDB] overflow-hidden">
+    <div className="bg-white/5 backdrop-blur-xl rounded-lg shadow-sm border border-[#DBDBDB] overflow-hidden">
       {/* Instagram Header */}
       <div className="px-3 py-2.5 flex items-center justify-between border-b border-[#EFEFEF]">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] p-[2px]">
-            <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
+            <div className="w-full h-full rounded-full bg-white/5 backdrop-blur-xl flex items-center justify-center">
               <span className="text-[10px] font-bold text-[#262626]">A</span>
             </div>
           </div>
@@ -360,11 +360,11 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white max-w-6xl h-[90vh] p-0 gap-0 overflow-hidden">
+      <DialogContent className="bg-white/5 backdrop-blur-xl max-w-6xl h-[90vh] p-0 gap-0 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E5E5]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
           <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-[#1A1A1A]">
+            <h2 className="text-xl font-semibold text-white">
               {editingPost ? "Modifier la publication" : "Créer une publication"}
             </h2>
             <Badge variant="outline" className="text-[#FF6B35] border-[#FF6B35]">
@@ -378,13 +378,13 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
 
         <div className="flex flex-1 overflow-hidden">
           {/* Left Column - Account Selection */}
-          <div className="w-64 border-r border-[#E5E5E5] bg-[#FAFAFA] p-4 flex flex-col">
+          <div className="w-64 border-r border-white/10 bg-[#FAFAFA] p-4 flex flex-col">
             <div className="relative mb-4">
               <Input 
                 placeholder="Chercher un compte" 
-                className="bg-white border-[#E5E5E5] pl-9"
+                className="bg-white/5 backdrop-blur-xl border-white/10 pl-9"
               />
-              <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
@@ -400,7 +400,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                   }
                 }}
               />
-              <span className="text-sm text-[#666666]">Sélectionner tout</span>
+              <span className="text-sm text-white/60">Sélectionner tout</span>
             </label>
 
             <div className="space-y-2 flex-1">
@@ -408,8 +408,8 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
               <div 
                 className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
                   selectedAccounts.includes("facebook") 
-                    ? "bg-white border-2 border-[#FF6B35]" 
-                    : "bg-white border border-[#E5E5E5] hover:border-[#CCCCCC]"
+                    ? "bg-white/5 backdrop-blur-xl border-2 border-[#FF6B35]" 
+                    : "bg-white/5 backdrop-blur-xl border border-white/10 hover:border-[#CCCCCC]"
                 }`}
                 onClick={() => toggleAccount("facebook")}
               >
@@ -418,8 +418,8 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                     <Facebook className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">Alpha Agency</p>
-                    <p className="text-xs text-[#666666]">Facebook Page</p>
+                    <p className="text-sm font-medium text-white">Alpha Agency</p>
+                    <p className="text-xs text-white/60">Facebook Page</p>
                   </div>
                 </div>
                 {selectedAccounts.includes("facebook") && (
@@ -436,8 +436,8 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
               <div 
                 className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
                   selectedAccounts.includes("instagram") 
-                    ? "bg-white border-2 border-[#FF6B35]" 
-                    : "bg-white border border-[#E5E5E5] hover:border-[#CCCCCC]"
+                    ? "bg-white/5 backdrop-blur-xl border-2 border-[#FF6B35]" 
+                    : "bg-white/5 backdrop-blur-xl border border-white/10 hover:border-[#CCCCCC]"
                 }`}
                 onClick={() => toggleAccount("instagram")}
               >
@@ -446,8 +446,8 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                     <Instagram className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-[#1A1A1A]">Alpha Agency</p>
-                    <p className="text-xs text-[#666666]">Instagram Business</p>
+                    <p className="text-sm font-medium text-white">Alpha Agency</p>
+                    <p className="text-xs text-white/60">Instagram Business</p>
                   </div>
                 </div>
                 {selectedAccounts.includes("instagram") && (
@@ -472,7 +472,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
           <div className="flex-1 p-6 overflow-y-auto">
             <div className="max-w-2xl mx-auto space-y-6">
               {/* Publication Content Card */}
-              <Card className="border-[#E5E5E5]">
+              <Card className="border-white/10">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base font-medium flex items-center gap-2">
                     <Edit className="w-4 h-4" />
@@ -486,39 +486,39 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Rédigez une description avec du texte, des liens..."
                     rows={6}
-                    className="bg-white border-[#E5E5E5] resize-none text-base"
+                    className="bg-white/5 backdrop-blur-xl border-white/10 resize-none text-base"
                   />
                   
                   {/* Toolbar */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" className="text-[#666666] hover:text-[#FF6B35]">
+                      <Button variant="ghost" size="sm" className="text-white/60 hover:text-[#FF6B35]">
                         <Smile className="w-5 h-5" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-[#666666] hover:text-[#FF6B35]">
+                      <Button variant="ghost" size="sm" className="text-white/60 hover:text-[#FF6B35]">
                         <MapPin className="w-5 h-5" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-[#666666] hover:text-[#FF6B35]">
+                      <Button variant="ghost" size="sm" className="text-white/60 hover:text-[#FF6B35]">
                         <Hash className="w-5 h-5" />
                       </Button>
                     </div>
                   </div>
 
                   {/* Draft Toggle */}
-                  <div className="flex items-center justify-between pt-2 border-t border-[#E5E5E5]">
+                  <div className="flex items-center justify-between pt-2 border-t border-white/10">
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={isDraft}
                         onCheckedChange={setIsDraft}
                       />
-                      <span className="text-sm text-[#666666]">Ceci est un brouillon</span>
+                      <span className="text-sm text-white/60">Ceci est un brouillon</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Media Upload Card */}
-              <Card className="border-[#E5E5E5]">
+              <Card className="border-white/10">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base font-medium flex items-center gap-2">
                     <Image className="w-4 h-4" />
@@ -530,7 +530,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                   {mediaUrls.length > 0 && (
                     <div className="grid grid-cols-4 gap-3 mb-4">
                       {mediaUrls.map((url, idx) => (
-                        <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden bg-[#F8F8F8]">
+                        <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden bg-white/5">
                           <img src={url} alt={`Media ${idx + 1}`} className="w-full h-full object-cover" />
                           <button
                             onClick={() => removeMedia(idx)}
@@ -549,26 +549,26 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    className="border-2 border-dashed border-[#E5E5E5] rounded-lg p-8 text-center transition-colors"
+                    className="border-2 border-dashed border-white/10 rounded-lg p-8 text-center transition-colors"
                   >
                     {uploading ? (
                       <div className="flex flex-col items-center">
                         <Loader2 className="w-10 h-10 text-[#FF6B35] animate-spin mb-3" />
-                        <p className="text-[#666666]">Upload en cours...</p>
+                        <p className="text-white/60">Upload en cours...</p>
                       </div>
                     ) : (
                       <>
                         <Upload className="w-10 h-10 text-[#CCCCCC] mx-auto mb-3" />
-                        <p className="text-[#666666] mb-4">Glissez et déposez les fichiers n'importe où</p>
+                        <p className="text-white/60 mb-4">Glissez et déposez les fichiers n'importe où</p>
                         
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="border-[#E5E5E5]">
+                            <Button variant="outline" className="border-white/10">
                               Parcourir les fichiers
                               <ChevronDown className="w-4 h-4 ml-2" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent className="bg-white border-[#E5E5E5]">
+                          <DropdownMenuContent className="bg-white/5 backdrop-blur-xl border-white/10">
                             <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
                               <Upload className="w-4 h-4 mr-2" />
                               Choisir depuis l'ordinateur
@@ -601,7 +601,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
 
               {/* Schedule Card */}
               {!isDraft && (
-                <Card className="border-[#E5E5E5]">
+                <Card className="border-white/10">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base font-medium flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
@@ -613,7 +613,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                       type="datetime-local"
                       value={scheduledAt}
                       onChange={(e) => setScheduledAt(e.target.value)}
-                      className="bg-white border-[#E5E5E5] w-full"
+                      className="bg-white/5 backdrop-blur-xl border-white/10 w-full"
                     />
                   </CardContent>
                 </Card>
@@ -622,11 +622,11 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
           </div>
 
           {/* Right Column - Preview */}
-          <div className="w-96 border-l border-[#E5E5E5] bg-[#F0F2F5] p-4 overflow-y-auto">
+          <div className="w-96 border-l border-white/10 bg-[#F0F2F5] p-4 overflow-y-auto">
             {/* Preview Header with Selector */}
             <div className="flex items-center justify-between mb-4">
               <Select value={previewPlatform} onValueChange={setPreviewPlatform}>
-                <SelectTrigger className="w-[200px] bg-white border-[#E5E5E5]">
+                <SelectTrigger className="w-[200px] bg-white/5 backdrop-blur-xl border-white/10">
                   <SelectValue>
                     <div className="flex items-center gap-2">
                       {previewPlatform === "facebook" ? (
@@ -643,7 +643,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                     </div>
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent className="bg-white/5 backdrop-blur-xl">
                   <SelectItem value="facebook">
                     <div className="flex items-center gap-2">
                       <Facebook className="w-4 h-4 text-[#1877F2]" />
@@ -660,18 +660,18 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
               </Select>
               
               {/* Device Toggle */}
-              <div className="flex items-center gap-1 bg-white rounded-lg border border-[#E5E5E5] p-0.5">
+              <div className="flex items-center gap-1 bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-0.5">
                 <button
                   onClick={() => setPreviewDevice("desktop")}
                   className={`p-1.5 rounded ${previewDevice === "desktop" ? "bg-[#F0F2F5]" : ""}`}
                 >
-                  <Monitor className={`w-4 h-4 ${previewDevice === "desktop" ? "text-[#FF6B35]" : "text-[#666666]"}`} />
+                  <Monitor className={`w-4 h-4 ${previewDevice === "desktop" ? "text-[#FF6B35]" : "text-white/60"}`} />
                 </button>
                 <button
                   onClick={() => setPreviewDevice("mobile")}
                   className={`p-1.5 rounded ${previewDevice === "mobile" ? "bg-[#F0F2F5]" : ""}`}
                 >
-                  <Smartphone className={`w-4 h-4 ${previewDevice === "mobile" ? "text-[#FF6B35]" : "text-[#666666]"}`} />
+                  <Smartphone className={`w-4 h-4 ${previewDevice === "mobile" ? "text-[#FF6B35]" : "text-white/60"}`} />
                 </button>
               </div>
             </div>
@@ -679,11 +679,11 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
             {/* Preview Content */}
             <div className={previewDevice === "mobile" ? "max-w-[320px] mx-auto" : ""}>
               {selectedAccounts.length === 0 && !content ? (
-                <div className="bg-white rounded-lg p-6 text-center shadow-sm">
-                  <p className="text-[#666666] text-sm mb-4">
+                <div className="bg-white/5 backdrop-blur-xl rounded-lg p-6 text-center shadow-sm">
+                  <p className="text-white/60 text-sm mb-4">
                     Sélectionnez un profil et ajoutez du contenu pour voir l'aperçu.
                   </p>
-                  <div className="bg-[#F8F8F8] rounded-lg p-6">
+                  <div className="bg-white/5 rounded-lg p-6">
                     <div className="w-10 h-10 rounded-full bg-[#E5E5E5] mx-auto mb-3" />
                     <div className="h-2 bg-[#E5E5E5] rounded w-24 mx-auto mb-2" />
                     <div className="h-16 bg-[#E5E5E5] rounded mx-auto mb-2" />
@@ -700,7 +700,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#E5E5E5] bg-white">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/10 bg-white/5 backdrop-blur-xl">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Annuler
           </Button>
@@ -1051,11 +1051,11 @@ const SocialMediaPage = () => {
       days.push(
         <div 
           key={day} 
-          className={`h-16 sm:h-28 border border-[#E5E5E5] p-1 sm:p-2 overflow-hidden transition-colors hover:bg-[#FAFAFA] ${
-            isToday ? 'bg-orange-50 border-[#FF6B35]' : 'bg-white'
+          className={`h-16 sm:h-28 border border-white/10 p-1 sm:p-2 overflow-hidden transition-colors hover:bg-[#FAFAFA] ${
+            isToday ? 'bg-orange-50 border-[#FF6B35]' : 'bg-white/5 backdrop-blur-xl'
           }`}
         >
-          <div className={`text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 ${isToday ? 'text-[#FF6B35]' : 'text-[#666666]'}`}>
+          <div className={`text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 ${isToday ? 'text-[#FF6B35]' : 'text-white/60'}`}>
             {day}
           </div>
           {/* Desktop: show post details */}
@@ -1073,7 +1073,7 @@ const SocialMediaPage = () => {
               </div>
             ))}
             {dayPosts.length > 2 && (
-              <div className="text-xs text-[#666666]">+{dayPosts.length - 2} autre(s)</div>
+              <div className="text-xs text-white/60">+{dayPosts.length - 2} autre(s)</div>
             )}
           </div>
           {/* Mobile: just show dot indicator */}
@@ -1087,19 +1087,19 @@ const SocialMediaPage = () => {
     }
     
     return (
-      <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
+      <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden">
         {/* Days header - Desktop */}
-        <div className="hidden sm:grid grid-cols-7 bg-[#FAFAFA] border-b border-[#E5E5E5]">
+        <div className="hidden sm:grid grid-cols-7 bg-[#FAFAFA] border-b border-white/10">
           {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => (
-            <div key={d} className="text-center py-3 text-sm font-medium text-[#666666]">
+            <div key={d} className="text-center py-3 text-sm font-medium text-white/60">
               {d}
             </div>
           ))}
         </div>
         {/* Days header - Mobile */}
-        <div className="sm:hidden grid grid-cols-7 bg-[#FAFAFA] border-b border-[#E5E5E5]">
+        <div className="sm:hidden grid grid-cols-7 bg-[#FAFAFA] border-b border-white/10">
           {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
-            <div key={i} className="text-center py-2 text-xs font-medium text-[#666666]">
+            <div key={i} className="text-center py-2 text-xs font-medium text-white/60">
               {d}
             </div>
           ))}
@@ -1127,10 +1127,10 @@ const SocialMediaPage = () => {
 
     if (Object.keys(groupedPosts).length === 0) {
       return (
-        <div className="bg-white rounded-xl border border-[#E5E5E5] p-12 text-center">
+        <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-12 text-center">
           <Calendar className="w-12 h-12 mx-auto mb-4 text-[#E5E5E5]" />
-          <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Aucune publication programmée</h3>
-          <p className="text-[#666666] mb-4">Commencez par créer votre premier post</p>
+          <h3 className="text-lg font-medium text-white mb-2">Aucune publication programmée</h3>
+          <p className="text-white/60 mb-4">Commencez par créer votre premier post</p>
           <Button onClick={openNewPost} className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white">
             <Plus className="w-4 h-4 mr-2" />
             Créer un post
@@ -1146,22 +1146,22 @@ const SocialMediaPage = () => {
           const isToday = new Date().toISOString().startsWith(date);
           
           return (
-            <div key={date} className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
+            <div key={date} className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden">
               {/* Date Header */}
-              <div className={`px-4 py-3 border-b border-[#E5E5E5] flex items-center gap-3 ${
+              <div className={`px-4 py-3 border-b border-white/10 flex items-center gap-3 ${
                 isToday ? 'bg-orange-50' : 'bg-[#FAFAFA]'
               }`}>
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold ${
-                  isToday ? 'bg-[#FF6B35] text-white' : 'bg-white text-[#1A1A1A]'
+                  isToday ? 'bg-[#FF6B35] text-white' : 'bg-white/5 backdrop-blur-xl text-white'
                 }`}>
                   {dateObj.getDate()}
                 </div>
                 <div>
-                  <p className="font-medium text-[#1A1A1A] capitalize">
+                  <p className="font-medium text-white capitalize">
                     {dateObj.toLocaleDateString('fr-FR', { weekday: 'long' })}
                     {isToday && <Badge className="ml-2 bg-[#FF6B35] text-white text-xs">Aujourd'hui</Badge>}
                   </p>
-                  <p className="text-xs text-[#666666]">
+                  <p className="text-xs text-white/60">
                     {dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
                 </div>
@@ -1174,7 +1174,7 @@ const SocialMediaPage = () => {
                     <div className="flex items-start gap-4">
                       {/* Time & Platforms */}
                       <div className="text-center w-16 flex-shrink-0">
-                        <p className="text-lg font-bold text-[#1A1A1A]">
+                        <p className="text-lg font-bold text-white">
                           {new Date(post.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                         <div className="flex gap-1 justify-center mt-1">
@@ -1186,7 +1186,7 @@ const SocialMediaPage = () => {
                       
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-[#1A1A1A] line-clamp-2">{post.content}</p>
+                        <p className="text-sm text-white line-clamp-2">{post.content}</p>
                         <div className="flex items-center gap-2 mt-2">
                           <StatusBadge status={post.status} />
                           {post.media_urls?.length > 0 && (
@@ -1200,7 +1200,7 @@ const SocialMediaPage = () => {
                       
                       {/* Media Preview */}
                       {post.media_urls?.length > 0 && (
-                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-[#F8F8F8] flex-shrink-0">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-white/5 flex-shrink-0">
                           <img src={post.media_urls[0]} alt="" className="w-full h-full object-cover" />
                         </div>
                       )}
@@ -1212,7 +1212,7 @@ const SocialMediaPage = () => {
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white">
+                        <DropdownMenuContent align="end" className="bg-white/5 backdrop-blur-xl">
                           <DropdownMenuItem onClick={() => openEditPost(post)}>
                             <Edit className="w-4 h-4 mr-2" />
                             Modifier
@@ -1252,8 +1252,8 @@ const SocialMediaPage = () => {
       {/* Header - Agorapulse Style */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#1A1A1A]">Social Media</h1>
-          <p className="text-[#666666] text-xs sm:text-sm">Gérez vos réseaux sociaux</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Social Media</h1>
+          <p className="text-white/60 text-xs sm:text-sm">Gérez vos réseaux sociaux</p>
         </div>
         <Button onClick={openNewPost} className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
@@ -1264,67 +1264,67 @@ const SocialMediaPage = () => {
       {/* Stats - Agorapulse Orange Theme */}
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardContent className="p-3">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-blue-100 flex-shrink-0">
                   <Clock className="w-4 h-4 text-blue-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.posts?.scheduled || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-[#666666]">Programmés</p>
+                  <p className="text-lg sm:text-2xl font-bold text-white">{stats.posts?.scheduled || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-white/60">Programmés</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardContent className="p-3">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-green-100 flex-shrink-0">
                   <CheckCircle className="w-4 h-4 text-green-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.posts?.published || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-[#666666]">Publiés</p>
+                  <p className="text-lg sm:text-2xl font-bold text-white">{stats.posts?.published || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-white/60">Publiés</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardContent className="p-3">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-gray-100 flex-shrink-0">
-                  <FileText className="w-4 h-4 text-gray-600" />
+                <div className="p-1.5 rounded-lg bg-white/10 flex-shrink-0">
+                  <FileText className="w-4 h-4 text-white/60" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.posts?.drafts || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-[#666666]">Brouillons</p>
+                  <p className="text-lg sm:text-2xl font-bold text-white">{stats.posts?.drafts || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-white/60">Brouillons</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-white border-[#E5E5E5]">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
             <CardContent className="p-3">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-orange-100 flex-shrink-0">
                   <Inbox className="w-4 h-4 text-orange-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.inbox?.unread || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-[#666666]">Non lus</p>
+                  <p className="text-lg sm:text-2xl font-bold text-white">{stats.inbox?.unread || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-white/60">Non lus</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-white border-[#E5E5E5] col-span-2 sm:col-span-1">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10 col-span-2 sm:col-span-1">
             <CardContent className="p-3">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-purple-100 flex-shrink-0">
                   <MessageSquare className="w-4 h-4 text-purple-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A]">{stats.inbox?.pending_reply || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-[#666666]">À répondre</p>
+                  <p className="text-lg sm:text-2xl font-bold text-white">{stats.inbox?.pending_reply || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-white/60">À répondre</p>
                 </div>
               </div>
             </CardContent>
@@ -1334,7 +1334,7 @@ const SocialMediaPage = () => {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="bg-white border border-[#E5E5E5] p-1 rounded-xl w-full sm:w-auto grid grid-cols-3 sm:flex">
+        <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-1 rounded-xl w-full sm:w-auto grid grid-cols-3 sm:flex">
           <TabsTrigger value="calendar" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg text-xs sm:text-sm">
             <Calendar className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
             <span className="hidden sm:inline">Calendrier</span>
@@ -1386,20 +1386,20 @@ const SocialMediaPage = () => {
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
-              <span className="text-lg font-semibold text-[#1A1A1A] ml-2">
+              <span className="text-lg font-semibold text-white ml-2">
                 {monthNames[currentMonth - 1]} {currentYear}
               </span>
             </div>
             
             {/* View Mode Toggle */}
-            <div className="flex items-center gap-1 bg-[#F8F8F8] rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setCalendarViewMode("list")}
                 className={calendarViewMode === "list" 
-                  ? "bg-white shadow-sm text-[#FF6B35]" 
-                  : "text-[#666666]"}
+                  ? "bg-white/5 backdrop-blur-xl shadow-sm text-[#FF6B35]" 
+                  : "text-white/60"}
               >
                 <LayoutList className="w-4 h-4 mr-1" />
                 Liste
@@ -1409,8 +1409,8 @@ const SocialMediaPage = () => {
                 size="sm"
                 onClick={() => setCalendarViewMode("month")}
                 className={calendarViewMode === "month" 
-                  ? "bg-white shadow-sm text-[#FF6B35]" 
-                  : "text-[#666666]"}
+                  ? "bg-white/5 backdrop-blur-xl shadow-sm text-[#FF6B35]" 
+                  : "text-white/60"}
               >
                 <CalendarDays className="w-4 h-4 mr-1" />
                 Mois
@@ -1426,15 +1426,15 @@ const SocialMediaPage = () => {
         <TabsContent value="inbox" className="mt-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Messages List */}
-            <Card className="bg-white border-[#E5E5E5] lg:col-span-1">
-              <CardHeader className="pb-2 border-b border-[#E5E5E5]">
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10 lg:col-span-1">
+              <CardHeader className="pb-2 border-b border-white/10">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-medium">Messages</CardTitle>
                   <Select value={inboxFilter} onValueChange={setInboxFilter}>
                     <SelectTrigger className="w-28 h-8 text-xs">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white">
+                    <SelectContent className="bg-white/5 backdrop-blur-xl">
                       <SelectItem value="all">Tous</SelectItem>
                       <SelectItem value="unread">Non lus</SelectItem>
                       <SelectItem value="replied">Répondus</SelectItem>
@@ -1446,7 +1446,7 @@ const SocialMediaPage = () => {
               <ScrollArea className="h-[500px]">
                 <div className="p-2 space-y-2">
                   {filteredInbox.length === 0 ? (
-                    <div className="text-center py-8 text-[#666666]">
+                    <div className="text-center py-8 text-white/60">
                       <Inbox className="w-10 h-10 mx-auto mb-2 opacity-30" />
                       <p className="text-sm">Aucun message</p>
                     </div>
@@ -1458,21 +1458,21 @@ const SocialMediaPage = () => {
                         className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                           selectedMessage?.id === msg.id 
                             ? 'border-[#FF6B35] bg-orange-50'
-                            : 'border-[#E5E5E5] hover:bg-[#F8F8F8]'
+                            : 'border-white/10 hover:bg-white/5'
                         } ${msg.status === 'unread' ? 'bg-blue-50/50' : ''}`}
                       >
                         <div className="flex items-start gap-2">
                           <PlatformIcon platform={msg.platform} className="w-4 h-4 mt-0.5" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
-                              <p className="text-sm font-medium text-[#1A1A1A] truncate">
+                              <p className="text-sm font-medium text-white truncate">
                                 {msg.sender_name}
                               </p>
                               {msg.status === 'unread' && (
                                 <div className="w-2 h-2 bg-[#FF6B35] rounded-full" />
                               )}
                             </div>
-                            <p className="text-xs text-[#666666] truncate mt-0.5">{msg.content}</p>
+                            <p className="text-xs text-white/60 truncate mt-0.5">{msg.content}</p>
                             <div className="flex items-center gap-2 mt-1">
                               <Badge variant="outline" className="text-[10px]">{msg.message_type}</Badge>
                               <PriorityBadge priority={msg.priority} />
@@ -1487,16 +1487,16 @@ const SocialMediaPage = () => {
             </Card>
 
             {/* Message Detail & Reply */}
-            <Card className="bg-white border-[#E5E5E5] lg:col-span-2">
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10 lg:col-span-2">
               {selectedMessage ? (
                 <>
-                  <CardHeader className="pb-2 border-b border-[#E5E5E5]">
+                  <CardHeader className="pb-2 border-b border-white/10">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <PlatformIcon platform={selectedMessage.platform} className="w-5 h-5" />
                         <div>
                           <CardTitle className="text-base">{selectedMessage.sender_name}</CardTitle>
-                          <p className="text-xs text-[#666666]">{selectedMessage.message_type} • {selectedMessage.platform}</p>
+                          <p className="text-xs text-white/60">{selectedMessage.message_type} • {selectedMessage.platform}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1512,9 +1512,9 @@ const SocialMediaPage = () => {
                   </CardHeader>
                   <CardContent className="p-4">
                     {/* Original Message */}
-                    <div className="bg-[#F8F8F8] rounded-lg p-4 mb-4">
-                      <p className="text-[#1A1A1A]">{selectedMessage.content}</p>
-                      <p className="text-xs text-[#666666] mt-2">
+                    <div className="bg-white/5 rounded-lg p-4 mb-4">
+                      <p className="text-white">{selectedMessage.content}</p>
+                      <p className="text-xs text-white/60 mt-2">
                         {new Date(selectedMessage.created_at).toLocaleString('fr-FR')}
                       </p>
                     </div>
@@ -1523,7 +1523,7 @@ const SocialMediaPage = () => {
                     {selectedMessage.reply_content && (
                       <div className="bg-orange-50 rounded-lg p-4 mb-4 border-l-4 border-[#FF6B35]">
                         <p className="text-xs text-[#FF6B35] font-medium mb-1">Votre réponse</p>
-                        <p className="text-[#1A1A1A]">{selectedMessage.reply_content}</p>
+                        <p className="text-white">{selectedMessage.reply_content}</p>
                       </div>
                     )}
 
@@ -1550,7 +1550,7 @@ const SocialMediaPage = () => {
                             <button
                               key={idx}
                               onClick={() => setReplyContent(suggestion)}
-                              className="w-full text-left p-3 bg-[#F8F8F8] rounded-lg hover:bg-[#E5E5E5] transition-colors text-sm"
+                              className="w-full text-left p-3 bg-white/5 rounded-lg hover:bg-[#E5E5E5] transition-colors text-sm"
                             >
                               {suggestion}
                             </button>
@@ -1567,7 +1567,7 @@ const SocialMediaPage = () => {
                         onChange={(e) => setReplyContent(e.target.value)}
                         placeholder="Écrivez votre réponse..."
                         rows={3}
-                        className="bg-white border-[#E5E5E5]"
+                        className="bg-white/5 backdrop-blur-xl border-white/10"
                       />
                       <Button
                         onClick={handleReply}
@@ -1582,7 +1582,7 @@ const SocialMediaPage = () => {
                 </>
               ) : (
                 <CardContent className="h-[500px] flex items-center justify-center">
-                  <div className="text-center text-[#666666]">
+                  <div className="text-center text-white/60">
                     <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-30" />
                     <p>Sélectionnez un message pour le voir</p>
                   </div>
@@ -1596,7 +1596,7 @@ const SocialMediaPage = () => {
         <TabsContent value="accounts" className="mt-4">
           <div className="space-y-6">
             {/* Meta Connection Card */}
-            <Card className="bg-white border-[#E5E5E5]">
+            <Card className="bg-white/5 backdrop-blur-xl border-white/10">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
@@ -1606,7 +1606,7 @@ const SocialMediaPage = () => {
                     Connexion Meta (Facebook & Instagram)
                   </CardTitle>
                   {metaConnected && (
-                    <Badge className="bg-green-100 text-green-700 border-0">
+                    <Badge className="bg-green-500/20 text-green-400 border-0">
                       <CheckCircle className="w-3 h-3 mr-1" />
                       Connecté
                     </Badge>
@@ -1617,18 +1617,18 @@ const SocialMediaPage = () => {
                 {metaLoading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin text-[#1877F2]" />
-                    <span className="ml-3 text-[#666666]">Connexion en cours...</span>
+                    <span className="ml-3 text-white/60">Connexion en cours...</span>
                   </div>
                 ) : metaConnected ? (
                   <div className="space-y-4">
                     {/* Connected Pages */}
                     <div>
-                      <h4 className="text-sm font-medium text-[#1A1A1A] mb-3">Pages connectées ({metaPages.length})</h4>
+                      <h4 className="text-sm font-medium text-white mb-3">Pages connectées ({metaPages.length})</h4>
                       <div className="grid gap-3">
                         {metaPages.map((page) => (
                           <div 
                             key={page.page_id}
-                            className="flex items-center gap-3 p-3 bg-[#F8F8F8] rounded-lg border border-[#E5E5E5]"
+                            className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10"
                           >
                             {page.picture_url ? (
                               <img src={page.picture_url} alt={page.page_name} className="w-10 h-10 rounded-full" />
@@ -1638,8 +1638,8 @@ const SocialMediaPage = () => {
                               </div>
                             )}
                             <div className="flex-1">
-                              <p className="font-medium text-[#1A1A1A]">{page.page_name}</p>
-                              <div className="flex items-center gap-2 text-xs text-[#666666]">
+                              <p className="font-medium text-white">{page.page_name}</p>
+                              <div className="flex items-center gap-2 text-xs text-white/60">
                                 <span>{page.category}</span>
                                 {page.has_instagram && (
                                   <Badge className="bg-pink-100 text-pink-700 border-0 text-xs">
@@ -1651,7 +1651,7 @@ const SocialMediaPage = () => {
                             </div>
                             <Button
                               size="sm"
-                              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+                              className="bg-indigo-600 hover:bg-indigo-500 text-white"
                               onClick={() => {
                                 setSelectedPage(page);
                                 setPublishModalOpen(true);
@@ -1666,7 +1666,7 @@ const SocialMediaPage = () => {
                     </div>
                     
                     {/* Actions */}
-                    <div className="flex gap-3 pt-4 border-t border-[#E5E5E5]">
+                    <div className="flex gap-3 pt-4 border-t border-white/10">
                       <Button
                         variant="outline"
                         onClick={fetchMetaPages}
@@ -1688,8 +1688,8 @@ const SocialMediaPage = () => {
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#1877F2] to-[#E4405F] flex items-center justify-center">
                       <Facebook className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">Connectez vos réseaux sociaux</h3>
-                    <p className="text-[#666666] mb-6 max-w-md mx-auto">
+                    <h3 className="text-lg font-medium text-white mb-2">Connectez vos réseaux sociaux</h3>
+                    <p className="text-white/60 mb-6 max-w-md mx-auto">
                       Connectez vos pages Facebook et comptes Instagram Business pour publier directement depuis Alpha Agency CRM.
                     </p>
                     <Button
@@ -1714,7 +1714,7 @@ const SocialMediaPage = () => {
 
             {/* Published Posts History */}
             {metaConnected && publishedPosts.length > 0 && (
-              <Card className="bg-white border-[#E5E5E5]">
+              <Card className="bg-white/5 backdrop-blur-xl border-white/10">
                 <CardHeader>
                   <CardTitle className="text-lg">Historique des publications</CardTitle>
                 </CardHeader>
@@ -1723,7 +1723,7 @@ const SocialMediaPage = () => {
                     {publishedPosts.slice(0, 10).map((post) => (
                       <div 
                         key={post.id}
-                        className="flex items-start gap-3 p-3 bg-[#F8F8F8] rounded-lg"
+                        className="flex items-start gap-3 p-3 bg-white/5 rounded-lg"
                       >
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                           post.platform === 'facebook' ? 'bg-[#1877F2]' : 'bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737]'
@@ -1735,14 +1735,14 @@ const SocialMediaPage = () => {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-[#1A1A1A] line-clamp-2">{post.content || post.caption}</p>
-                          <div className="flex items-center gap-2 mt-1 text-xs text-[#666666]">
+                          <p className="text-sm text-white line-clamp-2">{post.content || post.caption}</p>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-white/60">
                             <span>{post.page_name}</span>
                             <span>•</span>
                             <span>{new Date(post.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
                         </div>
-                        <Badge className="bg-green-100 text-green-700 border-0 text-xs">Publié</Badge>
+                        <Badge className="bg-green-500/20 text-green-400 border-0 text-xs">Publié</Badge>
                       </div>
                     ))}
                   </div>
@@ -1767,7 +1767,7 @@ const SocialMediaPage = () => {
 
       {/* Meta Publish Modal */}
       <Dialog open={publishModalOpen} onOpenChange={setPublishModalOpen}>
-        <DialogContent className="sm:max-w-[600px] bg-white">
+        <DialogContent className="sm:max-w-[600px] bg-white/5 backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1877F2] to-[#E4405F] flex items-center justify-center">
@@ -1780,7 +1780,7 @@ const SocialMediaPage = () => {
           <div className="space-y-4 py-4">
             {/* Selected Page Info */}
             {selectedPage && (
-              <div className="flex items-center gap-3 p-3 bg-[#F8F8F8] rounded-lg">
+              <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
                 {selectedPage.picture_url ? (
                   <img src={selectedPage.picture_url} alt={selectedPage.page_name} className="w-10 h-10 rounded-full" />
                 ) : (
@@ -1789,9 +1789,9 @@ const SocialMediaPage = () => {
                   </div>
                 )}
                 <div>
-                  <p className="font-medium text-[#1A1A1A]">{selectedPage.page_name}</p>
+                  <p className="font-medium text-white">{selectedPage.page_name}</p>
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">
+                    <Badge className="bg-blue-500/20 text-blue-400 border-0 text-xs">
                       <Facebook className="w-3 h-3 mr-1" />
                       Facebook
                     </Badge>
@@ -1814,7 +1814,7 @@ const SocialMediaPage = () => {
                 onChange={(e) => setPublishContent(e.target.value)}
                 placeholder="Qu'avez-vous à partager aujourd'hui ?"
                 rows={4}
-                className="bg-white border-[#E5E5E5] resize-none"
+                className="bg-white/5 backdrop-blur-xl border-white/10 resize-none"
               />
               <p className="text-xs text-[#999999] text-right">{publishContent.length} caractères</p>
             </div>
@@ -1826,7 +1826,7 @@ const SocialMediaPage = () => {
                 value={publishImageUrl}
                 onChange={(e) => setPublishImageUrl(e.target.value)}
                 placeholder="https://exemple.com/image.jpg"
-                className="bg-white border-[#E5E5E5]"
+                className="bg-white/5 backdrop-blur-xl border-white/10"
               />
               {publishImageUrl && (
                 <div className="mt-2 relative">

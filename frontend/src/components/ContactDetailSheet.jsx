@@ -117,21 +117,21 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
   };
 
   const quoteStatusColors = {
-    brouillon: "bg-gray-100 text-gray-700",
-    envoyé: "bg-blue-100 text-blue-700",
-    accepté: "bg-green-100 text-green-700",
-    refusé: "bg-red-100 text-red-700"
+    brouillon: "bg-white/10 text-white/80",
+    envoyé: "bg-blue-500/20 text-blue-400",
+    accepté: "bg-green-500/20 text-green-400",
+    refusé: "bg-red-500/20 text-red-400"
   };
 
   const invoiceStatusColors = {
-    brouillon: "bg-gray-100 text-gray-700",
-    en_attente: "bg-blue-100 text-blue-700",
-    envoyee: "bg-purple-100 text-purple-700",
-    "partiellement_payée": "bg-orange-100 text-orange-700",
-    "payée": "bg-green-100 text-green-700",
-    payee: "bg-green-100 text-green-700",
-    en_retard: "bg-red-100 text-red-700",
-    annulee: "bg-gray-100 text-gray-500"
+    brouillon: "bg-white/10 text-white/80",
+    en_attente: "bg-blue-500/20 text-blue-400",
+    envoyee: "bg-purple-500/20 text-purple-400",
+    "partiellement_payée": "bg-orange-500/20 text-orange-400",
+    "payée": "bg-green-500/20 text-green-400",
+    payee: "bg-green-500/20 text-green-400",
+    en_retard: "bg-red-500/20 text-red-400",
+    annulee: "bg-white/10 text-white/50"
   };
 
   const handleDownloadQuotePDF = async (quote) => {
@@ -228,7 +228,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent 
         side="right" 
-        className="w-full sm:max-w-[500px] md:max-w-[600px] p-0 bg-white overflow-hidden"
+        className="w-full sm:max-w-[500px] md:max-w-[600px] p-0 bg-white/5 overflow-hidden"
       >
         {loading ? (
           <div className="flex items-center justify-center h-full">
@@ -243,14 +243,14 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 <Button 
                   size="sm" 
                   variant="ghost" 
-                  className="text-white/80 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
+                  className="text-white/80 hover:text-white hover:bg-white/5/10 h-8 w-8 p-0"
                 >
                   <Star className="w-4 h-4" />
                 </Button>
                 <Button 
                   size="sm" 
                   variant="ghost" 
-                  className="text-white/80 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
+                  className="text-white/80 hover:text-white hover:bg-white/5/10 h-8 w-8 p-0"
                   onClick={() => navigate(`/admin/contacts?edit=${contact.id}`)}
                 >
                   <Pencil className="w-4 h-4" />
@@ -258,7 +258,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
               </div>
 
               <div className="flex items-start gap-3 sm:gap-4">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold flex-shrink-0">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/5/20 backdrop-blur rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold flex-shrink-0">
                   {contact.first_name?.[0]}{contact.last_name?.[0]}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -287,7 +287,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 {contact.email && (
                   <a 
                     href={`mailto:${contact.email}`}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/5/10 hover:bg-white/5/20 rounded-lg transition-colors text-sm"
                   >
                     <Mail className="w-4 h-4" />
                     <span className="hidden sm:inline">Email</span>
@@ -296,7 +296,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 {contact.phone && (
                   <a 
                     href={`tel:${contact.phone}`}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/5/10 hover:bg-white/5/20 rounded-lg transition-colors text-sm"
                   >
                     <Phone className="w-4 h-4" />
                     <span className="hidden sm:inline">Appeler</span>
@@ -304,7 +304,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 )}
                 <Button
                   size="sm"
-                  className="flex-1 bg-white text-[#CE0202] hover:bg-white/90 text-sm"
+                  className="flex-1 bg-white/5 text-[#CE0202] hover:bg-white/5/90 text-sm"
                   onClick={() => navigate(`/admin/factures?action=new&type=devis&contact=${contact.id}`)}
                 >
                   <Plus className="w-4 h-4 mr-1" />
@@ -316,42 +316,42 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
 
             {/* Summary Stats */}
             {history?.summary && (
-              <div className="grid grid-cols-4 gap-2 p-3 sm:p-4 bg-[#F8F8F8] border-b border-[#E5E5E5]">
+              <div className="grid grid-cols-4 gap-2 p-3 sm:p-4 bg-white/5 border-b border-white/10">
                 <div className="text-center">
-                  <p className="text-lg sm:text-xl font-bold text-[#1A1A1A]">{history.summary.quotes || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-[#666666]">Devis</p>
+                  <p className="text-lg sm:text-xl font-bold text-white">{history.summary.quotes || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-white/60">Devis</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg sm:text-xl font-bold text-[#1A1A1A]">{history.summary.invoices || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-[#666666]">Factures</p>
+                  <p className="text-lg sm:text-xl font-bold text-white">{history.summary.invoices || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-white/60">Factures</p>
                 </div>
                 <div className="text-center">
                   <p className="text-lg sm:text-xl font-bold text-[#CE0202]">{formatCurrency(history.summary.total_revenue || 0).replace('€', '')}</p>
-                  <p className="text-[10px] sm:text-xs text-[#666666]">CA</p>
+                  <p className="text-[10px] sm:text-xs text-white/60">CA</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg sm:text-xl font-bold text-[#1A1A1A]">{history.summary.tasks || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-[#666666]">Tâches</p>
+                  <p className="text-lg sm:text-xl font-bold text-white">{history.summary.tasks || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-white/60">Tâches</p>
                 </div>
               </div>
             )}
 
             {/* Tabs - Pipedrive Style */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-              <TabsList className="grid grid-cols-4 mx-3 sm:mx-4 mt-3 bg-[#F8F8F8] h-9">
-                <TabsTrigger value="overview" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
+              <TabsList className="grid grid-cols-4 mx-3 sm:mx-4 mt-3 bg-white/5 h-9">
+                <TabsTrigger value="overview" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
                   <User className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Profil</span>
                 </TabsTrigger>
-                <TabsTrigger value="timeline" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
+                <TabsTrigger value="timeline" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
                   <History className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Activité</span>
                 </TabsTrigger>
-                <TabsTrigger value="deals" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
+                <TabsTrigger value="deals" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
                   <DollarSign className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Affaires</span>
                 </TabsTrigger>
-                <TabsTrigger value="docs" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
+                <TabsTrigger value="docs" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
                   <FileText className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Docs</span>
                 </TabsTrigger>
@@ -362,40 +362,40 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 <ScrollArea className="h-full">
                   <div className="space-y-4 pt-3">
                     {/* Contact Details Card */}
-                    <Card className="border-[#E5E5E5]">
+                    <Card className="border-white/10">
                       <CardContent className="p-3 sm:p-4 space-y-3">
-                        <h3 className="font-semibold text-sm text-[#1A1A1A] flex items-center gap-2">
+                        <h3 className="font-semibold text-sm text-white flex items-center gap-2">
                           <User className="w-4 h-4 text-[#CE0202]" />
                           Informations
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {contact.email && (
                             <div className="flex items-center gap-2 text-sm">
-                              <Mail className="w-4 h-4 text-[#666666] flex-shrink-0" />
-                              <span className="text-[#1A1A1A] truncate">{contact.email}</span>
+                              <Mail className="w-4 h-4 text-white/60 flex-shrink-0" />
+                              <span className="text-white truncate">{contact.email}</span>
                             </div>
                           )}
                           {contact.phone && (
                             <div className="flex items-center gap-2 text-sm">
-                              <Phone className="w-4 h-4 text-[#666666] flex-shrink-0" />
-                              <span className="text-[#1A1A1A]">{contact.phone}</span>
+                              <Phone className="w-4 h-4 text-white/60 flex-shrink-0" />
+                              <span className="text-white">{contact.phone}</span>
                             </div>
                           )}
                           {contact.city && (
                             <div className="flex items-center gap-2 text-sm">
-                              <MapPin className="w-4 h-4 text-[#666666] flex-shrink-0" />
-                              <span className="text-[#1A1A1A]">{contact.city}</span>
+                              <MapPin className="w-4 h-4 text-white/60 flex-shrink-0" />
+                              <span className="text-white">{contact.city}</span>
                             </div>
                           )}
                           {contact.poste && (
                             <div className="flex items-center gap-2 text-sm">
-                              <Briefcase className="w-4 h-4 text-[#666666] flex-shrink-0" />
-                              <span className="text-[#1A1A1A]">{contact.poste}</span>
+                              <Briefcase className="w-4 h-4 text-white/60 flex-shrink-0" />
+                              <span className="text-white">{contact.poste}</span>
                             </div>
                           )}
                           <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="w-4 h-4 text-[#666666] flex-shrink-0" />
-                            <span className="text-[#666666]">Créé le {formatDate(contact.created_at)}</span>
+                            <Calendar className="w-4 h-4 text-white/60 flex-shrink-0" />
+                            <span className="text-white/60">Créé le {formatDate(contact.created_at)}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -403,28 +403,28 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
 
                     {/* Notes Card */}
                     {contact.note && (
-                      <Card className="border-[#E5E5E5]">
+                      <Card className="border-white/10">
                         <CardContent className="p-3 sm:p-4">
-                          <h3 className="font-semibold text-sm text-[#1A1A1A] flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-sm text-white flex items-center gap-2 mb-2">
                             <StickyNote className="w-4 h-4 text-[#CE0202]" />
                             Notes
                           </h3>
-                          <p className="text-sm text-[#666666] whitespace-pre-wrap">{contact.note}</p>
+                          <p className="text-sm text-white/60 whitespace-pre-wrap">{contact.note}</p>
                         </CardContent>
                       </Card>
                     )}
 
                     {/* Project Type Card */}
                     {contact.project_type && (
-                      <Card className="border-[#E5E5E5]">
+                      <Card className="border-white/10">
                         <CardContent className="p-3 sm:p-4">
-                          <h3 className="font-semibold text-sm text-[#1A1A1A] flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-sm text-white flex items-center gap-2 mb-2">
                             <Target className="w-4 h-4 text-[#CE0202]" />
                             Projet
                           </h3>
                           <Badge variant="outline">{contact.project_type}</Badge>
                           {contact.budget && (
-                            <p className="text-sm text-[#666666] mt-2">
+                            <p className="text-sm text-white/60 mt-2">
                               Budget: <span className="font-semibold text-[#CE0202]">{contact.budget}</span>
                             </p>
                           )}
@@ -442,7 +442,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                     {timeline.length === 0 ? (
                       <div className="text-center py-8">
                         <Activity className="w-10 h-10 mx-auto text-[#E5E5E5] mb-3" />
-                        <p className="text-[#666666] text-sm">Aucune activité</p>
+                        <p className="text-white/60 text-sm">Aucune activité</p>
                       </div>
                     ) : (
                       <div className="relative">
@@ -461,11 +461,11 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                                 
                                 {/* Content */}
                                 <div className="flex-1 min-w-0 pb-2">
-                                  <div className="bg-white rounded-lg border border-[#E5E5E5] p-3 hover:shadow-sm transition-shadow">
+                                  <div className="bg-white/5 rounded-lg border border-white/10 p-3 hover:shadow-sm transition-shadow">
                                     <div className="flex items-start justify-between gap-2">
                                       <div className="min-w-0">
-                                        <p className="font-medium text-sm text-[#1A1A1A] truncate">{item.title}</p>
-                                        <p className="text-xs text-[#666666]">{item.subtitle}</p>
+                                        <p className="font-medium text-sm text-white truncate">{item.title}</p>
+                                        <p className="text-xs text-white/60">{item.subtitle}</p>
                                       </div>
                                       {item.status && (
                                         <Badge className="text-[10px] flex-shrink-0">
@@ -494,29 +494,29 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                   <div className="space-y-4 pt-3">
                     {/* Opportunities */}
                     <div>
-                      <h3 className="font-semibold text-sm text-[#1A1A1A] flex items-center gap-2 mb-3">
+                      <h3 className="font-semibold text-sm text-white flex items-center gap-2 mb-3">
                         <Target className="w-4 h-4 text-[#CE0202]" />
                         Opportunités
                       </h3>
                       {history?.opportunities?.length > 0 ? (
                         <div className="space-y-2">
                           {history.opportunities.map((opp) => (
-                            <Card key={opp.id} className="border-[#E5E5E5] cursor-pointer hover:border-[#CE0202]/30 transition-colors">
+                            <Card key={opp.id} className="border-white/10 cursor-pointer hover:border-[#CE0202]/30 transition-colors">
                               <CardContent className="p-3 flex items-center justify-between">
                                 <div className="min-w-0">
-                                  <p className="font-medium text-sm text-[#1A1A1A] truncate">{opp.title}</p>
-                                  <p className="text-xs text-[#666666]">{opp.stage}</p>
+                                  <p className="font-medium text-sm text-white truncate">{opp.title}</p>
+                                  <p className="text-xs text-white/60">{opp.stage}</p>
                                 </div>
                                 <div className="text-right flex-shrink-0">
                                   <p className="font-bold text-[#CE0202]">{formatCurrency(opp.amount)}</p>
-                                  <p className="text-[10px] text-[#666666]">{opp.probability}%</p>
+                                  <p className="text-[10px] text-white/60">{opp.probability}%</p>
                                 </div>
                               </CardContent>
                             </Card>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-[#666666] text-center py-4">Aucune opportunité</p>
+                        <p className="text-sm text-white/60 text-center py-4">Aucune opportunité</p>
                       )}
                     </div>
                   </div>
@@ -529,25 +529,25 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                   <div className="space-y-4 pt-3">
                     {/* Quotes */}
                     <div>
-                      <h3 className="font-semibold text-sm text-[#1A1A1A] flex items-center gap-2 mb-3">
+                      <h3 className="font-semibold text-sm text-white flex items-center gap-2 mb-3">
                         <FileText className="w-4 h-4 text-blue-600" />
                         Devis ({history?.quotes?.length || 0})
                       </h3>
                       {history?.quotes?.length > 0 ? (
                         <div className="space-y-2">
                           {history.quotes.map((quote) => (
-                            <Card key={quote.id} className="border-[#E5E5E5]">
+                            <Card key={quote.id} className="border-white/10">
                               <CardContent className="p-3">
                                 <div className="flex items-center justify-between">
                                   <div className="min-w-0">
-                                    <p className="font-medium text-sm text-[#1A1A1A]">{quote.quote_number}</p>
-                                    <p className="text-xs text-[#666666]">{formatDate(quote.created_at)}</p>
+                                    <p className="font-medium text-sm text-white">{quote.quote_number}</p>
+                                    <p className="text-xs text-white/60">{formatDate(quote.created_at)}</p>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <Badge className={quoteStatusColors[quote.status] || "bg-gray-100 text-gray-700"}>
+                                    <Badge className={quoteStatusColors[quote.status] || "bg-white/10 text-white/80"}>
                                       {quote.status}
                                     </Badge>
-                                    <span className="font-bold text-sm text-[#1A1A1A]">{formatCurrency(quote.total_ttc)}</span>
+                                    <span className="font-bold text-sm text-white">{formatCurrency(quote.total_ttc)}</span>
                                     <Button
                                       size="sm"
                                       variant="ghost"
@@ -563,31 +563,31 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-[#666666] text-center py-4">Aucun devis</p>
+                        <p className="text-sm text-white/60 text-center py-4">Aucun devis</p>
                       )}
                     </div>
 
                     {/* Invoices */}
                     <div>
-                      <h3 className="font-semibold text-sm text-[#1A1A1A] flex items-center gap-2 mb-3">
+                      <h3 className="font-semibold text-sm text-white flex items-center gap-2 mb-3">
                         <Receipt className="w-4 h-4 text-purple-600" />
                         Factures ({history?.invoices?.length || 0})
                       </h3>
                       {history?.invoices?.length > 0 ? (
                         <div className="space-y-2">
                           {history.invoices.map((invoice) => (
-                            <Card key={invoice.id} className="border-[#E5E5E5]">
+                            <Card key={invoice.id} className="border-white/10">
                               <CardContent className="p-3">
                                 <div className="flex items-center justify-between">
                                   <div className="min-w-0">
-                                    <p className="font-medium text-sm text-[#1A1A1A]">{invoice.invoice_number}</p>
-                                    <p className="text-xs text-[#666666]">{formatDate(invoice.created_at)}</p>
+                                    <p className="font-medium text-sm text-white">{invoice.invoice_number}</p>
+                                    <p className="text-xs text-white/60">{formatDate(invoice.created_at)}</p>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <Badge className={invoiceStatusColors[invoice.status] || "bg-gray-100 text-gray-700"}>
+                                    <Badge className={invoiceStatusColors[invoice.status] || "bg-white/10 text-white/80"}>
                                       {invoice.status}
                                     </Badge>
-                                    <span className="font-bold text-sm text-[#1A1A1A]">{formatCurrency(invoice.total_ttc)}</span>
+                                    <span className="font-bold text-sm text-white">{formatCurrency(invoice.total_ttc)}</span>
                                     <Button
                                       size="sm"
                                       variant="ghost"
@@ -603,7 +603,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-[#666666] text-center py-4">Aucune facture</p>
+                        <p className="text-sm text-white/60 text-center py-4">Aucune facture</p>
                       )}
                     </div>
                   </div>
@@ -613,7 +613,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
           </div>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <p className="text-[#666666]">Contact non trouvé</p>
+            <p className="text-white/60">Contact non trouvé</p>
           </div>
         )}
       </SheetContent>

@@ -162,20 +162,20 @@ const TagsManagePage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#CE0202] flex items-center justify-center">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
               <Tag className="w-5 h-5 text-white" />
             </div>
             Gestion des Tags
           </h1>
-          <p className="text-[#666666] text-sm mt-1">
+          <p className="text-white/60 text-sm mt-1">
             Créez et organisez vos tags pour le portfolio et le blog
           </p>
         </div>
         
         <Button
           onClick={() => handleOpenModal(null, activeTab)}
-          className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+          className="bg-indigo-600 hover:bg-indigo-500 text-white"
           data-testid="add-tag-btn"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -188,14 +188,14 @@ const TagsManagePage = () => {
         <TabsList className="bg-[#F5F5F5] p-1">
           <TabsTrigger 
             value="portfolio" 
-            className="data-[state=active]:bg-white data-[state=active]:text-[#CE0202]"
+            className="data-[state=active]:bg-white/5 backdrop-blur-xl data-[state=active]:text-indigo-400"
           >
             <FolderOpen className="w-4 h-4 mr-2" />
             Portfolio ({portfolioTags.length})
           </TabsTrigger>
           <TabsTrigger 
             value="blog"
-            className="data-[state=active]:bg-white data-[state=active]:text-[#CE0202]"
+            className="data-[state=active]:bg-white/5 backdrop-blur-xl data-[state=active]:text-indigo-400"
           >
             <FileText className="w-4 h-4 mr-2" />
             Blog ({blogTags.length})
@@ -227,10 +227,10 @@ const TagsManagePage = () => {
 
       {/* Create/Edit Modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-white">
+        <DialogContent className="sm:max-w-[425px] bg-white/5 backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Tag className="w-5 h-5 text-[#CE0202]" />
+              <Tag className="w-5 h-5 text-indigo-400" />
               {editingTag ? "Modifier le tag" : "Nouveau tag"}
             </DialogTitle>
           </DialogHeader>
@@ -244,7 +244,7 @@ const TagsManagePage = () => {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Ex: Design, Marketing, Tech..."
-                className="bg-white border-[#E5E5E5]"
+                className="bg-white/5 backdrop-blur-xl border-white/10"
                 data-testid="tag-name-input"
               />
             </div>
@@ -278,10 +278,10 @@ const TagsManagePage = () => {
                   value={formData.type} 
                   onValueChange={(value) => setFormData({ ...formData, type: value })}
                 >
-                  <SelectTrigger className="bg-white border-[#E5E5E5]">
+                  <SelectTrigger className="bg-white/5 backdrop-blur-xl border-white/10">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white">
+                  <SelectContent className="bg-white/5 backdrop-blur-xl">
                     <SelectItem value="portfolio">
                       <div className="flex items-center gap-2">
                         <FolderOpen className="w-4 h-4" />
@@ -302,7 +302,7 @@ const TagsManagePage = () => {
             {/* Preview */}
             <div className="space-y-2">
               <Label>Aperçu</Label>
-              <div className="flex items-center gap-2 p-3 bg-[#F8F8F8] rounded-lg">
+              <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
                 <Badge 
                   style={{ backgroundColor: formData.color }}
                   className="text-white border-0"
@@ -324,7 +324,7 @@ const TagsManagePage = () => {
             <Button
               onClick={handleSave}
               disabled={saving || !formData.name.trim()}
-              className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white"
               data-testid="save-tag-btn"
             >
               {saving ? (
@@ -340,7 +340,7 @@ const TagsManagePage = () => {
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-white">
+        <AlertDialogContent className="bg-white/5 backdrop-blur-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer ce tag ?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -368,25 +368,25 @@ const TagsGrid = ({ tags, loading, onEdit, onDelete, onAdd, type }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-10 h-10 animate-spin text-[#CE0202]" />
+        <Loader2 className="w-10 h-10 animate-spin text-indigo-400" />
       </div>
     );
   }
 
   if (tags.length === 0) {
     return (
-      <Card className="bg-white border-[#E5E5E5]">
+      <Card className="bg-white/5 backdrop-blur-xl border-white/10">
         <CardContent className="py-16 text-center">
           <Tag className="w-16 h-16 mx-auto mb-4 text-[#E5E5E5]" />
-          <h3 className="text-xl font-semibold text-[#1A1A1A] mb-2">
+          <h3 className="text-xl font-semibold text-white mb-2">
             Aucun tag {type === "portfolio" ? "portfolio" : "blog"}
           </h3>
-          <p className="text-[#666666] mb-6 max-w-md mx-auto">
+          <p className="text-white/60 mb-6 max-w-md mx-auto">
             Créez des tags pour organiser vos {type === "portfolio" ? "réalisations" : "articles"} et faciliter la navigation.
           </p>
           <Button
             onClick={onAdd}
-            className="bg-[#CE0202] hover:bg-[#B00202] text-white"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
             Créer le premier tag
@@ -397,13 +397,13 @@ const TagsGrid = ({ tags, loading, onEdit, onDelete, onAdd, type }) => {
   }
 
   return (
-    <Card className="bg-white border-[#E5E5E5]">
+    <Card className="bg-white/5 backdrop-blur-xl border-white/10">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           {type === "portfolio" ? (
-            <FolderOpen className="w-5 h-5 text-[#CE0202]" />
+            <FolderOpen className="w-5 h-5 text-indigo-400" />
           ) : (
-            <FileText className="w-5 h-5 text-[#CE0202]" />
+            <FileText className="w-5 h-5 text-indigo-400" />
           )}
           Tags {type === "portfolio" ? "Portfolio" : "Blog"}
         </CardTitle>
@@ -413,7 +413,7 @@ const TagsGrid = ({ tags, loading, onEdit, onDelete, onAdd, type }) => {
           {tags.map((tag) => (
             <div
               key={tag.id}
-              className="flex items-center justify-between p-3 bg-[#F8F8F8] rounded-lg border border-[#E5E5E5] hover:border-[#CE0202]/30 transition-colors group"
+              className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10 hover:border-[#CE0202]/30 transition-colors group"
               data-testid={`tag-item-${tag.id}`}
             >
               <div className="flex items-center gap-3 min-w-0">
@@ -421,7 +421,7 @@ const TagsGrid = ({ tags, loading, onEdit, onDelete, onAdd, type }) => {
                   className="w-4 h-4 rounded-full flex-shrink-0"
                   style={{ backgroundColor: tag.color || "#CE0202" }}
                 />
-                <span className="font-medium text-[#1A1A1A] truncate">
+                <span className="font-medium text-white truncate">
                   {tag.name}
                 </span>
               </div>
@@ -434,7 +434,7 @@ const TagsGrid = ({ tags, loading, onEdit, onDelete, onAdd, type }) => {
                   onClick={() => onEdit(tag)}
                   data-testid={`edit-tag-${tag.id}`}
                 >
-                  <Pencil className="w-4 h-4 text-[#666666]" />
+                  <Pencil className="w-4 h-4 text-white/60" />
                 </Button>
                 <Button
                   variant="ghost"
