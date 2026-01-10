@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { 
   Bot, Send, Loader2, Sparkles, User, Image as ImageIcon,
   MessageSquare, Trash2, Plus, X, Upload, Wand2,
-  ChevronLeft, Camera, Download, Zap
+  ChevronLeft, Camera, Download, Zap, CheckCircle2, AlertCircle,
+  FileText, Users, ListTodo
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -27,6 +28,7 @@ const AIAssistantPageNew = () => {
   const [generatingImage, setGeneratingImage] = useState(false);
   const [generatedImage, setGeneratedImage] = useState(null);
   const [mode, setMode] = useState("chat");
+  const [actionsEnabled, setActionsEnabled] = useState(true);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
