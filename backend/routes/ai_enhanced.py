@@ -452,6 +452,19 @@ async def get_context(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
 
 
+@router.post("/execute-action")
+async def execute_action_endpoint(request: ActionRequest, current_user: dict = Depends(get_current_user)):
+    """Execute an action directly (without AI)"""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    result = await execute_action(request.action_type, request.params, user_id)
+    
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("error", "Action échouée"))
+    
+    return result
+
+
 @router.post("/chat")
 async def enhanced_chat(request: ChatRequest, current_user: dict = Depends(get_current_user)):
     """Chat with AI - supports text and image attachments. Now context-aware!"""
