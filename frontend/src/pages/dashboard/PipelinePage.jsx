@@ -197,7 +197,7 @@ const SortableDealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDele
                 <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-white/5 backdrop-blur-xl border-white/10" align="end">
+            <DropdownMenuContent className="bg-[#1a1a2e] border-white/10" align="end">
               <DropdownMenuItem onClick={() => onEdit(opp)} data-testid={`opp-edit-${opp.id}`}>
                 <Edit className="w-4 h-4 mr-2" /> Modifier
               </DropdownMenuItem>
@@ -347,7 +347,7 @@ const DroppableColumn = ({ column, children, onEdit, onDelete, oppsCount, totalA
                   <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4 text-white/60" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white/5 backdrop-blur-xl border-white/10">
+              <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
                 <DropdownMenuItem onClick={() => onEdit(column)}>
                   <Edit className="w-4 h-4 mr-2" /> Modifier
                 </DropdownMenuItem>
@@ -894,7 +894,7 @@ const PipelinePage = () => {
                 <span className="sm:hidden">Ajouter</span>
               </Button>
             </DialogTrigger>
-              <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-lg max-h-[90vh] overflow-y-auto">
+              <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="text-white">
                     {editingOpp ? "Modifier l'affaire" : "Nouvelle affaire"}
@@ -907,7 +907,7 @@ const PipelinePage = () => {
                       <SelectTrigger className="bg-white/5 border-white/10">
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white/5 backdrop-blur-xl">
+                      <SelectContent className="bg-[#1a1a2e]">
                         {contacts.map((c) => (
                           <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>
                         ))}
@@ -933,7 +933,7 @@ const PipelinePage = () => {
                       <Label>Type d'offre</Label>
                       <Select value={formData.offer_type} onValueChange={(v) => setFormData({...formData, offer_type: v})}>
                         <SelectTrigger className="bg-white/5 border-white/10"><SelectValue placeholder="Sélectionner" /></SelectTrigger>
-                        <SelectContent className="bg-white/5 backdrop-blur-xl">
+                        <SelectContent className="bg-[#1a1a2e]">
                           <SelectItem value="site_web">Site Web</SelectItem>
                           <SelectItem value="cm">Community Management</SelectItem>
                           <SelectItem value="photo">Photographie</SelectItem>
@@ -954,7 +954,7 @@ const PipelinePage = () => {
                       <SelectTrigger className="bg-white/5 border-white/10">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-white/5 backdrop-blur-xl">
+                      <SelectContent className="bg-[#1a1a2e]">
                         {columns.map((col) => (
                           <SelectItem key={col.id} value={col.id}>
                             <div className="flex items-center gap-2">
@@ -1149,7 +1149,7 @@ const PipelinePage = () => {
 
       {/* Column Dialog */}
       <Dialog open={columnDialogOpen} onOpenChange={setColumnDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
           <DialogHeader>
             <DialogTitle>{editingColumn ? "Modifier l'étape" : "Nouvelle étape"}</DialogTitle>
           </DialogHeader>

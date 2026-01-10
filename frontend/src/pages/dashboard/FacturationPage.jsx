@@ -432,7 +432,7 @@ const FacturationPage = () => {
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Statut" />
               </SelectTrigger>
-              <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
+              <SelectContent className="bg-[#1a1a2e] border-white/10">
                 <SelectItem value="all">Tous</SelectItem>
                 {activeTab === 'devis' ? (
                   <>
@@ -708,7 +708,7 @@ const FacturationPage = () => {
 
       {/* Add Payment Dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-indigo-400" />
@@ -780,7 +780,7 @@ const FacturationPage = () => {
                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
+                    <SelectContent className="bg-[#1a1a2e] border-white/10">
                       {Object.entries(paymentMethods).map(([key, method]) => {
                         const Icon = method.icon;
                         return (

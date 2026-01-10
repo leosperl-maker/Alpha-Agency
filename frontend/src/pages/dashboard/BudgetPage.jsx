@@ -312,7 +312,7 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
 
       {/* Add Forecast Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white">Nouvelle prévision</DialogTitle>
           </DialogHeader>
@@ -324,7 +324,7 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
                 <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white/5 backdrop-blur-xl">
+                <SelectContent className="bg-[#1a1a2e]">
                   <SelectItem value="expense">Dépense</SelectItem>
                   <SelectItem value="income">Revenu</SelectItem>
                 </SelectContent>
@@ -337,7 +337,7 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
                 <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue placeholder="Sélectionner une catégorie" />
                 </SelectTrigger>
-                <SelectContent className="bg-white/5 backdrop-blur-xl">
+                <SelectContent className="bg-[#1a1a2e]">
                   {getAllCategories(form.type).map(cat => (
                     <SelectItem key={cat.id} value={cat.id}>
                       <div className="flex items-center gap-2">
@@ -383,7 +383,7 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
 
       {/* Copy Dialog */}
       <Dialog open={copyDialogOpen} onOpenChange={setCopyDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-sm">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-sm">
           <DialogHeader>
             <DialogTitle className="text-white">Copier les prévisions</DialogTitle>
           </DialogHeader>
@@ -465,7 +465,7 @@ const CashflowTab = ({ formatCurrency }) => {
             <SelectTrigger className="bg-white/5 border-white/10 w-32">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-white/5 backdrop-blur-xl">
+            <SelectContent className="bg-[#1a1a2e]">
               <SelectItem value="3">3 mois</SelectItem>
               <SelectItem value="6">6 mois</SelectItem>
               <SelectItem value="12">12 mois</SelectItem>
@@ -984,7 +984,7 @@ const BudgetPage = () => {
               <Calendar className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-white/5 backdrop-blur-xl max-h-60">
+            <SelectContent className="bg-[#1a1a2e] max-h-60">
               {months.map(m => (
                 <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
               ))}
@@ -1216,7 +1216,7 @@ const BudgetPage = () => {
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white/5 backdrop-blur-xl">
+              <SelectContent className="bg-[#1a1a2e]">
                 <SelectItem value="all">Tout</SelectItem>
                 <SelectItem value="credit">Revenus</SelectItem>
                 <SelectItem value="debit">Dépenses</SelectItem>
@@ -1227,7 +1227,7 @@ const BudgetPage = () => {
                 <Tag className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Catégorie" />
               </SelectTrigger>
-              <SelectContent className="bg-white/5 backdrop-blur-xl">
+              <SelectContent className="bg-[#1a1a2e]">
                 <SelectItem value="all">Toutes</SelectItem>
                 <SelectItem value="uncategorized">Non catégorisé</SelectItem>
                 {getAllCategories().map(cat => (
@@ -1282,7 +1282,7 @@ const BudgetPage = () => {
                                     <AlertCircle className="w-3 h-3 mr-1" />
                                     <span>Catégoriser</span>
                                   </SelectTrigger>
-                                  <SelectContent className="bg-white/5 backdrop-blur-xl">
+                                  <SelectContent className="bg-[#1a1a2e]">
                                     {getAllCategories(isCredit ? "income" : "expense").map(cat => (
                                       <SelectItem key={cat.id} value={cat.id}>
                                         <div className="flex items-center gap-2">
@@ -1308,7 +1308,7 @@ const BudgetPage = () => {
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="bg-white/5 backdrop-blur-xl border-white/10">
+                            <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
                               <DropdownMenuItem onClick={() => openEditTransaction(transaction)}>
                                 <Edit className="w-4 h-4 mr-2" /> Modifier
                               </DropdownMenuItem>
@@ -1490,7 +1490,7 @@ const BudgetPage = () => {
 
       {/* Import Dialog */}
       <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-lg">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <FileSpreadsheet className="w-5 h-5 text-indigo-400" />
@@ -1560,7 +1560,7 @@ const BudgetPage = () => {
 
       {/* Category Dialog */}
       <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}
@@ -1584,7 +1584,7 @@ const BudgetPage = () => {
                 <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white/5 backdrop-blur-xl">
+                <SelectContent className="bg-[#1a1a2e]">
                   <SelectItem value="income">Revenu</SelectItem>
                   <SelectItem value="expense">Dépense</SelectItem>
                 </SelectContent>
@@ -1618,7 +1618,7 @@ const BudgetPage = () => {
 
       {/* Rule Dialog */}
       <Dialog open={ruleDialogOpen} onOpenChange={setRuleDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white">Nouvelle règle d'auto-catégorisation</DialogTitle>
           </DialogHeader>
@@ -1630,7 +1630,7 @@ const BudgetPage = () => {
                 <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white/5 backdrop-blur-xl">
+                <SelectContent className="bg-[#1a1a2e]">
                   <SelectItem value="contains">Contient</SelectItem>
                   <SelectItem value="starts_with">Commence par</SelectItem>
                   <SelectItem value="ends_with">Finit par</SelectItem>
@@ -1657,7 +1657,7 @@ const BudgetPage = () => {
                 <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue placeholder="Toutes les transactions" />
                 </SelectTrigger>
-                <SelectContent className="bg-white/5 backdrop-blur-xl">
+                <SelectContent className="bg-[#1a1a2e]">
                   <SelectItem value="all">Toutes les transactions</SelectItem>
                   <SelectItem value="credit">Revenus uniquement</SelectItem>
                   <SelectItem value="debit">Dépenses uniquement</SelectItem>
@@ -1671,7 +1671,7 @@ const BudgetPage = () => {
                 <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue placeholder="Sélectionner..." />
                 </SelectTrigger>
-                <SelectContent className="bg-white/5 backdrop-blur-xl">
+                <SelectContent className="bg-[#1a1a2e]">
                   {getAllCategories().map(cat => (
                     <SelectItem key={cat.id} value={cat.id}>
                       <div className="flex items-center gap-2">
@@ -1696,7 +1696,7 @@ const BudgetPage = () => {
 
       {/* Transaction Dialog */}
       <Dialog open={transactionDialogOpen} onOpenChange={setTransactionDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editingTransaction ? "Modifier la transaction" : "Nouvelle transaction"}
@@ -1751,7 +1751,7 @@ const BudgetPage = () => {
                 <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue placeholder="Sélectionner..." />
                 </SelectTrigger>
-                <SelectContent className="bg-white/5 backdrop-blur-xl">
+                <SelectContent className="bg-[#1a1a2e]">
                   {getAllCategories(transactionForm.type === "credit" ? "income" : "expense").map(cat => (
                     <SelectItem key={cat.id} value={cat.id}>
                       <div className="flex items-center gap-2">

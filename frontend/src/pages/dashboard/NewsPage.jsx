@@ -555,7 +555,7 @@ const NewsPage = () => {
               <MapPin className="w-4 h-4 mr-2 text-white/60" />
               <SelectValue placeholder="Région" />
             </SelectTrigger>
-            <SelectContent className="bg-white/5 backdrop-blur-xl">
+            <SelectContent className="bg-[#1a1a2e]">
               {regions.map(region => {
                 const Icon = regionIcons[region.id] || Globe;
                 return (

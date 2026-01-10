@@ -738,7 +738,7 @@ const InvoicesPage = () => {
                 Nouveau document
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-white/5 backdrop-blur-xl border-white/10">
+            <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
               <DropdownMenuItem onClick={() => openCreateSheet('facture')} className="cursor-pointer">
                 <Receipt className="w-4 h-4 mr-2" />
                 Facture
@@ -818,7 +818,7 @@ const InvoicesPage = () => {
             <Filter className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Filtrer par statut" />
           </SelectTrigger>
-          <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
+          <SelectContent className="bg-[#1a1a2e] border-white/10">
             <SelectItem value="all">Tous les statuts</SelectItem>
             {Object.entries(statusConfig).map(([key, config]) => (
               <SelectItem key={key} value={key}>{config.label}</SelectItem>
@@ -922,7 +922,7 @@ const InvoicesPage = () => {
                             <span>{status.label}</span>
                           </div>
                         </SelectTrigger>
-                        <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
+                        <SelectContent className="bg-[#1a1a2e] border-white/10">
                           {Object.entries(statusConfig).map(([key, config]) => {
                             const Icon = config.icon;
                             return (
@@ -1046,7 +1046,7 @@ const InvoicesPage = () => {
                       <SelectTrigger className="bg-white/5 border-white/10 text-white">
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
+                      <SelectContent className="bg-[#1a1a2e] border-white/10">
                         {contacts.map((contact) => (
                           <SelectItem key={contact.id} value={contact.id}>
                             {contact.first_name} {contact.last_name}
@@ -1167,7 +1167,7 @@ const InvoicesPage = () => {
                               <SelectTrigger className="w-16 bg-white/5 backdrop-blur-xl border-white/10 px-2">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-white/5 backdrop-blur-xl">
+                              <SelectContent className="bg-[#1a1a2e]">
                                 <SelectItem value="percent">%</SelectItem>
                                 <SelectItem value="fixed">€</SelectItem>
                               </SelectContent>
@@ -1216,7 +1216,7 @@ const InvoicesPage = () => {
                       <SelectTrigger className="w-32 bg-white/5 backdrop-blur-xl border-white/10">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-white/5 backdrop-blur-xl">
+                      <SelectContent className="bg-[#1a1a2e]">
                         <SelectItem value="percent">%</SelectItem>
                         <SelectItem value="fixed">€ fixe</SelectItem>
                       </SelectContent>
@@ -1305,7 +1305,7 @@ const InvoicesPage = () => {
 
       {/* Services Management Dialog */}
       <Dialog open={servicesDialogOpen} onOpenChange={setServicesDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-2xl">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Package className="w-5 h-5 text-indigo-400" />
@@ -1433,7 +1433,7 @@ const InvoicesPage = () => {
 
       {/* View Invoice Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-3xl max-h-[90vh] overflow-y-auto">
           {selectedInvoice && (
             <>
               <DialogHeader>
@@ -1624,7 +1624,7 @@ const InvoicesPage = () => {
 
       {/* Add Payment Dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-indigo-400" />
@@ -1696,7 +1696,7 @@ const InvoicesPage = () => {
                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
+                    <SelectContent className="bg-[#1a1a2e] border-white/10">
                       {Object.entries(paymentMethods).map(([key, method]) => {
                         const Icon = method.icon;
                         return (

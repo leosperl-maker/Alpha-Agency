@@ -154,7 +154,7 @@ const QuotesPage = () => {
               Nouveau devis
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-white">Nouveau devis</DialogTitle>
             </DialogHeader>
@@ -170,7 +170,7 @@ const QuotesPage = () => {
                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue placeholder="Sélectionner un contact" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
+                    <SelectContent className="bg-[#1a1a2e] border-white/10">
                       {contacts.map((contact) => (
                         <SelectItem key={contact.id} value={contact.id}>
                           {contact.first_name} {contact.last_name}

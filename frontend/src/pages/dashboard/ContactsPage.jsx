@@ -216,7 +216,7 @@ const ContactsPage = () => {
                 <span className="sm:hidden">Ajouter</span>
               </Button>
             </DialogTrigger>
-          <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-white">
                 {editingContact ? "Modifier le contact" : "Nouveau contact"}
@@ -336,7 +336,7 @@ const ContactsPage = () => {
                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
+                    <SelectContent className="bg-[#1a1a2e] border-white/10">
                       <SelectItem value="nouveau">Nouveau</SelectItem>
                       <SelectItem value="prospect">Prospect</SelectItem>
                       <SelectItem value="qualifie">Qualifié</SelectItem>
@@ -357,7 +357,7 @@ const ContactsPage = () => {
                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
+                    <SelectContent className="bg-[#1a1a2e] border-white/10">
                       <SelectItem value="chaud">Chaud</SelectItem>
                       <SelectItem value="tiède">Tiède</SelectItem>
                       <SelectItem value="froid">Froid</SelectItem>
@@ -437,7 +437,7 @@ const ContactsPage = () => {
             <Filter className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
-          <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
+          <SelectContent className="bg-[#1a1a2e] border-white/10">
             <SelectItem value="all">Tous</SelectItem>
             <SelectItem value="nouveau">Nouveau</SelectItem>
             <SelectItem value="qualifie">Qualifié</SelectItem>

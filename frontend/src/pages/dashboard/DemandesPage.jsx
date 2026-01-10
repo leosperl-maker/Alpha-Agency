@@ -230,7 +230,7 @@ const DemandesPage = () => {
             <Filter className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Tous les statuts" />
           </SelectTrigger>
-          <SelectContent className="bg-white/5 backdrop-blur-xl border-white/10">
+          <SelectContent className="bg-[#1a1a2e] border-white/10">
             <SelectItem value="all">Tous les statuts</SelectItem>
             <SelectItem value="nouveau">Non traité</SelectItem>
             <SelectItem value="contacté">Contacté</SelectItem>
@@ -341,7 +341,7 @@ const DemandesPage = () => {
 
       {/* Detail Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl flex items-center gap-3">
               <User className="w-6 h-6" />
@@ -365,7 +365,7 @@ const DemandesPage = () => {
                     <SelectTrigger className="w-40 bg-white/5 backdrop-blur-xl">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white/5 backdrop-blur-xl">
+                    <SelectContent className="bg-[#1a1a2e]">
                       <SelectItem value="nouveau">Non traité</SelectItem>
                       <SelectItem value="contacté">Contacté</SelectItem>
                       <SelectItem value="qualifié">Qualifié</SelectItem>

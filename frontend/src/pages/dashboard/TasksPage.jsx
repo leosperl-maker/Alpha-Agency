@@ -137,7 +137,7 @@ const SortableTaskCard = ({ task, onEdit, onDelete, onStatusChange, onViewDetail
               <MoreVertical className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-white/5 backdrop-blur-xl" align="end">
+          <DropdownMenuContent className="bg-[#1a1a2e]" align="end">
             <DropdownMenuItem onClick={() => onEdit(task)} data-testid={`task-edit-${task.id}`}>
               <Edit className="w-4 h-4 mr-2" /> Modifier
             </DropdownMenuItem>
@@ -266,7 +266,7 @@ const DroppableTaskColumn = ({ column, children, onEdit, onDelete, tasksCount, t
                   <MoreVertical className="w-4 h-4 text-white/60" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white/5 backdrop-blur-xl border-white/10">
+              <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
                 <DropdownMenuItem onClick={() => onEdit(column)}>
                   <Edit className="w-4 h-4 mr-2" /> Modifier
                 </DropdownMenuItem>
@@ -825,7 +825,7 @@ const TasksPage = () => {
           <SelectTrigger className="w-full sm:w-36 bg-white/5 backdrop-blur-xl border-white/10">
             <SelectValue placeholder="Priorité" />
           </SelectTrigger>
-          <SelectContent className="bg-white/5 backdrop-blur-xl">
+          <SelectContent className="bg-[#1a1a2e]">
             <SelectItem value="all">Toutes</SelectItem>
             {Object.entries(priorityConfig).map(([key, config]) => (
               <SelectItem key={key} value={key}>{config.label}</SelectItem>
@@ -909,7 +909,7 @@ const TasksPage = () => {
 
       {/* Task Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#1a1a2e] max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white">
               {editingTask ? "Modifier la tâche" : "Nouvelle tâche"}
@@ -946,7 +946,7 @@ const TasksPage = () => {
                   <SelectTrigger className="bg-white/5 border-white/10">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white/5 backdrop-blur-xl">
+                  <SelectContent className="bg-[#1a1a2e]">
                     {Object.entries(priorityConfig).map(([key, config]) => (
                       <SelectItem key={key} value={key}>{config.label}</SelectItem>
                     ))}
@@ -960,7 +960,7 @@ const TasksPage = () => {
                   <SelectTrigger className="bg-white/5 border-white/10">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white/5 backdrop-blur-xl">
+                  <SelectContent className="bg-[#1a1a2e]">
                     {categories.map(cat => (
                       <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                     ))}
@@ -975,7 +975,7 @@ const TasksPage = () => {
                 <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white/5 backdrop-blur-xl">
+                <SelectContent className="bg-[#1a1a2e]">
                   {columns.map(col => (
                     <SelectItem key={col.id} value={col.id}>
                       <div className="flex items-center gap-2">
@@ -1010,7 +1010,7 @@ const TasksPage = () => {
                 <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue placeholder="Aucun contact" />
                 </SelectTrigger>
-                <SelectContent className="bg-white/5 backdrop-blur-xl max-h-60">
+                <SelectContent className="bg-[#1a1a2e] max-h-60">
                   <SelectItem value="none">— Aucun contact —</SelectItem>
                   {contacts.map(contact => (
                     <SelectItem key={contact.id} value={contact.id}>
@@ -1036,7 +1036,7 @@ const TasksPage = () => {
 
       {/* Column Dialog */}
       <Dialog open={columnDialogOpen} onOpenChange={setColumnDialogOpen}>
-        <DialogContent className="bg-white/5 backdrop-blur-xl border-white/10 max-w-md">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
           <DialogHeader>
             <DialogTitle>{editingColumn ? "Modifier la colonne" : "Nouvelle colonne"}</DialogTitle>
           </DialogHeader>

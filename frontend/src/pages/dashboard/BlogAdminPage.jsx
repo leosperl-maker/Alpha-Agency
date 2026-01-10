@@ -50,7 +50,7 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
                 <SelectTrigger className="w-24 bg-white/5 backdrop-blur-xl">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white/5 backdrop-blur-xl">
+                <SelectContent className="bg-[#1a1a2e]">
                   <SelectItem value="2">H2</SelectItem>
                   <SelectItem value="3">H3</SelectItem>
                 </SelectContent>
@@ -114,7 +114,7 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
                 <SelectTrigger className="w-28 bg-white/5 backdrop-blur-xl">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white/5 backdrop-blur-xl">
+                <SelectContent className="bg-[#1a1a2e]">
                   <SelectItem value="left">Gauche</SelectItem>
                   <SelectItem value="center">Centre</SelectItem>
                   <SelectItem value="right">Droite</SelectItem>
@@ -128,7 +128,7 @@ const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, i
                 <SelectTrigger className="w-24 bg-white/5 backdrop-blur-xl">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white/5 backdrop-blur-xl">
+                <SelectContent className="bg-[#1a1a2e]">
                   <SelectItem value="small">Petit</SelectItem>
                   <SelectItem value="medium">Moyen</SelectItem>
                   <SelectItem value="large">Grand</SelectItem>
@@ -570,7 +570,7 @@ const ArticleEditor = ({ article, onSave, onCancel, tags: availableTags }) => {
           <SelectTrigger className="w-40 bg-white/5 backdrop-blur-xl">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-white/5 backdrop-blur-xl">
+          <SelectContent className="bg-[#1a1a2e]">
             <SelectItem value="draft">Brouillon</SelectItem>
             <SelectItem value="published">Publié</SelectItem>
           </SelectContent>
@@ -725,7 +725,7 @@ const BlogAdminPage = () => {
                 <Tag className="w-4 h-4 mr-1" /> Tags
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-white/5 backdrop-blur-xl">
+            <DialogContent className="bg-[#1a1a2e]">
               <DialogHeader>
                 <DialogTitle>Gestion des tags</DialogTitle>
               </DialogHeader>
@@ -781,7 +781,7 @@ const BlogAdminPage = () => {
           <SelectTrigger className="w-full sm:w-32 bg-white/5 backdrop-blur-xl">
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
-          <SelectContent className="bg-white/5 backdrop-blur-xl">
+          <SelectContent className="bg-[#1a1a2e]">
             <SelectItem value="all">Tous</SelectItem>
             <SelectItem value="draft">Brouillon</SelectItem>
             <SelectItem value="published">Publié</SelectItem>
@@ -791,7 +791,7 @@ const BlogAdminPage = () => {
           <SelectTrigger className="w-full sm:w-32 bg-white/5 backdrop-blur-xl">
             <SelectValue placeholder="Tag" />
           </SelectTrigger>
-          <SelectContent className="bg-white/5 backdrop-blur-xl">
+          <SelectContent className="bg-[#1a1a2e]">
             <SelectItem value="all">Tous</SelectItem>
             {tags.map(tag => (
               <SelectItem key={tag.id} value={tag.name}>{tag.name}</SelectItem>
@@ -849,7 +849,7 @@ const BlogAdminPage = () => {
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="bg-white/5 backdrop-blur-xl">
+                        <DropdownMenuContent className="bg-[#1a1a2e]">
                           <DropdownMenuItem onClick={() => { setEditingArticle(article); setEditorOpen(true); }}>
                             <Edit className="w-4 h-4 mr-2" /> Modifier
                           </DropdownMenuItem>

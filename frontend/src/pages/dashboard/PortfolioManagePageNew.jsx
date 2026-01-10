@@ -317,7 +317,7 @@ const PortfolioManagePage = () => {
             <Filter className="w-4 h-4 mr-2" />
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-white/5 backdrop-blur-xl">
+          <SelectContent className="bg-[#1a1a2e]">
             <SelectItem value="all">Tous</SelectItem>
             <SelectItem value="published">Publiés</SelectItem>
             <SelectItem value="draft">Brouillons</SelectItem>
@@ -328,7 +328,7 @@ const PortfolioManagePage = () => {
             <Tag className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Catégorie" />
           </SelectTrigger>
-          <SelectContent className="bg-white/5 backdrop-blur-xl">
+          <SelectContent className="bg-[#1a1a2e]">
             <SelectItem value="all">Toutes</SelectItem>
             {CATEGORIES.map(cat => (
               <SelectItem key={cat.id} value={cat.id}>
@@ -421,7 +421,7 @@ const PortfolioManagePage = () => {
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-white/5 backdrop-blur-xl border-white/10" align="end">
+                      <DropdownMenuContent className="bg-[#1a1a2e] border-white/10" align="end">
                         <DropdownMenuItem onClick={() => openEditor(item)}>
                           <Edit className="w-4 h-4 mr-2" /> Modifier
                         </DropdownMenuItem>
@@ -607,7 +607,7 @@ const PortfolioManagePage = () => {
                       <SelectTrigger className="bg-white/5 border-white/10">
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white/5 backdrop-blur-xl">
+                      <SelectContent className="bg-[#1a1a2e]">
                         {CATEGORIES.map((cat) => (
                           <SelectItem key={cat.id} value={cat.id}>
                             <div className="flex items-center gap-2">
@@ -629,7 +629,7 @@ const PortfolioManagePage = () => {
                       <SelectTrigger className="bg-white/5 border-white/10">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-white/5 backdrop-blur-xl">
+                      <SelectContent className="bg-[#1a1a2e]">
                         <SelectItem value="draft">Brouillon</SelectItem>
                         <SelectItem value="published">Publié</SelectItem>
                       </SelectContent>
