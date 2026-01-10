@@ -106,7 +106,7 @@ const InvoicesPage = () => {
   });
   const [savingPayment, setSavingPayment] = useState(false);
   
-  const [items, setItems] = useState([{ title: "", description: "", quantity: 1, unit_price: 0, discount: 0 }]);
+  const [items, setItems] = useState([{ title: "", description: "", quantity: 1, unit_price: 0, discount: 0, discountType: "percent" }]);
   const [globalDiscount, setGlobalDiscount] = useState({ type: "percent", value: 0 }); // type: "percent" or "fixed"
   const [formData, setFormData] = useState({
     contact_id: "",
