@@ -343,6 +343,20 @@ const AIAssistantPageNew = () => {
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
+            {/* Actions Toggle */}
+            <button
+              onClick={() => setActionsEnabled(!actionsEnabled)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${
+                actionsEnabled 
+                  ? "bg-amber-500/20 border-amber-500/40 text-amber-400" 
+                  : "bg-white/5 border-white/10 text-white/40"
+              }`}
+              title={actionsEnabled ? "Actions activées (l'IA peut créer des tâches, devis, etc.)" : "Actions désactivées"}
+            >
+              <ListTodo className="w-3.5 h-3.5" />
+              Actions {actionsEnabled ? "ON" : "OFF"}
+            </button>
+
             {/* Mode Toggle */}
             <div className="flex items-center bg-white/5 rounded-xl p-1 border border-white/10">
               <button
