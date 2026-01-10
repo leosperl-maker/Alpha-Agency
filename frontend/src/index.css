@@ -81,27 +81,30 @@ body.dark {
 
 /* Pipeline horizontal scrollbar - always visible */
 .pipeline-scroll {
-    overflow-x: auto;
+    overflow-x: scroll !important;
     overflow-y: visible;
-    padding-bottom: 12px;
+    padding-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .pipeline-scroll::-webkit-scrollbar {
-    height: 10px;
-    background: #F0F0F0;
-    border-radius: 5px;
+    height: 12px;
+    background: #E5E5E5;
+    border-radius: 6px;
+    display: block !important;
 }
 
 .pipeline-scroll::-webkit-scrollbar-track {
-    background: #F0F0F0;
-    border-radius: 5px;
-    margin: 0 10px;
+    background: #E5E5E5;
+    border-radius: 6px;
+    margin: 0 16px;
 }
 
 .pipeline-scroll::-webkit-scrollbar-thumb {
     background: linear-gradient(to right, #CE0202, #B00202);
-    border-radius: 5px;
-    min-width: 60px;
+    border-radius: 6px;
+    min-width: 80px;
+    border: 2px solid #E5E5E5;
 }
 
 .pipeline-scroll::-webkit-scrollbar-thumb:hover {
@@ -109,9 +112,11 @@ body.dark {
 }
 
 /* Firefox scrollbar */
-.pipeline-scroll {
-    scrollbar-width: thin;
-    scrollbar-color: #CE0202 #F0F0F0;
+@-moz-document url-prefix() {
+    .pipeline-scroll {
+        scrollbar-width: auto;
+        scrollbar-color: #CE0202 #E5E5E5;
+    }
 }
 
 /* Noise texture overlay - lower z-index to not interfere with dropdowns */
