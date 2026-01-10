@@ -41,6 +41,7 @@ const BLOCK_TYPES = {
   gallery: { label: "Galerie", icon: ImagePlus, category: "media" },
   video: { label: "Vidéo", icon: Video, category: "media" },
   audio: { label: "Audio", icon: Music, category: "media" },
+  pdf: { label: "Document PDF", icon: Link2, category: "media" },
   beforeAfter: { label: "Avant/Après", icon: SlidersHorizontal, category: "media" },
   
   // Layout
