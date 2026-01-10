@@ -1029,11 +1029,11 @@ const PipelinePage = () => {
           >
             <div 
               ref={scrollContainerRef}
-              className="pipeline-scroll pb-4 pl-3 sm:pl-4 md:pl-6"
-              style={{ WebkitOverflowScrolling: 'touch', overflowX: 'auto', paddingRight: '24px' }}
+              className="pipeline-scroll pb-4 px-3 sm:px-4 md:px-6"
+              style={{ WebkitOverflowScrolling: 'touch', overflowX: 'auto' }}
             >
               <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
-                <div className="flex gap-3 sm:gap-4" style={{ width: 'max-content' }}>
+                <div className="flex gap-3 sm:gap-4" style={{ width: 'max-content', paddingRight: '320px' }}>
                   {columns.map((column) => {
                     const columnOpps = filterOpportunities(pipeline[column.id] || []);
                     const totalAmount = columnOpps.reduce((sum, opp) => sum + (opp.amount || 0), 0);
