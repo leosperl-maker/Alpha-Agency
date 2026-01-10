@@ -376,6 +376,8 @@ export const aiAPI = {
 export const aiEnhancedAPI = {
   getStatus: () => api.get('/ai-enhanced/status'),
   chat: (data) => api.post('/ai-enhanced/chat', data),
+  getContext: () => api.get('/ai-enhanced/context'),
+  executeAction: (actionType, params) => api.post('/ai-enhanced/execute-action', { action_type: actionType, params }),
   analyzeImage: (file, prompt, model = 'gpt-4o') => {
     const formData = new FormData();
     formData.append('file', file);
@@ -390,6 +392,41 @@ export const aiEnhancedAPI = {
   getConversations: () => api.get('/ai-enhanced/conversations'),
   getConversation: (id) => api.get(`/ai-enhanced/conversations/${id}`),
   deleteConversation: (id) => api.delete(`/ai-enhanced/conversations/${id}`),
+};
+
+// Documents Manager API
+export const documentsAPI = {
+  // Folders
+  getFolders: (parentId) => api.get('/documents/folders', { params: { parent_id: parentId } }),
+  getFolderTree: () => api.get('/documents/folders/tree'),
+  createFolder: (data) => api.post('/documents/folders', data),
+  updateFolder: (id, data) => api.put(`/documents/folders/${id}`, data),
+  deleteFolder: (id, force = false) => api.delete(`/documents/folders/${id}`, { params: { force } }),
+  
+  // Documents
+  getAll: (params) => api.get('/documents', { params }),
+  getStats: () => api.get('/documents/stats'),
+  getOne: (id) => api.get(`/documents/${id}`),
+  upload: (file, folderId, tags) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (folderId) formData.append('folder_id', folderId);
+    if (tags) formData.append('tags', tags);
+    return api.post('/documents/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  update: (id, data) => api.put(`/documents/${id}`, data),
+  delete: (id) => api.delete(`/documents/${id}`),
+  bulkDelete: (ids) => api.post('/documents/bulk-delete', ids),
+  move: (docIds, folderId) => {
+    const formData = new FormData();
+    docIds.forEach(id => formData.append('doc_ids', id));
+    if (folderId) formData.append('folder_id', folderId);
+    return api.post('/documents/move', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
 };
 
 // News/Actualités API (NewsAPI.org - Style Perplexity Discover)
