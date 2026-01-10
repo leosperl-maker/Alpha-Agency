@@ -43,7 +43,129 @@ const DashboardLayout = () => {
     if (userData) {
       setUser(JSON.parse(userData));
     }
+    
+    // Fetch notifications
+    fetchNotifications();
   }, [navigate]);
+
+  // Click outside handlers
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setSearchOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotificationsOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      // Fetch overdue tasks
+      const tasksRes = await tasksAPI.getAll({ status: 'todo,in_progress' });
+      const overdueTasks = (tasksRes.data || []).filter(t => {
+        if (!t.due_date) return false;
+        return new Date(t.due_date) < new Date();
+      }).slice(0, 3);
+      
+      // Fetch overdue invoices
+      const invoicesRes = await invoicesAPI.getAll({ status: 'pending,overdue' });
+      const overdueInvoices = (invoicesRes.data || []).filter(i => i.status === 'overdue').slice(0, 3);
+      
+      // Fetch new leads (recent contacts)
+      const contactsRes = await contactsAPI.getAll({ type: 'lead' });
+      const recentLeads = (contactsRes.data || []).slice(0, 3);
+      
+      const notifs = [];
+      
+      overdueTasks.forEach(t => {
+        notifs.push({
+          id: `task-${t.id}`,
+          type: 'task',
+          title: 'Tâche en retard',
+          message: t.title,
+          icon: Clock,
+          color: 'text-orange-400',
+          link: '/admin/taches'
+        });
+      });
+      
+      overdueInvoices.forEach(i => {
+        notifs.push({
+          id: `invoice-${i.id}`,
+          type: 'invoice',
+          title: 'Facture impayée',
+          message: `${i.number || 'Facture'} - ${i.total?.toFixed(2) || 0}€`,
+          icon: FileWarning,
+          color: 'text-red-400',
+          link: '/admin/facturation'
+        });
+      });
+      
+      recentLeads.slice(0, 2).forEach(c => {
+        notifs.push({
+          id: `contact-${c.id}`,
+          type: 'contact',
+          title: 'Nouveau lead',
+          message: `${c.first_name} ${c.last_name}`,
+          icon: UserPlus,
+          color: 'text-green-400',
+          link: '/admin/contacts'
+        });
+      });
+      
+      setNotifications(notifs.slice(0, 5));
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const handleSearch = async (query) => {
+    setSearchQuery(query);
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    
+    try {
+      const [contactsRes, tasksRes] = await Promise.all([
+        contactsAPI.getAll({ search: query }),
+        tasksAPI.getAll({ search: query })
+      ]);
+      
+      const results = [];
+      (contactsRes.data || []).slice(0, 3).forEach(c => {
+        results.push({
+          id: `contact-${c.id}`,
+          type: 'Contact',
+          title: `${c.first_name} ${c.last_name}`,
+          subtitle: c.company || c.email,
+          icon: Users,
+          link: '/admin/contacts'
+        });
+      });
+      (tasksRes.data || []).slice(0, 3).forEach(t => {
+        results.push({
+          id: `task-${t.id}`,
+          type: 'Tâche',
+          title: t.title,
+          subtitle: t.status,
+          icon: CheckSquare,
+          link: '/admin/taches'
+        });
+      });
+      
+      setSearchResults(results);
+    } catch (error) {
+      console.error("Search error:", error);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("alpha_token");
