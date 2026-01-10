@@ -560,6 +560,32 @@ Utilise ces données pour répondre aux questions de l'utilisateur. Si l'utilisa
         # Send message
         response = await chat.send_message(user_message)
         
+        # Check for actions in response
+        action_result = None
+        clean_response = response
+        if request.enable_actions and "[ACTION]" in response:
+            import re
+            action_match = re.search(r'\[ACTION\](.*?)\[/ACTION\]', response, re.DOTALL)
+            if action_match:
+                try:
+                    action_json = action_match.group(1).strip()
+                    action_data = json.loads(action_json)
+                    action_result = await execute_action(
+                        action_data.get("action_type"),
+                        action_data.get("params", {}),
+                        user_id
+                    )
+                    # Remove action block from displayed response
+                    clean_response = response.replace(action_match.group(0), "").strip()
+                    if action_result.get("success"):
+                        clean_response += f"\n\n{action_result.get('message', '')}"
+                    else:
+                        clean_response += f"\n\n⚠️ Erreur d'action: {action_result.get('error', 'Erreur inconnue')}"
+                except json.JSONDecodeError as je:
+                    logger.error(f"Action JSON parse error: {je}")
+                except Exception as ae:
+                    logger.error(f"Action execution error: {ae}")
+        
         # Increment usage
         await increment_usage(user_id)
         
@@ -575,7 +601,7 @@ Utilise ces données pour répondre aux questions de l'utilisateur. Si l'utilisa
                     "messages": {
                         "$each": [
                             {"role": "user", "content": last_msg.content, "timestamp": datetime.now(timezone.utc).isoformat()},
-                            {"role": "assistant", "content": response, "timestamp": datetime.now(timezone.utc).isoformat()}
+                            {"role": "assistant", "content": clean_response, "timestamp": datetime.now(timezone.utc).isoformat()}
                         ]
                     }
                 },
@@ -590,8 +616,9 @@ Utilise ces données pour répondre aux questions de l'utilisateur. Si l'utilisa
         )
         
         return {
-            "message": response,
+            "message": clean_response,
             "conversation_id": conversation_id,
+            "action_executed": action_result,
             "usage": {
                 "calls_today": (await db.ai_usage.find_one({"user_id": user_id, "date": datetime.now(timezone.utc).strftime("%Y-%m-%d")}))["calls"],
                 "remaining": remaining - 1
