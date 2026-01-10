@@ -206,11 +206,12 @@ const ContactPage = () => {
                         >
                           <SelectValue placeholder="Sélectionnez un type" />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-[#E5E5E5] z-[100]">
+                        <SelectContent className="bg-white border-[#E5E5E5] z-[100]" data-testid="select-project-type-content">
                           {projectTypes.map((type) => (
                             <SelectItem 
                               key={type.value} 
                               value={type.value}
+                              data-testid={`select-option-${type.value}`}
                               className="text-[#1A1A1A] hover:bg-[#F8F8F8] cursor-pointer"
                             >
                               {type.label}
