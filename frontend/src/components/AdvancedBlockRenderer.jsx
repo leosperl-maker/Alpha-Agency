@@ -417,19 +417,21 @@ const SectionBlock = ({ block, renderBlocks }) => {
 const AdvancedBlockRenderer = ({ blocks = [] }) => {
   const renderBlock = (block, index) => {
     const key = block.id || `block-${index}`;
+    const isFirst = index === 0;
+    const isLast = index === blocks.length - 1;
     
     // Different spacing based on block type
-    const getMarginClass = () => {
+    const getSpacing = () => {
       if (['image', 'gallery', 'video', 'beforeAfter'].includes(block.type)) {
-        return 'mt-16 mb-16'; // Extra large margin above and below media blocks
+        return { marginTop: isFirst ? 0 : 64, marginBottom: isLast ? 0 : 64 }; // 64px = 4rem
       }
       if (['stats', 'quote'].includes(block.type)) {
-        return 'my-14'; // Medium-large margin for emphasis blocks
+        return { marginTop: isFirst ? 0 : 48, marginBottom: isLast ? 0 : 48 }; // 48px = 3rem
       }
       if (['heading'].includes(block.type)) {
-        return 'mt-10 mb-4'; // Less bottom margin for headings
+        return { marginTop: isFirst ? 0 : 32, marginBottom: 16 };
       }
-      return 'mb-6'; // Normal margin for text blocks
+      return { marginBottom: isLast ? 0 : 24 };
     };
     
     const wrapper = (children) => (
@@ -439,7 +441,7 @@ const AdvancedBlockRenderer = ({ blocks = [] }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className={`${getMarginClass()} first:mt-0 last:mb-0`}
+        style={getSpacing()}
       >
         {children}
       </motion.div>
