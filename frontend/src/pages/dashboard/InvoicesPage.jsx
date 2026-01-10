@@ -441,12 +441,16 @@ const InvoicesPage = () => {
   };
 
   const addItem = () => {
-    setItems([...items, { title: "", description: "", quantity: 1, unit_price: 0, discount: 0 }]);
+    setItems([...items, { title: "", description: "", quantity: 1, unit_price: 0, discount: 0, discountType: "percent" }]);
   };
 
   const updateItem = (index, field, value) => {
     const newItems = [...items];
-    newItems[index][field] = field === "quantity" || field === "unit_price" ? parseFloat(value) || 0 : value;
+    if (field === "quantity" || field === "unit_price" || field === "discount") {
+      newItems[index][field] = parseFloat(value) || 0;
+    } else {
+      newItems[index][field] = value;
+    }
     setItems(newItems);
   };
 
@@ -456,10 +460,18 @@ const InvoicesPage = () => {
     }
   };
 
-  const calculateLineTotal = (item) => {
+  const calculateLineDiscount = (item) => {
     const subtotal = item.quantity * item.unit_price;
     const discount = item.discount || 0;
-    return subtotal - (subtotal * discount / 100);
+    if (item.discountType === "fixed") {
+      return Math.min(discount, subtotal); // Can't discount more than the subtotal
+    }
+    return subtotal * (discount / 100);
+  };
+
+  const calculateLineTotal = (item) => {
+    const subtotal = item.quantity * item.unit_price;
+    return Math.max(0, subtotal - calculateLineDiscount(item)); // Never negative
   };
 
   const calculateSubtotal = (invoiceItems = items) => {
