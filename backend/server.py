@@ -2976,6 +2976,82 @@ async def upload_audio(file: UploadFile = File(...), current_user: dict = Depend
         logger.error(f"Cloudinary upload error: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur lors de l'upload: {str(e)}")
 
+
+@api_router.post("/upload/video", response_model=dict)
+async def upload_video(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload video file to Cloudinary"""
+    if not CLOUDINARY_CLOUD_NAME:
+        raise HTTPException(status_code=500, detail="Cloudinary non configuré")
+    
+    allowed_types = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo']
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Type de fichier non autorisé. Formats acceptés: MP4, WebM, OGG, MOV, AVI")
+    
+    # Check file size (max 100MB)
+    content = await file.read()
+    if len(content) > 100 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Fichier trop volumineux. Maximum: 100MB")
+    
+    try:
+        result = cloudinary.uploader.upload_large(
+            content,
+            folder="alpha-agency/video",
+            resource_type="video",
+            chunk_size=6000000
+        )
+        return {
+            "url": result['secure_url'],
+            "public_id": result['public_id'],
+            "duration": result.get('duration'),
+            "format": result.get('format'),
+            "width": result.get('width'),
+            "height": result.get('height')
+        }
+    except Exception as e:
+        logger.error(f"Cloudinary video upload error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'upload vidéo: {str(e)}")
+
+
+@api_router.post("/upload/file", response_model=dict)
+async def upload_file(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload generic file (PDF, documents) to Cloudinary"""
+    if not CLOUDINARY_CLOUD_NAME:
+        raise HTTPException(status_code=500, detail="Cloudinary non configuré")
+    
+    allowed_types = ['application/pdf', 'application/msword', 
+                     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                     'application/vnd.ms-excel',
+                     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                     'application/vnd.ms-powerpoint',
+                     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                     'text/plain', 'text/csv']
+    
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Type de fichier non autorisé. Formats acceptés: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, CSV")
+    
+    # Check file size (max 50MB)
+    content = await file.read()
+    if len(content) > 50 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Fichier trop volumineux. Maximum: 50MB")
+    
+    try:
+        result = cloudinary.uploader.upload(
+            content,
+            folder="alpha-agency/files",
+            resource_type="raw",
+            public_id=f"{uuid.uuid4()}_{file.filename}"
+        )
+        return {
+            "url": result['secure_url'],
+            "public_id": result['public_id'],
+            "filename": file.filename,
+            "size": len(content),
+            "content_type": file.content_type
+        }
+    except Exception as e:
+        logger.error(f"Cloudinary file upload error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'upload: {str(e)}")
+
 @api_router.delete("/upload/{public_id:path}", response_model=dict)
 async def delete_upload(public_id: str, current_user: dict = Depends(get_current_user)):
     """Delete file from Cloudinary"""
