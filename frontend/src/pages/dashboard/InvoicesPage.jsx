@@ -416,9 +416,10 @@ const InvoicesPage = () => {
           description: item.description || "",
           quantity: item.quantity || 1,
           unit_price: item.unit_price || 0,
-          discount: item.discount || 0
+          discount: item.discount || 0,
+          discountType: item.discountType || "percent"
         }))
-      : [{ title: "", description: "", quantity: 1, unit_price: 0, discount: 0 }];
+      : [{ title: "", description: "", quantity: 1, unit_price: 0, discount: 0, discountType: "percent" }];
     setItems(loadedItems);
     setGlobalDiscount(invoice.global_discount || { type: "percent", value: 0 });
     setSheetOpen(true);
