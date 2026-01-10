@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { useState, useEffect, useRef } from "react";
 import { 
   Plus, Euro, Calendar, User, MoreVertical, Trash2, Archive, Edit, 
