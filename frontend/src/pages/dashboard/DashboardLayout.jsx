@@ -4,16 +4,18 @@ import {
   LayoutDashboard, Users, Kanban, FileText, Receipt, CreditCard, Settings,
   LogOut, Menu, X, Image, Inbox, FileCheck, CheckSquare, Wallet, Database,
   UserCog, Bot, Newspaper, Share2, Tag, Mail, ChevronLeft, Bell, Search,
-  User, ChevronDown, AlertCircle, Clock, FileWarning, UserPlus
+  User, ChevronDown, AlertCircle, Clock, FileWarning, UserPlus, Sun, Moon
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import FloatingAIChat from "../../components/FloatingAIChat";
 import { tasksAPI, contactsAPI, invoicesAPI } from "../../lib/api";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
