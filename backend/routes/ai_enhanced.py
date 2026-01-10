@@ -632,9 +632,17 @@ Actions disponibles:
 4. create_quote - Créer un devis
    Params: client_name (requis), client_email, services: [{title, description, quantity, unit_price}], notes
 
+5. get_document - Obtenir les détails d'un document uploadé
+   Params: document_name OU document_id
+   
+6. list_documents - Lister les documents avec filtres
+   Params: folder_name (optionnel), file_type (optionnel: image, document, spreadsheet, video, audio, archive), search (optionnel)
+
 Exemples:
 - "Crée une tâche pour rappeler Jean demain" → Inclure [ACTION]{"action_type": "create_task", "params": {"title": "Rappeler Jean", "due_date": "2026-01-12", "priority": "medium"}}[/ACTION]
 - "Marque la tâche 'Appeler client' comme terminée" → [ACTION]{"action_type": "mark_task_done", "params": {"task_title": "Appeler client"}}[/ACTION]
+- "Montre-moi les documents PDF" → [ACTION]{"action_type": "list_documents", "params": {"file_type": "document"}}[/ACTION]
+- "Trouve le fichier contrat" → [ACTION]{"action_type": "get_document", "params": {"document_name": "contrat"}}[/ACTION]
 
 IMPORTANT: N'exécute une action que si l'utilisateur le demande explicitement. Demande confirmation pour les actions irréversibles."""
         
