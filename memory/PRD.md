@@ -208,9 +208,9 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 ## Pending Tasks
 
 ### P1 - Priorité haute
-- [ ] **Toggle Thème Clair/Sombre** - Switch entre glassmorphique sombre et thème clair
-- [ ] **Intégrer Documents dans l'assistant IA** - Permettre à l'IA d'accéder aux fichiers du module Documents
-- [ ] Appliquer le design glassmorphique aux pages restantes (Contacts, Pipeline, Facturation, etc.)
+- [x] ~~**Toggle Thème Clair/Sombre**~~ - ✅ Implémenté avec ThemeContext + toggle dans profile dropdown
+- [x] ~~**Intégrer Documents dans l'assistant IA**~~ - ✅ L'IA accède aux fichiers et peut les lister
+- [x] ~~Appliquer le design glassmorphique aux pages restantes~~ - ✅ ContactsPage, PipelinePage, SettingsPage, TasksPage, etc.
 
 ### P2 - Priorité moyenne
 - [ ] Nettoyer les routes dupliquées dans server.py (auth, contacts, opportunities restent à migrer)
