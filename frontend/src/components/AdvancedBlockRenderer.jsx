@@ -418,6 +418,10 @@ const AdvancedBlockRenderer = ({ blocks = [] }) => {
   const renderBlock = (block, index) => {
     const key = block.id || `block-${index}`;
     
+    // Media blocks get extra spacing
+    const isMediaBlock = ['image', 'gallery', 'video', 'beforeAfter'].includes(block.type);
+    const marginClass = isMediaBlock ? 'my-16' : 'mb-10';
+    
     const wrapper = (children) => (
       <motion.div
         key={key}
@@ -425,7 +429,7 @@ const AdvancedBlockRenderer = ({ blocks = [] }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="mb-12 last:mb-0"
+        className={`${marginClass} last:mb-0`}
       >
         {children}
       </motion.div>
