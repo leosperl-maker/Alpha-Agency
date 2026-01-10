@@ -298,7 +298,8 @@ const InvoicesPage = () => {
       description: service.description || "",
       quantity: 1,
       unit_price: parseFloat(service.price),
-      discount: 0
+      discount: 0,
+      discountType: "percent"
     }]);
     toast.success("Service ajouté à la facture");
   };
@@ -316,7 +317,8 @@ const InvoicesPage = () => {
           description: item.description || "",
           quantity: item.quantity,
           unit_price: parseFloat(item.unit_price),
-          discount: parseFloat(item.discount) || 0
+          discount: parseFloat(item.discount) || 0,
+          discountType: item.discountType || "percent"
         })),
         global_discount: globalDiscount
       };
