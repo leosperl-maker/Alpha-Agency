@@ -47,22 +47,23 @@ import MainLayout from "./components/MainLayout";
 
 function App() {
   return (
-    <div className="App">
-      <Toaster 
-        position="top-right" 
-        toastOptions={{
-          style: {
-            background: '#0A0A0A',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: '#E1E1E1',
-          },
-        }}
-      />
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          {/* Site vitrine */}
-          <Route element={<MainLayout />}>
+    <ThemeProvider>
+      <div className="App">
+        <Toaster 
+          position="top-right" 
+          toastOptions={{
+            style: {
+              background: '#0A0A0A',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#E1E1E1',
+            },
+          }}
+        />
+        <BrowserRouter>
+          <ScrollToTop />
+          <Routes>
+            {/* Site vitrine */}
+            <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/agence" element={<AgencyPage />} />
             <Route path="/offres" element={<OffersPage />} />
