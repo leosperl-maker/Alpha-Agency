@@ -46,10 +46,10 @@ const DocumentsPage = () => {
     setLoading(true);
     try {
       const [foldersRes, docsRes, statsRes, treeRes] = await Promise.all([
-        documentsAPI.getFolders(currentFolder),
-        documentsAPI.getAll({ folder_id: currentFolder, search: searchQuery || undefined }),
-        documentsAPI.getStats(),
-        documentsAPI.getFolderTree()
+        fileManagerAPI.getFolders(currentFolder),
+        fileManagerAPI.getAll({ folder_id: currentFolder, search: searchQuery || undefined }),
+        fileManagerAPI.getStats(),
+        fileManagerAPI.getFolderTree()
       ]);
       setFolders(foldersRes.data || []);
       setDocuments(docsRes.data || []);
@@ -104,7 +104,7 @@ const DocumentsPage = () => {
   const handleCreateFolder = async () => {
     if (!newFolderName.trim()) return;
     try {
-      await documentsAPI.createFolder({
+      await fileManagerAPI.createFolder({
         name: newFolderName.trim(),
         parent_id: currentFolder
       });
@@ -129,7 +129,7 @@ const DocumentsPage = () => {
       ));
       
       try {
-        await documentsAPI.upload(file, currentFolder);
+        await fileManagerAPI.upload(file, currentFolder);
         setUploadProgress(prev => prev.map((p, idx) => 
           idx === i ? { ...p, status: "done" } : p
         ));
@@ -151,10 +151,10 @@ const DocumentsPage = () => {
   const handleDelete = async (type, id) => {
     try {
       if (type === "folder") {
-        await documentsAPI.deleteFolder(id, true);
+        await fileManagerAPI.deleteFolder(id, true);
         toast.success("Dossier supprimé");
       } else {
-        await documentsAPI.delete(id);
+        await fileManagerAPI.delete(id);
         toast.success("Document supprimé");
       }
       fetchData();
@@ -168,10 +168,10 @@ const DocumentsPage = () => {
     try {
       const docIds = selectedItems.filter(i => i.type === "document").map(i => i.id);
       if (docIds.length) {
-        await documentsAPI.bulkDelete(docIds);
+        await fileManagerAPI.bulkDelete(docIds);
       }
       for (const item of selectedItems.filter(i => i.type === "folder")) {
-        await documentsAPI.deleteFolder(item.id, true);
+        await fileManagerAPI.deleteFolder(item.id, true);
       }
       toast.success(`${selectedItems.length} élément(s) supprimé(s)`);
       setSelectedItems([]);
@@ -186,7 +186,7 @@ const DocumentsPage = () => {
     try {
       const docIds = selectedItems.filter(i => i.type === "document").map(i => i.id);
       if (docIds.length) {
-        await documentsAPI.move(docIds, moveTarget);
+        await fileManagerAPI.move(docIds, moveTarget);
       }
       toast.success(`${docIds.length} document(s) déplacé(s)`);
       setMoveModal(false);
