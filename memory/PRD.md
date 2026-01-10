@@ -198,9 +198,15 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - [ ] Appliquer le design glassmorphique aux pages restantes (Contacts, Pipeline, Facturation, etc.)
 
 ### P2 - Priorité moyenne
+- [ ] Nettoyer les routes dupliquées dans server.py (auth, contacts, opportunities restent à migrer)
+- [ ] Supprimer le code mort dans server.py après migration complète
 - [ ] Intégration Google Agenda
 - [ ] Tags sur pages publiques (blog/portfolio) avec filtrage
 - [ ] Finaliser intégration Meta (test publication)
+
+### P3 - Priorité basse
+- [ ] Étendre l'accès aux données de l'IA (inclure le futur module Documents)
+- [ ] Améliorer la recherche globale dans la topbar (plus de types de résultats)
 
 ## Known Issues
 - Routes dupliquées temporairement dans server.py et modules séparés
