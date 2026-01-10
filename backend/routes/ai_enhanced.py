@@ -243,6 +243,88 @@ async def create_quote_action(params: dict, user_id: str) -> dict:
     }
 
 
+async def get_document_action(params: dict) -> dict:
+    """Get document details and content preview"""
+    doc_id = params.get("document_id")
+    doc_name = params.get("document_name")
+    
+    # Find by ID or name
+    query = {}
+    if doc_id:
+        query["id"] = doc_id
+    elif doc_name:
+        query["name"] = {"$regex": doc_name, "$options": "i"}
+    else:
+        return {"success": False, "error": "ID ou nom du document requis"}
+    
+    document = await db.documents.find_one(query, {"_id": 0})
+    if not document:
+        return {"success": False, "error": "Document non trouvé"}
+    
+    # Get folder name if applicable
+    folder_name = "Racine"
+    if document.get("folder_id"):
+        folder = await db.folders.find_one({"id": document["folder_id"]})
+        if folder:
+            folder_name = folder.get("name", "Inconnu")
+    
+    return {
+        "success": True,
+        "message": f"📄 Document trouvé: {document.get('name')}",
+        "document": {
+            "id": document.get("id"),
+            "name": document.get("name"),
+            "file_type": document.get("file_type"),
+            "size": document.get("size_formatted"),
+            "folder": folder_name,
+            "url": document.get("url"),
+            "content_type": document.get("content_type"),
+            "created_at": document.get("created_at"),
+            "tags": document.get("tags", [])
+        }
+    }
+
+
+async def list_documents_action(params: dict) -> dict:
+    """List documents with optional filters"""
+    folder_name = params.get("folder_name")
+    file_type = params.get("file_type")
+    search = params.get("search")
+    
+    query = {}
+    
+    # Filter by folder
+    if folder_name:
+        folder = await db.folders.find_one({"name": {"$regex": folder_name, "$options": "i"}})
+        if folder:
+            query["folder_id"] = folder["id"]
+    
+    # Filter by type
+    if file_type:
+        query["file_type"] = file_type
+    
+    # Search by name
+    if search:
+        query["name"] = {"$regex": search, "$options": "i"}
+    
+    documents = await db.documents.find(query, {"_id": 0, "id": 1, "name": 1, "file_type": 1, "size_formatted": 1, "created_at": 1}).to_list(20)
+    
+    if not documents:
+        return {
+            "success": True,
+            "message": "Aucun document trouvé avec ces critères",
+            "documents": []
+        }
+    
+    docs_list = "\n".join([f"• {d.get('name')} ({d.get('file_type')}, {d.get('size_formatted')})" for d in documents])
+    
+    return {
+        "success": True,
+        "message": f"📁 {len(documents)} document(s) trouvé(s):\n{docs_list}",
+        "documents": documents
+    }
+
+
 # ==================== CONTEXT HELPERS ====================
 
 async def get_app_context() -> str:
