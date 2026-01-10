@@ -234,6 +234,20 @@ export const uploadAPI = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
+  video: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/video', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  file: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/file', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
   audio: (file) => {
     const formData = new FormData();
     formData.append('file', file);
