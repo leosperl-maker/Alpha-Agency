@@ -425,7 +425,7 @@ const AdvancedBlockRenderer = ({ blocks = [] }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="mb-8 last:mb-0"
+        className="mb-12 last:mb-0"
       >
         {children}
       </motion.div>
