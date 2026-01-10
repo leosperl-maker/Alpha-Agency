@@ -79,13 +79,23 @@ body.dark {
     color: #E1E1E1;
 }
 
-/* Pipeline horizontal scrollbar - ALWAYS visible custom scrollbar */
+/* Pipeline horizontal scrollbar - HIDE native, use custom only */
 .pipeline-scroll {
     overflow-x: auto;
     overflow-y: visible;
     padding-bottom: 8px;
     -webkit-overflow-scrolling: touch;
     position: relative;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+/* Hide native scrollbar for Chrome/Safari */
+.pipeline-scroll::-webkit-scrollbar {
+    display: none;
+    height: 0;
+    width: 0;
+    background: transparent;
 }
 
 /* Custom scrollbar track - always visible */
@@ -115,35 +125,6 @@ body.dark {
 
 .pipeline-scroll-thumb:active {
     cursor: grabbing;
-}
-
-/* Native scrollbar styling (backup) */
-.pipeline-scroll::-webkit-scrollbar {
-    height: 10px;
-    background: #E5E5E5;
-    border-radius: 5px;
-}
-
-.pipeline-scroll::-webkit-scrollbar-track {
-    background: #E5E5E5;
-    border-radius: 5px;
-}
-
-.pipeline-scroll::-webkit-scrollbar-thumb {
-    background: #CE0202;
-    border-radius: 5px;
-}
-
-.pipeline-scroll::-webkit-scrollbar-thumb:hover {
-    background: #B00202;
-}
-
-/* Firefox */
-@supports (-moz-appearance: none) {
-    .pipeline-scroll {
-        scrollbar-width: thin;
-        scrollbar-color: #CE0202 #E5E5E5;
-    }
 }
 
 /* Noise texture overlay - lower z-index to not interfere with dropdowns */
