@@ -293,9 +293,11 @@ const InvoicesPage = () => {
 
   const addServiceToInvoice = (service) => {
     setItems([...items, {
-      description: service.description ? `${service.title}\n${service.description}` : service.title,
+      title: service.title,
+      description: service.description || "",
       quantity: 1,
-      unit_price: parseFloat(service.price)
+      unit_price: parseFloat(service.price),
+      discount: 0
     }]);
     toast.success("Service ajouté à la facture");
   };
