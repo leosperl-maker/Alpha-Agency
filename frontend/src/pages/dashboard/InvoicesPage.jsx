@@ -405,7 +405,18 @@ const InvoicesPage = () => {
       conditions: invoice.conditions || "",
       bank_details: invoice.bank_details || ""
     });
-    setItems(invoice.items?.length > 0 ? invoice.items : [{ description: "", quantity: 1, unit_price: 0 }]);
+    // Map items to ensure all fields exist
+    const loadedItems = invoice.items?.length > 0 
+      ? invoice.items.map(item => ({
+          title: item.title || "",
+          description: item.description || "",
+          quantity: item.quantity || 1,
+          unit_price: item.unit_price || 0,
+          discount: item.discount || 0
+        }))
+      : [{ title: "", description: "", quantity: 1, unit_price: 0, discount: 0 }];
+    setItems(loadedItems);
+    setGlobalDiscount(invoice.global_discount || { type: "percent", value: 0 });
     setSheetOpen(true);
   };
 
