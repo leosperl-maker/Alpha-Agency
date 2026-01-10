@@ -876,24 +876,23 @@ const PipelinePage = () => {
     <div data-testid="pipeline-page" className="space-y-4 sm:space-y-6 overflow-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Pipeline</h1>
-          <p className="text-white/60 text-xs sm:text-sm">Gérez vos affaires commerciales</p>
-        </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Button variant="outline" onClick={() => openColumnDialog()} className="border-indigo-500/50 text-indigo-400 flex-1 sm:flex-none text-sm">
-            <Settings2 className="w-4 h-4 mr-1 sm:mr-2" /> 
-            <span className="hidden sm:inline">Étapes</span>
-            <span className="sm:hidden">Config</span>
-          </Button>
-          <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
-            <DialogTrigger asChild>
-              <Button onClick={resetForm} className="bg-indigo-600 hover:bg-indigo-500 text-white flex-1 sm:flex-none text-sm">
-                <Plus className="w-4 h-4 mr-1 sm:mr-2" /> 
-                <span className="hidden sm:inline">Nouvelle affaire</span>
-                <span className="sm:hidden">Ajouter</span>
-              </Button>
-            </DialogTrigger>
+        <div className="flex items-center gap-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">Pipeline</h1>
+            <p className="text-white/60 text-xs sm:text-sm">Gérez vos affaires commerciales</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => openColumnDialog()} size="sm" className="border-indigo-500/50 text-indigo-400 text-xs">
+              <Settings2 className="w-3.5 h-3.5 mr-1" /> 
+              Étapes
+            </Button>
+            <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
+              <DialogTrigger asChild>
+                <Button onClick={resetForm} size="sm" className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs">
+                  <Plus className="w-3.5 h-3.5 mr-1" /> 
+                  Nouvelle
+                </Button>
+              </DialogTrigger>
               <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="text-white">
