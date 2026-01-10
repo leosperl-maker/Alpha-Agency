@@ -204,6 +204,46 @@ const DocumentsPage = () => {
     }
   };
 
+  // Rename item (folder or document)
+  const openRenameModal = (type, item) => {
+    setRenameItem({ type, ...item });
+    setNewName(item.name);
+    setRenameModal(true);
+  };
+
+  const handleRename = async () => {
+    if (!newName.trim() || !renameItem) return;
+    setRenaming(true);
+    try {
+      if (renameItem.type === "folder") {
+        await fileManagerAPI.updateFolder(renameItem.id, { name: newName.trim() });
+        toast.success("Dossier renommé");
+      } else {
+        await fileManagerAPI.update(renameItem.id, { name: newName.trim() });
+        toast.success("Document renommé");
+      }
+      setRenameModal(false);
+      setRenameItem(null);
+      setNewName("");
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Erreur lors du renommage");
+    } finally {
+      setRenaming(false);
+    }
+  };
+
+  // Check if file can be previewed
+  const canPreview = (doc) => {
+    if (!doc || !doc.url) return false;
+    const previewableTypes = ['image', 'video', 'audio', 'document'];
+    return previewableTypes.includes(doc.file_type) || 
+           doc.content_type?.includes('pdf') ||
+           doc.content_type?.includes('image') ||
+           doc.content_type?.includes('video') ||
+           doc.content_type?.includes('audio');
+  };
+
   // Get file icon
   const getFileIcon = (fileType) => {
     const icons = {
