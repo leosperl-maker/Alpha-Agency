@@ -168,11 +168,34 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Cartes KPI en grille 2 colonnes sur mobile
   - Menu hamburger pour navigation mobile
 
+### Session 6 - 2026-01-10 (Corrections UI & IA Context-Aware)
+- ✅ **Bug Fix: Scrollbar sidebar**
+  - Ajout de `overflow-y-auto`, `min-h-0`, `flex-shrink-0` au conteneur de navigation
+  - Tous les 38 éléments de menu sont maintenant accessibles
+- ✅ **Bug Fix: Page de connexion**
+  - Migré vers design glassmorphique sombre (bg-[#02040A])
+  - Texte blanc, bouton gradient indigo/purple, champs arrondis
+- ✅ **Bug Fix: Contraste texte**
+  - Corrigé les classes `text-[#1A1A1A]` vers `text-white/80`
+  - Plus de texte noir sur fond sombre
+- ✅ **Bug Fix: Topbar fonctionnelle**
+  - Barre de recherche interactive avec résultats (contacts, tâches)
+  - Dropdown notifications avec données réelles (tâches en retard, factures impayées, nouveaux leads)
+  - Dropdown profil avec liens vers Paramètres et Déconnexion
+- ✅ **NOUVEAU: Assistant IA Context-Aware**
+  - L'IA a maintenant accès à toutes les données CRM en temps réel
+  - Données accessibles : Factures, Contacts, Tâches, Pipeline, Budget, Devis
+  - Endpoint `/api/ai-enhanced/context` pour récupérer le résumé des données
+  - Badge "Context-Aware" visible dans l'interface
+  - Suggestions contextuelles ("Quelles factures sont impayées?", etc.)
+  - L'IA peut répondre à des questions comme "Quelles tâches sont en retard?" avec des données réelles
+
 ## Pending Tasks
 
 ### P1 - Priorité haute
-- [ ] Nettoyer les routes dupliquées dans server.py (auth, contacts, opportunities restent à migrer)
-- [ ] Supprimer le code mort dans server.py après migration complète
+- [ ] **Module Documents** - Gestionnaire de fichiers complet (dossiers, upload, téléchargement)
+- [ ] **Toggle Thème Clair/Sombre** - Switch entre glassmorphique sombre et thème clair
+- [ ] Appliquer le design glassmorphique aux pages restantes (Contacts, Pipeline, Facturation, etc.)
 
 ### P2 - Priorité moyenne
 - [ ] Intégration Google Agenda
