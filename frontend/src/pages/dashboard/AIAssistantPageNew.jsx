@@ -391,11 +391,22 @@ const AIAssistantPageNew = () => {
                     <Bot className="w-10 h-10 text-indigo-400" />
                   </div>
                   <h2 className="text-xl md:text-2xl font-bold text-white mb-2">Comment puis-je vous aider ?</h2>
-                  <p className="text-white/50 max-w-md mx-auto text-sm md:text-base">
+                  <p className="text-white/50 max-w-md mx-auto text-sm md:text-base mb-3">
                     Posez une question, envoyez une image à analyser, ou demandez-moi de générer du contenu.
                   </p>
-                  <div className="flex flex-wrap justify-center gap-2 mt-6">
-                    {["Résume mes ventes", "Analyse cette image", "Rédige un email", "Idées marketing"].map((suggestion, i) => (
+                  {status?.features?.context_aware && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-sm mb-6">
+                      <Zap className="w-4 h-4" />
+                      <span>J'ai accès à vos données CRM : factures, contacts, tâches, pipeline, devis...</span>
+                    </div>
+                  )}
+                  <div className="flex flex-wrap justify-center gap-2 mt-4">
+                    {[
+                      "Quelles factures sont impayées ?", 
+                      "Combien de leads ai-je ?", 
+                      "Quelles tâches sont en retard ?", 
+                      "Résume mon pipeline"
+                    ].map((suggestion, i) => (
                       <button
                         key={i}
                         onClick={() => setInput(suggestion)}
