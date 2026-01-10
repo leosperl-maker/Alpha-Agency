@@ -115,10 +115,10 @@ const TextBlockEditor = ({ block, onUpdate }) => (
     <div className="flex gap-2">
       <Select value={block.alignment || 'left'} onValueChange={(v) => onUpdate({ ...block, alignment: v })}>
         <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-        <SelectContent className="bg-[#1a1a2e] border-white/10">
-          <SelectItem value="left"><AlignLeft className="w-4 h-4 inline mr-2" />Gauche</SelectItem>
-          <SelectItem value="center"><AlignCenter className="w-4 h-4 inline mr-2" />Centre</SelectItem>
-          <SelectItem value="right"><AlignRight className="w-4 h-4 inline mr-2" />Droite</SelectItem>
+        <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+          <SelectItem value="left" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white"><AlignLeft className="w-4 h-4 inline mr-2" />Gauche</SelectItem>
+          <SelectItem value="center" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white"><AlignCenter className="w-4 h-4 inline mr-2" />Centre</SelectItem>
+          <SelectItem value="right" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white"><AlignRight className="w-4 h-4 inline mr-2" />Droite</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -130,11 +130,11 @@ const HeadingBlockEditor = ({ block, onUpdate }) => (
     <div className="flex gap-2">
       <Select value={String(block.level || 2)} onValueChange={(v) => onUpdate({ ...block, level: parseInt(v) })}>
         <SelectTrigger className="w-20 bg-white/5"><SelectValue /></SelectTrigger>
-        <SelectContent className="bg-[#1a1a2e] border-white/10">
-          <SelectItem value="1">H1</SelectItem>
-          <SelectItem value="2">H2</SelectItem>
-          <SelectItem value="3">H3</SelectItem>
-          <SelectItem value="4">H4</SelectItem>
+        <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+          <SelectItem value="1" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">H1</SelectItem>
+          <SelectItem value="2" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">H2</SelectItem>
+          <SelectItem value="3" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">H3</SelectItem>
+          <SelectItem value="4" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">H4</SelectItem>
         </SelectContent>
       </Select>
       <Input
@@ -150,10 +150,10 @@ const HeadingBlockEditor = ({ block, onUpdate }) => (
     </div>
     <Select value={block.alignment || 'left'} onValueChange={(v) => onUpdate({ ...block, alignment: v })}>
       <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-      <SelectContent className="bg-[#1a1a2e] border-white/10">
-        <SelectItem value="left">Gauche</SelectItem>
-        <SelectItem value="center">Centre</SelectItem>
-        <SelectItem value="right">Droite</SelectItem>
+      <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+        <SelectItem value="left" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Gauche</SelectItem>
+        <SelectItem value="center" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Centre</SelectItem>
+        <SelectItem value="right" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Droite</SelectItem>
       </SelectContent>
     </Select>
   </div>
@@ -1004,7 +1004,7 @@ const AddBlockButton = ({ onAdd }) => {
           Ajouter un bloc
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64 bg-[#1a1a2e] border-white/10" align="center">
+      <DropdownMenuContent className="w-64 bg-[#1a1a2e] border-white/10 z-[9999]" align="center">
         {Object.entries(categories).map(([catKey, cat]) => (
           <div key={catKey}>
             <DropdownMenuLabel className="text-xs uppercase text-white/50">{cat.label}</DropdownMenuLabel>
@@ -1015,14 +1015,14 @@ const AddBlockButton = ({ onAdd }) => {
                 <DropdownMenuItem
                   key={type}
                   onClick={() => onAdd(type)}
-                  className="cursor-pointer"
+                  className="cursor-pointer text-white hover:bg-white/10 focus:bg-white/10 focus:text-white"
                 >
-                  <Icon className="w-4 h-4 mr-2" />
-                  {blockType.label}
+                  <Icon className="w-4 h-4 mr-2 text-white/70" />
+                  <span className="text-white">{blockType.label}</span>
                 </DropdownMenuItem>
               );
             })}
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="bg-white/10" />
           </div>
         ))}
       </DropdownMenuContent>
