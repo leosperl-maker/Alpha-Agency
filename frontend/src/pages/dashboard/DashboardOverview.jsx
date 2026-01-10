@@ -258,34 +258,34 @@ const DashboardOverview = () => {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Leads Trend Chart */}
-        <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-[#CE0202]" />
+            <CardTitle className="text-white text-lg flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-indigo-400" />
               Évolution des leads
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={leadsTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E5E5" />
-                <XAxis dataKey="name" stroke="#666666" fontSize={12} />
-                <YAxis stroke="#666666" fontSize={12} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" fontSize={12} />
+                <YAxis stroke="rgba(255,255,255,0.5)" fontSize={12} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #E5E5E5', borderRadius: '8px' }}
+                  contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', color: 'white' }}
                   formatter={(value) => [value, 'Leads']}
                 />
-                <Bar dataKey="leads" fill="#CE0202" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="leads" fill="#6366f1" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Pipeline Distribution */}
-        <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
-              <PieChartIcon className="w-5 h-5 text-[#8B5CF6]" />
+            <CardTitle className="text-white text-lg flex items-center gap-2">
+              <PieChartIcon className="w-5 h-5 text-purple-400" />
               Répartition Pipeline
             </CardTitle>
           </CardHeader>
@@ -307,7 +307,7 @@ const DashboardOverview = () => {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#fff', border: '1px solid #E5E5E5', borderRadius: '8px' }}
+                    contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', color: 'white' }}
                     formatter={(value, name) => [value, name]}
                   />
                 </PieChart>
@@ -317,9 +317,9 @@ const DashboardOverview = () => {
                   <div key={item.name} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="text-sm text-[#666666]">{item.name}</span>
+                      <span className="text-sm text-white/60">{item.name}</span>
                     </div>
-                    <span className="font-bold text-[#1A1A1A]">{item.value}</span>
+                    <span className="font-bold text-white">{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -331,10 +331,10 @@ const DashboardOverview = () => {
       {/* Third Row - Invoice Status & Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Invoice Status */}
-        <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
-              <Receipt className="w-5 h-5 text-[#F59E0B]" />
+            <CardTitle className="text-white text-lg flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-amber-400" />
               Statut Factures
             </CardTitle>
           </CardHeader>
@@ -344,9 +344,9 @@ const DashboardOverview = () => {
                 <div key={item.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="text-sm text-[#666666]">{item.name}</span>
+                    <span className="text-sm text-white/60">{item.name}</span>
                   </div>
-                  <span className="font-bold text-[#1A1A1A]">{item.value}</span>
+                  <span className="font-bold text-white">{item.value}</span>
                 </div>
               ))}
               <div className="pt-3 mt-3 border-t border-[#E5E5E5]">
