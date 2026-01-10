@@ -941,6 +941,7 @@ const BlockEditor = ({ block, index, onUpdate, onDelete, onMoveUp, onMoveDown, i
       case 'image': return <ImageBlockEditor block={block} onUpdate={onUpdate} />;
       case 'gallery': return <GalleryBlockEditor block={block} onUpdate={onUpdate} />;
       case 'video': return <VideoBlockEditor block={block} onUpdate={onUpdate} />;
+      case 'pdf': return <PDFBlockEditor block={block} onUpdate={onUpdate} />;
       case 'beforeAfter': return <BeforeAfterBlockEditor block={block} onUpdate={onUpdate} />;
       case 'stats': return <StatsBlockEditor block={block} onUpdate={onUpdate} />;
       case 'cta': return <CTABlockEditor block={block} onUpdate={onUpdate} />;
