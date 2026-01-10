@@ -6378,6 +6378,10 @@ app.include_router(blog_router, prefix="/api", tags=["blog"])
 app.include_router(portfolio_router, prefix="/api", tags=["portfolio"])
 app.include_router(tags_router, prefix="/api", tags=["tags"])
 
+# Enhanced AI Assistant
+from routes.ai_enhanced import router as ai_enhanced_router
+app.include_router(ai_enhanced_router, prefix="/api", tags=["ai-enhanced"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
