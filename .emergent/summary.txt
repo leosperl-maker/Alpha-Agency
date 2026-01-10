@@ -1,176 +1,151 @@
 <analysis>**original_problem_statement:**
-L'utilisateur a soumis une longue liste de corrections de bugs et de refontes majeures après avoir testé les dernières fonctionnalités :
+L'utilisateur a fourni une liste exhaustive de nouvelles demandes de fonctionnalités et de corrections de bugs après la refonte de l'interface utilisateur vers un thème glassmorphique.
 
-1.  **Pipeline :** La barre de défilement horizontale est manquante, bien que le texte invitant à faire défiler soit présent.
-2.  **Facturation :** Après avoir créé un devis ou une facture, l'utilisateur est redirigé vers les anciennes pages de liste qui devraient être supprimées. Il devrait rester sur la nouvelle interface.
-3.  **Budget & Trésorerie :** Le graphique Évolution mensuelle affiche des valeurs fixes (5000€ d'entrée, 150€ de dépense) qui semblent être codées en dur et n'ont aucun lien avec les données réelles.
-4.  **Réalisations (Portfolio) :** Une refonte complète est demandée. L'utilisateur est très mécontent de la version actuelle.
-    *   **Problème :** Les modifications faites dans le dashboard (images, textes) ne se reflètent pas correctement sur le site public.
-    *   **Objectif :** Un éditeur de blocs flexible et puissant, inspiré de , permettant de composer librement la mise en page (texte en gros, colonnes, images pleine largeur, coins arrondis).
-    *   **Interface :** L'affichage public (grille de projets et vue détaillée) doit être de haute qualité et correspondre à ce qui est prévisualisé dans l'admin (WYSIWYG). Les réalisations existantes doivent être supprimées et remplacées par des exemples gérables depuis le dashboard.
-5.  **Actualités (News) :** Ajouter plus de sources de contenu pour Saint-Martin et Saint-Barthélemy afin d'obtenir plus d'articles.
+**Bugs et corrections d'UI urgents :**
+1.  **Navigation :** La barre de défilement (scrollbar) a disparu de la sidebar, empêchant l'accès aux éléments de menu inférieurs comme Paramètres.
+2.  **Contraste :** Du texte noir apparaît sur des fonds sombres, le rendant illisible. Il doit être blanc.
+3.  **Apparence :**
+    *   Les boutons sur le dashboard et la page de connexion doivent avoir des coins arrondis.
+    *   Certaines pages contiennent encore des sections blanches qui jurent avec le nouveau design sombre.
+4.  **Fonctionnalités non implémentées :** La barre de recherche, l'icône de notifications (cloche) et l'icône de profil dans la barre supérieure sont codées en dur et ne fonctionnent pas. Elles doivent être rendues fonctionnelles.
+
+**Demandes de fonctionnalités majeures :**
+1.  **Assistant IA Context-Aware :** L'assistant IA doit pouvoir accéder et raisonner sur les données de l'application. Par exemple, il doit pouvoir répondre à des questions comme quelles factures sont impayées ? ou quel contact attend une proposition ? en consultant les données des factures, des contacts, du pipeline, etc.
+2.  **Nouveau module Documents :** Créer une nouvelle page Documents qui agira comme un système de gestion de fichiers complet. L'utilisateur doit pouvoir :
+    *   Créer des dossiers et des sous-dossiers.
+    *   Déposer/uploader, télécharger, importer et exporter des fichiers de tous types (PDF, Word, Excel, PNG, JPG, ZIP, SVG, etc.).
+    *   L'assistant IA doit avoir accès à tous les fichiers stockés dans ce module pour aider l'utilisateur.
+3.  **Thème Clair / Sombre :** Ajouter un interrupteur (toggle) pour permettre à l'utilisateur de choisir entre le thème sombre actuel (glassmorphique) et un nouveau thème clair, avec une gestion cohérente des couleurs pour chaque thème.
 
 **User's preferred language**: Français
 
 **what currently exists?**
-L'application est dans un état avancé. L'agent a brillamment résolu un problème de pertinence des articles d'actualité en implémentant une recherche par mots-clés locaux, ce qui a été validé par l'utilisateur. Un module de campagnes Email & SMS a été créé (backend et frontend), incluant des templates d'email et un éditeur visuel drag-and-drop fonctionnel. Une page de gestion des clés API a été ajoutée. La refactorisation du fichier monolithique  a commencé, avec les modules News et Meta extraits dans leurs propres routeurs. Cependant, l'utilisateur a identifié plusieurs bugs critiques et a demandé une refonte complète du module Réalisations.
+L'agent a complété avec succès une refactorisation majeure du backend, migrant tout le code du fichier monolithique  vers des modules  distincts et fonctionnels (, , , etc.).
+
+Parallèlement, une refonte complète de l'interface utilisateur du tableau de bord administrateur a été réalisée, passant à un design glassmorphique sombre. Cela inclut un nouveau layout (), de nouveaux styles globaux (, ), et la mise à jour de la page principale ().
+
+Un nouvel assistant IA a été créé (, ) avec une interface améliorée, le support des intégrations via la clé universelle Emergent (OpenAI, Gemini), et la correction des problèmes de limite de requêtes. L'apparence de l'assistant et de la bulle de chat flottante a été mise à jour pour correspondre au nouveau design.
 
 **Last working item**:
--   **Last item agent was working:** L'agent venait de recevoir une longue liste de bugs et de nouvelles exigences de l'utilisateur. Il a commencé à investiguer le premier point : le bug de la barre de défilement horizontale manquante sur la page Pipeline.
--   **Status:** IN PROGRESS
+-   **Last item agent was working:** L'agent venait de terminer l'implémentation de la refonte visuelle glassmorphique et de l'assistant IA amélioré. Il a ensuite reçu une longue liste de bugs, de corrections d'UI et de nouvelles demandes de fonctionnalités majeures de la part de l'utilisateur, basées sur des captures d'écran et des tests manuels. L'agent analysait cette nouvelle vague de demandes.
+-   **Status:** NOT STARTED
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** Frontend testing agent (pour le bug de la scrollbar et les autres problèmes d'UI).
--   **User Testing Done:** N
+-   **User Testing Done:** Y (L'utilisateur a testé et a fourni une liste détaillée de problèmes et de nouvelles demandes).
 
 **All Pending/In progress Issue list**:
--   **Issue 1: (P0) Bug des valeurs fixes dans le graphique Budget.**
--   **Issue 2: (P1) Bug de la barre de défilement (scrollbar) manquante sur la page Pipeline.**
--   **Issue 3: (P2) Bug de redirection vers les anciennes pages de facturation/devis.**
--   **Issue 4: (P3) Échec récurrent du test E2E du formulaire de contact.**
+-   **Issue 1: (P0 - Bloquant) La barre de défilement de la sidebar est manquante.**
+-   **Issue 2: (P0 - Critique) Problèmes de contraste du texte.**
+-   **Issue 3: (P1) Les boutons ne sont pas arrondis.**
+-   **Issue 4: (P1) Des sections blanches persistent sur certaines pages.**
+-   **Issue 5: (P1) Les icônes de la barre supérieure (recherche, notifications, profil) sont codées en dur.**
 
 **Issues Detail:**
--   **Issue 1: Bug des valeurs fixes dans le graphique Budget.**
-    -   **Attempted fixes:** L'agent a inspecté le code frontend () et backend () mais n'a pas encore localisé la source des données hardcodées (5000€ et 150€).
+-   **Issue 1: La barre de défilement de la sidebar est manquante.**
+    -   **Attempted fixes:** Aucune. Le problème est apparu avec le nouveau .
     -   **Next debug checklist:**
-        1.  Dans , inspecter la variable  et tracer son origine.
-        2.  Vérifier si des données par défaut sont injectées côté frontend lors de l'initialisation de l'état.
-        3.  Inspecter l'endpoint backend qui fournit les données du graphique pour voir s'il renvoie des valeurs par défaut lorsque la base de données est vide.
-    -   **Why fix this issue and what will be achieved with the fix?** Le graphique est trompeur et inutile s'il n'affiche pas les données réelles. Le corriger restaurera la fiabilité de la section budget.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Both
-    -   **Blocked on other issue:** None
-
--   **Issue 2: Bug de la barre de défilement (scrollbar) manquante sur la page Pipeline.**
-    -   **Attempted fixes:** L'agent a inspecté  et a trouvé la classe . L'investigation a été interrompue.
-    -   **Next debug checklist:**
-        1.  Vérifier les styles CSS des conteneurs parents de l'élément avec  dans .
-        2.  S'assurer qu'un conteneur parent n'a pas un  qui annulerait le scroll.
-        3.  Forcer l'affichage de la scrollbar avec des classes TailwindCSS comme  ou via CSS personnalisé pour s'assurer qu'elle n'est pas simplement invisible.
-    -   **Why fix this issue and what will be achieved with the fix?** Rend le pipeline utilisable sur des écrans plus petits où toutes les colonnes ne sont pas visibles.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue:** None
-
--   **Issue 3: Bug de redirection vers les anciennes pages de facturation/devis.**
-    -   **Attempted fixes:** None.
-    -   **Next debug checklist:**
-        1.  Identifier la logique de création de devis/facture et le  ou  utilisé après la soumission réussie.
-        2.  Changer la redirection pour qu'elle pointe vers la nouvelle page principale de facturation.
-        3.  Identifier les fichiers des anciennes pages de liste de devis/factures.
-        4.  Supprimer ces fichiers et les routes associées dans .
-    -   **Why fix this issue and what will be achieved with the fix?** Élimine du code mort, simplifie la navigation et évite la confusion pour l'utilisateur.
+        1.  Inspecter le CSS de  et du conteneur de la sidebar.
+        2.  Vérifier les propriétés , , et .
+        3.  Ajouter  à la classe du conteneur de la liste de navigation pour restaurer le défilement.
+    -   **Why fix this issue and what will be achieved with the fix?** C'est un bug bloquant qui empêche l'accès à des parties clés de l'application comme les Paramètres.
     -   **Status:** NOT STARTED
     -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue:** None
 
--   **Issue 4: Échec récurrent du test E2E du formulaire de contact.**
-    -   **Attempted fixes:** Aucune. Problème hérité non priorisé.
-    -   **Next debug checklist:** Analyser les rapports de test Playwright, inspecter le composant  et ajouter des  robustes.
-    -   **Why fix this issue and what will be achieved with the fix?** Assurer la fiabilité de la suite de tests E2E.
+-   **Issue 2: Problèmes de contraste du texte.**
+    -   **Attempted fixes:** Aucune.
+    -   **Next debug checklist:**
+        1.  Faire un  global sur le répertoire  pour trouver les classes comme , , etc., appliquées dans des conteneurs sombres.
+        2.  Remplacer ces classes par des classes à fort contraste comme , , ou .
+        3.  Inspecter spécifiquement la page de connexion mentionnée par l'utilisateur.
+    -   **Why fix this issue and what will be achieved with the fix?** Améliorer l'accessibilité et la lisibilité de base de l'application.
     -   **Status:** NOT STARTED
-    -   **Is recurring issue?** Y
+    -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue:** None
 
-**In progress Task List**:
--   **Task 1: (P0) Refonte complète du module Réalisations (Portfolio).**
-    -   **Where to resume:** Le travail doit partir de zéro. L'implémentation actuelle doit être supprimée.
-        1.  Concevoir et créer un nouvel éditeur de blocs avancé pour les pages de projet (inspiré de  mais plus puissant).
-        2.  Créer les endpoints backend pour sauvegarder la nouvelle structure de contenu flexible.
-        3.  Recréer les pages publiques ( et la vue détaillée) pour afficher le contenu riche et le design souhaité (style ).
-        4.  Supprimer les anciennes données de réalisation et créer des exemples modifiables depuis le dashboard.
-    -   **What will be achieved with this?** L'utilisateur aura un portfolio professionnel et flexible qu'il pourra gérer entièrement depuis le dashboard.
+-   **Issue 3, 4, 5 (Groupe UI/Fonctionnalité):**
+    -   **Attempted fixes:** Aucune.
+    -   **Next debug checklist:**
+        *   **Boutons :** Ajouter la classe  ou  aux composants  dans  ou directement sur les éléments.
+        *   **Sections Blanches :** Identifier les pages et composants concernés (par ex: ) et s'assurer qu'ils utilisent les nouvelles classes de style glassmorphique (, , etc.) au lieu de .
+        *   **Topbar :** Implémenter la logique pour la recherche (un modal ou une page de recherche), les notifications (un dropdown affichant les notifications depuis une nouvelle collection DB) et le profil (un dropdown avec des liens vers les paramètres et la déconnexion).
+    -   **Why fix this issue and what will be achieved with the fix?** Assurer la cohérence visuelle et rendre l'interface utilisateur entièrement fonctionnelle.
     -   **Status:** NOT STARTED
-    -   **Should Test frontend/backend/both after fix?** Both
-    -   **Blocked on something:** None
-
--   **Task 2: (P1) Finaliser la refactorisation de .**
-    -   **Where to resume:** Les modules News et Meta ont été extraits. Les prochaines cibles sont les sections volumineuses restantes : Auth, Contacts, Budget, Pipeline, Invoices, etc.
-    -   **What will be achieved with this?** Amélioration drastique de la maintenabilité, de la stabilité et de la performance du backend.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Backend
-    -   **Blocked on something:** None
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Both (le topbar nécessitera du backend).
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **(P2)** Ajouter des sources d'actualités pour Saint-Martin et Saint-Barthélemy ().
+    -   **(P1) Rendre l'assistant IA Context-Aware :**
+        *   Modifier le backend de l'assistant ().
+        *   Créer une fonction qui récupère et formate le contexte pertinent (factures, contacts, etc.) depuis la base de données.
+        *   Injecter ce contexte dans le prompt envoyé aux LLMs (OpenAI/Gemini).
+    -   **(P2) Appliquer le design glassmorphique à toutes les pages restantes :** Contacts, Pipeline, Facturation, Budget, Tâches, etc., pour assurer une cohérence visuelle totale.
 -   **Future Tasks:**
-    -   **(P2)** Intégration de Google Agenda.
-    -   **(P2)** Afficher les tags sur les pages publiques du blog/portfolio et permettre le filtrage.
+    -   **(P2) Créer le module Documents :** Backend pour la gestion de fichiers (upload, création de dossiers), et frontend pour l'interface de gestion de type explorateur de fichiers.
+    -   **(P3) Implémenter le toggle Thème Clair/Sombre :** Utiliser des variables CSS et un state global (React Context) pour basculer entre les palettes de couleurs.
     -   **(P3)** Finaliser l'intégration de l'API Meta (test du flux de publication).
-    -   **(P3)** Intégration de médias avancés (vidéo, PDF) dans les éditeurs de contenu.
 
 **Completed work in this session**
--   **Amélioration des actualités locales :** La logique de recherche a été entièrement refondue pour utiliser des mots-clés locaux, fournissant des articles beaucoup plus pertinents pour les DOM-TOM.
--   **Implémentation de multiples clés API :** Le backend  peut maintenant utiliser et alterner entre plusieurs clés NewsAPI pour contourner les limites de taux.
--   **Page de gestion des API :** Création d'un onglet API dans les paramètres qui affiche le statut de toutes les intégrations tierces.
--   **Templates de campagne email :** Ajout de templates prédéfinis (Newsletter, Promo, etc.) pour accélérer la création de campagnes.
--   **Éditeur d'email visuel :** Intégration d'un éditeur drag-and-drop () pour concevoir des emails.
--   **Début de refactorisation du backend :** Les modules  et  ont été extraits du monolithique  dans des routeurs FastAPI dédiés.
--   **Création de la base du module Campagnes :** Le backend (), l'API frontend () et la page UI () ont été créés et sont fonctionnels.
--   **Documentation :** Création du fichier  avec des suggestions pour l'utilisateur.
+-   **Refactorisation complète du backend :** Le fichier monolithique  a été entièrement démantelé en modules  distincts (, , , , , , , , ).
+-   **Refonte UI Glassmorphique (Phase 1) :** Le design de l'admin dashboard a été transformé avec un thème sombre glassmorphique, incluant un nouveau layout principal, de nouvelles cartes KPI et des styles globaux.
+-   **Assistant IA amélioré :**
+    *   Création d'une nouvelle page et d'un nouveau backend pour l'assistant.
+    *   Intégration via la clé Emergent pour OpenAI (GPT-4o) et Gemini.
+    *   Ajout d'une interface pour l'upload d'images et la génération d'images (fonctionnalité de base prête).
+    *   Correction des bugs de limite de requêtes et des problèmes d'UI (contraste, agencement).
+-   **Support Média Avancé :** Ajout de blocs PDF et Vidéo dans l'éditeur de contenu du portfolio, avec les routes d'upload backend correspondantes.
+-   **Correction Bug E2E :** Ajout de  robustes pour résoudre un problème de test sur le formulaire de contact.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Backend:** FastAPI, Refactorisation d'un monolithe vers des , gestion de clés API multiples, requêtes complexes vers des API tierces.
--   **Frontend:** React, TailwindCSS, Shadcn UI, gestion d'erreurs, intégration d'un éditeur de contenu tiers (), débogage de style (CSS overflow).
+-   **UI/UX :** Glassmorphism, design de thèmes sombres, UI responsive.
+-   **Frontend :** TailwindCSS JIT, variables CSS pour le theming, React Hooks & Context, architecture de layout, composants Shadcn/UI.
+-   **Backend :** Refactorisation d'API (monolithe vers micro-services/routeurs), intégration de multiples LLMs via une bibliothèque unifiée ().
 
 **All files of reference**
--   : Toujours un fichier central mais en cours de démantèlement.
--   : Contient la nouvelle logique de recherche d'articles locaux.
--   : Fichier à modifier pour le bug de la scrollbar.
--   : Fichier à modifier pour le bug des valeurs fixes.
--   : Sera probablement supprimé/remplacé lors de la refonte du portfolio.
--   : Référence pour l'intégration d'éditeurs de contenu.
+-   : Fichier clé pour la structure du dashboard. **C'est ici que le bug de la scrollbar doit être corrigé.**
+-   : Exemple d'une page mise à jour avec le nouveau design.
+-   : La nouvelle page de l'assistant IA.
+-   : Contient toutes les nouvelles variables CSS et styles pour le thème glassmorphique.
+-   : Le nouveau backend pour l'assistant IA, à étendre pour l'accès aux données.
+-   : Fichier principal de l'application FastAPI, qui inclut maintenant tous les routeurs modulaires.
 
 **Areas that need refactoring**:
--   ** (CRITIQUE):** La refactorisation doit être poursuivie. C'est une dette technique majeure qui ralentit le développement.
--   **Pages de facturation (CRITIQUE) :** Les anciennes pages de liste de devis/factures doivent être supprimées pour éviter la confusion et nettoyer le code.
--   **Module Réalisations (CRITIQUE) :** Le module entier doit être jeté et reconstruit selon les nouvelles spécifications de l'utilisateur.
+-   **Cohérence des pages du Dashboard :** De nombreuses pages (, , , , etc.) n'ont pas encore été migrées vers le nouveau design glassmorphique. Elles doivent être mises à jour pour utiliser les nouveaux composants et styles définis dans  et  afin d'éviter les incohérences visuelles (comme les sections blanches).
 
 **Critical Info for New Agent**
--   **LANGUE :** Communiquer exclusivement en **français**.
--   **NOUVELLES PRIORITÉS :** L'utilisateur a fourni une liste de bugs et de refontes qui sont maintenant la priorité absolue. Vous devez commencer par les bugs (Pipeline, Budget, Facturation), puis attaquer la refonte majeure du module Réalisations.
--   **Refonte des Réalisations :** C'est la tâche la plus importante pour l'utilisateur. Elle nécessite de créer un éditeur de blocs avancé et de revoir complètement le rendu public pour correspondre à une esthétique haut de gamme (voir ). L'implémentation actuelle doit être supprimée.
--   **Refactorisation Backend :** La refactorisation de  est toujours en cours et reste une tâche de fond importante pour la santé du projet.
+-   **Priorité Absolue :** Le travail doit commencer par la correction des bugs d'UI urgents signalés par l'utilisateur (P0 : scrollbar, contraste). Ces problèmes dégradent fortement l'expérience utilisateur.
+-   **Vision Produit :** L'utilisateur a une vision claire et ambitieuse pour l'application. Les deux axes majeurs sont l'amélioration de l'intelligence de l'assistant (accès aux données) et la création d'un hub central pour les documents. Ces tâches sont complexes et nécessiteront une planification minutieuse.
+-   **Approche de Design :** Tout nouveau développement frontend doit suivre le design glassmorphique sombre établi. La demande d'un thème clair/sombre doit être gardée à l'esprit pour toute nouvelle implémentation de style (utiliser des variables CSS).
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Demande d'implémenter les templates d'email, d'ajouter de nouvelles clés NewsAPI et une page de gestion des API. (Status: COMPLETED)
-2.  **Agent:** Implémente toutes les demandes. (Status: COMPLETED)
-3.  **Agent:** Finalise et suggère d'implémenter un éditeur d'email visuel. (Status: COMPLETED)
-4.  **User:** Approuve l'éditeur visuel et demande de continuer la refactorisation de . (Status: COMPLETED)
-5.  **Agent:** Implémente l'éditeur d'email visuel. (Status: COMPLETED)
-6.  **Agent:** Propose une liste d'améliorations futures. (Status: COMPLETED)
-7.  **User:** Signale que les articles d'actualité ne sont toujours pas assez locaux, malgré les améliorations. (Status: PENDING)
-8.  **Agent:** Comprend le problème de pertinence, refond complètement la logique de recherche d'actualités avec des mots-clés locaux spécifiques. (Status: COMPLETED)
-9.  **Agent:** Valide avec des captures d'écran que les articles sont maintenant vraiment locaux. (Status: COMPLETED)
-10. **User:** Valide la correction des actualités mais envoie une longue liste de nouveaux bugs et d'une refonte majeure pour le module Réalisations. (Status: PENDING - This is the current work)
+1.  **User:** Signale de multiples bugs UI (scrollbar, contraste, boutons) et des fonctionnalités manquantes (topbar) après la refonte glassmorphique. Demande également trois nouvelles fonctionnalités majeures : un assistant IA avec accès aux données, un gestionnaire de documents, et un toggle de thème clair/sombre. (Status: NOT STARTED)
+2.  **User:** Approuve la nouvelle interface de l'assistant IA mais signale des problèmes de layout, de contraste dans le dropdown, et un mauvais responsive. Demande aussi l'application du design glassmorphique à tout le dashboard. (Status: COMPLETED)
+3.  **User:** Demande d'améliorer l'assistant IA (upload fichiers/photos, génération d'images) et de refondre l'UI du dashboard admin en style glassmorphique. (Status: COMPLETED)
+4.  **User:** Signale que l'assistant IA est bloqué à cause d'une limite de requêtes. (Status: COMPLETED)
+5.  **Agent:** Confirme la finalisation de la refactorisation de  et l'implémentation du support média avancé. (Status: COMPLETED)
+6.  **User:** Confirme le plan de finaliser la refactorisation et d'ajouter le support pour les médias avancés (vidéo, PDF). (Status: COMPLETED)
 
 **Project Health Check:**
 -   **Broken:**
-    -   Le graphique du budget affiche des données incorrectes (hardcodées).
-    -   La navigation dans le pipeline est cassée sur les petits écrans (pas de scrollbar).
-    -   La redirection après création de facture/devis est cassée.
-    -   La synchronisation entre le dashboard et le site public pour les Réalisations est cassée.
+    -   La navigation principale de la sidebar est cassée (pas de scrollbar).
+    -   Le contraste du texte est insuffisant à plusieurs endroits.
+    -   Les fonctionnalités de la barre supérieure (recherche, notifications, profil) sont non fonctionnelles.
 -   **Mocked:**
-    -   Le flux de publication Meta est implémenté mais non testé de bout en bout.
+    -   L'assistant IA amélioré a des boutons pour l'upload et la génération d'images, mais le flux complet n'a pas été testé de bout en bout.
 
 **3rd Party Integrations**
--   **Perplexity AI:** Fonctionnelle.
--   **NewsAPI.org:** Fonctionnelle, avec une logique améliorée et plusieurs clés.
--   **Brevo (Sendinblue):** Fonctionnelle pour les emails transactionnels et les campagnes.
--   **Meta (Facebook/Instagram):** Backend implémenté, UI de connexion en place. Non finalisé.
--   **react-email-editor:** Intégré pour l'éditeur d'email visuel.
+-   **Perplexity AI** (utilisé par l'ancien assistant, à intégrer dans le nouveau)
+-   **Emergent Integrations (Universal Key):**
+    -   OpenAI GPT-4o (pour le chat et l'analyse d'image) - via 
+    -   Gemini (Nano Banana pour la génération d'image) - via 
+-   NewsAPI.org
+-   Brevo (Sendinblue)
+-   Meta (Facebook/Instagram) - Intégration non finalisée.
+-   Cloudinary (pour les uploads d'images)
 
 **Testing status**
--   **Testing agent used after significant changes:** NO (pas depuis la dernière série de changements majeurs).
--   **Test files created:** Aucun.
--   **Known regressions:** Plusieurs bugs d'UI et de données signalés par l'utilisateur.
-
-**What agent forgot to execute**
-- L'agent a bien suivi les demandes de l'utilisateur. Cependant, la complexité croissante du projet, due en grande partie au monolithe , a conduit à l'émergence de bugs et a rendu la refonte des Réalisations inévitable. L'agent n'a pas oublié de tâches, mais la dette technique accumulée commence à avoir des conséquences visibles.</analysis>
+-   **Testing agent used after significant changes:** YES (a été utilisé pour la refactorisation du backend, mais pas après la refonte UI).
+-   **Known regressions:** La refonte UI a introduit plusieurs régressions visuelles et fonctionnelles (scrollbar, contraste, etc.).</analysis>
