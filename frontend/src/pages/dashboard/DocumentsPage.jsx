@@ -4,7 +4,7 @@ import {
   FileText, FileSpreadsheet, FileImage, FileVideo, FileAudio,
   Archive, Download, ChevronRight, Search, Grid, List,
   FolderOpen, Plus, X, Edit2, Move, Tag, Filter,
-  HardDrive, Clock, CheckCircle2
+  HardDrive, Clock, CheckCircle2, Eye, Pencil, Save
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -40,6 +40,12 @@ const DocumentsPage = () => {
   const [moveModal, setMoveModal] = useState(false);
   const [moveTarget, setMoveTarget] = useState(null);
   const [previewDoc, setPreviewDoc] = useState(null);
+  
+  // Rename state
+  const [renameModal, setRenameModal] = useState(false);
+  const [renameItem, setRenameItem] = useState(null);
+  const [newName, setNewName] = useState("");
+  const [renaming, setRenaming] = useState(false);
 
   // Fetch data
   const fetchData = useCallback(async () => {
