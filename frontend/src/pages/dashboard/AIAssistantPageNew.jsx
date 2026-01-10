@@ -142,16 +142,26 @@ const AIAssistantPageNew = () => {
         response = await aiEnhancedAPI.chat({
           messages: [...messages, userMessage],
           conversation_id: currentConversationId,
-          model: selectedModel
+          model: selectedModel,
+          include_context: true,
+          enable_actions: actionsEnabled
         });
 
         const assistantMessage = {
           role: "assistant",
-          content: response.data.message
+          content: response.data.message,
+          action_executed: response.data.action_executed
         };
         
         setMessages(prev => [...prev, assistantMessage]);
         setCurrentConversationId(response.data.conversation_id);
+        
+        // Show toast for successful actions
+        if (response.data.action_executed?.success) {
+          toast.success(response.data.action_executed.message, {
+            icon: <CheckCircle2 className="w-4 h-4" />
+          });
+        }
         
         if (response.data.usage) {
           setStatus(prev => ({
