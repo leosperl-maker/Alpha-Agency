@@ -43,11 +43,200 @@ class ChatRequest(BaseModel):
     conversation_id: Optional[str] = None
     model: Optional[str] = "gpt-4o"  # gpt-4o, gemini-3-flash-preview
     include_context: Optional[bool] = True  # Include app data context
+    enable_actions: Optional[bool] = True  # Enable AI to perform actions
     
 class ImageGenerateRequest(BaseModel):
     prompt: str
     model: Optional[str] = "gemini-3-pro-image-preview"  # gemini-3-pro-image-preview, gpt-image-1
     size: Optional[str] = "1024x1024"
+
+# Action models
+class ActionRequest(BaseModel):
+    action_type: str  # create_task, update_contact, create_quote, mark_task_done
+    params: dict
+
+class TaskActionParams(BaseModel):
+    title: str
+    description: Optional[str] = ""
+    priority: Optional[str] = "medium"
+    due_date: Optional[str] = None
+    contact_id: Optional[str] = None
+
+class ContactUpdateParams(BaseModel):
+    contact_id: str
+    updates: dict
+
+class QuoteActionParams(BaseModel):
+    client_name: str
+    client_email: Optional[str] = None
+    services: List[dict]  # [{title, description, quantity, unit_price}]
+    notes: Optional[str] = ""
+
+
+# ==================== ACTION HANDLERS ====================
+
+async def execute_action(action_type: str, params: dict, user_id: str) -> dict:
+    """Execute an action based on type and parameters"""
+    try:
+        if action_type == "create_task":
+            return await create_task_action(params, user_id)
+        elif action_type == "mark_task_done":
+            return await mark_task_done_action(params)
+        elif action_type == "update_contact":
+            return await update_contact_action(params)
+        elif action_type == "create_quote":
+            return await create_quote_action(params, user_id)
+        else:
+            return {"success": False, "error": f"Action inconnue: {action_type}"}
+    except Exception as e:
+        logger.error(f"Action error: {str(e)}")
+        return {"success": False, "error": str(e)}
+
+
+async def create_task_action(params: dict, user_id: str) -> dict:
+    """Create a new task"""
+    task_id = str(uuid.uuid4())
+    task = {
+        "id": task_id,
+        "title": params.get("title", "Nouvelle tâche"),
+        "description": params.get("description", ""),
+        "status": "todo",
+        "priority": params.get("priority", "medium"),
+        "category": params.get("category", "general"),
+        "due_date": params.get("due_date"),
+        "contact_id": params.get("contact_id"),
+        "assigned_to": params.get("assigned_to"),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": user_id
+    }
+    await db.tasks.insert_one(task)
+    return {
+        "success": True, 
+        "message": f"✅ Tâche créée: {task['title']}",
+        "task_id": task_id,
+        "task": {k: v for k, v in task.items() if k != "_id"}
+    }
+
+
+async def mark_task_done_action(params: dict) -> dict:
+    """Mark a task as done"""
+    task_id = params.get("task_id")
+    task_title = params.get("task_title")
+    
+    # Find by ID or title
+    query = {}
+    if task_id:
+        query["id"] = task_id
+    elif task_title:
+        query["title"] = {"$regex": task_title, "$options": "i"}
+    else:
+        return {"success": False, "error": "ID ou titre de tâche requis"}
+    
+    task = await db.tasks.find_one(query)
+    if not task:
+        return {"success": False, "error": "Tâche non trouvée"}
+    
+    await db.tasks.update_one(
+        {"id": task["id"]},
+        {"$set": {
+            "status": "done",
+            "completed_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    return {
+        "success": True,
+        "message": f"✅ Tâche terminée: {task['title']}",
+        "task_id": task["id"]
+    }
+
+
+async def update_contact_action(params: dict) -> dict:
+    """Update a contact"""
+    contact_id = params.get("contact_id")
+    contact_name = params.get("contact_name")
+    updates = params.get("updates", {})
+    
+    if not updates:
+        return {"success": False, "error": "Aucune mise à jour spécifiée"}
+    
+    # Find by ID or name
+    query = {}
+    if contact_id:
+        query["id"] = contact_id
+    elif contact_name:
+        # Search by first_name or last_name
+        query["$or"] = [
+            {"first_name": {"$regex": contact_name, "$options": "i"}},
+            {"last_name": {"$regex": contact_name, "$options": "i"}},
+            {"company": {"$regex": contact_name, "$options": "i"}}
+        ]
+    else:
+        return {"success": False, "error": "ID ou nom du contact requis"}
+    
+    contact = await db.contacts.find_one(query)
+    if not contact:
+        return {"success": False, "error": "Contact non trouvé"}
+    
+    # Only allow certain fields to be updated
+    allowed_fields = ["phone", "email", "company", "notes", "type", "tags"]
+    safe_updates = {k: v for k, v in updates.items() if k in allowed_fields}
+    safe_updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.contacts.update_one({"id": contact["id"]}, {"$set": safe_updates})
+    
+    return {
+        "success": True,
+        "message": f"✅ Contact mis à jour: {contact.get('first_name', '')} {contact.get('last_name', '')}",
+        "contact_id": contact["id"],
+        "updates": safe_updates
+    }
+
+
+async def create_quote_action(params: dict, user_id: str) -> dict:
+    """Create a new quote/devis"""
+    quote_id = str(uuid.uuid4())
+    
+    # Calculate totals
+    services = params.get("services", [])
+    subtotal = sum(
+        s.get("quantity", 1) * s.get("unit_price", 0) * (1 - s.get("discount", 0) / 100)
+        for s in services
+    )
+    tva_rate = 8.5  # Guadeloupe TVA
+    tva_amount = subtotal * tva_rate / 100
+    total = subtotal + tva_amount
+    
+    # Generate quote number
+    count = await db.quotes.count_documents({})
+    quote_number = f"DEV-{datetime.now().year}-{str(count + 1).zfill(4)}"
+    
+    quote = {
+        "id": quote_id,
+        "number": quote_number,
+        "client_name": params.get("client_name", "Client"),
+        "client_email": params.get("client_email", ""),
+        "client_address": params.get("client_address", ""),
+        "services": services,
+        "subtotal": subtotal,
+        "tva_rate": tva_rate,
+        "tva_amount": tva_amount,
+        "total": total,
+        "notes": params.get("notes", ""),
+        "status": "brouillon",
+        "valid_until": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": user_id
+    }
+    
+    await db.quotes.insert_one(quote)
+    
+    return {
+        "success": True,
+        "message": f"✅ Devis créé: {quote_number} pour {quote['client_name']} - Total: {total:.2f}€",
+        "quote_id": quote_id,
+        "quote_number": quote_number,
+        "total": total
+    }
 
 
 # ==================== CONTEXT HELPERS ====================
