@@ -211,7 +211,8 @@ async def get_enhanced_status(current_user: dict = Depends(get_current_user)):
         "features": {
             "chat": True,
             "image_analysis": EMERGENT_AVAILABLE,
-            "image_generation": EMERGENT_AVAILABLE
+            "image_generation": EMERGENT_AVAILABLE,
+            "context_aware": True  # NEW: AI can access app data
         },
         "available_models": {
             "chat": ["gpt-4o", "gemini-3-flash-preview"],
@@ -219,6 +220,19 @@ async def get_enhanced_status(current_user: dict = Depends(get_current_user)):
             "image_generation": ["gemini-3-pro-image-preview"]
         }
     }
+
+
+@router.get("/context")
+async def get_context(current_user: dict = Depends(get_current_user)):
+    """Get current app context that the AI has access to"""
+    try:
+        context = await get_app_context()
+        return {
+            "context": context,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
 
 
 @router.post("/chat")
