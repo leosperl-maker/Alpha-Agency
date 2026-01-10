@@ -115,7 +115,7 @@ const TextBlockEditor = ({ block, onUpdate }) => (
     <div className="flex gap-2">
       <Select value={block.alignment || 'left'} onValueChange={(v) => onUpdate({ ...block, alignment: v })}>
         <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-        <SelectContent className="bg-white/5">
+        <SelectContent className="bg-[#1a1a2e] border-white/10">
           <SelectItem value="left"><AlignLeft className="w-4 h-4 inline mr-2" />Gauche</SelectItem>
           <SelectItem value="center"><AlignCenter className="w-4 h-4 inline mr-2" />Centre</SelectItem>
           <SelectItem value="right"><AlignRight className="w-4 h-4 inline mr-2" />Droite</SelectItem>
@@ -130,7 +130,7 @@ const HeadingBlockEditor = ({ block, onUpdate }) => (
     <div className="flex gap-2">
       <Select value={String(block.level || 2)} onValueChange={(v) => onUpdate({ ...block, level: parseInt(v) })}>
         <SelectTrigger className="w-20 bg-white/5"><SelectValue /></SelectTrigger>
-        <SelectContent className="bg-white/5">
+        <SelectContent className="bg-[#1a1a2e] border-white/10">
           <SelectItem value="1">H1</SelectItem>
           <SelectItem value="2">H2</SelectItem>
           <SelectItem value="3">H3</SelectItem>
@@ -150,7 +150,7 @@ const HeadingBlockEditor = ({ block, onUpdate }) => (
     </div>
     <Select value={block.alignment || 'left'} onValueChange={(v) => onUpdate({ ...block, alignment: v })}>
       <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-      <SelectContent className="bg-white/5">
+      <SelectContent className="bg-[#1a1a2e] border-white/10">
         <SelectItem value="left">Gauche</SelectItem>
         <SelectItem value="center">Centre</SelectItem>
         <SelectItem value="right">Droite</SelectItem>
@@ -297,7 +297,7 @@ const ImageBlockEditor = ({ block, onUpdate }) => {
       <div className="flex flex-wrap gap-2">
         <Select value={block.size || 'large'} onValueChange={(v) => onUpdate({ ...block, size: v })}>
           <SelectTrigger className="w-28 bg-white/5"><SelectValue placeholder="Taille" /></SelectTrigger>
-          <SelectContent className="bg-white/5">
+          <SelectContent className="bg-[#1a1a2e] border-white/10">
             <SelectItem value="small">Petit</SelectItem>
             <SelectItem value="medium">Moyen</SelectItem>
             <SelectItem value="large">Grand</SelectItem>
@@ -306,7 +306,7 @@ const ImageBlockEditor = ({ block, onUpdate }) => {
         </Select>
         <Select value={block.alignment || 'center'} onValueChange={(v) => onUpdate({ ...block, alignment: v })}>
           <SelectTrigger className="w-28 bg-white/5"><SelectValue placeholder="Align" /></SelectTrigger>
-          <SelectContent className="bg-white/5">
+          <SelectContent className="bg-[#1a1a2e] border-white/10">
             <SelectItem value="left">Gauche</SelectItem>
             <SelectItem value="center">Centre</SelectItem>
             <SelectItem value="right">Droite</SelectItem>
@@ -378,7 +378,7 @@ const GalleryBlockEditor = ({ block, onUpdate }) => {
       <div className="flex flex-wrap gap-2">
         <Select value={block.layout || 'grid'} onValueChange={(v) => onUpdate({ ...block, layout: v })}>
           <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-          <SelectContent className="bg-white/5">
+          <SelectContent className="bg-[#1a1a2e] border-white/10">
             <SelectItem value="grid">Grille</SelectItem>
             <SelectItem value="masonry">Masonry</SelectItem>
             <SelectItem value="carousel">Carrousel</SelectItem>
@@ -386,7 +386,7 @@ const GalleryBlockEditor = ({ block, onUpdate }) => {
         </Select>
         <Select value={String(block.columns || 3)} onValueChange={(v) => onUpdate({ ...block, columns: parseInt(v) })}>
           <SelectTrigger className="w-28 bg-white/5"><SelectValue /></SelectTrigger>
-          <SelectContent className="bg-white/5">
+          <SelectContent className="bg-[#1a1a2e] border-white/10">
             <SelectItem value="2">2 colonnes</SelectItem>
             <SelectItem value="3">3 colonnes</SelectItem>
             <SelectItem value="4">4 colonnes</SelectItem>
@@ -423,7 +423,7 @@ const GalleryBlockEditor = ({ block, onUpdate }) => {
           </div>
         ))}
         <label className={`h-24 border-2 border-dashed border-white/10 flex items-center justify-center cursor-pointer hover:border-[#CE0202] ${block.rounded ? 'rounded-lg' : ''}`}>
-          {uploading ? <Loader2 className="w-6 h-6 animate-spin text-[#CE0202]" /> : <Plus className="w-6 h-6 text-white/60" />}
+          {uploading ? <Loader2 className="w-6 h-6 animate-spin text-indigo-400" /> : <Plus className="w-6 h-6 text-white/60" />}
           <input type="file" accept="image/*" multiple className="hidden" onChange={handleUpload} />
         </label>
       </div>
@@ -474,7 +474,7 @@ const VideoBlockEditor = ({ block, onUpdate }) => {
       <div className="flex gap-2 flex-wrap">
         <Select value={block.type || 'youtube'} onValueChange={(v) => onUpdate({ ...block, type: v, url: '' })}>
           <SelectTrigger className="w-40 bg-white/5"><SelectValue /></SelectTrigger>
-          <SelectContent className="bg-white/5">
+          <SelectContent className="bg-[#1a1a2e] border-white/10">
             <SelectItem value="youtube">YouTube</SelectItem>
             <SelectItem value="vimeo">Vimeo</SelectItem>
             <SelectItem value="direct">Fichier uploadé</SelectItem>
@@ -554,10 +554,10 @@ const PDFBlockEditor = ({ block, onUpdate }) => {
     <div className="space-y-4">
       <div className="flex gap-2 items-center">
         <label className="cursor-pointer flex-1">
-          <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${block.url ? 'border-green-500 bg-green-50' : 'border-white/10 hover:border-[#CE0202]'}`}>
+          <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${block.url ? 'border-green-500 bg-green-50' : 'border-white/10 hover:border-indigo-500'}`}>
             {uploading ? (
               <div className="flex items-center justify-center gap-2">
-                <Loader2 className="w-6 h-6 animate-spin text-[#CE0202]" />
+                <Loader2 className="w-6 h-6 animate-spin text-indigo-400" />
                 <span>Upload en cours...</span>
               </div>
             ) : block.url ? (
@@ -695,7 +695,7 @@ const StatsBlockEditor = ({ block, onUpdate }) => {
       <div className="flex gap-2">
         <Select value={String(block.columns || 4)} onValueChange={(v) => onUpdate({ ...block, columns: parseInt(v) })}>
           <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-          <SelectContent className="bg-white/5">
+          <SelectContent className="bg-[#1a1a2e] border-white/10">
             <SelectItem value="2">2 colonnes</SelectItem>
             <SelectItem value="3">3 colonnes</SelectItem>
             <SelectItem value="4">4 colonnes</SelectItem>
@@ -751,7 +751,7 @@ const CTABlockEditor = ({ block, onUpdate }) => (
     <div className="flex gap-2 flex-wrap">
       <Select value={block.style || 'primary'} onValueChange={(v) => onUpdate({ ...block, style: v })}>
         <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-        <SelectContent className="bg-white/5">
+        <SelectContent className="bg-[#1a1a2e] border-white/10">
           <SelectItem value="primary">Principal</SelectItem>
           <SelectItem value="outline">Contour</SelectItem>
           <SelectItem value="ghost">Transparent</SelectItem>
@@ -759,7 +759,7 @@ const CTABlockEditor = ({ block, onUpdate }) => (
       </Select>
       <Select value={block.alignment || 'center'} onValueChange={(v) => onUpdate({ ...block, alignment: v })}>
         <SelectTrigger className="w-28 bg-white/5"><SelectValue /></SelectTrigger>
-        <SelectContent className="bg-white/5">
+        <SelectContent className="bg-[#1a1a2e] border-white/10">
           <SelectItem value="left">Gauche</SelectItem>
           <SelectItem value="center">Centre</SelectItem>
           <SelectItem value="right">Droite</SelectItem>
@@ -782,7 +782,7 @@ const DividerBlockEditor = ({ block, onUpdate }) => (
     <div className="flex gap-2">
       <Select value={block.style || 'line'} onValueChange={(v) => onUpdate({ ...block, style: v })}>
         <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-        <SelectContent className="bg-white/5">
+        <SelectContent className="bg-[#1a1a2e] border-white/10">
           <SelectItem value="line">Ligne</SelectItem>
           <SelectItem value="dashed">Tirets</SelectItem>
           <SelectItem value="dotted">Points</SelectItem>
@@ -808,7 +808,7 @@ const SpacerBlockEditor = ({ block, onUpdate }) => (
     <Label>Hauteur :</Label>
     <Select value={block.height || 'md'} onValueChange={(v) => onUpdate({ ...block, height: v })}>
       <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-      <SelectContent className="bg-white/5">
+      <SelectContent className="bg-[#1a1a2e] border-white/10">
         <SelectItem value="sm">Petit (16px)</SelectItem>
         <SelectItem value="md">Moyen (32px)</SelectItem>
         <SelectItem value="lg">Grand (64px)</SelectItem>
@@ -871,7 +871,7 @@ const CodeBlockEditor = ({ block, onUpdate }) => (
   <div className="space-y-3">
     <Select value={block.language || 'javascript'} onValueChange={(v) => onUpdate({ ...block, language: v })}>
       <SelectTrigger className="w-40 bg-white/5"><SelectValue /></SelectTrigger>
-      <SelectContent className="bg-white/5">
+      <SelectContent className="bg-[#1a1a2e] border-white/10">
         <SelectItem value="javascript">JavaScript</SelectItem>
         <SelectItem value="html">HTML</SelectItem>
         <SelectItem value="css">CSS</SelectItem>
@@ -911,7 +911,7 @@ const SectionBlockEditor = ({ block, onUpdate }) => (
       </div>
       <Select value={block.padding || 'lg'} onValueChange={(v) => onUpdate({ ...block, padding: v })}>
         <SelectTrigger className="w-32 bg-white/5"><SelectValue placeholder="Padding" /></SelectTrigger>
-        <SelectContent className="bg-white/5">
+        <SelectContent className="bg-[#1a1a2e] border-white/10">
           <SelectItem value="sm">Petit</SelectItem>
           <SelectItem value="md">Moyen</SelectItem>
           <SelectItem value="lg">Grand</SelectItem>
@@ -999,15 +999,15 @@ const AddBlockButton = ({ onAdd }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="w-full border-dashed border-2 border-white/10 hover:border-[#CE0202] py-6">
+        <Button variant="outline" className="w-full border-dashed border-2 border-white/10 hover:border-indigo-500 py-6">
           <Plus className="w-5 h-5 mr-2" />
           Ajouter un bloc
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64 bg-white/5" align="center">
+      <DropdownMenuContent className="w-64 bg-[#1a1a2e] border-white/10" align="center">
         {Object.entries(categories).map(([catKey, cat]) => (
           <div key={catKey}>
-            <DropdownMenuLabel className="text-xs uppercase text-[#999999]">{cat.label}</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-xs uppercase text-white/50">{cat.label}</DropdownMenuLabel>
             {cat.types.map((type) => {
               const blockType = BLOCK_TYPES[type];
               const Icon = blockType.icon;
