@@ -318,7 +318,15 @@ const AIAssistantPageNew = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-white">Assistant IA Alpha</h1>
-              <p className="text-xs text-white/50">GPT-4o • Gemini • Perplexity</p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-white/50">GPT-4o • Gemini • Perplexity</p>
+                {status?.features?.context_aware && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 text-[10px] font-semibold">
+                    <Zap className="w-2.5 h-2.5" />
+                    Context-Aware
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
