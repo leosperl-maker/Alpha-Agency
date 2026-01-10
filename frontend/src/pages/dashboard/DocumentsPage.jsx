@@ -616,10 +616,18 @@ const DocumentsPage = () => {
                             <MoreVertical className="w-4 h-4 text-white/40" />
                           </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
+                        <DropdownMenuContent className="bg-[#1a1a2e] border-white/10 z-50">
+                          <DropdownMenuItem
+                            onClick={(e) => { e.stopPropagation(); openRenameModal("folder", folder); }}
+                            className="text-white/80 focus:bg-white/10 focus:text-white"
+                          >
+                            <Pencil className="w-4 h-4 mr-2" />
+                            Renommer
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-white/10" />
                           <DropdownMenuItem
                             onClick={(e) => { e.stopPropagation(); handleDelete("folder", folder.id); }}
-                            className="text-red-400 focus:bg-red-500/20"
+                            className="text-red-400 focus:bg-red-500/20 focus:text-red-400"
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Supprimer
@@ -657,17 +665,33 @@ const DocumentsPage = () => {
                               <MoreVertical className="w-4 h-4 text-white/40" />
                             </button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
-                            <DropdownMenuItem asChild className="text-white/80 focus:bg-white/10">
+                          <DropdownMenuContent className="bg-[#1a1a2e] border-white/10 z-50">
+                            {canPreview(doc) && (
+                              <DropdownMenuItem
+                                onClick={(e) => { e.stopPropagation(); setPreviewDoc(doc); }}
+                                className="text-white/80 focus:bg-white/10 focus:text-white"
+                              >
+                                <Eye className="w-4 h-4 mr-2" />
+                                Aperçu
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem asChild className="text-white/80 focus:bg-white/10 focus:text-white">
                               <a href={doc.url} download={doc.name} target="_blank" rel="noopener noreferrer">
                                 <Download className="w-4 h-4 mr-2" />
                                 Télécharger
                               </a>
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => { e.stopPropagation(); openRenameModal("document", doc); }}
+                              className="text-white/80 focus:bg-white/10 focus:text-white"
+                            >
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Renommer
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-white/10" />
                             <DropdownMenuItem
                               onClick={(e) => { e.stopPropagation(); handleDelete("document", doc.id); }}
-                              className="text-red-400 focus:bg-red-500/20"
+                              className="text-red-400 focus:bg-red-500/20 focus:text-red-400"
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
                               Supprimer
