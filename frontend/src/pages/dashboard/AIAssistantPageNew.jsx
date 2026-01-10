@@ -464,6 +464,27 @@ const AIAssistantPageNew = () => {
                           <img src={msg.image_url} alt="Attached" className="max-w-full md:max-w-xs rounded-lg mb-3" />
                         )}
                         <p className="whitespace-pre-wrap text-sm md:text-base">{msg.content}</p>
+                        
+                        {/* Action Result Badge */}
+                        {msg.action_executed && (
+                          <div className={`mt-3 pt-3 border-t ${msg.action_executed.success ? 'border-green-500/30' : 'border-red-500/30'}`}>
+                            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium ${
+                              msg.action_executed.success 
+                                ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                                : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                            }`}>
+                              {msg.action_executed.success ? (
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                              ) : (
+                                <AlertCircle className="w-3.5 h-3.5" />
+                              )}
+                              {msg.action_executed.task_id && <ListTodo className="w-3.5 h-3.5" />}
+                              {msg.action_executed.quote_number && <FileText className="w-3.5 h-3.5" />}
+                              {msg.action_executed.contact_id && <Users className="w-3.5 h-3.5" />}
+                              <span>Action exécutée</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                     {msg.role === "user" && (
