@@ -228,29 +228,29 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent 
         side="right" 
-        className="w-full sm:max-w-[500px] md:max-w-[600px] p-0 bg-white/5 overflow-hidden"
+        className="w-full sm:max-w-[500px] md:max-w-[600px] p-0 bg-[#0a0a14] border-l border-white/10 overflow-hidden"
       >
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#CE0202]"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
           </div>
         ) : contact ? (
           <div className="flex flex-col h-full">
-            {/* Header - Pipedrive Style */}
-            <div className="relative bg-gradient-to-br from-[#CE0202] via-[#b00202] to-[#8a0000] text-white p-4 sm:p-6">
+            {/* Header - Glassmorphic Style */}
+            <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 text-white p-4 sm:p-6">
               {/* Quick Actions */}
               <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex gap-1">
                 <Button 
                   size="sm" 
                   variant="ghost" 
-                  className="text-white/80 hover:text-white hover:bg-white/5/10 h-8 w-8 p-0"
+                  className="text-white/80 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
                 >
                   <Star className="w-4 h-4" />
                 </Button>
                 <Button 
                   size="sm" 
                   variant="ghost" 
-                  className="text-white/80 hover:text-white hover:bg-white/5/10 h-8 w-8 p-0"
+                  className="text-white/80 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
                   onClick={() => navigate(`/admin/contacts?edit=${contact.id}`)}
                 >
                   <Pencil className="w-4 h-4" />
@@ -258,7 +258,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
               </div>
 
               <div className="flex items-start gap-3 sm:gap-4">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/5/20 backdrop-blur rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold flex-shrink-0">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold flex-shrink-0">
                   {contact.first_name?.[0]}{contact.last_name?.[0]}
                 </div>
                 <div className="flex-1 min-w-0">
