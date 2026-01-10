@@ -173,10 +173,10 @@ const DashboardOverview = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 bg-white animate-pulse rounded-lg" />
+            <div key={i} className="h-32 bg-white/5 animate-pulse rounded-2xl border border-white/10" />
           ))}
         </div>
       </div>
@@ -184,11 +184,11 @@ const DashboardOverview = () => {
   }
 
   return (
-    <div data-testid="dashboard-overview" className="space-y-4 sm:space-y-6 p-4 sm:p-6 bg-[#F8F8F8]">
+    <div data-testid="dashboard-overview" className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="mb-2">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A]">Vue d'ensemble</h1>
-        <p className="text-[#666666] text-sm sm:text-base">Bienvenue sur votre dashboard Alpha Agency</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">Vue d'ensemble</h1>
+        <p className="text-white/50 text-sm sm:text-base">Bienvenue sur votre dashboard Alpha Agency</p>
       </div>
 
       {/* Main KPI Cards - Row 1 */}
@@ -201,17 +201,17 @@ const DashboardOverview = () => {
             transition={{ delay: index * 0.05 }}
           >
             <Link to={kpi.link}>
-              <Card className="bg-white border border-[#E5E5E5] shadow-sm hover:shadow-md transition-all cursor-pointer h-full">
+              <Card className="bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/20 shadow-lg hover:shadow-xl hover:shadow-indigo-500/10 transition-all cursor-pointer h-full rounded-2xl group">
                 <CardContent className="p-3 sm:p-5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="text-[#666666] text-xs sm:text-sm mb-1 truncate">{kpi.title}</p>
-                      <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A] font-mono">{kpi.value}</p>
-                      <p className="text-[10px] sm:text-xs text-[#666666] mt-1 truncate">{kpi.subValue}</p>
+                      <p className="text-white/50 text-xs sm:text-sm mb-1 truncate">{kpi.title}</p>
+                      <p className="text-lg sm:text-2xl font-bold text-white font-mono">{kpi.value}</p>
+                      <p className="text-[10px] sm:text-xs text-white/40 mt-1 truncate">{kpi.subValue}</p>
                     </div>
                     <div 
-                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: `${kpi.color}15` }}
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
+                      style={{ backgroundColor: `${kpi.color}25` }}
                     >
                       <kpi.icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: kpi.color }} />
                     </div>
@@ -233,17 +233,17 @@ const DashboardOverview = () => {
             transition={{ delay: 0.2 + index * 0.05 }}
           >
             <Link to={kpi.link}>
-              <Card className="bg-white border border-[#E5E5E5] shadow-sm hover:shadow-md transition-all cursor-pointer h-full">
+              <Card className="bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/20 shadow-lg hover:shadow-xl transition-all cursor-pointer h-full rounded-2xl group">
                 <CardContent className="p-3 sm:p-5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="text-[#666666] text-xs sm:text-sm mb-1 truncate">{kpi.title}</p>
-                      <p className="text-lg sm:text-2xl font-bold text-[#1A1A1A] font-mono">{kpi.value}</p>
-                      <p className="text-[10px] sm:text-xs text-[#666666] mt-1 truncate">{kpi.subValue}</p>
+                      <p className="text-white/50 text-xs sm:text-sm mb-1 truncate">{kpi.title}</p>
+                      <p className="text-lg sm:text-2xl font-bold text-white font-mono">{kpi.value}</p>
+                      <p className="text-[10px] sm:text-xs text-white/40 mt-1 truncate">{kpi.subValue}</p>
                     </div>
                     <div 
-                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: `${kpi.color}15` }}
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
+                      style={{ backgroundColor: `${kpi.color}25` }}
                     >
                       <kpi.icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: kpi.color }} />
                     </div>
