@@ -297,19 +297,19 @@ const ImageBlockEditor = ({ block, onUpdate }) => {
       <div className="flex flex-wrap gap-2">
         <Select value={block.size || 'large'} onValueChange={(v) => onUpdate({ ...block, size: v })}>
           <SelectTrigger className="w-28 bg-white/5"><SelectValue placeholder="Taille" /></SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e] border-white/10">
-            <SelectItem value="small">Petit</SelectItem>
-            <SelectItem value="medium">Moyen</SelectItem>
-            <SelectItem value="large">Grand</SelectItem>
-            <SelectItem value="full">Plein</SelectItem>
+          <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+            <SelectItem value="small" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Petit</SelectItem>
+            <SelectItem value="medium" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Moyen</SelectItem>
+            <SelectItem value="large" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Grand</SelectItem>
+            <SelectItem value="full" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Plein</SelectItem>
           </SelectContent>
         </Select>
         <Select value={block.alignment || 'center'} onValueChange={(v) => onUpdate({ ...block, alignment: v })}>
           <SelectTrigger className="w-28 bg-white/5"><SelectValue placeholder="Align" /></SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e] border-white/10">
-            <SelectItem value="left">Gauche</SelectItem>
-            <SelectItem value="center">Centre</SelectItem>
-            <SelectItem value="right">Droite</SelectItem>
+          <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+            <SelectItem value="left" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Gauche</SelectItem>
+            <SelectItem value="center" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Centre</SelectItem>
+            <SelectItem value="right" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Droite</SelectItem>
           </SelectContent>
         </Select>
         <Button
@@ -378,18 +378,18 @@ const GalleryBlockEditor = ({ block, onUpdate }) => {
       <div className="flex flex-wrap gap-2">
         <Select value={block.layout || 'grid'} onValueChange={(v) => onUpdate({ ...block, layout: v })}>
           <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e] border-white/10">
-            <SelectItem value="grid">Grille</SelectItem>
-            <SelectItem value="masonry">Masonry</SelectItem>
-            <SelectItem value="carousel">Carrousel</SelectItem>
+          <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+            <SelectItem value="grid" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Grille</SelectItem>
+            <SelectItem value="masonry" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Masonry</SelectItem>
+            <SelectItem value="carousel" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Carrousel</SelectItem>
           </SelectContent>
         </Select>
         <Select value={String(block.columns || 3)} onValueChange={(v) => onUpdate({ ...block, columns: parseInt(v) })}>
           <SelectTrigger className="w-28 bg-white/5"><SelectValue /></SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e] border-white/10">
-            <SelectItem value="2">2 colonnes</SelectItem>
-            <SelectItem value="3">3 colonnes</SelectItem>
-            <SelectItem value="4">4 colonnes</SelectItem>
+          <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+            <SelectItem value="2" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">2 colonnes</SelectItem>
+            <SelectItem value="3" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">3 colonnes</SelectItem>
+            <SelectItem value="4" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">4 colonnes</SelectItem>
           </SelectContent>
         </Select>
         <Button
@@ -474,10 +474,10 @@ const VideoBlockEditor = ({ block, onUpdate }) => {
       <div className="flex gap-2 flex-wrap">
         <Select value={block.type || 'youtube'} onValueChange={(v) => onUpdate({ ...block, type: v, url: '' })}>
           <SelectTrigger className="w-40 bg-white/5"><SelectValue /></SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e] border-white/10">
-            <SelectItem value="youtube">YouTube</SelectItem>
-            <SelectItem value="vimeo">Vimeo</SelectItem>
-            <SelectItem value="direct">Fichier uploadé</SelectItem>
+          <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+            <SelectItem value="youtube" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">YouTube</SelectItem>
+            <SelectItem value="vimeo" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Vimeo</SelectItem>
+            <SelectItem value="direct" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Fichier uploadé</SelectItem>
           </SelectContent>
         </Select>
         {block.type === 'direct' && (
@@ -695,10 +695,10 @@ const StatsBlockEditor = ({ block, onUpdate }) => {
       <div className="flex gap-2">
         <Select value={String(block.columns || 4)} onValueChange={(v) => onUpdate({ ...block, columns: parseInt(v) })}>
           <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e] border-white/10">
-            <SelectItem value="2">2 colonnes</SelectItem>
-            <SelectItem value="3">3 colonnes</SelectItem>
-            <SelectItem value="4">4 colonnes</SelectItem>
+          <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+            <SelectItem value="2" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">2 colonnes</SelectItem>
+            <SelectItem value="3" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">3 colonnes</SelectItem>
+            <SelectItem value="4" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">4 colonnes</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -751,18 +751,18 @@ const CTABlockEditor = ({ block, onUpdate }) => (
     <div className="flex gap-2 flex-wrap">
       <Select value={block.style || 'primary'} onValueChange={(v) => onUpdate({ ...block, style: v })}>
         <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-        <SelectContent className="bg-[#1a1a2e] border-white/10">
-          <SelectItem value="primary">Principal</SelectItem>
-          <SelectItem value="outline">Contour</SelectItem>
-          <SelectItem value="ghost">Transparent</SelectItem>
+        <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+          <SelectItem value="primary" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Principal</SelectItem>
+          <SelectItem value="outline" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Contour</SelectItem>
+          <SelectItem value="ghost" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Transparent</SelectItem>
         </SelectContent>
       </Select>
       <Select value={block.alignment || 'center'} onValueChange={(v) => onUpdate({ ...block, alignment: v })}>
         <SelectTrigger className="w-28 bg-white/5"><SelectValue /></SelectTrigger>
-        <SelectContent className="bg-[#1a1a2e] border-white/10">
-          <SelectItem value="left">Gauche</SelectItem>
-          <SelectItem value="center">Centre</SelectItem>
-          <SelectItem value="right">Droite</SelectItem>
+        <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+          <SelectItem value="left" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Gauche</SelectItem>
+          <SelectItem value="center" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Centre</SelectItem>
+          <SelectItem value="right" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Droite</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -782,11 +782,11 @@ const DividerBlockEditor = ({ block, onUpdate }) => (
     <div className="flex gap-2">
       <Select value={block.style || 'line'} onValueChange={(v) => onUpdate({ ...block, style: v })}>
         <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-        <SelectContent className="bg-[#1a1a2e] border-white/10">
-          <SelectItem value="line">Ligne</SelectItem>
-          <SelectItem value="dashed">Tirets</SelectItem>
-          <SelectItem value="dotted">Points</SelectItem>
-          <SelectItem value="gradient">Dégradé</SelectItem>
+        <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+          <SelectItem value="line" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Ligne</SelectItem>
+          <SelectItem value="dashed" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Tirets</SelectItem>
+          <SelectItem value="dotted" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Points</SelectItem>
+          <SelectItem value="gradient" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Dégradé</SelectItem>
         </SelectContent>
       </Select>
       <Input
@@ -808,11 +808,11 @@ const SpacerBlockEditor = ({ block, onUpdate }) => (
     <Label>Hauteur :</Label>
     <Select value={block.height || 'md'} onValueChange={(v) => onUpdate({ ...block, height: v })}>
       <SelectTrigger className="w-32 bg-white/5"><SelectValue /></SelectTrigger>
-      <SelectContent className="bg-[#1a1a2e] border-white/10">
-        <SelectItem value="sm">Petit (16px)</SelectItem>
-        <SelectItem value="md">Moyen (32px)</SelectItem>
-        <SelectItem value="lg">Grand (64px)</SelectItem>
-        <SelectItem value="xl">Très grand (96px)</SelectItem>
+      <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+        <SelectItem value="sm" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Petit (16px)</SelectItem>
+        <SelectItem value="md" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Moyen (32px)</SelectItem>
+        <SelectItem value="lg" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Grand (64px)</SelectItem>
+        <SelectItem value="xl" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Très grand (96px)</SelectItem>
       </SelectContent>
     </Select>
     <div className="flex-1 bg-white/5 rounded" style={{
@@ -871,12 +871,12 @@ const CodeBlockEditor = ({ block, onUpdate }) => (
   <div className="space-y-3">
     <Select value={block.language || 'javascript'} onValueChange={(v) => onUpdate({ ...block, language: v })}>
       <SelectTrigger className="w-40 bg-white/5"><SelectValue /></SelectTrigger>
-      <SelectContent className="bg-[#1a1a2e] border-white/10">
-        <SelectItem value="javascript">JavaScript</SelectItem>
-        <SelectItem value="html">HTML</SelectItem>
-        <SelectItem value="css">CSS</SelectItem>
-        <SelectItem value="python">Python</SelectItem>
-        <SelectItem value="bash">Bash</SelectItem>
+      <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+        <SelectItem value="javascript" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">JavaScript</SelectItem>
+        <SelectItem value="html" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">HTML</SelectItem>
+        <SelectItem value="css" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">CSS</SelectItem>
+        <SelectItem value="python" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Python</SelectItem>
+        <SelectItem value="bash" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Bash</SelectItem>
       </SelectContent>
     </Select>
     <Textarea
@@ -911,10 +911,10 @@ const SectionBlockEditor = ({ block, onUpdate }) => (
       </div>
       <Select value={block.padding || 'lg'} onValueChange={(v) => onUpdate({ ...block, padding: v })}>
         <SelectTrigger className="w-32 bg-white/5"><SelectValue placeholder="Padding" /></SelectTrigger>
-        <SelectContent className="bg-[#1a1a2e] border-white/10">
-          <SelectItem value="sm">Petit</SelectItem>
-          <SelectItem value="md">Moyen</SelectItem>
-          <SelectItem value="lg">Grand</SelectItem>
+        <SelectContent className="bg-[#1a1a2e] border-white/10 z-[9999]">
+          <SelectItem value="sm" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Petit</SelectItem>
+          <SelectItem value="md" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Moyen</SelectItem>
+          <SelectItem value="lg" className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">Grand</SelectItem>
         </SelectContent>
       </Select>
     </div>
