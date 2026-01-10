@@ -418,9 +418,16 @@ const AdvancedBlockRenderer = ({ blocks = [] }) => {
   const renderBlock = (block, index) => {
     const key = block.id || `block-${index}`;
     
-    // Media blocks get extra spacing
-    const isMediaBlock = ['image', 'gallery', 'video', 'beforeAfter'].includes(block.type);
-    const marginClass = isMediaBlock ? 'my-16' : 'mb-10';
+    // Different spacing based on block type
+    const getMarginClass = () => {
+      if (['image', 'gallery', 'video', 'beforeAfter'].includes(block.type)) {
+        return 'my-16'; // Large margin for media blocks
+      }
+      if (['stats', 'quote'].includes(block.type)) {
+        return 'my-14'; // Medium-large margin for emphasis blocks
+      }
+      return 'mb-8'; // Normal margin for text blocks
+    };
     
     const wrapper = (children) => (
       <motion.div
@@ -429,7 +436,7 @@ const AdvancedBlockRenderer = ({ blocks = [] }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className={`${marginClass} last:mb-0`}
+        className={`${getMarginClass()} last:mb-0`}
       >
         {children}
       </motion.div>
