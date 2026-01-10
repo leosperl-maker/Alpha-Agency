@@ -1175,7 +1175,7 @@ const PipelinePage = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setColumnDialogOpen(false)}>Annuler</Button>
-            <Button onClick={handleSaveColumn} className="bg-indigo-600 hover:bg-indigo-500 text-white">{editingColumn ? "Mettre à jour" : "Créer"}</Button>
+            <Button onClick={handleSaveColumn} className="bg-indigo-600 hover:bg-indigo-500 text-white">{editingColumn ? "Mettre a jour" : "Creer"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
