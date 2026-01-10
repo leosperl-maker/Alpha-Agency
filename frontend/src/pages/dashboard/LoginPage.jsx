@@ -77,9 +77,9 @@ const LoginPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-[#1A1A1A]">Email</Label>
+              <Label htmlFor="email" className="text-white/80">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#666666]" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                 <Input
                   id="email"
                   name="email"
@@ -88,16 +88,16 @@ const LoginPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A] focus:border-[#CE0202] h-12 pl-10"
+                  className="bg-white/5 border-white/10 text-white placeholder-white/40 focus:border-indigo-500/50 h-12 pl-10 rounded-xl"
                   placeholder="admin@alphagency.fr"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-[#1A1A1A]">Mot de passe</Label>
+              <Label htmlFor="password" className="text-white/80">Mot de passe</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#666666]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                 <Input
                   id="password"
                   name="password"
@@ -106,13 +106,13 @@ const LoginPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="bg-[#F8F8F8] border-[#E5E5E5] text-[#1A1A1A] focus:border-[#CE0202] h-12 pl-10 pr-10"
+                  className="bg-white/5 border-white/10 text-white placeholder-white/40 focus:border-indigo-500/50 h-12 pl-10 pr-10 rounded-xl"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666666] hover:text-[#1A1A1A]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -123,7 +123,7 @@ const LoginPage = () => {
               type="submit"
               data-testid="submit-btn"
               disabled={loading}
-              className="w-full bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-none py-6 text-sm font-bold uppercase tracking-wider"
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl py-6 text-sm font-bold uppercase tracking-wider shadow-lg shadow-indigo-500/25"
             >
               {loading ? "Connexion..." : "Se connecter"}
             </Button>
@@ -131,14 +131,14 @@ const LoginPage = () => {
             <div className="text-center">
               <Link 
                 to="/alpha-admin-2024/reset-password" 
-                className="text-sm text-[#CE0202] hover:underline"
+                className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 Mot de passe oublié ?
               </Link>
             </div>
           </form>
 
-          <p className="mt-6 text-center text-xs text-[#666666]">
+          <p className="mt-6 text-center text-xs text-white/40">
             Accès réservé aux administrateurs Alpha Agency
           </p>
         </div>
