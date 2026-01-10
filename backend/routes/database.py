@@ -65,6 +65,9 @@ NEWSAPI_KEY = os.environ.get('NEWSAPI_KEY', '')
 # Perplexity Config
 PERPLEXITY_API_KEY = os.environ.get('PERPLEXITY_API_KEY', '')
 
+# Emergent LLM Key (for GPT-4o, Gemini, Claude)
+EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+
 # Meta Config
 META_APP_ID = os.environ.get('META_APP_ID', '')
 META_APP_SECRET = os.environ.get('META_APP_SECRET', '')
