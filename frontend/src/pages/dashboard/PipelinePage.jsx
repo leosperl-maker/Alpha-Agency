@@ -1095,8 +1095,27 @@ const PipelinePage = () => {
             </DragOverlay>
           </DndContext>
         
+          {/* Custom visible scrollbar */}
+          {scrollInfo.scrollWidth > scrollInfo.clientWidth && (
+            <div 
+              className="mt-3 mx-4 h-3 bg-[#E5E5E5] rounded-full cursor-pointer relative"
+              onClick={handleScrollbarClick}
+              data-testid="pipeline-scrollbar"
+            >
+              <div 
+                className="absolute h-full bg-[#CE0202] rounded-full transition-all hover:bg-[#B00202]"
+                style={{
+                  width: `${Math.max((scrollInfo.clientWidth / scrollInfo.scrollWidth) * 100, 15)}%`,
+                  left: `${(scrollInfo.scrollLeft / (scrollInfo.scrollWidth - scrollInfo.clientWidth)) * (100 - Math.max((scrollInfo.clientWidth / scrollInfo.scrollWidth) * 100, 15))}%`
+                }}
+              />
+            </div>
+          )}
           <p className="text-xs text-[#999999] text-center mt-2">
-            Faites défiler horizontalement pour voir toutes les colonnes
+            {scrollInfo.scrollWidth > scrollInfo.clientWidth 
+              ? "← Cliquez sur la barre ou faites défiler horizontalement →"
+              : "Toutes les colonnes sont visibles"
+            }
           </p>
         </div>
       )}
