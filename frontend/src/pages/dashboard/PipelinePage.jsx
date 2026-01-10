@@ -557,6 +557,45 @@ const PipelinePage = () => {
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
   const scrollContainerRef = useRef(null);
   
+  // Custom scrollbar state
+  const [scrollInfo, setScrollInfo] = useState({ scrollLeft: 0, scrollWidth: 0, clientWidth: 0 });
+  
+  // Update scroll info on scroll
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    
+    const handleScroll = () => {
+      setScrollInfo({
+        scrollLeft: container.scrollLeft,
+        scrollWidth: container.scrollWidth,
+        clientWidth: container.clientWidth
+      });
+    };
+    
+    // Initial measurement
+    handleScroll();
+    
+    container.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll);
+    
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [columns, loading]);
+  
+  // Handle custom scrollbar drag
+  const handleScrollbarClick = (e) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickPosition = (e.clientX - rect.left) / rect.width;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    container.scrollLeft = clickPosition * maxScroll;
+  };
+  
   const [formData, setFormData] = useState({
     contact_id: "",
     title: "",
