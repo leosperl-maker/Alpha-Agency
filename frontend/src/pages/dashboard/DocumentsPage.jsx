@@ -818,46 +818,119 @@ const DocumentsPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Preview Modal */}
+      {/* Preview Modal - Enhanced */}
       <Dialog open={!!previewDoc} onOpenChange={() => setPreviewDoc(null)}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-3xl">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{previewDoc?.name}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-indigo-400" />
+              {previewDoc?.name}
+            </DialogTitle>
           </DialogHeader>
           
           {previewDoc && (
             <div className="space-y-4">
-              {previewDoc.file_type === "image" && previewDoc.url && (
-                <div className="bg-white/5 rounded-xl overflow-hidden">
-                  <img src={previewDoc.url} alt={previewDoc.name} className="max-h-96 mx-auto" />
-                </div>
-              )}
+              {/* File Preview */}
+              <div className="bg-white/5 rounded-xl overflow-hidden min-h-[200px] flex items-center justify-center">
+                {previewDoc.file_type === "image" && previewDoc.url && (
+                  <img 
+                    src={previewDoc.url} 
+                    alt={previewDoc.name} 
+                    className="max-h-[60vh] max-w-full object-contain" 
+                  />
+                )}
+                
+                {previewDoc.file_type === "video" && previewDoc.url && (
+                  <video 
+                    src={previewDoc.url} 
+                    controls 
+                    className="max-h-[60vh] max-w-full"
+                  >
+                    Votre navigateur ne supporte pas la lecture vidéo.
+                  </video>
+                )}
+                
+                {previewDoc.file_type === "audio" && previewDoc.url && (
+                  <div className="w-full p-8">
+                    <div className="flex items-center justify-center mb-4">
+                      <FileAudio className="w-16 h-16 text-pink-400" />
+                    </div>
+                    <audio 
+                      src={previewDoc.url} 
+                      controls 
+                      className="w-full"
+                    >
+                      Votre navigateur ne supporte pas la lecture audio.
+                    </audio>
+                  </div>
+                )}
+                
+                {(previewDoc.content_type?.includes('pdf') || previewDoc.file_type === "document") && previewDoc.url && (
+                  previewDoc.url.startsWith('data:') ? (
+                    <div className="w-full h-[60vh]">
+                      <iframe 
+                        src={previewDoc.url}
+                        className="w-full h-full border-0"
+                        title={previewDoc.name}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-[60vh]">
+                      <iframe 
+                        src={previewDoc.url}
+                        className="w-full h-full border-0"
+                        title={previewDoc.name}
+                      />
+                    </div>
+                  )
+                )}
+                
+                {/* Fallback for non-previewable files */}
+                {!['image', 'video', 'audio', 'document'].includes(previewDoc.file_type) && 
+                 !previewDoc.content_type?.includes('pdf') && (
+                  <div className="text-center p-8">
+                    <File className="w-16 h-16 mx-auto text-white/30 mb-4" />
+                    <p className="text-white/60">Aperçu non disponible pour ce type de fichier</p>
+                    <p className="text-white/40 text-sm mt-1">Téléchargez le fichier pour le visualiser</p>
+                  </div>
+                )}
+              </div>
               
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              {/* File Info */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm bg-white/5 rounded-lg p-4">
                 <div>
-                  <p className="text-white/50">Taille</p>
-                  <p className="text-white">{previewDoc.size_formatted}</p>
+                  <p className="text-white/50 text-xs uppercase tracking-wider mb-1">Taille</p>
+                  <p className="text-white font-medium">{previewDoc.size_formatted}</p>
                 </div>
                 <div>
-                  <p className="text-white/50">Type</p>
-                  <p className="text-white capitalize">{previewDoc.file_type}</p>
+                  <p className="text-white/50 text-xs uppercase tracking-wider mb-1">Type</p>
+                  <p className="text-white font-medium capitalize">{previewDoc.file_type}</p>
                 </div>
                 <div>
-                  <p className="text-white/50">Date de création</p>
-                  <p className="text-white">{new Date(previewDoc.created_at).toLocaleDateString('fr-FR')}</p>
+                  <p className="text-white/50 text-xs uppercase tracking-wider mb-1">Date</p>
+                  <p className="text-white font-medium">{new Date(previewDoc.created_at).toLocaleDateString('fr-FR')}</p>
                 </div>
                 <div>
-                  <p className="text-white/50">Format</p>
-                  <p className="text-white">{previewDoc.content_type}</p>
+                  <p className="text-white/50 text-xs uppercase tracking-wider mb-1">Format</p>
+                  <p className="text-white font-medium text-xs">{previewDoc.content_type}</p>
                 </div>
               </div>
               
+              {/* Actions */}
               <div className="flex gap-3">
-                <Button asChild className="flex-1 bg-indigo-600">
+                <Button asChild className="flex-1 bg-indigo-600 hover:bg-indigo-500">
                   <a href={previewDoc.url} download={previewDoc.name} target="_blank" rel="noopener noreferrer">
                     <Download className="w-4 h-4 mr-2" />
                     Télécharger
                   </a>
+                </Button>
+                <Button
+                  onClick={() => { openRenameModal("document", previewDoc); setPreviewDoc(null); }}
+                  variant="outline"
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Renommer
                 </Button>
                 <Button
                   onClick={() => { handleDelete("document", previewDoc.id); setPreviewDoc(null); }}
@@ -870,6 +943,62 @@ const DocumentsPage = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Rename Modal */}
+      <Dialog open={renameModal} onOpenChange={(open) => { if (!open) { setRenameModal(false); setRenameItem(null); setNewName(""); } }}>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="w-5 h-5 text-indigo-400" />
+              Renommer {renameItem?.type === "folder" ? "le dossier" : "le fichier"}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
+              {renameItem?.type === "folder" ? (
+                <Folder className="w-6 h-6 text-indigo-400" />
+              ) : (
+                <File className="w-6 h-6 text-white/60" />
+              )}
+              <span className="text-white/60 text-sm truncate">{renameItem?.name}</span>
+            </div>
+            
+            <div>
+              <label className="text-white/60 text-sm mb-2 block">Nouveau nom</label>
+              <Input
+                placeholder="Entrez le nouveau nom"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="bg-white/5 border-white/10 text-white"
+                onKeyDown={(e) => e.key === "Enter" && handleRename()}
+                autoFocus
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" className="border-white/20 text-white" disabled={renaming}>
+                Annuler
+              </Button>
+            </DialogClose>
+            <Button onClick={handleRename} className="bg-indigo-600" disabled={renaming || !newName.trim()}>
+              {renaming ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Renommage...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Renommer
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
