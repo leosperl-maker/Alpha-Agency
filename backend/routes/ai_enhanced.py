@@ -131,8 +131,7 @@ async def get_app_context() -> str:
             in_progress = [t for t in tasks if t.get("status") == "in_progress"]
             overdue_tasks = []
             for t in tasks:
-                due = parse_date(t.get("due_date"))
-                if due and due < today and t.get("status") not in ["done", "cancelled"]:
+                if is_past_due(t.get("due_date")) and t.get("status") not in ["done", "cancelled"]:
                     overdue_tasks.append(t)
             urgent_tasks = [t for t in tasks if t.get("priority") == "urgent" and t.get("status") not in ["done", "cancelled"]]
             
