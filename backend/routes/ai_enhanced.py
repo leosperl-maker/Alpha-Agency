@@ -223,7 +223,7 @@ async def get_enhanced_status(current_user: dict = Depends(get_current_user)):
 
 @router.post("/chat")
 async def enhanced_chat(request: ChatRequest, current_user: dict = Depends(get_current_user)):
-    """Chat with AI - supports text and image attachments"""
+    """Chat with AI - supports text and image attachments. Now context-aware!"""
     if not EMERGENT_AVAILABLE:
         raise HTTPException(status_code=503, detail="Module IA non disponible")
     if not EMERGENT_LLM_KEY:
@@ -239,14 +239,37 @@ async def enhanced_chat(request: ChatRequest, current_user: dict = Depends(get_c
         conversation_id = request.conversation_id or str(uuid.uuid4())
         session_id = f"alpha-{user_id}-{conversation_id}"
         
+        # Build context-aware system message
+        base_system_message = """Tu es l'assistant IA d'Alpha Agency, une agence de communication digitale en Guadeloupe.
+Tu aides l'équipe avec leurs tâches quotidiennes: analyse de données, rédaction, conseils marketing, etc.
+Tu peux analyser des images si l'utilisateur en envoie.
+Réponds toujours en français, de manière professionnelle mais amicale.
+
+IMPORTANT: Tu as accès aux données en temps réel de l'application CRM. Utilise ces informations pour répondre aux questions sur les factures, contacts, tâches, pipeline, budget, etc.
+Quand on te pose des questions comme "quelles factures sont impayées?" ou "quel contact attend une proposition?", consulte les données ci-dessous pour répondre de manière précise."""
+        
+        # Fetch app context if enabled
+        context_data = ""
+        if request.include_context:
+            context_data = await get_app_context()
+            system_message = f"""{base_system_message}
+
+═══════════════════════════════════════════════
+📊 DONNÉES ACTUELLES DE L'APPLICATION (mis à jour en temps réel):
+═══════════════════════════════════════════════
+
+{context_data}
+
+═══════════════════════════════════════════════
+Utilise ces données pour répondre aux questions de l'utilisateur. Si l'utilisateur demande des informations non disponibles dans le contexte, indique-le clairement."""
+        else:
+            system_message = base_system_message
+        
         # Initialize chat
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,
             session_id=session_id,
-            system_message="""Tu es l'assistant IA d'Alpha Agency, une agence de communication digitale en Guadeloupe.
-Tu aides l'équipe avec leurs tâches quotidiennes: analyse de données, rédaction, conseils marketing, etc.
-Tu peux analyser des images si l'utilisateur en envoie.
-Réponds toujours en français, de manière professionnelle mais amicale."""
+            system_message=system_message
         )
         
         # Set model
