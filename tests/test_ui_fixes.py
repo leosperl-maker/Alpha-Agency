@@ -146,13 +146,16 @@ class TestTasksAPI:
     def test_tasks_stats(self, auth_token):
         """Test tasks statistics endpoint"""
         response = requests.get(
-            f"{BASE_URL}/api/tasks/stats",
+            f"{BASE_URL}/api/tasks/stats/summary",
             headers={"Authorization": f"Bearer {auth_token}"}
         )
         assert response.status_code == 200
         data = response.json()
         # Should have task status counts
-        assert "todo" in data or "in_progress" in data or "done" in data
+        assert "todo" in data
+        assert "in_progress" in data
+        assert "done" in data
+        assert "completion_rate" in data
 
 
 class TestContactsAPI:
