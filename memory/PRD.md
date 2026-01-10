@@ -120,11 +120,23 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Remise par ligne (%)
   - Remise globale (% ou € fixe)
 
+### Session 3 - 2026-01-10 (suite)
+- ✅ **Refactorisation backend avancée**
+  - Création module `/app/backend/routes/invoices.py` (complet avec PDF, paiements)
+  - Création module `/app/backend/routes/budget.py` (CRUD + stats)
+  - Correction conflit collection budget (budget_entries → budget)
+  - Inclusion des nouveaux modules dans server.py
+- ✅ **Bug E2E formulaire contact corrigé**
+  - Ajout data-testid sur options Select Radix UI
+  - Tests Playwright passent maintenant
+- ✅ Suppression tâche P2 (sources Saint-Martin/Saint-Barth - plus nécessaire)
+
 ## Pending Tasks
 
-### P1 - Priorité haute
-- [ ] Ajouter sources actualités Saint-Martin / Saint-Barth
-- [ ] Continuer refactorisation server.py (auth, contacts, budget, invoices)
+### P0 - En cours
+- [ ] Finaliser refactorisation server.py (supprimer routes dupliquées)
+  - Routes à supprimer: invoices, budget (déjà dans modules)
+  - Routes à extraire: auth, contacts, opportunities, quotes, subscriptions, tasks, blog, portfolio, tags, settings
 
 ### P2 - Priorité moyenne
 - [ ] Intégration Google Agenda
@@ -133,11 +145,30 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 
 ### P3 - Priorité basse
 - [ ] Médias avancés (vidéo, PDF) dans éditeurs
-- [ ] Test E2E formulaire de contact (récurrent)
 
 ## Known Issues
-- Test E2E formulaire contact échoue (composant Select)
-- server.py encore monolithique (dette technique)
+- server.py encore partiellement monolithique (dette technique - refactorisation en cours)
+- Routes dupliquées temporairement (invoices, budget) - à nettoyer
+
+## Architecture Backend (mise à jour)
+
+```
+/app/backend/
+├── server.py              # Principal (en refactorisation)
+├── routes/
+│   ├── __init__.py
+│   ├── auth.py            # Module auth (créé, pas encore utilisé)
+│   ├── backup.py          # Module backup
+│   ├── budget.py          # ✅ Module budget (actif)
+│   ├── campaigns.py       # ✅ Module campagnes (actif)
+│   ├── contacts.py        # Module contacts (créé, pas encore utilisé)
+│   ├── database.py        # Utilitaires DB partagés
+│   ├── invoices.py        # ✅ Module factures (actif)
+│   ├── meta.py            # ✅ Module Meta (actif)
+│   ├── news.py            # ✅ Module actualités (actif)
+│   └── opportunities.py   # Module opportunities (créé, pas encore utilisé)
+└── requirements.txt
+```
 
 ## Environment
 - Backend: FastAPI (port 8001)
