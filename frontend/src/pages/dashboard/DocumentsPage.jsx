@@ -17,7 +17,7 @@ import {
 } from "../../components/ui/dropdown-menu";
 import { ScrollArea } from "../../components/ui/scroll-area";
 import { toast } from "sonner";
-import { documentsAPI } from "../../lib/api";
+import { fileManagerAPI } from "../../lib/api";
 
 const DocumentsPage = () => {
   const [documents, setDocuments] = useState([]);

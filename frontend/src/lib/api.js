@@ -394,8 +394,8 @@ export const aiEnhancedAPI = {
   deleteConversation: (id) => api.delete(`/ai-enhanced/conversations/${id}`),
 };
 
-// Documents Manager API (File Manager)
-export const documentsAPI = {
+// File Manager API (Gestionnaire de fichiers)
+export const fileManagerAPI = {
   // Folders
   getFolders: (parentId) => api.get('/file-manager/folders', { params: { parent_id: parentId } }),
   getFolderTree: () => api.get('/file-manager/folders/tree'),
