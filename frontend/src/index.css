@@ -79,44 +79,63 @@ body.dark {
     color: #E1E1E1;
 }
 
-/* Pipeline horizontal scrollbar - always visible */
+/* Pipeline horizontal scrollbar - ALWAYS visible */
 .pipeline-scroll {
     overflow-x: scroll !important;
     overflow-y: visible;
-    padding-bottom: 16px;
+    padding-bottom: 20px;
     -webkit-overflow-scrolling: touch;
 }
 
+/* Force scrollbar to always show - works on macOS/Windows */
 .pipeline-scroll::-webkit-scrollbar {
-    height: 12px;
+    -webkit-appearance: none;
+    height: 14px;
     background: #E5E5E5;
-    border-radius: 6px;
+    border-radius: 7px;
     display: block !important;
 }
 
 .pipeline-scroll::-webkit-scrollbar-track {
     background: #E5E5E5;
-    border-radius: 6px;
+    border-radius: 7px;
     margin: 0 16px;
 }
 
 .pipeline-scroll::-webkit-scrollbar-thumb {
-    background: linear-gradient(to right, #CE0202, #B00202);
-    border-radius: 6px;
+    background: #CE0202;
+    border-radius: 7px;
     min-width: 80px;
-    border: 2px solid #E5E5E5;
+    border: 3px solid #E5E5E5;
 }
 
 .pipeline-scroll::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to right, #B00202, #900202);
+    background: #B00202;
 }
 
-/* Firefox scrollbar */
-@-moz-document url-prefix() {
+/* Firefox scrollbar - always visible */
+@supports (-moz-appearance: none) {
     .pipeline-scroll {
-        scrollbar-width: auto;
+        scrollbar-width: auto !important;
         scrollbar-color: #CE0202 #E5E5E5;
     }
+}
+
+/* Fallback indicator for scroll */
+.pipeline-scroll::after {
+    content: '← Défiler →';
+    position: sticky;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    display: block;
+    text-align: center;
+    font-size: 11px;
+    color: #999;
+    padding: 4px 12px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 4px;
+    pointer-events: none;
 }
 
 /* Noise texture overlay - lower z-index to not interfere with dropdowns */
