@@ -512,6 +512,23 @@ const DashboardLayout = () => {
                       <Bot className="w-4 h-4" />
                       Assistant IA
                     </button>
+                    
+                    {/* Theme Toggle */}
+                    <div className="border-t border-white/10 mt-1 pt-1">
+                      <button
+                        onClick={toggleTheme}
+                        className="w-full flex items-center justify-between p-2 hover:bg-white/10 rounded-lg transition-colors text-white/80 text-sm"
+                      >
+                        <div className="flex items-center gap-3">
+                          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                          <span>Thème {theme === 'dark' ? 'clair' : 'sombre'}</span>
+                        </div>
+                        <div className={`w-8 h-4 rounded-full relative transition-colors ${theme === 'dark' ? 'bg-indigo-600' : 'bg-white/20'}`}>
+                          <div className={`absolute w-3 h-3 rounded-full bg-white top-0.5 transition-all ${theme === 'dark' ? 'left-4' : 'left-0.5'}`} />
+                        </div>
+                      </button>
+                    </div>
+                    
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-3 p-2 hover:bg-red-500/20 rounded-lg transition-colors text-red-400 text-sm mt-1"
