@@ -381,6 +381,35 @@ async def get_app_context() -> str:
                 quotes_list = "\n".join([f"  • {q.get('number', 'N/A')} - {q.get('client_name', 'N/A')}: {q.get('total', 0):.2f}€" for q in pending_quotes[:5]])
                 context_parts.append(f"Devis en cours:\n{quotes_list}")
         
+        # 7. Documents Summary (File Manager)
+        documents = await db.documents.find({}, {"_id": 0, "id": 1, "name": 1, "file_type": 1, "size_formatted": 1, "folder_id": 1, "created_at": 1}).to_list(100)
+        folders = await db.folders.find({}, {"_id": 0, "id": 1, "name": 1}).to_list(100)
+        
+        if documents or folders:
+            # Group documents by type
+            by_type = {}
+            for doc in documents:
+                ft = doc.get("file_type", "other")
+                if ft not in by_type:
+                    by_type[ft] = []
+                by_type[ft].append(doc)
+            
+            context_parts.append(f"""📁 DOCUMENTS:
+- {len(documents)} fichiers au total
+- {len(folders)} dossiers
+- Types: {', '.join([f'{t} ({len(docs)})' for t, docs in by_type.items()])}""")
+            
+            # List recent documents
+            recent_docs = sorted(documents, key=lambda x: x.get("created_at", ""), reverse=True)[:5]
+            if recent_docs:
+                docs_list = "\n".join([f"  • {d.get('name', 'N/A')} ({d.get('file_type', 'N/A')}, {d.get('size_formatted', 'N/A')})" for d in recent_docs])
+                context_parts.append(f"Fichiers récents:\n{docs_list}")
+            
+            # List folders
+            if folders:
+                folders_list = ", ".join([f.get("name", "N/A") for f in folders[:10]])
+                context_parts.append(f"Dossiers: {folders_list}")
+        
     except Exception as e:
         logger.error(f"Error fetching context: {str(e)}")
         context_parts.append(f"(Erreur lors de la récupération de certaines données: {str(e)})")
