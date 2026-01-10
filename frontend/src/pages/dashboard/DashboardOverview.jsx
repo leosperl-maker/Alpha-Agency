@@ -352,7 +352,7 @@ const DashboardOverview = () => {
               <div className="pt-3 mt-3 border-t border-[#E5E5E5]">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-[#1A1A1A]">Total facturé</span>
-                  <span className="font-bold text-[#CE0202]">{formatCurrency(stats?.invoices?.total_invoiced || 0)}</span>
+                  <span className="font-bold text-indigo-400">{formatCurrency(stats?.invoices?.total_invoiced || 0)}</span>
                 </div>
               </div>
             </div>
@@ -360,37 +360,37 @@ const DashboardOverview = () => {
         </Card>
 
         {/* Recent Tasks */}
-        <Card className="bg-white border border-[#E5E5E5] shadow-sm lg:col-span-2">
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
-              <CheckSquare className="w-5 h-5 text-[#3B82F6]" />
+            <CardTitle className="text-white text-lg flex items-center gap-2">
+              <CheckSquare className="w-5 h-5 text-blue-400" />
               Tâches récentes
             </CardTitle>
-            <Link to="/admin/taches" className="text-sm text-[#CE0202] hover:underline">
+            <Link to="/admin/taches" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
               Voir tout →
             </Link>
           </CardHeader>
           <CardContent>
             {recentTasks.length === 0 ? (
-              <p className="text-[#666666] text-center py-6">Aucune tâche</p>
+              <p className="text-white/50 text-center py-6">Aucune tâche</p>
             ) : (
               <div className="space-y-2">
                 {recentTasks.map(task => (
-                  <div key={task.id} className="flex items-center justify-between p-3 bg-[#F8F8F8] rounded-lg">
+                  <div key={task.id} className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${
                         task.status === 'done' ? 'bg-green-500' : 
-                        task.status === 'in_progress' ? 'bg-blue-500' : 'bg-gray-400'
+                        task.status === 'in_progress' ? 'bg-blue-500' : 'bg-gray-500'
                       }`} />
-                      <span className={`text-sm ${task.status === 'done' ? 'line-through text-[#666666]' : 'text-[#1A1A1A]'}`}>
+                      <span className={`text-sm ${task.status === 'done' ? 'line-through text-white/40' : 'text-white/90'}`}>
                         {task.title}
                       </span>
                     </div>
-                    <Badge className={`text-xs border-none ${
-                      task.priority === 'urgent' ? 'bg-red-100 text-red-700' :
-                      task.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                      task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-gray-100 text-gray-700'
+                    <Badge className={`text-xs border ${
+                      task.priority === 'urgent' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
+                      task.priority === 'high' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' :
+                      task.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
+                      'bg-white/10 text-white/60 border-white/20'
                     }`}>
                       {task.priority === 'urgent' ? 'Urgent' : 
                        task.priority === 'high' ? 'Haute' :
@@ -407,46 +407,46 @@ const DashboardOverview = () => {
       {/* Fourth Row - Task Stats & Budget */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Task Progression */}
-        <Card className="bg-white border border-[#E5E5E5] shadow-sm">
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[#1A1A1A] text-lg flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-[#10B981]" />
+            <CardTitle className="text-white text-lg flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-green-400" />
               Progression des tâches
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-6">
               <div className="text-center">
-                <div className="text-4xl font-bold text-[#1A1A1A] font-mono">
+                <div className="text-4xl font-bold text-white font-mono">
                   {taskStats?.completion_rate || 0}%
                 </div>
-                <p className="text-[#666666] text-sm">Complétion</p>
+                <p className="text-white/50 text-sm">Complétion</p>
               </div>
               <div className="flex-1 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#666666] flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-full bg-gray-400" /> À faire
+                  <span className="text-white/60 flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-gray-500" /> À faire
                   </span>
-                  <span className="font-bold">{taskStats?.todo || 0}</span>
+                  <span className="font-bold text-white">{taskStats?.todo || 0}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#666666] flex items-center gap-1">
+                  <span className="text-white/60 flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-blue-500" /> En cours
                   </span>
-                  <span className="font-bold">{taskStats?.in_progress || 0}</span>
+                  <span className="font-bold text-white">{taskStats?.in_progress || 0}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#666666] flex items-center gap-1">
+                  <span className="text-white/60 flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-green-500" /> Terminées
                   </span>
-                  <span className="font-bold text-green-600">{taskStats?.done || 0}</span>
+                  <span className="font-bold text-green-400">{taskStats?.done || 0}</span>
                 </div>
                 {taskStats?.overdue > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-red-600 flex items-center gap-1">
+                    <span className="text-red-400 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" /> En retard
                     </span>
-                    <span className="font-bold text-red-600">{taskStats.overdue}</span>
+                    <span className="font-bold text-red-400">{taskStats.overdue}</span>
                   </div>
                 )}
               </div>
