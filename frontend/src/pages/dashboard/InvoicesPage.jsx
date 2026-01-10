@@ -425,7 +425,7 @@ const InvoicesPage = () => {
   };
 
   const addItem = () => {
-    setItems([...items, { description: "", quantity: 1, unit_price: 0 }]);
+    setItems([...items, { title: "", description: "", quantity: 1, unit_price: 0, discount: 0 }]);
   };
 
   const updateItem = (index, field, value) => {
