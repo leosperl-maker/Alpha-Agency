@@ -67,16 +67,47 @@ html {
 
 body {
     font-family: 'Manrope', sans-serif;
-    background-color: #FFFFFF;
-    color: #1A1A1A;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Light theme (default for public pages) */
+body.light {
+    background-color: #FFFFFF;
+    color: #1A1A1A;
+}
+
+/* Dark theme (dashboard default) */
 body.dark {
-    background-color: #050505;
+    background-color: #02040A;
     color: #E1E1E1;
+}
+
+/* Theme-aware utility classes */
+.theme-bg {
+    @apply bg-white dark:bg-[#02040A];
+}
+
+.theme-bg-card {
+    @apply bg-white dark:bg-white/5 dark:backdrop-blur-xl;
+}
+
+.theme-bg-input {
+    @apply bg-gray-50 dark:bg-white/5;
+}
+
+.theme-text {
+    @apply text-gray-900 dark:text-white;
+}
+
+.theme-text-muted {
+    @apply text-gray-600 dark:text-white/60;
+}
+
+.theme-border {
+    @apply border-gray-200 dark:border-white/10;
 }
 
 /* Pipeline horizontal scrollbar - HIDE native, use custom only */
