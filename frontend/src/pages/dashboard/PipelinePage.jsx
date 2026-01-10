@@ -1020,7 +1020,7 @@ const PipelinePage = () => {
           ))}
         </div>
       ) : (
-        <div className="relative -mx-3 sm:-mx-4 md:-mx-6">
+        <div className="relative -mx-3 sm:-mx-4 md:-mx-6 overflow-hidden" style={{ maxWidth: '100vw' }}>
           <DndContext 
             sensors={sensors} 
             collisionDetection={closestCenter} 
