@@ -505,6 +505,7 @@ const AdvancedBlockRenderer = ({ blocks = [] }) => {
       case 'image': return wrapper(<ImageBlock block={block} />);
       case 'gallery': return wrapper(<GalleryBlock block={block} />);
       case 'video': return wrapper(<VideoBlock block={block} />);
+      case 'pdf': return wrapper(<PDFBlock block={block} />);
       case 'beforeAfter': return wrapper(<BeforeAfterBlock block={block} />);
       case 'stats': return wrapper(<StatsBlock block={block} />);
       case 'cta': return wrapper(<CTABlock block={block} />);
