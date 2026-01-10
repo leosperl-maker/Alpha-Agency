@@ -44,27 +44,33 @@ const LoginPage = () => {
   };
 
   return (
-    <div data-testid="login-page" className="min-h-screen bg-[#F8F8F8] flex items-center justify-center px-6">
+    <div data-testid="login-page" className="min-h-screen bg-[#02040A] flex items-center justify-center px-6 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
+      </div>
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         {/* Logo */}
         <div className="text-center mb-8">
           <img 
-            src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/r2ww2fnl_Design%20sans%20titre%20%2893%29.png"
+            src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png"
             alt="Alpha Agency"
-            className="h-32 mx-auto"
+            className="h-12 mx-auto brightness-0 invert"
           />
-          <p className="text-[#666666] mt-4">Espace administration</p>
+          <p className="text-white/50 mt-4">Espace administration</p>
         </div>
 
         {/* Form */}
-        <div className="bg-white p-8 rounded-lg border border-[#E5E5E5] shadow-sm">
+        <div className="bg-white/5 backdrop-blur-xl p-8 rounded-2xl border border-white/10 shadow-xl">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <Shield className="w-5 h-5 text-[#CE0202]" />
-            <h2 className="text-2xl font-bold text-[#1A1A1A] text-center">
+            <Shield className="w-5 h-5 text-indigo-400" />
+            <h2 className="text-2xl font-bold text-white text-center">
               Connexion sécurisée
             </h2>
           </div>

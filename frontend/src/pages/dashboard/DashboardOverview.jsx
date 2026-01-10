@@ -349,9 +349,9 @@ const DashboardOverview = () => {
                   <span className="font-bold text-white">{item.value}</span>
                 </div>
               ))}
-              <div className="pt-3 mt-3 border-t border-[#E5E5E5]">
+              <div className="pt-3 mt-3 border-t border-white/10">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-[#1A1A1A]">Total facturé</span>
+                  <span className="text-sm font-medium text-white/80">Total facturé</span>
                   <span className="font-bold text-indigo-400">{formatCurrency(stats?.invoices?.total_invoiced || 0)}</span>
                 </div>
               </div>
