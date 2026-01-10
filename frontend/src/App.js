@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 
+// Contexts
+import { ThemeProvider } from "./contexts/ThemeContext";
+
 // Components
 import ScrollToTop from "./components/ScrollToTop";
 
