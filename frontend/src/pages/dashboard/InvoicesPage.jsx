@@ -440,16 +440,34 @@ const InvoicesPage = () => {
     }
   };
 
+  const calculateLineTotal = (item) => {
+    const subtotal = item.quantity * item.unit_price;
+    const discount = item.discount || 0;
+    return subtotal - (subtotal * discount / 100);
+  };
+
   const calculateSubtotal = (invoiceItems = items) => {
-    return invoiceItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    return invoiceItems.reduce((sum, item) => sum + calculateLineTotal(item), 0);
+  };
+
+  const calculateGlobalDiscountAmount = (invoiceItems = items) => {
+    const subtotal = calculateSubtotal(invoiceItems);
+    if (globalDiscount.type === "percent") {
+      return subtotal * (globalDiscount.value / 100);
+    }
+    return globalDiscount.value || 0;
+  };
+
+  const calculateSubtotalAfterDiscount = (invoiceItems = items) => {
+    return calculateSubtotal(invoiceItems) - calculateGlobalDiscountAmount(invoiceItems);
   };
 
   const calculateTVA = (invoiceItems = items) => {
-    return calculateSubtotal(invoiceItems) * TVA_RATE;
+    return calculateSubtotalAfterDiscount(invoiceItems) * TVA_RATE;
   };
 
   const calculateTotal = (invoiceItems = items) => {
-    return calculateSubtotal(invoiceItems) + calculateTVA(invoiceItems);
+    return calculateSubtotalAfterDiscount(invoiceItems) + calculateTVA(invoiceItems);
   };
 
   const getContact = (contactId) => {
