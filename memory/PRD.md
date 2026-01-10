@@ -131,24 +131,33 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Tests Playwright passent maintenant
 - ✅ Suppression tâche P2 (sources Saint-Martin/Saint-Barth - plus nécessaire)
 
+### Session 4 - 2026-01-10 (continuation)
+- ✅ **Refactorisation backend MASSIVE - 5 nouveaux modules**
+  - `quotes.py` - Devis (CRUD, PDF, conversion en facture)
+  - `tasks.py` - Tâches (CRUD + statistiques)
+  - `blog.py` - Articles (CRUD avec blocs de contenu)
+  - `portfolio.py` - Réalisations (CRUD avec blocs de contenu)
+  - `tags.py` - Tags (CRUD + suggestions IA Perplexity)
+- ✅ **Médias avancés (P3)**
+  - Nouveau bloc PDF dans l'éditeur (upload, aperçu, téléchargement)
+  - Bloc vidéo amélioré (YouTube, Vimeo, fichiers uploadés)
+  - Routes backend `/upload/video` et `/upload/file` pour Cloudinary
+- ✅ Tous les modules inclus dans server.py via `app.include_router()`
+
 ## Pending Tasks
 
-### P0 - En cours
-- [ ] Finaliser refactorisation server.py (supprimer routes dupliquées)
-  - Routes à supprimer: invoices, budget (déjà dans modules)
-  - Routes à extraire: auth, contacts, opportunities, quotes, subscriptions, tasks, blog, portfolio, tags, settings
+### P1 - Priorité haute
+- [ ] Nettoyer les routes dupliquées dans server.py (auth, contacts, opportunities restent à migrer)
+- [ ] Supprimer le code mort dans server.py après migration complète
 
 ### P2 - Priorité moyenne
 - [ ] Intégration Google Agenda
 - [ ] Tags sur pages publiques (blog/portfolio) avec filtrage
 - [ ] Finaliser intégration Meta (test publication)
 
-### P3 - Priorité basse
-- [ ] Médias avancés (vidéo, PDF) dans éditeurs
-
 ## Known Issues
-- server.py encore partiellement monolithique (dette technique - refactorisation en cours)
-- Routes dupliquées temporairement (invoices, budget) - à nettoyer
+- Routes dupliquées temporairement dans server.py et modules séparés
+- server.py encore partiellement monolithique (~6000 lignes) mais 10 modules extraits
 
 ## Architecture Backend (mise à jour)
 
@@ -157,16 +166,21 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 ├── server.py              # Principal (en refactorisation)
 ├── routes/
 │   ├── __init__.py
-│   ├── auth.py            # Module auth (créé, pas encore utilisé)
-│   ├── backup.py          # Module backup
-│   ├── budget.py          # ✅ Module budget (actif)
-│   ├── campaigns.py       # ✅ Module campagnes (actif)
-│   ├── contacts.py        # Module contacts (créé, pas encore utilisé)
+│   ├── auth.py            # Créé (pas encore migré)
+│   ├── backup.py          # ✅ Actif
+│   ├── blog.py            # ✅ NOUVEAU - Actif
+│   ├── budget.py          # ✅ Actif
+│   ├── campaigns.py       # ✅ Actif
+│   ├── contacts.py        # Créé (pas encore migré)
 │   ├── database.py        # Utilitaires DB partagés
-│   ├── invoices.py        # ✅ Module factures (actif)
-│   ├── meta.py            # ✅ Module Meta (actif)
-│   ├── news.py            # ✅ Module actualités (actif)
-│   └── opportunities.py   # Module opportunities (créé, pas encore utilisé)
+│   ├── invoices.py        # ✅ Actif
+│   ├── meta.py            # ✅ Actif
+│   ├── news.py            # ✅ Actif
+│   ├── opportunities.py   # Créé (pas encore migré)
+│   ├── portfolio.py       # ✅ NOUVEAU - Actif
+│   ├── quotes.py          # ✅ NOUVEAU - Actif
+│   ├── tags.py            # ✅ NOUVEAU - Actif
+│   └── tasks.py           # ✅ NOUVEAU - Actif
 └── requirements.txt
 ```
 
