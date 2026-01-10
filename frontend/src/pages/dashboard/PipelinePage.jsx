@@ -1097,26 +1097,53 @@ const PipelinePage = () => {
         
           {/* Custom visible scrollbar */}
           {scrollInfo.scrollWidth > scrollInfo.clientWidth && (
-            <div 
-              className="mt-3 mx-4 h-3 bg-[#E5E5E5] rounded-full cursor-pointer relative"
-              onClick={handleScrollbarClick}
-              data-testid="pipeline-scrollbar"
-            >
+            <div className="mt-4 mx-4">
               <div 
-                className="absolute h-full bg-[#CE0202] rounded-full transition-all hover:bg-[#B00202]"
-                style={{
-                  width: `${Math.max((scrollInfo.clientWidth / scrollInfo.scrollWidth) * 100, 15)}%`,
-                  left: `${(scrollInfo.scrollLeft / (scrollInfo.scrollWidth - scrollInfo.clientWidth)) * (100 - Math.max((scrollInfo.clientWidth / scrollInfo.scrollWidth) * 100, 15))}%`
+                className="h-3 bg-[#E5E5E5] rounded-full cursor-pointer relative"
+                onClick={handleScrollbarClick}
+                onMouseDown={(e) => {
+                  // Start dragging
+                  const container = scrollContainerRef.current;
+                  if (!container) return;
+                  
+                  const track = e.currentTarget;
+                  const rect = track.getBoundingClientRect();
+                  const thumbWidth = Math.max((scrollInfo.clientWidth / scrollInfo.scrollWidth) * rect.width, 40);
+                  
+                  const handleMouseMove = (moveEvent) => {
+                    const newPosition = (moveEvent.clientX - rect.left - thumbWidth / 2) / (rect.width - thumbWidth);
+                    const clampedPosition = Math.max(0, Math.min(1, newPosition));
+                    container.scrollLeft = clampedPosition * (container.scrollWidth - container.clientWidth);
+                  };
+                  
+                  const handleMouseUp = () => {
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                  };
+                  
+                  document.addEventListener('mousemove', handleMouseMove);
+                  document.addEventListener('mouseup', handleMouseUp);
                 }}
-              />
+                data-testid="pipeline-scrollbar"
+              >
+                <div 
+                  className="absolute h-full bg-[#CE0202] rounded-full hover:bg-[#B00202] active:bg-[#900202] transition-colors shadow-sm"
+                  style={{
+                    width: `${Math.max((scrollInfo.clientWidth / scrollInfo.scrollWidth) * 100, 10)}%`,
+                    left: `${Math.min((scrollInfo.scrollLeft / (scrollInfo.scrollWidth - scrollInfo.clientWidth)) * (100 - Math.max((scrollInfo.clientWidth / scrollInfo.scrollWidth) * 100, 10)), 100 - Math.max((scrollInfo.clientWidth / scrollInfo.scrollWidth) * 100, 10))}%`
+                  }}
+                />
+              </div>
+              <p className="text-xs text-[#999999] text-center mt-2">
+                ← Cliquez ou glissez la barre rouge pour naviguer →
+              </p>
             </div>
           )}
-          <p className="text-xs text-[#999999] text-center mt-2">
-            {scrollInfo.scrollWidth > scrollInfo.clientWidth 
-              ? "← Cliquez sur la barre ou faites défiler horizontalement →"
-              : "Toutes les colonnes sont visibles"
-            }
-          </p>
+          {scrollInfo.scrollWidth <= scrollInfo.clientWidth && (
+            <p className="text-xs text-[#999999] text-center mt-2">
+              Toutes les colonnes sont visibles
+            </p>
+          )}
         </div>
       )}
 
