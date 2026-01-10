@@ -107,6 +107,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </div>
+    </ThemeProvider>
   );
 }
 
