@@ -372,6 +372,26 @@ export const aiAPI = {
   deleteConversation: (id) => api.delete(`/ai/conversations/${id}`),
 };
 
+// Enhanced AI API (with image support)
+export const aiEnhancedAPI = {
+  getStatus: () => api.get('/ai-enhanced/status'),
+  chat: (data) => api.post('/ai-enhanced/chat', data),
+  analyzeImage: (file, prompt, model = 'gpt-4o') => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('prompt', prompt);
+    formData.append('model', model);
+    return api.post('/ai-enhanced/analyze-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  generateImage: (prompt, model = 'gemini-3-pro-image-preview') => 
+    api.post('/ai-enhanced/generate-image', { prompt, model }),
+  getConversations: () => api.get('/ai-enhanced/conversations'),
+  getConversation: (id) => api.get(`/ai-enhanced/conversations/${id}`),
+  deleteConversation: (id) => api.delete(`/ai-enhanced/conversations/${id}`),
+};
+
 // News/Actualités API (NewsAPI.org - Style Perplexity Discover)
 export const newsAPI = {
   getCategories: () => api.get('/news/categories'),
