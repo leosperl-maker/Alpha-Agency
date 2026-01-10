@@ -204,6 +204,18 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Sélection multiple et actions groupées (déplacer, supprimer)
   - Prévisualisation des fichiers
   - Statistiques de stockage
+- ✅ **Design Glassmorphique étendu**
+  - Toutes les pages dashboard migrées vers le thème sombre
+  - ContactsPage, PipelinePage, SettingsPage, TasksPage, BudgetPage, etc.
+  - Badges et boutons avec nouveau design
+- ✅ **Documents intégrés à l'assistant IA**
+  - L'IA peut voir les fichiers uploadés dans le contexte
+  - Actions `get_document` et `list_documents` disponibles
+  - L'IA peut rechercher et lister les documents par type ou nom
+- ✅ **Toggle Thème Sombre/Clair**
+  - ThemeContext avec persistance localStorage
+  - Toggle dans le dropdown profil (topbar)
+  - Support classes utilitaires theme-bg, theme-text, etc.
 
 ## Pending Tasks
 
