@@ -57,9 +57,9 @@ const DEFAULT_TASK_COLUMNS = [
 
 const priorityConfig = {
   low: { label: "Basse", color: "bg-gray-100 text-gray-600" },
-  medium: { label: "Moyenne", color: "bg-yellow-100 text-yellow-700" },
-  high: { label: "Haute", color: "bg-orange-100 text-orange-700" },
-  urgent: { label: "Urgente", color: "bg-red-100 text-red-700" }
+  medium: { label: "Moyenne", color: "bg-amber-500/20 text-amber-400" },
+  high: { label: "Haute", color: "bg-orange-500/20 text-orange-400" },
+  urgent: { label: "Urgente", color: "bg-red-500/20 text-red-400" }
 };
 
 const categories = [
@@ -173,7 +173,7 @@ const SortableTaskCard = ({ task, onEdit, onDelete, onStatusChange, onViewDetail
           </Badge>
         )}
         {task.due_date && (
-          <Badge className={`${isOverdue ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'} border-none text-xs`}>
+          <Badge className={`${isOverdue ? 'bg-red-500/20 text-red-400' : 'bg-gray-100 text-gray-600'} border-none text-xs`}>
             <Calendar className="w-3 h-3 mr-1" />
             {new Date(task.due_date).toLocaleDateString('fr-FR')}
           </Badge>
@@ -332,7 +332,7 @@ const TaskDetailSheet = ({ task, open, onOpenChange, onEdit, contacts, columns }
               </Badge>
             )}
             {isOverdue && (
-              <Badge className="bg-red-100 text-red-700">
+              <Badge className="bg-red-500/20 text-red-400">
                 <AlertCircle className="w-3 h-3 mr-1" /> En retard
               </Badge>
             )}

@@ -177,7 +177,7 @@ const BackupPage = () => {
                 <Clock className="w-5 h-5 text-white/60" />
                 <span className="text-white">Fréquence</span>
               </div>
-              <Badge className="bg-blue-100 text-blue-700 border-none">
+              <Badge className="bg-blue-500/20 text-blue-400 border-none">
                 {status?.schedule || "Toutes les 6 heures"}
               </Badge>
             </div>
@@ -195,7 +195,7 @@ const BackupPage = () => {
                 <History className="w-5 h-5 text-white/60" />
                 <span className="text-white">Rétention</span>
               </div>
-              <Badge className="bg-gray-100 text-gray-700 border-none">
+              <Badge className="bg-white/10 text-white/60 border-none">
                 {status?.retention_days || 30} jours
               </Badge>
             </div>
@@ -231,7 +231,7 @@ const BackupPage = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-white/60">Type</span>
-                  <Badge className={status.last_backup.manual ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}>
+                  <Badge className={status.last_backup.manual ? "bg-blue-500/20 text-blue-400" : "bg-white/10 text-white/60"}>
                     {status.last_backup.manual ? "Manuel" : "Automatique"}
                   </Badge>
                 </div>
@@ -239,8 +239,8 @@ const BackupPage = () => {
                   <span className="text-white/60">Statut</span>
                   <Badge className={
                     status.last_backup.status === "completed" 
-                      ? "bg-green-100 text-green-700" 
-                      : "bg-red-100 text-red-700"
+                      ? "bg-green-500/20 text-green-400" 
+                      : "bg-red-500/20 text-red-400"
                   }>
                     {status.last_backup.status === "completed" ? (
                       <><CheckCircle className="w-3 h-3 mr-1" /> Réussi</>
@@ -256,17 +256,17 @@ const BackupPage = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-white/60">Dropbox</span>
                   {status.last_backup.dropbox_uploaded ? (
-                    <Badge className="bg-green-100 text-green-700"><CheckCircle className="w-3 h-3 mr-1" /> Uploadé</Badge>
+                    <Badge className="bg-green-500/20 text-green-400"><CheckCircle className="w-3 h-3 mr-1" /> Uploadé</Badge>
                   ) : (
-                    <Badge className="bg-gray-100 text-gray-700">Non uploadé</Badge>
+                    <Badge className="bg-white/10 text-white/60">Non uploadé</Badge>
                   )}
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-white/60">Email</span>
                   {status.last_backup.email_sent ? (
-                    <Badge className="bg-green-100 text-green-700"><CheckCircle className="w-3 h-3 mr-1" /> Envoyé</Badge>
+                    <Badge className="bg-green-500/20 text-green-400"><CheckCircle className="w-3 h-3 mr-1" /> Envoyé</Badge>
                   ) : (
-                    <Badge className="bg-gray-100 text-gray-700">Non envoyé</Badge>
+                    <Badge className="bg-white/10 text-white/60">Non envoyé</Badge>
                   )}
                 </div>
               </div>
@@ -310,7 +310,7 @@ const BackupPage = () => {
                     <tr key={backup.backup_id || index} className="border-b border-white/10 last:border-0">
                       <td className="py-3 text-white">{formatDate(backup.started_at)}</td>
                       <td className="py-3">
-                        <Badge className={backup.manual ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-700"}>
+                        <Badge className={backup.manual ? "bg-blue-500/20 text-blue-400" : "bg-white/10 text-white/60"}>
                           {backup.manual ? "Manuel" : "Auto"}
                         </Badge>
                       </td>

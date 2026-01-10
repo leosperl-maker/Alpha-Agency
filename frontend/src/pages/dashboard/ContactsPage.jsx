@@ -168,20 +168,20 @@ const ContactsPage = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      nouveau: "bg-blue-100 text-blue-700",
-      qualifie: "bg-purple-100 text-purple-700",
-      en_discussion: "bg-yellow-100 text-yellow-700",
-      client: "bg-green-100 text-green-700",
-      perdu: "bg-red-100 text-red-700"
+      nouveau: "bg-blue-500/20 text-blue-400",
+      qualifie: "bg-purple-500/20 text-purple-400",
+      en_discussion: "bg-amber-500/20 text-amber-400",
+      client: "bg-green-500/20 text-green-400",
+      perdu: "bg-red-500/20 text-red-400"
     };
     return styles[status] || styles.nouveau;
   };
 
   const getScoreBadge = (score) => {
     const styles = {
-      chaud: "bg-red-100 text-red-700",
-      tiede: "bg-yellow-100 text-yellow-700",
-      froid: "bg-blue-100 text-blue-700"
+      chaud: "bg-red-500/20 text-red-400",
+      tiede: "bg-amber-500/20 text-amber-400",
+      froid: "bg-blue-500/20 text-blue-400"
     };
     return styles[score] || styles.tiede;
   };

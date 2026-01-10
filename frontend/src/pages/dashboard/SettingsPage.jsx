@@ -346,7 +346,7 @@ const SettingsPage = () => {
                   {/* API Keys List */}
                   <div className="space-y-3">
                     {Object.entries(apiKeys.api_keys).map(([key, config]) => (
-                      <div key={key} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                      <div key={key} className="flex items-center justify-between p-4 border rounded-lg hover:bg-white/5 transition-colors">
                         <div className="flex items-center gap-4">
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${config.configured ? "bg-green-100" : "bg-gray-100"}`}>
                             {config.configured ? (
@@ -364,7 +364,7 @@ const SettingsPage = () => {
                               </code>
                             )}
                             {key === "newsapi" && config.count && (
-                              <Badge className="ml-2 bg-blue-100 text-blue-700">{config.count} clés</Badge>
+                              <Badge className="ml-2 bg-blue-500/20 text-blue-400">{config.count} clés</Badge>
                             )}
                           </div>
                         </div>

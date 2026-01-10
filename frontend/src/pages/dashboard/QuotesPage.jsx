@@ -122,10 +122,10 @@ const QuotesPage = () => {
   const getStatusBadge = (status) => {
     const styles = {
       brouillon: "bg-gray-100 text-gray-600",
-      envoyé: "bg-blue-100 text-blue-700",
-      accepté: "bg-green-100 text-green-700",
-      refusé: "bg-red-100 text-red-700",
-      expiré: "bg-yellow-100 text-yellow-700"
+      envoyé: "bg-blue-500/20 text-blue-400",
+      accepté: "bg-green-500/20 text-green-400",
+      refusé: "bg-red-500/20 text-red-400",
+      expiré: "bg-amber-500/20 text-amber-400"
     };
     return styles[status] || styles.brouillon;
   };

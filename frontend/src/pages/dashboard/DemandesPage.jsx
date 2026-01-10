@@ -23,11 +23,11 @@ const DemandesPage = () => {
 
   // Status configuration
   const statusConfig = {
-    nouveau: { label: "Non traité", color: "bg-blue-100 text-blue-700", icon: Clock },
-    contacté: { label: "Contacté", color: "bg-yellow-100 text-yellow-700", icon: Phone },
-    qualifié: { label: "Qualifié", color: "bg-purple-100 text-purple-700", icon: CheckCircle },
-    converti: { label: "Converti", color: "bg-green-100 text-green-700", icon: CheckCircle },
-    perdu: { label: "Perdu", color: "bg-red-100 text-red-700", icon: AlertCircle }
+    nouveau: { label: "Non traité", color: "bg-blue-500/20 text-blue-400", icon: Clock },
+    contacté: { label: "Contacté", color: "bg-amber-500/20 text-amber-400", icon: Phone },
+    qualifié: { label: "Qualifié", color: "bg-purple-500/20 text-purple-400", icon: CheckCircle },
+    converti: { label: "Converti", color: "bg-green-500/20 text-green-400", icon: CheckCircle },
+    perdu: { label: "Perdu", color: "bg-red-500/20 text-red-400", icon: AlertCircle }
   };
 
   useEffect(() => {

@@ -251,7 +251,7 @@ const SortableDealCard = ({ opp, columns, onEdit, onArchive, onUnarchive, onDele
             </Badge>
           )}
           {isOverdue && (
-            <Badge className="text-[10px] sm:text-xs bg-red-100 text-red-700 border-red-200 py-0 px-1.5 sm:px-2">
+            <Badge className="text-[10px] sm:text-xs bg-red-500/20 text-red-400 border-red-200 py-0 px-1.5 sm:px-2">
               <AlertCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" /> Retard
             </Badge>
           )}
