@@ -625,7 +625,7 @@ const InvoicesPage = () => {
                 <th className="text-left p-2 text-[10px]">Désignation</th>
                 <th className="text-center p-2 text-[10px] w-12">Qté</th>
                 <th className="text-right p-2 text-[10px] w-16">P.U. HT</th>
-                <th className="text-center p-2 text-[10px] w-12">Rem.</th>
+                <th className="text-center p-2 text-[10px] w-16">Remise</th>
                 <th className="text-right p-2 text-[10px] w-20">Total HT</th>
               </tr>
             </thead>
@@ -639,7 +639,11 @@ const InvoicesPage = () => {
                   <td className="p-2 text-[10px] text-center">{item.quantity}</td>
                   <td className="p-2 text-[10px] text-right">{formatCurrency(item.unit_price)}</td>
                   <td className="p-2 text-[10px] text-center text-[#CE0202]">
-                    {item.discount > 0 ? `-${item.discount}%` : '-'}
+                    {item.discount > 0 
+                      ? (item.discountType === "fixed" 
+                          ? `-${formatCurrency(item.discount)}` 
+                          : `-${item.discount}%`)
+                      : '-'}
                   </td>
                   <td className="p-2 text-[10px] text-right font-medium">{formatCurrency(calculateLineTotal(item))}</td>
                 </tr>
