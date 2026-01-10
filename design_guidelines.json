@@ -1,135 +1,199 @@
 {
-  "identity": {
-    "name": "E1",
-    "role": "Anti-AI Creative Designer",
-    "mission": "Create a 'Digital Noir' aesthetic that blends high-tech precision with the organic warmth of Guadeloupe."
-  },
-  "typography": {
-    "headings": {
-      "font_family": "Syne, sans-serif",
-      "weights": ["700", "800"],
-      "usage": "Use for all H1-H3. Tight tracking (-0.02em).",
-      "import_url": "https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap"
+  "design_system": {
+    "identity": {
+      "name": "Alphagency Admin 2025",
+      "vibe": "Futuristic Glassmorphism, Deep Space, Neon Data",
+      "principles": [
+        "Glass is the surface, Data is the light",
+        "Depth over flatness (Layers)",
+        "Neon accents guide the eye",
+        "Motion defines state"
+      ]
     },
-    "body": {
-      "font_family": "Manrope, sans-serif",
-      "weights": ["400", "500", "600"],
-      "usage": "Use for all body text, UI elements, and data.",
-      "import_url": "https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap"
-    },
-    "mono": {
-      "font_family": "JetBrains Mono, monospace",
-      "usage": "Use for small labels, KPIs, and technical details."
-    }
-  },
-  "colors": {
-    "palette": {
-      "background": {
-        "default": "#050505",
-        "paper": "#0A0A0A",
-        "subtle": "#121212"
+    "typography": {
+      "font_family": {
+        "headings": "Outfit, sans-serif",
+        "body": "Inter, sans-serif",
+        "mono": "JetBrains Mono, monospace"
       },
-      "primary": {
-        "main": "#6A0F1A",
-        "light": "#8B1422",
-        "dark": "#4A0B12",
-        "foreground": "#FFFFFF"
+      "weights": {
+        "light": 300,
+        "regular": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700
       },
-      "secondary": {
-        "main": "#E1E1E1",
-        "muted": "#A1A1AA"
-      },
-      "accent": {
-        "chrome": "#D4D4D8",
-        "glass": "rgba(255, 255, 255, 0.05)"
+      "scale": {
+        "h1": "text-4xl md:text-5xl font-bold tracking-tight",
+        "h2": "text-3xl font-semibold tracking-tight",
+        "h3": "text-2xl font-semibold",
+        "h4": "text-xl font-medium",
+        "body": "text-sm leading-relaxed",
+        "small": "text-xs text-muted-foreground"
       }
     },
-    "gradients": {
-      "hero_glow": "radial-gradient(circle at 50% 50%, rgba(106, 15, 26, 0.15) 0%, rgba(5, 5, 5, 0) 70%)",
-      "card_border": "linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(106, 15, 26, 0.3) 100%)"
-    }
-  },
-  "visual_enhancers": {
-    "borders": "1px solid rgba(255, 255, 255, 0.08)",
-    "glassmorphism": {
-      "default": "backdrop-blur-xl bg-black/40 border border-white/10",
-      "heavy": "backdrop-blur-2xl bg-black/80 border border-white/5"
+    "colors": {
+      "palette": {
+        "background": {
+          "default": "#02040A",
+          "layer1": "#09090B",
+          "layer2": "#18181B"
+        },
+        "glass": {
+          "panel": "rgba(255, 255, 255, 0.03)",
+          "panel_hover": "rgba(255, 255, 255, 0.06)",
+          "border": "rgba(255, 255, 255, 0.08)",
+          "border_highlight": "rgba(255, 255, 255, 0.15)"
+        },
+        "primary": {
+          "DEFAULT": "#6366f1",
+          "foreground": "#ffffff",
+          "glow": "rgba(99, 102, 241, 0.5)"
+        },
+        "secondary": {
+          "DEFAULT": "#1e293b",
+          "foreground": "#f8fafc"
+        },
+        "accent": {
+          "cyan": "#06b6d4",
+          "purple": "#d946ef",
+          "green": "#10b981",
+          "orange": "#f97316"
+        },
+        "text": {
+          "primary": "#f8fafc",
+          "secondary": "#94a3b8",
+          "muted": "#64748b"
+        }
+      },
+      "gradients": {
+        "background": "radial-gradient(circle at 50% 0%, #1e1b4b 0%, #02040A 60%)",
+        "card_shine": "linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)",
+        "neon_border": "linear-gradient(90deg, #06b6d4, #d946ef)"
+      }
+    },
+    "spacing": {
+      "container_padding": "p-6 md:p-8 lg:p-10",
+      "section_gap": "gap-6 md:gap-8",
+      "element_gap": "gap-4"
+    },
+    "borders": {
+      "radius": {
+        "sm": "rounded-md",
+        "md": "rounded-xl",
+        "lg": "rounded-2xl",
+        "full": "rounded-full"
+      },
+      "width": "border",
+      "style": "border-white/10"
     },
     "shadows": {
-      "glow": "0 0 40px -10px rgba(106, 15, 26, 0.3)",
-      "sharp": "0 1px 2px 0 rgba(0, 0, 0, 0.5)"
+      "glass": "0 8px 32px 0 rgba(0, 0, 0, 0.36)",
+      "neon": "0 0 10px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.3)",
+      "glow_text": "0 0 10px rgba(255,255,255,0.3)"
     },
-    "textures": "Add a subtle noise overlay (opacity 0.03) to the main background to kill the 'digital flatness'."
-  },
-  "grids": {
-    "marketing": {
-      "type": "Tetris Grid",
-      "classes": "grid grid-cols-1 md:grid-cols-12 gap-8",
-      "rules": "Never fill 100%. Use col-span-7 vs col-span-5 asymmetry."
-    },
-    "dashboard": {
-      "type": "Control Room",
-      "classes": "grid grid-cols-1 md:grid-cols-4 gap-4",
-      "rules": "Dense. No gaps > 16px. Use h-full for all children."
+    "effects": {
+      "glassmorphism": {
+        "base": "bg-white/5 backdrop-blur-xl border border-white/10 shadow-glass",
+        "heavy": "bg-black/40 backdrop-blur-2xl border border-white/5",
+        "light": "bg-white/10 backdrop-blur-md border border-white/20"
+      },
+      "transitions": "transition-all duration-300 ease-out"
     }
   },
   "components": {
-    "buttons": {
-      "primary": "bg-[#6A0F1A] text-white hover:bg-[#8B1422] rounded-none uppercase tracking-widest text-xs font-bold px-8 py-4 transition-all duration-300",
-      "outline": "border border-white/20 text-white hover:border-[#6A0F1A] hover:text-[#6A0F1A] bg-transparent rounded-none uppercase tracking-widest text-xs font-bold px-8 py-4"
+    "layout": {
+      "sidebar": {
+        "style": "fixed left-0 top-0 h-full w-64 glass-heavy z-50 border-r border-white/10 hidden md:flex flex-col",
+        "item": "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-white hover:bg-white/5 transition-all group relative overflow-hidden",
+        "item_active": "text-white bg-primary/10 border border-primary/20 shadow-[0_0_15px_rgba(99,102,241,0.15)]"
+      },
+      "topbar": {
+        "style": "sticky top-0 z-40 w-full glass border-b border-white/10 h-16 flex items-center justify-between px-6 md:px-8"
+      },
+      "main": {
+        "style": "min-h-screen bg-[#02040A] text-foreground pl-0 md:pl-64 pt-16 relative overflow-x-hidden"
+      }
     },
     "cards": {
-      "marketing": "bg-white/5 border border-white/10 hover:border-[#6A0F1A]/50 transition-colors duration-500 p-8 rounded-sm",
-      "dashboard": "bg-[#0A0A0A] border border-white/5 p-6 rounded-md"
+      "kpi": {
+        "wrapper": "glass p-6 rounded-2xl relative overflow-hidden group hover:border-primary/30 transition-all duration-500",
+        "value": "text-3xl font-bold text-white mt-2 mb-1 tracking-tight",
+        "label": "text-sm text-muted-foreground font-medium uppercase tracking-wider",
+        "icon": "p-3 rounded-xl bg-white/5 text-primary mb-4 w-fit group-hover:scale-110 transition-transform duration-300 group-hover:bg-primary/20 group-hover:text-white"
+      },
+      "chart": {
+        "wrapper": "glass p-6 rounded-2xl h-full flex flex-col"
+      },
+      "table": {
+        "wrapper": "glass rounded-2xl overflow-hidden border border-white/10",
+        "header": "bg-white/5 text-xs uppercase tracking-wider font-semibold text-muted-foreground py-4 px-6",
+        "row": "border-b border-white/5 hover:bg-white/5 transition-colors"
+      }
+    },
+    "buttons": {
+      "primary": "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/25 rounded-xl px-6 py-2.5 font-medium transition-all hover:scale-[1.02] active:scale-[0.98]",
+      "secondary": "bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl px-6 py-2.5 font-medium transition-all",
+      "ghost": "hover:bg-white/5 text-muted-foreground hover:text-white rounded-xl px-4 py-2 transition-all"
     },
     "inputs": {
-      "style": "bg-black/50 border-white/10 focus:border-[#6A0F1A] rounded-sm h-12"
+      "field": "bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-muted-foreground/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all outline-none"
     }
   },
-  "motion": {
-    "scroll": "Use 'lenis' for smooth scrolling.",
-    "transitions": "transition-all duration-500 ease-[0.22, 1, 0.36, 1]",
-    "micro": "Buttons should have a magnetic pull or a subtle scale (0.98) on click."
+  "assets": {
+    "images": {
+      "team": [
+        "https://images.unsplash.com/photo-1758691737387-a89bb8adf768?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBvZmZpY2UlMjB0ZWFtJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY4MDgxOTMwfDA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1758873268851-feebbfb1d037?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBvZmZpY2UlMjB0ZWFtJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY4MDgxOTMwfDA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1737575655055-e3967cbefd03?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBvZmZpY2UlMjB0ZWFtJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY4MDgxOTMwfDA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1758691737535-57edd2a11d73?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHw0fHxtb2Rlcm4lMjBvZmZpY2UlMjB0ZWFtJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzY4MDgxOTMwfDA&ixlib=rb-4.1.0&q=85"
+      ],
+      "backgrounds": [
+        "https://images.unsplash.com/photo-1766340002626-8c04658babff?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwzfHxhYnN0cmFjdCUyMGRpZ2l0YWwlMjBhcnQlMjB0ZWNobm9sb2d5JTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NjgwODE5MzF8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1765410852726-36917d756725?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHw0fHxhYnN0cmFjdCUyMGRpZ2l0YWwlMjBhcnQlMjB0ZWNobm9sb2d5JTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NjgwODE5MzF8MA&ixlib=rb-4.1.0&q=85"
+      ]
+    },
+    "icons": "Lucide React (already installed)"
   },
-  "media": {
-    "image_urls": {
-      "hero_bg": {
-        "url": "https://images.unsplash.com/photo-1724355221699-962d54e6a119?crop=entropy&cs=srgb&fm=jpg&q=85",
-        "desc": "Guadeloupe Aerial - Darken this by 70% and use as hero background",
-        "category": "background"
-      },
-      "team_meeting": {
-        "url": "https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?crop=entropy&cs=srgb&fm=jpg&q=85",
-        "desc": "Modern team working - Use for 'L'Agence' section",
-        "category": "content"
-      },
-      "tech_abstract": {
-        "url": "https://images.unsplash.com/photo-1544380904-c686aad2fc40?crop=entropy&cs=srgb&fm=jpg&q=85",
-        "desc": "3D Abstract Red/Black - Use for 'Expertises' background or cards",
-        "category": "decoration"
-      },
-      "guadeloupe_nature": {
-        "url": "https://images.unsplash.com/photo-1652300842180-abd09727d3f9?crop=entropy&cs=srgb&fm=jpg&q=85",
-        "desc": "Guadeloupe Mountains - Use for 'Contact' section background (darkened)",
-        "category": "background"
-      }
-    }
+  "instructions_to_main_agent": {
+    "setup": [
+      "Install fonts: Add 'Outfit' and 'Inter' from Google Fonts to index.css",
+      "Update tailwind.config.js: Add custom colors (neon palette) and extend theme",
+      "Global CSS: Define .dark variables for the deep space theme"
+    ],
+    "implementation_strategy": [
+      "1. LAYOUT: Build the 'GlassShell' layout component (Sidebar + Topbar + Main Content Area). Use the 'backgrounds' image as a subtle fixed overlay with low opacity (5%) in the body.",
+      "2. DASHBOARD: Create a Bento Grid layout for the Overview page. Top row: 4 KPI cards. Middle: Large Chart + Recent Activity. Bottom: Quick Actions.",
+      "3. COMPONENTS: Refactor existing Shadcn components (Card, Button, Input, Table) to use the 'glass' styles defined above. Remove all white backgrounds.",
+      "4. CHARTS: Use Recharts. Style them with gradients (defs) and neon strokes. Hide grid lines or make them very subtle (white/5).",
+      "5. ANIMATION: Add 'framer-motion' for page transitions and card hover effects (scale 1.02).",
+      "6. TABLES: Ensure tables have transparent backgrounds and use border-bottom for separation. No zebra striping, just hover effects."
+    ],
+    "critical_rules": [
+      "NEVER use solid white backgrounds for containers. Always use 'bg-white/5' or similar glass styles.",
+      "Ensure text contrast. If background is dark, text must be white/gray-200.",
+      "Use 'backdrop-blur-xl' for the sidebar and topbar to ensure content behind is readable but blurred.",
+      "Do not touch the public website code. Only modify /app/frontend/src/pages/admin/* and related components."
+    ]
   },
-  "instructions_to_main_agent": [
-    "1. SETUP: Install 'lenis' for smooth scrolling immediately.",
-    "2. THEME: Force DARK MODE as default. The brand is 'Digital Noir'.",
-    "3. LAYOUT: Do not use standard Bootstrap containers. Use the 'Tetris Grid' for the landing page.",
-    "4. NAV: Create a floating glass navbar. It should NOT be full width. It should be a pill or a compact bar centered or right-aligned.",
-    "5. DASHBOARD: Keep it strictly functional. High contrast. No decorative gradients in the dashboard, only in the marketing site.",
-    "6. LOGO: Create a text-based logo using the 'Syne' font with a large 'A' in #6A0F1A if no SVG is available.",
-    "7. SHADCN: Customize all Shadcn components to remove the 'default Vercel look'. Set rounded-radius to '0.25rem' or '0' for a sharper look."
-  ],
-  "universal_guidelines": [
-    "Avoid 'AI Slop': No generic centered layouts.",
-    "Dark colors must be solid or subtle noise, NO muddy gradients.",
-    "Use 2-3x more spacing than typical (p-12, p-24).",
-    "All interactive elements must have data-testid.",
-    "Use 'sonner' for toasts.",
-    "Never use emoji icons. Use Lucide React icons."
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "Use glass-morphism effects with backdrop filters (12-24px blur)",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file. This disrupts the human natural reading flow of text",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN",
+    "Prioritize using pre-existing components from src/components/ui when applicable",
+    "Create new components that match the style and conventions of existing components when needed",
+    "Examine existing components to understand the project's component patterns before creating new ones",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use sonner for toasts. Sonner component are located in /app/src/components/ui/sonner.tsx"
   ]
 }
