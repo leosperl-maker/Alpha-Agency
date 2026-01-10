@@ -421,13 +421,13 @@ const AdvancedBlockRenderer = ({ blocks = [] }) => {
     // Different spacing based on block type
     const getMarginClass = () => {
       if (['image', 'gallery', 'video', 'beforeAfter'].includes(block.type)) {
-        return 'mt-12 mb-16'; // Large margin above and below media blocks
+        return 'mt-16 mb-16'; // Extra large margin above and below media blocks
       }
       if (['stats', 'quote'].includes(block.type)) {
-        return 'my-12'; // Medium-large margin for emphasis blocks
+        return 'my-14'; // Medium-large margin for emphasis blocks
       }
       if (['heading'].includes(block.type)) {
-        return 'mt-8 mb-4'; // Less bottom margin for headings
+        return 'mt-10 mb-4'; // Less bottom margin for headings
       }
       return 'mb-6'; // Normal margin for text blocks
     };
