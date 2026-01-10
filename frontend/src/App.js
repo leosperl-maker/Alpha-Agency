@@ -31,7 +31,7 @@ import TasksPage from "./pages/dashboard/TasksPage";
 import BudgetPage from "./pages/dashboard/BudgetPage";
 import BackupPage from "./pages/dashboard/BackupPage";
 import UsersPage from "./pages/dashboard/UsersPage";
-import AIAssistantPage from "./pages/dashboard/AIAssistantPage";
+import AIAssistantPage from "./pages/dashboard/AIAssistantPageNew";
 import NewsPage from "./pages/dashboard/NewsPage";
 import SocialMediaPage from "./pages/dashboard/SocialMediaPage";
 import BlogAdminPage from "./pages/dashboard/BlogAdminPage";
