@@ -193,11 +193,11 @@ const GalleryBlock = ({ block }) => {
 const VideoBlock = ({ block }) => {
   const getEmbedUrl = () => {
     if (block.type === 'youtube') {
-      const videoId = block.url?.split('v=')[1]?.split('&')[0] || block.url?.split('/').pop();
+      const videoId = block.url?.split('v=')[1]?.split('&')[0] || block.url?.split('/').pop()?.split('?')[0];
       return `https://www.youtube.com/embed/${videoId}`;
     }
     if (block.type === 'vimeo') {
-      const videoId = block.url?.split('/').pop();
+      const videoId = block.url?.split('/').pop()?.split('?')[0];
       return `https://player.vimeo.com/video/${videoId}`;
     }
     return block.url;
@@ -225,6 +225,56 @@ const VideoBlock = ({ block }) => {
         />
       </div>
       {block.caption && <figcaption className="mt-3 text-center text-sm text-[#666666]">{block.caption}</figcaption>}
+    </figure>
+  );
+};
+
+const PDFBlock = ({ block }) => {
+  return (
+    <figure className="my-8">
+      {block.title && (
+        <div className="flex items-center justify-between mb-4 p-4 bg-[#F8F8F8] rounded-t-lg border border-[#E5E5E5] border-b-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#CE0202] rounded-lg flex items-center justify-center text-white font-bold text-sm">
+              PDF
+            </div>
+            <span className="font-medium text-[#1A1A1A]">{block.title}</span>
+          </div>
+          {block.downloadable !== false && (
+            <a 
+              href={block.url} 
+              download 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-[#CE0202] text-white rounded-lg hover:bg-[#B50202] transition-colors"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Télécharger
+            </a>
+          )}
+        </div>
+      )}
+      {block.preview !== false && block.url && (
+        <div className="border border-[#E5E5E5] rounded-b-lg overflow-hidden bg-gray-100" style={{height: '600px'}}>
+          <iframe 
+            src={block.url} 
+            className="w-full h-full" 
+            title={block.title || 'Document PDF'}
+          />
+        </div>
+      )}
+      {block.preview === false && !block.title && block.url && (
+        <a 
+          href={block.url} 
+          download 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[#CE0202] text-white rounded-lg hover:bg-[#B50202] transition-colors"
+        >
+          <div className="w-8 h-8 bg-white/20 rounded flex items-center justify-center font-bold text-xs">PDF</div>
+          Télécharger le document
+        </a>
+      )}
     </figure>
   );
 };
