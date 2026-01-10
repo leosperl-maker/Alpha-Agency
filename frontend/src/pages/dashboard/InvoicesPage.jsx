@@ -1107,7 +1107,7 @@ const InvoicesPage = () => {
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-[#666666]">Prix unitaire HT (€)</Label>
+                          <Label className="text-xs text-[#666666]">Prix HT (€)</Label>
                           <Input
                             type="number"
                             min="0"
@@ -1118,14 +1118,70 @@ const InvoicesPage = () => {
                             className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
                           />
                         </div>
+                        <div>
+                          <Label className="text-xs text-[#666666]">Remise (%)</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="1"
+                            placeholder="0"
+                            value={item.discount || 0}
+                            onChange={(e) => updateItem(index, "discount", e.target.value)}
+                            className="bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                          />
+                        </div>
                       </div>
-                      {item.description && item.unit_price > 0 && (
-                        <div className="text-right text-sm font-medium text-[#1A1A1A]">
-                          Total ligne: {formatCurrency(item.quantity * item.unit_price)}
+                      {(item.title || item.description) && item.unit_price > 0 && (
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-[#666666]">
+                            {item.discount > 0 && `(-${item.discount}%)`}
+                          </span>
+                          <span className="font-medium text-[#1A1A1A]">
+                            Total ligne: {formatCurrency(calculateLineTotal(item))}
+                          </span>
                         </div>
                       )}
                     </div>
                   ))}
+                </div>
+
+                {/* Global Discount */}
+                <div className="bg-gradient-to-r from-[#CE0202]/10 to-[#CE0202]/5 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <Label className="text-[#1A1A1A] font-semibold flex items-center gap-2">
+                      <Percent className="w-4 h-4 text-[#CE0202]" />
+                      Remise globale
+                    </Label>
+                  </div>
+                  <div className="flex gap-2">
+                    <Select
+                      value={globalDiscount.type}
+                      onValueChange={(v) => setGlobalDiscount({ ...globalDiscount, type: v })}
+                    >
+                      <SelectTrigger className="w-32 bg-white border-[#E5E5E5]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="percent">%</SelectItem>
+                        <SelectItem value="fixed">€ fixe</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      type="number"
+                      min="0"
+                      step={globalDiscount.type === "percent" ? "1" : "0.01"}
+                      placeholder="0"
+                      value={globalDiscount.value || ""}
+                      onChange={(e) => setGlobalDiscount({ ...globalDiscount, value: parseFloat(e.target.value) || 0 })}
+                      className="flex-1 bg-white border-[#E5E5E5] text-[#1A1A1A]"
+                    />
+                  </div>
+                  {globalDiscount.value > 0 && (
+                    <div className="mt-2 text-sm text-[#CE0202] font-medium">
+                      Remise appliquée: -{formatCurrency(calculateGlobalDiscountAmount())}
+                    </div>
+                  )}
                 </div>
 
                 {/* Notes */}
@@ -1146,6 +1202,18 @@ const InvoicesPage = () => {
                     <span className="text-white/70">Sous-total HT</span>
                     <span className="font-mono">{formatCurrency(calculateSubtotal())}</span>
                   </div>
+                  {globalDiscount.value > 0 && (
+                    <div className="flex justify-between py-1 text-[#CE0202]">
+                      <span>Remise globale ({globalDiscount.type === "percent" ? `${globalDiscount.value}%` : "fixe"})</span>
+                      <span className="font-mono">-{formatCurrency(calculateGlobalDiscountAmount())}</span>
+                    </div>
+                  )}
+                  {globalDiscount.value > 0 && (
+                    <div className="flex justify-between py-1">
+                      <span className="text-white/70">Sous-total après remise</span>
+                      <span className="font-mono">{formatCurrency(calculateSubtotalAfterDiscount())}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between py-1">
                     <span className="text-white/70">TVA (8.5%)</span>
                     <span className="font-mono">{formatCurrency(calculateTVA())}</span>
