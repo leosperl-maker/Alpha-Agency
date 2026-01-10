@@ -1081,14 +1081,20 @@ const InvoicesPage = () => {
                           <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
-                      <Textarea
-                        placeholder="Description du service ou produit (ex: Création site web vitrine - Design personnalisé, responsive, optimisé SEO)"
-                        value={item.description}
-                        onChange={(e) => updateItem(index, "description", e.target.value)}
-                        className="bg-white border-[#E5E5E5] text-[#1A1A1A] min-h-[80px]"
-                        rows={3}
+                      <Input
+                        placeholder="Titre du service (ex: Création site web)"
+                        value={item.title || ""}
+                        onChange={(e) => updateItem(index, "title", e.target.value)}
+                        className="bg-white border-[#E5E5E5] text-[#1A1A1A] font-semibold"
                       />
-                      <div className="grid grid-cols-2 gap-3">
+                      <Textarea
+                        placeholder="Description détaillée (optionnel)"
+                        value={item.description || ""}
+                        onChange={(e) => updateItem(index, "description", e.target.value)}
+                        className="bg-white border-[#E5E5E5] text-[#1A1A1A] text-sm"
+                        rows={2}
+                      />
+                      <div className="grid grid-cols-3 gap-2">
                         <div>
                           <Label className="text-xs text-[#666666]">Quantité</Label>
                           <Input
