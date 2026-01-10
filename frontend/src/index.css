@@ -31,27 +31,67 @@
         --chart-4: 280 65% 60%;
         --chart-5: 340 75% 55%;
         --radius: 0.25rem;
+        
+        /* Custom theme variables */
+        --bg-primary: #FFFFFF;
+        --bg-secondary: #F5F5F5;
+        --bg-card: #FFFFFF;
+        --text-primary: #1A1A1A;
+        --text-secondary: #4A4A4A;
+        --border-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Light mode explicit */
+    .light, [data-theme="light"] {
+        --background: 0 0% 97%;
+        --foreground: 0 0% 10%;
+        --card: 0 0% 100%;
+        --card-foreground: 0 0% 10%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 0 0% 10%;
+        --primary: 239 84% 67%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 0 0% 96%;
+        --secondary-foreground: 0 0% 10%;
+        --muted: 0 0% 96%;
+        --muted-foreground: 0 0% 45%;
+        --border: 0 0% 90%;
+        --input: 0 0% 90%;
+        
+        --bg-primary: #FFFFFF;
+        --bg-secondary: #F5F5F5;
+        --bg-card: #FFFFFF;
+        --text-primary: #1A1A1A;
+        --text-secondary: #4A4A4A;
+        --border-color: rgba(0, 0, 0, 0.1);
     }
     
     /* Dark mode for dashboard */
-    .dark {
+    .dark, [data-theme="dark"] {
         --background: 0 0% 2%;
         --foreground: 0 0% 98%;
         --card: 0 0% 4%;
         --card-foreground: 0 0% 98%;
         --popover: 0 0% 4%;
         --popover-foreground: 0 0% 98%;
-        --primary: 0 100% 40%;
+        --primary: 239 84% 67%;
         --primary-foreground: 0 0% 100%;
         --secondary: 0 0% 8%;
         --secondary-foreground: 0 0% 98%;
         --muted: 0 0% 8%;
         --muted-foreground: 0 0% 63%;
-        --accent: 0 100% 40%;
+        --accent: 239 84% 67%;
         --accent-foreground: 0 0% 100%;
         --border: 0 0% 12%;
         --input: 0 0% 12%;
-        --ring: 0 100% 40%;
+        --ring: 239 84% 67%;
+        
+        --bg-primary: #02040A;
+        --bg-secondary: #0A0A0A;
+        --bg-card: rgba(255, 255, 255, 0.03);
+        --text-primary: #FFFFFF;
+        --text-secondary: rgba(255, 255, 255, 0.6);
+        --border-color: rgba(255, 255, 255, 0.1);
     }
 }
 
@@ -74,15 +114,50 @@ body {
 }
 
 /* Light theme (default for public pages) */
-body.light {
-    background-color: #FFFFFF;
-    color: #1A1A1A;
+body.light, body[data-theme="light"] {
+    background-color: #F5F5F5 !important;
+    color: #1A1A1A !important;
+}
+
+body.light .glass-sidebar,
+body[data-theme="light"] .glass-sidebar {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light .glass-panel,
+body[data-theme="light"] .glass-panel {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light .kpi-card,
+body[data-theme="light"] .kpi-card {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light .nav-item,
+body[data-theme="light"] .nav-item {
+    color: #4A4A4A !important;
+}
+
+body.light .nav-item:hover,
+body[data-theme="light"] .nav-item:hover {
+    background: rgba(99, 102, 241, 0.1) !important;
+    color: #1A1A1A !important;
+}
+
+body.light .nav-item.active,
+body[data-theme="light"] .nav-item.active {
+    background: rgba(99, 102, 241, 0.15) !important;
+    color: #4F46E5 !important;
 }
 
 /* Dark theme (dashboard default) */
-body.dark {
-    background-color: #02040A;
-    color: #E1E1E1;
+body.dark, body[data-theme="dark"] {
+    background-color: #02040A !important;
+    color: #E1E1E1 !important;
 }
 
 /* Theme-aware utility classes */
