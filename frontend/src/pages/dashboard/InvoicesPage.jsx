@@ -383,7 +383,8 @@ const InvoicesPage = () => {
       conditions: "Paiement par virement bancaire ou chèque à l'ordre de Alpha Agency.\nEn cas de retard de paiement, des pénalités de 3 fois le taux d'intérêt légal seront appliquées.",
       bank_details: "IBAN: FR76 XXXX XXXX XXXX XXXX XXXX XXX\nBIC: XXXXXXXX\nBanque: Crédit Agricole Guadeloupe"
     });
-    setItems([{ description: "", quantity: 1, unit_price: 0 }]);
+    setItems([{ title: "", description: "", quantity: 1, unit_price: 0, discount: 0 }]);
+    setGlobalDiscount({ type: "percent", value: 0 });
     setEditingInvoice(null);
   };
 
