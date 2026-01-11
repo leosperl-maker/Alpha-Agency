@@ -1202,91 +1202,91 @@ const BudgetPage = () => {
   }
 
   return (
-    <div data-testid="budget-page" className="p-4 md:p-6 bg-white/5 min-h-screen overflow-x-hidden">
+    <div data-testid="budget-page" className="p-3 sm:p-4 md:p-6 bg-white/5 min-h-screen overflow-x-hidden">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+      <div className="flex flex-col gap-3 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Budget & Trésorerie</h1>
-          <p className="text-sm text-white/60">Pilotage financier de votre activité</p>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Budget & Trésorerie</h1>
+          <p className="text-xs sm:text-sm text-white/60">Pilotage financier</p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[140px] sm:w-[180px] bg-white/5 backdrop-blur-xl border-white/10 text-sm">
-              <Calendar className="w-4 h-4 mr-2" />
+            <SelectTrigger className="w-[120px] sm:w-[160px] bg-white/5 backdrop-blur-xl border-white/10 text-xs sm:text-sm h-8 sm:h-9">
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-[#1a1a2e] max-h-60">
               {months.map(m => (
-                <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                <SelectItem key={m.value} value={m.value} className="text-xs sm:text-sm">{m.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           
-          <Button onClick={() => setImportDialogOpen(true)} variant="outline" size="sm" className="border-indigo-500/50 text-indigo-400">
-            <Upload className="w-4 h-4 sm:mr-2" /> <span className="hidden sm:inline">Importer</span>
+          <Button onClick={() => setImportDialogOpen(true)} variant="outline" size="sm" className="border-indigo-500/50 text-indigo-400 h-8 sm:h-9 px-2 sm:px-3">
+            <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
           
-          <Button onClick={() => { resetTransactionForm(); setTransactionDialogOpen(true); }} size="sm" className="bg-indigo-600 hover:bg-indigo-500 text-white">
-            <Plus className="w-4 h-4 sm:mr-2" /> <span className="hidden sm:inline">Transaction</span>
+          <Button onClick={() => { resetTransactionForm(); setTransactionDialogOpen(true); }} size="sm" className="bg-indigo-600 hover:bg-indigo-500 text-white h-8 sm:h-9 px-2 sm:px-3">
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-4 sm:mb-6">
         <Card className="bg-white/5 backdrop-blur-xl border-white/10">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-white/60">Revenus</p>
-                <p className="text-base sm:text-xl md:text-2xl font-bold text-green-400 truncate">{formatCurrency(summary.total_credit || 0)}</p>
+          <CardContent className="p-2 sm:p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-green-500/20 flex-shrink-0">
+                <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
               </div>
-              <div className="p-2 rounded-full bg-green-500/20 flex-shrink-0">
-                <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs text-white/60">Revenus</p>
+                <p className="text-sm sm:text-lg font-bold text-green-400 truncate">{formatCurrency(summary.total_credit || 0)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
         <Card className="bg-white/5 backdrop-blur-xl border-white/10">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-white/60">Dépenses</p>
-                <p className="text-base sm:text-xl md:text-2xl font-bold text-red-400 truncate">{formatCurrency(summary.total_debit || 0)}</p>
+          <CardContent className="p-2 sm:p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-red-500/20 flex-shrink-0">
+                <ArrowDownRight className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
               </div>
-              <div className="p-2 rounded-full bg-red-500/20 flex-shrink-0">
-                <ArrowDownRight className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs text-white/60">Dépenses</p>
+                <p className="text-sm sm:text-lg font-bold text-red-400 truncate">{formatCurrency(summary.total_debit || 0)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
         <Card className="bg-white/5 backdrop-blur-xl border-white/10">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-white/60">Résultat</p>
-                <p className={`text-base sm:text-xl md:text-2xl font-bold truncate ${(summary.balance || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+          <CardContent className="p-2 sm:p-3">
+            <div className="flex items-center gap-2">
+              <div className={`p-1.5 sm:p-2 rounded-lg flex-shrink-0 ${(summary.balance || 0) >= 0 ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                <Wallet className={`w-3 h-3 sm:w-4 sm:h-4 ${(summary.balance || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs text-white/60">Résultat</p>
+                <p className={`text-sm sm:text-lg font-bold truncate ${(summary.balance || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {formatCurrency(summary.balance || 0)}
                 </p>
               </div>
-              <div className={`p-2 rounded-full flex-shrink-0 ${(summary.balance || 0) >= 0 ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                <Wallet className={`w-4 h-4 sm:w-5 sm:h-5 ${(summary.balance || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`} />
-              </div>
             </div>
           </CardContent>
         </Card>
         
         <Card className="bg-white/5 backdrop-blur-xl border-white/10">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-white/60">Non catégorisé</p>
-                <p className="text-base sm:text-xl md:text-2xl font-bold text-orange-400">{summary.uncategorized_count || 0}</p>
+          <CardContent className="p-2 sm:p-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-orange-500/20 flex-shrink-0">
+                <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 text-orange-400" />
               </div>
-              <div className="p-2 rounded-full bg-orange-500/20 flex-shrink-0">
-                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] sm:text-xs text-white/60">Non catég.</p>
+                <p className="text-sm sm:text-lg font-bold text-orange-400">{summary.uncategorized_count || 0}</p>
               </div>
             </div>
           </CardContent>
