@@ -1355,6 +1355,7 @@ const BudgetPage = () => {
                     <Area type="monotone" dataKey="expense" name="Dépenses" stroke="#EF4444" fillOpacity={1} fill="url(#colorExpense)" />
                   </AreaChart>
                 </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
 
