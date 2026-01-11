@@ -145,37 +145,55 @@ export const invoicesAPI = {
   getPayments: (id) => api.get(`/invoices/${id}/payments`),
   addPayment: (id, data) => api.post(`/invoices/${id}/payments`, data),
   deletePayment: (invoiceId, paymentId) => api.delete(`/invoices/${invoiceId}/payments/${paymentId}`),
-  // Helper function to download PDF with authentication - iOS compatible
+  // Helper function to download PDF with authentication - All platforms
   downloadPDF: async (id, invoiceNumber, type = 'facture') => {
     try {
-      // Check if on iOS/mobile
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      
-      if (isIOS || isMobile) {
-        // Mobile: Use URL-based approach (upload to Cloudinary, get direct URL)
-        const urlResponse = await api.get(`/invoices/${id}/pdf-url`);
-        if (urlResponse.data?.url) {
-          // Open in new tab - works reliably on all mobile browsers
-          window.open(urlResponse.data.url, '_blank');
-          return true;
+      // Always use direct blob approach with proper headers
+      const response = await api.get(`/invoices/${id}/pdf`, { 
+        responseType: 'blob',
+        headers: {
+          'Accept': 'application/pdf'
         }
-      }
+      });
       
-      // Desktop: Standard blob download
-      const response = await api.get(`/invoices/${id}/pdf`, { responseType: 'blob' });
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const filename = `${type}_${invoiceNumber || id}.pdf`;
       
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Check if on iOS/mobile
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
+      if (isIOS) {
+        // iOS: Create object URL and open in new window
+        const fileURL = window.URL.createObjectURL(blob);
+        // For iOS Safari, we need to use window.open
+        const newWindow = window.open(fileURL, '_blank');
+        
+        // If popup was blocked, try the download approach
+        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+          // Fallback: create a download link
+          const link = document.createElement('a');
+          link.href = fileURL;
+          link.target = '_blank';
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+        
+        // Clean up after a delay
+        setTimeout(() => window.URL.revokeObjectURL(fileURL), 10000);
+      } else {
+        // Desktop: Standard download
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
       
       return true;
     } catch (error) {
