@@ -6386,6 +6386,10 @@ app.include_router(ai_enhanced_router, prefix="/api", tags=["ai-enhanced"])
 from routes.documents import router as documents_router
 app.include_router(documents_router, prefix="/api", tags=["documents"])
 
+# Qonto Banking Integration
+from routes.qonto import router as qonto_router
+app.include_router(qonto_router, prefix="/api", tags=["qonto"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
