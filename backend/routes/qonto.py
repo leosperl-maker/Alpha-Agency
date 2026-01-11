@@ -16,7 +16,7 @@ router = APIRouter(prefix="/qonto", tags=["Qonto"])
 
 # Qonto API Configuration - OAuth2
 QONTO_API_BASE = "https://thirdparty.qonto.com/v2"
-QONTO_CLIENT_ID = os.environ.get("QONTO_CLIENT_ID", "65f89684-6c15-4ba4-9f89-8efc52ae6f10")
+QONTO_CLIENT_ID = os.environ.get("QONTO_CLIENT_ID", "e140adc5-560d-4bed-8dbf-8500767bd49c")
 QONTO_CLIENT_SECRET = os.environ.get("QONTO_CLIENT_SECRET", "S3vc0ir927G37S8AOZSU2SzQpD")
 QONTO_OAUTH_URL = "https://oauth.qonto.com/oauth2/token"
 
