@@ -29,13 +29,14 @@ CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET', '')
 
 # Brevo configuration
 BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
-BREVO_SENDER_EMAIL = os.environ.get('BREVO_SENDER_EMAIL', 'noreply@alphagency.fr')
+BREVO_SENDER_EMAIL = os.environ.get('BREVO_SENDER_EMAIL', 'leo.sperl@alphagency.fr')
 BREVO_SENDER_NAME = os.environ.get('BREVO_SENDER_NAME', 'Alpha Agency')
 
 # Company info for branding
 COMPANY_NAME = "ALPHAGENCY"
 COMPANY_LOGO = "https://customer-assets.emergentagent.com/job_46adb236-f8e1-4856-a9f0-1ea29ce009cd/artifacts/kpvir23o_LOGO%20DEVIS%20FACTURES.png"
 COMPANY_WEBSITE = "https://alphagency.fr"
+ALPHAGENCY_URL = os.environ.get('ALPHAGENCY_URL', 'https://alphagency.fr')
 
 USE_CLOUDINARY = all([CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET])
 
