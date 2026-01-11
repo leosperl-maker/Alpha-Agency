@@ -335,8 +335,8 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Ajout de `overflow-x-hidden` au conteneur principal
   - Layout mobile optimisé (déjà existant mais vérifié)
 - ✅ **Page Tâches (Kanban) responsive**
-  - Colonnes avec scroll horizontal sur mobile
-  - Wrapper `overflow-x-auto` avec `-webkit-overflow-scrolling: touch`
+  - Colonnes réduites à 260px sur mobile (vs 320px desktop)
+  - Wrapper `overflow-x-auto` avec scroll horizontal
 - ✅ **Page MindMap responsive**
   - Toolbar responsive (flex-col sur mobile, flex-row sur desktop)
   - Support touch events pour le canvas (pan et drag des nœuds)
@@ -344,8 +344,32 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - ✅ **Page Things responsive**
   - Déjà responsive avec dropdown de filtre mobile
 
+### Session 9 - 2026-01-11 (Refonte Mobile Avancée)
+- ✅ **REFONTE: Page Assistant IA style Perplexity**
+  - Design minimaliste et centré
+  - Titre "Que voulez-vous savoir ?" au centre
+  - Suggestions de questions en pills cliquables
+  - Input en bas avec sélecteur de modèle intégré
+  - Panneau historique accessible via bouton
+  - Suppression de la sidebar permanente
+- ✅ **Page Budget responsive complète**
+  - Stats cards en grille 2x2 sur mobile (grid-cols-2)
+  - Tabs avec scroll horizontal (overflow-x-auto)
+  - Graphiques avec hauteur adaptative (h-[200px] sm:h-[280px])
+  - Boutons compacts (icônes seules sur mobile)
+- ✅ **Page Facturation responsive complète**
+  - Stats cards en grille 2x2 sur mobile
+  - Vue cards mobile (sm:hidden) pour les factures
+  - Vue tableau desktop (hidden sm:block)
+  - Actions dropdown sur chaque carte
+- ✅ **Page Tâches améliorée**
+  - Colonnes Kanban encore plus étroites (260px)
+  - Stats cards empilées proprement
+
 ## Test Results
-- Session 8: 100% pass rate (7/7 tests frontend mobile)
+- Session 8: 100% pass rate (7/7 tests frontend mobile) - iteration_21.json
+- Session 9: 100% pass rate (6/6 tests frontend mobile) - iteration_22.json
 - Viewport testé: 375x800 (iPhone SE/XR)
 - Toutes les pages principales fonctionnent correctement sur mobile
+
 
