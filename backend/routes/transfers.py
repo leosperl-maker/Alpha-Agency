@@ -521,6 +521,86 @@ async def record_download(transfer_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class CommentCreate(BaseModel):
+    author_name: str
+    author_email: Optional[str] = None
+    content: str
+    rating: Optional[int] = None  # 1-5 stars
+
+
+@router.post("/public/{transfer_id}/comment")
+async def add_comment(transfer_id: str, comment: CommentCreate):
+    """Add a comment to a transfer (public, no auth required)"""
+    try:
+        # Verify transfer exists
+        transfer = await db.transfers.find_one({"id": transfer_id})
+        if not transfer:
+            raise HTTPException(status_code=404, detail="Transfer not found")
+        
+        # Create comment
+        comment_doc = {
+            "id": str(uuid.uuid4())[:8],
+            "author_name": comment.author_name,
+            "author_email": comment.author_email,
+            "content": comment.content,
+            "rating": comment.rating,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Add to transfer
+        await db.transfers.update_one(
+            {"id": transfer_id},
+            {"$push": {"comments": comment_doc}}
+        )
+        
+        # Send notification email to sender
+        sender_email = transfer.get("sender_email")
+        if sender_email and BREVO_API_KEY:
+            try:
+                url = "https://api.brevo.com/v3/smtp/email"
+                headers = {
+                    "accept": "application/json",
+                    "content-type": "application/json",
+                    "api-key": BREVO_API_KEY
+                }
+                
+                payload = {
+                    "sender": {
+                        "name": BREVO_SENDER_NAME,
+                        "email": BREVO_SENDER_EMAIL
+                    },
+                    "to": [{"email": sender_email}],
+                    "subject": f"💬 Nouveau commentaire sur votre transfert - {transfer['title']}",
+                    "htmlContent": f"""
+                    <html>
+                    <body style="font-family: Arial, sans-serif; padding: 20px;">
+                        <h2 style="color: #6366f1;">Nouveau commentaire</h2>
+                        <p><strong>{comment.author_name}</strong> a laissé un commentaire sur votre transfert "<strong>{transfer['title']}</strong>":</p>
+                        <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                            <p style="margin: 0; color: #333;">{comment.content}</p>
+                            {f'<p style="margin-top: 10px;">Note: {"⭐" * comment.rating}</p>' if comment.rating else ''}
+                        </div>
+                        <p style="color: #666; font-size: 12px;">
+                            Envoyé via <a href="{COMPANY_WEBSITE}" style="color: #6366f1;">{COMPANY_NAME}</a>
+                        </p>
+                    </body>
+                    </html>
+                    """
+                }
+                
+                requests.post(url, json=payload, headers=headers)
+            except Exception as e:
+                logger.warning(f"Failed to send comment notification: {e}")
+        
+        return {"success": True, "comment": comment_doc}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error adding comment: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.delete("/{transfer_id}")
 async def delete_transfer(
     transfer_id: str,
