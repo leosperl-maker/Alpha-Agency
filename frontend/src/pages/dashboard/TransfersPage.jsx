@@ -382,6 +382,8 @@ const TransfersPage = () => {
                     <SelectItem value="7" className="text-white hover:bg-white/10">7 jours</SelectItem>
                     <SelectItem value="14" className="text-white hover:bg-white/10">14 jours</SelectItem>
                     <SelectItem value="30" className="text-white hover:bg-white/10">30 jours</SelectItem>
+                    <SelectItem value="90" className="text-white hover:bg-white/10">90 jours</SelectItem>
+                    <SelectItem value="0" className="text-white hover:bg-white/10">♾️ Illimité (ne jamais supprimer)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
