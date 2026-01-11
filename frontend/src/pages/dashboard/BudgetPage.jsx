@@ -1084,6 +1084,9 @@ const BudgetPage = () => {
           <TabsTrigger value="cashflow" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             <TrendingUp className="w-4 h-4 mr-2" /> Cashflow
           </TabsTrigger>
+          <TabsTrigger value="qonto" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+            <Building2 className="w-4 h-4 mr-2" /> Qonto
+          </TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
