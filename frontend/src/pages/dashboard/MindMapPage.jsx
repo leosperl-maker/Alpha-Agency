@@ -260,6 +260,39 @@ const MindMapPage = () => {
     setDraggingNode(null);
   };
 
+  // Touch event handlers for mobile
+  const handleCanvasTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      if (e.target === canvasRef.current || e.target.classList.contains('mindmap-canvas')) {
+        setIsDragging(true);
+        setDragStart({ x: touch.clientX - pan.x, y: touch.clientY - pan.y });
+        setSelectedNode(null);
+      }
+    }
+  };
+
+  const handleCanvasTouchMove = (e) => {
+    if (e.touches.length === 1 && (isDragging || draggingNode)) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      if (isDragging && !draggingNode) {
+        setPan({ x: touch.clientX - dragStart.x, y: touch.clientY - dragStart.y });
+      }
+      if (draggingNode) {
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = (touch.clientX - rect.left - pan.x) / zoom;
+        const y = (touch.clientY - rect.top - pan.y) / zoom;
+        updateNodePosition(draggingNode, x, y);
+      }
+    }
+  };
+
+  const handleCanvasTouchEnd = () => {
+    setIsDragging(false);
+    setDraggingNode(null);
+  };
+
   // Render node recursively
   const renderNode = (node, depth = 0) => {
     const color = NODE_COLORS[node.color] || NODE_COLORS[0];
