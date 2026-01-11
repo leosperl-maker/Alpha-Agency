@@ -627,7 +627,6 @@ const MindMapPage = () => {
           </defs>
           {renderNode(mindmap)}
         </svg>
-        </svg>
 
         {/* Selected node toolbar */}
         {selectedNode && (
