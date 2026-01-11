@@ -555,6 +555,9 @@ const DashboardLayout = () => {
 
       {/* Floating AI Chat */}
       <FloatingAIChat />
+      
+      {/* Quick Actions Button */}
+      <QuickActions />
     </div>
   );
 };
