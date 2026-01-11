@@ -628,6 +628,7 @@ const QontoTab = ({ formatCurrency }) => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchData = async () => {
@@ -654,7 +655,61 @@ const QontoTab = ({ formatCurrency }) => {
 
   useEffect(() => {
     fetchData();
+    
+    // Handle OAuth callback
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    const qontoCallback = urlParams.get('qonto_callback');
+    
+    if (code && state && qontoCallback) {
+      handleOAuthCallback(code, state);
+    }
   }, []);
+
+  const handleOAuthCallback = async (code, state) => {
+    setConnecting(true);
+    try {
+      await qontoAPI.handleCallback(code, state);
+      toast.success("Connexion à Qonto réussie !");
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "Erreur lors de la connexion à Qonto");
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const handleConnect = async () => {
+    setConnecting(true);
+    try {
+      const res = await qontoAPI.getAuthUrl();
+      const authUrl = res.data?.auth_url;
+      if (authUrl) {
+        window.location.href = authUrl;
+      } else {
+        toast.error("Impossible de générer l'URL de connexion");
+        setConnecting(false);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "Erreur lors de la connexion");
+      setConnecting(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      await qontoAPI.disconnect();
+      toast.success("Déconnexion de Qonto réussie");
+      setStatus({ connected: false });
+      setAccounts([]);
+      setTransactions([]);
+    } catch (err) {
+      toast.error("Erreur lors de la déconnexion");
+    }
+  };
 
   const handleSync = async () => {
     setSyncing(true);
@@ -671,40 +726,123 @@ const QontoTab = ({ formatCurrency }) => {
 
   const totalBalance = accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
 
-  if (loading) {
+  if (loading || connecting) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+        <span className="text-white/60">
+          {connecting ? "Connexion à Qonto en cours..." : "Chargement..."}
+        </span>
       </div>
     );
   }
 
+  // Not connected state - Show connection prompt
+  if (!status?.connected) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-gradient-to-br from-[#1a1a2e]/80 to-[#16213e]/80 backdrop-blur-xl border-white/10">
+          <CardContent className="pt-8 pb-8">
+            <div className="flex flex-col items-center text-center space-y-6">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+                <Building2 className="w-10 h-10 text-white" />
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold text-white">Connectez votre compte Qonto</h3>
+                <p className="text-white/60 max-w-md">
+                  Synchronisez automatiquement vos transactions bancaires et suivez votre trésorerie en temps réel.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl mt-4">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                  <RefreshCw className="w-5 h-5 text-green-400" />
+                  <span className="text-white/80 text-sm">Sync automatique</span>
+                </div>
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                  <TrendingUp className="w-5 h-5 text-blue-400" />
+                  <span className="text-white/80 text-sm">Analyse des flux</span>
+                </div>
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                  <Shield className="w-5 h-5 text-purple-400" />
+                  <span className="text-white/80 text-sm">Connexion sécurisée</span>
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleConnect}
+                disabled={connecting}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-6 text-lg rounded-xl"
+              >
+                {connecting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Connexion en cours...
+                  </>
+                ) : (
+                  <>
+                    <ExternalLink className="w-5 h-5 mr-2" />
+                    Connecter Qonto
+                  </>
+                )}
+              </Button>
+
+              <p className="text-white/40 text-xs">
+                Vous serez redirigé vers Qonto pour autoriser l'accès
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {error && (
+          <Card className="bg-red-500/10 border-red-500/30">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2 text-red-400">
+                <AlertCircle className="w-5 h-5" />
+                <span>{error}</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    );
+  }
+
+  // Connected state
   return (
     <div className="space-y-6">
       {/* Connection Status */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={`w-3 h-3 rounded-full ${status?.connected ? "bg-green-500" : "bg-red-500"}`} />
+          <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
           <span className="text-white">
-            {status?.connected 
-              ? `Connecté à ${status.organization}` 
-              : "Non connecté à Qonto"
-            }
+            Connecté à <span className="font-semibold">{status.organization}</span>
           </span>
         </div>
-        <Button 
-          onClick={handleSync} 
-          disabled={syncing || !status?.connected}
-          variant="outline"
-          className="border-white/20 text-white"
-        >
-          {syncing ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
-            <RefreshCw className="w-4 h-4 mr-2" />
-          )}
-          Synchroniser
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={handleSync} 
+            disabled={syncing}
+            variant="outline"
+            className="border-white/20 text-white"
+          >
+            {syncing ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4 mr-2" />
+            )}
+            Synchroniser
+          </Button>
+          <Button 
+            onClick={handleDisconnect}
+            variant="outline"
+            className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+          >
+            <X className="w-4 h-4 mr-2" />
+            Déconnecter
+          </Button>
+        </div>
       </div>
 
       {error && (
