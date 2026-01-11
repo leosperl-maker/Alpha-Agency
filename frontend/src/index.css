@@ -189,7 +189,13 @@ body.light, body[data-theme="light"] {
         background-color: rgba(0, 0, 0, 0.05) !important;
     }
     
-    /* MAIN TEXT COLOR FIX: Convert pure white text to dark */
+    /* MAIN TEXT COLOR FIX: Convert white text to dark using attribute selectors */
+    /* This captures ALL elements with text-white in their class list */
+    [class*="text-white"]:not([class*="from-indigo"]):not([class*="from-purple"]):not([class*="from-cyan"]):not([class*="from-gradient"]):not([class*="bg-indigo"]):not([class*="bg-purple"]):not([class*="bg-gradient"]) {
+        color: #1A1A1A !important;
+    }
+    
+    /* Specific text-white class */
     .text-white {
         color: #1A1A1A !important;
     }
