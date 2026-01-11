@@ -436,17 +436,31 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - ✅ **Nettoyage**
   - Suppression fichier obsolète `FacturationPage.jsx`
 
+### Session 13 - 2026-01-11 (Bug Fix Critique + Améliorations)
+- ✅ **Bug Fix P0 CRITIQUE: Création Devis génère FAC- au lieu de DEV-**
+  - **Cause racine:** Routes `/invoices` dupliquées dans `server.py` (lignes 1624-1856) qui étaient enregistrées AVANT celles de `routes/invoices.py`
+  - L'ancienne fonction `get_next_invoice_number()` dans server.py retournait TOUJOURS `FAC-`
+  - **Solution:** Suppression complète des routes invoices dupliquées de server.py
+  - Routes invoices maintenant centralisées dans `routes/invoices.py`
+  - Tests: 10/10 passés (100%)
+- ✅ **Configuration Email Brevo**
+  - Adresse d'expéditeur changée vers `noreply@alphagency.fr`
+  - L'utilisateur doit vérifier cette adresse dans le dashboard Brevo
+- ✅ **Amélioration Téléchargement PDF Mobile**
+  - Sur iOS/mobile, utilisation de l'endpoint `/pdf-url` qui génère une URL Cloudinary
+  - Évite les problèmes de blob sur Safari iOS
+  - Fallback vers la méthode blob pour desktop
+- ✅ **Nettoyage Code**
+  - Suppression de ~230 lignes de code dupliqué dans server.py
+  - Architecture backend plus propre
+
 ## En attente
-- **Intégration Qonto** : Backend prêt, en attente autorisation utilisateur via OAuth2
-- **Améliorations MindMap** : Style Mindnote
+- **Vérification Email Brevo** : L'utilisateur doit vérifier `noreply@alphagency.fr` dans Brevo
+- **Test PDF Mobile** : L'utilisateur doit confirmer que le téléchargement PDF fonctionne sur son appareil
 
 ## Test Results
-- Session 8: 100% pass rate (7/7) - iteration_21.json
-- Session 9: 100% pass rate (6/6) - iteration_22.json
-- Session 10: 100% pass rate (6/6) - iteration_23.json
-- Session 12: 100% backend (10/10), 100% frontend - iteration_24.json
-- Viewport testé: 375x800 (mobile) et 1920x800 (desktop)
-- Thème light testé et fonctionnel sur toutes les pages
+- Session 13: 100% pass rate (10/10) - iteration_25.json
+- Bug critique DEV-/FAC- prefix corrigé et vérifié
 
 ## Architecture Backend (mise à jour Session 12)
 
