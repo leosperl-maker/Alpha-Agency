@@ -873,14 +873,14 @@ const PipelinePage = () => {
   };
 
   return (
-    <div data-testid="pipeline-page" className="space-y-4 sm:space-y-6 overflow-hidden">
+    <div data-testid="pipeline-page" className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 overflow-visible">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex-shrink-0 min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold text-white">Pipeline</h1>
           <p className="text-white/60 text-xs sm:text-sm">Gérez vos affaires commerciales</p>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0 z-10">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Button variant="outline" onClick={() => openColumnDialog()} size="sm" className="border-indigo-500/50 text-indigo-400 text-xs whitespace-nowrap">
             <Settings2 className="w-3.5 h-3.5 mr-1" /> 
             Étapes
