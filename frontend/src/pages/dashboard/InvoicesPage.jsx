@@ -871,14 +871,15 @@ const InvoicesPage = () => {
               const status = statusConfig[invoice.status] || statusConfig.brouillon;
               const StatusIcon = status.icon;
               const totalPaid = invoice.total_paid || 0;
-              const isDevis = invoice.document_type === 'devis';
+              // Use invoice_number prefix as source of truth (more reliable than document_type for legacy data)
+              const isDevis = invoice.invoice_number?.startsWith('DEV-') || invoice.document_type === 'devis';
               return (
                 <div key={invoice.id} className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isDevis ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                          {isDevis ? 'DEVIS' : 'FACTURE'}
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${invoice.invoice_number?.startsWith('DEV-') ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                          {invoice.invoice_number?.startsWith('DEV-') ? 'DEVIS' : 'FACTURE'}
                         </span>
                         <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
                       </div>
