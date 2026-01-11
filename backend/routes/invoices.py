@@ -362,9 +362,10 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
 
 @router.post("", response_model=dict)
 async def create_invoice(invoice: InvoiceCreate, current_user: dict = Depends(get_current_user)):
-    """Create a new invoice"""
+    """Create a new invoice or quote"""
     invoice_id = str(uuid.uuid4())
-    invoice_number = await get_next_invoice_number()
+    doc_type = invoice.document_type or "facture"
+    invoice_number = await get_next_invoice_number(doc_type)
     
     items_list = [item.model_dump() for item in invoice.items]
     subtotal, tva, total = calculate_invoice_totals(
@@ -378,7 +379,7 @@ async def create_invoice(invoice: InvoiceCreate, current_user: dict = Depends(ge
         "invoice_number": invoice_number,
         "quote_id": invoice.quote_id,
         "contact_id": invoice.contact_id,
-        "document_type": invoice.document_type or "facture",
+        "document_type": doc_type,
         "items": items_list,
         "subtotal": subtotal,
         "tva": tva,
@@ -394,7 +395,9 @@ async def create_invoice(invoice: InvoiceCreate, current_user: dict = Depends(ge
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.invoices.insert_one(invoice_doc)
-    return {"id": invoice_id, "invoice_number": invoice_number, "message": "Facture créée"}
+    
+    type_label = "Devis" if doc_type == "devis" else "Facture"
+    return {"id": invoice_id, "invoice_number": invoice_number, "message": f"{type_label} créé(e)"}
 
 
 @router.get("", response_model=List[dict])
