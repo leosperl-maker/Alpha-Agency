@@ -61,14 +61,18 @@ class PaymentCreate(BaseModel):
 
 # ==================== HELPERS ====================
 
-async def get_next_invoice_number():
+async def get_next_invoice_number(doc_type: str = "facture"):
+    """Generate next invoice/quote number"""
+    prefix = "DEV" if doc_type == "devis" else "FAC"
+    counter_name = f"{prefix.lower()}_number"
+    
     counter = await db.counters.find_one_and_update(
-        {"name": "invoice_number"},
+        {"name": counter_name},
         {"$inc": {"value": 1}},
         upsert=True,
         return_document=True
     )
-    return f"FAC-{datetime.now().year}-{str(counter['value']).zfill(4)}"
+    return f"{prefix}-{datetime.now().year}-{str(counter['value']).zfill(4)}"
 
 
 def calculate_invoice_totals(items: list, global_discount: float = 0, global_discount_type: str = "%"):
