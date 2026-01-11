@@ -1,45 +1,106 @@
 """
 Qonto API Integration Routes
-Synchronisation des données bancaires avec Qonto
+Synchronisation des données bancaires avec Qonto via OAuth2 (Authorization Code Flow)
 """
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from typing import Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import httpx
 import os
-import base64
+import secrets
 from pymongo import MongoClient
 
 router = APIRouter(prefix="/qonto", tags=["Qonto"])
 
-# Qonto API Configuration - OAuth2
+# MongoDB connection
+MONGO_URL = os.environ.get("MONGO_URL")
+DB_NAME = os.environ.get("DB_NAME", "smartcrm")
+client = MongoClient(MONGO_URL)
+db = client[DB_NAME]
+
+# Qonto API Configuration - OAuth2 Authorization Code Flow
 QONTO_API_BASE = "https://thirdparty.qonto.com/v2"
 QONTO_CLIENT_ID = os.environ.get("QONTO_CLIENT_ID", "e140adc5-560d-4bed-8dbf-8500767bd49c")
 QONTO_CLIENT_SECRET = os.environ.get("QONTO_CLIENT_SECRET", "S3vc0ir927G37S8AOZSU2SzQpD")
-QONTO_OAUTH_URL = "https://oauth.qonto.com/oauth2/token"
+QONTO_AUTH_URL = "https://oauth.qonto.com/oauth2/auth"
+QONTO_TOKEN_URL = "https://oauth.qonto.com/oauth2/token"
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://smartcrm-mobile.preview.emergentagent.com")
 
-async def get_oauth_token():
-    """Get OAuth2 access token from Qonto"""
+# Scopes needed for Qonto API
+QONTO_SCOPES = "organization.read offline_access"
+
+def get_stored_token():
+    """Get stored OAuth token from database"""
+    token_doc = db.qonto_tokens.find_one({"_id": "current_token"})
+    if token_doc:
+        # Check if token is expired
+        if token_doc.get("expires_at"):
+            expires_at = token_doc["expires_at"]
+            if isinstance(expires_at, str):
+                expires_at = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+            if datetime.now(timezone.utc) < expires_at:
+                return token_doc.get("access_token")
+        # Try to refresh if we have a refresh token
+        if token_doc.get("refresh_token"):
+            return None  # Will trigger refresh
+    return None
+
+async def refresh_access_token(refresh_token: str):
+    """Refresh the access token using refresh token"""
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(
-                QONTO_OAUTH_URL,
+                QONTO_TOKEN_URL,
                 data={
-                    "grant_type": "client_credentials",
+                    "grant_type": "refresh_token",
+                    "refresh_token": refresh_token,
                     "client_id": QONTO_CLIENT_ID,
-                    "client_secret": QONTO_CLIENT_SECRET,
-                    "scope": "read"
+                    "client_secret": QONTO_CLIENT_SECRET
                 },
                 headers={"Content-Type": "application/x-www-form-urlencoded"}
             )
             if response.status_code == 200:
-                return response.json().get("access_token")
+                token_data = response.json()
+                # Store new tokens
+                expires_at = datetime.now(timezone.utc) + timedelta(seconds=token_data.get("expires_in", 3600))
+                db.qonto_tokens.update_one(
+                    {"_id": "current_token"},
+                    {"$set": {
+                        "access_token": token_data.get("access_token"),
+                        "refresh_token": token_data.get("refresh_token", refresh_token),
+                        "expires_at": expires_at.isoformat(),
+                        "updated_at": datetime.now(timezone.utc).isoformat()
+                    }},
+                    upsert=True
+                )
+                return token_data.get("access_token")
             return None
         except Exception as e:
-            print(f"OAuth error: {e}")
+            print(f"Token refresh error: {e}")
             return None
+
+async def get_valid_token():
+    """Get a valid access token, refreshing if necessary"""
+    token_doc = db.qonto_tokens.find_one({"_id": "current_token"})
+    if not token_doc:
+        return None
+    
+    # Check if token is still valid
+    if token_doc.get("expires_at"):
+        expires_at = token_doc["expires_at"]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+        if datetime.now(timezone.utc) < expires_at - timedelta(minutes=5):
+            return token_doc.get("access_token")
+    
+    # Try to refresh
+    if token_doc.get("refresh_token"):
+        return await refresh_access_token(token_doc["refresh_token"])
+    
+    return None
 
 def get_qonto_headers(token: str = None):
     """Generate authentication headers for Qonto API (Bearer token)"""
@@ -47,6 +108,96 @@ def get_qonto_headers(token: str = None):
         "Authorization": f"Bearer {token}" if token else "",
         "Content-Type": "application/json"
     }
+
+# OAuth2 endpoints
+@router.get("/auth/url")
+async def get_auth_url():
+    """Generate OAuth2 authorization URL for Qonto"""
+    state = secrets.token_urlsafe(32)
+    
+    # Store state for verification
+    db.qonto_oauth_states.update_one(
+        {"_id": state},
+        {"$set": {"created_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    
+    # Build authorization URL
+    redirect_uri = f"{FRONTEND_URL}/admin/budget?qonto_callback=true"
+    auth_url = (
+        f"{QONTO_AUTH_URL}?"
+        f"client_id={QONTO_CLIENT_ID}&"
+        f"redirect_uri={redirect_uri}&"
+        f"response_type=code&"
+        f"scope={QONTO_SCOPES.replace(' ', '%20')}&"
+        f"state={state}"
+    )
+    
+    return {"auth_url": auth_url, "state": state}
+
+
+@router.post("/auth/callback")
+async def oauth_callback(code: str, state: str):
+    """Handle OAuth2 callback and exchange code for tokens"""
+    # Verify state
+    state_doc = db.qonto_oauth_states.find_one({"_id": state})
+    if not state_doc:
+        raise HTTPException(status_code=400, detail="État OAuth invalide")
+    
+    # Delete used state
+    db.qonto_oauth_states.delete_one({"_id": state})
+    
+    # Exchange code for tokens
+    redirect_uri = f"{FRONTEND_URL}/admin/budget?qonto_callback=true"
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(
+                QONTO_TOKEN_URL,
+                data={
+                    "grant_type": "authorization_code",
+                    "code": code,
+                    "client_id": QONTO_CLIENT_ID,
+                    "client_secret": QONTO_CLIENT_SECRET,
+                    "redirect_uri": redirect_uri
+                },
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
+            )
+            
+            if response.status_code == 200:
+                token_data = response.json()
+                expires_at = datetime.now(timezone.utc) + timedelta(seconds=token_data.get("expires_in", 3600))
+                
+                # Store tokens
+                db.qonto_tokens.update_one(
+                    {"_id": "current_token"},
+                    {"$set": {
+                        "access_token": token_data.get("access_token"),
+                        "refresh_token": token_data.get("refresh_token"),
+                        "expires_at": expires_at.isoformat(),
+                        "token_type": token_data.get("token_type"),
+                        "scope": token_data.get("scope"),
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }},
+                    upsert=True
+                )
+                
+                return {"success": True, "message": "Connexion Qonto réussie"}
+            else:
+                error_data = response.json()
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Erreur OAuth: {error_data.get('error_description', error_data.get('error', 'Unknown'))}"
+                )
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=503, detail=f"Erreur de connexion: {str(e)}")
+
+
+@router.delete("/auth/disconnect")
+async def disconnect_qonto():
+    """Disconnect Qonto integration"""
+    db.qonto_tokens.delete_one({"_id": "current_token"})
+    return {"success": True, "message": "Qonto déconnecté"}
 
 # MongoDB connection for this module
 mongo_url = os.environ.get('MONGO_URL')
