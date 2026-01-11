@@ -86,9 +86,7 @@ const FloatingAIChat = () => {
     setMessages([]);
   };
 
-  if (shouldHide) return null;
-
-  // Drag handlers for touch and mouse
+  // Drag handlers for touch and mouse - must be before conditional return
   const handleDragStart = useCallback((e) => {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -148,6 +146,8 @@ const FloatingAIChat = () => {
     }
     return {}; // Use CSS default positioning
   };
+
+  if (shouldHide) return null;
 
   return (
     <>
