@@ -353,15 +353,23 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     # Payment info for invoices
     if doc_type == "facture":
         payment_style = ParagraphStyle('Payment', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=12)
-        if doc_data.get('bank_details'):
+        
+        # Bank details from document or settings
+        bank_details = doc_data.get('bank_details') or invoice_settings.get('bank_details', '')
+        if bank_details:
             elements.append(Paragraph("<b>Coordonnées bancaires:</b>", payment_style))
-            for line in doc_data['bank_details'].split('\n'):
-                elements.append(Paragraph(line, payment_style))
+            for line in bank_details.split('\n'):
+                if line.strip():
+                    elements.append(Paragraph(line.strip(), payment_style))
             elements.append(Spacer(1, 0.5*cm))
-        if doc_data.get('conditions'):
+        
+        # Conditions from document or settings
+        conditions = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
+        if conditions:
             elements.append(Paragraph("<b>Conditions de paiement:</b>", payment_style))
-            for line in doc_data['conditions'].split('\n'):
-                elements.append(Paragraph(line, payment_style))
+            for line in conditions.split('\n'):
+                if line.strip():
+                    elements.append(Paragraph(line.strip(), payment_style))
     
     # Footer
     elements.append(Spacer(1, 1*cm))
