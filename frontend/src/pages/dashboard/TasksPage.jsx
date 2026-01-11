@@ -713,97 +713,96 @@ const TasksPage = () => {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 overflow-hidden" data-testid="tasks-page">
+    <div className="space-y-3 p-3 sm:p-4 md:p-6 overflow-hidden" data-testid="tasks-page">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Tâches</h1>
-          <p className="text-white/60 text-xs sm:text-sm">Gérez vos tâches et projets</p>
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-xl font-bold text-white">Tâches</h1>
+          <p className="text-white/60 text-xs hidden sm:block">Gérez vos tâches</p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
+        <div className="flex gap-1.5 sm:gap-2">
           <Button 
             variant="outline" 
+            size="sm"
             onClick={() => openColumnDialog()} 
-            className="border-indigo-500/50 text-indigo-400 flex-1 sm:flex-none text-sm"
+            className="border-indigo-500/50 text-indigo-400 h-8 px-2 sm:px-3"
           >
-            <Settings2 className="w-4 h-4 mr-1 sm:mr-2" /> 
-            <span className="hidden sm:inline">Colonnes</span>
-            <span className="sm:hidden">Config</span>
+            <Settings2 className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
           <Button 
+            size="sm"
             onClick={() => { resetForm(); setDialogOpen(true); }} 
-            className="bg-indigo-600 hover:bg-indigo-500 text-white flex-1 sm:flex-none text-sm"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white h-8 px-2 sm:px-3"
           >
-            <Plus className="w-4 h-4 mr-1 sm:mr-2" /> 
-            <span className="hidden sm:inline">Nouvelle tâche</span>
-            <span className="sm:hidden">Ajouter</span>
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+            <span className="hidden sm:inline text-xs">Ajouter</span>
           </Button>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
+      {/* Stats - Compact on mobile */}
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-2">
         <Card className="bg-white/5 backdrop-blur-xl border-white/10">
-          <CardContent className="p-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-gray-100 flex-shrink-0">
-                <Clock className="w-4 h-4 text-gray-600" />
+          <CardContent className="p-2 sm:p-3">
+            <div className="text-center sm:flex sm:items-center sm:gap-2 sm:text-left">
+              <div className="hidden sm:block p-1.5 rounded-lg bg-gray-500/20 flex-shrink-0">
+                <Clock className="w-3 h-3 text-gray-400" />
               </div>
-              <div className="min-w-0">
-                <p className="text-lg sm:text-2xl font-bold text-white">{stats.todo || 0}</p>
-                <p className="text-[10px] sm:text-xs text-white/60">À faire</p>
+              <div>
+                <p className="text-base sm:text-lg font-bold text-white">{stats.todo || 0}</p>
+                <p className="text-[9px] sm:text-[10px] text-white/60">À faire</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="bg-white/5 backdrop-blur-xl border-white/10">
-          <CardContent className="p-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-blue-100 flex-shrink-0">
-                <Clock className="w-4 h-4 text-blue-600" />
+          <CardContent className="p-2 sm:p-3">
+            <div className="text-center sm:flex sm:items-center sm:gap-2 sm:text-left">
+              <div className="hidden sm:block p-1.5 rounded-lg bg-blue-500/20 flex-shrink-0">
+                <Clock className="w-3 h-3 text-blue-400" />
               </div>
-              <div className="min-w-0">
-                <p className="text-lg sm:text-2xl font-bold text-white">{stats.in_progress || 0}</p>
-                <p className="text-[10px] sm:text-xs text-white/60">En cours</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
-          <CardContent className="p-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-green-100 flex-shrink-0">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-lg sm:text-2xl font-bold text-white">{stats.done || 0}</p>
-                <p className="text-[10px] sm:text-xs text-white/60">Terminées</p>
+              <div>
+                <p className="text-base sm:text-lg font-bold text-white">{stats.in_progress || 0}</p>
+                <p className="text-[9px] sm:text-[10px] text-white/60">En cours</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card className="bg-white/5 backdrop-blur-xl border-white/10">
-          <CardContent className="p-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-red-100 flex-shrink-0">
-                <AlertCircle className="w-4 h-4 text-red-600" />
+          <CardContent className="p-2 sm:p-3">
+            <div className="text-center sm:flex sm:items-center sm:gap-2 sm:text-left">
+              <div className="hidden sm:block p-1.5 rounded-lg bg-green-500/20 flex-shrink-0">
+                <CheckCircle className="w-3 h-3 text-green-400" />
               </div>
-              <div className="min-w-0">
-                <p className="text-lg sm:text-2xl font-bold text-white">{overdueCount}</p>
-                <p className="text-[10px] sm:text-xs text-white/60">En retard</p>
+              <div>
+                <p className="text-base sm:text-lg font-bold text-white">{stats.done || 0}</p>
+                <p className="text-[9px] sm:text-[10px] text-white/60">Faites</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10 col-span-2 sm:col-span-1">
-          <CardContent className="p-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-indigo-600/10 flex-shrink-0">
-                <CheckCircle className="w-4 h-4 text-indigo-400" />
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10 hidden sm:block">
+          <CardContent className="p-2 sm:p-3">
+            <div className="text-center sm:flex sm:items-center sm:gap-2 sm:text-left">
+              <div className="hidden sm:block p-1.5 rounded-lg bg-red-500/20 flex-shrink-0">
+                <AlertCircle className="w-3 h-3 text-red-400" />
               </div>
-              <div className="min-w-0">
-                <p className="text-lg sm:text-2xl font-bold text-white">{stats.completion_rate || 0}%</p>
-                <p className="text-[10px] sm:text-xs text-white/60">Complétion</p>
+              <div>
+                <p className="text-base sm:text-lg font-bold text-white">{overdueCount}</p>
+                <p className="text-[9px] sm:text-[10px] text-white/60">Retard</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10 hidden sm:block">
+          <CardContent className="p-2 sm:p-3">
+            <div className="text-center sm:flex sm:items-center sm:gap-2 sm:text-left">
+              <div className="hidden sm:block p-1.5 rounded-lg bg-indigo-500/20 flex-shrink-0">
+                <CheckCircle className="w-3 h-3 text-indigo-400" />
+              </div>
+              <div>
+                <p className="text-base sm:text-lg font-bold text-white">{stats.completion_rate || 0}%</p>
+                <p className="text-[9px] sm:text-[10px] text-white/60">Complet</p>
               </div>
             </div>
           </CardContent>
