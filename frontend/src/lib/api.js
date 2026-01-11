@@ -148,60 +148,74 @@ export const invoicesAPI = {
   // Helper function to download PDF with authentication - All platforms
   downloadPDF: async (id, invoiceNumber, type = 'facture') => {
     try {
-      // Check if on actual mobile device (not just touch-enabled desktop)
+      // Check if on actual mobile device
       const userAgent = navigator.userAgent;
       const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
       const isAndroid = /Android/i.test(userAgent);
       const isMobileDevice = isIOS || isAndroid;
+      const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
       
-      // For mobile devices, try Cloudinary URL first
-      if (isMobileDevice) {
+      // For mobile devices OR Safari, use Cloudinary URL (more reliable)
+      if (isMobileDevice || isSafari) {
         try {
           const response = await api.get(`/invoices/${id}/pdf-url`);
           const { url } = response.data;
           
           if (url) {
-            // Open the Cloudinary URL directly - works on all mobile browsers
+            // Open the Cloudinary URL directly
             window.open(url, '_blank');
             return true;
           }
         } catch (cloudinaryError) {
-          console.warn('Cloudinary PDF failed, falling back to blob:', cloudinaryError);
-          // Fall through to blob method
+          console.warn('Cloudinary PDF failed, trying alternative method:', cloudinaryError);
         }
       }
       
-      // Desktop: Use blob approach with proper handling
-      const response = await api.get(`/invoices/${id}/pdf`, { 
-        responseType: 'blob',
+      // Standard approach: Use blob with fetch for better compatibility
+      const token = localStorage.getItem('token');
+      const baseUrl = process.env.REACT_APP_BACKEND_URL || '';
+      
+      const response = await fetch(`${baseUrl}/api/invoices/${id}/pdf`, {
+        method: 'GET',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Accept': 'application/pdf'
         }
       });
       
-      // Verify we got a valid PDF blob
-      if (!response.data || response.data.size === 0) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      
+      if (!blob || blob.size === 0) {
         throw new Error('Empty PDF response');
       }
       
-      const blob = new Blob([response.data], { type: 'application/pdf' });
       const filename = `${type}_${invoiceNumber || id}.pdf`;
       
-      // Create download link
+      // Create download using blob URL
       const downloadUrl = window.URL.createObjectURL(blob);
+      
+      // Use anchor element for download
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = filename;
       link.style.display = 'none';
       
       document.body.appendChild(link);
+      
+      // Trigger download
       link.click();
       
-      // Cleanup after a short delay
+      // Cleanup
       setTimeout(() => {
-        document.body.removeChild(link);
+        if (link.parentNode) {
+          document.body.removeChild(link);
+        }
         window.URL.revokeObjectURL(downloadUrl);
-      }, 100);
+      }, 250);
       
       return true;
     } catch (error) {
