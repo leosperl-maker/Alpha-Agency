@@ -179,7 +179,12 @@ body.light, body[data-theme="light"] {
         background-color: rgba(0, 0, 0, 0.05) !important;
     }
     
-    /* Text colors - convert white text to dark for general content */
+    /* MAIN TEXT COLOR FIX: Convert pure white text to dark */
+    .text-white {
+        color: #1A1A1A !important;
+    }
+    
+    /* Text colors with opacity - convert to dark with matching opacity */
     .text-white\/90 {
         color: rgba(26, 26, 26, 0.9) !important;
     }
@@ -209,10 +214,38 @@ body.light, body[data-theme="light"] {
         border-color: rgba(0, 0, 0, 0.1) !important;
     }
     
-    /* Cards and panels */
+    /* Cards and panels - light glassmorphism */
     .backdrop-blur-xl, .backdrop-blur-2xl {
         backdrop-filter: blur(8px) !important;
         background-color: rgba(255, 255, 255, 0.8) !important;
+    }
+    
+    /* Glass panels specific */
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.7) !important;
+        border-color: rgba(0, 0, 0, 0.08) !important;
+    }
+    
+    .glass-sidebar {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border-color: rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .glass-topbar {
+        background: rgba(255, 255, 255, 0.9) !important;
+        border-color: rgba(0, 0, 0, 0.06) !important;
+    }
+    
+    /* KPI cards */
+    .kpi-card {
+        background: rgba(255, 255, 255, 0.9) !important;
+        border-color: rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Charts and cards */
+    .chart-container {
+        background: rgba(255, 255, 255, 0.8) !important;
+        border-color: rgba(0, 0, 0, 0.08) !important;
     }
     
     /* Placeholders */
