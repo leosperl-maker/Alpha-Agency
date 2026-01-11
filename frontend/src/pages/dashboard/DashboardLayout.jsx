@@ -297,12 +297,12 @@ const DashboardLayout = () => {
 
       {/* Mobile Sidebar */}
       <aside className={`
-        lg:hidden fixed inset-y-0 left-0 z-50 w-72
+        lg:hidden fixed inset-y-0 left-0 z-50 w-72 flex flex-col
         bg-black/90 backdrop-blur-2xl border-r border-white/10
         transform transition-transform duration-300
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="h-16 flex items-center justify-between px-4 border-b border-white/10">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 flex-shrink-0">
           <img 
             src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png"
             alt="Alpha Agency"
@@ -315,7 +315,7 @@ const DashboardLayout = () => {
             <X className="w-5 h-5" />
           </button>
         </div>
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1" style={{
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1 min-h-0" style={{
           WebkitOverflowScrolling: 'touch',
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(255,255,255,0.3) transparent'
