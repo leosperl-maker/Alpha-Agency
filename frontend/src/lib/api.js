@@ -148,29 +148,7 @@ export const invoicesAPI = {
   // Helper function to download PDF with authentication - All platforms
   downloadPDF: async (id, invoiceNumber, type = 'facture') => {
     try {
-      // Check if on actual mobile device
-      const userAgent = navigator.userAgent;
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-      const isAndroid = /Android/i.test(userAgent);
-      const isMobileDevice = isIOS || isAndroid;
-      const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
-      
-      // For mobile devices OR Safari, use Cloudinary URL (more reliable)
-      if (isMobileDevice || isSafari) {
-        try {
-          const response = await api.get(`/invoices/${id}/pdf-url`);
-          const { url } = response.data;
-          
-          if (url) {
-            window.open(url, '_blank');
-            return true;
-          }
-        } catch (cloudinaryError) {
-          console.warn('Cloudinary PDF failed, trying blob method:', cloudinaryError);
-        }
-      }
-      
-      // Desktop: Use axios with blob response
+      // Always use blob approach which works reliably
       const response = await api.get(`/invoices/${id}/pdf`, {
         responseType: 'blob',
         headers: {
@@ -186,23 +164,50 @@ export const invoicesAPI = {
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const filename = `${type}_${invoiceNumber || id}.pdf`;
       
-      // Create download link
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = filename;
-      link.style.display = 'none';
+      // Check if on mobile
+      const userAgent = navigator.userAgent;
+      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+      const isAndroid = /Android/i.test(userAgent);
+      const isMobile = isIOS || isAndroid;
       
-      document.body.appendChild(link);
-      link.click();
+      // Create blob URL
+      const blobUrl = window.URL.createObjectURL(blob);
       
-      // Cleanup
-      setTimeout(() => {
-        if (link.parentNode) {
+      if (isMobile) {
+        // Mobile: Open in new window/tab - Safari will use its PDF viewer
+        const newWindow = window.open(blobUrl, '_blank');
+        
+        // If popup blocked, try download link
+        if (!newWindow) {
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = filename;
+          link.target = '_blank';
+          document.body.appendChild(link);
+          link.click();
           document.body.removeChild(link);
         }
-        window.URL.revokeObjectURL(downloadUrl);
-      }, 250);
+        
+        // Keep URL alive for viewing, cleanup after delay
+        setTimeout(() => window.URL.revokeObjectURL(blobUrl), 60000);
+      } else {
+        // Desktop: Direct download
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        // Cleanup
+        setTimeout(() => {
+          if (link.parentNode) {
+            document.body.removeChild(link);
+          }
+          window.URL.revokeObjectURL(blobUrl);
+        }, 250);
+      }
       
       return true;
     } catch (error) {
