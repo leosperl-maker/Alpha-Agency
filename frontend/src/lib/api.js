@@ -148,13 +148,14 @@ export const invoicesAPI = {
   // Helper function to download PDF with authentication - All platforms
   downloadPDF: async (id, invoiceNumber, type = 'facture') => {
     try {
-      // Check if on iOS/mobile
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      // Check if on actual mobile device (not just touch-enabled desktop)
+      const userAgent = navigator.userAgent;
+      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+      const isAndroid = /Android/i.test(userAgent);
+      const isMobileDevice = isIOS || isAndroid;
       
-      if (isIOS || isMobile) {
-        // Mobile: Use Cloudinary URL endpoint for better compatibility
+      // For mobile devices, try Cloudinary URL first
+      if (isMobileDevice) {
         try {
           const response = await api.get(`/invoices/${id}/pdf-url`);
           const { url } = response.data;
@@ -170,7 +171,7 @@ export const invoicesAPI = {
         }
       }
       
-      // Desktop or fallback: Use blob approach
+      // Desktop: Use blob approach with proper handling
       const response = await api.get(`/invoices/${id}/pdf`, { 
         responseType: 'blob',
         headers: {
@@ -178,18 +179,29 @@ export const invoicesAPI = {
         }
       });
       
+      // Verify we got a valid PDF blob
+      if (!response.data || response.data.size === 0) {
+        throw new Error('Empty PDF response');
+      }
+      
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const filename = `${type}_${invoiceNumber || id}.pdf`;
       
-      // Standard download
-      const url = window.URL.createObjectURL(blob);
+      // Create download link
+      const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
+      link.href = downloadUrl;
       link.download = filename;
+      link.style.display = 'none';
+      
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      
+      // Cleanup after a short delay
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+      }, 100);
       
       return true;
     } catch (error) {
