@@ -810,24 +810,24 @@ const TasksPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+      <div className="flex gap-1.5 sm:gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-white/60" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher..."
-            className="pl-9 bg-white/5 backdrop-blur-xl border-white/10 w-full"
+            className="pl-7 sm:pl-9 bg-white/5 backdrop-blur-xl border-white/10 h-8 sm:h-9 text-xs sm:text-sm"
           />
         </div>
         <Select value={filterPriority} onValueChange={setFilterPriority}>
-          <SelectTrigger className="w-full sm:w-36 bg-white/5 backdrop-blur-xl border-white/10">
+          <SelectTrigger className="w-20 sm:w-28 bg-white/5 backdrop-blur-xl border-white/10 h-8 sm:h-9 text-xs sm:text-sm">
             <SelectValue placeholder="Priorité" />
           </SelectTrigger>
           <SelectContent className="bg-[#1a1a2e]">
-            <SelectItem value="all">Toutes</SelectItem>
+            <SelectItem value="all" className="text-xs">Toutes</SelectItem>
             {Object.entries(priorityConfig).map(([key, config]) => (
-              <SelectItem key={key} value={key}>{config.label}</SelectItem>
+              <SelectItem key={key} value={key} className="text-xs">{config.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -842,11 +842,11 @@ const TasksPage = () => {
       >
         <div className="-mx-3 sm:-mx-4 md:-mx-6">
           <div 
-            className="overflow-x-auto pb-4 px-3 sm:px-4 md:px-6"
+            className="overflow-x-auto pb-3 px-3 sm:px-4 md:px-6"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
-              <div className="flex gap-3 sm:gap-4" style={{ width: 'fit-content' }}>
+              <div className="flex gap-2 sm:gap-3" style={{ width: 'fit-content' }}>
               {columns.map((column) => {
                 const columnTasks = getTasksByColumn(column.id);
                 
