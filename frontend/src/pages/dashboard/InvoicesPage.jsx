@@ -871,11 +871,17 @@ const InvoicesPage = () => {
               const status = statusConfig[invoice.status] || statusConfig.brouillon;
               const StatusIcon = status.icon;
               const totalPaid = invoice.total_paid || 0;
+              const isDevis = invoice.document_type === 'devis';
               return (
                 <div key={invoice.id} className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${isDevis ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                          {isDevis ? 'DEVIS' : 'FACTURE'}
+                        </span>
+                        <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
+                      </div>
                       <p className="text-xs text-white/60 mt-0.5">{formatDate(invoice.created_at)}</p>
                     </div>
                     <Badge className={`${status.color} text-xs`}>
