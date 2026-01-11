@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 import httpx
 import os
 import base64
+from pymongo import MongoClient
 
 router = APIRouter(prefix="/qonto", tags=["Qonto"])
 
@@ -27,11 +28,15 @@ def get_qonto_headers():
         "Content-Type": "application/json"
     }
 
-# MongoDB collections (imported from server)
-from server import db
-qonto_transactions_collection = db["qonto_transactions"]
-qonto_accounts_collection = db["qonto_accounts"]
-qonto_sync_collection = db["qonto_sync_logs"]
+# MongoDB connection for this module
+mongo_url = os.environ.get('MONGO_URL')
+db_name = os.environ.get('DB_NAME', 'alpha_agency')
+_client = MongoClient(mongo_url)
+_db = _client[db_name]
+
+qonto_transactions_collection = _db["qonto_transactions"]
+qonto_accounts_collection = _db["qonto_accounts"]
+qonto_sync_collection = _db["qonto_sync_logs"]
 
 
 class QontoAccount(BaseModel):
