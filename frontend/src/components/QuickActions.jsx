@@ -216,15 +216,22 @@ const QuickActions = () => {
   return (
     <>
       {/* Floating Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div 
+        className={`fixed ${position.x === null ? 'bottom-6 right-6' : ''} z-50`}
+        style={getButtonStyle()}
+      >
         <Button
-          onClick={() => setIsOpen(!isOpen)}
+          ref={dragRef}
+          onClick={() => !isDragging && setIsOpen(!isOpen)}
+          onMouseDown={handleDragStart}
+          onTouchStart={handleDragStart}
           className={`
-            w-14 h-14 rounded-full shadow-lg transition-all duration-300
+            w-14 h-14 rounded-full shadow-lg transition-all duration-300 touch-none
             ${isOpen 
               ? "bg-white/10 backdrop-blur-xl rotate-45" 
               : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500"
             }
+            ${isDragging ? 'scale-110 cursor-grabbing' : 'cursor-grab'}
           `}
           data-testid="quick-actions-button"
         >
