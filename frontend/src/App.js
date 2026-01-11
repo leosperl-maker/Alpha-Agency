@@ -110,7 +110,11 @@ function App() {
             <Route path="parametres" element={<SettingsPage />} />
             <Route path="things" element={<ThingsPage />} />
             <Route path="mindmap" element={<MindMapPage />} />
+            <Route path="transfer" element={<TransfersPage />} />
           </Route>
+          
+          {/* Public transfer download page */}
+          <Route path="/transfer/:transferId" element={<TransferDownloadPage />} />
         </Routes>
       </BrowserRouter>
     </div>
