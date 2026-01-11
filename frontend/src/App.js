@@ -41,6 +41,8 @@ import BlogAdminPage from "./pages/dashboard/BlogAdminPage";
 import TagsManagePage from "./pages/dashboard/TagsManagePage";
 import CampaignsPage from "./pages/dashboard/CampaignsPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import ThingsPage from "./pages/dashboard/ThingsPage";
+import MindMapPage from "./pages/dashboard/MindMapPage";
 
 // Layout
 import MainLayout from "./components/MainLayout";
