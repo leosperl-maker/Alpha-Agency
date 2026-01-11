@@ -452,17 +452,6 @@ const AIAssistantPage = () => {
             </Button>
           </div>
         </div>
-              variant="outline"
-              size="sm"
-              onClick={clearCurrentChat}
-              disabled={messages.length === 0 && !currentConversationId}
-              className="h-8"
-            >
-              <Trash2 className="w-3 h-3 mr-1" />
-              Effacer
-            </Button>
-          </div>
-        </div>
 
         {/* Chat Card */}
         <Card className="bg-white border-[#E5E5E5] flex-1 flex flex-col min-h-0">
