@@ -410,14 +410,64 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Stockage et refresh des tokens en base
   - L'utilisateur doit autoriser l'accès dans Qonto
 
+### Session 12 - 2026-01-11 (Module WeTransfer + Fix Mode Clair)
+- ✅ **Bug Fix P0: Texte illisible en mode clair**
+  - Texte noir sur fond violet était invisible
+  - Ajout de règles CSS avec sélecteurs d'attribut `[class*="text-white"]`
+  - Préservation du texte blanc sur boutons colorés (indigo, purple, gradient)
+  - Amélioration du contraste des éléments interactifs (`bg-white/5`)
+- ✅ **NOUVEAU: Module WeTransfer (Transfert de fichiers)**
+  - Backend: `/app/backend/routes/transfers.py`
+    - Upload fichiers vers Cloudinary (chunked, 2GB+)
+    - Génération de liens uniques de téléchargement
+    - Envoi d'emails via Brevo avec template HTML brandé
+    - Statistiques (transferts actifs, téléchargements)
+    - Expiration configurable (1-30 jours)
+  - Frontend Admin: `/admin/transfer` (`TransfersPage.jsx`)
+    - Zone drag & drop pour fichiers
+    - Formulaire: titre, message, emails destinataires
+    - Historique des transferts avec actions (copier lien, voir, supprimer)
+    - Stats KPI (transferts actifs, téléchargements)
+  - Page publique: `/transfer/:id` (`TransferDownloadPage.jsx`)
+    - Page de téléchargement brandée Alphagency
+    - Affichage expéditeur, message, liste fichiers
+    - Bouton télécharger tout
+    - Gestion erreurs 404 et expiration
+- ✅ **Nettoyage**
+  - Suppression fichier obsolète `FacturationPage.jsx`
+
 ## En attente
-- **Module WeTransfer** : Architecture validée (Cloudinary, 2GB+, Brevo)
+- **Intégration Qonto** : Backend prêt, en attente autorisation utilisateur via OAuth2
 - **Améliorations MindMap** : Style Mindnote
 
 ## Test Results
 - Session 8: 100% pass rate (7/7) - iteration_21.json
 - Session 9: 100% pass rate (6/6) - iteration_22.json
 - Session 10: 100% pass rate (6/6) - iteration_23.json
-- Viewport testé: 375x800 (iPhone SE/XR)
-- Thème light testé et fonctionnel
+- Session 12: 100% backend (10/10), 100% frontend - iteration_24.json
+- Viewport testé: 375x800 (mobile) et 1920x800 (desktop)
+- Thème light testé et fonctionnel sur toutes les pages
+
+## Architecture Backend (mise à jour Session 12)
+
+```
+/app/backend/routes/
+├── transfers.py       # ✅ NOUVEAU - Module WeTransfer
+├── ai_enhanced.py     # ✅ Context-Aware AI
+├── backup.py          # ✅ Sauvegardes
+├── blog.py            # ✅ Articles
+├── budget.py          # ✅ Budget
+├── campaigns.py       # ✅ Campagnes
+├── database.py        # Utilitaires DB
+├── documents.py       # ✅ Documents
+├── file_manager.py    # ✅ Gestionnaire fichiers
+├── invoices.py        # ✅ Factures
+├── meta.py            # ✅ Meta (Facebook/Instagram)
+├── news.py            # ✅ Actualités
+├── portfolio.py       # ✅ Réalisations
+├── qonto.py           # ✅ Intégration Qonto OAuth2
+├── quotes.py          # ✅ Devis
+├── tags.py            # ✅ Tags
+└── tasks.py           # ✅ Tâches
+```
 
