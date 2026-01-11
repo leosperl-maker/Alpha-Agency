@@ -1000,7 +1000,7 @@ const InvoicesPage = () => {
                             <DropdownMenuItem onClick={() => handleDuplicate(invoice)} className="text-white">
                               <Copy className="w-4 h-4 mr-2" /> Dupliquer
                             </DropdownMenuItem>
-                            {invoice.type === 'devis' && invoice.status !== 'payée' && (
+                            {invoice.document_type === 'devis' && invoice.status !== 'payée' && (
                               <DropdownMenuItem onClick={() => handleConvertToInvoice(invoice)} className="text-green-400">
                                 <ArrowRightLeft className="w-4 h-4 mr-2" /> Convertir en facture
                               </DropdownMenuItem>
