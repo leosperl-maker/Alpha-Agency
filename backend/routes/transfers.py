@@ -415,7 +415,8 @@ async def create_transfer(
                 "id": transfer_id,
                 "title": title,
                 "download_link": download_link,
-                "expires_at": expires_at.isoformat(),
+                "expires_at": expires_at.isoformat() if expires_at else None,
+                "never_expires": expires_in_days == 0,
                 "recipient_count": len(emails)
             }
         }
