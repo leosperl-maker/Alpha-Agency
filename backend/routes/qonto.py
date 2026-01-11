@@ -98,10 +98,14 @@ class QontoTransaction(BaseModel):
 async def get_qonto_status():
     """Check Qonto API connection status"""
     try:
+        token = await get_oauth_token()
+        if not token:
+            return {"connected": False, "error": "Impossible d'obtenir le token OAuth2"}
+        
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(
                 f"{QONTO_API_BASE}/organization",
-                headers=get_qonto_headers()
+                headers=get_qonto_headers(token)
             )
             
             if response.status_code == 200:
@@ -112,7 +116,7 @@ async def get_qonto_status():
                     "slug": data.get("organization", {}).get("slug", "Unknown")
                 }
             elif response.status_code == 401:
-                return {"connected": False, "error": "Credentials invalides"}
+                return {"connected": False, "error": "Token expiré ou invalide"}
             else:
                 return {"connected": False, "error": f"Erreur API: {response.status_code}"}
     except Exception as e:
@@ -123,10 +127,14 @@ async def get_qonto_status():
 async def get_organization():
     """Get organization details from Qonto"""
     try:
+        token = await get_oauth_token()
+        if not token:
+            raise HTTPException(status_code=401, detail="Impossible d'obtenir le token OAuth2")
+        
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(
                 f"{QONTO_API_BASE}/organization",
-                headers=get_qonto_headers()
+                headers=get_qonto_headers(token)
             )
             
             if response.status_code == 200:
@@ -141,11 +149,15 @@ async def get_organization():
 async def get_bank_accounts():
     """Get all bank accounts from Qonto"""
     try:
+        token = await get_oauth_token()
+        if not token:
+            raise HTTPException(status_code=401, detail="Impossible d'obtenir le token OAuth2")
+        
         async with httpx.AsyncClient(timeout=10.0) as client:
             # First get organization to get the slug
             org_response = await client.get(
                 f"{QONTO_API_BASE}/organization",
-                headers=get_qonto_headers()
+                headers=get_qonto_headers(token)
             )
             
             if org_response.status_code != 200:
