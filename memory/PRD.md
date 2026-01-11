@@ -450,6 +450,15 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Sur iOS/mobile, utilisation de l'endpoint `/pdf-url` qui génère une URL Cloudinary
   - Évite les problèmes de blob sur Safari iOS
   - Fallback vers la méthode blob pour desktop
+- ✅ **Badges Devis/Facture**
+  - Badge bleu "DEVIS" pour les numéros DEV-XXXX
+  - Badge vert "FACTURE" pour les numéros FAC-XXXX
+  - Utilise le préfixe du numéro comme source de vérité
+- ✅ **MindMap Style Mindnote**
+  - Courbes de Bézier pour les connexions (plus de lignes droites)
+  - Nœuds avec gradient, ombres et effet de brillance
+  - Fond amélioré avec gradient et grille de points
+  - Bouton "+" rapide pour ajouter un enfant quand un nœud est sélectionné
 - ✅ **Nettoyage Code**
   - Suppression de ~230 lignes de code dupliqué dans server.py
   - Architecture backend plus propre
