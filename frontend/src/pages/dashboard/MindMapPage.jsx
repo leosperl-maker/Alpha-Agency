@@ -579,15 +579,23 @@ const MindMapPage = () => {
         onTouchEnd={handleCanvasTouchEnd}
         style={{ cursor: isDragging ? "grabbing" : "grab" }}
       >
-        {/* Grid background */}
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a1a] via-[#050510] to-[#0a0a20]" />
+        
+        {/* Radial glow effect */}
         <div 
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-30"
           style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
-            `,
-            backgroundSize: `${50 * zoom}px ${50 * zoom}px`,
+            background: "radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 70%)"
+          }}
+        />
+        
+        {/* Dot grid background */}
+        <div 
+          className="absolute inset-0 opacity-40"
+          style={{
+            backgroundImage: `radial-gradient(circle at center, rgba(255,255,255,0.15) 1px, transparent 1px)`,
+            backgroundSize: `${30 * zoom}px ${30 * zoom}px`,
             backgroundPosition: `${pan.x}px ${pan.y}px`
           }}
         />
@@ -601,7 +609,24 @@ const MindMapPage = () => {
             transformOrigin: "0 0"
           }}
         >
+          {/* SVG Definitions for gradients and filters */}
+          <defs>
+            {NODE_COLORS.map((color, i) => (
+              <linearGradient key={`gradient-${i}`} id={`gradient-${color.name.toLowerCase()}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor={color.hex} stopOpacity="1" />
+                <stop offset="100%" stopColor={color.hex} stopOpacity="0.7" />
+              </linearGradient>
+            ))}
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
           {renderNode(mindmap)}
+        </svg>
         </svg>
 
         {/* Selected node toolbar */}
