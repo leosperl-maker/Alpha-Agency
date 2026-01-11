@@ -88,7 +88,31 @@ Banque: Votre Banque`,
   useEffect(() => {
     fetchNotificationSettings();
     fetchApiKeys();
+    fetchInvoiceSettings();
   }, []);
+
+  const fetchInvoiceSettings = async () => {
+    try {
+      const res = await settingsAPI.getInvoiceSettings();
+      if (res.data) {
+        setInvoiceSettings(prev => ({ ...prev, ...res.data }));
+      }
+    } catch (error) {
+      console.error("Error fetching invoice settings:", error);
+    }
+  };
+
+  const handleSaveInvoiceSettings = async () => {
+    setSavingInvoiceSettings(true);
+    try {
+      await settingsAPI.updateInvoiceSettings(invoiceSettings);
+      toast.success("Paramètres des devis/factures sauvegardés");
+    } catch (error) {
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setSavingInvoiceSettings(false);
+    }
+  };
 
   const fetchApiKeys = async () => {
     setLoadingApiKeys(true);
