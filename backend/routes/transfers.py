@@ -434,12 +434,11 @@ async def get_my_transfers(
             {"_id": 0}
         ).sort("created_at", -1).to_list(100)
         
-        # Add download link and expiry status
-        frontend_url = os.environ.get('FRONTEND_URL', 'https://easytransfer-17.preview.emergentagent.com')
+        # Add download link and expiry status using alphagency.fr domain
         now = datetime.now(timezone.utc)
         
         for t in transfers:
-            t["download_link"] = f"{frontend_url}/transfer/{t['id']}"
+            t["download_link"] = f"{ALPHAGENCY_URL}/transfer/{t['id']}"
             expires_at = datetime.fromisoformat(t["expires_at"].replace('Z', '+00:00'))
             t["is_expired"] = now > expires_at
         
