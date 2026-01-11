@@ -125,8 +125,21 @@ def fetch_logo_image():
         logger.error(f"Failed to fetch logo: {e}")
         return None
 
-def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "facture") -> BytesIO:
+def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "facture", invoice_settings: dict = None) -> BytesIO:
     """Generate professional PDF for invoice or quote matching the Alpha Agency design"""
+    # Default settings if none provided
+    if not invoice_settings:
+        invoice_settings = {
+            "default_payment_terms": "30",
+            "default_tva_rate": "8.5",
+            "default_conditions": """• Ce devis est valable 30 jours à compter de sa date d'émission.
+• Paiement par virement bancaire ou carte bancaire.
+• Le règlement doit intervenir sous 30 jours après réception de la facture.""",
+            "bank_details": "",
+            "footer_text": "Merci de votre confiance - Alpha Agency",
+            "signature_text": "Bon pour accord, le client :"
+        }
+    
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer, 
