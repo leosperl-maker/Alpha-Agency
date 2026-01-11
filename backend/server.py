@@ -2505,6 +2505,54 @@ async def update_settings_integrations(integrations: SettingsIntegrations, curre
     return {"message": "Intégrations mises à jour"}
 
 
+# ==================== INVOICE SETTINGS ====================
+
+class InvoiceSettingsUpdate(BaseModel):
+    default_payment_terms: Optional[str] = "30"
+    default_tva_rate: Optional[str] = "8.5"
+    default_conditions: Optional[str] = None
+    bank_details: Optional[str] = None
+    footer_text: Optional[str] = None
+    signature_text: Optional[str] = None
+    show_logo: Optional[bool] = True
+    logo_position: Optional[str] = "left"
+
+@api_router.get("/settings/invoice", response_model=dict)
+async def get_invoice_settings(current_user: dict = Depends(get_current_user)):
+    """Get invoice/quote default settings"""
+    settings = await db.settings.find_one({"type": "invoice_settings"}, {"_id": 0})
+    if not settings:
+        # Return default values
+        return {
+            "default_payment_terms": "30",
+            "default_tva_rate": "8.5",
+            "default_conditions": """• Ce devis est valable 30 jours à compter de sa date d'émission.
+• Paiement par virement bancaire ou carte bancaire.
+• Le règlement doit intervenir sous 30 jours après réception de la facture.
+• Tout retard de paiement entraînera des pénalités de retard.""",
+            "bank_details": "",
+            "footer_text": "Merci de votre confiance - Alpha Agency",
+            "signature_text": "Bon pour accord, le client :",
+            "show_logo": True,
+            "logo_position": "left"
+        }
+    return settings
+
+@api_router.put("/settings/invoice", response_model=dict)
+async def update_invoice_settings(data: InvoiceSettingsUpdate, current_user: dict = Depends(get_current_user)):
+    """Update invoice/quote default settings"""
+    update_data = data.model_dump(exclude_unset=True)
+    update_data["type"] = "invoice_settings"
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.settings.update_one(
+        {"type": "invoice_settings"},
+        {"$set": update_data},
+        upsert=True
+    )
+    return {"message": "Paramètres de facturation mis à jour"}
+
+
 # ==================== API KEYS MANAGEMENT ====================
 
 @api_router.get("/settings/api-keys", response_model=dict)
