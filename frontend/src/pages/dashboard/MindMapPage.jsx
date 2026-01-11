@@ -293,33 +293,87 @@ const MindMapPage = () => {
     setDraggingNode(null);
   };
 
+  // Generate curved path between two points (Bézier curve)
+  const generateCurvedPath = (x1, y1, x2, y2) => {
+    const midX = (x1 + x2) / 2;
+    const midY = (y1 + y2) / 2;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    
+    // Control point offset based on distance
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const curvature = Math.min(distance * 0.3, 80);
+    
+    // Determine curve direction based on relative position
+    let cx1, cy1, cx2, cy2;
+    
+    if (Math.abs(dx) > Math.abs(dy)) {
+      // Horizontal-ish connection
+      cx1 = x1 + dx * 0.4;
+      cy1 = y1;
+      cx2 = x2 - dx * 0.4;
+      cy2 = y2;
+    } else {
+      // Vertical-ish connection
+      cx1 = x1;
+      cy1 = y1 + dy * 0.4;
+      cx2 = x2;
+      cy2 = y2 - dy * 0.4;
+    }
+    
+    return `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`;
+  };
+
   // Render node recursively
   const renderNode = (node, depth = 0) => {
     const color = NODE_COLORS[node.color] || NODE_COLORS[0];
     const isSelected = selectedNode === node.id;
     const isEditing = editingNode === node.id;
     const isRoot = node.id === mindmap.id;
+    const nodeWidth = isRoot ? 180 : 160;
+    const nodeHeight = isRoot ? 60 : 50;
 
     return (
       <g key={node.id}>
-        {/* Lines to children */}
-        {node.children?.map(child => (
-          <line
-            key={`line-${node.id}-${child.id}`}
-            x1={node.x}
-            y1={node.y}
-            x2={child.x}
-            y2={child.y}
-            stroke="rgba(255,255,255,0.2)"
-            strokeWidth={2}
-            strokeDasharray={isRoot ? "none" : "5,5"}
-          />
-        ))}
+        {/* Curved lines to children with gradient */}
+        {node.children?.map(child => {
+          const childColor = NODE_COLORS[child.color] || NODE_COLORS[0];
+          return (
+            <g key={`line-${node.id}-${child.id}`}>
+              {/* Glow effect */}
+              <path
+                d={generateCurvedPath(node.x, node.y, child.x, child.y)}
+                fill="none"
+                stroke={color.hex}
+                strokeWidth={6}
+                strokeOpacity={0.15}
+                strokeLinecap="round"
+              />
+              {/* Main line */}
+              <path
+                d={generateCurvedPath(node.x, node.y, child.x, child.y)}
+                fill="none"
+                stroke={`url(#line-gradient-${node.id}-${child.id})`}
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                className="transition-all duration-300"
+              />
+              {/* Gradient definition for this line */}
+              <defs>
+                <linearGradient id={`line-gradient-${node.id}-${child.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor={color.hex} stopOpacity="0.8" />
+                  <stop offset="100%" stopColor={childColor.hex} stopOpacity="0.8" />
+                </linearGradient>
+              </defs>
+            </g>
+          );
+        })}
         
         {/* Node */}
         <g
           transform={`translate(${node.x}, ${node.y})`}
           style={{ cursor: "pointer" }}
+          className="transition-transform duration-200 hover:scale-105"
           onMouseDown={(e) => {
             e.stopPropagation();
             setDraggingNode(node.id);
@@ -330,27 +384,96 @@ const MindMapPage = () => {
             setEditText(node.text);
           }}
         >
-          {/* Node background */}
+          {/* Shadow */}
+          <ellipse
+            cx={3}
+            cy={5}
+            rx={nodeWidth / 2 - 5}
+            ry={nodeHeight / 2 - 3}
+            fill="rgba(0,0,0,0.3)"
+            style={{ filter: "blur(8px)" }}
+          />
+          
+          {/* Glow effect when selected */}
+          {isSelected && (
+            <ellipse
+              cx={0}
+              cy={0}
+              rx={nodeWidth / 2 + 8}
+              ry={nodeHeight / 2 + 8}
+              fill="none"
+              stroke={color.hex}
+              strokeWidth={3}
+              strokeOpacity={0.4}
+              style={{ filter: "blur(4px)" }}
+            />
+          )}
+          
+          {/* Node background with gradient */}
           <rect
-            x={-80}
-            y={-25}
-            width={160}
-            height={50}
-            rx={isRoot ? 25 : 12}
-            className={`${color.bg} ${isSelected ? "stroke-white stroke-2" : ""}`}
-            style={{ filter: isSelected ? "drop-shadow(0 0 10px rgba(99, 102, 241, 0.5))" : "none" }}
+            x={-nodeWidth / 2}
+            y={-nodeHeight / 2}
+            width={nodeWidth}
+            height={nodeHeight}
+            rx={isRoot ? nodeHeight / 2 : 16}
+            fill={color.hex}
+            stroke={isSelected ? "white" : "rgba(255,255,255,0.2)"}
+            strokeWidth={isSelected ? 2.5 : 1}
+            style={{ 
+              filter: isSelected ? `drop-shadow(0 0 20px ${color.hex})` : "none",
+            }}
+          />
+          
+          {/* Inner highlight */}
+          <rect
+            x={-nodeWidth / 2 + 2}
+            y={-nodeHeight / 2 + 2}
+            width={nodeWidth - 4}
+            height={nodeHeight / 2 - 4}
+            rx={isRoot ? (nodeHeight / 2) - 2 : 14}
+            fill="rgba(255,255,255,0.15)"
           />
           
           {/* Node text */}
           <text
             x={0}
-            y={5}
+            y={isRoot ? 6 : 5}
             textAnchor="middle"
-            className={`${color.text} text-sm font-medium`}
-            style={{ pointerEvents: "none" }}
+            fill="white"
+            fontSize={isRoot ? 16 : 14}
+            fontWeight={isRoot ? 600 : 500}
+            style={{ pointerEvents: "none", textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
           >
-            {node.text.length > 18 ? node.text.slice(0, 18) + "..." : node.text}
+            {node.text.length > 20 ? node.text.slice(0, 20) + "..." : node.text}
           </text>
+          
+          {/* Add child indicator */}
+          {isSelected && (
+            <g transform={`translate(${nodeWidth / 2 + 15}, 0)`}>
+              <circle
+                r={12}
+                fill="rgba(99, 102, 241, 0.9)"
+                stroke="white"
+                strokeWidth={1.5}
+                style={{ cursor: "pointer" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addChild(node.id);
+                }}
+              />
+              <text
+                x={0}
+                y={5}
+                textAnchor="middle"
+                fill="white"
+                fontSize={16}
+                fontWeight="bold"
+                style={{ pointerEvents: "none" }}
+              >
+                +
+              </text>
+            </g>
+          )}
         </g>
         
         {/* Render children */}
