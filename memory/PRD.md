@@ -235,9 +235,32 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - [ ] Étendre l'accès aux données de l'IA (inclure le futur module Documents)
 - [ ] Améliorer la recherche globale dans la topbar (plus de types de résultats)
 
+### Session 7 - 2026-01-11 (Corrections bugs critiques)
+- ✅ **Bug Fix CRITIQUE: PipelinePage.jsx**
+  - 2 balises `<div>` non fermées (lignes 876 et 878) causaient une erreur de parsing JSX
+  - L'erreur "Unterminated JSX contents" bloquait complètement le frontend
+  - Ajout des balises fermantes `</div>` aux lignes 1191-1194
+- ✅ **Bug Fix: Texte invisible dans l'éditeur de blocs**
+  - SelectContent et DropdownMenuContent avaient un fond sombre mais pas de couleur de texte
+  - Ajout de classes `text-white hover:bg-white/10 focus:bg-white/10 focus:text-white`
+  - Les options H1-H4 et tous les types de blocs sont maintenant visibles
+- ✅ **NOUVEAU: Prévisualisation fichiers (Documents)**
+  - Modal de preview avec affichage du fichier (images, vidéos, audio, PDF)
+  - Informations détaillées (taille, type, date, format MIME)
+  - Boutons d'action : Télécharger, Renommer, Supprimer
+- ✅ **NOUVEAU: Renommage fichiers/dossiers (Documents)**
+  - Option "Renommer" dans les menus contextuels des fichiers et dossiers
+  - Modal de renommage avec champ pré-rempli
+  - Sauvegarde instantanée du nouveau nom
+- ✅ **ThemeContext amélioré**
+  - Application directe des styles via CSS custom properties
+  - Support attribut `data-theme` sur html et body
+  - Variables CSS définies pour thèmes light/dark
+
 ## Known Issues
 - Routes dupliquées temporairement dans server.py et modules séparés
 - server.py encore partiellement monolithique (~6000 lignes) mais 10 modules extraits
+- **Toggle thème clair/sombre : fonctionne techniquement mais l'interface reste sombre car tous les composants utilisent des couleurs CSS hardcodées (bg-[#1a1a2e], text-white, etc.) au lieu de variables CSS. Refactoring CSS complet nécessaire pour un vrai support du thème clair.**
 
 ## Architecture Backend (mise à jour)
 
