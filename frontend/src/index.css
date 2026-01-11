@@ -162,17 +162,27 @@ body.dark, body[data-theme="dark"] {
 
 /* Light theme overrides for hard-coded dark colors */
 body.light, body[data-theme="light"] {
-    /* Override dark backgrounds */
+    /* Override dark backgrounds - make them light but NOT white for visibility */
     .bg-\[\#0a0a12\], .bg-\[\#02040A\], .bg-\[\#050510\], .bg-\[\#0d0d1a\], .bg-\[\#12121f\], .bg-\[\#1a1a2e\] {
         background-color: #F5F5F5 !important;
+    }
+    
+    /* Convert dark gradients to light versions - keep subtle gradient effect */
+    .bg-gradient-to-b.from-\[\#0a0a12\].to-\[\#0d0d1a\],
+    .from-\[\#0a0a12\],
+    .to-\[\#0d0d1a\],
+    .from-\[\#12121f\],
+    .to-\[\#0a0a12\] {
+        --tw-gradient-from: #F5F5F5 !important;
+        --tw-gradient-to: #EBEBEB !important;
     }
     
     .bg-black\/60, .bg-black\/80, .bg-black\/90 {
         background-color: rgba(255, 255, 255, 0.9) !important;
     }
     
-    .bg-white\/5, .bg-white\/\[0\.02\], .bg-white\/\[0\.03\] {
-        background-color: rgba(0, 0, 0, 0.03) !important;
+    .bg-white\/\[0\.02\], .bg-white\/\[0\.03\] {
+        background-color: rgba(0, 0, 0, 0.02) !important;
     }
     
     .bg-white\/10 {
