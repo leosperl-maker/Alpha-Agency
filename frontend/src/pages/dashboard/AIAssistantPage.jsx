@@ -376,36 +376,39 @@ const AIAssistantPage = () => {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col gap-4 min-w-0">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-              <History className="w-4 h-4" />
-            </Button>
-            <div>
-              <h1 className="text-xl font-bold text-[#1A1A1A] flex items-center gap-2">
-                <Bot className="w-6 h-6 text-[#CE0202]" />
-                Assistant IA
-              </h1>
-              <p className="text-[#666666] text-xs">Propulsé par Perplexity AI</p>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="lg:hidden"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+              >
+                <History className="w-4 h-4" />
+              </Button>
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold text-[#1A1A1A] flex items-center gap-2">
+                  <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-[#CE0202]" />
+                  Assistant IA
+                </h1>
+                <p className="text-[#666666] text-[10px] sm:text-xs">Propulsé par Perplexity AI</p>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
+            
             {status && (
-              <Badge variant="outline" className="text-[#666666] text-xs">
+              <Badge variant="outline" className="text-[#666666] text-[10px] sm:text-xs">
                 <Sparkles className="w-3 h-3 mr-1" />
-                {status.remaining}/{status.daily_limit} restantes
+                {status.remaining}/{status.daily_limit}
               </Badge>
             )}
-            
+          </div>
+          
+          {/* Controls Row - Scrollable on mobile */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1" style={{ WebkitOverflowScrolling: 'touch' }}>
             {/* Context Selector */}
             <Select value={contextType} onValueChange={setContextType}>
-              <SelectTrigger className="w-28 sm:w-36 h-8 bg-white border-[#E5E5E5] text-xs">
+              <SelectTrigger className="w-28 h-8 bg-white border-[#E5E5E5] text-xs flex-shrink-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white z-50">
@@ -422,7 +425,7 @@ const AIAssistantPage = () => {
             
             {/* Model Selector */}
             <Select value={selectedModel} onValueChange={setSelectedModel}>
-              <SelectTrigger className="w-28 sm:w-36 h-8 bg-white border-[#E5E5E5] text-xs">
+              <SelectTrigger className="w-32 h-8 bg-white border-[#E5E5E5] text-xs flex-shrink-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white z-50">
@@ -438,6 +441,17 @@ const AIAssistantPage = () => {
             </Select>
             
             <Button
+              variant="outline"
+              size="sm"
+              onClick={clearCurrentChat}
+              disabled={messages.length === 0 && !currentConversationId}
+              className="h-8 flex-shrink-0"
+            >
+              <Trash2 className="w-3 h-3 mr-1" />
+              <span className="hidden sm:inline">Effacer</span>
+            </Button>
+          </div>
+        </div>
               variant="outline"
               size="sm"
               onClick={clearCurrentChat}
