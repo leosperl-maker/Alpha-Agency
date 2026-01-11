@@ -353,9 +353,9 @@ async def get_transactions(
 ):
     """Get transactions from Qonto"""
     try:
-        token = await get_oauth_token()
+        token = await get_valid_token()
         if not token:
-            raise HTTPException(status_code=401, detail="Impossible d'obtenir le token OAuth2")
+            raise HTTPException(status_code=401, detail="Non connecté à Qonto")
         
         # Get organization and accounts first
         async with httpx.AsyncClient(timeout=30.0) as client:
