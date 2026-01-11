@@ -2,9 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { 
   Plus, Search, Filter, MoreVertical, Edit, Trash2, Eye, 
   FileText, Calendar, Tag, Clock, CheckCircle, Archive,
-  Image, Video, Music, X, GripVertical, Bold, Italic,
-  Heading1, Heading2, List, Quote, Link2, AlignLeft, 
-  AlignCenter, AlignRight, Maximize, Loader2, Sparkles
+  X, Loader2, Sparkles, Save, ArrowLeft
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -13,7 +11,7 @@ import { Label } from "../../components/ui/label";
 import { Badge } from "../../components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { 
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter 
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter 
 } from "../../components/ui/dialog";
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
@@ -23,863 +21,536 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
 } from "../../components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { ScrollArea } from "../../components/ui/scroll-area";
 import { blogAPI, tagsAPI, uploadAPI } from "../../lib/api";
 import { toast } from "sonner";
+import AdvancedBlockEditor from "../../components/AdvancedBlockEditor";
 
-// Rich Text Content Block Component
-const ContentBlockEditor = ({ block, onUpdate, onDelete, onMoveUp, onMoveDown, isFirst, isLast }) => {
-  const renderBlockContent = () => {
-    switch (block.type) {
-      case 'text':
-        return (
-          <Textarea
-            value={block.content || ''}
-            onChange={(e) => onUpdate({ ...block, content: e.target.value })}
-            placeholder="Votre texte ici..."
-            className="min-h-24 bg-white/5 backdrop-blur-xl border-white/10"
-          />
-        );
-      case 'heading':
-        return (
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <Select 
-                value={String(block.level || 2)} 
-                onValueChange={(v) => onUpdate({ ...block, level: parseInt(v) })}
-              >
-                <SelectTrigger className="w-24 bg-white/5 backdrop-blur-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e]">
-                  <SelectItem value="2">H2</SelectItem>
-                  <SelectItem value="3">H3</SelectItem>
-                </SelectContent>
-              </Select>
-              <Input
-                value={block.content || ''}
-                onChange={(e) => onUpdate({ ...block, content: e.target.value })}
-                placeholder="Titre de la section"
-                className={`flex-1 bg-white/5 backdrop-blur-xl ${block.level === 2 ? 'text-xl font-bold' : 'text-lg font-semibold'}`}
-              />
-            </div>
-          </div>
-        );
-      case 'image':
-        return (
-          <div className="space-y-3">
-            <div className="flex gap-2">
-              <Input
-                value={block.url || ''}
-                onChange={(e) => onUpdate({ ...block, url: e.target.value })}
-                placeholder="URL de l'image"
-                className="flex-1 bg-white/5 backdrop-blur-xl"
-              />
-              <label className="cursor-pointer">
-                <Button variant="outline" size="sm" asChild>
-                  <span><Image className="w-4 h-4 mr-1" /> Upload</span>
-                </Button>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  className="hidden"
-                  onChange={async (e) => {
-                    if (e.target.files?.[0]) {
-                      try {
-                        const res = await uploadAPI.image(e.target.files[0]);
-                        onUpdate({ ...block, url: res.data.url });
-                        toast.success("Image uploadée");
-                      } catch (err) {
-                        toast.error("Erreur upload");
-                      }
-                    }
-                  }}
-                />
-              </label>
-            </div>
-            {block.url && (
-              <div className="relative">
-                <img 
-                  src={block.url} 
-                  alt="" 
-                  className={`max-h-48 object-cover ${block.rounded ? 'rounded-xl' : ''}`}
-                  style={{ width: block.size === 'full' ? '100%' : block.size === 'large' ? '80%' : '50%' }}
-                />
-              </div>
-            )}
-            <div className="flex gap-2 flex-wrap">
-              <Select 
-                value={block.alignment || 'center'} 
-                onValueChange={(v) => onUpdate({ ...block, alignment: v })}
-              >
-                <SelectTrigger className="w-28 bg-white/5 backdrop-blur-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e]">
-                  <SelectItem value="left">Gauche</SelectItem>
-                  <SelectItem value="center">Centre</SelectItem>
-                  <SelectItem value="right">Droite</SelectItem>
-                  <SelectItem value="full">Pleine largeur</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select 
-                value={block.size || 'medium'} 
-                onValueChange={(v) => onUpdate({ ...block, size: v })}
-              >
-                <SelectTrigger className="w-24 bg-white/5 backdrop-blur-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e]">
-                  <SelectItem value="small">Petit</SelectItem>
-                  <SelectItem value="medium">Moyen</SelectItem>
-                  <SelectItem value="large">Grand</SelectItem>
-                  <SelectItem value="full">Plein</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                variant={block.rounded ? "default" : "outline"}
-                size="sm"
-                onClick={() => onUpdate({ ...block, rounded: !block.rounded })}
-              >
-                Coins arrondis
-              </Button>
-            </div>
-            <Input
-              value={block.caption || ''}
-              onChange={(e) => onUpdate({ ...block, caption: e.target.value })}
-              placeholder="Légende (optionnel)"
-              className="bg-white/5 backdrop-blur-xl"
-            />
-          </div>
-        );
-      case 'gallery':
-        return (
-          <div className="space-y-3">
-            <p className="text-sm text-white/60">Galerie d'images (URLs séparées par des virgules)</p>
-            <Textarea
-              value={(block.urls || []).join(', ')}
-              onChange={(e) => onUpdate({ ...block, urls: e.target.value.split(',').map(u => u.trim()).filter(u => u) })}
-              placeholder="https://image1.jpg, https://image2.jpg"
-              className="bg-white/5 backdrop-blur-xl"
-            />
-            {block.urls?.length > 0 && (
-              <div className="flex gap-2 flex-wrap">
-                {block.urls.map((url, i) => (
-                  <img key={i} src={url} alt="" className="w-20 h-20 object-cover rounded" />
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      case 'audio':
-        return (
-          <div className="space-y-3">
-            <Input
-              value={block.url || ''}
-              onChange={(e) => onUpdate({ ...block, url: e.target.value })}
-              placeholder="URL du fichier audio"
-              className="bg-white/5 backdrop-blur-xl"
-            />
-            {block.url && (
-              <audio controls className="w-full">
-                <source src={block.url} />
-              </audio>
-            )}
-          </div>
-        );
-      case 'video':
-        return (
-          <div className="space-y-3">
-            <Input
-              value={block.url || ''}
-              onChange={(e) => onUpdate({ ...block, url: e.target.value })}
-              placeholder="URL YouTube ou Vimeo"
-              className="bg-white/5 backdrop-blur-xl"
-            />
-            {block.url && (
-              <div className="aspect-video bg-white/5 rounded-lg flex items-center justify-center">
-                <Video className="w-12 h-12 text-white/60" />
-              </div>
-            )}
-          </div>
-        );
-      case 'quote':
-        return (
-          <div className="space-y-2 border-l-4 border-indigo-500/50 pl-4">
-            <Textarea
-              value={block.content || ''}
-              onChange={(e) => onUpdate({ ...block, content: e.target.value })}
-              placeholder="Citation..."
-              className="bg-white/5 backdrop-blur-xl italic"
-            />
-            <Input
-              value={block.caption || ''}
-              onChange={(e) => onUpdate({ ...block, caption: e.target.value })}
-              placeholder="Auteur (optionnel)"
-              className="bg-white/5 backdrop-blur-xl text-sm"
-            />
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const blockTypeLabels = {
-    text: 'Texte',
-    heading: 'Titre',
-    image: 'Image',
-    gallery: 'Galerie',
-    audio: 'Audio',
-    video: 'Vidéo',
-    quote: 'Citation'
-  };
-
-  return (
-    <div className="bg-white/5 rounded-lg p-3 border border-white/10 group">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <GripVertical className="w-4 h-4 text-white/40 cursor-grab" />
-          <Badge variant="outline" className="text-xs">
-            {blockTypeLabels[block.type] || block.type}
-          </Badge>
-        </div>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button variant="ghost" size="sm" onClick={onMoveUp} disabled={isFirst} className="h-6 w-6 p-0">
-            ↑
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onMoveDown} disabled={isLast} className="h-6 w-6 p-0">
-            ↓
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onDelete} className="h-6 w-6 p-0 text-red-500">
-            <X className="w-3 h-3" />
-          </Button>
-        </div>
-      </div>
-      {renderBlockContent()}
-    </div>
-  );
-};
-
-// Article Editor Component
-const ArticleEditor = ({ article, onSave, onCancel, tags: availableTags }) => {
+const BlogAdminPage = () => {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [availableTags, setAvailableTags] = useState([]);
+  
+  // Editor state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
   const [formData, setFormData] = useState({
-    title: article?.title || '',
-    slug: article?.slug || '',
-    excerpt: article?.excerpt || '',
-    featured_image: article?.featured_image || '',
-    content_blocks: article?.content_blocks || [],
-    tags: article?.tags || [],
-    category: article?.category || '',
-    status: article?.status || 'draft',
-    seo_title: article?.seo_title || '',
-    seo_description: article?.seo_description || ''
+    title: "",
+    excerpt: "",
+    content_blocks: [],
+    featured_image: "",
+    status: "draft",
+    tags: [],
+    meta_title: "",
+    meta_description: "",
+    slug: ""
   });
   const [saving, setSaving] = useState(false);
-  const [suggestingTags, setSuggestingTags] = useState(false);
-  const [suggestedNewTags, setSuggestedNewTags] = useState([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
-  const handleSuggestTags = async () => {
-    const contentText = formData.content_blocks
-      .filter(b => b.type === 'text' || b.type === 'heading')
-      .map(b => b.content)
-      .join('\n');
-    
-    if (!formData.title && !contentText) {
-      toast.error("Ajoutez un titre ou du contenu pour suggérer des tags");
-      return;
-    }
-    
-    setSuggestingTags(true);
+  // Fetch posts
+  const fetchPosts = useCallback(async () => {
     try {
-      const res = await tagsAPI.suggest(contentText, formData.title, 'blog');
-      
-      if (res.data.suggested_tags && res.data.suggested_tags.length > 0) {
-        const newTags = [...new Set([...formData.tags, ...res.data.suggested_tags])];
-        setFormData(prev => ({ ...prev, tags: newTags }));
-        toast.success(`${res.data.suggested_tags.length} tag(s) suggéré(s) et ajouté(s)`);
-      }
-      
-      if (res.data.new_tags && res.data.new_tags.length > 0) {
-        setSuggestedNewTags(res.data.new_tags);
-        toast.info(`${res.data.new_tags.length} nouveau(x) tag(s) proposé(s)`);
-      }
-      
-      if (!res.data.suggested_tags?.length && !res.data.new_tags?.length) {
-        toast.info("Aucune suggestion de tag pour ce contenu");
-      }
+      const res = await blogAPI.getAll({ status: statusFilter !== "all" ? statusFilter : undefined });
+      setPosts(res.data.posts || res.data || []);
     } catch (error) {
-      console.error("Error suggesting tags:", error);
-      toast.error("Erreur lors de la suggestion de tags");
+      toast.error("Erreur lors du chargement des articles");
     } finally {
-      setSuggestingTags(false);
+      setLoading(false);
+    }
+  }, [statusFilter]);
+
+  // Fetch tags
+  const fetchTags = useCallback(async () => {
+    try {
+      const res = await tagsAPI.getAll();
+      setAvailableTags(res.data.filter(t => t.type === "blog" || !t.type) || []);
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPosts();
+    fetchTags();
+  }, [fetchPosts, fetchTags]);
+
+  // Generate slug
+  const generateSlug = (title) => {
+    return title
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
+
+  // Handle title change with auto slug
+  const handleTitleChange = (title) => {
+    setFormData(prev => ({
+      ...prev,
+      title,
+      slug: prev.slug || generateSlug(title)
+    }));
+  };
+
+  // Upload featured image
+  const handleImageUpload = async (e) => {
+    if (e.target.files?.[0]) {
+      setUploadingImage(true);
+      try {
+        const res = await uploadAPI.image(e.target.files[0]);
+        setFormData(prev => ({ ...prev, featured_image: res.data.url }));
+        toast.success("Image uploadée");
+      } catch (err) {
+        toast.error("Erreur lors de l'upload de l'image");
+      } finally {
+        setUploadingImage(false);
+      }
     }
   };
 
-  const addBlock = (type) => {
-    const newBlock = {
-      id: `block-${Date.now()}`,
-      type,
-      content: '',
-      level: type === 'heading' ? 2 : undefined
-    };
-    setFormData(prev => ({
-      ...prev,
-      content_blocks: [...prev.content_blocks, newBlock]
-    }));
+  // Open editor for new post
+  const createNewPost = () => {
+    setEditingPost(null);
+    setFormData({
+      title: "",
+      excerpt: "",
+      content_blocks: [],
+      featured_image: "",
+      status: "draft",
+      tags: [],
+      meta_title: "",
+      meta_description: "",
+      slug: ""
+    });
+    setIsEditing(true);
   };
 
-  const updateBlock = (index, updatedBlock) => {
-    setFormData(prev => ({
-      ...prev,
-      content_blocks: prev.content_blocks.map((b, i) => i === index ? updatedBlock : b)
-    }));
+  // Open editor for existing post
+  const editPost = (post) => {
+    setEditingPost(post);
+    setFormData({
+      title: post.title || "",
+      excerpt: post.excerpt || "",
+      content_blocks: post.content_blocks || [],
+      featured_image: post.featured_image || "",
+      status: post.status || "draft",
+      tags: post.tags || [],
+      meta_title: post.meta_title || "",
+      meta_description: post.meta_description || "",
+      slug: post.slug || ""
+    });
+    setIsEditing(true);
   };
 
-  const deleteBlock = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      content_blocks: prev.content_blocks.filter((_, i) => i !== index)
-    }));
-  };
-
-  const moveBlock = (index, direction) => {
-    const newBlocks = [...formData.content_blocks];
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= newBlocks.length) return;
-    [newBlocks[index], newBlocks[newIndex]] = [newBlocks[newIndex], newBlocks[index]];
-    setFormData(prev => ({ ...prev, content_blocks: newBlocks }));
-  };
-
-  const handleSubmit = async () => {
+  // Save post
+  const savePost = async (newStatus = null) => {
     if (!formData.title.trim()) {
       toast.error("Le titre est requis");
       return;
     }
+    
     setSaving(true);
     try {
-      await onSave(formData);
+      const postData = {
+        ...formData,
+        status: newStatus || formData.status
+      };
+      
+      if (editingPost) {
+        await blogAPI.update(editingPost.id, postData);
+        toast.success("Article mis à jour");
+      } else {
+        await blogAPI.create(postData);
+        toast.success("Article créé");
+      }
+      
+      setIsEditing(false);
+      fetchPosts();
+    } catch (error) {
+      toast.error("Erreur lors de la sauvegarde");
     } finally {
       setSaving(false);
     }
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Header Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Titre *</Label>
-          <Input
-            value={formData.title}
-            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            placeholder="Titre de l'article"
-            className="bg-white/5 backdrop-blur-xl"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Slug (URL)</Label>
-          <Input
-            value={formData.slug}
-            onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-            placeholder="mon-article"
-            className="bg-white/5 backdrop-blur-xl"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Chapeau / Extrait</Label>
-        <Textarea
-          value={formData.excerpt}
-          onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
-          placeholder="Courte description de l'article"
-          className="bg-white/5 backdrop-blur-xl"
-          rows={2}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Image à la une</Label>
-          <div className="flex gap-2">
-            <Input
-              value={formData.featured_image}
-              onChange={(e) => setFormData(prev => ({ ...prev, featured_image: e.target.value }))}
-              placeholder="URL de l'image"
-              className="flex-1 bg-white/5 backdrop-blur-xl"
-            />
-            <label className="cursor-pointer">
-              <Button variant="outline" size="sm" asChild>
-                <span><Image className="w-4 h-4" /></span>
-              </Button>
-              <input 
-                type="file" 
-                accept="image/*" 
-                className="hidden"
-                onChange={async (e) => {
-                  if (e.target.files?.[0]) {
-                    try {
-                      const res = await uploadAPI.image(e.target.files[0]);
-                      setFormData(prev => ({ ...prev, featured_image: res.data.url }));
-                      toast.success("Image uploadée");
-                    } catch (err) {
-                      toast.error("Erreur upload");
-                    }
-                  }
-                }}
-              />
-            </label>
-          </div>
-          {formData.featured_image && (
-            <img src={formData.featured_image} alt="" className="h-24 object-cover rounded-lg" />
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label>Tags</Label>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleSuggestTags}
-              disabled={suggestingTags}
-              className="text-indigo-400 border-indigo-500/50 hover:bg-indigo-600 hover:text-white"
-            >
-              {suggestingTags ? (
-                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-              ) : (
-                <Sparkles className="w-3 h-3 mr-1" />
-              )}
-              Suggérer via IA
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {availableTags?.map(tag => (
-              <Badge
-                key={tag.id}
-                variant={formData.tags.includes(tag.name) ? "default" : "outline"}
-                className="cursor-pointer"
-                style={formData.tags.includes(tag.name) ? { backgroundColor: tag.color || '#CE0202' } : {}}
-                onClick={() => {
-                  setFormData(prev => ({
-                    ...prev,
-                    tags: prev.tags.includes(tag.name)
-                      ? prev.tags.filter(t => t !== tag.name)
-                      : [...prev.tags, tag.name]
-                  }));
-                }}
-              >
-                {tag.name}
-              </Badge>
-            ))}
-          </div>
-          
-          {/* Suggested new tags */}
-          {suggestedNewTags.length > 0 && (
-            <div className="mt-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
-              <p className="text-sm text-amber-800 font-medium mb-2 flex items-center gap-1">
-                <Sparkles className="w-4 h-4" />
-                Nouveaux tags suggérés par l'IA :
-              </p>
-              <div className="flex flex-wrap gap-1">
-                {suggestedNewTags.map((tagName, idx) => (
-                  <Badge
-                    key={idx}
-                    variant="outline"
-                    className="cursor-pointer border-amber-400 text-amber-700 hover:bg-amber-100"
-                    onClick={async () => {
-                      try {
-                        await tagsAPI.create({ name: tagName, color: '#F97316', type: 'blog' });
-                        setFormData(prev => ({ ...prev, tags: [...prev.tags, tagName] }));
-                        setSuggestedNewTags(prev => prev.filter(t => t !== tagName));
-                        toast.success(`Tag "${tagName}" créé et ajouté`);
-                      } catch (error) {
-                        toast.error("Erreur lors de la création du tag");
-                      }
-                    }}
-                  >
-                    + {tagName}
-                  </Badge>
-                ))}
-              </div>
-              <p className="text-xs text-amber-600 mt-2">Cliquez pour créer et ajouter le tag</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Content Blocks */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label className="text-lg">Contenu</Label>
-          <div className="flex gap-1 flex-wrap">
-            <Button variant="outline" size="sm" onClick={() => addBlock('text')}>
-              <FileText className="w-3 h-3 mr-1" /> Texte
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => addBlock('heading')}>
-              <Heading2 className="w-3 h-3 mr-1" /> Titre
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => addBlock('image')}>
-              <Image className="w-3 h-3 mr-1" /> Image
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => addBlock('gallery')}>
-              <Image className="w-3 h-3 mr-1" /> Galerie
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => addBlock('quote')}>
-              <Quote className="w-3 h-3 mr-1" /> Citation
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => addBlock('audio')}>
-              <Music className="w-3 h-3 mr-1" /> Audio
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => addBlock('video')}>
-              <Video className="w-3 h-3 mr-1" /> Vidéo
-            </Button>
-          </div>
-        </div>
-
-        <div className="space-y-3 min-h-48">
-          {formData.content_blocks.length === 0 ? (
-            <div className="text-center py-12 text-white/60 bg-white/5 rounded-lg border-2 border-dashed border-white/10">
-              <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>Ajoutez des blocs de contenu avec les boutons ci-dessus</p>
-            </div>
-          ) : (
-            formData.content_blocks.map((block, index) => (
-              <ContentBlockEditor
-                key={block.id}
-                block={block}
-                onUpdate={(updated) => updateBlock(index, updated)}
-                onDelete={() => deleteBlock(index)}
-                onMoveUp={() => moveBlock(index, -1)}
-                onMoveDown={() => moveBlock(index, 1)}
-                isFirst={index === 0}
-                isLast={index === formData.content_blocks.length - 1}
-              />
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Status & Actions */}
-      <div className="flex items-center justify-between pt-4 border-t border-white/10">
-        <Select 
-          value={formData.status} 
-          onValueChange={(v) => setFormData(prev => ({ ...prev, status: v }))}
-        >
-          <SelectTrigger className="w-40 bg-white/5 backdrop-blur-xl">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e]">
-            <SelectItem value="draft">Brouillon</SelectItem>
-            <SelectItem value="published">Publié</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onCancel}>Annuler</Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={saving}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white"
-          >
-            {saving ? "Enregistrement..." : article?.id ? "Mettre à jour" : "Créer"}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Main Blog Admin Page
-const BlogAdminPage = () => {
-  const [articles, setArticles] = useState([]);
-  const [tags, setTags] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterTag, setFilterTag] = useState('all');
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [editingArticle, setEditingArticle] = useState(null);
-  const [tagDialogOpen, setTagDialogOpen] = useState(false);
-  const [newTagName, setNewTagName] = useState('');
-
-  const fetchData = useCallback(async () => {
-    try {
-      const [articlesRes, tagsRes] = await Promise.all([
-        blogAPI.getAll({ published_only: false }),
-        tagsAPI.getAll('blog')
-      ]);
-      setArticles(articlesRes.data);
-      setTags(tagsRes.data);
-    } catch (error) {
-      toast.error("Erreur de chargement");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const handleSaveArticle = async (data) => {
-    try {
-      if (editingArticle?.id) {
-        await blogAPI.update(editingArticle.id, data);
-        toast.success("Article mis à jour");
-      } else {
-        await blogAPI.create(data);
-        toast.success("Article créé");
-      }
-      setEditorOpen(false);
-      setEditingArticle(null);
-      fetchData();
-    } catch (error) {
-      toast.error("Erreur lors de l'enregistrement");
-    }
-  };
-
-  const handleDeleteArticle = async (id) => {
-    if (!window.confirm("Supprimer cet article ?")) return;
+  // Delete post
+  const deletePost = async (id) => {
+    if (!confirm("Supprimer cet article ?")) return;
     try {
       await blogAPI.delete(id);
       toast.success("Article supprimé");
-      fetchData();
+      fetchPosts();
     } catch (error) {
-      toast.error("Erreur");
+      toast.error("Erreur lors de la suppression");
     }
   };
 
-  const handleCreateTag = async () => {
-    if (!newTagName.trim()) return;
-    try {
-      await tagsAPI.create({ name: newTagName, type: 'blog' });
-      toast.success("Tag créé");
-      setNewTagName('');
-      setTagDialogOpen(false);
-      fetchData();
-    } catch (error) {
-      toast.error("Erreur");
-    }
+  // Toggle tag
+  const toggleTag = (tagName) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.includes(tagName)
+        ? prev.tags.filter(t => t !== tagName)
+        : [...prev.tags, tagName]
+    }));
   };
 
-  const handleDeleteTag = async (id) => {
-    if (!window.confirm("Supprimer ce tag ?")) return;
-    try {
-      await tagsAPI.delete(id);
-      toast.success("Tag supprimé");
-      fetchData();
-    } catch (error) {
-      toast.error("Erreur");
+  // Filter posts
+  const filteredPosts = posts.filter(post => {
+    if (searchQuery && !post.title?.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
     }
-  };
-
-  const filteredArticles = articles.filter(article => {
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      if (!article.title?.toLowerCase().includes(q)) return false;
-    }
-    if (filterStatus !== 'all' && article.status !== filterStatus) return false;
-    if (filterTag !== 'all' && !article.tags?.includes(filterTag)) return false;
     return true;
   });
 
-  if (editorOpen) {
+  // Stats
+  const stats = {
+    total: posts.length,
+    published: posts.filter(p => p.status === "published").length,
+    draft: posts.filter(p => p.status === "draft").length
+  };
+
+  // Editor View
+  if (isEditing) {
     return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={() => { setEditorOpen(false); setEditingArticle(null); }}>
-            ← Retour
-          </Button>
-          <h1 className="text-xl font-bold">
-            {editingArticle?.id ? "Modifier l'article" : "Nouvel article"}
-          </h1>
+      <div data-testid="blog-editor" className="h-full flex flex-col">
+        {/* Editor Header */}
+        <div className="flex items-center justify-between p-4 border-b border-white/10 bg-black/40 backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" onClick={() => setIsEditing(false)} className="text-white/60">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Retour
+            </Button>
+            <span className="text-white/40">|</span>
+            <h1 className="text-lg font-semibold text-white">
+              {editingPost ? "Modifier l'article" : "Nouvel article"}
+            </h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => savePost("draft")}
+              disabled={saving}
+              className="border-white/20 text-white"
+            >
+              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              Brouillon
+            </Button>
+            <Button
+              onClick={() => savePost("published")}
+              disabled={saving}
+              className="bg-indigo-600 hover:bg-indigo-500"
+            >
+              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+              Publier
+            </Button>
+          </div>
         </div>
-        <Card className="bg-white/5 backdrop-blur-xl">
-          <CardContent className="p-6">
-            <ArticleEditor
-              article={editingArticle}
-              tags={tags}
-              onSave={handleSaveArticle}
-              onCancel={() => { setEditorOpen(false); setEditingArticle(null); }}
-            />
-          </CardContent>
-        </Card>
+
+        {/* Editor Content */}
+        <div className="flex-1 overflow-hidden flex">
+          {/* Main Editor Area */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="max-w-4xl mx-auto space-y-6">
+              {/* Title */}
+              <div>
+                <Input
+                  value={formData.title}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  placeholder="Titre de l'article"
+                  className="text-3xl font-bold bg-transparent border-0 border-b border-white/10 rounded-none px-0 h-auto py-3 focus-visible:ring-0 focus-visible:border-indigo-500"
+                />
+              </div>
+
+              {/* Excerpt */}
+              <div>
+                <Textarea
+                  value={formData.excerpt}
+                  onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
+                  placeholder="Extrait / résumé de l'article (affiché dans les aperçus)"
+                  className="bg-white/5 border-white/10 min-h-20"
+                />
+              </div>
+
+              {/* Content Blocks - Using AdvancedBlockEditor */}
+              <div className="space-y-4">
+                <Label className="text-lg text-white font-semibold flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Contenu
+                </Label>
+                <AdvancedBlockEditor
+                  blocks={formData.content_blocks}
+                  onChange={(blocks) => setFormData(prev => ({ ...prev, content_blocks: blocks }))}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar Panel */}
+          <aside className="w-80 border-l border-white/10 bg-black/40 backdrop-blur-xl overflow-y-auto">
+            <ScrollArea className="h-full">
+              <div className="p-4 space-y-6">
+                {/* Status */}
+                <div className="space-y-2">
+                  <Label>Statut</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(v) => setFormData(prev => ({ ...prev, status: v }))}
+                  >
+                    <SelectTrigger className="bg-white/5 border-white/10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a1a2e] border-white/10">
+                      <SelectItem value="draft" className="text-white">Brouillon</SelectItem>
+                      <SelectItem value="published" className="text-white">Publié</SelectItem>
+                      <SelectItem value="archived" className="text-white">Archivé</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Featured Image */}
+                <div className="space-y-2">
+                  <Label>Image à la une</Label>
+                  {formData.featured_image ? (
+                    <div className="relative">
+                      <img
+                        src={formData.featured_image}
+                        alt="Featured"
+                        className="w-full h-40 object-cover rounded-lg"
+                      />
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="absolute top-2 right-2"
+                        onClick={() => setFormData(prev => ({ ...prev, featured_image: "" }))}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <label className="block cursor-pointer">
+                      <div className="border-2 border-dashed border-white/10 rounded-lg p-6 text-center hover:border-indigo-500 transition-colors">
+                        {uploadingImage ? (
+                          <Loader2 className="w-8 h-8 mx-auto animate-spin text-white/60" />
+                        ) : (
+                          <>
+                            <FileText className="w-8 h-8 mx-auto text-white/40 mb-2" />
+                            <p className="text-sm text-white/60">Cliquez pour uploader</p>
+                          </>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageUpload}
+                      />
+                    </label>
+                  )}
+                </div>
+
+                {/* Slug */}
+                <div className="space-y-2">
+                  <Label>URL (slug)</Label>
+                  <Input
+                    value={formData.slug}
+                    onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                    placeholder="url-de-l-article"
+                    className="bg-white/5 border-white/10"
+                  />
+                </div>
+
+                {/* Tags */}
+                <div className="space-y-2">
+                  <Label>Tags</Label>
+                  <div className="flex flex-wrap gap-1">
+                    {availableTags.map(tag => (
+                      <Badge
+                        key={tag.id}
+                        variant={formData.tags.includes(tag.name) ? "default" : "outline"}
+                        className="cursor-pointer"
+                        style={formData.tags.includes(tag.name) ? { backgroundColor: tag.color || '#6366f1' } : {}}
+                        onClick={() => toggleTag(tag.name)}
+                      >
+                        {tag.name}
+                      </Badge>
+                    ))}
+                    {availableTags.length === 0 && (
+                      <p className="text-sm text-white/40">Aucun tag disponible</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* SEO */}
+                <div className="space-y-4 pt-4 border-t border-white/10">
+                  <Label className="text-white/80">SEO</Label>
+                  <div className="space-y-2">
+                    <Input
+                      value={formData.meta_title}
+                      onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
+                      placeholder="Titre SEO (optionnel)"
+                      className="bg-white/5 border-white/10 text-sm"
+                    />
+                    <Textarea
+                      value={formData.meta_description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
+                      placeholder="Description SEO (optionnel)"
+                      className="bg-white/5 border-white/10 text-sm min-h-16"
+                    />
+                  </div>
+                </div>
+              </div>
+            </ScrollArea>
+          </aside>
+        </div>
       </div>
     );
   }
 
+  // List View
   return (
-    <div className="space-y-4 sm:space-y-6" data-testid="blog-admin-page">
+    <div data-testid="blog-admin-page" className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Blog / Actualités</h1>
-          <p className="text-white/60 text-xs sm:text-sm">{articles.length} articles</p>
+          <h1 className="text-2xl font-bold text-white">Blog</h1>
+          <p className="text-white/60 text-sm">Gérez vos articles de blog</p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Dialog open={tagDialogOpen} onOpenChange={setTagDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="flex-1 sm:flex-none text-sm">
-                <Tag className="w-4 h-4 mr-1" /> Tags
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-[#1a1a2e]">
-              <DialogHeader>
-                <DialogTitle>Gestion des tags</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    value={newTagName}
-                    onChange={(e) => setNewTagName(e.target.value)}
-                    placeholder="Nouveau tag"
-                    className="flex-1"
-                  />
-                  <Button onClick={handleCreateTag} className="bg-indigo-600 text-white">
-                    Ajouter
-                  </Button>
-                </div>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {tags.map(tag => (
-                    <div key={tag.id} className="flex items-center justify-between p-2 bg-white/5 rounded">
-                      <Badge variant="outline">{tag.name}</Badge>
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteTag(tag.id)}>
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
-                    </div>
-                  ))}
-                  {tags.length === 0 && (
-                    <p className="text-center text-white/60 py-4">Aucun tag</p>
-                  )}
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-          <Button 
-            onClick={() => { setEditingArticle(null); setEditorOpen(true); }}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white flex-1 sm:flex-none text-sm"
-          >
-            <Plus className="w-4 h-4 mr-1" /> Nouvel article
-          </Button>
-        </div>
+        <Button onClick={createNewPost} className="bg-indigo-600 hover:bg-indigo-500">
+          <Plus className="w-4 h-4 mr-2" />
+          Nouvel article
+        </Button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold text-white">{stats.total}</p>
+            <p className="text-white/60 text-sm">Total</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold text-green-400">{stats.published}</p>
+            <p className="text-white/60 text-sm">Publiés</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <CardContent className="pt-4">
+            <p className="text-3xl font-bold text-amber-400">{stats.draft}</p>
+            <p className="text-white/60 text-sm">Brouillons</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-2">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
           <Input
+            placeholder="Rechercher un article..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher..."
-            className="pl-9 bg-white/5 backdrop-blur-xl w-full"
+            className="pl-10 bg-white/5 backdrop-blur-xl border-white/10"
           />
         </div>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full sm:w-32 bg-white/5 backdrop-blur-xl">
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-40 bg-white/5 backdrop-blur-xl border-white/10">
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e]">
-            <SelectItem value="all">Tous</SelectItem>
-            <SelectItem value="draft">Brouillon</SelectItem>
-            <SelectItem value="published">Publié</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filterTag} onValueChange={setFilterTag}>
-          <SelectTrigger className="w-full sm:w-32 bg-white/5 backdrop-blur-xl">
-            <SelectValue placeholder="Tag" />
-          </SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e]">
-            <SelectItem value="all">Tous</SelectItem>
-            {tags.map(tag => (
-              <SelectItem key={tag.id} value={tag.name}>{tag.name}</SelectItem>
-            ))}
+          <SelectContent className="bg-[#1a1a2e] border-white/10">
+            <SelectItem value="all" className="text-white">Tous</SelectItem>
+            <SelectItem value="published" className="text-white">Publiés</SelectItem>
+            <SelectItem value="draft" className="text-white">Brouillons</SelectItem>
+            <SelectItem value="archived" className="text-white">Archivés</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Articles List */}
+      {/* Posts List */}
       {loading ? (
-        <div className="grid gap-4">
-          {[1,2,3].map(i => (
-            <div key={i} className="h-24 bg-[#E5E5E5] animate-pulse rounded-lg" />
-          ))}
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
         </div>
-      ) : filteredArticles.length === 0 ? (
-        <Card className="bg-white/5 backdrop-blur-xl">
-          <CardContent className="py-12 text-center">
-            <FileText className="w-12 h-12 mx-auto mb-3 text-white/60 opacity-30" />
-            <p className="text-white/60">Aucun article</p>
-            <Button 
-              onClick={() => { setEditingArticle(null); setEditorOpen(true); }}
-              className="mt-4 bg-indigo-600 text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" /> Créer un article
+      ) : filteredPosts.length === 0 ? (
+        <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
+          <FileText className="w-12 h-12 mx-auto text-white/30 mb-3" />
+          <h3 className="text-white font-medium mb-1">Aucun article</h3>
+          <p className="text-white/50 text-sm mb-4">
+            {searchQuery ? "Aucun article ne correspond à votre recherche" : "Créez votre premier article"}
+          </p>
+          {!searchQuery && (
+            <Button onClick={createNewPost} className="bg-indigo-600 hover:bg-indigo-500">
+              <Plus className="w-4 h-4 mr-2" />
+              Créer un article
             </Button>
-          </CardContent>
-        </Card>
+          )}
+        </div>
       ) : (
-        <div className="grid gap-3">
-          {filteredArticles.map(article => (
-            <Card key={article.id} className="bg-white/5 backdrop-blur-xl hover:shadow-md transition-shadow">
+        <div className="grid gap-4">
+          {filteredPosts.map(post => (
+            <Card key={post.id} className="bg-white/5 backdrop-blur-xl border-white/10 hover:border-white/20 transition-colors">
               <CardContent className="p-4">
-                <div className="flex items-start gap-4">
-                  {article.featured_image ? (
-                    <img 
-                      src={article.featured_image} 
-                      alt="" 
-                      className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg flex-shrink-0"
+                <div className="flex gap-4">
+                  {/* Thumbnail */}
+                  {post.featured_image && (
+                    <img
+                      src={post.featured_image}
+                      alt={post.title}
+                      className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
                     />
-                  ) : (
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/5 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-8 h-8 text-white/60 opacity-30" />
-                    </div>
                   )}
+                  
+                  {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h3 className="font-semibold text-white truncate">{article.title}</h3>
-                        <p className="text-sm text-white/60 line-clamp-2 mt-1">{article.excerpt}</p>
+                      <div>
+                        <h3 className="font-semibold text-white truncate">{post.title}</h3>
+                        <p className="text-white/60 text-sm line-clamp-2 mt-1">{post.excerpt}</p>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="flex-shrink-0">
-                            <MoreVertical className="w-4 h-4" />
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="w-4 h-4 text-white/60" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="bg-[#1a1a2e]">
-                          <DropdownMenuItem onClick={() => { setEditingArticle(article); setEditorOpen(true); }}>
-                            <Edit className="w-4 h-4 mr-2" /> Modifier
+                        <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
+                          <DropdownMenuItem onClick={() => editPost(post)} className="text-white">
+                            <Edit className="w-4 h-4 mr-2" />
+                            Modifier
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => window.open(`/actualites/${article.slug}`, '_blank')}>
-                            <Eye className="w-4 h-4 mr-2" /> Voir
+                          <DropdownMenuItem className="text-white">
+                            <Eye className="w-4 h-4 mr-2" />
+                            Aperçu
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleDeleteArticle(article.id)} className="text-red-600">
-                            <Trash2 className="w-4 h-4 mr-2" /> Supprimer
+                          <DropdownMenuSeparator className="bg-white/10" />
+                          <DropdownMenuItem onClick={() => deletePost(post.id)} className="text-red-400">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Supprimer
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                    <div className="flex items-center gap-2 mt-3 flex-wrap">
-                      <Badge variant={article.status === 'published' ? 'default' : 'outline'} className="text-xs">
-                        {article.status === 'published' ? (
-                          <><CheckCircle className="w-3 h-3 mr-1" /> Publié</>
-                        ) : (
-                          <><Clock className="w-3 h-3 mr-1" /> Brouillon</>
-                        )}
+                    
+                    {/* Meta */}
+                    <div className="flex items-center gap-3 mt-3 text-xs text-white/40">
+                      <Badge variant={post.status === "published" ? "default" : "secondary"} className="text-xs">
+                        {post.status === "published" ? "Publié" : post.status === "draft" ? "Brouillon" : "Archivé"}
                       </Badge>
-                      {article.tags?.slice(0, 3).map(tag => (
-                        <Badge key={tag} variant="outline" className="text-xs bg-white/5">
-                          {tag}
-                        </Badge>
-                      ))}
-                      {article.published_at && (
-                        <span className="text-xs text-white/60 flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(article.published_at).toLocaleDateString('fr-FR')}
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(post.created_at).toLocaleDateString('fr-FR')}
+                      </span>
+                      {post.tags?.length > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Tag className="w-3 h-3" />
+                          {post.tags.slice(0, 2).join(", ")}
+                          {post.tags.length > 2 && ` +${post.tags.length - 2}`}
                         </span>
                       )}
                     </div>
