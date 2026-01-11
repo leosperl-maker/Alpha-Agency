@@ -58,9 +58,20 @@ const ThingsPage = () => {
   };
 
   const toggleComplete = (id) => {
-    setTodos(prev => prev.map(t => 
-      t.id === id ? { ...t, completed: !t.completed, completedAt: !t.completed ? new Date().toISOString() : null } : t
-    ));
+    setTodos(prev => prev.map(t => {
+      if (t.id === id) {
+        const isNowCompleted = !t.completed;
+        // When completing, mark as archived too (will appear in Archives/Logbook)
+        return { 
+          ...t, 
+          completed: isNowCompleted, 
+          archived: isNowCompleted, // Auto-archive when completed
+          completedAt: isNowCompleted ? new Date().toISOString() : null 
+        };
+      }
+      return t;
+    }));
+    toast.success("Tâche terminée et archivée");
   };
 
   const toggleStar = (id) => {
