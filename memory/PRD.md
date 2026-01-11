@@ -317,3 +317,35 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - Database: MongoDB
 - Auth: JWT
 - Admin: admin@alphagency.fr / superpassword
+
+### Session 8 - 2026-01-11 (Corrections Mobile Responsive)
+- ✅ **Bug Fix CRITIQUE: Bulles flottantes se superposaient sur mobile**
+  - FloatingAIChat déplacé à `bottom-24 right-6`
+  - QuickActions reste à `bottom-6 right-6`
+  - 16px d'écart entre les deux bulles
+- ✅ **NOUVEAU: Bulles déplaçables au doigt (touch drag)**
+  - Ajout de `useCallback` handlers pour `touchstart`, `touchmove`, `touchend`
+  - Les deux bulles peuvent être repositionnées par l'utilisateur sur mobile
+  - Classe `touch-none` pour contrôle personnalisé du touch
+- ✅ **Bug Fix: Scrollbar manquante dans la sidebar mobile**
+  - Ajout de `flex flex-col` sur le conteneur aside
+  - `overflow-y-auto` et `min-h-0` sur le conteneur nav
+  - `flex-shrink-0` sur les sections header et footer
+- ✅ **Page Contacts responsive**
+  - Ajout de `overflow-x-hidden` au conteneur principal
+  - Layout mobile optimisé (déjà existant mais vérifié)
+- ✅ **Page Tâches (Kanban) responsive**
+  - Colonnes avec scroll horizontal sur mobile
+  - Wrapper `overflow-x-auto` avec `-webkit-overflow-scrolling: touch`
+- ✅ **Page MindMap responsive**
+  - Toolbar responsive (flex-col sur mobile, flex-row sur desktop)
+  - Support touch events pour le canvas (pan et drag des nœuds)
+  - Toolbar du nœud sélectionné adaptée pour mobile (bottom-16 au lieu de bottom-4)
+- ✅ **Page Things responsive**
+  - Déjà responsive avec dropdown de filtre mobile
+
+## Test Results
+- Session 8: 100% pass rate (7/7 tests frontend mobile)
+- Viewport testé: 375x800 (iPhone SE/XR)
+- Toutes les pages principales fonctionnent correctement sur mobile
+
