@@ -496,6 +496,35 @@ async def get_app_context() -> str:
                 folders_list = ", ".join([f.get("name", "N/A") for f in folders[:10]])
                 context_parts.append(f"Dossiers: {folders_list}")
         
+        # 8. Qonto Bank Data (if available)
+        qonto_accounts = await db.qonto_accounts.find({}, {"_id": 0}).to_list(10)
+        if qonto_accounts:
+            total_balance = sum(acc.get("balance", 0) for acc in qonto_accounts)
+            context_parts.append(f"""🏦 COMPTES QONTO:
+- {len(qonto_accounts)} compte(s) bancaire(s)
+- Solde total: {total_balance:.2f}€""")
+            
+            for acc in qonto_accounts[:3]:
+                context_parts.append(f"  • {acc.get('name', acc.get('slug', 'Compte'))}: {acc.get('balance', 0):.2f}€ (IBAN: {acc.get('iban', 'N/A')[-4:]})")
+        
+        # Recent Qonto transactions
+        qonto_txs = await db.qonto_transactions.find({}, {"_id": 0}).sort("settled_at", -1).to_list(10)
+        if qonto_txs:
+            credits = sum(tx.get("amount", 0) for tx in qonto_txs if tx.get("side") == "credit")
+            debits = sum(tx.get("amount", 0) for tx in qonto_txs if tx.get("side") == "debit")
+            context_parts.append(f"""💳 TRANSACTIONS RÉCENTES (Qonto):
+- {len(qonto_txs)} transactions récentes
+- Crédits: +{credits:.2f}€ / Débits: -{debits:.2f}€""")
+            
+            tx_list = []
+            for tx in qonto_txs[:5]:
+                label = tx.get("label", tx.get("note", "Transaction"))[:30]
+                amount = tx.get("amount", 0)
+                side = "+" if tx.get("side") == "credit" else "-"
+                tx_list.append(f"  • {side}{abs(amount):.2f}€ - {label}")
+            if tx_list:
+                context_parts.append("\n".join(tx_list))
+        
     except Exception as e:
         logger.error(f"Error fetching context: {str(e)}")
         context_parts.append(f"(Erreur lors de la récupération de certaines données: {str(e)})")
