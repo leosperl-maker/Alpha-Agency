@@ -596,18 +596,26 @@ async def get_invoice_pdf_url(invoice_id: str, current_user: dict = Depends(get_
     filename = f"{'devis' if doc_type == 'devis' else 'facture'}_{invoice['invoice_number']}"
     
     try:
-        # Upload PDF to Cloudinary with bytes data
+        # Upload PDF to Cloudinary with correct content type
         result = cloudinary.uploader.upload(
             pdf_data,
             resource_type="raw",
             public_id=f"pdfs/{filename}",
-            overwrite=True
+            overwrite=True,
+            format="pdf",
+            type="upload",
+            access_mode="public"
         )
         
-        logger.info(f"Cloudinary upload result: {result.get('secure_url')}")
+        # Construct URL with .pdf extension for proper MIME type detection
+        secure_url = result.get('secure_url', '')
+        if secure_url and not secure_url.endswith('.pdf'):
+            secure_url = secure_url + '.pdf'
+        
+        logger.info(f"Cloudinary upload result: {secure_url}")
         
         return {
-            "url": result.get('secure_url'),
+            "url": secure_url,
             "filename": f"{filename}.pdf"
         }
     except Exception as e:
