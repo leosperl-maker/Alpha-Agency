@@ -831,7 +831,7 @@ const InvoicesPage = () => {
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-[#E5E5E5] animate-pulse rounded-lg" />
+            <div key={i} className="h-24 bg-white/5 animate-pulse rounded-lg" />
           ))}
         </div>
       ) : filteredInvoices.length === 0 ? (
@@ -842,182 +842,170 @@ const InvoicesPage = () => {
           </p>
         </div>
       ) : (
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 overflow-hidden overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-white/5 border-b border-white/10">
-              <tr>
-                <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Numéro</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Client</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase hidden md:table-cell">Date</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase hidden lg:table-cell">Échéance</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Montant</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Payé</th>
-                <th className="text-center px-4 py-3 text-xs font-medium text-white/60 uppercase">Statut</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E5E5E5]">
-              {filteredInvoices.map((invoice) => {
-                const status = statusConfig[invoice.status] || statusConfig.brouillon;
-                const StatusIcon = status.icon;
-                const totalPaid = invoice.total_paid || 0;
-                const remaining = (invoice.total || 0) - totalPaid;
-                const paymentProgress = invoice.total > 0 ? (totalPaid / invoice.total) * 100 : 0;
-                return (
-                  <tr key={invoice.id} className="hover:bg-white/5 transition-colors">
-                    <td className="px-4 py-4">
+        <>
+          {/* Mobile Card View */}
+          <div className="sm:hidden space-y-3">
+            {filteredInvoices.map((invoice) => {
+              const status = statusConfig[invoice.status] || statusConfig.brouillon;
+              const StatusIcon = status.icon;
+              const totalPaid = invoice.total_paid || 0;
+              return (
+                <div key={invoice.id} className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
                       <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div>
-                        <p className="font-medium text-white text-sm">{getContactName(invoice.contact_id)}</p>
-                        {getContactCompany(invoice.contact_id) && (
-                          <p className="text-xs text-white/60">{getContactCompany(invoice.contact_id)}</p>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-white/60 hidden md:table-cell">
-                      {formatDate(invoice.created_at)}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-white/60 hidden lg:table-cell">
-                      {formatDate(invoice.due_date)}
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      <span className="font-mono font-bold text-white text-sm">{formatCurrency(invoice.total)}</span>
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      <div className="flex flex-col items-end gap-1">
-                        <span className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-green-600 font-bold' : 'text-white/60'}`}>
-                          {formatCurrency(totalPaid)}
-                        </span>
-                        {invoice.total > 0 && totalPaid > 0 && totalPaid < invoice.total && (
-                          <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-orange-500 rounded-full transition-all"
-                              style={{ width: `${Math.min(paymentProgress, 100)}%` }}
-                            />
-                          </div>
-                        )}
-                        {remaining > 0 && invoice.status !== 'brouillon' && invoice.status !== 'annulee' && invoice.status !== 'payée' && invoice.status !== 'payee' && (
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="h-6 px-2 text-xs text-indigo-400 hover:text-indigo-400 hover:bg-indigo-600/10"
-                            onClick={() => openPaymentDialog(invoice)}
-                          >
-                            <Plus className="w-3 h-3 mr-1" />
-                            Paiement
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-center">
-                      <Select
-                        value={invoice.status}
-                        onValueChange={(newStatus) => handleStatusUpdate(invoice.id, newStatus)}
-                      >
-                        <SelectTrigger className={`w-[120px] h-8 ${status.color} border-none text-xs`}>
-                          <div className="flex items-center gap-1">
-                            <StatusIcon className="w-3 h-3" />
-                            <span>{status.label}</span>
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#1a1a2e] border-white/10">
-                          {Object.entries(statusConfig).map(([key, config]) => {
-                            const Icon = config.icon;
-                            return (
-                              <SelectItem key={key} value={key} className="text-xs">
-                                <div className="flex items-center gap-2">
-                                  <Icon className="w-3 h-3" />
-                                  <span>{config.label}</span>
-                                </div>
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white/5 backdrop-blur-xl border-white/10">
-                          <DropdownMenuItem onClick={() => openViewDialog(invoice)} className="cursor-pointer">
-                            <Eye className="w-4 h-4 mr-2" />
-                            Voir
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openEditSheet(invoice)} className="cursor-pointer">
-                            <Edit className="w-4 h-4 mr-2" />
-                            Modifier
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDuplicate(invoice)} className="cursor-pointer">
-                            <Copy className="w-4 h-4 mr-2" />
-                            Dupliquer
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleDownloadPDF(invoice)}
-                            className="cursor-pointer"
-                          >
-                            <Download className="w-4 h-4 mr-2" />
-                            Télécharger PDF
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          {invoice.status !== "payée" && invoice.status !== "payee" && invoice.status !== "brouillon" && invoice.status !== "annulee" && (
-                            <DropdownMenuItem 
-                              onClick={() => openPaymentDialog(invoice)}
-                              className="cursor-pointer text-indigo-400"
-                            >
-                              <CreditCard className="w-4 h-4 mr-2" />
-                              Ajouter un paiement
-                            </DropdownMenuItem>
+                      <p className="text-xs text-white/60 mt-0.5">{formatDate(invoice.created_at)}</p>
+                    </div>
+                    <Badge className={`${status.color} text-xs`}>
+                      <StatusIcon className="w-3 h-3 mr-1" />
+                      {status.label}
+                    </Badge>
+                  </div>
+                  <p className="font-medium text-white text-sm">{getContactName(invoice.contact_id)}</p>
+                  {getContactCompany(invoice.contact_id) && (
+                    <p className="text-xs text-white/50">{getContactCompany(invoice.contact_id)}</p>
+                  )}
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+                    <div>
+                      <p className="text-xs text-white/50">Total</p>
+                      <p className="font-mono font-bold text-white">{formatCurrency(invoice.total)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-white/50">Payé</p>
+                      <p className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-green-400' : 'text-white/60'}`}>
+                        {formatCurrency(totalPaid)}
+                      </p>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="w-4 h-4 text-white/60" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-[#1a1a2e] border-white/10">
+                        <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-white">
+                          <Eye className="w-4 h-4 mr-2" /> Voir
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-green-400">
+                          <CreditCard className="w-4 h-4 mr-2" /> Paiement
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-white/10" />
+                        <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-red-400">
+                          <Trash2 className="w-4 h-4 mr-2" /> Supprimer
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden sm:block bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 overflow-hidden overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-white/5 border-b border-white/10">
+                <tr>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Numéro</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Client</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase hidden md:table-cell">Date</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase hidden lg:table-cell">Échéance</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Montant</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Payé</th>
+                  <th className="text-center px-4 py-3 text-xs font-medium text-white/60 uppercase">Statut</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {filteredInvoices.map((invoice) => {
+                  const status = statusConfig[invoice.status] || statusConfig.brouillon;
+                  const StatusIcon = status.icon;
+                  const totalPaid = invoice.total_paid || 0;
+                  const remaining = (invoice.total || 0) - totalPaid;
+                  const paymentProgress = invoice.total > 0 ? (totalPaid / invoice.total) * 100 : 0;
+                  return (
+                    <tr key={invoice.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-4 py-4">
+                        <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div>
+                          <p className="font-medium text-white text-sm">{getContactName(invoice.contact_id)}</p>
+                          {getContactCompany(invoice.contact_id) && (
+                            <p className="text-xs text-white/60">{getContactCompany(invoice.contact_id)}</p>
                           )}
-                          {invoice.status !== "payée" && invoice.status !== "payee" && (
-                            <DropdownMenuItem 
-                              onClick={() => handleStatusUpdate(invoice.id, "payée")}
-                              className="cursor-pointer text-green-600"
-                            >
-                              <CheckCircle className="w-4 h-4 mr-2" />
-                              Marquer comme payée
-                            </DropdownMenuItem>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-white/60 hidden md:table-cell">
+                        {formatDate(invoice.created_at)}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-white/60 hidden lg:table-cell">
+                        {formatDate(invoice.due_date)}
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <span className="font-mono font-bold text-white text-sm">{formatCurrency(invoice.total)}</span>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <div className="flex flex-col items-end gap-1">
+                          <span className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-green-400 font-bold' : 'text-white/60'}`}>
+                            {formatCurrency(totalPaid)}
+                          </span>
+                          {invoice.total > 0 && totalPaid > 0 && totalPaid < invoice.total && (
+                            <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-orange-500 rounded-full transition-all"
+                                style={{ width: `${Math.min(paymentProgress, 100)}%` }}
+                              />
+                            </div>
                           )}
-                          {invoice.status === "brouillon" && (
-                            <DropdownMenuItem 
-                              onClick={() => handleStatusUpdate(invoice.id, "envoyee")}
-                              className="cursor-pointer text-purple-600"
-                            >
-                              <Mail className="w-4 h-4 mr-2" />
-                              Marquer comme envoyée
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <Badge className={status.color}>
+                          <StatusIcon className="w-3 h-3 mr-1" />
+                          {status.label}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreVertical className="w-4 h-4 text-white/60" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-[#1a1a2e] border-white/10 w-48">
+                            <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-white">
+                              <Eye className="w-4 h-4 mr-2" /> Voir le document
                             </DropdownMenuItem>
-                          )}
-                          {!["annulee", "payée", "payee"].includes(invoice.status) && (
-                            <DropdownMenuItem 
-                              onClick={() => handleStatusUpdate(invoice.id, "annulee")}
-                              className="cursor-pointer text-gray-600"
-                            >
-                              <XCircle className="w-4 h-4 mr-2" />
-                              Annuler
+                            <DropdownMenuItem onClick={() => handleDuplicate(invoice)} className="text-white">
+                              <Copy className="w-4 h-4 mr-2" /> Dupliquer
                             </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            onClick={() => handleDelete(invoice.id)}
-                            className="cursor-pointer text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                            {invoice.type === 'devis' && invoice.status !== 'payée' && (
+                              <DropdownMenuItem onClick={() => handleConvertToInvoice(invoice)} className="text-green-400">
+                                <ArrowRightLeft className="w-4 h-4 mr-2" /> Convertir en facture
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator className="bg-white/10" />
+                            <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-green-400">
+                              <CreditCard className="w-4 h-4 mr-2" /> Enregistrer paiement
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-white/10" />
+                            <DropdownMenuItem onClick={() => openEditSheet(invoice)} className="text-white">
+                              <Edit className="w-4 h-4 mr-2" /> Modifier
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-red-400">
+                              <Trash2 className="w-4 h-4 mr-2" /> Supprimer
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {/* Create/Edit Sheet with Preview */}
