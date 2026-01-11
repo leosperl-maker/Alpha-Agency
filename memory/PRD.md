@@ -250,27 +250,28 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - [ ] Étendre l'accès aux données de l'IA (inclure le futur module Documents)
 - [ ] Améliorer la recherche globale dans la topbar (plus de types de résultats)
 
-### Session 7 - 2026-01-11 (Corrections bugs critiques)
+### Session 7 - 2026-01-11 (Corrections bugs critiques + Nouvelles pages)
 - ✅ **Bug Fix CRITIQUE: PipelinePage.jsx**
-  - 2 balises `<div>` non fermées (lignes 876 et 878) causaient une erreur de parsing JSX
-  - L'erreur "Unterminated JSX contents" bloquait complètement le frontend
-  - Ajout des balises fermantes `</div>` aux lignes 1191-1194
+  - 2 balises `<div>` non fermées causaient une erreur de parsing JSX
+  - Correction de l'alignement du header pour que les boutons "Étapes" et "Nouvelle" soient visibles
 - ✅ **Bug Fix: Texte invisible dans l'éditeur de blocs**
-  - SelectContent et DropdownMenuContent avaient un fond sombre mais pas de couleur de texte
-  - Ajout de classes `text-white hover:bg-white/10 focus:bg-white/10 focus:text-white`
-  - Les options H1-H4 et tous les types de blocs sont maintenant visibles
-- ✅ **NOUVEAU: Prévisualisation fichiers (Documents)**
-  - Modal de preview avec affichage du fichier (images, vidéos, audio, PDF)
-  - Informations détaillées (taille, type, date, format MIME)
-  - Boutons d'action : Télécharger, Renommer, Supprimer
-- ✅ **NOUVEAU: Renommage fichiers/dossiers (Documents)**
-  - Option "Renommer" dans les menus contextuels des fichiers et dossiers
-  - Modal de renommage avec champ pré-rempli
-  - Sauvegarde instantanée du nouveau nom
-- ✅ **ThemeContext amélioré**
-  - Application directe des styles via CSS custom properties
-  - Support attribut `data-theme` sur html et body
-  - Variables CSS définies pour thèmes light/dark
+  - Ajout de classes `text-white hover:bg-white/10` sur tous les SelectItem et DropdownMenuItem
+- ✅ **NOUVEAU: Page Things**
+  - Liste de tâches journalière style "Things app"
+  - Sections : Aujourd'hui, Prochainement, À tout moment, Favoris, Terminées, Archives
+  - Route : `/admin/things`
+- ✅ **NOUVEAU: Page MindMap**
+  - Outil de mind mapping interactif
+  - Gestion multi-cartes avec onglets
+  - Contrôles de zoom et réinitialisation
+  - Route : `/admin/mindmap`
+- ✅ **Refonte éditeur Blog**
+  - Utilisation de l'AdvancedBlockEditor (identique aux Réalisations)
+  - Interface éditeur full-screen avec sidebar de paramètres
+  - Tous les types de blocs disponibles (Texte, Titre, Image, Vidéo, etc.)
+- ✅ **Preview et Rename pour Documents**
+  - Modal de prévisualisation amélioré (images, vidéos, audio, PDF)
+  - Option Renommer dans les menus contextuels
 
 ## Known Issues
 - Routes dupliquées temporairement dans server.py et modules séparés
