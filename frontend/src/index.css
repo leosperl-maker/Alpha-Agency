@@ -222,12 +222,26 @@ body.light, body[data-theme="light"] {
     
     /* Improve background visibility for interactive elements */
     .bg-white\/5 {
-        background-color: rgba(99, 102, 241, 0.08) !important; /* Light indigo tint */
-        border-color: rgba(99, 102, 241, 0.2) !important;
+        background-color: rgba(99, 102, 241, 0.12) !important; /* Light indigo tint */
+        border-color: rgba(99, 102, 241, 0.25) !important;
     }
     
     .hover\:bg-white\/10:hover {
+        background-color: rgba(99, 102, 241, 0.2) !important;
+    }
+    
+    /* Make suggestion buttons more visible */
+    button.rounded-full.bg-white\/5,
+    .rounded-full.bg-white\/5 {
         background-color: rgba(99, 102, 241, 0.15) !important;
+        border-color: rgba(99, 102, 241, 0.3) !important;
+        color: #4338CA !important; /* Indigo-700 */
+    }
+    
+    button.rounded-full.bg-white\/5:hover,
+    .rounded-full.bg-white\/5:hover {
+        background-color: rgba(99, 102, 241, 0.25) !important;
+        border-color: rgba(99, 102, 241, 0.4) !important;
     }
     
     /* Border colors */
