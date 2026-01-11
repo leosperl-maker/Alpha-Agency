@@ -753,48 +753,48 @@ const InvoicesPage = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Clock className="w-5 h-5 text-blue-600" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
             </div>
-            <div>
-              <p className="text-white/60 text-xs">En attente</p>
-              <p className="text-xl font-bold text-white font-mono">{formatCurrency(totalPending)}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-white/60 text-xs">Payées</p>
-              <p className="text-xl font-bold text-white font-mono">{formatCurrency(totalPaid)}</p>
+            <div className="min-w-0">
+              <p className="text-white/60 text-[10px] sm:text-xs">En attente</p>
+              <p className="text-sm sm:text-xl font-bold text-white font-mono truncate">{formatCurrency(totalPending)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
             </div>
-            <div>
-              <p className="text-white/60 text-xs">En retard</p>
-              <p className="text-xl font-bold text-white font-mono">{formatCurrency(totalOverdue)}</p>
+            <div className="min-w-0">
+              <p className="text-white/60 text-[10px] sm:text-xs">Payées</p>
+              <p className="text-sm sm:text-xl font-bold text-white font-mono truncate">{formatCurrency(totalPaid)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-indigo-500/50/20 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600/10 rounded-lg flex items-center justify-center">
-              <Euro className="w-5 h-5 text-indigo-400" />
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
             </div>
-            <div>
-              <p className="text-white/60 text-xs">Total facturé</p>
-              <p className="text-xl font-bold text-white font-mono">
+            <div className="min-w-0">
+              <p className="text-white/60 text-[10px] sm:text-xs">En retard</p>
+              <p className="text-sm sm:text-xl font-bold text-white font-mono truncate">{formatCurrency(totalOverdue)}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-indigo-500/20 p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-600/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Euro className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-white/60 text-[10px] sm:text-xs">Total facturé</p>
+              <p className="text-sm sm:text-xl font-bold text-white font-mono truncate">
                 {formatCurrency(invoices.reduce((sum, i) => sum + (i.total || 0), 0))}
               </p>
             </div>
