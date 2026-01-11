@@ -232,7 +232,7 @@ const DroppableTaskColumn = ({ column, children, onEdit, onDelete, tasksCount, t
       }}
       style={style}
       data-testid={`task-column-${column.id}`}
-      className={`flex-shrink-0 w-full md:w-[340px] ${isOver ? 'ring-2 ring-[#CE0202] ring-opacity-50' : ''}`}
+      className={`flex-shrink-0 w-[280px] sm:w-[300px] md:w-[320px] ${isOver ? 'ring-2 ring-[#CE0202] ring-opacity-50' : ''}`}
     >
       <div className={`bg-white/5 backdrop-blur-xl rounded-xl border shadow-sm h-full transition-all ${
         isOver ? 'border-indigo-500/50 bg-indigo-600/5' : 'border-white/10'
