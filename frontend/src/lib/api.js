@@ -148,7 +148,33 @@ export const invoicesAPI = {
   // Helper function to download PDF with authentication - All platforms
   downloadPDF: async (id, invoiceNumber, type = 'facture') => {
     try {
-      // Always use blob approach which works reliably
+      // Check if on mobile
+      const userAgent = navigator.userAgent;
+      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+      const isAndroid = /Android/i.test(userAgent);
+      const isMobile = isIOS || isAndroid;
+      
+      if (isMobile) {
+        // Mobile: Use token-based URL that Safari can open directly
+        try {
+          const tokenResponse = await api.get(`/invoices/${id}/pdf-token`);
+          const { token } = tokenResponse.data;
+          
+          if (token) {
+            // Construct direct URL with token
+            const baseUrl = process.env.REACT_APP_BACKEND_URL || '';
+            const pdfUrl = `${baseUrl}/api/invoices/${id}/pdf-download/${token}`;
+            
+            // Open in new window - Safari will display the PDF
+            window.open(pdfUrl, '_blank');
+            return true;
+          }
+        } catch (tokenError) {
+          console.warn('Token-based PDF failed, trying blob:', tokenError);
+        }
+      }
+      
+      // Desktop or fallback: Use blob approach
       const response = await api.get(`/invoices/${id}/pdf`, {
         responseType: 'blob',
         headers: {
@@ -156,58 +182,26 @@ export const invoicesAPI = {
         }
       });
       
-      // Verify we got valid data
       if (!response.data || response.data.size === 0) {
         throw new Error('Empty PDF response');
       }
       
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const filename = `${type}_${invoiceNumber || id}.pdf`;
-      
-      // Check if on mobile
-      const userAgent = navigator.userAgent;
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-      const isAndroid = /Android/i.test(userAgent);
-      const isMobile = isIOS || isAndroid;
-      
-      // Create blob URL
       const blobUrl = window.URL.createObjectURL(blob);
       
-      if (isMobile) {
-        // Mobile: Open in new window/tab - Safari will use its PDF viewer
-        const newWindow = window.open(blobUrl, '_blank');
-        
-        // If popup blocked, try download link
-        if (!newWindow) {
-          const link = document.createElement('a');
-          link.href = blobUrl;
-          link.download = filename;
-          link.target = '_blank';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        }
-        
-        // Keep URL alive for viewing, cleanup after delay
-        setTimeout(() => window.URL.revokeObjectURL(blobUrl), 60000);
-      } else {
-        // Desktop: Direct download
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = filename;
-        link.style.display = 'none';
-        
-        document.body.appendChild(link);
-        link.click();
-        
-        // Cleanup
-        setTimeout(() => {
-          if (link.parentNode) {
-            document.body.removeChild(link);
-          }
-          window.URL.revokeObjectURL(blobUrl);
-        }, 250);
-      }
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      setTimeout(() => {
+        if (link.parentNode) document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      }, 250);
       
       return true;
     } catch (error) {
