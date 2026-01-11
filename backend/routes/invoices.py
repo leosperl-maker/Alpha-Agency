@@ -547,8 +547,11 @@ async def get_invoice_pdf_url(invoice_id: str, current_user: dict = Depends(get_
     if not contact:
         contact = {"first_name": "", "last_name": "", "email": "", "company": ""}
     
+    # Load invoice settings
+    invoice_settings = await db.settings.find_one({"type": "invoice_settings"}, {"_id": 0})
+    
     doc_type = invoice.get('document_type', 'facture')
-    pdf_buffer = generate_professional_pdf(invoice, contact, doc_type)
+    pdf_buffer = generate_professional_pdf(invoice, contact, doc_type, invoice_settings)
     
     # Configure Cloudinary
     cloudinary.config(
