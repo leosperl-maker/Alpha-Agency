@@ -594,13 +594,19 @@ async def get_invoice_pdf_url(invoice_id: str, current_user: dict = Depends(get_
     )
     
     filename = f"{'devis' if doc_type == 'devis' else 'facture'}_{invoice['invoice_number']}"
+    unique_filename = f"{filename}_{int(datetime.now(timezone.utc).timestamp())}"
     
     try:
-        # Upload PDF to Cloudinary - include .pdf in public_id
+        import base64
+        # Convert bytes to base64 data URI for upload
+        pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
+        data_uri = f"data:application/pdf;base64,{pdf_base64}"
+        
+        # Upload PDF to Cloudinary
         result = cloudinary.uploader.upload(
-            pdf_data,
+            data_uri,
             resource_type="raw",
-            public_id=f"pdfs/{filename}.pdf",
+            public_id=f"invoices/{unique_filename}",
             overwrite=True
         )
         
