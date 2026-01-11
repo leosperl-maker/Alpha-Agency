@@ -453,13 +453,16 @@ const InvoicesPage = () => {
   };
 
   const handleDownloadPDF = async (invoice) => {
+    const toastId = toast.loading("Préparation du PDF...");
     try {
-      toast.info("Préparation du PDF...");
       const type = invoice.document_type === 'devis' ? 'devis' : 'facture';
       await invoicesAPI.downloadPDF(invoice.id, invoice.invoice_number, type);
-      toast.success("PDF téléchargé");
+      toast.dismiss(toastId);
+      toast.success("PDF téléchargé ! Vérifiez votre dossier Téléchargements ou un nouvel onglet.");
     } catch (error) {
-      toast.error("Erreur lors du téléchargement du PDF");
+      toast.dismiss(toastId);
+      console.error('PDF download error:', error);
+      toast.error("Erreur lors du téléchargement du PDF. Réessayez.");
     }
   };
 
