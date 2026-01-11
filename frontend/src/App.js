@@ -42,6 +42,10 @@ import CampaignsPage from "./pages/dashboard/CampaignsPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ThingsPage from "./pages/dashboard/ThingsPage";
 import MindMapPage from "./pages/dashboard/MindMapPage";
+import TransfersPage from "./pages/dashboard/TransfersPage";
+
+// Public pages
+import TransferDownloadPage from "./pages/TransferDownloadPage";
 
 // Layout
 import MainLayout from "./components/MainLayout";
