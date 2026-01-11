@@ -1295,29 +1295,31 @@ const BudgetPage = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-1 flex-wrap h-auto">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-            <TrendingUp className="w-4 h-4 mr-2" /> Vue d'ensemble
-          </TabsTrigger>
-          <TabsTrigger value="transactions" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-            <Receipt className="w-4 h-4 mr-2" /> Transactions
-          </TabsTrigger>
-          <TabsTrigger value="categories" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-            <Tag className="w-4 h-4 mr-2" /> Catégories
-          </TabsTrigger>
-          <TabsTrigger value="rules" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-            <Settings2 className="w-4 h-4 mr-2" /> Règles auto
-          </TabsTrigger>
-          <TabsTrigger value="forecast" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-            <Target className="w-4 h-4 mr-2" /> Prévisionnel
-          </TabsTrigger>
-          <TabsTrigger value="cashflow" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-            <TrendingUp className="w-4 h-4 mr-2" /> Cashflow
-          </TabsTrigger>
-          <TabsTrigger value="qonto" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-            <Building2 className="w-4 h-4 mr-2" /> Qonto
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-1 inline-flex min-w-max sm:flex sm:flex-wrap h-auto gap-1">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
+              <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Vue d'ensemble</span><span className="sm:hidden">Vue</span>
+            </TabsTrigger>
+            <TabsTrigger value="transactions" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
+              <Receipt className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Transactions</span><span className="sm:hidden">Trans.</span>
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
+              <Tag className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Catégories</span><span className="sm:hidden">Cat.</span>
+            </TabsTrigger>
+            <TabsTrigger value="rules" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
+              <Settings2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Règles auto</span><span className="sm:hidden">Règles</span>
+            </TabsTrigger>
+            <TabsTrigger value="forecast" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
+              <Target className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Prévisionnel</span><span className="sm:hidden">Prévi.</span>
+            </TabsTrigger>
+            <TabsTrigger value="cashflow" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
+              <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Cashflow
+            </TabsTrigger>
+            <TabsTrigger value="qonto" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
+              <Building2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Qonto
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
