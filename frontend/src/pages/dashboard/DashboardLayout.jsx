@@ -192,6 +192,7 @@ const DashboardLayout = () => {
     { path: "/admin/mindmap", icon: GitBranch, label: "MindMap" },
     { path: "/admin/tags", icon: Tag, label: "Tags" },
     { path: "/admin/documents", icon: FileCheck, label: "Documents" },
+    { path: "/admin/transfer", icon: Send, label: "Transfert" },
     { path: "/admin/sauvegardes", icon: Database, label: "Sauvegardes" },
     { path: "/admin/assistant", icon: Bot, label: "Assistant IA" },
     { path: "/admin/actualites", icon: Newspaper, label: "Actualités" },
