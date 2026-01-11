@@ -553,6 +553,16 @@ async def get_invoice_pdf_url(invoice_id: str, current_user: dict = Depends(get_
     doc_type = invoice.get('document_type', 'facture')
     pdf_buffer = generate_professional_pdf(invoice, contact, doc_type, invoice_settings)
     
+    # IMPORTANT: Reset buffer position to beginning
+    pdf_buffer.seek(0)
+    pdf_data = pdf_buffer.read()
+    
+    if len(pdf_data) == 0:
+        logger.error("PDF buffer is empty!")
+        raise HTTPException(status_code=500, detail="Erreur: PDF vide")
+    
+    logger.info(f"Generated PDF size: {len(pdf_data)} bytes")
+    
     # Configure Cloudinary
     cloudinary.config(
         cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
@@ -563,14 +573,15 @@ async def get_invoice_pdf_url(invoice_id: str, current_user: dict = Depends(get_
     filename = f"{'devis' if doc_type == 'devis' else 'facture'}_{invoice['invoice_number']}"
     
     try:
-        # Upload PDF to Cloudinary
+        # Upload PDF to Cloudinary with bytes data
         result = cloudinary.uploader.upload(
-            pdf_buffer.getvalue(),
+            pdf_data,
             resource_type="raw",
             public_id=f"pdfs/{filename}",
-            overwrite=True,
-            format="pdf"
+            overwrite=True
         )
+        
+        logger.info(f"Cloudinary upload result: {result.get('secure_url')}")
         
         return {
             "url": result.get('secure_url'),
