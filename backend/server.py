@@ -6390,6 +6390,10 @@ app.include_router(documents_router, prefix="/api", tags=["documents"])
 from routes.qonto import router as qonto_router
 app.include_router(qonto_router, prefix="/api", tags=["qonto"])
 
+# File Transfers (WeTransfer-like)
+from routes.transfers import router as transfers_router
+app.include_router(transfers_router, prefix="/api", tags=["transfers"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
