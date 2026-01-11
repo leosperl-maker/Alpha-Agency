@@ -365,7 +365,7 @@ async def create_invoice(invoice: InvoiceCreate, current_user: dict = Depends(ge
     """Create a new invoice or quote"""
     invoice_id = str(uuid.uuid4())
     doc_type = invoice.document_type or "facture"
-    logger.info(f"Creating document with type: {doc_type}, raw value: {invoice.document_type}")
+    print(f"DEBUG: Creating document with type: {doc_type}, raw value: {invoice.document_type}")
     invoice_number = await get_next_invoice_number(doc_type)
     
     items_list = [item.model_dump() for item in invoice.items]
