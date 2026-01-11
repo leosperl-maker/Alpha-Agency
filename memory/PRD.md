@@ -389,19 +389,35 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - ✅ **Page Things - Archivage automatique**
   - Les tâches complétées sont automatiquement déplacées vers "Archives"
   - Fonction de restauration disponible
-- ⚠️ **Intégration Qonto OAuth2**
-  - Code mis à jour pour OAuth2 (client_credentials flow)
-  - **BLOQUÉ** : Les credentials fournis retournent `invalid_client`
-  - L'utilisateur doit fournir des credentials valides
+
+### Session 11 - 2026-01-11 (Bugs critiques + Améliorations)
+- ✅ **Assistant IA refonte complète**
+  - Nouveau design style Perplexity plus élégant
+  - Formatage markdown → HTML (plus d'astérisques ** visibles)
+  - Dropdown modèles fonctionnel avec Nano Banana
+  - Tooltips sur toutes les icônes
+  - Panneau historique amélioré avec suppression
+  - Animation de chargement (dots bouncing)
+- ✅ **Toggle thème clair/sombre**
+  - CSS overrides pour les couleurs hard-codées
+  - Thème light fonctionne sur toutes les pages admin
+- ✅ **Consolidation Facturation**
+  - Une seule page InvoicesPage pour devis + factures
+  - Suppression des redirections vers anciennes pages
+- ✅ **Qonto OAuth2 (Authorization Code Flow)**
+  - Implémentation complète du flow OAuth2
+  - Endpoints: /auth/url, /auth/callback, /auth/disconnect
+  - Stockage et refresh des tokens en base
+  - L'utilisateur doit autoriser l'accès dans Qonto
+
+## En attente
+- **Module WeTransfer** : Architecture validée (Cloudinary, 2GB+, Brevo)
+- **Améliorations MindMap** : Style Mindnote
 
 ## Test Results
-- Session 8: 100% pass rate (7/7 tests frontend mobile) - iteration_21.json
-- Session 9: 100% pass rate (6/6 tests frontend mobile) - iteration_22.json
-- Session 10: 100% pass rate (6/6 tests frontend mobile) - iteration_23.json
+- Session 8: 100% pass rate (7/7) - iteration_21.json
+- Session 9: 100% pass rate (6/6) - iteration_22.json
+- Session 10: 100% pass rate (6/6) - iteration_23.json
 - Viewport testé: 375x800 (iPhone SE/XR)
-- Toutes les pages principales fonctionnent correctement sur mobile
-
-## Known Issues
-- **Qonto OAuth2** : Les credentials `65f89684-6c15-4ba4-9f89-8efc52ae6f10` / `S3vc0ir927G37S8AOZSU2SzQpD` retournent `invalid_client`. L'utilisateur doit vérifier ses credentials dans l'espace développeur Qonto.
-- **Toggle thème** : Le toggle clair/sombre ne fonctionne pas visuellement (P2)
+- Thème light testé et fonctionnel
 
