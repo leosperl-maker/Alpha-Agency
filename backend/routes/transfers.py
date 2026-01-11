@@ -358,8 +358,13 @@ async def create_transfer(
             else:
                 title = f"{len(files)} fichiers"
         
-        # Calculate expiry
-        expires_at = datetime.now(timezone.utc) + timedelta(days=expires_in_days)
+        # Calculate expiry (0 = never expires)
+        if expires_in_days == 0:
+            expires_at = None
+            expires_formatted = "Jamais"
+        else:
+            expires_at = datetime.now(timezone.utc) + timedelta(days=expires_in_days)
+            expires_formatted = expires_at.strftime("%d/%m/%Y à %H:%M")
         
         # Get sender info
         sender_name = current_user.get('name') or current_user.get('email', 'Quelqu\'un')
@@ -376,9 +381,11 @@ async def create_transfer(
             "sender_id": current_user.get("id"),
             "sender_name": sender_name,
             "sender_email": current_user.get("email"),
-            "expires_at": expires_at.isoformat(),
+            "expires_at": expires_at.isoformat() if expires_at else None,
+            "never_expires": expires_in_days == 0,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "download_count": 0,
+            "comments": [],  # For user comments/notes
             "status": "active"
         }
         
@@ -388,10 +395,7 @@ async def create_transfer(
         # Generate download link using alphagency.fr domain
         download_link = f"{ALPHAGENCY_URL}/transfer/{transfer_id}"
         
-        # Format expiry date for email
-        expires_formatted = expires_at.strftime("%d/%m/%Y à %H:%M")
-        
-        # Send emails in background
+        # Send emails in background (only if emails provided)
         for email in emails:
             background_tasks.add_task(
                 send_transfer_email,
