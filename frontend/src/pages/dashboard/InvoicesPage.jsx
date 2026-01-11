@@ -951,10 +951,16 @@ const InvoicesPage = () => {
                   const totalPaid = invoice.total_paid || 0;
                   const remaining = (invoice.total || 0) - totalPaid;
                   const paymentProgress = invoice.total > 0 ? (totalPaid / invoice.total) * 100 : 0;
+                  const isDevis = invoice.document_type === 'devis';
                   return (
                     <tr key={invoice.id} className="hover:bg-white/5 transition-colors">
                       <td className="px-4 py-4">
-                        <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap ${isDevis ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                            {isDevis ? 'DEVIS' : 'FACTURE'}
+                          </span>
+                          <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
+                        </div>
                       </td>
                       <td className="px-4 py-4">
                         <div>
