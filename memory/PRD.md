@@ -265,17 +265,23 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Sections : Aujourd'hui, Prochainement, À tout moment, Favoris, Terminées, Archives
   - Route : `/admin/things`
 - ✅ **NOUVEAU: Page MindMap**
-  - Outil de mind mapping interactif
-  - Gestion multi-cartes avec onglets
-  - Contrôles de zoom et réinitialisation
+  - Outil de mind mapping interactif avec gestion multi-cartes
   - Route : `/admin/mindmap`
 - ✅ **Refonte éditeur Blog**
   - Utilisation de l'AdvancedBlockEditor (identique aux Réalisations)
   - Interface éditeur full-screen avec sidebar de paramètres
-  - Tous les types de blocs disponibles (Texte, Titre, Image, Vidéo, etc.)
 - ✅ **Preview et Rename pour Documents**
-  - Modal de prévisualisation amélioré (images, vidéos, audio, PDF)
-  - Option Renommer dans les menus contextuels
+  - Modal de prévisualisation amélioré + option Renommer
+- ✅ **NOUVEAU: Bouton Quick Actions flottant**
+  - Accessible depuis toutes les pages du dashboard
+  - Actions rapides : Contact, Facture, Tâche, Opportunité, Document, Article
+  - Design glassmorphique avec icônes colorées en gradient
+- ✅ **NOUVEAU: Intégration Qonto**
+  - Backend : `/api/qonto/*` (status, accounts, transactions, sync, stats)
+  - Nouvel onglet "Qonto" dans la page Budget
+  - Affichage solde, revenus/dépenses 30j, liste transactions
+  - Bouton de synchronisation manuelle
+  - Cache local MongoDB des transactions
 
 ## Known Issues
 - Routes dupliquées temporairement dans server.py et modules séparés
