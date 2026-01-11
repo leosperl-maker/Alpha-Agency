@@ -116,13 +116,36 @@ from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 import urllib.request
 
 def fetch_logo_image():
-    """Fetch and cache the logo image for PDF generation"""
+    """Fetch, resize and cache the logo image for PDF generation"""
     try:
+        from PIL import Image as PILImage
+        import io
+        
         logo_path = "/tmp/alpha_logo.png"
+        resized_path = "/tmp/alpha_logo_resized.png"
+        
+        # Download image
         urllib.request.urlretrieve(COMPANY_INFO['logo_url'], logo_path)
-        return logo_path
+        
+        # Resize to reasonable dimensions for PDF (max 300x100 pixels)
+        with PILImage.open(logo_path) as img:
+            # Convert to RGB if necessary (for PNG with transparency)
+            if img.mode in ('RGBA', 'LA', 'P'):
+                background = PILImage.new('RGB', img.size, (255, 255, 255))
+                if img.mode == 'P':
+                    img = img.convert('RGBA')
+                background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                img = background
+            
+            # Resize maintaining aspect ratio
+            max_width = 300
+            max_height = 100
+            img.thumbnail((max_width, max_height), PILImage.Resampling.LANCZOS)
+            img.save(resized_path, 'PNG', optimize=True)
+        
+        return resized_path
     except Exception as e:
-        logger.error(f"Failed to fetch logo: {e}")
+        logger.error(f"Failed to fetch/resize logo: {e}")
         return None
 
 def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "facture", invoice_settings: dict = None) -> BytesIO:
