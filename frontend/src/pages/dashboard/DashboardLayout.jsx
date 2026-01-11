@@ -341,7 +341,16 @@ const DashboardLayout = () => {
             <X className="w-5 h-5" />
           </button>
         </div>
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1" style={{
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+        }}>
+          <style>{`
+            nav::-webkit-scrollbar { width: 6px; }
+            nav::-webkit-scrollbar-track { background: transparent; }
+            nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+          `}</style>
           {navItems.map((item) => (
             <NavLink
               key={item.path}
