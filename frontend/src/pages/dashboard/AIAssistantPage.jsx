@@ -32,7 +32,14 @@ const AIAssistantPage = () => {
   const [editingTitle, setEditingTitle] = useState(null);
   const [newTitle, setNewTitle] = useState("");
   const [loadingConversations, setLoadingConversations] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("gpt-4o");
   const messagesEndRef = useRef(null);
+
+  // Available AI models
+  const aiModels = [
+    { value: "gpt-4o", label: "GPT-4o", icon: "🤖" },
+    { value: "gemini-3-flash-preview", label: "Gemini Flash", icon: "⚡" },
+  ];
 
   // Fetch AI status and conversations on mount
   useEffect(() => {
