@@ -1433,27 +1433,27 @@ const BudgetPage = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6 pb-1">
-          <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-0.5 sm:p-1 inline-flex min-w-max h-auto gap-0.5">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+        <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6 pb-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-0.5 sm:p-1 inline-flex min-w-max h-auto gap-0.5 whitespace-nowrap">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
               <TrendingUp className="w-3 h-3 mr-1" /> Vue
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+            <TabsTrigger value="transactions" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
               <Receipt className="w-3 h-3 mr-1" /> Trans.
             </TabsTrigger>
-            <TabsTrigger value="categories" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+            <TabsTrigger value="categories" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
               <Tag className="w-3 h-3 mr-1" /> Cat.
             </TabsTrigger>
-            <TabsTrigger value="rules" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+            <TabsTrigger value="rules" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
               <Settings2 className="w-3 h-3 mr-1" /> Règles
             </TabsTrigger>
-            <TabsTrigger value="forecast" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+            <TabsTrigger value="forecast" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
               <Target className="w-3 h-3 mr-1" /> Prévi.
             </TabsTrigger>
-            <TabsTrigger value="cashflow" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+            <TabsTrigger value="cashflow" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
               <TrendingUp className="w-3 h-3 mr-1" /> Cash
             </TabsTrigger>
-            <TabsTrigger value="qonto" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+            <TabsTrigger value="qonto" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
               <Building2 className="w-3 h-3 mr-1" /> Qonto
             </TabsTrigger>
           </TabsList>
