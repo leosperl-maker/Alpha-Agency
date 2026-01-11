@@ -46,6 +46,24 @@ const SettingsPage = () => {
     stripe_api_key: ""
   });
 
+  // Invoice/Quote default settings
+  const [invoiceSettings, setInvoiceSettings] = useState({
+    default_payment_terms: "30",
+    default_tva_rate: "8.5",
+    default_conditions: `• Ce devis est valable 30 jours à compter de sa date d'émission.
+• Paiement par virement bancaire ou carte bancaire.
+• Le règlement doit intervenir sous 30 jours après réception de la facture.
+• Tout retard de paiement entraînera des pénalités de retard.`,
+    bank_details: `IBAN: FR76 XXXX XXXX XXXX XXXX XXXX XXX
+BIC: XXXXXXXX
+Banque: Votre Banque`,
+    footer_text: "Merci de votre confiance - Alpha Agency",
+    signature_text: "Bon pour accord, le client :",
+    show_logo: true,
+    logo_position: "left"
+  });
+  const [savingInvoiceSettings, setSavingInvoiceSettings] = useState(false);
+
   const [dataStats, setDataStats] = useState(null);
   const [deletingData, setDeletingData] = useState(false);
 
