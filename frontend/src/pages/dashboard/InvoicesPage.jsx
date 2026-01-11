@@ -735,36 +735,36 @@ const InvoicesPage = () => {
   };
 
   return (
-    <div data-testid="invoices-page" className="space-y-6">
+    <div data-testid="invoices-page" className="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-6 overflow-x-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">Facturation</h1>
-          <p className="text-white/60 text-sm">{invoices.length} documents au total</p>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Facturation</h1>
+          <p className="text-white/60 text-xs sm:text-sm">{invoices.length} documents</p>
         </div>
         <div className="flex gap-2">
           <Button 
             variant="outline"
+            size="sm"
             onClick={() => setServicesDialogOpen(true)}
-            className="border-white/10"
+            className="border-white/10 h-8 px-2 sm:px-3"
           >
-            <Package className="w-4 h-4 mr-2" />
-            Services
+            <Package className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="bg-indigo-600 hover:bg-indigo-500 text-white">
-                <Plus className="w-4 h-4 mr-2" />
-                Nouveau document
+              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-500 text-white h-8 px-2 sm:px-3">
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                <span className="hidden sm:inline text-xs">Nouveau</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
-              <DropdownMenuItem onClick={() => openCreateSheet('facture')} className="cursor-pointer">
-                <Receipt className="w-4 h-4 mr-2" />
+              <DropdownMenuItem onClick={() => openCreateSheet('facture')} className="cursor-pointer text-xs">
+                <Receipt className="w-3 h-3 mr-2" />
                 Facture
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openCreateSheet('devis')} className="cursor-pointer">
-                <FileText className="w-4 h-4 mr-2" />
+              <DropdownMenuItem onClick={() => openCreateSheet('devis')} className="cursor-pointer text-xs">
+                <FileText className="w-3 h-3 mr-2" />
                 Devis
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -773,52 +773,54 @@ const InvoicesPage = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-3 sm:p-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+      <div className="grid grid-cols-2 gap-2">
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-2 sm:p-3">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-blue-500/20 rounded-lg flex-shrink-0">
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />
             </div>
-            <div className="min-w-0">
-              <p className="text-white/60 text-[10px] sm:text-xs">En attente</p>
-              <p className="text-sm sm:text-xl font-bold text-white font-mono truncate">{formatCurrency(totalPending)}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-3 sm:p-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-white/60 text-[10px] sm:text-xs">Payées</p>
-              <p className="text-sm sm:text-xl font-bold text-white font-mono truncate">{formatCurrency(totalPaid)}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-white/60 text-[10px]">Attente</p>
+              <p className="text-xs sm:text-sm font-bold text-white truncate">{formatCurrency(totalPending)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-3 sm:p-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-2 sm:p-3">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-green-500/20 rounded-lg flex-shrink-0">
+              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
             </div>
-            <div className="min-w-0">
-              <p className="text-white/60 text-[10px] sm:text-xs">En retard</p>
-              <p className="text-sm sm:text-xl font-bold text-white font-mono truncate">{formatCurrency(totalOverdue)}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-white/60 text-[10px]">Payées</p>
+              <p className="text-xs sm:text-sm font-bold text-white truncate">{formatCurrency(totalPaid)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-indigo-500/20 p-3 sm:p-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-600/10 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Euro className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-2 sm:p-3">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-red-500/20 rounded-lg flex-shrink-0">
+              <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
             </div>
-            <div className="min-w-0">
-              <p className="text-white/60 text-[10px] sm:text-xs">Total facturé</p>
-              <p className="text-sm sm:text-xl font-bold text-white font-mono truncate">
+            <div className="min-w-0 flex-1">
+              <p className="text-white/60 text-[10px]">Retard</p>
+              <p className="text-xs sm:text-sm font-bold text-white truncate">{formatCurrency(totalOverdue)}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-indigo-500/20 p-2 sm:p-3">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-indigo-500/20 rounded-lg flex-shrink-0">
+              <Euro className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-400" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-white/60 text-[10px]">Total</p>
+              <p className="text-xs sm:text-sm font-bold text-white truncate">
                 {formatCurrency(invoices.reduce((sum, i) => sum + (i.total || 0), 0))}
               </p>
             </div>
           </div>
+        </div>
+      </div>
         </div>
       </div>
 
