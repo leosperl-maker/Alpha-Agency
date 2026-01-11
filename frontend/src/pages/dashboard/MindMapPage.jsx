@@ -484,22 +484,22 @@ const MindMapPage = () => {
         {/* Selected node toolbar */}
         {selectedNode && (
           <div 
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 p-2 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-xl"
+            className="absolute bottom-16 sm:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 sm:gap-2 p-1.5 sm:p-2 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-xl"
           >
             <Button
               size="sm"
               variant="ghost"
               onClick={() => addChild(selectedNode)}
-              className="text-white/80 hover:text-white hover:bg-white/10"
+              className="text-white/80 hover:text-white hover:bg-white/10 h-8 px-2 sm:px-3"
             >
-              <Plus className="w-4 h-4 mr-1" />
-              Enfant
+              <Plus className="w-4 h-4 sm:mr-1" />
+              <span className="hidden sm:inline">Enfant</span>
             </Button>
 
             {/* Color picker */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10">
+                <Button size="sm" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 h-8 w-8 p-0">
                   <Palette className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -526,7 +526,7 @@ const MindMapPage = () => {
                   setEditText(node.text);
                 }
               }}
-              className="text-white/80 hover:text-white hover:bg-white/10"
+              className="text-white/80 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
             >
               <Edit2 className="w-4 h-4" />
             </Button>
@@ -536,7 +536,7 @@ const MindMapPage = () => {
                 size="sm"
                 variant="ghost"
                 onClick={() => deleteNode(selectedNode)}
-                className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                className="text-red-400 hover:text-red-300 hover:bg-red-500/20 h-8 w-8 p-0"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
