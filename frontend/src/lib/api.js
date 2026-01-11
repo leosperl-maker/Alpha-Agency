@@ -262,6 +262,8 @@ export const settingsAPI = {
   updateSocialLinks: (data) => api.put('/settings/social-links', data),
   updateLegalTexts: (data) => api.put('/settings/legal-texts', data),
   updateIntegrations: (data) => api.put('/settings/integrations', data),
+  getInvoiceSettings: () => api.get('/settings/invoice'),
+  updateInvoiceSettings: (data) => api.put('/settings/invoice', data),
 };
 
 // Upload API
