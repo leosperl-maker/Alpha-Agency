@@ -874,8 +874,8 @@ const PipelinePage = () => {
 
   return (
     <div data-testid="pipeline-page" className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      {/* Header - isolated from pipeline board */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3" style={{ maxWidth: 'calc(100vw - 320px)' }}>
         <div className="flex-shrink-0 min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold text-white">Pipeline</h1>
           <p className="text-white/60 text-xs sm:text-sm">Gérez vos affaires commerciales</p>
