@@ -821,29 +821,26 @@ const InvoicesPage = () => {
           </div>
         </div>
       </div>
-        </div>
-      </div>
-
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+          <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-white/60" />
           <Input
-            placeholder="Rechercher par numéro, client..."
+            placeholder="Rechercher..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white/5 backdrop-blur-xl border-white/10 text-white"
+            className="pl-7 sm:pl-10 bg-white/5 backdrop-blur-xl border-white/10 text-white h-8 sm:h-9 text-xs sm:text-sm"
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-48 bg-white/5 backdrop-blur-xl border-white/10 text-white">
-            <Filter className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Filtrer par statut" />
+          <SelectTrigger className="w-24 sm:w-36 bg-white/5 backdrop-blur-xl border-white/10 text-white h-8 sm:h-9 text-xs sm:text-sm">
+            <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+            <SelectValue placeholder="Statut" />
           </SelectTrigger>
           <SelectContent className="bg-[#1a1a2e] border-white/10">
-            <SelectItem value="all">Tous les statuts</SelectItem>
+            <SelectItem value="all" className="text-xs">Tous</SelectItem>
             {Object.entries(statusConfig).map(([key, config]) => (
-              <SelectItem key={key} value={key}>{config.label}</SelectItem>
+              <SelectItem key={key} value={key} className="text-xs">{config.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -851,22 +848,22 @@ const InvoicesPage = () => {
 
       {/* Invoices List */}
       {loading ? (
-        <div className="space-y-4">
+        <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-white/5 animate-pulse rounded-lg" />
+            <div key={i} className="h-20 bg-white/5 animate-pulse rounded-lg" />
           ))}
         </div>
       ) : filteredInvoices.length === 0 ? (
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-12 text-center">
-          <Receipt className="w-12 h-12 text-white/60 mx-auto mb-4" />
-          <p className="text-white/60">
-            {searchQuery || filterStatus !== "all" ? "Aucun document trouvé" : "Aucun document créé"}
+        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-8 text-center">
+          <Receipt className="w-10 h-10 text-white/60 mx-auto mb-3" />
+          <p className="text-white/60 text-sm">
+            {searchQuery || filterStatus !== "all" ? "Aucun document" : "Aucun document créé"}
           </p>
         </div>
       ) : (
         <>
           {/* Mobile Card View */}
-          <div className="sm:hidden space-y-3">
+          <div className="sm:hidden space-y-2">
             {filteredInvoices.map((invoice) => {
               const status = statusConfig[invoice.status] || statusConfig.brouillon;
               const StatusIcon = status.icon;
