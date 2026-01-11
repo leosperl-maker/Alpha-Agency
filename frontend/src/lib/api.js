@@ -450,6 +450,9 @@ export const cashflowAPI = {
 // Qonto Banking API
 export const qontoAPI = {
   getStatus: () => api.get('/qonto/status'),
+  getAuthUrl: () => api.get('/qonto/auth/url'),
+  handleCallback: (code, state) => api.post('/qonto/auth/callback', null, { params: { code, state } }),
+  disconnect: () => api.delete('/qonto/auth/disconnect'),
   getOrganization: () => api.get('/qonto/organization'),
   getAccounts: () => api.get('/qonto/accounts'),
   getTransactions: (params) => api.get('/qonto/transactions', { params }),
