@@ -88,9 +88,9 @@ function App() {
             <Route path="demandes" element={<DemandesPage />} />
             <Route path="contacts" element={<ContactsPage />} />
             <Route path="pipeline" element={<PipelinePage />} />
-            <Route path="facturation" element={<FacturationPage />} />
+            <Route path="facturation" element={<InvoicesPage />} />
             <Route path="devis" element={<Navigate to="/admin/facturation?tab=devis" replace />} />
-            <Route path="factures" element={<InvoicesPage />} />
+            <Route path="factures" element={<Navigate to="/admin/facturation?tab=facture" replace />} />
             <Route path="abonnements" element={<SubscriptionsPage />} />
             <Route path="realisations" element={<PortfolioManagePage />} />
             <Route path="documents" element={<DocumentsPage />} />
