@@ -234,7 +234,58 @@ const DashboardLayout = () => {
               className="h-9 w-auto brightness-0 invert"
             />
           ) : (
-            <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+            <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+              <span className="text-white font-bold text-lg">A</span>
+            </div>
+          )}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+          >
+            <ChevronLeft className={`w-5 h-5 transition-transform ${!sidebarOpen ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+
+        {/* Nav Items - Scrollable */}
+        <nav className="flex-1 p-3 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          <div className="space-y-1">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.end}
+                className={({ isActive }) => `
+                  flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all
+                  ${isActive 
+                    ? 'bg-indigo-600/20 text-indigo-400' 
+                    : 'text-white/60 hover:bg-white/5 hover:text-white'
+                  }
+                `}
+              >
+                <item.icon className={`w-5 h-5 flex-shrink-0`} />
+                {sidebarOpen && (
+                  <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
+                )}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
+
+        {/* User Section - Fixed at bottom */}
+        <div className="p-3 border-t border-white/10 flex-shrink-0">
+          <div className={`flex items-center gap-3 p-2 rounded-xl bg-white/5 ${!sidebarOpen ? 'justify-center' : ''}`}>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+              {user?.name?.charAt(0) || 'A'}
+            </div>
+            {sidebarOpen && (
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-medium truncate">{user?.name || 'Admin'}</p>
+                <p className="text-white/50 text-xs truncate">{user?.role || 'Utilisateur'}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </aside>ms-center justify-center text-white font-bold text-lg">
               A
             </div>
           )}
