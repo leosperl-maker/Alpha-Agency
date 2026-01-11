@@ -1188,7 +1188,6 @@ const PipelinePage = () => {
         onEdit={openEditDialog}
         contacts={contacts}
       />
-      </div>
     </div>
   );
 };
