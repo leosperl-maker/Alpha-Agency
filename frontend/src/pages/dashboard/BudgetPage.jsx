@@ -1323,33 +1323,34 @@ const BudgetPage = () => {
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Monthly Evolution Chart */}
             <Card className="bg-white/5 backdrop-blur-xl border-white/10">
-              <CardHeader>
-                <CardTitle className="text-white text-lg flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-indigo-400" />
-                  Évolution mensuelle {selectedYear}
+              <CardHeader className="p-4">
+                <CardTitle className="text-white text-base sm:text-lg flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
+                  Évolution {selectedYear}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={280}>
-                  <AreaChart data={monthlyData}>
-                    <defs>
-                      <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
-                      </linearGradient>
-                      <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E5E5" />
-                    <XAxis dataKey="name" tick={{ fill: '#666666', fontSize: 12 }} />
-                    <YAxis tick={{ fill: '#666666', fontSize: 12 }} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(value) => formatCurrency(value)} contentStyle={{ backgroundColor: '#fff', border: '1px solid #E5E5E5', borderRadius: '8px' }} />
-                    <Legend />
+              <CardContent className="p-2 sm:p-4">
+                <div className="h-[200px] sm:h-[280px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={monthlyData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                      <defs>
+                        <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                      <XAxis dataKey="name" tick={{ fill: '#ffffff80', fontSize: 10 }} />
+                      <YAxis tick={{ fill: '#ffffff80', fontSize: 10 }} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
+                      <Tooltip formatter={(value) => formatCurrency(value)} contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }} />
+                      <Legend wrapperStyle={{ fontSize: '12px' }} />
                     <Area type="monotone" dataKey="income" name="Revenus" stroke="#10B981" fillOpacity={1} fill="url(#colorIncome)" />
                     <Area type="monotone" dataKey="expense" name="Dépenses" stroke="#EF4444" fillOpacity={1} fill="url(#colorExpense)" />
                   </AreaChart>
