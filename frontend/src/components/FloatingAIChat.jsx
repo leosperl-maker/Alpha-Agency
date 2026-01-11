@@ -18,6 +18,12 @@ const FloatingAIChat = () => {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null);
   const messagesEndRef = useRef(null);
+  
+  // Draggable state
+  const [position, setPosition] = useState({ x: null, y: null });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef(null);
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
 
   // Check if we should hide (on assistant page)
   const shouldHide = location.pathname === "/admin/assistant";

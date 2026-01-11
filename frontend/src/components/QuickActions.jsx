@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Plus, X, UserPlus, Receipt, FileText, CheckSquare, 
@@ -20,6 +20,12 @@ const QuickActions = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [loading, setLoading] = useState(false);
+  
+  // Draggable state
+  const [position, setPosition] = useState({ x: null, y: null });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef(null);
+  const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
 
   // Form states
   const [contactForm, setContactForm] = useState({ name: "", email: "", phone: "", company: "" });
