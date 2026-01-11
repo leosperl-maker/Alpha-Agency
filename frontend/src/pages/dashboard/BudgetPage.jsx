@@ -1294,29 +1294,29 @@ const BudgetPage = () => {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-          <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-1 inline-flex min-w-max sm:flex sm:flex-wrap h-auto gap-1">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
-              <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Vue d'ensemble</span><span className="sm:hidden">Vue</span>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6 pb-1">
+          <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-0.5 sm:p-1 inline-flex min-w-max h-auto gap-0.5">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+              <TrendingUp className="w-3 h-3 mr-1" /> Vue
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
-              <Receipt className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Transactions</span><span className="sm:hidden">Trans.</span>
+            <TabsTrigger value="transactions" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+              <Receipt className="w-3 h-3 mr-1" /> Trans.
             </TabsTrigger>
-            <TabsTrigger value="categories" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
-              <Tag className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Catégories</span><span className="sm:hidden">Cat.</span>
+            <TabsTrigger value="categories" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+              <Tag className="w-3 h-3 mr-1" /> Cat.
             </TabsTrigger>
-            <TabsTrigger value="rules" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
-              <Settings2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Règles auto</span><span className="sm:hidden">Règles</span>
+            <TabsTrigger value="rules" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+              <Settings2 className="w-3 h-3 mr-1" /> Règles
             </TabsTrigger>
-            <TabsTrigger value="forecast" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
-              <Target className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> <span className="hidden sm:inline">Prévisionnel</span><span className="sm:hidden">Prévi.</span>
+            <TabsTrigger value="forecast" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+              <Target className="w-3 h-3 mr-1" /> Prévi.
             </TabsTrigger>
-            <TabsTrigger value="cashflow" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
-              <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Cashflow
+            <TabsTrigger value="cashflow" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+              <TrendingUp className="w-3 h-3 mr-1" /> Cash
             </TabsTrigger>
-            <TabsTrigger value="qonto" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm whitespace-nowrap">
-              <Building2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Qonto
+            <TabsTrigger value="qonto" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+              <Building2 className="w-3 h-3 mr-1" /> Qonto
             </TabsTrigger>
           </TabsList>
         </div>
