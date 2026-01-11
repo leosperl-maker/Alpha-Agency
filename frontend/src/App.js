@@ -105,6 +105,8 @@ function App() {
             <Route path="campagnes" element={<CampaignsPage />} />
             <Route path="tags" element={<TagsManagePage />} />
             <Route path="parametres" element={<SettingsPage />} />
+            <Route path="things" element={<ThingsPage />} />
+            <Route path="mindmap" element={<MindMapPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
