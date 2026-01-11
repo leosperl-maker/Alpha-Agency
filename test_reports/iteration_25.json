@@ -1,0 +1,76 @@
+{
+  "summary": "Testing completed for critical DEV-/FAC- prefix bug fix. All 10 backend tests passed (100%). Frontend UI correctly displays and creates documents with proper prefixes. Bug fix verified: creating a devis now returns DEV- prefix instead of FAC-.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/tests/test_invoices_devis_fix.py",
+    "/app/test_reports/pytest/pytest_invoices_devis_fix.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Bug fix verified: Duplicate /invoices routes in server.py were removed",
+    "routes/invoices.py get_next_invoice_number() correctly generates DEV- for devis and FAC- for facture",
+    "Frontend InvoicesPage.jsx correctly passes document_type to API"
+  ],
+  "updated_files": [
+    "/app/tests/test_invoices_devis_fix.py"
+  ],
+  "success_rate": {
+    "backend": "100% (10/10 tests passed)",
+    "frontend": "100% (DEV-/FAC- prefixes display correctly, creation flow works)"
+  },
+  "test_credentials": {
+    "email": "admin@alphagency.fr",
+    "password": "superpassword"
+  },
+  "seed_data_creation": "Created test invoices/devis during testing (DEV-2026-0007, etc.)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Critical DEV-/FAC- prefix bug has been fixed and verified. The fix involved removing duplicate /invoices routes from server.py that were overriding the correct routes in routes/invoices.py. All invoice/devis CRUD operations work correctly.",
+  "features_tested": {
+    "create_devis_dev_prefix": {
+      "status": "PASS",
+      "details": "POST /api/invoices with document_type='devis' returns DEV- prefix (e.g., DEV-2026-0007)"
+    },
+    "create_facture_fac_prefix": {
+      "status": "PASS",
+      "details": "POST /api/invoices with document_type='facture' returns FAC- prefix"
+    },
+    "get_invoices_list": {
+      "status": "PASS",
+      "details": "GET /api/invoices returns list with both DEV- and FAC- prefixed documents"
+    },
+    "get_single_invoice": {
+      "status": "PASS",
+      "details": "GET /api/invoices/{id} returns correct document with proper prefix"
+    },
+    "get_invoice_pdf": {
+      "status": "PASS",
+      "details": "GET /api/invoices/{id}/pdf returns PDF with correct filename (devis_DEV-*.pdf)"
+    },
+    "get_invoice_pdf_url": {
+      "status": "PASS",
+      "details": "GET /api/invoices/{id}/pdf-url returns Cloudinary URL with correct filename"
+    },
+    "frontend_display": {
+      "status": "PASS",
+      "details": "Facturation page displays both DEV- and FAC- prefixed documents correctly"
+    },
+    "frontend_create_devis": {
+      "status": "PASS",
+      "details": "Creating a devis via UI generates DEV- prefix and shows success message"
+    }
+  },
+  "mocked_features": {
+    "has_mocked_apis": false,
+    "mocked_apis_list": [],
+    "note": "All APIs are real implementations. Brevo email configured with noreply@alphagency.fr (requires verification in Brevo dashboard)"
+  }
+}
