@@ -59,6 +59,67 @@ const QuickActions = () => {
     setOpportunityForm({ name: "", amount: "", company: "" });
   };
 
+  // Drag handlers for touch and mouse
+  const handleDragStart = useCallback((e) => {
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    const rect = dragRef.current?.getBoundingClientRect();
+    if (rect) {
+      dragStartRef.current = {
+        x: clientX,
+        y: clientY,
+        posX: position.x ?? window.innerWidth - rect.width - 24,
+        posY: position.y ?? window.innerHeight - rect.height - 24
+      };
+    }
+    setIsDragging(true);
+  }, [position]);
+
+  const handleDragMove = useCallback((e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    const deltaX = clientX - dragStartRef.current.x;
+    const deltaY = clientY - dragStartRef.current.y;
+    
+    const newX = Math.max(24, Math.min(window.innerWidth - 80, dragStartRef.current.posX + deltaX));
+    const newY = Math.max(24, Math.min(window.innerHeight - 80, dragStartRef.current.posY + deltaY));
+    
+    setPosition({ x: newX, y: newY });
+  }, [isDragging]);
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Add global listeners for drag
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleDragMove);
+      window.addEventListener('mouseup', handleDragEnd);
+      window.addEventListener('touchmove', handleDragMove, { passive: false });
+      window.addEventListener('touchend', handleDragEnd);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleDragMove);
+      window.removeEventListener('mouseup', handleDragEnd);
+      window.removeEventListener('touchmove', handleDragMove);
+      window.removeEventListener('touchend', handleDragEnd);
+    };
+  }, [isDragging, handleDragMove, handleDragEnd]);
+
+  // Calculate button style
+  const getButtonStyle = () => {
+    if (position.x !== null && position.y !== null) {
+      return { left: position.x, top: position.y, right: 'auto', bottom: 'auto' };
+    }
+    return {}; // Use CSS default positioning
+  };
+
   const closeModal = () => {
     setActiveModal(null);
     resetForms();

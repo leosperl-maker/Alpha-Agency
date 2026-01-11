@@ -88,13 +88,78 @@ const FloatingAIChat = () => {
 
   if (shouldHide) return null;
 
+  // Drag handlers for touch and mouse
+  const handleDragStart = useCallback((e) => {
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    const rect = dragRef.current?.getBoundingClientRect();
+    if (rect) {
+      dragStartRef.current = {
+        x: clientX,
+        y: clientY,
+        posX: position.x ?? window.innerWidth - rect.width - 24,
+        posY: position.y ?? window.innerHeight - rect.height - 24
+      };
+    }
+    setIsDragging(true);
+  }, [position]);
+
+  const handleDragMove = useCallback((e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    const deltaX = clientX - dragStartRef.current.x;
+    const deltaY = clientY - dragStartRef.current.y;
+    
+    const newX = Math.max(24, Math.min(window.innerWidth - 80, dragStartRef.current.posX + deltaX));
+    const newY = Math.max(24, Math.min(window.innerHeight - 80, dragStartRef.current.posY + deltaY));
+    
+    setPosition({ x: newX, y: newY });
+  }, [isDragging]);
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Add global listeners for drag
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleDragMove);
+      window.addEventListener('mouseup', handleDragEnd);
+      window.addEventListener('touchmove', handleDragMove, { passive: false });
+      window.addEventListener('touchend', handleDragEnd);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleDragMove);
+      window.removeEventListener('mouseup', handleDragEnd);
+      window.removeEventListener('touchmove', handleDragMove);
+      window.removeEventListener('touchend', handleDragEnd);
+    };
+  }, [isDragging, handleDragMove, handleDragEnd]);
+
+  // Calculate button style
+  const getButtonStyle = () => {
+    if (position.x !== null && position.y !== null) {
+      return { left: position.x, top: position.y, right: 'auto', bottom: 'auto' };
+    }
+    return {}; // Use CSS default positioning
+  };
+
   return (
     <>
       {/* Floating Button */}
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-2xl shadow-indigo-500/40 hover:shadow-indigo-500/60 hover:scale-110 transition-all duration-300 flex items-center justify-center group"
+          ref={dragRef}
+          onClick={() => !isDragging && setIsOpen(true)}
+          onMouseDown={handleDragStart}
+          onTouchStart={handleDragStart}
+          style={getButtonStyle()}
+          className={`fixed ${position.x === null ? 'bottom-24 right-6' : ''} z-50 w-14 h-14 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-2xl shadow-indigo-500/40 hover:shadow-indigo-500/60 transition-all duration-300 flex items-center justify-center group touch-none ${isDragging ? 'scale-110 cursor-grabbing' : 'hover:scale-110 cursor-grab'}`}
         >
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
           <Sparkles className="w-6 h-6 relative z-10" />
