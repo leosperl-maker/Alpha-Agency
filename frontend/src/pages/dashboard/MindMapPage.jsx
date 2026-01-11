@@ -446,11 +446,14 @@ const MindMapPage = () => {
       {/* Canvas */}
       <div 
         ref={canvasRef}
-        className="flex-1 overflow-hidden bg-[#050510] mindmap-canvas relative"
+        className="flex-1 overflow-hidden bg-[#050510] mindmap-canvas relative touch-none"
         onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}
         onMouseLeave={handleCanvasMouseUp}
+        onTouchStart={handleCanvasTouchStart}
+        onTouchMove={handleCanvasTouchMove}
+        onTouchEnd={handleCanvasTouchEnd}
         style={{ cursor: isDragging ? "grabbing" : "grab" }}
       >
         {/* Grid background */}
