@@ -404,15 +404,32 @@ const AIAssistantPage = () => {
             
             {/* Context Selector */}
             <Select value={contextType} onValueChange={setContextType}>
-              <SelectTrigger className="w-36 h-8 bg-white border-[#E5E5E5] text-xs">
+              <SelectTrigger className="w-28 sm:w-36 h-8 bg-white border-[#E5E5E5] text-xs">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-white z-50">
                 {contextOptions.map(opt => (
                   <SelectItem key={opt.value} value={opt.value}>
                     <div className="flex items-center gap-2">
                       <opt.icon className="w-3 h-3" />
                       {opt.label}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {/* Model Selector */}
+            <Select value={selectedModel} onValueChange={setSelectedModel}>
+              <SelectTrigger className="w-28 sm:w-36 h-8 bg-white border-[#E5E5E5] text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white z-50">
+                {aiModels.map(model => (
+                  <SelectItem key={model.value} value={model.value}>
+                    <div className="flex items-center gap-2">
+                      <span>{model.icon}</span>
+                      <span className="truncate">{model.label}</span>
                     </div>
                   </SelectItem>
                 ))}
