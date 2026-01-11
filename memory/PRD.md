@@ -222,33 +222,37 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 ### P0 - Bugs Critiques (TOUS CORRIGÉS)
 - [x] ~~Bug PipelinePage.jsx (balises div non fermées)~~ - ✅ Corrigé
 - [x] ~~Texte invisible sélecteur de blocs~~ - ✅ Corrigé avec classes text-white
+- [x] ~~Boutons "Étapes" et "Nouvelle" invisibles sur Pipeline~~ - ✅ Corrigé
 
-### P1 - Priorité haute
-- [x] ~~**Toggle Thème Clair/Sombre**~~ - ✅ Implémenté avec ThemeContext + toggle dans profile dropdown
-- [x] ~~**Intégrer Documents dans l'assistant IA**~~ - ✅ L'IA accède aux fichiers et peut les lister
-- [x] ~~Appliquer le design glassmorphique aux pages restantes~~ - ✅ ContactsPage, PipelinePage, SettingsPage, TasksPage, etc.
+### P1 - Priorité haute (COMPLÉTÉES)
+- [x] ~~**Page Things**~~ - ✅ Liste de tâches journalière implémentée
+- [x] ~~**Page MindMap**~~ - ✅ Outil de mind mapping implémenté
+- [x] ~~**Refonte éditeur Blog**~~ - ✅ Utilise maintenant AdvancedBlockEditor
 - [x] ~~Preview et Rename pour Documents~~ - ✅ Modal de prévisualisation amélioré + option Renommer
 
-### P1.5 - Nouvelles fonctionnalités (demandées par l'utilisateur)
-- [ ] **Page "Things"** - Liste de tâches journalière (style app Things)
-- [ ] **Page "MindMap"** - Outil de mind mapping
+### P1.5 - Fonctionnalités en cours
 - [ ] **Cloche de notifications** - Backend pour stocker/récupérer les notifications
 - [ ] **Bouton Quick Actions** - Créer contact, facture, etc. depuis n'importe où
-- [ ] **Refondre éditeur Blog** - Identique à l'éditeur de blocs avancé
 
 ### P2 - Priorité moyenne
-- [ ] Nettoyer les routes dupliquées dans server.py (auth, contacts, opportunities restent à migrer)
-- [ ] Supprimer le code mort dans server.py après migration complète
-- [ ] Intégration Google Agenda
-- [ ] Tags sur pages publiques (blog/portfolio) avec filtrage
-- [ ] Finaliser intégration Meta (test publication)
+- [ ] **Intégration Qonto** - Synchronisation transactions bancaires avec Budget
+  - Credentials : sb-digital-3245 / 8b715440c1dcf713aa1487662cabd850
+  - Phase 1 : Récupération solde et transactions
+  - Phase 2 : Rapprochement automatique factures ↔ transactions
+  - Phase 3 : Comptabilité intégrée style Indy
 - [ ] Remplacer les champs URL d'image/vidéo par des composants d'upload
-- [ ] Style glassmorphique pour pages restantes (Abonnement, Tags, Social Media, Gestion utilisateurs)
+- [ ] Style glassmorphique pour pages restantes (Abonnement, Tags, Social Media)
+- [ ] Finaliser intégration Meta (test publication)
 
-### P3 - Priorité basse
-- [ ] Refactoring CSS complet pour support réel du thème clair (remplacer couleurs hardcodées par variables CSS)
-- [ ] Étendre l'accès aux données de l'IA (inclure le futur module Documents)
-- [ ] Améliorer la recherche globale dans la topbar (plus de types de résultats)
+### P3 - Priorité basse / Backlog futur
+- [ ] **Import Gmail automatique des factures & reçus**
+  - Analyse boîte de réception toutes les 3h
+  - Extraction automatique (nom tiers, montant, date)
+  - Rapprochement avec transactions Qonto
+  - Section "Vérification des documents" pour factures non rapprochées
+- [ ] **Google Ads / META Ads invoices import** - Import automatique factures publicitaires
+- [ ] Refactoring CSS complet pour support réel du thème clair
+- [ ] Améliorer la recherche globale dans la topbar
 
 ### Session 7 - 2026-01-11 (Corrections bugs critiques + Nouvelles pages)
 - ✅ **Bug Fix CRITIQUE: PipelinePage.jsx**
