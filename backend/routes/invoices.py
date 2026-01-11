@@ -486,8 +486,57 @@ async def download_invoice_pdf(invoice_id: str, current_user: dict = Depends(get
     return StreamingResponse(
         pdf_buffer,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename={filename}"}
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}",
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
     )
+
+
+@router.get("/{invoice_id}/pdf-url")
+async def get_invoice_pdf_url(invoice_id: str, current_user: dict = Depends(get_current_user)):
+    """Generate PDF and upload to Cloudinary, return direct URL (iOS compatible)"""
+    import cloudinary
+    import cloudinary.uploader
+    import os
+    
+    invoice = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+    
+    contact = await db.contacts.find_one({"id": invoice['contact_id']}, {"_id": 0})
+    if not contact:
+        contact = {"first_name": "", "last_name": "", "email": "", "company": ""}
+    
+    doc_type = invoice.get('document_type', 'facture')
+    pdf_buffer = generate_professional_pdf(invoice, contact, doc_type)
+    
+    # Configure Cloudinary
+    cloudinary.config(
+        cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
+        api_key=os.environ.get('CLOUDINARY_API_KEY', ''),
+        api_secret=os.environ.get('CLOUDINARY_API_SECRET', '')
+    )
+    
+    filename = f"{'devis' if doc_type == 'devis' else 'facture'}_{invoice['invoice_number']}"
+    
+    try:
+        # Upload PDF to Cloudinary
+        result = cloudinary.uploader.upload(
+            pdf_buffer.getvalue(),
+            resource_type="raw",
+            public_id=f"pdfs/{filename}",
+            overwrite=True,
+            format="pdf"
+        )
+        
+        return {
+            "url": result.get('secure_url'),
+            "filename": f"{filename}.pdf"
+        }
+    except Exception as e:
+        logger.error(f"Error uploading PDF to Cloudinary: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la génération du PDF")
 
 
 # ==================== PAYMENTS ROUTES ====================
