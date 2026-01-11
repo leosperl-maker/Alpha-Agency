@@ -620,6 +620,236 @@ const CashflowTab = ({ formatCurrency }) => {
   );
 };
 
+// QontoTab Component for Qonto Banking Integration
+const QontoTab = ({ formatCurrency }) => {
+  const [status, setStatus] = useState(null);
+  const [accounts, setAccounts] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [statusRes, balanceRes, txRes, statsRes] = await Promise.all([
+        qontoAPI.getStatus(),
+        qontoAPI.getCachedBalance(),
+        qontoAPI.getCachedTransactions({ limit: 50 }),
+        qontoAPI.getStats()
+      ]);
+      
+      setStatus(statusRes.data);
+      setAccounts(balanceRes.data?.accounts || []);
+      setTransactions(txRes.data?.transactions || []);
+      setStats(statsRes.data);
+    } catch (err) {
+      setError(err.response?.data?.detail || "Erreur de connexion à Qonto");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await qontoAPI.syncAll();
+      toast.success(`${res.data.transactions_synced} transactions synchronisées`);
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "Erreur de synchronisation");
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const totalBalance = accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Connection Status */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`w-3 h-3 rounded-full ${status?.connected ? "bg-green-500" : "bg-red-500"}`} />
+          <span className="text-white">
+            {status?.connected 
+              ? `Connecté à ${status.organization}` 
+              : "Non connecté à Qonto"
+            }
+          </span>
+        </div>
+        <Button 
+          onClick={handleSync} 
+          disabled={syncing || !status?.connected}
+          variant="outline"
+          className="border-white/20 text-white"
+        >
+          {syncing ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <RefreshCw className="w-4 h-4 mr-2" />
+          )}
+          Synchroniser
+        </Button>
+      </div>
+
+      {error && (
+        <Card className="bg-red-500/10 border-red-500/30">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2 text-red-400">
+              <AlertCircle className="w-5 h-5" />
+              <span>{error}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Balance Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="bg-gradient-to-br from-indigo-600/20 to-purple-600/20 backdrop-blur-xl border-white/10">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/60 text-sm">Solde total</p>
+                <p className="text-3xl font-bold text-white">{formatCurrency(totalBalance)}</p>
+              </div>
+              <Wallet className="w-10 h-10 text-indigo-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/60 text-sm">Revenus (30j)</p>
+                <p className="text-2xl font-bold text-green-400">+{formatCurrency(stats?.income?.total || 0)}</p>
+                <p className="text-white/40 text-xs">{stats?.income?.count || 0} transactions</p>
+              </div>
+              <ArrowUpRight className="w-8 h-8 text-green-400" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/60 text-sm">Dépenses (30j)</p>
+                <p className="text-2xl font-bold text-red-400">-{formatCurrency(stats?.expenses?.total || 0)}</p>
+                <p className="text-white/40 text-xs">{stats?.expenses?.count || 0} transactions</p>
+              </div>
+              <ArrowDownRight className="w-8 h-8 text-red-400" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Bank Accounts */}
+      {accounts.length > 0 && (
+        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <CardHeader>
+            <CardTitle className="text-white text-lg flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-indigo-400" />
+              Comptes bancaires
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {accounts.map((account, idx) => (
+                <div key={idx} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                  <div>
+                    <p className="text-white font-medium">{account.name || account.slug}</p>
+                    <p className="text-white/40 text-sm font-mono">{account.iban}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-white">{formatCurrency(account.balance)}</p>
+                    <p className="text-white/40 text-xs">{account.currency}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recent Transactions */}
+      <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <CardHeader>
+          <CardTitle className="text-white text-lg flex items-center gap-2">
+            <Receipt className="w-5 h-5 text-indigo-400" />
+            Dernières transactions
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {transactions.length === 0 ? (
+            <div className="text-center py-8 text-white/40">
+              <Receipt className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>Aucune transaction synchronisée</p>
+              <p className="text-sm mt-1">Cliquez sur "Synchroniser" pour récupérer vos transactions</p>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {transactions.map((tx, idx) => (
+                <div 
+                  key={idx}
+                  className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      tx.side === "credit" ? "bg-green-500/20" : "bg-red-500/20"
+                    }`}>
+                      {tx.side === "credit" ? (
+                        <ArrowDownRight className="w-5 h-5 text-green-400" />
+                      ) : (
+                        <ArrowUpRight className="w-5 h-5 text-red-400" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white font-medium truncate">{tx.label}</p>
+                      <p className="text-white/40 text-xs">
+                        {tx.emitted_at ? new Date(tx.emitted_at).toLocaleDateString('fr-FR') : '-'}
+                        {tx.operation_type && ` • ${tx.operation_type}`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0 ml-4">
+                    <p className={`font-bold ${tx.side === "credit" ? "text-green-400" : "text-red-400"}`}>
+                      {tx.side === "credit" ? "+" : "-"}{formatCurrency(Math.abs(tx.amount))}
+                    </p>
+                    <Badge variant="outline" className={`text-xs ${
+                      tx.status === "completed" ? "text-green-400 border-green-400/30" :
+                      tx.status === "pending" ? "text-amber-400 border-amber-400/30" :
+                      "text-white/40 border-white/20"
+                    }`}>
+                      {tx.status === "completed" ? "Complété" : 
+                       tx.status === "pending" ? "En attente" : tx.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 const BudgetPage = () => {
   // Core state
   const [activeTab, setActiveTab] = useState("overview");
