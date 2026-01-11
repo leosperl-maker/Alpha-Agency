@@ -331,18 +331,18 @@ const MindMapPage = () => {
   if (!mindmap) return null;
 
   return (
-    <div data-testid="mindmap-page" className="h-full flex flex-col">
+    <div data-testid="mindmap-page" className="h-full flex flex-col overflow-hidden">
       {/* Toolbar */}
-      <header className="p-4 border-b border-white/10 flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold text-white">Mind Map</h1>
+      <header className="p-3 sm:p-4 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <h1 className="text-lg sm:text-xl font-bold text-white">Mind Map</h1>
           
           {/* Map selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="border-white/20 text-white">
-                <Layers className="w-4 h-4 mr-2" />
-                {currentMap?.name || "Sélectionner"}
+              <Button variant="outline" size="sm" className="border-white/20 text-white text-xs sm:text-sm">
+                <Layers className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="truncate max-w-[100px] sm:max-w-[150px]">{currentMap?.name || "Sélectionner"}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-[#1a1a2e] border-white/10 w-56">
@@ -366,21 +366,21 @@ const MindMapPage = () => {
           </DropdownMenu>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
           {/* Zoom controls */}
           <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1 border border-white/10">
             <button
               onClick={() => setZoom(z => Math.max(0.25, z - 0.25))}
-              className="p-2 rounded hover:bg-white/10 text-white/60 hover:text-white"
+              className="p-1.5 sm:p-2 rounded hover:bg-white/10 text-white/60 hover:text-white"
             >
               <ZoomOut className="w-4 h-4" />
             </button>
-            <span className="px-2 text-white/60 text-sm min-w-[50px] text-center">
+            <span className="px-1.5 sm:px-2 text-white/60 text-xs sm:text-sm min-w-[40px] sm:min-w-[50px] text-center">
               {Math.round(zoom * 100)}%
             </span>
             <button
               onClick={() => setZoom(z => Math.min(2, z + 0.25))}
-              className="p-2 rounded hover:bg-white/10 text-white/60 hover:text-white"
+              className="p-1.5 sm:p-2 rounded hover:bg-white/10 text-white/60 hover:text-white"
             >
               <ZoomIn className="w-4 h-4" />
             </button>
@@ -391,7 +391,7 @@ const MindMapPage = () => {
             variant="outline"
             size="sm"
             onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
-            className="border-white/20 text-white/60 hover:text-white"
+            className="border-white/20 text-white/60 hover:text-white h-8 w-8 p-0 sm:h-9 sm:w-auto sm:px-3"
           >
             <RotateCcw className="w-4 h-4" />
           </Button>
@@ -401,10 +401,10 @@ const MindMapPage = () => {
             <Button
               size="sm"
               onClick={() => addChild(selectedNode)}
-              className="bg-indigo-600 hover:bg-indigo-500"
+              className="bg-indigo-600 hover:bg-indigo-500 text-xs sm:text-sm"
             >
-              <Plus className="w-4 h-4 mr-1" />
-              Ajouter
+              <Plus className="w-4 h-4 sm:mr-1" />
+              <span className="hidden sm:inline">Ajouter</span>
             </Button>
           )}
         </div>
