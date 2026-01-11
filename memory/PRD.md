@@ -436,40 +436,32 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - ✅ **Nettoyage**
   - Suppression fichier obsolète `FacturationPage.jsx`
 
-### Session 13 - 2026-01-11 (Bug Fix Critique + Améliorations)
+### Session 13 - 2026-01-11 (Bug Fix Critique + Améliorations Majeures)
 - ✅ **Bug Fix P0 CRITIQUE: Création Devis génère FAC- au lieu de DEV-**
-  - **Cause racine:** Routes `/invoices` dupliquées dans `server.py` (lignes 1624-1856) qui étaient enregistrées AVANT celles de `routes/invoices.py`
-  - L'ancienne fonction `get_next_invoice_number()` dans server.py retournait TOUJOURS `FAC-`
-  - **Solution:** Suppression complète des routes invoices dupliquées de server.py
-  - Routes invoices maintenant centralisées dans `routes/invoices.py`
+  - **Cause racine:** Routes `/invoices` dupliquées dans `server.py`
+  - **Solution:** Suppression des routes dupliquées, centralisation dans `routes/invoices.py`
   - Tests: 10/10 passés (100%)
 - ✅ **Configuration Email Brevo**
-  - Adresse d'expéditeur changée vers `noreply@alphagency.fr`
-  - L'utilisateur doit vérifier cette adresse dans le dashboard Brevo
+  - Adresse d'expéditeur: `noreply@alphagency.fr` (à vérifier dans Brevo)
 - ✅ **Amélioration Téléchargement PDF Mobile**
-  - Sur iOS/mobile, utilisation de l'endpoint `/pdf-url` qui génère une URL Cloudinary
-  - Évite les problèmes de blob sur Safari iOS
-  - Fallback vers la méthode blob pour desktop
+  - Utilisation de l'endpoint `/pdf-url` avec URL Cloudinary sur iOS/mobile
 - ✅ **Badges Devis/Facture**
-  - Badge bleu "DEVIS" pour les numéros DEV-XXXX
-  - Badge vert "FACTURE" pour les numéros FAC-XXXX
-  - Utilise le préfixe du numéro comme source de vérité
+  - Badge bleu "DEVIS" pour DEV-XXXX, badge vert "FACTURE" pour FAC-XXXX
 - ✅ **MindMap Style Mindnote**
-  - Courbes de Bézier pour les connexions (plus de lignes droites)
-  - Nœuds avec gradient, ombres et effet de brillance
-  - Fond amélioré avec gradient et grille de points
-  - Bouton "+" rapide pour ajouter un enfant quand un nœud est sélectionné
-- ✅ **Nettoyage Code**
-  - Suppression de ~230 lignes de code dupliqué dans server.py
-  - Architecture backend plus propre
+  - Courbes de Bézier, nœuds avec gradient/ombres, fond amélioré
+- ✅ **Interface Connexion Qonto**
+  - Nouvelle interface élégante avec bouton "Connecter Qonto"
+  - Gestion du callback OAuth2
+  - Bouton de déconnexion
+  - 3 badges de fonctionnalités (Sync auto, Analyse flux, Sécurité)
 
-## En attente
-- **Vérification Email Brevo** : L'utilisateur doit vérifier `noreply@alphagency.fr` dans Brevo
-- **Test PDF Mobile** : L'utilisateur doit confirmer que le téléchargement PDF fonctionne sur son appareil
+## En attente de validation utilisateur
+- **Email Brevo** : Vérifier `noreply@alphagency.fr` dans le dashboard Brevo
+- **PDF Mobile** : Tester le téléchargement sur appareil mobile
+- **Qonto** : L'utilisateur doit autoriser l'accès via OAuth2
 
 ## Test Results
 - Session 13: 100% pass rate (10/10) - iteration_25.json
-- Bug critique DEV-/FAC- prefix corrigé et vérifié
 
 ## Architecture Backend (mise à jour Session 12)
 
