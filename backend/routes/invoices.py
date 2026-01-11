@@ -336,11 +336,17 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     if doc_type == "devis":
         conditions_style = ParagraphStyle('Conditions', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=12)
         elements.append(Paragraph("<b>Conditions:</b>", conditions_style))
-        elements.append(Paragraph("• Date de validité: 30 jours à compter de la date du devis", conditions_style))
-        elements.append(Paragraph("• Moyen de règlement: Virement bancaire ou chèque", conditions_style))
-        elements.append(Paragraph("• Délai de règlement: 30% à la commande, solde à la livraison", conditions_style))
+        
+        # Use custom conditions from settings or document
+        conditions_text = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
+        if conditions_text:
+            for line in conditions_text.strip().split('\n'):
+                if line.strip():
+                    elements.append(Paragraph(line.strip(), conditions_style))
+        
         elements.append(Spacer(1, 0.8*cm))
-        elements.append(Paragraph("<b>Signature du client précédée de la mention 'Lu et approuvé, bon pour accord':</b>", conditions_style))
+        signature_text = invoice_settings.get('signature_text', "Bon pour accord, le client :")
+        elements.append(Paragraph(f"<b>Signature du client précédée de la mention '{signature_text}':</b>", conditions_style))
         elements.append(Spacer(1, 2*cm))
         elements.append(Paragraph("_" * 40, conditions_style))
     
