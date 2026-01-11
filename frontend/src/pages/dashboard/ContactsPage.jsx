@@ -187,7 +187,7 @@ const ContactsPage = () => {
   };
 
   return (
-    <div data-testid="contacts-page" className="space-y-4 sm:space-y-6">
+    <div data-testid="contacts-page" className="space-y-4 sm:space-y-6 overflow-x-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
