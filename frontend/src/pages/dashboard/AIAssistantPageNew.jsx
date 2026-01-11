@@ -554,7 +554,7 @@ const AIAssistantPageNew = () => {
                     {showModelMenu && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowModelMenu(false)} />
-                        <div className="absolute bottom-full left-0 mb-1 w-48 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
+                        <div className="absolute bottom-full left-0 mb-2 w-48 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 transform -translate-y-1">
                           {modelOptions.map(model => (
                             <button
                               key={model.value}
