@@ -4,7 +4,8 @@ import {
   LayoutDashboard, Users, Kanban, FileText, Receipt, CreditCard, Settings,
   LogOut, Menu, X, Image, Inbox, FileCheck, CheckSquare, Wallet, Database,
   UserCog, Bot, Newspaper, Share2, Tag, Mail, ChevronLeft, Bell, Search,
-  User, ChevronDown, AlertCircle, Clock, FileWarning, UserPlus, Sun, Moon
+  User, ChevronDown, AlertCircle, Clock, FileWarning, UserPlus, Sun, Moon,
+  ListTodo, GitBranch
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
