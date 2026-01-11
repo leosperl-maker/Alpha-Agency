@@ -20,13 +20,16 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - Colonnes personnalisables
 - Drag & drop
 
-### 4. Facturation ✅ UPDATED 2026-01-10
+### 4. Facturation ✅ UPDATED 2026-01-11
 - Devis et factures avec prévisualisation PDF
 - **Services avec titre séparé de la description**
 - **Remises par ligne (%)**
 - **Remise globale (% ou montant fixe)**
 - Suivi des paiements
 - TVA 8.5% (Guadeloupe)
+- **PDF téléchargement mobile iOS/Safari corrigé** ✅
+- **Mise en page PDF : Expéditeur (gauche) / Destinataire (droite)** ✅
+- **Nom de fichier PDF correct (devis_DEV-XXXX.pdf / facture_FAC-XXXX.pdf)** ✅
 
 ### 5. Budget & Trésorerie
 - Graphique évolution mensuelle (combine budget + bank_transactions)
