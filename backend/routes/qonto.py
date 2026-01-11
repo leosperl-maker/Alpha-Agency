@@ -14,17 +14,37 @@ from pymongo import MongoClient
 
 router = APIRouter(prefix="/qonto", tags=["Qonto"])
 
-# Qonto API Configuration
+# Qonto API Configuration - OAuth2
 QONTO_API_BASE = "https://thirdparty.qonto.com/v2"
-QONTO_LOGIN = os.environ.get("QONTO_LOGIN", "sb-digital-3245")
-QONTO_SECRET = os.environ.get("QONTO_SECRET_KEY", "8b715440c1dcf713aa1487662cabd850")
+QONTO_CLIENT_ID = os.environ.get("QONTO_CLIENT_ID", "65f89684-6c15-4ba4-9f89-8efc52ae6f10")
+QONTO_CLIENT_SECRET = os.environ.get("QONTO_CLIENT_SECRET", "S3vc0ir927G37S8AOZSU2SzQpD")
+QONTO_OAUTH_URL = "https://oauth.qonto.com/oauth2/token"
 
-def get_qonto_headers():
-    """Generate authentication headers for Qonto API (Basic Auth)"""
-    credentials = f"{QONTO_LOGIN}:{QONTO_SECRET}"
-    encoded = base64.b64encode(credentials.encode()).decode()
+async def get_oauth_token():
+    """Get OAuth2 access token from Qonto"""
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(
+                QONTO_OAUTH_URL,
+                data={
+                    "grant_type": "client_credentials",
+                    "client_id": QONTO_CLIENT_ID,
+                    "client_secret": QONTO_CLIENT_SECRET,
+                    "scope": "read"
+                },
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
+            )
+            if response.status_code == 200:
+                return response.json().get("access_token")
+            return None
+        except Exception as e:
+            print(f"OAuth error: {e}")
+            return None
+
+def get_qonto_headers(token: str = None):
+    """Generate authentication headers for Qonto API (Bearer token)"""
     return {
-        "Authorization": f"Basic {encoded}",
+        "Authorization": f"Bearer {token}" if token else "",
         "Content-Type": "application/json"
     }
 
