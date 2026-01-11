@@ -219,10 +219,22 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 
 ## Pending Tasks
 
+### P0 - Bugs Critiques (TOUS CORRIGÉS)
+- [x] ~~Bug PipelinePage.jsx (balises div non fermées)~~ - ✅ Corrigé
+- [x] ~~Texte invisible sélecteur de blocs~~ - ✅ Corrigé avec classes text-white
+
 ### P1 - Priorité haute
 - [x] ~~**Toggle Thème Clair/Sombre**~~ - ✅ Implémenté avec ThemeContext + toggle dans profile dropdown
 - [x] ~~**Intégrer Documents dans l'assistant IA**~~ - ✅ L'IA accède aux fichiers et peut les lister
 - [x] ~~Appliquer le design glassmorphique aux pages restantes~~ - ✅ ContactsPage, PipelinePage, SettingsPage, TasksPage, etc.
+- [x] ~~Preview et Rename pour Documents~~ - ✅ Modal de prévisualisation amélioré + option Renommer
+
+### P1.5 - Nouvelles fonctionnalités (demandées par l'utilisateur)
+- [ ] **Page "Things"** - Liste de tâches journalière (style app Things)
+- [ ] **Page "MindMap"** - Outil de mind mapping
+- [ ] **Cloche de notifications** - Backend pour stocker/récupérer les notifications
+- [ ] **Bouton Quick Actions** - Créer contact, facture, etc. depuis n'importe où
+- [ ] **Refondre éditeur Blog** - Identique à l'éditeur de blocs avancé
 
 ### P2 - Priorité moyenne
 - [ ] Nettoyer les routes dupliquées dans server.py (auth, contacts, opportunities restent à migrer)
@@ -230,8 +242,11 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - [ ] Intégration Google Agenda
 - [ ] Tags sur pages publiques (blog/portfolio) avec filtrage
 - [ ] Finaliser intégration Meta (test publication)
+- [ ] Remplacer les champs URL d'image/vidéo par des composants d'upload
+- [ ] Style glassmorphique pour pages restantes (Abonnement, Tags, Social Media, Gestion utilisateurs)
 
 ### P3 - Priorité basse
+- [ ] Refactoring CSS complet pour support réel du thème clair (remplacer couleurs hardcodées par variables CSS)
 - [ ] Étendre l'accès aux données de l'IA (inclure le futur module Documents)
 - [ ] Améliorer la recherche globale dans la topbar (plus de types de résultats)
 
