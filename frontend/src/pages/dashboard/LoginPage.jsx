@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, Mail, Eye, EyeOff, Shield } from "lucide-react";
@@ -12,10 +12,20 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
+
+  // Check if user chose "remember me" before
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("alpha_remember_email");
+    if (savedEmail) {
+      setFormData(prev => ({ ...prev, email: savedEmail }));
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,6 +44,18 @@ const LoginPage = () => {
 
       localStorage.setItem("alpha_token", response.data.token);
       localStorage.setItem("alpha_user", JSON.stringify(response.data.user));
+      
+      // Handle "Remember me"
+      if (rememberMe) {
+        localStorage.setItem("alpha_remember_email", formData.email);
+        // Set longer token expiry (30 days)
+        localStorage.setItem("alpha_token_expiry", Date.now() + 30 * 24 * 60 * 60 * 1000);
+      } else {
+        localStorage.removeItem("alpha_remember_email");
+        // Set normal token expiry (1 day)
+        localStorage.setItem("alpha_token_expiry", Date.now() + 24 * 60 * 60 * 1000);
+      }
+      
       toast.success("Connexion réussie");
       navigate("/admin");
     } catch (error) {
@@ -117,6 +139,20 @@ const LoginPage = () => {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+            </div>
+
+            {/* Remember me checkbox */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="remember-me"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-white/20 bg-white/5 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0"
+              />
+              <Label htmlFor="remember-me" className="text-white/60 text-sm cursor-pointer">
+                Rester connecté
+              </Label>
             </div>
 
             <Button
