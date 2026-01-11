@@ -443,8 +443,12 @@ async def get_my_transfers(
         
         for t in transfers:
             t["download_link"] = f"{ALPHAGENCY_URL}/transfer/{t['id']}"
-            expires_at = datetime.fromisoformat(t["expires_at"].replace('Z', '+00:00'))
-            t["is_expired"] = now > expires_at
+            # Handle never-expiring transfers
+            if t.get("never_expires") or not t.get("expires_at"):
+                t["is_expired"] = False
+            else:
+                expires_at = datetime.fromisoformat(t["expires_at"].replace('Z', '+00:00'))
+                t["is_expired"] = now > expires_at
         
         return {"data": transfers}
         
@@ -465,10 +469,13 @@ async def get_public_transfer(transfer_id: str):
         if not transfer:
             raise HTTPException(status_code=404, detail="Transfer not found")
         
-        # Check expiry
+        # Check expiry (handle never-expiring transfers)
         now = datetime.now(timezone.utc)
-        expires_at = datetime.fromisoformat(transfer["expires_at"].replace('Z', '+00:00'))
-        is_expired = now > expires_at
+        if transfer.get("never_expires") or not transfer.get("expires_at"):
+            is_expired = False
+        else:
+            expires_at = datetime.fromisoformat(transfer["expires_at"].replace('Z', '+00:00'))
+            is_expired = now > expires_at
         
         return {
             "id": transfer["id"],
@@ -478,9 +485,11 @@ async def get_public_transfer(transfer_id: str):
             "total_size": transfer["total_size"],
             "total_size_formatted": transfer["total_size_formatted"],
             "sender_name": transfer.get("sender_name", "Quelqu'un"),
-            "expires_at": transfer["expires_at"],
+            "expires_at": transfer.get("expires_at"),
+            "never_expires": transfer.get("never_expires", False),
             "is_expired": is_expired,
             "download_count": transfer.get("download_count", 0),
+            "comments": transfer.get("comments", []),
             "created_at": transfer["created_at"]
         }
         
