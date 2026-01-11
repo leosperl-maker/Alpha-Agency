@@ -162,51 +162,38 @@ export const invoicesAPI = {
           const { url } = response.data;
           
           if (url) {
-            // Open the Cloudinary URL directly
             window.open(url, '_blank');
             return true;
           }
         } catch (cloudinaryError) {
-          console.warn('Cloudinary PDF failed, trying alternative method:', cloudinaryError);
+          console.warn('Cloudinary PDF failed, trying blob method:', cloudinaryError);
         }
       }
       
-      // Standard approach: Use blob with fetch for better compatibility
-      const token = localStorage.getItem('token');
-      const baseUrl = process.env.REACT_APP_BACKEND_URL || '';
-      
-      const response = await fetch(`${baseUrl}/api/invoices/${id}/pdf`, {
-        method: 'GET',
+      // Desktop: Use axios with blob response
+      const response = await api.get(`/invoices/${id}/pdf`, {
+        responseType: 'blob',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Accept': 'application/pdf'
         }
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const blob = await response.blob();
-      
-      if (!blob || blob.size === 0) {
+      // Verify we got valid data
+      if (!response.data || response.data.size === 0) {
         throw new Error('Empty PDF response');
       }
       
+      const blob = new Blob([response.data], { type: 'application/pdf' });
       const filename = `${type}_${invoiceNumber || id}.pdf`;
       
-      // Create download using blob URL
+      // Create download link
       const downloadUrl = window.URL.createObjectURL(blob);
-      
-      // Use anchor element for download
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = filename;
       link.style.display = 'none';
       
       document.body.appendChild(link);
-      
-      // Trigger download
       link.click();
       
       // Cleanup
