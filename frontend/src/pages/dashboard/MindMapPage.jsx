@@ -377,22 +377,7 @@ const MindMapPage = () => {
             style={{ filter: "blur(8px)" }}
           />
           
-          {/* Glow effect when selected */}
-          {isSelected && (
-            <ellipse
-              cx={0}
-              cy={0}
-              rx={nodeWidth / 2 + 8}
-              ry={nodeHeight / 2 + 8}
-              fill="none"
-              stroke={color.hex}
-              strokeWidth={3}
-              strokeOpacity={0.4}
-              style={{ filter: "blur(4px)" }}
-            />
-          )}
-          
-          {/* Node background with gradient */}
+          {/* Node background - simplified for mobile */}
           <rect
             x={-nodeWidth / 2}
             y={-nodeHeight / 2}
@@ -400,21 +385,8 @@ const MindMapPage = () => {
             height={nodeHeight}
             rx={isRoot ? nodeHeight / 2 : 16}
             fill={color.hex}
-            stroke={isSelected ? "white" : "rgba(255,255,255,0.2)"}
-            strokeWidth={isSelected ? 2.5 : 1}
-            style={{ 
-              filter: isSelected ? `drop-shadow(0 0 20px ${color.hex})` : "none",
-            }}
-          />
-          
-          {/* Inner highlight */}
-          <rect
-            x={-nodeWidth / 2 + 2}
-            y={-nodeHeight / 2 + 2}
-            width={nodeWidth - 4}
-            height={nodeHeight / 2 - 4}
-            rx={isRoot ? (nodeHeight / 2) - 2 : 14}
-            fill="rgba(255,255,255,0.15)"
+            stroke={isSelected ? "white" : "rgba(255,255,255,0.3)"}
+            strokeWidth={isSelected ? 3 : 1}
           />
           
           {/* Node text */}
@@ -425,7 +397,7 @@ const MindMapPage = () => {
             fill="white"
             fontSize={isRoot ? 16 : 14}
             fontWeight={isRoot ? 600 : 500}
-            style={{ pointerEvents: "none", textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
+            style={{ pointerEvents: "none" }}
           >
             {node.text.length > 20 ? node.text.slice(0, 20) + "..." : node.text}
           </text>
