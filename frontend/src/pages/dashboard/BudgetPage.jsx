@@ -3,7 +3,7 @@ import {
   Plus, TrendingUp, TrendingDown, Wallet, PiggyBank, MoreVertical, Trash2, Edit, 
   Calendar, Filter, ArrowUpRight, ArrowDownRight, Upload, Download, Settings2,
   Tag, FileSpreadsheet, Search, ChevronRight, X, Check, Loader2, AlertCircle,
-  Banknote, CreditCard, Receipt, Target, RefreshCw
+  Banknote, CreditCard, Receipt, Target, RefreshCw, ExternalLink, Shield
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
