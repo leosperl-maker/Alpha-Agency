@@ -340,40 +340,23 @@ const MindMapPage = () => {
           const childColor = NODE_COLORS[child.color] || NODE_COLORS[0];
           return (
             <g key={`line-${node.id}-${child.id}`}>
-              {/* Glow effect */}
+              {/* Main line only - simplified */}
               <path
                 d={generateCurvedPath(node.x, node.y, child.x, child.y)}
                 fill="none"
                 stroke={color.hex}
-                strokeWidth={6}
-                strokeOpacity={0.15}
-                strokeLinecap="round"
-              />
-              {/* Main line */}
-              <path
-                d={generateCurvedPath(node.x, node.y, child.x, child.y)}
-                fill="none"
-                stroke={`url(#line-gradient-${node.id}-${child.id})`}
                 strokeWidth={2.5}
+                strokeOpacity={0.7}
                 strokeLinecap="round"
-                className="transition-all duration-300"
               />
-              {/* Gradient definition for this line */}
-              <defs>
-                <linearGradient id={`line-gradient-${node.id}-${child.id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor={color.hex} stopOpacity="0.8" />
-                  <stop offset="100%" stopColor={childColor.hex} stopOpacity="0.8" />
-                </linearGradient>
-              </defs>
             </g>
           );
         })}
         
-        {/* Node */}
+        {/* Node - no CSS transform to avoid SVG glitches */}
         <g
           transform={`translate(${node.x}, ${node.y})`}
           style={{ cursor: "pointer" }}
-          className="transition-transform duration-200 hover:scale-105"
           onMouseDown={(e) => {
             e.stopPropagation();
             setDraggingNode(node.id);
