@@ -225,23 +225,22 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - [x] ~~Boutons "Étapes" et "Nouvelle" invisibles sur Pipeline~~ - ✅ Corrigé
 
 ### P1 - Priorité haute (COMPLÉTÉES)
-- [x] ~~**Page Things**~~ - ✅ Liste de tâches journalière implémentée
-- [x] ~~**Page MindMap**~~ - ✅ Outil de mind mapping implémenté
-- [x] ~~**Refonte éditeur Blog**~~ - ✅ Utilise maintenant AdvancedBlockEditor
-- [x] ~~Preview et Rename pour Documents~~ - ✅ Modal de prévisualisation amélioré + option Renommer
+- [x] ~~**Page Things**~~ - ✅ Liste de tâches journalière
+- [x] ~~**Page MindMap**~~ - ✅ Outil de mind mapping
+- [x] ~~**Refonte éditeur Blog**~~ - ✅ Utilise AdvancedBlockEditor
+- [x] ~~**Preview et Rename pour Documents**~~ - ✅ Modal amélioré
+- [x] ~~**Bouton Quick Actions**~~ - ✅ Bouton flottant avec 6 actions rapides
+- [x] ~~**Intégration Qonto (Phase 1)**~~ - ✅ Onglet Qonto dans Budget avec sync transactions
 
 ### P1.5 - Fonctionnalités en cours
-- [ ] **Cloche de notifications** - Backend pour stocker/récupérer les notifications
-- [ ] **Bouton Quick Actions** - Créer contact, facture, etc. depuis n'importe où
+- [ ] **Cloche de notifications fonctionnelle** - Backend + frontend pour notifications temps réel
+- [ ] **Intégration Qonto (Phase 2)** - Rapprochement automatique factures ↔ transactions
+  - Credentials actuels : sb-digital-3245 / 8b715440c1dcf713aa1487662cabd850 (⚠️ semblent invalides, vérifier avec Qonto)
 
 ### P2 - Priorité moyenne
-- [ ] **Intégration Qonto** - Synchronisation transactions bancaires avec Budget
-  - Credentials : sb-digital-3245 / 8b715440c1dcf713aa1487662cabd850
-  - Phase 1 : Récupération solde et transactions
-  - Phase 2 : Rapprochement automatique factures ↔ transactions
-  - Phase 3 : Comptabilité intégrée style Indy
+- [ ] **Intégration Qonto (Phase 3)** - Comptabilité intégrée style Indy, calcul TVA, déclarations
 - [ ] Remplacer les champs URL d'image/vidéo par des composants d'upload
-- [ ] Style glassmorphique pour pages restantes (Abonnement, Tags, Social Media)
+- [ ] Style glassmorphique pour pages restantes
 - [ ] Finaliser intégration Meta (test publication)
 
 ### P3 - Priorité basse / Backlog futur
@@ -249,10 +248,8 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Analyse boîte de réception toutes les 3h
   - Extraction automatique (nom tiers, montant, date)
   - Rapprochement avec transactions Qonto
-  - Section "Vérification des documents" pour factures non rapprochées
 - [ ] **Google Ads / META Ads invoices import** - Import automatique factures publicitaires
 - [ ] Refactoring CSS complet pour support réel du thème clair
-- [ ] Améliorer la recherche globale dans la topbar
 
 ### Session 7 - 2026-01-11 (Corrections bugs critiques + Nouvelles pages)
 - ✅ **Bug Fix CRITIQUE: PipelinePage.jsx**
