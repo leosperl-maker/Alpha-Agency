@@ -10,6 +10,7 @@ import {
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import FloatingAIChat from "../../components/FloatingAIChat";
+import QuickActions from "../../components/QuickActions";
 import { tasksAPI, contactsAPI, invoicesAPI } from "../../lib/api";
 import { useTheme } from "../../contexts/ThemeContext";
 
