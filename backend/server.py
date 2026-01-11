@@ -5401,26 +5401,7 @@ def generate_professional_invoice_pdf(invoice: dict, contact: dict) -> BytesIO:
     buffer.seek(0)
     return buffer
 
-# Override invoice PDF endpoint with professional version
-@api_router.get("/invoices/{invoice_id}/pdf")
-async def download_professional_invoice_pdf(invoice_id: str, current_user: dict = Depends(get_current_user)):
-    invoice = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
-    if not invoice:
-        raise HTTPException(status_code=404, detail="Facture non trouvée")
-    
-    contact = await db.contacts.find_one({"id": invoice['contact_id']}, {"_id": 0})
-    if not contact:
-        contact = {"first_name": "", "last_name": "", "email": "", "company": ""}
-    
-    pdf_buffer = generate_professional_invoice_pdf(invoice, contact)
-    doc_type = invoice.get('document_type', 'facture')
-    prefix = 'devis' if doc_type == 'devis' else 'facture'
-    
-    return StreamingResponse(
-        pdf_buffer,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename={prefix}_{invoice['invoice_number']}.pdf"}
-    )
+# NOTE: L'endpoint /invoices/{invoice_id}/pdf est maintenant dans routes/invoices.py
 
 # ==================== ADMIN USERS MANAGEMENT ====================
 
