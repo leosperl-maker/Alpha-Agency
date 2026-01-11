@@ -385,9 +385,8 @@ async def create_transfer(
         # Save to database
         await db.transfers.insert_one(transfer_doc)
         
-        # Generate download link
-        frontend_url = os.environ.get('FRONTEND_URL', 'https://easytransfer-17.preview.emergentagent.com')
-        download_link = f"{frontend_url}/transfer/{transfer_id}"
+        # Generate download link using alphagency.fr domain
+        download_link = f"{ALPHAGENCY_URL}/transfer/{transfer_id}"
         
         # Format expiry date for email
         expires_formatted = expires_at.strftime("%d/%m/%Y à %H:%M")
