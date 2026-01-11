@@ -632,20 +632,27 @@ async def trigger_invoice_reminders(current_user: dict = Depends(get_current_use
     
     return {"message": f"{sent_count} rappel(s) de facture envoyé(s)", "sent": sent_count}
 
+class TestEmailRequest(BaseModel):
+    to_email: Optional[str] = None
+
 @api_router.post("/notifications/test-email", response_model=dict)
-async def test_email_notification(current_user: dict = Depends(get_current_user)):
+async def test_email_notification(request: TestEmailRequest = None, current_user: dict = Depends(get_current_user)):
     """Send a test email to verify Brevo configuration"""
-    user = await db.users.find_one({"id": current_user["user_id"]})
-    user_email = user.get("email") if user else None
+    # Use provided email or fall back to user's email
+    if request and request.to_email:
+        target_email = request.to_email
+    else:
+        user = await db.users.find_one({"id": current_user["user_id"]})
+        target_email = user.get("email") if user else None
     
-    if not user_email:
-        raise HTTPException(status_code=400, detail="Email utilisateur non trouvé")
+    if not target_email:
+        raise HTTPException(status_code=400, detail="Email non trouvé")
     
     html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <div style="background: #22C55E; color: white; padding: 20px; text-align: center;">
+            <div style="background: linear-gradient(135deg, #e63946, #c1121f); color: white; padding: 20px; text-align: center;">
                 <h1 style="margin: 0; font-size: 24px;">✅ Test Email Réussi</h1>
             </div>
             <div style="padding: 30px; text-align: center;">
@@ -655,16 +662,19 @@ async def test_email_notification(current_user: dict = Depends(get_current_user)
                 <p style="color: #999; font-size: 14px; margin-top: 20px;">
                     Envoyé depuis Alpha Agency CRM via Brevo API
                 </p>
+                <p style="color: #ccc; font-size: 12px; margin-top: 10px;">
+                    Expéditeur: noreply@alphagency.fr
+                </p>
             </div>
         </div>
     </body>
     </html>
     """
     
-    success = await send_email_notification(user_email, "✅ Test Email - Alpha Agency CRM", html, user.get("full_name", ""))
+    success = await send_email_notification(target_email, "✅ Test Email - Alpha Agency CRM", html, "")
     
     if success:
-        return {"message": f"Email de test envoyé à {user_email}", "success": True}
+        return {"message": f"Email de test envoyé à {target_email}", "success": True}
     else:
         raise HTTPException(status_code=500, detail="Échec de l'envoi de l'email de test")
 
