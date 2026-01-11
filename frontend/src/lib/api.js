@@ -447,6 +447,18 @@ export const cashflowAPI = {
   getProjection: (startMonth, months = 6) => api.get('/budget/cashflow', { params: { start_month: startMonth, months } }),
 };
 
+// Qonto Banking API
+export const qontoAPI = {
+  getStatus: () => api.get('/qonto/status'),
+  getOrganization: () => api.get('/qonto/organization'),
+  getAccounts: () => api.get('/qonto/accounts'),
+  getTransactions: (params) => api.get('/qonto/transactions', { params }),
+  syncAll: () => api.post('/qonto/sync'),
+  getCachedTransactions: (params) => api.get('/qonto/cached/transactions', { params }),
+  getCachedBalance: () => api.get('/qonto/cached/balance'),
+  getStats: () => api.get('/qonto/stats'),
+};
+
 // Notifications API
 export const notificationsAPI = {
   getSettings: () => api.get('/notifications/settings'),
