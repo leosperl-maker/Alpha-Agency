@@ -380,6 +380,26 @@ const InvoicesPage = () => {
     }
   };
 
+  const handleConvertToInvoice = async (devis) => {
+    try {
+      const newInvoice = {
+        contact_id: devis.contact_id,
+        due_date: "",
+        payment_terms: devis.payment_terms || "30",
+        notes: devis.notes,
+        conditions: devis.conditions,
+        bank_details: devis.bank_details,
+        items: devis.items,
+        document_type: "facture"
+      };
+      await invoicesAPI.create(newInvoice);
+      toast.success("Devis converti en facture");
+      fetchData();
+    } catch (error) {
+      toast.error("Erreur lors de la conversion");
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       contact_id: "",
