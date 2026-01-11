@@ -366,10 +366,42 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Colonnes Kanban encore plus étroites (260px)
   - Stats cards empilées proprement
 
+### Session 10 - 2026-01-11 (Mobile-First Responsive V2)
+- ✅ **Responsive Mobile-First amélioré**
+  - Polices réduites: `text-[10px]` pour labels, `text-xs` pour texte
+  - Espacements compacts: `p-2 sm:p-3`, `gap-1.5 sm:gap-2`
+  - Icônes réduites: `w-3 h-3 sm:w-4 sm:h-4`
+- ✅ **Page Budget V2**
+  - Header ultra-compact avec titre et actions en ligne
+  - Cards stats avec icônes à gauche et texte tronqué
+  - Tabs avec `text-[10px]` et abréviations (Vue, Trans., Cat., etc.)
+- ✅ **Page Facturation V2**
+  - Header compact avec dropdown "Nouveau"
+  - Stats cards 2x2 ultra-compactes
+  - Filtres inline (recherche + dropdown)
+- ✅ **Page Tâches V2**
+  - Stats en 3 colonnes centrées sur mobile
+  - Recherche et filtre compacts (h-8)
+  - Kanban avec gap-2 et colonnes scrollables
+- ✅ **Assistant IA - Accès CRM complet**
+  - Contexte étendu aux données Qonto (comptes et transactions)
+  - L'IA peut maintenant voir toutes les données : Budget, Factures, Contacts, Tâches, Pipeline, Devis, Documents, Qonto
+- ✅ **Page Things - Archivage automatique**
+  - Les tâches complétées sont automatiquement déplacées vers "Archives"
+  - Fonction de restauration disponible
+- ⚠️ **Intégration Qonto OAuth2**
+  - Code mis à jour pour OAuth2 (client_credentials flow)
+  - **BLOQUÉ** : Les credentials fournis retournent `invalid_client`
+  - L'utilisateur doit fournir des credentials valides
+
 ## Test Results
 - Session 8: 100% pass rate (7/7 tests frontend mobile) - iteration_21.json
 - Session 9: 100% pass rate (6/6 tests frontend mobile) - iteration_22.json
+- Session 10: 100% pass rate (6/6 tests frontend mobile) - iteration_23.json
 - Viewport testé: 375x800 (iPhone SE/XR)
 - Toutes les pages principales fonctionnent correctement sur mobile
 
+## Known Issues
+- **Qonto OAuth2** : Les credentials `65f89684-6c15-4ba4-9f89-8efc52ae6f10` / `S3vc0ir927G37S8AOZSU2SzQpD` retournent `invalid_client`. L'utilisateur doit vérifier ses credentials dans l'espace développeur Qonto.
+- **Toggle thème** : Le toggle clair/sombre ne fonctionne pas visuellement (P2)
 
