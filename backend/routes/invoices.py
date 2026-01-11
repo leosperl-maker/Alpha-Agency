@@ -515,8 +515,11 @@ async def download_invoice_pdf(invoice_id: str, current_user: dict = Depends(get
     if not contact:
         contact = {"first_name": "", "last_name": "", "email": "", "company": ""}
     
+    # Load invoice settings
+    invoice_settings = await db.settings.find_one({"type": "invoice_settings"}, {"_id": 0})
+    
     doc_type = invoice.get('document_type', 'facture')
-    pdf_buffer = generate_professional_pdf(invoice, contact, doc_type)
+    pdf_buffer = generate_professional_pdf(invoice, contact, doc_type, invoice_settings)
     
     filename = f"{'devis' if doc_type == 'devis' else 'facture'}_{invoice['invoice_number']}.pdf"
     return StreamingResponse(
