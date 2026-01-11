@@ -364,8 +364,10 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
 async def create_invoice(invoice: InvoiceCreate, current_user: dict = Depends(get_current_user)):
     """Create a new invoice or quote"""
     invoice_id = str(uuid.uuid4())
-    doc_type = invoice.document_type or "facture"
-    print(f"DEBUG: Creating document with type: '{doc_type}', raw value: '{invoice.document_type}'")
+    # DEBUG v2 - 2026-01-11 17:10
+    raw_doc_type = invoice.document_type
+    doc_type = raw_doc_type if raw_doc_type else "facture"
+    print(f"[INVOICE_DEBUG_V2] raw_doc_type='{raw_doc_type}', final doc_type='{doc_type}'")
     logger.info(f"Creating document with type: {doc_type}, raw value: {invoice.document_type}")
     invoice_number = await get_next_invoice_number(doc_type)
     
