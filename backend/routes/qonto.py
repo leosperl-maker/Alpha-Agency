@@ -249,9 +249,9 @@ class QontoTransaction(BaseModel):
 async def get_qonto_status():
     """Check Qonto API connection status"""
     try:
-        token = await get_oauth_token()
+        token = await get_valid_token()
         if not token:
-            return {"connected": False, "error": "Impossible d'obtenir le token OAuth2"}
+            return {"connected": False, "error": "Non connecté. Veuillez autoriser l'accès Qonto."}
         
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(
@@ -267,7 +267,7 @@ async def get_qonto_status():
                     "slug": data.get("organization", {}).get("slug", "Unknown")
                 }
             elif response.status_code == 401:
-                return {"connected": False, "error": "Token expiré ou invalide"}
+                return {"connected": False, "error": "Token expiré, reconnexion nécessaire"}
             else:
                 return {"connected": False, "error": f"Erreur API: {response.status_code}"}
     except Exception as e:
@@ -278,9 +278,9 @@ async def get_qonto_status():
 async def get_organization():
     """Get organization details from Qonto"""
     try:
-        token = await get_oauth_token()
+        token = await get_valid_token()
         if not token:
-            raise HTTPException(status_code=401, detail="Impossible d'obtenir le token OAuth2")
+            raise HTTPException(status_code=401, detail="Non connecté à Qonto")
         
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(
@@ -300,9 +300,9 @@ async def get_organization():
 async def get_bank_accounts():
     """Get all bank accounts from Qonto"""
     try:
-        token = await get_oauth_token()
+        token = await get_valid_token()
         if not token:
-            raise HTTPException(status_code=401, detail="Impossible d'obtenir le token OAuth2")
+            raise HTTPException(status_code=401, detail="Non connecté à Qonto")
         
         async with httpx.AsyncClient(timeout=10.0) as client:
             # First get organization to get the slug
