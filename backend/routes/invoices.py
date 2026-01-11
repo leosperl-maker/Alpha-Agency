@@ -527,6 +527,79 @@ async def update_invoice_status(invoice_id: str, status_update: StatusUpdate, cu
     return {"message": f"Statut mis à jour: {status}"}
 
 
+@router.get("/{invoice_id}/pdf-token")
+async def get_pdf_download_token(invoice_id: str, current_user: dict = Depends(get_current_user)):
+    """Generate a temporary token for PDF download (for mobile Safari)"""
+    import secrets
+    
+    # Verify invoice exists
+    invoice = await db.invoices.find_one({"id": invoice_id}, {"_id": 0, "invoice_number": 1})
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+    
+    # Generate temporary token (valid for 5 minutes)
+    token = secrets.token_urlsafe(32)
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
+    
+    # Store token in database
+    await db.pdf_tokens.insert_one({
+        "token": token,
+        "invoice_id": invoice_id,
+        "expires_at": expires_at.isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {
+        "token": token,
+        "invoice_number": invoice.get('invoice_number'),
+        "expires_in": 300
+    }
+
+
+@router.get("/{invoice_id}/pdf-download/{token}")
+async def download_pdf_with_token(invoice_id: str, token: str):
+    """Download PDF using temporary token (no auth header needed - for mobile Safari)"""
+    # Verify token
+    token_doc = await db.pdf_tokens.find_one({"token": token, "invoice_id": invoice_id})
+    if not token_doc:
+        raise HTTPException(status_code=401, detail="Token invalide ou expiré")
+    
+    # Check expiration
+    expires_at = datetime.fromisoformat(token_doc['expires_at'].replace('Z', '+00:00'))
+    if datetime.now(timezone.utc) > expires_at:
+        await db.pdf_tokens.delete_one({"token": token})
+        raise HTTPException(status_code=401, detail="Token expiré")
+    
+    # Delete token (one-time use)
+    await db.pdf_tokens.delete_one({"token": token})
+    
+    # Get invoice
+    invoice = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+    
+    contact = await db.contacts.find_one({"id": invoice['contact_id']}, {"_id": 0})
+    if not contact:
+        contact = {"first_name": "", "last_name": "", "email": "", "company": ""}
+    
+    # Load invoice settings
+    invoice_settings = await db.settings.find_one({"type": "invoice_settings"}, {"_id": 0})
+    
+    doc_type = invoice.get('document_type', 'facture')
+    pdf_buffer = generate_professional_pdf(invoice, contact, doc_type, invoice_settings)
+    
+    filename = f"{'devis' if doc_type == 'devis' else 'facture'}_{invoice['invoice_number']}.pdf"
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"inline; filename={filename}",
+            "Content-Type": "application/pdf",
+            "Cache-Control": "no-cache"
+        }
+    )
+
+
 @router.get("/{invoice_id}/pdf")
 async def download_invoice_pdf(invoice_id: str, current_user: dict = Depends(get_current_user)):
     """Download invoice as PDF"""
