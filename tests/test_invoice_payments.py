@@ -8,7 +8,7 @@ import requests
 import os
 from datetime import datetime
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://taskflow-revamp-3.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://smartcrm-mobile.preview.emergentagent.com')
 
 class TestInvoicePayments:
     """Test suite for invoice payment functionality"""

@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import Dict, Any
 
 class AlphaAgencyAPITester:
-    def __init__(self, base_url="https://taskflow-revamp-3.preview.emergentagent.com"):
+    def __init__(self, base_url="https://smartcrm-mobile.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.tests_run = 0
