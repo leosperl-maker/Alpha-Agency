@@ -179,8 +179,8 @@ body.light, body[data-theme="light"] {
         background-color: rgba(0, 0, 0, 0.05) !important;
     }
     
-    /* Text colors */
-    .text-white {
+    /* Text colors - EXCEPT on colored backgrounds */
+    .text-white:not(.bg-indigo-600 .text-white):not(.bg-gradient-to-r .text-white):not(.bg-gradient-to-br .text-white):not([class*="from-indigo"] .text-white):not([class*="from-purple"] .text-white) {
         color: #1A1A1A !important;
     }
     
@@ -206,6 +206,37 @@ body.light, body[data-theme="light"] {
     
     .text-white\/40 {
         color: rgba(26, 26, 26, 0.4) !important;
+    }
+    
+    /* IMPORTANT: Keep white text on colored backgrounds */
+    .bg-indigo-600,
+    .bg-indigo-500,
+    .bg-purple-600,
+    .bg-purple-500,
+    .bg-gradient-to-r,
+    .bg-gradient-to-br,
+    .bg-gradient-to-b,
+    [class*="from-indigo"],
+    [class*="from-purple"],
+    [class*="from-cyan"],
+    .bg-green-500,
+    .bg-red-500,
+    .bg-blue-500,
+    .bg-orange-500,
+    .bg-amber-500 {
+        color: white !important;
+    }
+    
+    .bg-indigo-600 *,
+    .bg-indigo-500 *,
+    .bg-purple-600 *,
+    .bg-purple-500 *,
+    .bg-gradient-to-r *,
+    .bg-gradient-to-br *,
+    [class*="from-indigo"] *,
+    [class*="from-purple"] *,
+    [class*="from-cyan"] * {
+        color: white !important;
     }
     
     /* Border colors */
