@@ -15,18 +15,18 @@ import { Label } from "../../components/ui/label";
 import { ScrollArea } from "../../components/ui/scroll-area";
 import { toast } from "sonner";
 
-// Node colors
+// Node colors with gradients
 const NODE_COLORS = [
-  { name: "Indigo", bg: "bg-indigo-600", border: "border-indigo-500", text: "text-indigo-100" },
-  { name: "Purple", bg: "bg-purple-600", border: "border-purple-500", text: "text-purple-100" },
-  { name: "Blue", bg: "bg-blue-600", border: "border-blue-500", text: "text-blue-100" },
-  { name: "Cyan", bg: "bg-cyan-600", border: "border-cyan-500", text: "text-cyan-100" },
-  { name: "Green", bg: "bg-green-600", border: "border-green-500", text: "text-green-100" },
-  { name: "Yellow", bg: "bg-amber-500", border: "border-amber-400", text: "text-amber-100" },
-  { name: "Orange", bg: "bg-orange-600", border: "border-orange-500", text: "text-orange-100" },
-  { name: "Red", bg: "bg-red-600", border: "border-red-500", text: "text-red-100" },
-  { name: "Pink", bg: "bg-pink-600", border: "border-pink-500", text: "text-pink-100" },
-  { name: "Gray", bg: "bg-gray-600", border: "border-gray-500", text: "text-gray-100" },
+  { name: "Indigo", bg: "bg-indigo-600", gradient: "url(#gradient-indigo)", border: "border-indigo-500", text: "text-indigo-100", hex: "#6366f1" },
+  { name: "Purple", bg: "bg-purple-600", gradient: "url(#gradient-purple)", border: "border-purple-500", text: "text-purple-100", hex: "#9333ea" },
+  { name: "Blue", bg: "bg-blue-600", gradient: "url(#gradient-blue)", border: "border-blue-500", text: "text-blue-100", hex: "#2563eb" },
+  { name: "Cyan", bg: "bg-cyan-600", gradient: "url(#gradient-cyan)", border: "border-cyan-500", text: "text-cyan-100", hex: "#0891b2" },
+  { name: "Green", bg: "bg-green-600", gradient: "url(#gradient-green)", border: "border-green-500", text: "text-green-100", hex: "#16a34a" },
+  { name: "Yellow", bg: "bg-amber-500", gradient: "url(#gradient-yellow)", border: "border-amber-400", text: "text-amber-100", hex: "#f59e0b" },
+  { name: "Orange", bg: "bg-orange-600", gradient: "url(#gradient-orange)", border: "border-orange-500", text: "text-orange-100", hex: "#ea580c" },
+  { name: "Red", bg: "bg-red-600", gradient: "url(#gradient-red)", border: "border-red-500", text: "text-red-100", hex: "#dc2626" },
+  { name: "Pink", bg: "bg-pink-600", gradient: "url(#gradient-pink)", border: "border-pink-500", text: "text-pink-100", hex: "#db2777" },
+  { name: "Gray", bg: "bg-gray-600", gradient: "url(#gradient-gray)", border: "border-gray-500", text: "text-gray-100", hex: "#4b5563" },
 ];
 
 // Initial mindmap data
