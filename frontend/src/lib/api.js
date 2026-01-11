@@ -462,6 +462,35 @@ export const qontoAPI = {
   getStats: () => api.get('/qonto/stats'),
 };
 
+// File Transfers API (WeTransfer-like)
+export const transfersAPI = {
+  uploadFile: (file, transferId, onProgress) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (transferId) formData.append('transfer_id', transferId);
+    return api.post('/transfers/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: onProgress,
+    });
+  },
+  create: (data) => {
+    const formData = new FormData();
+    if (data.title) formData.append('title', data.title);
+    if (data.message) formData.append('message', data.message);
+    formData.append('recipient_emails', data.recipient_emails.join(','));
+    formData.append('expires_in_days', data.expires_in_days || 7);
+    formData.append('files_json', JSON.stringify(data.files));
+    return api.post('/transfers/create', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  getMyTransfers: () => api.get('/transfers/mine'),
+  getPublicTransfer: (id) => api.get(`/transfers/public/${id}`),
+  recordDownload: (id) => api.post(`/transfers/public/${id}/download`),
+  delete: (id) => api.delete(`/transfers/${id}`),
+  getStats: () => api.get('/transfers/stats'),
+};
+
 // Notifications API
 export const notificationsAPI = {
   getSettings: () => api.get('/notifications/settings'),
