@@ -272,6 +272,20 @@ const ThingsPage = () => {
               className="pl-10 h-10 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-lg"
             />
           </div>
+
+          {/* Mobile Progress */}
+          <div className="md:hidden mt-3 p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-green-400" />
+              <span className="text-white/60 text-sm">{completedToday} terminées aujourd'hui</span>
+            </div>
+            <div className="h-2 w-24 bg-white/10 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
+                style={{ width: `${todayCount + completedToday > 0 ? (completedToday / (todayCount + completedToday)) * 100 : 0}%` }}
+              />
+            </div>
+          </div>
         </header>
 
         {/* Todo List */}
