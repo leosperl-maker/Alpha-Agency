@@ -148,7 +148,29 @@ export const invoicesAPI = {
   // Helper function to download PDF with authentication - All platforms
   downloadPDF: async (id, invoiceNumber, type = 'facture') => {
     try {
-      // Always use direct blob approach with proper headers
+      // Check if on iOS/mobile
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isIOS || isMobile) {
+        // Mobile: Use Cloudinary URL endpoint for better compatibility
+        try {
+          const response = await api.get(`/invoices/${id}/pdf-url`);
+          const { url } = response.data;
+          
+          if (url) {
+            // Open the Cloudinary URL directly - works on all mobile browsers
+            window.open(url, '_blank');
+            return true;
+          }
+        } catch (cloudinaryError) {
+          console.warn('Cloudinary PDF failed, falling back to blob:', cloudinaryError);
+          // Fall through to blob method
+        }
+      }
+      
+      // Desktop or fallback: Use blob approach
       const response = await api.get(`/invoices/${id}/pdf`, { 
         responseType: 'blob',
         headers: {
@@ -159,41 +181,15 @@ export const invoicesAPI = {
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const filename = `${type}_${invoiceNumber || id}.pdf`;
       
-      // Check if on iOS/mobile
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      
-      if (isIOS) {
-        // iOS: Create object URL and open in new window
-        const fileURL = window.URL.createObjectURL(blob);
-        // For iOS Safari, we need to use window.open
-        const newWindow = window.open(fileURL, '_blank');
-        
-        // If popup was blocked, try the download approach
-        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-          // Fallback: create a download link
-          const link = document.createElement('a');
-          link.href = fileURL;
-          link.target = '_blank';
-          link.download = filename;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        }
-        
-        // Clean up after a delay
-        setTimeout(() => window.URL.revokeObjectURL(fileURL), 10000);
-      } else {
-        // Desktop: Standard download
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      }
+      // Standard download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
       
       return true;
     } catch (error) {
