@@ -194,7 +194,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     totals_bold_style = ParagraphStyle('TotalsBold', parent=styles['Normal'], fontSize=11, textColor=BRAND_RED, alignment=TA_RIGHT)
     footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=LIGHT_GRAY, alignment=TA_CENTER, leading=10)
     
-    # Header
+    # Header with Logo and Document Info
     logo_path = fetch_logo_image()
     header_left = []
     if logo_path:
@@ -204,13 +204,6 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
             header_left.append(Paragraph(f"<b>{COMPANY_INFO['commercial_name']}</b>", company_name_style))
     else:
         header_left.append(Paragraph(f"<b>{COMPANY_INFO['commercial_name']}</b>", company_name_style))
-    
-    header_left.append(Spacer(1, 0.3*cm))
-    header_left.append(Paragraph(f"{COMPANY_INFO['address']}", company_info_style))
-    header_left.append(Paragraph(f"{COMPANY_INFO['city']}, {COMPANY_INFO['region']}", company_info_style))
-    header_left.append(Spacer(1, 0.2*cm))
-    header_left.append(Paragraph(f"Tél: {COMPANY_INFO['phone']}", company_info_style))
-    header_left.append(Paragraph(f"Email: {COMPANY_INFO['email']}", company_info_style))
     
     doc_number = doc_data.get('invoice_number') or doc_data.get('quote_number', '')
     doc_date = doc_data.get('created_at', '')[:10]
@@ -236,19 +229,42 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     header_table = Table(header_table_data, colWidths=[10*cm, 7*cm])
     header_table.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP'), ('ALIGN', (1, 0), (1, 0), 'RIGHT')]))
     elements.append(header_table)
-    elements.append(Spacer(1, 0.8*cm))
+    elements.append(Spacer(1, 0.6*cm))
     
-    # Client section
-    elements.append(Paragraph("<b>DESTINATAIRE</b>", client_header_style))
+    # ===== SENDER (left) and RECIPIENT (right) side by side =====
+    # Sender info block
+    sender_content = []
+    sender_content.append(Paragraph(f"<b>{COMPANY_INFO['commercial_name']}</b>", client_info_style))
+    sender_content.append(Paragraph(f"{COMPANY_INFO['address']}", company_info_style))
+    sender_content.append(Paragraph(f"{COMPANY_INFO['city']}, {COMPANY_INFO['region']}", company_info_style))
+    sender_content.append(Spacer(1, 0.15*cm))
+    sender_content.append(Paragraph(f"Tél: {COMPANY_INFO['phone']}", company_info_style))
+    sender_content.append(Paragraph(f"Email: {COMPANY_INFO['email']}", company_info_style))
+    
+    # Recipient info block
+    recipient_content = []
+    recipient_content.append(Paragraph("<b>DESTINATAIRE</b>", client_header_style))
     client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
     if client_name:
-        elements.append(Paragraph(f"<b>{client_name}</b>", client_info_style))
+        recipient_content.append(Paragraph(f"<b>{client_name}</b>", client_info_style))
     if contact.get('company'):
-        elements.append(Paragraph(contact['company'], client_info_style))
+        recipient_content.append(Paragraph(contact['company'], client_info_style))
     if contact.get('email'):
-        elements.append(Paragraph(contact['email'], client_info_style))
+        recipient_content.append(Paragraph(contact['email'], client_info_style))
     if contact.get('phone'):
-        elements.append(Paragraph(contact['phone'], client_info_style))
+        recipient_content.append(Paragraph(contact['phone'], client_info_style))
+    
+    # Create a two-column table: Sender (left) | Recipient (right)
+    address_table_data = [[sender_content, recipient_content]]
+    address_table = Table(address_table_data, colWidths=[8.5*cm, 8.5*cm])
+    address_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
+        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    elements.append(address_table)
     elements.append(Spacer(1, 0.8*cm))
     
     # Items table
@@ -588,14 +604,27 @@ async def download_pdf_with_token(invoice_id: str, token: str):
     doc_type = invoice.get('document_type', 'facture')
     pdf_buffer = generate_professional_pdf(invoice, contact, doc_type, invoice_settings)
     
+    # Get PDF bytes and size
+    pdf_buffer.seek(0)
+    pdf_bytes = pdf_buffer.read()
+    pdf_size = len(pdf_bytes)
+    
+    # RFC 5987 compliant filename for Safari/iOS
     filename = f"{'devis' if doc_type == 'devis' else 'facture'}_{invoice['invoice_number']}.pdf"
+    # URL-encode filename for Content-Disposition
+    from urllib.parse import quote
+    filename_encoded = quote(filename)
+    
     return StreamingResponse(
-        pdf_buffer,
+        iter([pdf_bytes]),
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f"inline; filename={filename}",
+            "Content-Disposition": f"attachment; filename=\"{filename}\"; filename*=UTF-8''{filename_encoded}",
             "Content-Type": "application/pdf",
-            "Cache-Control": "no-cache"
+            "Content-Length": str(pdf_size),
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "X-Content-Type-Options": "nosniff"
         }
     )
 

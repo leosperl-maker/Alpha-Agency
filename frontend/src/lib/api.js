@@ -154,8 +154,11 @@ export const invoicesAPI = {
       const isAndroid = /Android/i.test(userAgent);
       const isMobile = isIOS || isAndroid;
       
+      // Generate filename
+      const filename = `${type}_${invoiceNumber || id}.pdf`;
+      
       if (isMobile) {
-        // Mobile: Use token-based URL that Safari can open directly
+        // Mobile (especially iOS Safari): Use token-based direct link download
         try {
           const tokenResponse = await api.get(`/invoices/${id}/pdf-token`);
           const { token } = tokenResponse.data;
@@ -165,8 +168,25 @@ export const invoicesAPI = {
             const baseUrl = process.env.REACT_APP_BACKEND_URL || '';
             const pdfUrl = `${baseUrl}/api/invoices/${id}/pdf-download/${token}`;
             
-            // Open in new window - Safari will display the PDF
-            window.open(pdfUrl, '_blank');
+            // Create an invisible anchor element and force download
+            // This works better on iOS Safari than window.open
+            const link = document.createElement('a');
+            link.href = pdfUrl;
+            link.download = filename;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.style.display = 'none';
+            
+            document.body.appendChild(link);
+            link.click();
+            
+            // Cleanup after a delay
+            setTimeout(() => {
+              if (link.parentNode) {
+                document.body.removeChild(link);
+              }
+            }, 1000);
+            
             return true;
           }
         } catch (tokenError) {
@@ -187,7 +207,6 @@ export const invoicesAPI = {
       }
       
       const blob = new Blob([response.data], { type: 'application/pdf' });
-      const filename = `${type}_${invoiceNumber || id}.pdf`;
       const blobUrl = window.URL.createObjectURL(blob);
       
       const link = document.createElement('a');
@@ -201,7 +220,7 @@ export const invoicesAPI = {
       setTimeout(() => {
         if (link.parentNode) document.body.removeChild(link);
         window.URL.revokeObjectURL(blobUrl);
-      }, 250);
+      }, 500);
       
       return true;
     } catch (error) {
