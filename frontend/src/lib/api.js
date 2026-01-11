@@ -148,48 +148,35 @@ export const invoicesAPI = {
   // Helper function to download PDF with authentication - iOS compatible
   downloadPDF: async (id, invoiceNumber, type = 'facture') => {
     try {
+      // Check if on iOS/mobile
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isIOS || isMobile) {
+        // Mobile: Use URL-based approach (upload to Cloudinary, get direct URL)
+        const urlResponse = await api.get(`/invoices/${id}/pdf-url`);
+        if (urlResponse.data?.url) {
+          // Open in new tab - works reliably on all mobile browsers
+          window.open(urlResponse.data.url, '_blank');
+          return true;
+        }
+      }
+      
+      // Desktop: Standard blob download
       const response = await api.get(`/invoices/${id}/pdf`, { responseType: 'blob' });
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const filename = `${type}_${invoiceNumber || id}.pdf`;
       
-      // Check if on iOS
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
       
-      if (isIOS) {
-        // iOS: Open in new tab (iOS doesn't support blob downloads well)
-        const fileURL = window.URL.createObjectURL(blob);
-        const newWindow = window.open(fileURL, '_blank');
-        if (!newWindow) {
-          // If popup blocked, try alternative method
-          const reader = new FileReader();
-          reader.onload = function() {
-            const win = window.open('', '_blank');
-            if (win) {
-              win.document.write(`
-                <html>
-                  <head><title>${filename}</title></head>
-                  <body style="margin:0;padding:0;">
-                    <iframe src="${reader.result}" style="width:100%;height:100vh;border:none;"></iframe>
-                  </body>
-                </html>
-              `);
-            }
-          };
-          reader.readAsDataURL(blob);
-        }
-        setTimeout(() => window.URL.revokeObjectURL(fileURL), 100);
-      } else {
-        // Desktop: Standard download
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      }
       return true;
     } catch (error) {
       console.error('PDF download error:', error);
