@@ -952,7 +952,8 @@ const InvoicesPage = () => {
                   const totalPaid = invoice.total_paid || 0;
                   const remaining = (invoice.total || 0) - totalPaid;
                   const paymentProgress = invoice.total > 0 ? (totalPaid / invoice.total) * 100 : 0;
-                  const isDevis = invoice.document_type === 'devis';
+                  // Use invoice_number prefix as source of truth
+                  const isDevis = invoice.invoice_number?.startsWith('DEV-');
                   return (
                     <tr key={invoice.id} className="hover:bg-white/5 transition-colors">
                       <td className="px-4 py-4">
