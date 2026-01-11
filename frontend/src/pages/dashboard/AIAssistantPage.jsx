@@ -110,7 +110,8 @@ const AIAssistantPage = () => {
         conversation_id: currentConversationId,
         messages: newMessages.map(m => ({ role: m.role, content: m.content })),
         context_type: contextType === "general" ? null : contextType,
-        context_id: null
+        context_id: null,
+        model: selectedModel
       });
 
       setMessages([...newMessages, {
