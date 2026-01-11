@@ -617,7 +617,7 @@ const InvoicesPage = () => {
               <p className="text-white/60 mt-1">SIRET: {COMPANY_INFO.siret}</p>
             </div>
             <div className="bg-white/5 p-3 rounded">
-              <p className="font-bold text-white/60 mb-1">FACTURER À:</p>
+              <p className="font-bold text-white/60 mb-1">DESTINATAIRE</p>
               {contact ? (
                 <>
                   <p className="font-bold text-white">{contact.first_name} {contact.last_name}</p>
