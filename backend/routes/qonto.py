@@ -202,11 +202,15 @@ async def get_transactions(
 ):
     """Get transactions from Qonto"""
     try:
+        token = await get_oauth_token()
+        if not token:
+            raise HTTPException(status_code=401, detail="Impossible d'obtenir le token OAuth2")
+        
         # Get organization and accounts first
         async with httpx.AsyncClient(timeout=30.0) as client:
             org_response = await client.get(
                 f"{QONTO_API_BASE}/organization",
-                headers=get_qonto_headers()
+                headers=get_qonto_headers(token)
             )
             
             if org_response.status_code != 200:
@@ -249,7 +253,7 @@ async def get_transactions(
             # Get transactions
             tx_response = await client.get(
                 f"{QONTO_API_BASE}/transactions",
-                headers=get_qonto_headers(),
+                headers=get_qonto_headers(token),
                 params=params
             )
             
