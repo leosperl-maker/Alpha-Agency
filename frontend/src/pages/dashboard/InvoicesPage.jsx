@@ -1749,23 +1749,34 @@ const InvoicesPage = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Email de contact</Label>
+                    <Label className="text-white/60 text-xs">Email</Label>
                     <Input
-                      value={invoiceSettings?.contact_email || ""}
-                      onChange={(e) => setInvoiceSettings({...invoiceSettings, contact_email: e.target.value})}
+                      value={invoiceSettings?.company_email || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, company_email: e.target.value})}
                       className="bg-white/5 border-white/10 text-white text-sm"
                       placeholder="contact@alphagency.fr"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-white/60 text-xs">Adresse complète</Label>
-                  <Input
-                    value={invoiceSettings?.company_address || ""}
-                    onChange={(e) => setInvoiceSettings({...invoiceSettings, company_address: e.target.value})}
-                    className="bg-white/5 border-white/10 text-white text-sm"
-                    placeholder="3 Boulevard du Marquisat de Houelbourg, 97122 Baie-Mahault"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">Adresse complète</Label>
+                    <Input
+                      value={invoiceSettings?.company_address || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, company_address: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                      placeholder="Immeuble Carat, Jarry, 97122 Baie-Mahault"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">Téléphone</Label>
+                    <Input
+                      value={invoiceSettings?.company_phone || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, company_phone: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                      placeholder="06 90 55 30 18"
+                    />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
