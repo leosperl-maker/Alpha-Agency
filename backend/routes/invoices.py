@@ -293,19 +293,19 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         title = item.get('title', '').strip()
         desc = item.get('description', '').strip()
         
-        # NO LIMIT on description - let ReportLab handle multi-page tables
+        # Limit very long descriptions to prevent page overflow
+        if len(desc) > 800:
+            desc = desc[:797] + "..."
+        
         # Format description with proper line breaks
         desc = desc.replace('\n', '<br/>')
         
-        # Adjust font size based on description length for readability
-        desc_font_size = 8 if len(desc) < 800 else 7
-        
         if title and desc:
-            full_desc = f"<b>{title}</b><br/><font size='{desc_font_size}'>{desc}</font>"
+            full_desc = f"<b>{title}</b><br/><font size='8'>{desc}</font>"
         elif title:
             full_desc = f"<b>{title}</b>"
         else:
-            full_desc = f"<font size='{desc_font_size}'>{desc}</font>"
+            full_desc = f"<font size='8'>{desc}</font>"
         
         # Format discount correctly
         if discount:
