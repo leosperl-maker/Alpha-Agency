@@ -1000,9 +1000,30 @@ const InvoicesPage = () => {
 
           {/* Desktop Table View */}
           <div className="hidden sm:block bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 overflow-hidden overflow-x-auto">
+            {/* Bulk actions bar */}
+            {selectedIds.length > 0 && (
+              <div className="bg-indigo-600/20 border-b border-indigo-500/30 px-4 py-2 flex items-center gap-3">
+                <span className="text-sm text-white">{selectedIds.length} sélectionné(s)</span>
+                <Button size="sm" variant="ghost" onClick={handleBulkDownload} disabled={isDownloading} className="text-white hover:bg-white/10">
+                  <Download className="w-4 h-4 mr-1" /> Télécharger
+                </Button>
+                <Button size="sm" variant="ghost" onClick={handleBulkDelete} className="text-red-400 hover:bg-red-500/10">
+                  <Trash2 className="w-4 h-4 mr-1" /> Supprimer
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="text-white/60 hover:bg-white/10 ml-auto">
+                  Annuler
+                </Button>
+              </div>
+            )}
             <table className="w-full">
               <thead className="bg-white/5 border-b border-white/10">
                 <tr>
+                  <th className="w-10 px-3 py-3">
+                    <button onClick={toggleSelectAll} className="text-white/60 hover:text-white">
+                      {selectedIds.length === filteredInvoices.length && filteredInvoices.length > 0 ? 
+                        <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+                    </button>
+                  </th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Numéro</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Client</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase hidden md:table-cell">Date</th>
