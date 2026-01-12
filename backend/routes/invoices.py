@@ -330,7 +330,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         else:
             subtotal -= global_discount
     
-    items_table = Table(table_data, colWidths=[8*cm, 1.5*cm, 2.5*cm, 2.5*cm, 2.5*cm], repeatRows=1)
+    items_table = Table(table_data, colWidths=[9*cm, 1.2*cm, 2.3*cm, 2.3*cm, 2.2*cm], repeatRows=1, splitByRow=True)
     items_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), BRAND_RED),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
