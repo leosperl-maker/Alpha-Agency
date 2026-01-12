@@ -1210,6 +1210,9 @@ const InvoicesPage = () => {
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10" onClick={() => handleDownloadPDF(invoice)} title="Télécharger PDF">
                             <Download className="w-4 h-4" />
                           </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10" onClick={() => handleSendEmail(invoice)} title="Envoyer par email">
+                            <Mail className="w-4 h-4" />
+                          </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -1219,6 +1222,9 @@ const InvoicesPage = () => {
                             <DropdownMenuContent align="end" className="bg-[#1a1a2e] border-white/10 w-48">
                               <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-white">
                                 <Eye className="w-4 h-4 mr-2" /> Voir le document
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleChangeStatus(invoice)} className="text-white">
+                                <Clock className="w-4 h-4 mr-2" /> Changer statut
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleDuplicate(invoice)} className="text-white">
                                 <Copy className="w-4 h-4 mr-2" /> Dupliquer
