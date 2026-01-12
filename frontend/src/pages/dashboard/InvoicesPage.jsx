@@ -113,13 +113,15 @@ const InvoicesPage = () => {
   
   const [items, setItems] = useState([{ title: "", description: "", quantity: 1, unit_price: 0, discount: 0, discountType: "percent" }]);
   const [globalDiscount, setGlobalDiscount] = useState({ type: "percent", value: 0 }); // type: "percent" or "fixed"
+  const [invoiceSettings, setInvoiceSettings] = useState(null);
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     contact_id: "",
     due_date: "",
     payment_terms: "30",
     notes: "",
-    conditions: "Paiement par virement bancaire ou chèque à l'ordre de Alpha Agency.\nEn cas de retard de paiement, des pénalités de 3 fois le taux d'intérêt légal seront appliquées.",
-    bank_details: "IBAN: FR76 XXXX XXXX XXXX XXXX XXXX XXX\nBIC: XXXXXXXX\nBanque: Crédit Agricole Guadeloupe"
+    conditions: "",
+    bank_details: ""
   });
 
   // Handle URL parameters for opening dialogs
