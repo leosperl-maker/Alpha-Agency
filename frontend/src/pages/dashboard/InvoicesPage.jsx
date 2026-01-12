@@ -1901,7 +1901,7 @@ BANQUE : ..."
                 </div>
               </div>
               
-              {/* Full Preview */}
+              {/* Full Preview - Uses invoiceSettings in real-time */}
               <div className="bg-white rounded-lg shadow-lg p-6 text-black text-xs" style={{ transform: 'scale(0.85)', transformOrigin: 'top left', width: '118%' }}>
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
@@ -1913,18 +1913,18 @@ BANQUE : ..."
                     <h2 className="text-lg font-bold text-red-600 mb-1">
                       {documentType === 'devis' ? 'DEVIS' : 'FACTURE'}
                     </h2>
-                    <p className="text-gray-600">N° {documentType === 'devis' ? (invoiceSettings?.quote_prefix || 'DEV-') : (invoiceSettings?.invoice_prefix || 'FAC-')}2026-001</p>
+                    <p className="text-gray-600">N° {documentType === 'devis' ? 'DEV-' : 'FAC-'}2026-001</p>
                     <p className="text-gray-600">Date: {new Date().toLocaleDateString('fr-FR')}</p>
                   </div>
                 </div>
                 
-                {/* Company & Client Side by Side */}
+                {/* Company & Client Side by Side - USES SETTINGS */}
                 <div className="flex justify-between mb-6 text-[10px]">
                   <div className="w-[45%]">
                     <p className="font-bold text-gray-800 mb-1">{invoiceSettings?.company_name || COMPANY_INFO.name}</p>
                     <p className="text-gray-600">{invoiceSettings?.company_address || `${COMPANY_INFO.address}, ${COMPANY_INFO.city}`}</p>
-                    <p className="text-gray-600">Tél: {COMPANY_INFO.phone}</p>
-                    <p className="text-gray-600">{COMPANY_INFO.email}</p>
+                    <p className="text-gray-600">Tél: {invoiceSettings?.company_phone || COMPANY_INFO.phone}</p>
+                    <p className="text-gray-600">{invoiceSettings?.company_email || COMPANY_INFO.email}</p>
                   </div>
                   <div className="w-[45%] text-right">
                     <p className="font-bold text-red-600 mb-1">DESTINATAIRE</p>
@@ -1941,7 +1941,7 @@ BANQUE : ..."
                       <th className="p-2 text-left">Désignation</th>
                       <th className="p-2 text-center w-10">Qté</th>
                       <th className="p-2 text-right w-16">P.U. HT</th>
-                      <th className="p-2 text-right w-14">TVA</th>
+                      <th className="p-2 text-center w-14">Remise</th>
                       <th className="p-2 text-right w-16">Total HT</th>
                     </tr>
                   </thead>
@@ -1953,7 +1953,7 @@ BANQUE : ..."
                       </td>
                       <td className="p-2 text-center">1</td>
                       <td className="p-2 text-right">500,00 €</td>
-                      <td className="p-2 text-right text-[8px]">8.5%<br/>(42,50 €)</td>
+                      <td className="p-2 text-center">-</td>
                       <td className="p-2 text-right font-semibold">500,00 €</td>
                     </tr>
                   </tbody>
@@ -1980,7 +1980,7 @@ BANQUE : ..."
                 {/* Conditions */}
                 {invoiceSettings?.default_conditions && (
                   <div className="text-[8px] text-gray-600 mb-3 p-2 bg-gray-50 rounded">
-                    <p className="font-bold mb-1">Conditions de règlement:</p>
+                    <p className="font-bold mb-1">Conditions de {documentType === 'devis' ? 'règlement' : 'paiement'}:</p>
                     <p className="whitespace-pre-wrap">{invoiceSettings.default_conditions}</p>
                   </div>
                 )}
@@ -1989,7 +1989,7 @@ BANQUE : ..."
                 {invoiceSettings?.bank_details && (
                   <div className="text-[8px] text-gray-600 mb-3 p-2 bg-gray-50 rounded">
                     <p className="font-bold mb-1">Détails du paiement:</p>
-                    <p>Bénéficiaire: {COMPANY_INFO.name}</p>
+                    <p>Bénéficiaire: {invoiceSettings?.company_name || COMPANY_INFO.name}</p>
                     <p className="whitespace-pre-wrap">{invoiceSettings.bank_details}</p>
                   </div>
                 )}
@@ -1997,12 +1997,20 @@ BANQUE : ..."
                 {/* Signature for quotes */}
                 {documentType === 'devis' && (
                   <div className="text-[9px] text-gray-600 mt-4 pt-4 border-t">
-                    <p className="font-bold mb-2">{invoiceSettings?.signature_text || "Bon pour accord"}</p>
-                    <div className="w-48 border-b border-gray-400 h-8"></div>
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="font-bold mb-2">Pour Alpha Agency</p>
+                        <div className="w-32 border-b border-gray-400 h-8"></div>
+                      </div>
+                      <div>
+                        <p className="font-bold mb-2">{invoiceSettings?.signature_text || "Bon pour accord, le client"}</p>
+                        <div className="w-32 border-b border-gray-400 h-8"></div>
+                      </div>
+                    </div>
                   </div>
                 )}
                 
-                {/* Footer */}
+                {/* Footer - USES SETTINGS */}
                 <div className="border-t mt-4 pt-3 text-[7px] text-gray-500 text-center">
                   <p>{invoiceSettings?.company_name || COMPANY_INFO.name} - {invoiceSettings?.company_address || `${COMPANY_INFO.address}, ${COMPANY_INFO.city}`}</p>
                   <p>SIRET: {invoiceSettings?.company_siret || COMPANY_INFO.siret} | TVA: {invoiceSettings?.company_vat || COMPANY_INFO.tva}</p>
