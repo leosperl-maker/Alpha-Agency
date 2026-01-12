@@ -988,10 +988,6 @@ const InvoicesPage = () => {
       </div>
     );
   };
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div data-testid="invoices-page" className="space-y-3 sm:space-y-4 p-3 sm:p-4 md:p-6 overflow-x-hidden">
