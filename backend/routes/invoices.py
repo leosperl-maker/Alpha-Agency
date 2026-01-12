@@ -565,7 +565,7 @@ async def delete_invoice(invoice_id: str, current_user: dict = Depends(get_curre
 async def update_invoice_status(invoice_id: str, status_update: StatusUpdate, current_user: dict = Depends(get_current_user)):
     """Update invoice status"""
     status = status_update.status
-    valid_statuses = ["brouillon", "en_attente", "envoyee", "payée", "partiellement_payée", "en_retard", "annulee"]
+    valid_statuses = ["brouillon", "en_attente", "envoyée", "envoyee", "payée", "partiellement_payée", "en_retard", "annulée", "annulee"]
     if status not in valid_statuses:
         raise HTTPException(status_code=400, detail=f"Statut invalide. Valeurs possibles: {valid_statuses}")
     
