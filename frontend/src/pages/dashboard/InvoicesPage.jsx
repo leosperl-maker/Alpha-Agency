@@ -793,10 +793,17 @@ const InvoicesPage = () => {
     .reduce((sum, i) => sum + (i.total || 0), 0);
 
   // Invoice Preview Component
-  const InvoicePreview = () => {
+  // Invoice Preview Component - uses invoiceSettings for real-time preview
+  const InvoicePreview = ({ settings = invoiceSettings }) => {
     const contact = getContact(formData.contact_id);
     const today = new Date().toLocaleDateString('fr-FR');
     const dueDate = formData.due_date ? formatDate(formData.due_date) : "-";
+    
+    // Use settings or fallback to defaults
+    const companyName = settings?.company_name || COMPANY_INFO.name;
+    const companyAddress = settings?.company_address || `${COMPANY_INFO.address}, ${COMPANY_INFO.city}`;
+    const companySiret = settings?.company_siret || COMPANY_INFO.siret;
+    const companyVat = settings?.company_vat || COMPANY_INFO.tva;
     
     return (
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg shadow-lg overflow-hidden h-full">
@@ -825,12 +832,12 @@ const InvoicesPage = () => {
           {/* Company & Client Info */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-white/5 p-3 rounded">
-              <p className="font-bold text-white mb-1">{COMPANY_INFO.name}</p>
-              <p className="text-white/60">{COMPANY_INFO.address}</p>
-              <p className="text-white/60">{COMPANY_INFO.city}</p>
+              <p className="font-bold text-white mb-1">{companyName}</p>
+              <p className="text-white/60">{companyAddress}</p>
               <p className="text-white/60">Tél: {COMPANY_INFO.phone}</p>
               <p className="text-white/60">{COMPANY_INFO.email}</p>
-              <p className="text-white/60 mt-1">SIRET: {COMPANY_INFO.siret}</p>
+              <p className="text-white/60 mt-1">SIRET: {companySiret}</p>
+              {companyVat && <p className="text-white/60">TVA: {companyVat}</p>}
             </div>
             <div className="bg-white/5 p-3 rounded">
               <p className="font-bold text-white/60 mb-1">DESTINATAIRE</p>
