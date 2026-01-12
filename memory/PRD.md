@@ -470,7 +470,30 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - **PDF Mobile** : Tester le téléchargement sur appareil mobile
 - **Qonto** : L'utilisateur doit autoriser l'accès via OAuth2
 
+### Session 14 - 2026-01-12 (Corrections PDF & Paramètres Facturation)
+- ✅ **Bug Fix P0 CRITIQUE: Génération PDF avec LayoutError**
+  - **Cause racine:** Descriptions longues causaient un dépassement de page dans ReportLab
+  - **Solution:** Refonte complète de `generate_professional_pdf()` avec flowables séparés par article
+  - Les descriptions ne sont plus tronquées et peuvent s'étendre sur plusieurs pages
+  - Format de remise corrigé (`-200.00 €` au lieu de `-200.0fixed`)
+- ✅ **Bug Fix P0: Envoi d'email**
+  - L'API `/api/invoices/{id}/send-email` fonctionne correctement avec Brevo
+  - Copie BCC envoyée à `leo.sperl@alphagency.com`
+- ✅ **Amélioration P1: Modale des paramètres de facturation**
+  - Ajout des champs `company_address`, `company_siret`, `company_vat` au modèle `InvoiceSettingsUpdate`
+  - Valeurs par défaut depuis `COMPANY_INFO` dans le backend
+  - Frontend simplifié avec les 4 champs principaux (nom, adresse, SIRET, TVA)
+  - Prévisualisation PDF utilise les paramètres en temps réel
+- ✅ **Amélioration P1: Suppression multiple**
+  - API DELETE `/api/invoices/{id}` fonctionnelle
+  - Frontend avec checkbox et barre d'actions groupées
+- ✅ **Amélioration P1: InvoicePreview**
+  - Utilise les settings pour afficher le nom d'entreprise, adresse, SIRET, TVA
+  - Footer PDF avec mentions légales correctes (sans "Pas d'escompte")
+- Tests: 12/12 passés (100%) - iteration_27.json
+
 ## Test Results
+- Session 14: 100% pass rate (12/12) - iteration_27.json
 - Session 13: 100% pass rate (10/10) - iteration_25.json
 
 ## Architecture Backend (mise à jour Session 12)
