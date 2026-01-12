@@ -1823,9 +1823,10 @@ BANQUE : ..."
                   className="bg-white/5 border-white/10 text-white text-sm"
                 />
               </div>
+              </div>
               
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-[#0f0f1a] py-4">
+              {/* Action Buttons - Fixed at bottom */}
+              <div className="flex gap-3 p-6 border-t border-white/10 flex-shrink-0 bg-[#0f0f1a]">
                 <Button variant="outline" onClick={() => setSettingsDialogOpen(false)} className="flex-1 border-white/10 text-white hover:bg-white/5">
                   Annuler
                 </Button>
