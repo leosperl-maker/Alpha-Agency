@@ -2565,6 +2565,171 @@ async def update_invoice_settings(data: InvoiceSettingsUpdate, current_user: dic
     return {"message": "Paramètres de facturation mis à jour"}
 
 
+# ==================== EMAIL TEMPLATES ====================
+
+class EmailTemplateUpdate(BaseModel):
+    subject: Optional[str] = None
+    body: Optional[str] = None
+    
+@api_router.get("/settings/email-templates", response_model=dict)
+async def get_email_templates(current_user: dict = Depends(get_current_user)):
+    """Get all email templates"""
+    templates = await db.settings.find_one({"type": "email_templates"}, {"_id": 0})
+    if not templates:
+        return {
+            "devis": {
+                "subject": "Votre devis {{numero}} - {{company_name}}",
+                "body": """Bonjour {{client_name}},
+
+Veuillez trouver ci-joint votre devis <strong>{{numero}}</strong> d'un montant de <strong>{{montant}} €</strong>.
+
+Ce devis est valable 30 jours à compter de sa date d'émission. Pour l'accepter, merci de nous retourner une copie signée avec la mention "Bon pour accord".
+
+Pour toute question, n'hésitez pas à nous contacter.
+
+Cordialement,
+{{company_name}}
+{{company_phone}}
+{{company_email}}"""
+            },
+            "facture": {
+                "subject": "Votre facture {{numero}} - {{company_name}}",
+                "body": """Bonjour {{client_name}},
+
+Veuillez trouver ci-joint votre facture <strong>{{numero}}</strong> d'un montant de <strong>{{montant}} €</strong>.
+
+Nous vous remercions de bien vouloir procéder au règlement dans les délais convenus.
+
+Pour toute question, n'hésitez pas à nous contacter.
+
+Cordialement,
+{{company_name}}
+{{company_phone}}
+{{company_email}}"""
+            }
+        }
+    return templates
+
+@api_router.put("/settings/email-templates/{template_type}", response_model=dict)
+async def update_email_template(
+    template_type: str,
+    data: EmailTemplateUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update a specific email template (devis or facture)"""
+    if template_type not in ['devis', 'facture']:
+        raise HTTPException(status_code=400, detail="Type de template invalide")
+    
+    # Get existing templates
+    existing = await db.settings.find_one({"type": "email_templates"})
+    if not existing:
+        existing = {"type": "email_templates", "devis": {}, "facture": {}}
+    
+    # Update the specific template
+    update_data = data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        existing[template_type][key] = value
+    
+    existing["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.settings.update_one(
+        {"type": "email_templates"},
+        {"$set": existing},
+        upsert=True
+    )
+    return {"message": f"Template email '{template_type}' mis à jour"}
+
+@api_router.post("/settings/email-templates/test", response_model=dict)
+async def send_test_email(
+    current_user: dict = Depends(get_current_user)
+):
+    """Send test emails to leo.sperl@alphagency.com"""
+    import httpx
+    
+    brevo_api_key = os.environ.get('BREVO_API_KEY')
+    sender_email = os.environ.get('BREVO_SENDER_EMAIL', COMPANY_INFO['email'])
+    test_recipient = "leo.sperl@alphagency.com"
+    
+    if not brevo_api_key:
+        raise HTTPException(status_code=500, detail="Clé API Brevo non configurée")
+    
+    # Get templates
+    templates = await db.settings.find_one({"type": "email_templates"}, {"_id": 0})
+    if not templates:
+        templates = {
+            "devis": {"subject": "Votre devis {{numero}} - Alpha Agency", "body": "Test devis"},
+            "facture": {"subject": "Votre facture {{numero}} - Alpha Agency", "body": "Test facture"}
+        }
+    
+    # Get invoice settings for company info
+    inv_settings = await db.settings.find_one({"type": "invoice_settings"}, {"_id": 0})
+    company_name = inv_settings.get('company_name', COMPANY_INFO['commercial_name']) if inv_settings else COMPANY_INFO['commercial_name']
+    company_phone = inv_settings.get('company_phone', COMPANY_INFO['phone']) if inv_settings else COMPANY_INFO['phone']
+    company_email = inv_settings.get('company_email', COMPANY_INFO['email']) if inv_settings else COMPANY_INFO['email']
+    
+    results = []
+    
+    for doc_type in ['devis', 'facture']:
+        template = templates.get(doc_type, {})
+        subject = template.get('subject', f'Test {doc_type}')
+        body = template.get('body', f'Corps du {doc_type}')
+        
+        # Replace variables
+        replacements = {
+            '{{numero}}': f'{doc_type.upper()[:3]}-2026-TEST',
+            '{{client_name}}': 'Client Test',
+            '{{montant}}': '500.00',
+            '{{company_name}}': company_name,
+            '{{company_phone}}': company_phone,
+            '{{company_email}}': company_email
+        }
+        
+        for var, val in replacements.items():
+            subject = subject.replace(var, val)
+            body = body.replace(var, val)
+        
+        # Convert newlines to HTML
+        html_body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <img src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png" alt="{company_name}" style="max-height: 60px;">
+                </div>
+                <div style="white-space: pre-wrap;">{body}</div>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="font-size: 12px; color: #999; text-align: center;">
+                    Ceci est un email de test depuis les paramètres de template.
+                </p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        email_data = {
+            "sender": {"name": company_name, "email": sender_email},
+            "to": [{"email": test_recipient, "name": "Test"}],
+            "subject": f"[TEST] {subject}",
+            "htmlContent": html_body
+        }
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "https://api.brevo.com/v3/smtp/email",
+                    headers={"api-key": brevo_api_key, "Content-Type": "application/json"},
+                    json=email_data
+                )
+                if response.status_code in [200, 201]:
+                    results.append({"type": doc_type, "status": "success"})
+                else:
+                    results.append({"type": doc_type, "status": "error", "message": response.text})
+        except Exception as e:
+            results.append({"type": doc_type, "status": "error", "message": str(e)})
+    
+    return {"results": results, "sent_to": test_recipient}
+
+
 # ==================== API KEYS MANAGEMENT ====================
 
 @api_router.get("/settings/api-keys", response_model=dict)
