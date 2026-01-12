@@ -863,3 +863,123 @@ async def delete_payment(invoice_id: str, payment_id: str, current_user: dict = 
     )
     
     return {"message": "Paiement supprimé", "status": new_status}
+
+
+
+# ==================== EMAIL ====================
+
+class SendEmailRequest(BaseModel):
+    recipient_email: str
+    document_type: str = "facture"
+
+@router.post("/{invoice_id}/send-email", response_model=dict)
+async def send_invoice_email(invoice_id: str, request: SendEmailRequest, current_user: dict = Depends(get_current_user)):
+    """Send invoice/quote by email"""
+    import os
+    import base64
+    
+    invoice = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Document non trouvé")
+    
+    contact = await db.contacts.find_one({"id": invoice['contact_id']}, {"_id": 0})
+    if not contact:
+        contact = {"first_name": "", "last_name": "", "email": request.recipient_email}
+    
+    # Load invoice settings
+    invoice_settings = await db.settings.find_one({"type": "invoice_settings"}, {"_id": 0})
+    
+    # Generate PDF
+    doc_type = request.document_type
+    pdf_buffer = generate_professional_pdf(invoice, contact, doc_type, invoice_settings)
+    pdf_buffer.seek(0)
+    pdf_bytes = pdf_buffer.read()
+    pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+    
+    # Prepare email
+    doc_label = "Devis" if doc_type == "devis" else "Facture"
+    doc_number = invoice.get('invoice_number', '')
+    client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip() or "Client"
+    
+    subject = f"{doc_label} {doc_number} - {COMPANY_INFO['commercial_name']}"
+    
+    html_body = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <img src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png" alt="{COMPANY_INFO['commercial_name']}" style="max-height: 60px;">
+            </div>
+            
+            <p>Bonjour {client_name},</p>
+            
+            <p>Veuillez trouver ci-joint {'votre devis' if doc_type == 'devis' else 'votre facture'} <strong>{doc_number}</strong> d'un montant de <strong>{invoice.get('total', 0):.2f} €</strong>.</p>
+            
+            {'<p>Ce devis est valable 30 jours à compter de sa date d émission. Pour l accepter, merci de nous retourner une copie signée avec la mention "Bon pour accord".</p>' if doc_type == 'devis' else '<p>Nous vous remercions de bien vouloir procéder au règlement dans les délais convenus.</p>'}
+            
+            <p>Pour toute question, n'hésitez pas à nous contacter.</p>
+            
+            <p style="margin-top: 30px;">
+                Cordialement,<br>
+                <strong>{COMPANY_INFO['commercial_name']}</strong><br>
+                <span style="color: #666; font-size: 14px;">
+                    {COMPANY_INFO['phone']}<br>
+                    {COMPANY_INFO['email']}
+                </span>
+            </p>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            <p style="font-size: 12px; color: #999; text-align: center;">
+                {COMPANY_INFO['name']} - {COMPANY_INFO['address']}, {COMPANY_INFO['city']}<br>
+                SIRET: {COMPANY_INFO['siret']} | TVA: {COMPANY_INFO['tva_intra']}
+            </p>
+        </div>
+    </body>
+    </html>
+    """
+    
+    # Send via Brevo
+    brevo_api_key = os.environ.get('BREVO_API_KEY')
+    sender_email = os.environ.get('BREVO_SENDER_EMAIL', COMPANY_INFO['email'])
+    
+    if not brevo_api_key:
+        raise HTTPException(status_code=500, detail="Service email non configuré")
+    
+    import httpx
+    
+    filename = f"{'devis' if doc_type == 'devis' else 'facture'}_{doc_number}.pdf"
+    
+    email_data = {
+        "sender": {"name": COMPANY_INFO['commercial_name'], "email": sender_email},
+        "to": [{"email": request.recipient_email, "name": client_name}],
+        "subject": subject,
+        "htmlContent": html_body,
+        "attachment": [{"content": pdf_base64, "name": filename}]
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers={
+                "api-key": brevo_api_key,
+                "Content-Type": "application/json"
+            },
+            json=email_data
+        )
+        
+        if response.status_code not in [200, 201]:
+            logger.error(f"Brevo error: {response.text}")
+            raise HTTPException(status_code=500, detail="Erreur lors de l'envoi de l'email")
+    
+    # Update invoice to mark as sent
+    await db.invoices.update_one(
+        {"id": invoice_id},
+        {"$set": {
+            "status": "envoyée" if invoice.get('status') == 'brouillon' else invoice.get('status'),
+            "sent_at": datetime.now(timezone.utc).isoformat(),
+            "sent_to": request.recipient_email,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": f"Email envoyé à {request.recipient_email}", "status": "sent"}
