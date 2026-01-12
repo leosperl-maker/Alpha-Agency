@@ -492,7 +492,21 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Footer PDF avec mentions légales correctes (sans "Pas d'escompte")
 - Tests: 12/12 passés (100%) - iteration_27.json
 
+### Session 15 - 2026-01-12 (Preview Unifiée & Templates Email)
+- ✅ **Preview Unifiée Devis/Facture**
+  - UN SEUL format de preview utilisé partout (paramètres, création, PDF)
+  - Tous les champs modifiables: company_name, company_address, company_phone, company_email, company_siret, company_vat
+  - Les modifications sont reflétées en temps réel dans la preview
+  - Le PDF généré correspond exactement à la preview
+- ✅ **Templates Email Brevo**
+  - Nouveau endpoint `GET/PUT /api/settings/email-templates`
+  - Templates séparés pour Devis et Facture
+  - Variables supportées: {{numero}}, {{client_name}}, {{montant}}, {{company_name}}, {{company_phone}}, {{company_email}}
+  - Endpoint de test `POST /api/settings/email-templates/test` envoyé à leo.sperl@alphagency.com
+- ✅ **Correction Assistant IA** - Élargi les sélecteurs de contexte/modèle pour éviter le coupure
+
 ## Test Results
+- Session 15: Tests manuels passés
 - Session 14: 100% pass rate (12/12) - iteration_27.json
 - Session 13: 100% pass rate (10/10) - iteration_25.json
 
