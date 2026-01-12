@@ -1119,20 +1119,21 @@ const InvoicesPage = () => {
                                 <DropdownMenuItem onClick={() => handleConvertToInvoice(invoice)} className="text-green-400">
                                   <ArrowRightLeft className="w-4 h-4 mr-2" /> Convertir en facture
                               </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator className="bg-white/10" />
-                            <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-green-400">
-                              <CreditCard className="w-4 h-4 mr-2" /> Enregistrer paiement
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-white/10" />
-                            <DropdownMenuItem onClick={() => openEditSheet(invoice)} className="text-white">
-                              <Edit className="w-4 h-4 mr-2" /> Modifier
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-red-400">
-                              <Trash2 className="w-4 h-4 mr-2" /> Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                              )}
+                              <DropdownMenuSeparator className="bg-white/10" />
+                              <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-green-400">
+                                <CreditCard className="w-4 h-4 mr-2" /> Enregistrer paiement
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator className="bg-white/10" />
+                              <DropdownMenuItem onClick={() => openEditSheet(invoice)} className="text-white">
+                                <Edit className="w-4 h-4 mr-2" /> Modifier
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-red-400">
+                                <Trash2 className="w-4 h-4 mr-2" /> Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </td>
                     </tr>
                   );
