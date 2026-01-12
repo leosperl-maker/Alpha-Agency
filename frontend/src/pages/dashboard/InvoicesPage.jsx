@@ -792,16 +792,17 @@ const InvoicesPage = () => {
     .filter(i => i.status === "en_retard")
     .reduce((sum, i) => sum + (i.total || 0), 0);
 
-  // Invoice Preview Component
   // Invoice Preview Component - uses invoiceSettings for real-time preview
   const InvoicePreview = ({ settings = invoiceSettings }) => {
     const contact = getContact(formData.contact_id);
     const today = new Date().toLocaleDateString('fr-FR');
     const dueDate = formData.due_date ? formatDate(formData.due_date) : "-";
     
-    // Use settings or fallback to defaults
+    // Use settings or fallback to defaults - ALL FIELDS from settings
     const companyName = settings?.company_name || COMPANY_INFO.name;
     const companyAddress = settings?.company_address || `${COMPANY_INFO.address}, ${COMPANY_INFO.city}`;
+    const companyPhone = settings?.company_phone || COMPANY_INFO.phone;
+    const companyEmail = settings?.company_email || COMPANY_INFO.email;
     const companySiret = settings?.company_siret || COMPANY_INFO.siret;
     const companyVat = settings?.company_vat || COMPANY_INFO.tva;
     
@@ -834,8 +835,8 @@ const InvoicesPage = () => {
             <div className="bg-white/5 p-3 rounded">
               <p className="font-bold text-white mb-1">{companyName}</p>
               <p className="text-white/60">{companyAddress}</p>
-              <p className="text-white/60">Tél: {COMPANY_INFO.phone}</p>
-              <p className="text-white/60">{COMPANY_INFO.email}</p>
+              <p className="text-white/60">Tél: {companyPhone}</p>
+              <p className="text-white/60">{companyEmail}</p>
               <p className="text-white/60 mt-1">SIRET: {companySiret}</p>
               {companyVat && <p className="text-white/60">TVA: {companyVat}</p>}
             </div>
@@ -857,7 +858,7 @@ const InvoicesPage = () => {
           {/* Dates */}
           <div className="flex gap-4 mb-4 text-[10px]">
             <div className="bg-indigo-600/10 px-3 py-1 rounded">
-              <span className="text-indigo-400 font-medium">Date d'émission:</span> {today}
+              <span className="text-indigo-400 font-medium">Date d&apos;émission:</span> {today}
             </div>
             <div className="bg-indigo-600/10 px-3 py-1 rounded">
               <span className="text-indigo-400 font-medium">Échéance:</span> {dueDate}
@@ -934,6 +935,23 @@ const InvoicesPage = () => {
             </div>
           </div>
 
+          {/* Conditions */}
+          {(settings?.default_conditions || formData.conditions) && (
+            <div className="bg-white/5 p-3 rounded mb-4">
+              <p className="font-bold text-[10px] mb-1">Conditions de paiement:</p>
+              <p className="text-[10px] text-white/60 whitespace-pre-wrap">{settings?.default_conditions || formData.conditions}</p>
+            </div>
+          )}
+          
+          {/* Bank Details */}
+          {(settings?.bank_details || formData.bank_details) && (
+            <div className="bg-white/5 p-3 rounded mb-4">
+              <p className="font-bold text-[10px] mb-1">Détails du paiement:</p>
+              <p className="text-[10px] text-white/60">Bénéficiaire: {companyName}</p>
+              <p className="text-[10px] text-white/60 whitespace-pre-wrap font-mono">{settings?.bank_details || formData.bank_details}</p>
+            </div>
+          )}
+
           {/* Notes */}
           {formData.notes && (
             <div className="bg-white/5 p-3 rounded mb-4">
@@ -941,23 +959,35 @@ const InvoicesPage = () => {
               <p className="text-[10px] text-white/60 whitespace-pre-wrap">{formData.notes}</p>
             </div>
           )}
-
-          {/* Footer - Uses settings for conditions and bank details */}
-          <div className="border-t border-white/10 pt-4 mt-4">
-            <div className="grid grid-cols-2 gap-4 text-[8px] text-white/60">
-              <div>
-                <p className="font-bold mb-1">Conditions de paiement:</p>
-                <p className="whitespace-pre-wrap">{settings?.default_conditions || formData.conditions || "Non définies"}</p>
-              </div>
-              <div>
-                <p className="font-bold mb-1">Coordonnées bancaires:</p>
-                <p className="whitespace-pre-wrap font-mono">{settings?.bank_details || formData.bank_details || "Non définies"}</p>
+          
+          {/* Signature for devis */}
+          {documentType === 'devis' && (
+            <div className="border-t border-white/10 pt-4 mt-4">
+              <div className="grid grid-cols-2 gap-8">
+                <div>
+                  <p className="font-bold text-[10px] mb-2">Pour Alpha Agency</p>
+                  <div className="h-12 border-b border-white/30"></div>
+                </div>
+                <div>
+                  <p className="font-bold text-[10px] mb-2">{settings?.signature_text || "Bon pour accord, le client"}</p>
+                  <div className="h-12 border-b border-white/30"></div>
+                </div>
               </div>
             </div>
-            <div className="mt-3 pt-2 border-t border-white/10 text-[7px] text-white/40 text-center">
+          )}
+
+          {/* Footer */}
+          <div className="border-t border-white/10 pt-4 mt-4">
+            <div className="text-[7px] text-white/40 text-center">
+              <p>{companyName} - {companyAddress}</p>
               <p>SIRET: {companySiret} | TVA: {companyVat}</p>
+              <p className="mt-1">En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement.</p>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  };
         </div>
       </div>
     );
