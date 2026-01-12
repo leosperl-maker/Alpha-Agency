@@ -513,23 +513,37 @@ const InvoicesPage = () => {
   };
 
   const handleBulkDelete = async () => {
-    if (selectedIds.length === 0) return;
-    if (!window.confirm(`Supprimer ${selectedIds.length} document(s) ?`)) return;
+    if (selectedIds.length === 0) {
+      toast.error("Aucun document sélectionné");
+      return;
+    }
+    
+    const confirmDelete = window.confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.length} document(s) ? Cette action est irréversible.`);
+    if (!confirmDelete) {
+      return;
+    }
     
     const toastId = toast.loading(`Suppression de ${selectedIds.length} document(s)...`);
     let success = 0;
+    let errors = 0;
     
     for (const id of selectedIds) {
       try {
         await invoicesAPI.delete(id);
         success++;
       } catch (e) {
-        console.error('Delete failed for', id);
+        console.error('Delete failed for', id, e);
+        errors++;
       }
     }
     
     toast.dismiss(toastId);
-    toast.success(`${success} document(s) supprimé(s)`);
+    if (errors > 0) {
+      toast.error(`${errors} erreur(s) lors de la suppression`);
+    }
+    if (success > 0) {
+      toast.success(`${success} document(s) supprimé(s)`);
+    }
     setSelectedIds([]);
     fetchData();
   };
