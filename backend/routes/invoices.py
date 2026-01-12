@@ -179,8 +179,8 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     company_address = invoice_settings.get('company_address') or f"{COMPANY_INFO['address']}, {COMPANY_INFO['city']}"
     company_siret = invoice_settings.get('company_siret') or COMPANY_INFO['siret']
     company_vat = invoice_settings.get('company_vat') or COMPANY_INFO['tva_intra']
-    company_phone = COMPANY_INFO['phone']
-    company_email = COMPANY_INFO['email']
+    company_phone = invoice_settings.get('company_phone') or COMPANY_INFO['phone']
+    company_email = invoice_settings.get('company_email') or COMPANY_INFO['email']
     
     # ===== STYLES =====
     title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=14, textColor=BRAND_RED, alignment=TA_RIGHT, spaceAfter=3)
