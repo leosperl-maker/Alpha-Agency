@@ -899,6 +899,15 @@ const InvoicesPage = () => {
           >
             <Package className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSettingsDialogOpen(true)}
+            className="border-white/10 h-8 px-2 sm:px-3"
+            title="Paramètres facturation"
+          >
+            <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="sm" className="bg-indigo-600 hover:bg-indigo-500 text-white h-8 px-2 sm:px-3">
