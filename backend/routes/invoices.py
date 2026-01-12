@@ -275,13 +275,16 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         qty = item.get('quantity', 1)
         unit_price = item.get('unit_price', 0)
         discount = item.get('discount', 0)
-        discount_type = item.get('discountType', '%')
+        discount_type = item.get('discountType', 'percent')
         
         line_total = qty * unit_price
+        discount_amount = 0
         if discount:
-            if discount_type == '%':
-                line_total -= line_total * (discount / 100)
-            else:
+            if discount_type == 'percent' or discount_type == '%':
+                discount_amount = line_total * (discount / 100)
+                line_total -= discount_amount
+            else:  # fixed amount
+                discount_amount = discount
                 line_total -= discount
         
         subtotal += line_total
@@ -290,20 +293,22 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         title = item.get('title', '').strip()
         desc = item.get('description', '').strip()
         
-        # Limit description length to avoid page overflow
-        if len(desc) > 300:
-            desc = desc[:297] + "..."
+        # Allow full description - no truncation
         desc = desc.replace('\n', '<br/>')
         
         if title and desc:
-            full_desc = f"<b>{title}</b><br/><font size='7'>{desc}</font>"
+            full_desc = f"<b>{title}</b><br/><font size='8'>{desc}</font>"
         elif title:
             full_desc = f"<b>{title}</b>"
         else:
-            full_desc = desc if len(desc) < 300 else desc[:297] + "..."
+            full_desc = desc
         
+        # Format discount correctly
         if discount:
-            full_desc += f"<br/><font size='7' color='#CE0202'>Remise: -{discount}{discount_type}</font>"
+            if discount_type == 'percent' or discount_type == '%':
+                full_desc += f"<br/><font size='7' color='#CE0202'>Remise: -{discount}%</font>"
+            else:
+                full_desc += f"<br/><font size='7' color='#CE0202'>Remise: -{discount:.2f} €</font>"
         
         table_data.append([
             Paragraph(full_desc, table_cell_style),
