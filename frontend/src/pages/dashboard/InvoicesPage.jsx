@@ -1898,14 +1898,14 @@ BANQUE : ..."
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
                   <div>
-                    <img src={COMPANY_INFO.logo} alt="Alpha Agency" className="h-10 mb-2" />
+                    <img src={COMPANY_INFO.logo} alt="Logo" className="h-10 mb-2" />
                     <p className="text-[8px] text-gray-500">{COMPANY_INFO.tagline}</p>
                   </div>
                   <div className="text-right">
                     <h2 className="text-lg font-bold text-red-600 mb-1">
                       {documentType === 'devis' ? 'DEVIS' : 'FACTURE'}
                     </h2>
-                    <p className="text-gray-600">N° {invoiceSettings?.invoice_prefix || (documentType === 'devis' ? 'DEV-' : 'FAC-')}2026-001</p>
+                    <p className="text-gray-600">N° {documentType === 'devis' ? (invoiceSettings?.quote_prefix || 'DEV-') : (invoiceSettings?.invoice_prefix || 'FAC-')}2026-001</p>
                     <p className="text-gray-600">Date: {new Date().toLocaleDateString('fr-FR')}</p>
                   </div>
                 </div>
@@ -1913,10 +1913,10 @@ BANQUE : ..."
                 {/* Company & Client Side by Side */}
                 <div className="flex justify-between mb-6 text-[10px]">
                   <div className="w-[45%]">
-                    <p className="font-bold text-gray-800 mb-1">{COMPANY_INFO.name}</p>
-                    <p className="text-gray-600">{COMPANY_INFO.address}</p>
-                    <p className="text-gray-600">{COMPANY_INFO.city}</p>
-                    <p className="text-gray-600">Tél: {COMPANY_INFO.phone}</p>
+                    <p className="font-bold text-gray-800 mb-1">{invoiceSettings?.company_name || COMPANY_INFO.name}</p>
+                    <p className="text-gray-600">{invoiceSettings?.company_address || COMPANY_INFO.address}</p>
+                    <p className="text-gray-600">{invoiceSettings?.company_postal_code || "97170"} {invoiceSettings?.company_city || "Petit-Bourg"}</p>
+                    <p className="text-gray-600">Tél: {invoiceSettings?.company_phone || COMPANY_INFO.phone}</p>
                     <p className="text-gray-600">{invoiceSettings?.contact_email || COMPANY_INFO.email}</p>
                   </div>
                   <div className="w-[45%] text-right">
