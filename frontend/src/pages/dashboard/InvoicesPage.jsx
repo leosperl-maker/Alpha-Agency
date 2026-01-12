@@ -466,15 +466,16 @@ const InvoicesPage = () => {
   const saveSettings = async () => {
     try {
       await api.post('/settings/invoice', {
-        default_conditions: formData.conditions,
-        bank_details: formData.bank_details,
-        signature_text: invoiceSettings?.signature_text || "Bon pour accord"
-      });
-      setInvoiceSettings({
         ...invoiceSettings,
-        default_conditions: formData.conditions,
-        bank_details: formData.bank_details
+        default_conditions: invoiceSettings?.default_conditions || formData.conditions,
+        bank_details: invoiceSettings?.bank_details || formData.bank_details,
       });
+      // Also update formData with the new settings
+      setFormData(prev => ({
+        ...prev,
+        conditions: invoiceSettings?.default_conditions || prev.conditions,
+        bank_details: invoiceSettings?.bank_details || prev.bank_details
+      }));
       toast.success("Paramètres enregistrés");
       setSettingsDialogOpen(false);
     } catch (error) {
