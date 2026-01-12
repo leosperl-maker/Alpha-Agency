@@ -461,12 +461,75 @@ const InvoicesPage = () => {
       const type = invoice.document_type === 'devis' ? 'devis' : 'facture';
       await invoicesAPI.downloadPDF(invoice.id, invoice.invoice_number, type);
       toast.dismiss(toastId);
-      toast.success("PDF téléchargé ! Vérifiez votre dossier Téléchargements ou un nouvel onglet.");
+      toast.success("PDF téléchargé !");
     } catch (error) {
       toast.dismiss(toastId);
       console.error('PDF download error:', error);
       toast.error("Erreur lors du téléchargement du PDF. Réessayez.");
     }
+  };
+
+  // Multi-selection functions
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredInvoices.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredInvoices.map(inv => inv.id));
+    }
+  };
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDownload = async () => {
+    if (selectedIds.length === 0) return;
+    setIsDownloading(true);
+    const toastId = toast.loading(`Téléchargement de ${selectedIds.length} document(s)...`);
+    
+    let success = 0;
+    for (const id of selectedIds) {
+      const invoice = invoices.find(inv => inv.id === id);
+      if (invoice) {
+        try {
+          const type = invoice.document_type === 'devis' ? 'devis' : 'facture';
+          await invoicesAPI.downloadPDF(invoice.id, invoice.invoice_number, type);
+          success++;
+          await new Promise(r => setTimeout(r, 300)); // Small delay between downloads
+        } catch (e) {
+          console.error('Download failed for', invoice.invoice_number);
+        }
+      }
+    }
+    
+    toast.dismiss(toastId);
+    toast.success(`${success}/${selectedIds.length} PDF téléchargés`);
+    setSelectedIds([]);
+    setIsDownloading(false);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(`Supprimer ${selectedIds.length} document(s) ?`)) return;
+    
+    const toastId = toast.loading(`Suppression de ${selectedIds.length} document(s)...`);
+    let success = 0;
+    
+    for (const id of selectedIds) {
+      try {
+        await invoicesAPI.delete(id);
+        success++;
+      } catch (e) {
+        console.error('Delete failed for', id);
+      }
+    }
+    
+    toast.dismiss(toastId);
+    toast.success(`${success} document(s) supprimé(s)`);
+    setSelectedIds([]);
+    fetchData();
   };
 
   const addItem = () => {
