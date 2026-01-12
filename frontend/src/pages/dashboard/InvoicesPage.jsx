@@ -1746,80 +1746,33 @@ const InvoicesPage = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white/60 text-xs">Adresse</Label>
+                  <Label className="text-white/60 text-xs">Adresse complète</Label>
                   <Input
                     value={invoiceSettings?.company_address || ""}
                     onChange={(e) => setInvoiceSettings({...invoiceSettings, company_address: e.target.value})}
                     className="bg-white/5 border-white/10 text-white text-sm"
-                    placeholder="Immeuble Hibiscus, Route de Montebello"
+                    placeholder="3 Boulevard du Marquisat de Houelbourg, 97122 Baie-Mahault"
                   />
                 </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Code postal</Label>
-                    <Input
-                      value={invoiceSettings?.company_postal_code || ""}
-                      onChange={(e) => setInvoiceSettings({...invoiceSettings, company_postal_code: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
-                      placeholder="97170"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Ville</Label>
-                    <Input
-                      value={invoiceSettings?.company_city || ""}
-                      onChange={(e) => setInvoiceSettings({...invoiceSettings, company_city: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
-                      placeholder="Petit-Bourg"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Téléphone</Label>
-                    <Input
-                      value={invoiceSettings?.company_phone || ""}
-                      onChange={(e) => setInvoiceSettings({...invoiceSettings, company_phone: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
-                      placeholder="06 90 55 30 18"
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-white/60 text-xs">SIRET</Label>
                     <Input
-                      value={invoiceSettings?.siret || ""}
-                      onChange={(e) => setInvoiceSettings({...invoiceSettings, siret: e.target.value})}
+                      value={invoiceSettings?.company_siret || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, company_siret: e.target.value})}
                       className="bg-white/5 border-white/10 text-white text-sm"
-                      placeholder="123 456 789 00012"
+                      placeholder="91255383100013"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">N° TVA</Label>
+                    <Label className="text-white/60 text-xs">N° TVA Intracommunautaire</Label>
                     <Input
-                      value={invoiceSettings?.tva_number || ""}
-                      onChange={(e) => setInvoiceSettings({...invoiceSettings, tva_number: e.target.value})}
+                      value={invoiceSettings?.company_vat || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, company_vat: e.target.value})}
                       className="bg-white/5 border-white/10 text-white text-sm"
-                      placeholder="FR32123456789"
+                      placeholder="FR47912553831"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">RCS</Label>
-                    <Input
-                      value={invoiceSettings?.rcs || ""}
-                      onChange={(e) => setInvoiceSettings({...invoiceSettings, rcs: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
-                      placeholder="Pointe-à-Pitre A 123 456 789"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-white/60 text-xs">Capital social (€)</Label>
-                  <Input
-                    value={invoiceSettings?.capital || ""}
-                    onChange={(e) => setInvoiceSettings({...invoiceSettings, capital: e.target.value})}
-                    className="bg-white/5 border-white/10 text-white text-sm"
-                    placeholder="1000"
-                  />
                 </div>
               </div>
               
