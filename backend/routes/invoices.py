@@ -386,7 +386,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         elements.append(Paragraph("<b>Conditions de règlement:</b>", section_style))
         
         # Use custom conditions from settings or document
-        conditions_text = doc_data.get('conditions') or invoice_settings.get('default_quote_conditions') or invoice_settings.get('default_conditions', '')
+        conditions_text = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
         if conditions_text:
             for line in conditions_text.strip().split('\n'):
                 if line.strip():
@@ -396,7 +396,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         
         # Signature section
         signature_text = invoice_settings.get('signature_text', "Bon pour accord")
-        elements.append(Paragraph(f"<b>Mention \"{signature_text}\" suivie de la signature :</b>", section_style))
+        elements.append(Paragraph(f"<b>{signature_text}</b>", section_style))
         elements.append(Spacer(1, 1.5*cm))
         elements.append(Paragraph("_" * 50, section_style))
     
@@ -405,7 +405,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         elements.append(Spacer(1, 0.5*cm))
         
         # Conditions from document or settings
-        conditions = doc_data.get('conditions') or invoice_settings.get('default_invoice_conditions') or invoice_settings.get('default_conditions', '')
+        conditions = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
         if conditions:
             elements.append(Paragraph("<b>Conditions de paiement:</b>", section_style))
             for line in conditions.split('\n'):
@@ -415,7 +415,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     
     # Bank details section (for both)
     elements.append(Spacer(1, 0.3*cm))
-    bank_details = doc_data.get('bank_details') or invoice_settings.get('default_bank_details', '')
+    bank_details = doc_data.get('bank_details') or invoice_settings.get('bank_details', '')
     if bank_details:
         elements.append(Paragraph("<b>Détails du paiement:</b>", section_style))
         elements.append(Paragraph(f"Bénéficiaire: {COMPANY_INFO['commercial_name']}", section_style))
