@@ -1866,77 +1866,113 @@ BANQUE : ..."
                 </div>
               </div>
               
-              {/* Mini Preview */}
-              <div className="bg-white rounded-lg shadow-lg p-6 text-black text-xs scale-90 origin-top">
-                <div className="flex justify-between mb-4">
+              {/* Full Preview */}
+              <div className="bg-white rounded-lg shadow-lg p-6 text-black text-xs" style={{ transform: 'scale(0.85)', transformOrigin: 'top left', width: '118%' }}>
+                {/* Header */}
+                <div className="flex justify-between items-start mb-6">
                   <div>
-                    <h4 className="font-bold text-red-600">ALPHA AGENCY</h4>
-                    <p className="text-gray-600">123 Rue Example</p>
-                    <p className="text-gray-600">97100 Basse-Terre</p>
+                    <img src={COMPANY_INFO.logo} alt="Alpha Agency" className="h-10 mb-2" />
+                    <p className="text-[8px] text-gray-500">{COMPANY_INFO.tagline}</p>
                   </div>
                   <div className="text-right">
-                    <h4 className="font-bold">{documentType === 'devis' ? 'DEVIS' : 'FACTURE'}</h4>
-                    <p className="text-gray-600">{invoiceSettings?.invoice_prefix || 'FAC-'}001</p>
-                    <p className="text-gray-600">{new Date().toLocaleDateString('fr-FR')}</p>
+                    <h2 className="text-lg font-bold text-red-600 mb-1">
+                      {documentType === 'devis' ? 'DEVIS' : 'FACTURE'}
+                    </h2>
+                    <p className="text-gray-600">N° {invoiceSettings?.invoice_prefix || (documentType === 'devis' ? 'DEV-' : 'FAC-')}2026-001</p>
+                    <p className="text-gray-600">Date: {new Date().toLocaleDateString('fr-FR')}</p>
                   </div>
                 </div>
                 
-                <div className="flex justify-between mb-4 text-[10px]">
-                  <div className="w-1/2">
-                    <p className="font-bold mb-1">ÉMETTEUR</p>
-                    <p>Alpha Agency</p>
-                    <p>Email: {invoiceSettings?.contact_email || 'contact@alphagency.fr'}</p>
-                    <p>TVA: {invoiceSettings?.tva_number || 'FR...'}</p>
+                {/* Company & Client Side by Side */}
+                <div className="flex justify-between mb-6 text-[10px]">
+                  <div className="w-[45%]">
+                    <p className="font-bold text-gray-800 mb-1">{COMPANY_INFO.name}</p>
+                    <p className="text-gray-600">{COMPANY_INFO.address}</p>
+                    <p className="text-gray-600">{COMPANY_INFO.city}</p>
+                    <p className="text-gray-600">Tél: {COMPANY_INFO.phone}</p>
+                    <p className="text-gray-600">{invoiceSettings?.contact_email || COMPANY_INFO.email}</p>
                   </div>
-                  <div className="w-1/2 text-right">
-                    <p className="font-bold mb-1">DESTINATAIRE</p>
-                    <p>Nom du client</p>
-                    <p>Adresse client</p>
+                  <div className="w-[45%] text-right">
+                    <p className="font-bold text-red-600 mb-1">DESTINATAIRE</p>
+                    <p className="font-semibold text-gray-800">Nom du client</p>
+                    <p className="text-gray-600">Entreprise</p>
+                    <p className="text-gray-600">client@email.com</p>
                   </div>
                 </div>
                 
-                <table className="w-full mb-4 text-[10px]">
-                  <thead className="bg-gray-800 text-white">
-                    <tr>
-                      <th className="p-1 text-left">Description</th>
-                      <th className="p-1 text-right">Qté</th>
-                      <th className="p-1 text-right">PU</th>
-                      <th className="p-1 text-right">Total</th>
+                {/* Items Table */}
+                <table className="w-full mb-4 text-[9px]">
+                  <thead>
+                    <tr className="bg-gray-800 text-white">
+                      <th className="p-2 text-left">Désignation</th>
+                      <th className="p-2 text-center w-10">Qté</th>
+                      <th className="p-2 text-right w-16">P.U. HT</th>
+                      <th className="p-2 text-right w-14">TVA</th>
+                      <th className="p-2 text-right w-16">Total HT</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b">
-                      <td className="p-1">Service exemple</td>
-                      <td className="p-1 text-right">1</td>
-                      <td className="p-1 text-right">500,00 €</td>
-                      <td className="p-1 text-right">500,00 €</td>
+                    <tr className="border-b border-gray-200">
+                      <td className="p-2">
+                        <div className="font-semibold">Prestation exemple</div>
+                        <div className="text-gray-500 text-[8px]">Description du service</div>
+                      </td>
+                      <td className="p-2 text-center">1</td>
+                      <td className="p-2 text-right">500,00 €</td>
+                      <td className="p-2 text-right text-[8px]">8.5%<br/>(42,50 €)</td>
+                      <td className="p-2 text-right font-semibold">500,00 €</td>
                     </tr>
                   </tbody>
                 </table>
                 
-                <div className="text-right mb-4 text-[10px]">
-                  <p>Total HT: 500,00 €</p>
-                  <p>TVA (8.5%): 42,50 €</p>
-                  <p className="font-bold text-red-600">Total TTC: 542,50 €</p>
+                {/* Totals */}
+                <div className="flex justify-end mb-4">
+                  <div className="w-48 text-[10px]">
+                    <div className="flex justify-between py-1 border-b border-gray-200">
+                      <span>Total HT</span>
+                      <span>500,00 €</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-gray-200">
+                      <span>TVA (8.5%)</span>
+                      <span>42,50 €</span>
+                    </div>
+                    <div className="flex justify-between py-1 font-bold text-red-600">
+                      <span>Total TTC</span>
+                      <span>542,50 €</span>
+                    </div>
+                  </div>
                 </div>
                 
+                {/* Conditions */}
                 {invoiceSettings?.default_conditions && (
-                  <div className="text-[8px] text-gray-600 mb-2">
-                    <p className="font-bold">Conditions:</p>
-                    <p className="whitespace-pre-wrap">{invoiceSettings.default_conditions.substring(0, 150)}...</p>
+                  <div className="text-[8px] text-gray-600 mb-3 p-2 bg-gray-50 rounded">
+                    <p className="font-bold mb-1">Conditions de règlement:</p>
+                    <p className="whitespace-pre-wrap">{invoiceSettings.default_conditions}</p>
                   </div>
                 )}
                 
+                {/* Bank Details */}
                 {invoiceSettings?.bank_details && (
-                  <div className="text-[8px] text-gray-600 mb-2">
-                    <p className="font-bold">Coordonnées bancaires:</p>
+                  <div className="text-[8px] text-gray-600 mb-3 p-2 bg-gray-50 rounded">
+                    <p className="font-bold mb-1">Détails du paiement:</p>
+                    <p>Bénéficiaire: {COMPANY_INFO.name}</p>
                     <p className="whitespace-pre-wrap">{invoiceSettings.bank_details}</p>
                   </div>
                 )}
                 
-                <div className="border-t pt-2 text-[7px] text-gray-500 text-center">
-                  <p>Alpha Agency - SIRET: 123456789 | TVA: {invoiceSettings?.tva_number || 'FR...'}</p>
-                  <p>{invoiceSettings?.discount_conditions || 'Pas d\'escompte pour paiement anticipé.'}</p>
+                {/* Signature for quotes */}
+                {documentType === 'devis' && (
+                  <div className="text-[9px] text-gray-600 mt-4 pt-4 border-t">
+                    <p className="font-bold mb-2">{invoiceSettings?.signature_text || "Bon pour accord"}</p>
+                    <div className="w-48 border-b border-gray-400 h-8"></div>
+                  </div>
+                )}
+                
+                {/* Footer */}
+                <div className="border-t mt-4 pt-3 text-[7px] text-gray-500 text-center">
+                  <p>{COMPANY_INFO.name} - {COMPANY_INFO.address}, {COMPANY_INFO.city}</p>
+                  <p>SIRET: {COMPANY_INFO.siret} | TVA: {invoiceSettings?.tva_number || COMPANY_INFO.tva} | RCS: {invoiceSettings?.rcs || COMPANY_INFO.rcs}</p>
+                  <p className="mt-1">{invoiceSettings?.discount_conditions || 'Pas d\'escompte pour paiement anticipé.'} {invoiceSettings?.late_penalty || ''}</p>
                 </div>
               </div>
             </div>
