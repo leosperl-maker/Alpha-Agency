@@ -375,53 +375,80 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     
     # Conditions for quotes
     if doc_type == "devis":
-        conditions_style = ParagraphStyle('Conditions', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=12)
-        elements.append(Paragraph("<b>Conditions:</b>", conditions_style))
+        elements.append(Spacer(1, 0.5*cm))
+        elements.append(Paragraph("<b>Conditions de règlement:</b>", section_style))
         
         # Use custom conditions from settings or document
-        conditions_text = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
+        conditions_text = doc_data.get('conditions') or invoice_settings.get('default_quote_conditions') or invoice_settings.get('default_conditions', '')
         if conditions_text:
             for line in conditions_text.strip().split('\n'):
                 if line.strip():
-                    elements.append(Paragraph(line.strip(), conditions_style))
+                    elements.append(Paragraph(line.strip(), section_style))
         
-        elements.append(Spacer(1, 0.8*cm))
-        signature_text = invoice_settings.get('signature_text', "Bon pour accord, le client :")
-        elements.append(Paragraph(f"<b>Signature du client précédée de la mention '{signature_text}':</b>", conditions_style))
-        elements.append(Spacer(1, 2*cm))
-        elements.append(Paragraph("_" * 40, conditions_style))
+        elements.append(Spacer(1, 0.6*cm))
+        
+        # Signature section
+        signature_text = invoice_settings.get('signature_text', "Bon pour accord")
+        elements.append(Paragraph(f"<b>Mention \"{signature_text}\" suivie de la signature :</b>", section_style))
+        elements.append(Spacer(1, 1.5*cm))
+        elements.append(Paragraph("_" * 50, section_style))
     
     # Payment info for invoices
     if doc_type == "facture":
-        payment_style = ParagraphStyle('Payment', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=12)
-        
-        # Bank details from document or settings
-        bank_details = doc_data.get('bank_details') or invoice_settings.get('bank_details', '')
-        if bank_details:
-            elements.append(Paragraph("<b>Coordonnées bancaires:</b>", payment_style))
-            for line in bank_details.split('\n'):
-                if line.strip():
-                    elements.append(Paragraph(line.strip(), payment_style))
-            elements.append(Spacer(1, 0.5*cm))
+        elements.append(Spacer(1, 0.5*cm))
         
         # Conditions from document or settings
-        conditions = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
+        conditions = doc_data.get('conditions') or invoice_settings.get('default_invoice_conditions') or invoice_settings.get('default_conditions', '')
         if conditions:
-            elements.append(Paragraph("<b>Conditions de paiement:</b>", payment_style))
+            elements.append(Paragraph("<b>Conditions de paiement:</b>", section_style))
             for line in conditions.split('\n'):
                 if line.strip():
-                    elements.append(Paragraph(line.strip(), payment_style))
+                    elements.append(Paragraph(line.strip(), section_style))
+            elements.append(Spacer(1, 0.4*cm))
     
-    # Footer
-    elements.append(Spacer(1, 1*cm))
-    footer_text = f"{COMPANY_INFO['name']} - {COMPANY_INFO['address']} - {COMPANY_INFO['city']} - {COMPANY_INFO['region']}"
-    elements.append(Paragraph(footer_text, footer_style))
-    legal_text = f"SIRET: {COMPANY_INFO['siret']} | NAF: {COMPANY_INFO['naf']} | TVA: {COMPANY_INFO['tva_intra']} | RCS: {COMPANY_INFO['rcs']}"
-    elements.append(Paragraph(legal_text, footer_style))
-    capital_text = f"{COMPANY_INFO['legal_form']} au capital de {COMPANY_INFO['capital']} € | Tél: {COMPANY_INFO['phone']} | Email: {COMPANY_INFO['email']}"
-    elements.append(Paragraph(capital_text, footer_style))
+    # Bank details section (for both)
+    elements.append(Spacer(1, 0.3*cm))
+    bank_details = doc_data.get('bank_details') or invoice_settings.get('default_bank_details', '')
+    if bank_details:
+        elements.append(Paragraph("<b>Détails du paiement:</b>", section_style))
+        elements.append(Paragraph(f"Bénéficiaire: {COMPANY_INFO['commercial_name']}", section_style))
+        for line in bank_details.split('\n'):
+            if line.strip():
+                elements.append(Paragraph(line.strip(), section_style))
     
-    doc.build(elements)
+    # Build document with footer
+    def footer_canvas(canvas, doc):
+        canvas.saveState()
+        # Footer line
+        canvas.setStrokeColor(colors.HexColor('#CCCCCC'))
+        canvas.line(1.5*cm, 2.8*cm, A4[0] - 1.5*cm, 2.8*cm)
+        
+        # Footer text
+        canvas.setFont('Helvetica', 7)
+        canvas.setFillColor(colors.HexColor('#666666'))
+        
+        # Line 1: Company info
+        footer_line1 = f"{COMPANY_INFO['name']} - {COMPANY_INFO['legal_form']} au capital de {COMPANY_INFO['capital']} €"
+        canvas.drawCentredString(A4[0]/2, 2.4*cm, footer_line1)
+        
+        # Line 2: Address
+        footer_line2 = f"{COMPANY_INFO['address']}, {COMPANY_INFO['city']} - {COMPANY_INFO['region']}"
+        canvas.drawCentredString(A4[0]/2, 2.0*cm, footer_line2)
+        
+        # Line 3: Legal info
+        footer_line3 = f"SIRET: {COMPANY_INFO['siret']} | TVA: {COMPANY_INFO['tva_intra']} | RCS: {COMPANY_INFO['rcs']}"
+        canvas.drawCentredString(A4[0]/2, 1.6*cm, footer_line3)
+        
+        # Line 4: Contact + Legal mentions
+        footer_line4 = "Pas d'escompte pour règlement anticipé. En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement."
+        canvas.drawCentredString(A4[0]/2, 1.2*cm, footer_line4)
+        
+        # Page number
+        canvas.drawRightString(A4[0] - 1.5*cm, 0.8*cm, f"Page {doc.page}")
+        
+        canvas.restoreState()
+    
+    doc.build(elements, onFirstPage=footer_canvas, onLaterPages=footer_canvas)
     buffer.seek(0)
     return buffer
 
