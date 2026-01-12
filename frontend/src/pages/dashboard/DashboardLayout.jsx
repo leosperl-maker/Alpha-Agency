@@ -357,13 +357,14 @@ const DashboardLayout = () => {
 
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'}`}>
-        {/* Top Bar */}
-        <header className="sticky top-0 z-30 h-16 bg-black/40 backdrop-blur-2xl border-b border-white/10 flex items-center justify-between px-4 lg:px-6">
+        {/* Top Bar - with safe area for iOS */}
+        <header className="sticky top-0 z-30 bg-black/40 backdrop-blur-2xl border-b border-white/10 flex items-center justify-between px-4 lg:px-6" style={{ paddingTop: 'max(env(safe-area-inset-top), 0.5rem)', minHeight: '4rem' }}>
           {/* Left: Mobile menu + Page title */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="lg:hidden p-2 rounded-lg hover:bg-white/10 text-white"
+              data-testid="mobile-menu-btn"
             >
               <Menu className="w-5 h-5" />
             </button>
