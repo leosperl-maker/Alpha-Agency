@@ -392,26 +392,39 @@ const InvoicesPage = () => {
     }
   };
 
-  const handleSendEmail = async (invoice) => {
+  const openEmailDialog = (invoice) => {
     const contact = contacts.find(c => c.id === invoice.contact_id);
-    if (!contact?.email) {
-      toast.error("Ce contact n'a pas d'adresse email");
+    setEmailInvoice(invoice);
+    setEmailRecipient(contact?.email || "");
+    setEmailDialogOpen(true);
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailRecipient || !emailInvoice) {
+      toast.error("Adresse email requise");
       return;
     }
     
+    setSendingEmail(true);
     const toastId = toast.loading("Envoi de l'email en cours...");
     try {
-      const type = invoice.document_type === 'devis' ? 'devis' : 'facture';
-      await api.post(`/invoices/${invoice.id}/send-email`, {
-        recipient_email: contact.email,
+      const type = emailInvoice.document_type === 'devis' ? 'devis' : 'facture';
+      await api.post(`/invoices/${emailInvoice.id}/send-email`, {
+        recipient_email: emailRecipient,
         document_type: type
       });
       toast.dismiss(toastId);
-      toast.success(`Email envoyé à ${contact.email}`);
+      toast.success(`Email envoyé à ${emailRecipient}`);
+      setEmailDialogOpen(false);
+      setEmailInvoice(null);
+      setEmailRecipient("");
+      fetchData(); // Refresh to update status
     } catch (error) {
       toast.dismiss(toastId);
       console.error('Email error:', error);
       toast.error("Erreur lors de l'envoi de l'email");
+    } finally {
+      setSendingEmail(false);
     }
   };
 
