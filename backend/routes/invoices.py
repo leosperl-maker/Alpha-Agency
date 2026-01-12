@@ -111,7 +111,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, LongTable
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, KeepTogether
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 import urllib.request
 
@@ -171,6 +171,14 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     DARK_GRAY = colors.HexColor('#333333')
     LIGHT_GRAY = colors.HexColor('#666666')
     
+    # Get company info from settings or fallback to defaults
+    company_name = invoice_settings.get('company_name') or COMPANY_INFO['commercial_name']
+    company_address = invoice_settings.get('company_address') or f"{COMPANY_INFO['address']}, {COMPANY_INFO['city']}"
+    company_siret = invoice_settings.get('company_siret') or COMPANY_INFO['siret']
+    company_vat = invoice_settings.get('company_vat') or COMPANY_INFO['tva_intra']
+    company_phone = COMPANY_INFO['phone']
+    company_email = COMPANY_INFO['email']
+    
     # Styles
     company_name_style = ParagraphStyle('CompanyName', parent=styles['Heading1'], fontSize=20, textColor=BRAND_RED, spaceAfter=0)
     company_info_style = ParagraphStyle('CompanyInfo', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=12)
@@ -193,9 +201,9 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         try:
             header_left.append(Image(logo_path, width=6*cm, height=2.2*cm))
         except:
-            header_left.append(Paragraph(f"<b>{COMPANY_INFO['commercial_name']}</b>", company_name_style))
+            header_left.append(Paragraph(f"<b>{company_name}</b>", company_name_style))
     else:
-        header_left.append(Paragraph(f"<b>{COMPANY_INFO['commercial_name']}</b>", company_name_style))
+        header_left.append(Paragraph(f"<b>{company_name}</b>", company_name_style))
     
     doc_number = doc_data.get('invoice_number') or doc_data.get('quote_number', '')
     doc_date = doc_data.get('created_at', '')[:10]
@@ -224,14 +232,13 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(Spacer(1, 0.6*cm))
     
     # ===== SENDER (left) and RECIPIENT (right) side by side =====
-    # Sender info block
+    # Sender info block - use settings values
     sender_content = []
-    sender_content.append(Paragraph(f"<b>{COMPANY_INFO['commercial_name']}</b>", client_info_style))
-    sender_content.append(Paragraph(f"{COMPANY_INFO['address']}", company_info_style))
-    sender_content.append(Paragraph(f"{COMPANY_INFO['city']}, {COMPANY_INFO['region']}", company_info_style))
+    sender_content.append(Paragraph(f"<b>{company_name}</b>", client_info_style))
+    sender_content.append(Paragraph(company_address, company_info_style))
     sender_content.append(Spacer(1, 0.15*cm))
-    sender_content.append(Paragraph(f"Tél: {COMPANY_INFO['phone']}", company_info_style))
-    sender_content.append(Paragraph(f"Email: {COMPANY_INFO['email']}", company_info_style))
+    sender_content.append(Paragraph(f"Tél: {company_phone}", company_info_style))
+    sender_content.append(Paragraph(f"Email: {company_email}", company_info_style))
     
     # Recipient info block
     recipient_content = []
@@ -259,8 +266,8 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(address_table)
     elements.append(Spacer(1, 0.8*cm))
     
-    # Items table
-    table_data = [[
+    # Items table - build header first
+    table_header = [[
         Paragraph("<b>Description</b>", table_header_style),
         Paragraph("<b>Qté</b>", table_header_style),
         Paragraph("<b>PU HT</b>", table_header_style),
@@ -268,10 +275,25 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         Paragraph("<b>Total HT</b>", table_header_style)
     ]]
     
+    header_table = Table(table_header, colWidths=[9*cm, 1.2*cm, 2.3*cm, 2.3*cm, 2.2*cm])
+    header_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), BRAND_RED),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('TOPPADDING', (0, 0), (-1, 0), 10),
+        ('ALIGN', (1, 0), (-1, 0), 'CENTER'),
+        ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+    ]))
+    elements.append(header_table)
+    
     subtotal = 0
     tva_rate = 0.085
     
-    for item in doc_data.get('items', []):
+    # Build each item row individually to avoid LayoutError with long descriptions
+    for idx, item in enumerate(doc_data.get('items', [])):
         qty = item.get('quantity', 1)
         unit_price = item.get('unit_price', 0)
         discount = item.get('discount', 0)
@@ -293,10 +315,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         title = item.get('title', '').strip()
         desc = item.get('description', '').strip()
         
-        # Limit very long descriptions to prevent page overflow
-        if len(desc) > 800:
-            desc = desc[:797] + "..."
-        
+        # DO NOT truncate descriptions - let them flow naturally
         # Format description with proper line breaks
         desc = desc.replace('\n', '<br/>')
         
@@ -310,17 +329,41 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         # Format discount correctly
         if discount:
             if discount_type == 'percent' or discount_type == '%':
-                full_desc += f"<br/><font size='7' color='#CE0202'>Remise: -{discount}%</font>"
+                full_desc += f"<br/><font size='7' color='#CE0202'>Remise: -{discount:.0f}%</font>"
             else:
                 full_desc += f"<br/><font size='7' color='#CE0202'>Remise: -{discount:.2f} €</font>"
         
-        table_data.append([
+        # Create single row table for this item
+        row_bg = colors.white if idx % 2 == 0 else colors.HexColor('#F8F8F8')
+        item_row = [[
             Paragraph(full_desc, table_cell_style),
             Paragraph(str(qty), table_cell_right_style),
             Paragraph(f"{unit_price:.2f} €", table_cell_right_style),
             Paragraph(f"8.5%<br/>({tva_amount:.2f} €)", table_cell_right_style),
             Paragraph(f"{line_total:.2f} €", table_cell_right_style)
-        ])
+        ]]
+        
+        item_table = Table(item_row, colWidths=[9*cm, 1.2*cm, 2.3*cm, 2.3*cm, 2.2*cm])
+        item_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), row_bg),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
+            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+        ]))
+        
+        # Use KeepTogether to try to keep item on same page, but allow split if needed
+        try:
+            elements.append(KeepTogether([item_table]))
+        except:
+            # If KeepTogether fails, just add the table directly
+            elements.append(item_table)
+    
+    elements.append(Spacer(1, 0.5*cm))
     
     # Apply global discount
     global_discount = doc_data.get('globalDiscount', 0)
@@ -331,27 +374,6 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         else:
             subtotal -= global_discount
     
-    items_table = Table(table_data, colWidths=[9*cm, 1.2*cm, 2.3*cm, 2.3*cm, 2.2*cm], repeatRows=1)
-    items_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), BRAND_RED),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-        ('TOPPADDING', (0, 0), (-1, 0), 10),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
-        ('TOPPADDING', (0, 1), (-1, -1), 8),
-        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
-        ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F8F8F8')]),
-    ]))
-    elements.append(items_table)
-    elements.append(Spacer(1, 0.5*cm))
-    
     # Totals
     tva_total = subtotal * tva_rate
     total_ttc = subtotal + tva_total
@@ -360,7 +382,10 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ['', '', '', Paragraph("Total net HT:", totals_style), Paragraph(f"<b>{subtotal:.2f} €</b>", totals_style)],
     ]
     if global_discount:
-        totals_data.insert(0, ['', '', '', Paragraph(f"Remise globale ({global_discount}{global_discount_type}):", totals_style), Paragraph(f"<b>appliquée</b>", totals_style)])
+        if global_discount_type == '%':
+            totals_data.insert(0, ['', '', '', Paragraph(f"Remise globale ({global_discount:.0f}%):", totals_style), Paragraph(f"<b>appliquée</b>", totals_style)])
+        else:
+            totals_data.insert(0, ['', '', '', Paragraph(f"Remise globale ({global_discount:.2f} €):", totals_style), Paragraph(f"<b>appliquée</b>", totals_style)])
     
     totals_data.extend([
         ['', '', '', Paragraph("TVA 8.50%:", totals_style), Paragraph(f"<b>{tva_total:.2f} €</b>", totals_style)],
@@ -415,13 +440,13 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     bank_details = doc_data.get('bank_details') or invoice_settings.get('bank_details', '')
     if bank_details:
         elements.append(Paragraph("<b>Détails du paiement:</b>", section_style))
-        elements.append(Paragraph(f"Bénéficiaire: {COMPANY_INFO['commercial_name']}", section_style))
+        elements.append(Paragraph(f"Bénéficiaire: {company_name}", section_style))
         for line in bank_details.split('\n'):
             if line.strip():
                 elements.append(Paragraph(line.strip(), section_style))
     
-    # Build document with footer
-    def footer_canvas(canvas, doc):
+    # Build document with footer - use settings values
+    def footer_canvas(canvas, doc_obj):
         canvas.saveState()
         # Footer line
         canvas.setStrokeColor(colors.HexColor('#CCCCCC'))
@@ -435,20 +460,19 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         footer_line1 = f"{COMPANY_INFO['name']} - {COMPANY_INFO['legal_form']} au capital de {COMPANY_INFO['capital']} €"
         canvas.drawCentredString(A4[0]/2, 2.4*cm, footer_line1)
         
-        # Line 2: Address
-        footer_line2 = f"{COMPANY_INFO['address']}, {COMPANY_INFO['city']} - {COMPANY_INFO['region']}"
-        canvas.drawCentredString(A4[0]/2, 2.0*cm, footer_line2)
+        # Line 2: Address from settings
+        canvas.drawCentredString(A4[0]/2, 2.0*cm, company_address)
         
-        # Line 3: Legal info
-        footer_line3 = f"SIRET: {COMPANY_INFO['siret']} | TVA: {COMPANY_INFO['tva_intra']} | RCS: {COMPANY_INFO['rcs']}"
+        # Line 3: Legal info from settings
+        footer_line3 = f"SIRET: {company_siret} | TVA: {company_vat}"
         canvas.drawCentredString(A4[0]/2, 1.6*cm, footer_line3)
         
-        # Line 4: Contact + Legal mentions
-        footer_line4 = "Pas d'escompte pour règlement anticipé. En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement."
+        # Line 4: Legal mentions (removed "Pas d'escompte")
+        footer_line4 = "En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement."
         canvas.drawCentredString(A4[0]/2, 1.2*cm, footer_line4)
         
         # Page number
-        canvas.drawRightString(A4[0] - 1.5*cm, 0.8*cm, f"Page {doc.page}")
+        canvas.drawRightString(A4[0] - 1.5*cm, 0.8*cm, f"Page {doc_obj.page}")
         
         canvas.restoreState()
     
