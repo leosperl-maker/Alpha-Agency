@@ -194,6 +194,11 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=LIGHT_GRAY, alignment=TA_CENTER, leading=10)
     section_style = ParagraphStyle('Section', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=13)
     
+    # Item styles for flowable approach
+    item_title_style = ParagraphStyle('ItemTitle', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=12)
+    item_desc_style = ParagraphStyle('ItemDesc', parent=styles['Normal'], fontSize=8, textColor=DARK_GRAY, leading=11)
+    item_info_style = ParagraphStyle('ItemInfo', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT, leading=12)
+    
     # Header with Logo and Document Info
     logo_path = fetch_logo_image()
     header_left = []
@@ -292,7 +297,8 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     subtotal = 0
     tva_rate = 0.085
     
-    # Build each item row individually to avoid LayoutError with long descriptions
+    # Build each item as separate flowables
+    # This approach allows long descriptions to flow across pages
     for idx, item in enumerate(doc_data.get('items', [])):
         qty = item.get('quantity', 1)
         unit_price = item.get('unit_price', 0)
@@ -315,28 +321,29 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         title = item.get('title', '').strip()
         desc = item.get('description', '').strip()
         
-        # DO NOT truncate descriptions - let them flow naturally
-        # Format description with proper line breaks
-        desc = desc.replace('\n', '<br/>')
+        # Build description content
+        desc_parts = []
+        if title:
+            desc_parts.append(Paragraph(f"<b>{title}</b>", item_title_style))
         
-        if title and desc:
-            full_desc = f"<b>{title}</b><br/><font size='8'>{desc}</font>"
-        elif title:
-            full_desc = f"<b>{title}</b>"
-        else:
-            full_desc = f"<font size='8'>{desc}</font>"
+        if desc:
+            # Replace newlines for proper display
+            desc_formatted = desc.replace('\n', '<br/>')
+            desc_parts.append(Paragraph(desc_formatted, item_desc_style))
         
         # Format discount correctly
         if discount:
             if discount_type == 'percent' or discount_type == '%':
-                full_desc += f"<br/><font size='7' color='#CE0202'>Remise: -{discount:.0f}%</font>"
+                desc_parts.append(Paragraph(f"<font color='#CE0202'>Remise: -{discount:.0f}%</font>", item_desc_style))
             else:
-                full_desc += f"<br/><font size='7' color='#CE0202'>Remise: -{discount:.2f} €</font>"
+                desc_parts.append(Paragraph(f"<font color='#CE0202'>Remise: -{discount:.2f} €</font>", item_desc_style))
         
-        # Create single row table for this item
+        # Create numeric data for the right columns
         row_bg = colors.white if idx % 2 == 0 else colors.HexColor('#F8F8F8')
+        
+        # Put description as list of flowables (can split across pages)
         item_row = [[
-            Paragraph(full_desc, table_cell_style),
+            desc_parts,  # This is a list of flowables that can flow
             Paragraph(str(qty), table_cell_right_style),
             Paragraph(f"{unit_price:.2f} €", table_cell_right_style),
             Paragraph(f"8.5%<br/>({tva_amount:.2f} €)", table_cell_right_style),
@@ -356,12 +363,8 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
             ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
         ]))
         
-        # Use KeepTogether to try to keep item on same page, but allow split if needed
-        try:
-            elements.append(KeepTogether([item_table]))
-        except:
-            # If KeepTogether fails, just add the table directly
-            elements.append(item_table)
+        # Add directly without KeepTogether to allow splitting
+        elements.append(item_table)
     
     elements.append(Spacer(1, 0.5*cm))
     
