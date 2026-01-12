@@ -2382,6 +2382,231 @@ BANQUE : ..."
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Email Confirmation Dialog */}
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Mail className="w-5 h-5 text-emerald-400" />
+              Envoyer par email
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-white/70 text-sm">
+              {emailInvoice?.document_type === 'devis' ? 'Devis' : 'Facture'} {emailInvoice?.invoice_number}
+            </p>
+            <div className="space-y-2">
+              <Label className="text-white">Adresse email du destinataire</Label>
+              <Input
+                type="email"
+                value={emailRecipient}
+                onChange={(e) => setEmailRecipient(e.target.value)}
+                className="bg-white/5 border-white/10 text-white"
+                placeholder="client@email.com"
+              />
+            </div>
+            <p className="text-xs text-white/50">
+              Une copie sera envoyée à leo.sperl@alphagency.com
+            </p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setEmailDialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+              Annuler
+            </Button>
+            <Button onClick={handleSendEmail} disabled={sendingEmail || !emailRecipient} className="bg-emerald-600 hover:bg-emerald-700">
+              {sendingEmail ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
+              Envoyer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Phase 2: After Creation Dialog */}
+      <Dialog open={phase2DialogOpen} onOpenChange={setPhase2DialogOpen}>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <CheckCircle className="w-6 h-6 text-emerald-400" />
+              {createdInvoice?.document_type === 'devis' ? 'Devis' : 'Facture'} créé{createdInvoice?.document_type === 'devis' ? '' : 'e'} !
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-white/5 rounded-lg p-4">
+              <p className="text-white font-mono text-lg">{createdInvoice?.invoice_number}</p>
+              <p className="text-white/60 text-sm mt-1">
+                {getContactName(createdInvoice?.contact_id)} • {formatCurrency(createdInvoice?.total || 0)}
+              </p>
+            </div>
+            
+            <p className="text-white/70 text-sm">Que souhaitez-vous faire ?</p>
+            
+            <div className="space-y-2">
+              <Button 
+                onClick={() => {
+                  const contact = contacts.find(c => c.id === createdInvoice?.contact_id);
+                  setEmailInvoice(createdInvoice);
+                  setEmailRecipient(contact?.email || "");
+                  setPhase2DialogOpen(false);
+                  setEmailDialogOpen(true);
+                }}
+                className="w-full justify-start bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-600/30"
+              >
+                <Mail className="w-5 h-5 mr-3" />
+                <div className="text-left">
+                  <p className="font-medium">Envoyer par email</p>
+                  <p className="text-xs text-emerald-400/70">Envoyer le document au client</p>
+                </div>
+              </Button>
+              
+              <Button 
+                onClick={async () => {
+                  if (createdInvoice) {
+                    const type = createdInvoice.document_type === 'devis' ? 'devis' : 'facture';
+                    await invoicesAPI.downloadPDF(createdInvoice.id, createdInvoice.invoice_number, type);
+                    toast.success("PDF téléchargé");
+                  }
+                }}
+                className="w-full justify-start bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-600/30"
+              >
+                <Download className="w-5 h-5 mr-3" />
+                <div className="text-left">
+                  <p className="font-medium">Télécharger le PDF</p>
+                  <p className="text-xs text-indigo-400/70">Sauvegarder sur votre appareil</p>
+                </div>
+              </Button>
+              
+              <Button 
+                onClick={() => {
+                  if (createdInvoice) {
+                    setSelectedInvoice(createdInvoice);
+                    setPhase2DialogOpen(false);
+                    setViewDialogOpen(true);
+                  }
+                }}
+                className="w-full justify-start bg-white/5 hover:bg-white/10 text-white border border-white/10"
+              >
+                <Eye className="w-5 h-5 mr-3" />
+                <div className="text-left">
+                  <p className="font-medium">Voir l'aperçu</p>
+                  <p className="text-xs text-white/50">Prévisualiser le document</p>
+                </div>
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPhase2DialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Contact Dialog */}
+      <Dialog open={newContactDialogOpen} onOpenChange={setNewContactDialogOpen}>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Plus className="w-5 h-5 text-indigo-400" />
+              Nouveau client
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-white">Prénom</Label>
+                <Input
+                  value={newContactData.first_name}
+                  onChange={(e) => setNewContactData({...newContactData, first_name: e.target.value})}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white">Nom</Label>
+                <Input
+                  value={newContactData.last_name}
+                  onChange={(e) => setNewContactData({...newContactData, last_name: e.target.value})}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-white">Entreprise</Label>
+              <Input
+                value={newContactData.company}
+                onChange={(e) => setNewContactData({...newContactData, company: e.target.value})}
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-white">Email</Label>
+                <Input
+                  type="email"
+                  value={newContactData.email}
+                  onChange={(e) => setNewContactData({...newContactData, email: e.target.value})}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white">Téléphone</Label>
+                <Input
+                  value={newContactData.phone}
+                  onChange={(e) => setNewContactData({...newContactData, phone: e.target.value})}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-white">Adresse</Label>
+              <Input
+                value={newContactData.address}
+                onChange={(e) => setNewContactData({...newContactData, address: e.target.value})}
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+            
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label className="text-white">Code postal</Label>
+                <Input
+                  value={newContactData.postal_code}
+                  onChange={(e) => setNewContactData({...newContactData, postal_code: e.target.value})}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white">Ville</Label>
+                <Input
+                  value={newContactData.city}
+                  onChange={(e) => setNewContactData({...newContactData, city: e.target.value})}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white">Pays</Label>
+                <Input
+                  value={newContactData.country}
+                  onChange={(e) => setNewContactData({...newContactData, country: e.target.value})}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setNewContactDialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+              Annuler
+            </Button>
+            <Button onClick={handleCreateNewContact} disabled={savingContact} className="bg-indigo-600 hover:bg-indigo-700">
+              {savingContact ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              Créer et sélectionner
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
