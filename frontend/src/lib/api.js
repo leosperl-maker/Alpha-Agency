@@ -147,44 +147,30 @@ export const invoicesAPI = {
   deletePayment: (invoiceId, paymentId) => api.delete(`/invoices/${invoiceId}/payments/${paymentId}`),
   // Helper function to download PDF with authentication - All platforms
   downloadPDF: async (id, invoiceNumber, type = 'facture') => {
+    const filename = `${type}_${invoiceNumber || id}.pdf`;
+    
     try {
-      const filename = `${type}_${invoiceNumber || id}.pdf`;
+      // Use authenticated endpoint directly with axios (handles auth token)
+      const response = await api.get(`/invoices/${id}/pdf`, {
+        responseType: 'blob',
+        headers: { 'Accept': 'application/pdf' }
+      });
       
-      // Get token for download
-      const tokenResponse = await api.get(`/invoices/${id}/pdf-token`);
-      const { token } = tokenResponse.data;
-      
-      if (!token) {
-        throw new Error('No token received');
+      if (!response.data || response.data.size === 0) {
+        throw new Error('Empty PDF');
       }
       
-      // Construct URL
-      const baseUrl = process.env.REACT_APP_BACKEND_URL || '';
-      const pdfUrl = `${baseUrl}/api/invoices/${id}/pdf-download/${token}`;
+      // Create blob and download
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
       
-      // Fetch PDF as blob (works on all platforms including iOS)
-      const response = await fetch(pdfUrl);
-      if (!response.ok) {
-        throw new Error('PDF download failed');
-      }
-      
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      
-      // Create download link
       const link = document.createElement('a');
-      link.href = blobUrl;
+      link.href = url;
       link.download = filename;
-      link.style.display = 'none';
-      
       document.body.appendChild(link);
       link.click();
-      
-      // Cleanup
-      setTimeout(() => {
-        if (link.parentNode) document.body.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
-      }, 1000);
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
       
       return true;
     } catch (error) {
