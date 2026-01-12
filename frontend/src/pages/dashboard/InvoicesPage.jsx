@@ -373,6 +373,14 @@ const InvoicesPage = () => {
     }
   };
 
+  const handleSendEmail = async (invoice) => {
+    toast.info("Fonctionnalité d'envoi par email en cours de développement");
+  };
+
+  const handleChangeStatus = async (invoice) => {
+    toast.info("Fonctionnalité de changement de statut en cours de développement");
+  };
+
   const handleDuplicate = async (invoice) => {
     try {
       const newInvoice = {
