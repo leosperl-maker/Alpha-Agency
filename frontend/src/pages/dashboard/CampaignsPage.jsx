@@ -207,23 +207,24 @@ const EmailCampaignsTab = () => {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-white">Campagnes Email</h3>
-          <p className="text-sm text-white/60">Créez et gérez vos campagnes d'emailing</p>
+          <h3 className="text-base sm:text-lg font-semibold text-white">Campagnes Email</h3>
+          <p className="text-xs sm:text-sm text-white/60">Créez et gérez vos campagnes d'emailing</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={fetchCampaigns} disabled={loading}>
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-            Actualiser
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          <Button variant="outline" onClick={fetchCampaigns} disabled={loading} size="sm" className="flex-1 sm:flex-none">
+            <RefreshCw className={`w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 ${loading ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">Actualiser</span>
           </Button>
           
           {/* Visual Editor Dialog */}
           <Dialog open={showEditorDialog} onOpenChange={setShowEditorDialog}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="border-purple-500 text-purple-600 hover:bg-purple-50">
-                <Paintbrush className="w-4 h-4 mr-2" />
-                Éditeur visuel
+              <Button variant="outline" size="sm" className="border-purple-500 text-purple-600 hover:bg-purple-50 flex-1 sm:flex-none">
+                <Paintbrush className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Éditeur visuel</span>
+                <span className="sm:hidden">Éditeur</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-[95vw] max-h-[95vh] h-[90vh]">
@@ -391,6 +392,58 @@ const EmailCampaignsTab = () => {
         </Card>
       ) : (
         <>
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-3">
+            {campaigns.map((campaign) => {
+              const status = campaign.status || "draft";
+              const colors = statusColors[status] || statusColors.draft;
+              return (
+                <Card key={campaign.id} className="bg-white/5 backdrop-blur-xl border-white/10">
+                  <CardContent className="p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-white text-sm truncate">{campaign.name}</p>
+                        <p className="text-xs text-white/60 truncate mt-0.5">{campaign.subject}</p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge className={`${colors.bg} ${colors.text} border-0 text-xs`}>
+                            {statusLabels[status] || status}
+                          </Badge>
+                          <span className="text-[10px] text-white/40">{formatDate(campaign.createdAt)}</span>
+                        </div>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-[#1a1a2e] border-white/10">
+                          <DropdownMenuItem onClick={() => setSelectedCampaign(campaign)}>
+                            <Eye className="w-4 h-4 mr-2" />
+                            Voir les détails
+                          </DropdownMenuItem>
+                          {status === "draft" && (
+                            <>
+                              <DropdownMenuItem onClick={() => handleSendNow(campaign.id)}>
+                                <Send className="w-4 h-4 mr-2" />
+                                Envoyer maintenant
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleDelete(campaign.id)} className="text-red-600">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Supprimer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
           {/* Desktop Table View */}
           <Card className="hidden md:block">
             <Table>
@@ -1027,41 +1080,76 @@ const ContactsTab = () => {
             </CardContent>
           </Card>
         ) : (
-          <Card>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Téléphone</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {contacts.map((contact) => (
-                  <TableRow key={contact.email || contact.id}>
-                    <TableCell className="font-medium">{contact.email}</TableCell>
-                    <TableCell>
-                      {contact.attributes?.PRENOM || contact.attributes?.FIRSTNAME || ""}{" "}
-                      {contact.attributes?.NOM || contact.attributes?.LASTNAME || ""}
-                    </TableCell>
-                    <TableCell className="text-white/60">
-                      {contact.attributes?.SMS || contact.attributes?.PHONE || "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
+          <>
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-3">
+              {contacts.map((contact) => (
+                <Card key={contact.email || contact.id} className="bg-white/5 backdrop-blur-xl border-white/10">
+                  <CardContent className="p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-white text-sm truncate">{contact.email}</p>
+                        <p className="text-xs text-white/60 mt-0.5">
+                          {contact.attributes?.PRENOM || contact.attributes?.FIRSTNAME || ""}{" "}
+                          {contact.attributes?.NOM || contact.attributes?.LASTNAME || ""}
+                        </p>
+                        {(contact.attributes?.SMS || contact.attributes?.PHONE) && (
+                          <p className="text-xs text-white/40 mt-0.5">
+                            {contact.attributes?.SMS || contact.attributes?.PHONE}
+                          </p>
+                        )}
+                      </div>
                       <Button
                         variant="ghost"
                         size="sm"
+                        className="h-8 w-8 p-0 flex-shrink-0"
                         onClick={() => handleDeleteContact(contact.email)}
                       >
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </Button>
-                    </TableCell>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Desktop Table View */}
+            <Card className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Téléphone</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
+                </TableHeader>
+                <TableBody>
+                  {contacts.map((contact) => (
+                    <TableRow key={contact.email || contact.id}>
+                      <TableCell className="font-medium">{contact.email}</TableCell>
+                      <TableCell>
+                        {contact.attributes?.PRENOM || contact.attributes?.FIRSTNAME || ""}{" "}
+                        {contact.attributes?.NOM || contact.attributes?.LASTNAME || ""}
+                      </TableCell>
+                      <TableCell className="text-white/60">
+                        {contact.attributes?.SMS || contact.attributes?.PHONE || "-"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteContact(contact.email)}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </>
         )}
       </div>
     </div>

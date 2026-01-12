@@ -405,18 +405,18 @@ const AIAssistantPage = () => {
           </div>
           
           {/* Controls Row - Scrollable on mobile */}
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
             {/* Context Selector */}
             <Select value={contextType} onValueChange={setContextType}>
-              <SelectTrigger className="w-32 sm:w-36 h-8 bg-white border-[#E5E5E5] text-xs flex-shrink-0">
+              <SelectTrigger className="min-w-[100px] max-w-[120px] sm:min-w-[140px] sm:max-w-[160px] h-8 bg-white border-[#E5E5E5] text-[10px] sm:text-xs flex-shrink-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white z-50">
                 {contextOptions.map(opt => (
                   <SelectItem key={opt.value} value={opt.value}>
                     <div className="flex items-center gap-2">
-                      <opt.icon className="w-3 h-3" />
-                      {opt.label}
+                      <opt.icon className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate">{opt.label}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -425,14 +425,14 @@ const AIAssistantPage = () => {
             
             {/* Model Selector */}
             <Select value={selectedModel} onValueChange={setSelectedModel}>
-              <SelectTrigger className="w-36 sm:w-40 h-8 bg-white border-[#E5E5E5] text-xs flex-shrink-0">
+              <SelectTrigger className="min-w-[100px] max-w-[130px] sm:min-w-[150px] sm:max-w-[180px] h-8 bg-white border-[#E5E5E5] text-[10px] sm:text-xs flex-shrink-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white z-50">
                 {aiModels.map(model => (
                   <SelectItem key={model.value} value={model.value}>
                     <div className="flex items-center gap-2">
-                      <span>{model.icon}</span>
+                      <span className="flex-shrink-0">{model.icon}</span>
                       <span className="truncate">{model.label}</span>
                     </div>
                   </SelectItem>
@@ -445,10 +445,10 @@ const AIAssistantPage = () => {
               size="sm"
               onClick={clearCurrentChat}
               disabled={messages.length === 0 && !currentConversationId}
-              className="h-8 flex-shrink-0"
+              className="h-8 flex-shrink-0 px-2 sm:px-3"
             >
-              <Trash2 className="w-3 h-3 mr-1" />
-              <span className="hidden sm:inline">Effacer</span>
+              <Trash2 className="w-3 h-3" />
+              <span className="hidden sm:inline ml-1">Effacer</span>
             </Button>
           </div>
         </div>
