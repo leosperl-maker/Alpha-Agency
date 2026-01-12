@@ -1154,7 +1154,7 @@ const InvoicesPage = () => {
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10" onClick={() => handleDownloadPDF(invoice)} title="Télécharger">
                         <Download className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10" onClick={() => handleSendEmail(invoice)} title="Envoyer par email">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10" onClick={() => openEmailDialog(invoice)} title="Envoyer par email">
                         <Mail className="w-4 h-4" />
                       </Button>
                       <DropdownMenu>
@@ -1290,7 +1290,7 @@ const InvoicesPage = () => {
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10" onClick={() => handleDownloadPDF(invoice)} title="Télécharger PDF">
                             <Download className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10" onClick={() => handleSendEmail(invoice)} title="Envoyer par email">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10" onClick={() => openEmailDialog(invoice)} title="Envoyer par email">
                             <Mail className="w-4 h-4" />
                           </Button>
                           <DropdownMenu>
