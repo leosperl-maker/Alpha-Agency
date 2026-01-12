@@ -125,24 +125,31 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h3 className="text-lg font-semibold text-white">Budget prévisionnel</h3>
-          <p className="text-sm text-white/60">Comparez vos prévisions avec le réel</p>
+          <p className="text-sm text-white/60 hidden sm:block">Comparez vos prévisions avec le réel</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
           <Button 
             variant="outline" 
             onClick={() => setCopyDialogOpen(true)}
             disabled={forecasts.length === 0}
+            size="sm"
+            className="flex-1 sm:flex-none text-xs sm:text-sm"
           >
-            <Download className="w-4 h-4 mr-2" /> Copier vers autre mois
+            <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> 
+            <span className="hidden sm:inline">Copier vers autre mois</span>
+            <span className="sm:hidden">Copier</span>
           </Button>
           <Button 
             onClick={() => { 
               setForm({ month: selectedMonth, category_id: "", type: "expense", planned_amount: "", description: "" }); 
               setDialogOpen(true); 
             }}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white flex-1 sm:flex-none text-xs sm:text-sm"
+            size="sm"
           >
-            <Plus className="w-4 h-4 mr-2" /> Ajouter prévision
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> 
+            <span className="hidden sm:inline">Ajouter prévision</span>
+            <span className="sm:hidden">Ajouter</span>
           </Button>
         </div>
       </div>
