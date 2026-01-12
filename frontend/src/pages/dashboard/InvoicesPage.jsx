@@ -1857,17 +1857,8 @@ BANQUE : ..."
                   className="bg-white/5 border-white/10 text-white text-sm"
                 />
               </div>
-                      onChange={(e) => setInvoiceSettings({...invoiceSettings, discount_conditions: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Pénalités de retard</Label>
-                    <Input
-                      value={invoiceSettings?.late_penalty || "En cas de non-paiement à la date d'échéance, des pénalités calculées à trois fois le taux d'intérêt légal seront appliquées."}
-                      onChange={(e) => setInvoiceSettings({...invoiceSettings, late_penalty: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
-                    />
+              
+              {/* Action Buttons */}
                   </div>
                   <div className="space-y-2">
                     <Label className="text-white/60 text-xs">Indemnité forfaitaire</Label>
