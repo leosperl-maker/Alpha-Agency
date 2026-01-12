@@ -2508,6 +2508,10 @@ async def update_settings_integrations(integrations: SettingsIntegrations, curre
 # ==================== INVOICE SETTINGS ====================
 
 class InvoiceSettingsUpdate(BaseModel):
+    company_name: Optional[str] = None
+    company_address: Optional[str] = None
+    company_siret: Optional[str] = None
+    company_vat: Optional[str] = None
     default_payment_terms: Optional[str] = "30"
     default_tva_rate: Optional[str] = "8.5"
     default_conditions: Optional[str] = None
@@ -2522,8 +2526,12 @@ async def get_invoice_settings(current_user: dict = Depends(get_current_user)):
     """Get invoice/quote default settings"""
     settings = await db.settings.find_one({"type": "invoice_settings"}, {"_id": 0})
     if not settings:
-        # Return default values
+        # Return default values with company info from COMPANY_INFO
         return {
+            "company_name": COMPANY_INFO['commercial_name'],
+            "company_address": f"{COMPANY_INFO['address']}, {COMPANY_INFO['city']}",
+            "company_siret": COMPANY_INFO['siret'],
+            "company_vat": COMPANY_INFO['tva_intra'],
             "default_payment_terms": "30",
             "default_tva_rate": "8.5",
             "default_conditions": """• Ce devis est valable 30 jours à compter de sa date d'émission.
