@@ -1,202 +1,142 @@
 <analysis>**original_problem_statement:**
-Initialement, l'utilisateur a demandé diverses corrections d'interface utilisateur, la refonte de la page de connexion et une barre de navigation. Les exigences ont ensuite évolué pour inclure un assistant IA context-aware, un module de gestion de fichiers, et une fonctionnalité de type WeTransfer.
+L'utilisateur a demandé plusieurs corrections et fonctionnalités pour son CRM, avec une priorité sur l'unification et la correction du système de facturation.
 
-Les demandes les plus récentes et prioritaires de l'utilisateur sont les suivantes :
-1.  **Bugs Critiques (P0) :**
-    *   La création d'un devis génère une facture avec le préfixe  au lieu de . C'est un bug récurrent et la priorité absolue.
-    *   L'utilisateur a signalé que le destinataire ne reçoit pas l'e-mail de notification de transfert de fichiers.
-    *   Le téléchargement des devis/factures PDF échouait sur mobile (une nouvelle solution a été implémentée, en attente de validation utilisateur).
-2.  **Fonctionnalité P0 - Module WeTransfer :**
-    *   Le lien de téléchargement doit utiliser le domaine  (corrigé).
-    *   Ajouter une option d'expiration illimitée (implémenté).
-    *   Ajouter une section de commentaires sur la page de téléchargement publique (implémenté).
-3.  **Améliorations (P1) :**
-    *   Ajouter des capacités PWA (Ajouter à lécran daccueil) et une option Rester connecté (implémenté).
-    *   Améliorer l'interface de l'Assistant IA et de la page MindMap.
-4.  **Tâches de fond (P2) :**
-    *   Finaliser l'intégration de Qonto (bloquée).
-    *   Refactoriser le système de thème (actuellement un patch CSS).
+**Exigences Principales (P0):**
+1.  **Cohérence des Devis/Factures :** L'utilisateur exige qu'il n'y ait qu'UN SEUL design cohérent pour les devis et factures. Ce design doit être utilisé pour :
+    *   La prévisualisation dans la modale des paramètres.
+    *   La prévisualisation lors de la création/modification.
+    *   Le fichier PDF final généré.
+    Toutes ces versions doivent être **identiques**.
+2.  **Informations d'entreprise modifiables :** Les informations de l'entreprise affichées en haut des PDF (Nom, Adresse, Téléphone, Email) doivent être entièrement modifiables depuis la modale des paramètres de facturation et les changements doivent se refléter partout.
+3.  **Correction des PDF :**
+    *   Pas de page blanche superflue, même avec des descriptions très longues. Le contenu doit continuer sur la page suivante de manière fluide.
+    *   La mise en page doit s'inspirer du PDF d'exemple devis signé GHI.pdf.
+4.  **Scrollbar dans les paramètres :** La modale des paramètres de facturation n'a pas de barre de défilement, empêchant l'accès aux boutons de sauvegarde si le contenu est trop long.
+
+**Autres demandes importantes (P1 & P2):**
+1.  **Templates d'e-mail modifiables (P1) :** L'utilisateur veut une interface pour voir et modifier le contenu des e-mails de devis et de facture envoyés via Brevo, sans que le texte soit codé en dur.
+2.  **Correction massive de la réactivité mobile (P2) :** De nombreuses pages sont mal agencées ou coupées sur mobile/tablette (Pipeline, Contacts, Tâches, Budget, Assistant IA, Campagnes, Social Media, Mindmap).
+3.  **Module de Transfert (P2) :** L'utilisateur demande une analyse des fonctionnalités du module de transfert de fichiers par rapport à WeTransfer, notamment la prévisualisation et l'expiration des liens.
+4.  **Données Tâches récentes (P2) :** L'utilisateur pense que les tâches sur le tableau de bord sont codées en dur, car il voit des données alors qu'il pense ne pas avoir de tâches.
 
 **User's preferred language**: Français
 
 **what currently exists?**
-L'application est un CRM complet (React/FastAPI/MongoDB) avec une interface glassmorphique. Elle inclut un assistant IA, une gestion de documents via Cloudinary, et des modules pour les contacts, tâches, budget, et factures.
-
-Un module de transfert de fichiers type WeTransfer a été implémenté, avec des corrections récentes pour utiliser le domaine de production et ajouter une expiration illimitée.
-
-Un bug majeur d'affichage en mode clair (texte noir sur fond violet) a été corrigé. Une nouvelle solution pour le téléchargement des PDF sur mobile (via une URL Cloudinary temporaire) a été développée. Les fonctionnalités PWA et Rester connecté ont été ajoutées.
+L'application est un CRM full-stack React/FastAPI/MongoDB. L'agent précédent a effectué un travail considérable pour répondre aux demandes de l'utilisateur :
+-   **Génération PDF :** Le bug  a été résolu en refondant la logique de génération dans  pour qu'elle gère correctement les descriptions d'articles très longues sans planter.
+-   **Cohérence des Previews :** Une grande partie du travail a été faite pour unifier les aperçus. Les champs  et  ont été ajoutés aux paramètres, le backend a été mis à jour, et le frontend a été modifié pour utiliser un composant de prévisualisation plus cohérent qui se met à jour en temps réel dans la modale des paramètres. La scrollbar a aussi été corrigée.
+-   **Templates d'e-mail :** Le backend a été préparé. Des endpoints API () ont été créés et la logique d'envoi d'e-mails a été modifiée pour utiliser des templates depuis la base de données au lieu de contenu codé en dur.
+-   **Analyse des autres points :** L'agent a confirmé que les Tâches récentes ne sont pas codées en dur et que le module de transfert possède déjà la plupart des fonctionnalités demandées (prévisualisation, expiration). Il a également commencé à investiguer et appliquer des correctifs mineurs sur les problèmes de responsive.
 
 **Last working item**:
--   **Last item agent was working:** L'agent était en train de déboguer un bug critique et persistant où la création d'un devis génère incorrectement une facture avec un préfixe .
+-   **Last item agent was working:** L'agent était en train d'effectuer une analyse et une correction en masse des nombreux problèmes de réactivité (responsive design) sur mobile signalés par l'utilisateur sur une dizaine de pages. Il avait commencé par les pages , ,  et .
 -   **Status:** IN PROGRESS
--   **Agent Testing Done:** Y (mais les tests échouaient à cause du bug)
--   **Which testing method agent to use?** backend testing agent. Utiliser  pour appeler l'endpoint  avec le payload  et vérifier que le  retourné commence par .
--   **User Testing Done:** N
+-   **Agent Testing Done:** Y (Pour la partie backend/facturation. Le  a validé la génération de PDF et l'envoi d'e-mails. Des captures d'écran ont validé les changements sur la modale des paramètres de facturation.)
+-   **Which testing method agent to use?** frontend testing agent. La correction des problèmes de réactivité sur de nombreuses pages est une tâche d'envergure. Il est impératif d'utiliser un agent de test pour vérifier systématiquement le rendu et le comportement sur un viewport mobile pour chaque page corrigée.
+-   **User Testing Done:** N (L'utilisateur n'a pas encore validé les dernières corrections sur l'unification des factures et la réactivité mobile).
 
 **All Pending/In progress Issue list**:
--   Issue 1: La création d'un devis génère une facture (préfixe  au lieu de ). (P0)
--   Issue 2: L'e-mail de notification de transfert n'est pas reçu par le destinataire. (P0)
--   Issue 3: L'intégration Qonto est bloquée en attente de l'action de l'utilisateur. (P1)
--   Issue 4: Le toggle de thème est implémenté avec un patch CSS et nécessite une refonte. (P2)
+-   **Issue 1: (P1, Mobile) Pipeline Page Layout:** La carte Valeur moyenne est coupée sur mobile.
+-   **Issue 2: (P1, Mobile) Contacts Page Layout:** La page est coupée et n'est pas utilisable sur mobile.
+-   **Issue 3: (P1, Mobile) Tasks Page Layout:** La page s'affiche comme sur un ordinateur et n'est pas responsive. Elle devrait adopter une disposition en cartes comme la page Pipeline.
+-   **Issue 4: (P1, Mobile) Budget Page Layout:** L'agencement est mauvais sur mobile. Doit être repris sur le modèle de la page Pipeline.
+-   **Issue 5: (P1, Mobile) AI Assistant UI:** L'icône de sélection du modèle d'IA est coupée sur mobile.
+-   **Issue 6: (P1, Mobile) Campaigns Page Layout:** La page n'est pas du tout adaptée pour mobile/tablette.
+-   **Issue 7: (P1, Mobile) Social Media Page Layout:** Non adaptée pour mobile/tablette.
+-   **Issue 8: (P1, Mobile) Mindmap Page Layout:** Non adaptée pour mobile/tablette.
+-   **Issue 9: (P0, Clarification) Dashboard Tasks Data:** L'utilisateur croit que les données des Tâches récentes sont fausses. L'agent a vérifié que les données sont réelles. Il faut clarifier ce point avec l'utilisateur.
+-   **Issue 10: (P0, PDF) Blank Page Verification:** L'utilisateur a insisté sur le fait de ne pas avoir de page blanche. Bien que la génération de PDF soit fonctionnelle, une vérification finale est nécessaire pour confirmer qu'aucun cas de figure ne génère de page vide à la fin du document.
+-   **Issue 11: (P1, Bug) Bulk Delete:** Une ancienne issue mentionnée dans le précédent handoff. Sa fonctionnalité n'a pas été vérifiée dans cette session.
 
-**Issues Detail:**
--   **Issue 1: La création d'un devis génère une facture.**
-    -   **Attempted fixes:** Le code dans  a été modifié pour gérer différents préfixes (, ) en fonction du . Cependant, malgré de multiples redémarrages et tentatives de débogage (logs, prints), l'application en cours d'exécution ne semblait pas prendre en compte les modifications, retournant systématiquement .
-    -   **Next debug checklist:**
-        1.  Vérifier la configuration du rechargement automatique ( / ) pour s'assurer qu'il surveille bien .
-        2.  Examiner les logs  et  du backend pour trouver les  ou messages d'erreur qui n'apparaissaient pas.
-        3.  Confirmer de manière définitive le payload envoyé par le frontend pour s'assurer qu'il contient bien .
-        4.  Si le payload est correct, le problème réside dans l'environnement d'exécution du backend.
-    -   **Why fix this issue and what will be achieved with the fix?** C'est un bug critique de logique métier qui empêche la création correcte de documents comptables distincts.
+**In progress Task List**:
+-   **Task 1: Finir la correction de la réactivité mobile (P1, HIGHEST PRIORITY)**
+    -   **Where to resume:** L'agent doit reprendre son travail systématique sur les pages listées dans les issues ci-dessus (, , , etc.).
+    -   **What will be achieved with this?** L'application deviendra utilisable et professionnelle sur les appareils mobiles, ce qui est une demande forte de l'utilisateur.
     -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Backend
-
--   **Issue 2: L'e-mail de transfert n'est pas reçu.**
-    -   **Attempted fixes:** L'agent a vérifié la clé API Brevo, nettoyé le fichier , et un test d'envoi d'API a retourné un  de succès.
-    -   **Next debug checklist:**
-        1.  Demander à l'utilisateur de vérifier son dossier de spam/courrier indésirable.
-        2.  Vérifier l'exactitude de l'adresse e-mail du destinataire lors du test.
-        3.  Utiliser le  pour vérifier le statut de livraison dans le tableau de bord Brevo.
-    -   **Why fix this issue and what will be achieved with the fix?** La notification par e-mail est une fonctionnalité essentielle du module de transfert.
-    -   **Status:** USER VERIFICATION PENDING
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Backend
-
--   **Issue 3: Intégration Qonto bloquée.**
-    -   **Attempted fixes:** Le backend a été mis à jour pour le flux OAuth2.
-    -   **Next debug checklist:** Implémenter une interface sur la page  avec un bouton Connecter Qonto pour guider l'utilisateur dans le processus d'autorisation.
-    -   **Why fix this issue and what will be achieved with the fix?** Permettra la synchronisation des données bancaires, une fonctionnalité clé de la page Budget.
-    -   **Status:** BLOCKED (sur l'action de l'utilisateur)
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Both
-
--   **Issue 4: Patch pour le toggle de thème.**
-    -   **Attempted fixes:** Des règles CSS avec  ont été ajoutées.
-    -   **Next debug checklist:** Planifier un refactoring pour utiliser les variantes  de Tailwind et des variables CSS sémantiques.
-    -   **Why fix this issue and what will be achieved with the fix?** Assurer un système de thème robuste et maintenable.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** Frontend
+
+-   **Task 2: Créer l'interface pour les templates d'e-mail (P1)**
+    -   **Where to resume:** Le backend est prêt. Il faut maintenant créer une nouvelle section dans le frontend (probablement dans les paramètres) pour permettre à l'utilisateur de lister, voir et modifier les templates d'e-mail de devis et de facture via les endpoints .
+    -   **What will be achieved with this?** L'utilisateur pourra personnaliser sa communication client directement depuis l'application.
+    -   **Status:** NOT STARTED
+    -   **Should Test frontend/backend/both after fix?** Both
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **(P1) Améliorations de l'Assistant IA :** Permettre à l'IA d'accéder à toutes les données CRM pour des suggestions contextuelles.
-    -   **(P1) Améliorations de MindMap :** S'inspirer de Mindnote pour ajouter des fonctionnalités.
-    -   **(P2) Refactoring du Thème :** Remplacer la solution de patch actuelle.
+    -   **(P1) Flux Phase 2 post-création :** Afficher une vue d'actions (Envoyer, Télécharger) après la création d'un devis/facture.
+    -   **(P1) Création de contact en ligne :** Ajouter une option Créer un contact dans le formulaire de facture.
+    -   **(P1) Modale de confirmation d'e-mail :** Afficher une confirmation avant l'envoi pour vérifier l'adresse du destinataire.
+    -   **(P2) Améliorations MindMap :** Export PDF, raccourcis, etc.
+    -   **(P2) Notifications Push.**
 -   **Future Tasks:**
-    -   **(P2)** Remplacer les champs d'URL par des uploads de fichiers.
-    -   **(P3)** Intégration Gmail/Google/Meta Ads pour l'import de factures.
-    -   **(P3)** Activer les notifications en temps réel (icône de cloche).
+    -   Intégration Qonto.
+    -   Refactorisation du système de thèmes.
 
 **Completed work in this session**
--   **Bug P0 Corrigé : Texte illisible en mode clair**
-    -   Correction des règles CSS dans  pour garantir la lisibilité sur toutes les pages.
--   **Module WeTransfer (Améliorations majeures)**
-    -   Le lien de transfert utilise désormais le domaine de production ().
-    -   Ajout de l'option d'expiration Illimité.
-    -   La page de téléchargement publique a été repensée pour inclure les détails des fichiers et un formulaire de commentaire.
--   **Bug P0 Corrigé : Téléchargement de PDF sur mobile**
-    -   Création d'un endpoint backend () qui génère une URL de téléchargement direct via Cloudinary, contournant les problèmes de blob sur iOS.
--   **Améliorations (P1)**
-    -   Ajout de la fonctionnalité PWA ().
-    -   Ajout de l'option Rester connecté sur la page de connexion.
--   **Nettoyage de code**
-    -   Suppression du fichier obsolète .
-    -   Nettoyage des clés API dupliquées dans le fichier .
-
-**Earlier issues found/mentioned but not fixed**
--   **Issue 1: Améliorations de l'interface de la page Assistant IA.**
-    -   **Debug checklist:** Corriger le dropdown de sélection de modèle, améliorer le design du volet de l'historique des discussions, et clarifier la fonction des icônes.
-    -   **Why to solve this issue and what will be achieved with this?** Amélioration de l'UX sur une page clé.
-    -   **Should Test frontend/backend/both after fix:** Frontend.
-    -   **Is recurring issue?** N
-
-**Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** Intégration Qonto; Bug du toggle de thème; Bug de création devis/facture.
--   **Recurrence count:** 2+
--   **Status:** Qonto (BLOCKED), Thème (NOT STARTED), Devis/Facture (IN PROGRESS).
+-   **Unification de la facturation :**
+    -   La prévisualisation des devis/factures est maintenant unifiée et se met à jour en temps réel dans la modale des paramètres.
+    -   Les informations de l'entreprise (nom, adresse, tél, email) sont désormais modifiables depuis les paramètres et sont utilisées dans les PDF et les prévisualisations.
+    -   La modale des paramètres a été corrigée pour inclure une barre de défilement.
+-   **Correction critique de la génération PDF :**
+    -   La  qui bloquait la génération de PDF avec de longues descriptions a été définitivement résolue par une refonte complète de la logique dans .
+-   **Préparation des templates d'e-mail :**
+    -   Le backend a été développé pour gérer des templates d'e-mail dynamiques stockés en base de données.
+-   **Analyse et début des corrections responsive.**
+-   **Analyse du module de transfert de fichiers.**
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Frontend:** React, Tailwind CSS, Shadcn UI, Axios
--   **Backend:** FastAPI, Pydantic, MongoDB (motor), Cloudinary, Brevo
--   **Architecture:** Full-stack, API REST
-
-**key DB schema**
--   **transfers:** 
--   **invoices:** 
--   **counters:** 
-
-**changes in tech stack**
--   Aucun.
+-   **ReportLab:** La solution finale pour les descriptions longues consiste à ne pas utiliser de  pour le contenu principal, mais à construire le document comme une liste de flowables (, ) pour chaque ligne d'article, le tout enveloppé dans un .
+-   **React/TailwindCSS:** Le travail à venir est un exercice majeur de design responsive, impliquant l'utilisation de media queries (, ), de Flexbox/Grid, et le passage de tables à des listes de cartes pour les vues mobiles.
 
 **All files of reference**
--    (contient le bug P0)
--    (contient la logique de transfert)
 -   
 -   
 -   
 -   
 -   
-
-**Areas that need refactoring**:
--   **Theming :** Le thème clair est implémenté via des surcharges CSS . Un refactoring complet est nécessaire pour utiliser le système de theming natif de Tailwind CSS ().
-
-**key api endpoints**
--   : Crée une facture ou un devis (contient le bug P0).
--   : Crée un transfert de fichiers.
--   : Génère une URL de téléchargement de PDF pour mobile.
--   : Récupère les informations d'un transfert pour la page publique.
+-   
+-   
+-   
+-   
+-   
+-   
 
 **Critical Info for New Agent**
--   **Priorité Absolue (P0) :** La résolution du bug de création de devis qui génère une facture est la tâche la plus urgente. L'agent précédent suspectait un problème de hot-reload ou d'environnement d'exécution qui empêchait le code corrigé de s'exécuter. Commencez par vérifier cela.
--   **Vérification Utilisateur Requise :** Confirmez avec l'utilisateur s'il reçoit bien les e-mails de transfert après les récentes corrections (et après avoir vérifié son dossier spam).
--   **Intégration Qonto :** L'intégration est toujours bloquée. Une interface utilisateur doit être créée sur la page Budget pour permettre à l'utilisateur de lancer le processus d'autorisation OAuth2.
-
-**documents and test reports created in this job**
--    (mis à jour)
--   
+-   La priorité absolue est de terminer le travail sur la réactivité mobile. L'utilisateur est très exigeant sur la qualité de l'interface et l'application est actuellement inutilisable sur de nombreuses pages en version mobile.
+-   Communiquez clairement avec l'utilisateur sur les points qu'il a soulevés mais qui fonctionnent déjà (Tâches récentes, fonctionnalités de Transfert). Expliquez ce qui a été vérifié pour éviter de refaire le travail.
+-   Validez systématiquement chaque page corrigée pour la réactivité mobile, idéalement avec le  configuré pour un viewport mobile.
+-   Une fois la réactivité corrigée, implémentez l'interface pour les templates d'e-mail, car le backend est déjà prêt.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Confirme la configuration DNS, mais signale que les liens de transfert utilisent l'URL de preview et que les e-mails ne sont pas reçus. (Statut : Partiellement résolu).
-2.  **User:** Approuve le plan de l'agent.
-3.  **Agent:** Annonce la fin de la session de travail.
-4.  **User:** Signale que le téléchargement des PDF est toujours impossible, avec une capture d'écran montrant un chargement infini. (Statut : Résolu avec une nouvelle approche).
-5.  **Agent:** Résume les travaux terminés et demande à continuer.
-6.  **User:** Donne son accord pour continuer.
-7.  **Agent:** Demande la confirmation pour le nouveau plan.
-8.  **User:** Confirme le nouveau plan.
-9.  **Agent:** Accuse réception des retours et propose un plan d'action.
-10. **Agent:** Demande l'approbation du plan d'action.
+10. **User:** Demande la poursuite du travail sur les corrections responsive. (Pending)
+9.  **User:** Apporte des précisions cruciales : il veut une seule preview cohérente partout (paramètres, création, PDF) et que TOUTES les infos de l'en-tête (nom, adresse, tel, email) soient modifiables. Confirme la priorité : Facturation > P1 > P2 > Module de transfert. (PENDING)
+8.  **User:** Fournit une liste massive de retours : demande de templates email modifiables, signale des données hardcodées sur le dashboard, et liste de nombreux bugs de responsive mobile sur presque toutes les pages. Demande une analyse du module de transfert. (PENDING)
+7.  **Agent:** Termine la session après avoir corrigé les problèmes de PDF/preview.
+6.  **User:** Signale un manque de scrollbar dans la modale des paramètres, et que le PDF génère des pages blanches et ne ressemble pas à l'exemple fourni.
+5.  **Agent:** Annonce la fin des corrections P0.
+4.  **User:** Valide le fonctionnement de la sélection multiple.
+3.  **User:** Signale que la suppression multiple ne fonctionne pas.
+2.  **User:** Signale de multiples erreurs dans le PDF (descriptions, remise, pied de page). Demande de nouvelles fonctionnalités (Phase 2, etc.).
+1.  **User:** Signale des erreurs de téléchargement PDF et d'envoi d'email.
 
 **Project Health Check:**
 -   **Broken:**
-    -   **Logique de création Devis/Facture :** Bug critique qui empêche la création correcte des devis.
-    -   **Intégration Qonto :** Inutilisable car bloquée.
+    -   L'expérience utilisateur sur mobile est très dégradée sur de nombreuses pages.
 -   **Mocked:**
-    -   L'icône de notifications (cloche).
--   **Refactoring Needed:**
-    -   **Système de Thème :** La solution actuelle pour le mode clair est un patch fragile.
+    -   La gestion des templates d'e-mail a un backend fonctionnel mais pas d'interface utilisateur pour le moment.
 
 **3rd Party Integrations**
--   **Qonto:** Prêt pour OAuth2. **BLOQUÉ** en attente de l'action de l'utilisateur.
--   **Cloudinary:** Actif pour le stockage de fichiers.
--   **Brevo (Sendinblue):** Actif pour l'envoi d'e-mails (livraison à vérifier).
--   **Emergent Integrations (Clé Universelle):** Actif.
--   **NewsAPI.org:** Actif.
--   **Meta (Facebook/Instagram):** Incomplète.
+-   **Brevo (Sendinblue):** Actif pour l'envoi d'e-mails. La prochaine étape est de permettre la gestion des templates.
+-   **ReportLab:** Actif pour la génération de PDF. La logique a été stabilisée.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES (rapport )
--   **Test files created:** Aucun.
--   **Known regressions:** Le bug de création devis/facture est une régression ou un problème persistant.
-
-**Credentials to test flow:**
--   **Email:** 
--   **Password:** 
+-   **Testing agent used after significant changes:** YES (pour la partie backend/facturation).
+-   **Troubleshoot agent used after agent stuck in loop:** NO
+-   **Test files created:** Le  a généré .
+-   **Known regressions:** Aucune régression critique connue, les corrections sur le PDF ont résolu la régression précédente.
 
 **What agent forgot to execute**
--   L'agent n'a pas oublié mais était bloqué sur le débogage du bug de création de devis/facture, qui semble être lié à l'environnement d'exécution plutôt qu'au code lui-même. La résolution de ce blocage est la prochaine étape cruciale.</analysis>
+-   L'agent a bien suivi les dernières demandes de l'utilisateur. Cependant, l'ancienne issue concernant la **suppression multiple** n'a pas été formellement testée et clôturée. Il serait bon de la vérifier lors des tests de réactivité de la page de facturation.</analysis>
