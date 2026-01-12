@@ -586,8 +586,17 @@ async def download_pdf_with_token(invoice_id: str, token: str):
         await db.pdf_tokens.delete_one({"token": token})
         raise HTTPException(status_code=401, detail="Token expiré")
     
-    # Delete token (one-time use)
-    await db.pdf_tokens.delete_one({"token": token})
+    # Check usage count - allow up to 3 uses within expiration time
+    use_count = token_doc.get('use_count', 0)
+    if use_count >= 3:
+        await db.pdf_tokens.delete_one({"token": token})
+        raise HTTPException(status_code=401, detail="Token déjà utilisé")
+    
+    # Increment usage count instead of deleting
+    await db.pdf_tokens.update_one(
+        {"token": token},
+        {"$inc": {"use_count": 1}}
+    )
     
     # Get invoice
     invoice = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
