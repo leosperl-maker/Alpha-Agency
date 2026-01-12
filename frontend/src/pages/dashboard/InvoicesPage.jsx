@@ -1478,6 +1478,54 @@ const InvoicesPage = () => {
         </SheetContent>
       </Sheet>
 
+      {/* Settings Dialog */}
+      <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Settings className="w-5 h-5 text-indigo-400" />
+              Paramètres du document
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-white">Conditions de règlement</Label>
+              <Textarea
+                value={formData.conditions}
+                onChange={(e) => setFormData({...formData, conditions: e.target.value})}
+                placeholder="• Ce devis est valable 30 jours...
+• Paiement par virement bancaire..."
+                className="bg-white/5 border-white/10 text-white min-h-[150px]"
+              />
+              <p className="text-xs text-white/40">Ces conditions seront affichées sur le document PDF</p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-white">Coordonnées bancaires</Label>
+              <Textarea
+                value={formData.bank_details}
+                onChange={(e) => setFormData({...formData, bank_details: e.target.value})}
+                placeholder="IBAN : FR76 ...
+BIC/SWIFT : ...
+BANQUE : ..."
+                className="bg-white/5 border-white/10 text-white min-h-[100px]"
+              />
+              <p className="text-xs text-white/40">Ces coordonnées seront affichées dans la section "Détails du paiement"</p>
+            </div>
+          </div>
+          
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={() => setSettingsDialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+              Annuler
+            </Button>
+            <Button onClick={saveSettings} className="bg-indigo-600 hover:bg-indigo-700">
+              <Save className="w-4 h-4 mr-2" /> Enregistrer comme défaut
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Services Management Dialog */}
       <Dialog open={servicesDialogOpen} onOpenChange={setServicesDialogOpen}>
         <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-2xl">
