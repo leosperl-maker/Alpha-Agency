@@ -465,7 +465,7 @@ const InvoicesPage = () => {
 
   const saveSettings = async () => {
     try {
-      await api.post('/settings/invoice', {
+      await api.put('/settings/invoice', {
         ...invoiceSettings,
         default_conditions: invoiceSettings?.default_conditions || formData.conditions,
         bank_details: invoiceSettings?.bank_details || formData.bank_details,
