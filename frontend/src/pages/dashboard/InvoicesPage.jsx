@@ -105,6 +105,9 @@ const InvoicesPage = () => {
     notes: ""
   });
   const [savingPayment, setSavingPayment] = useState(false);
+  // Multi-selection state
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [isDownloading, setIsDownloading] = useState(false);
   
   const [items, setItems] = useState([{ title: "", description: "", quantity: 1, unit_price: 0, discount: 0, discountType: "percent" }]);
   const [globalDiscount, setGlobalDiscount] = useState({ type: "percent", value: 0 }); // type: "percent" or "fixed"
