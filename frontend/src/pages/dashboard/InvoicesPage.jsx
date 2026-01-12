@@ -402,7 +402,7 @@ const InvoicesPage = () => {
     const nextStatus = statuses[(currentIndex + 1) % statuses.length];
     
     try {
-      await api.patch(`/invoices/${invoice.id}/status`, { status: nextStatus });
+      await api.put(`/invoices/${invoice.id}/status`, { status: nextStatus });
       toast.success(`Statut changé en "${statusConfig[nextStatus]?.label || nextStatus}"`);
       fetchData();
     } catch (error) {
