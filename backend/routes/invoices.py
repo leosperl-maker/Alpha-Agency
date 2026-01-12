@@ -905,6 +905,11 @@ async def send_invoice_email(invoice_id: str, request: SendEmailRequest, current
     
     # Load invoice settings
     invoice_settings = await db.settings.find_one({"type": "invoice_settings"}, {"_id": 0})
+    if not invoice_settings:
+        invoice_settings = {}
+    
+    # Load email templates
+    email_templates = await db.settings.find_one({"type": "email_templates"}, {"_id": 0})
     
     # Generate PDF
     doc_type = request.document_type
@@ -913,42 +918,85 @@ async def send_invoice_email(invoice_id: str, request: SendEmailRequest, current
     pdf_bytes = pdf_buffer.read()
     pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
     
-    # Prepare email
+    # Prepare email - use templates if available
     doc_label = "Devis" if doc_type == "devis" else "Facture"
     doc_number = invoice.get('invoice_number', '')
     client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip() or "Client"
     
-    subject = f"{doc_label} {doc_number} - {COMPANY_INFO['commercial_name']}"
+    # Get company info from settings
+    company_name = invoice_settings.get('company_name') or COMPANY_INFO['commercial_name']
+    company_phone = invoice_settings.get('company_phone') or COMPANY_INFO['phone']
+    company_email = invoice_settings.get('company_email') or COMPANY_INFO['email']
+    company_address = invoice_settings.get('company_address') or f"{COMPANY_INFO['address']}, {COMPANY_INFO['city']}"
+    company_siret = invoice_settings.get('company_siret') or COMPANY_INFO['siret']
+    company_vat = invoice_settings.get('company_vat') or COMPANY_INFO['tva_intra']
+    
+    # Use template if available
+    if email_templates and doc_type in email_templates:
+        template = email_templates[doc_type]
+        subject = template.get('subject', f"{doc_label} {{{{numero}}}} - {{{{company_name}}}}")
+        body_template = template.get('body', '')
+    else:
+        # Default templates
+        subject = f"{doc_label} {{{{numero}}}} - {{{{company_name}}}}"
+        if doc_type == 'devis':
+            body_template = """Bonjour {{client_name}},
+
+Veuillez trouver ci-joint votre devis <strong>{{numero}}</strong> d'un montant de <strong>{{montant}} €</strong>.
+
+Ce devis est valable 30 jours à compter de sa date d'émission. Pour l'accepter, merci de nous retourner une copie signée avec la mention "Bon pour accord".
+
+Pour toute question, n'hésitez pas à nous contacter.
+
+Cordialement,
+{{company_name}}
+{{company_phone}}
+{{company_email}}"""
+        else:
+            body_template = """Bonjour {{client_name}},
+
+Veuillez trouver ci-joint votre facture <strong>{{numero}}</strong> d'un montant de <strong>{{montant}} €</strong>.
+
+Nous vous remercions de bien vouloir procéder au règlement dans les délais convenus.
+
+Pour toute question, n'hésitez pas à nous contacter.
+
+Cordialement,
+{{company_name}}
+{{company_phone}}
+{{company_email}}"""
+    
+    # Replace variables
+    replacements = {
+        '{{numero}}': doc_number,
+        '{{client_name}}': client_name,
+        '{{montant}}': f"{invoice.get('total', 0):.2f}",
+        '{{company_name}}': company_name,
+        '{{company_phone}}': company_phone,
+        '{{company_email}}': company_email
+    }
+    
+    for var, val in replacements.items():
+        subject = subject.replace(var, val)
+        body_template = body_template.replace(var, val)
+    
+    # Convert newlines to HTML and wrap in template
+    body_html = body_template.replace('\n', '<br>')
     
     html_body = f"""
     <html>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
-                <img src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png" alt="{COMPANY_INFO['commercial_name']}" style="max-height: 60px;">
+                <img src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png" alt="{company_name}" style="max-height: 60px;">
             </div>
             
-            <p>Bonjour {client_name},</p>
-            
-            <p>Veuillez trouver ci-joint {'votre devis' if doc_type == 'devis' else 'votre facture'} <strong>{doc_number}</strong> d'un montant de <strong>{invoice.get('total', 0):.2f} €</strong>.</p>
-            
-            {'<p>Ce devis est valable 30 jours à compter de sa date d émission. Pour l accepter, merci de nous retourner une copie signée avec la mention "Bon pour accord".</p>' if doc_type == 'devis' else '<p>Nous vous remercions de bien vouloir procéder au règlement dans les délais convenus.</p>'}
-            
-            <p>Pour toute question, n'hésitez pas à nous contacter.</p>
-            
-            <p style="margin-top: 30px;">
-                Cordialement,<br>
-                <strong>{COMPANY_INFO['commercial_name']}</strong><br>
-                <span style="color: #666; font-size: 14px;">
-                    {COMPANY_INFO['phone']}<br>
-                    {COMPANY_INFO['email']}
-                </span>
-            </p>
+            <div style="white-space: pre-wrap;">{body_html}</div>
             
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
             <p style="font-size: 12px; color: #999; text-align: center;">
-                {COMPANY_INFO['name']} - {COMPANY_INFO['address']}, {COMPANY_INFO['city']}<br>
-                SIRET: {COMPANY_INFO['siret']} | TVA: {COMPANY_INFO['tva_intra']}
+                {company_name} - {company_address}<br>
+                SIRET: {company_siret} | TVA: {company_vat}
             </p>
         </div>
     </body>
@@ -957,7 +1005,7 @@ async def send_invoice_email(invoice_id: str, request: SendEmailRequest, current
     
     # Send via Brevo
     brevo_api_key = os.environ.get('BREVO_API_KEY')
-    sender_email = os.environ.get('BREVO_SENDER_EMAIL', COMPANY_INFO['email'])
+    sender_email = os.environ.get('BREVO_SENDER_EMAIL', company_email)
     
     if not brevo_api_key:
         raise HTTPException(status_code=500, detail="Service email non configuré")
