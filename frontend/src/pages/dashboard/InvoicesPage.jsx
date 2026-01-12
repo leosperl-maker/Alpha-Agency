@@ -1859,29 +1859,6 @@ BANQUE : ..."
               </div>
               
               {/* Action Buttons */}
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Indemnité forfaitaire</Label>
-                    <Input
-                      value={invoiceSettings?.recovery_fee || "Tout retard de paiement entraînera une indemnité forfaitaire pour frais de recouvrement de 40€."}
-                      onChange={(e) => setInvoiceSettings({...invoiceSettings, recovery_fee: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              {/* Signature Text */}
-              <div className="space-y-2">
-                <h3 className="text-white font-semibold">Texte avant signature</h3>
-                <Input
-                  value={invoiceSettings?.signature_text || "Bon pour accord"}
-                  onChange={(e) => setInvoiceSettings({...invoiceSettings, signature_text: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white text-sm"
-                />
-              </div>
-              
-              {/* Action Buttons */}
               <div className="flex gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-[#0f0f1a] py-4">
                 <Button variant="outline" onClick={() => setSettingsDialogOpen(false)} className="flex-1 border-white/10 text-white hover:bg-white/5">
                   Annuler
