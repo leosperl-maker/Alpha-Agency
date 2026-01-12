@@ -386,9 +386,9 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     ]
     if global_discount:
         if global_discount_type == '%':
-            totals_data.insert(0, ['', '', '', Paragraph(f"Remise globale ({global_discount:.0f}%):", totals_style), Paragraph(f"<b>appliquée</b>", totals_style)])
+            totals_data.insert(0, ['', '', '', Paragraph(f"Remise globale ({global_discount:.0f}%):", totals_style), Paragraph("<b>appliquée</b>", totals_style)])
         else:
-            totals_data.insert(0, ['', '', '', Paragraph(f"Remise globale ({global_discount:.2f} €):", totals_style), Paragraph(f"<b>appliquée</b>", totals_style)])
+            totals_data.insert(0, ['', '', '', Paragraph(f"Remise globale ({global_discount:.2f} €):", totals_style), Paragraph("<b>appliquée</b>", totals_style)])
     
     totals_data.extend([
         ['', '', '', Paragraph("TVA 8.50%:", totals_style), Paragraph(f"<b>{tva_total:.2f} €</b>", totals_style)],
