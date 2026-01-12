@@ -374,11 +374,40 @@ const InvoicesPage = () => {
   };
 
   const handleSendEmail = async (invoice) => {
-    toast.info("Fonctionnalité d'envoi par email en cours de développement");
+    const contact = contacts.find(c => c.id === invoice.contact_id);
+    if (!contact?.email) {
+      toast.error("Ce contact n'a pas d'adresse email");
+      return;
+    }
+    
+    const toastId = toast.loading("Envoi de l'email en cours...");
+    try {
+      const type = invoice.document_type === 'devis' ? 'devis' : 'facture';
+      await api.post(`/invoices/${invoice.id}/send-email`, {
+        recipient_email: contact.email,
+        document_type: type
+      });
+      toast.dismiss(toastId);
+      toast.success(`Email envoyé à ${contact.email}`);
+    } catch (error) {
+      toast.dismiss(toastId);
+      console.error('Email error:', error);
+      toast.error("Erreur lors de l'envoi de l'email");
+    }
   };
 
   const handleChangeStatus = async (invoice) => {
-    toast.info("Fonctionnalité de changement de statut en cours de développement");
+    const statuses = ['brouillon', 'envoyée', 'payée', 'annulée'];
+    const currentIndex = statuses.indexOf(invoice.status);
+    const nextStatus = statuses[(currentIndex + 1) % statuses.length];
+    
+    try {
+      await invoicesAPI.update(invoice.id, { status: nextStatus });
+      toast.success(`Statut changé en "${statusConfig[nextStatus]?.label || nextStatus}"`);
+      fetchData();
+    } catch (error) {
+      toast.error("Erreur lors du changement de statut");
+    }
   };
 
   const handleDuplicate = async (invoice) => {
