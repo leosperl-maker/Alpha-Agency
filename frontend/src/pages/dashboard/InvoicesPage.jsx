@@ -357,12 +357,19 @@ const InvoicesPage = () => {
       if (editingInvoice) {
         await invoicesAPI.update(editingInvoice.id, payload);
         toast.success(`${documentType === 'devis' ? 'Devis' : 'Facture'} mise à jour`);
+        setSheetOpen(false);
+        resetForm();
       } else {
-        await invoicesAPI.create(payload);
+        const response = await invoicesAPI.create(payload);
+        const newInvoice = response.data;
         toast.success(`${documentType === 'devis' ? 'Devis' : 'Facture'} créée`);
+        
+        // Open Phase 2 dialog with the created invoice
+        setCreatedInvoice(newInvoice);
+        setSheetOpen(false);
+        setPhase2DialogOpen(true);
+        resetForm();
       }
-      setSheetOpen(false);
-      resetForm();
       fetchData();
     } catch (error) {
       toast.error("Erreur lors de l'enregistrement");
