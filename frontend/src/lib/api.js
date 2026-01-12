@@ -148,67 +148,30 @@ export const invoicesAPI = {
   // Helper function to download PDF with authentication - All platforms
   downloadPDF: async (id, invoiceNumber, type = 'facture') => {
     try {
-      // Check if on mobile
-      const userAgent = navigator.userAgent;
-      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-      const isAndroid = /Android/i.test(userAgent);
-      const isMobile = isIOS || isAndroid;
-      
-      // Generate filename
       const filename = `${type}_${invoiceNumber || id}.pdf`;
       
-      if (isMobile) {
-        // Mobile (especially iOS Safari): Use token-based direct link download
-        try {
-          const tokenResponse = await api.get(`/invoices/${id}/pdf-token`);
-          const { token } = tokenResponse.data;
-          
-          if (token) {
-            // Construct direct URL with token
-            const baseUrl = process.env.REACT_APP_BACKEND_URL || '';
-            const pdfUrl = `${baseUrl}/api/invoices/${id}/pdf-download/${token}`;
-            
-            // Create an invisible anchor element and force download
-            // This works better on iOS Safari than window.open
-            const link = document.createElement('a');
-            link.href = pdfUrl;
-            link.download = filename;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            link.style.display = 'none';
-            
-            document.body.appendChild(link);
-            link.click();
-            
-            // Cleanup after a delay
-            setTimeout(() => {
-              if (link.parentNode) {
-                document.body.removeChild(link);
-              }
-            }, 1000);
-            
-            return true;
-          }
-        } catch (tokenError) {
-          console.warn('Token-based PDF failed, trying blob:', tokenError);
-        }
+      // Get token for download
+      const tokenResponse = await api.get(`/invoices/${id}/pdf-token`);
+      const { token } = tokenResponse.data;
+      
+      if (!token) {
+        throw new Error('No token received');
       }
       
-      // Desktop or fallback: Use blob approach
-      const response = await api.get(`/invoices/${id}/pdf`, {
-        responseType: 'blob',
-        headers: {
-          'Accept': 'application/pdf'
-        }
-      });
+      // Construct URL
+      const baseUrl = process.env.REACT_APP_BACKEND_URL || '';
+      const pdfUrl = `${baseUrl}/api/invoices/${id}/pdf-download/${token}`;
       
-      if (!response.data || response.data.size === 0) {
-        throw new Error('Empty PDF response');
+      // Fetch PDF as blob (works on all platforms including iOS)
+      const response = await fetch(pdfUrl);
+      if (!response.ok) {
+        throw new Error('PDF download failed');
       }
       
-      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       
+      // Create download link
       const link = document.createElement('a');
       link.href = blobUrl;
       link.download = filename;
@@ -217,10 +180,11 @@ export const invoicesAPI = {
       document.body.appendChild(link);
       link.click();
       
+      // Cleanup
       setTimeout(() => {
         if (link.parentNode) document.body.removeChild(link);
         window.URL.revokeObjectURL(blobUrl);
-      }, 500);
+      }, 1000);
       
       return true;
     } catch (error) {
