@@ -1877,10 +1877,9 @@ BANQUE : ..."
                 <div className="flex justify-between mb-6 text-[10px]">
                   <div className="w-[45%]">
                     <p className="font-bold text-gray-800 mb-1">{invoiceSettings?.company_name || COMPANY_INFO.name}</p>
-                    <p className="text-gray-600">{invoiceSettings?.company_address || COMPANY_INFO.address}</p>
-                    <p className="text-gray-600">{invoiceSettings?.company_postal_code || "97170"} {invoiceSettings?.company_city || "Petit-Bourg"}</p>
-                    <p className="text-gray-600">Tél: {invoiceSettings?.company_phone || COMPANY_INFO.phone}</p>
-                    <p className="text-gray-600">{invoiceSettings?.contact_email || COMPANY_INFO.email}</p>
+                    <p className="text-gray-600">{invoiceSettings?.company_address || `${COMPANY_INFO.address}, ${COMPANY_INFO.city}`}</p>
+                    <p className="text-gray-600">Tél: {COMPANY_INFO.phone}</p>
+                    <p className="text-gray-600">{COMPANY_INFO.email}</p>
                   </div>
                   <div className="w-[45%] text-right">
                     <p className="font-bold text-red-600 mb-1">DESTINATAIRE</p>
