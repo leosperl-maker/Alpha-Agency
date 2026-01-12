@@ -296,14 +296,19 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         tva_amount = line_total * tva_rate
         
         title = item.get('title', '').strip()
-        desc = item.get('description', '').strip().replace('\n', '<br/>')
+        desc = item.get('description', '').strip()
+        
+        # Limit description length to avoid page overflow
+        if len(desc) > 300:
+            desc = desc[:297] + "..."
+        desc = desc.replace('\n', '<br/>')
         
         if title and desc:
-            full_desc = f"<b>{title}</b><br/><font size='8'>{desc}</font>"
+            full_desc = f"<b>{title}</b><br/><font size='7'>{desc}</font>"
         elif title:
             full_desc = f"<b>{title}</b>"
         else:
-            full_desc = desc
+            full_desc = desc if len(desc) < 300 else desc[:297] + "..."
         
         if discount:
             full_desc += f"<br/><font size='7' color='#CE0202'>Remise: -{discount}{discount_type}</font>"
