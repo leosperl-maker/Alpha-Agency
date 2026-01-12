@@ -415,14 +415,33 @@ const InvoicesPage = () => {
     setFormData({
       contact_id: "",
       due_date: "",
-      payment_terms: "30",
+      payment_terms: invoiceSettings?.default_payment_terms || "30",
       notes: "",
-      conditions: "Paiement par virement bancaire ou chèque à l'ordre de Alpha Agency.\nEn cas de retard de paiement, des pénalités de 3 fois le taux d'intérêt légal seront appliquées.",
-      bank_details: "IBAN: FR76 XXXX XXXX XXXX XXXX XXXX XXX\nBIC: XXXXXXXX\nBanque: Crédit Agricole Guadeloupe"
+      conditions: invoiceSettings?.default_conditions || "",
+      bank_details: invoiceSettings?.bank_details || ""
     });
     setItems([{ title: "", description: "", quantity: 1, unit_price: 0, discount: 0, discountType: "percent" }]);
     setGlobalDiscount({ type: "percent", value: 0 });
     setEditingInvoice(null);
+  };
+
+  const saveSettings = async () => {
+    try {
+      await api.post('/settings/invoice', {
+        default_conditions: formData.conditions,
+        bank_details: formData.bank_details,
+        signature_text: invoiceSettings?.signature_text || "Bon pour accord"
+      });
+      setInvoiceSettings({
+        ...invoiceSettings,
+        default_conditions: formData.conditions,
+        bank_details: formData.bank_details
+      });
+      toast.success("Paramètres enregistrés");
+      setSettingsDialogOpen(false);
+    } catch (error) {
+      toast.error("Erreur lors de l'enregistrement");
+    }
   };
 
   const openCreateSheet = (type) => {
