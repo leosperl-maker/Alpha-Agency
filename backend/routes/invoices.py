@@ -152,16 +152,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     """Generate professional PDF for invoice or quote matching the Alpha Agency design"""
     # Default settings if none provided
     if not invoice_settings:
-        invoice_settings = {
-            "default_payment_terms": "30",
-            "default_tva_rate": "8.5",
-            "default_conditions": """• Ce devis est valable 30 jours à compter de sa date d'émission.
-• Paiement par virement bancaire ou carte bancaire.
-• Le règlement doit intervenir sous 30 jours après réception de la facture.""",
-            "bank_details": "",
-            "footer_text": "Merci de votre confiance - Alpha Agency",
-            "signature_text": "Bon pour accord, le client :"
-        }
+        invoice_settings = {}
     
     buffer = BytesIO()
     doc = SimpleDocTemplate(
@@ -170,7 +161,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         rightMargin=1.5*cm, 
         leftMargin=1.5*cm, 
         topMargin=1.5*cm, 
-        bottomMargin=2.5*cm
+        bottomMargin=3.5*cm  # More space for footer
     )
     styles = getSampleStyleSheet()
     elements = []
@@ -193,6 +184,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     totals_style = ParagraphStyle('Totals', parent=styles['Normal'], fontSize=10, textColor=DARK_GRAY, alignment=TA_RIGHT)
     totals_bold_style = ParagraphStyle('TotalsBold', parent=styles['Normal'], fontSize=11, textColor=BRAND_RED, alignment=TA_RIGHT)
     footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=LIGHT_GRAY, alignment=TA_CENTER, leading=10)
+    section_style = ParagraphStyle('Section', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=13)
     
     # Header with Logo and Document Info
     logo_path = fetch_logo_image()
