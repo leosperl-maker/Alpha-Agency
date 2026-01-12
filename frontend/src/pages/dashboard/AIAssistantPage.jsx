@@ -408,7 +408,7 @@ const AIAssistantPage = () => {
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1" style={{ WebkitOverflowScrolling: 'touch' }}>
             {/* Context Selector */}
             <Select value={contextType} onValueChange={setContextType}>
-              <SelectTrigger className="w-28 h-8 bg-white border-[#E5E5E5] text-xs flex-shrink-0">
+              <SelectTrigger className="w-32 sm:w-36 h-8 bg-white border-[#E5E5E5] text-xs flex-shrink-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white z-50">
@@ -425,7 +425,7 @@ const AIAssistantPage = () => {
             
             {/* Model Selector */}
             <Select value={selectedModel} onValueChange={setSelectedModel}>
-              <SelectTrigger className="w-32 h-8 bg-white border-[#E5E5E5] text-xs flex-shrink-0">
+              <SelectTrigger className="w-36 sm:w-40 h-8 bg-white border-[#E5E5E5] text-xs flex-shrink-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white z-50">
