@@ -293,15 +293,18 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         title = item.get('title', '').strip()
         desc = item.get('description', '').strip()
         
-        # Allow full description - no truncation
+        # Format description - allow longer text with proper line breaks
         desc = desc.replace('\n', '<br/>')
         
+        # Adjust font size based on description length
+        desc_font_size = 8 if len(desc) < 500 else 7
+        
         if title and desc:
-            full_desc = f"<b>{title}</b><br/><font size='8'>{desc}</font>"
+            full_desc = f"<b>{title}</b><br/><font size='{desc_font_size}'>{desc}</font>"
         elif title:
             full_desc = f"<b>{title}</b>"
         else:
-            full_desc = desc
+            full_desc = f"<font size='{desc_font_size}'>{desc}</font>"
         
         # Format discount correctly
         if discount:
