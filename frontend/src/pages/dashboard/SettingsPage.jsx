@@ -319,10 +319,6 @@ Banque: Votre Banque`,
           <TabsTrigger value="company" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             Entreprise
           </TabsTrigger>
-          <TabsTrigger value="invoicing" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-            <FileText className="w-4 h-4 mr-2" />
-            Devis & Factures
-          </TabsTrigger>
           <TabsTrigger value="notifications" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             <Bell className="w-4 h-4 mr-2" />
             Notifications
@@ -345,113 +341,6 @@ Banque: Votre Banque`,
             Données
           </TabsTrigger>
         </TabsList>
-
-        {/* Invoice Settings Tab */}
-        <TabsContent value="invoicing">
-          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-indigo-400" />
-                Paramètres des Devis & Factures
-              </CardTitle>
-              <CardDescription className="text-white/60">
-                Configurez les valeurs par défaut qui seront appliquées à chaque nouveau document
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Payment Terms */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-white">Délai de paiement par défaut</Label>
-                  <select
-                    value={invoiceSettings.default_payment_terms}
-                    onChange={(e) => setInvoiceSettings(prev => ({ ...prev, default_payment_terms: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white"
-                  >
-                    <option value="0" className="bg-[#1a1a2e]">Paiement immédiat</option>
-                    <option value="15" className="bg-[#1a1a2e]">15 jours</option>
-                    <option value="30" className="bg-[#1a1a2e]">30 jours</option>
-                    <option value="45" className="bg-[#1a1a2e]">45 jours</option>
-                    <option value="60" className="bg-[#1a1a2e]">60 jours</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-white">Taux de TVA par défaut (%)</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    value={invoiceSettings.default_tva_rate}
-                    onChange={(e) => setInvoiceSettings(prev => ({ ...prev, default_tva_rate: e.target.value }))}
-                    className="bg-white/5 border-white/10 text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Conditions */}
-              <div className="space-y-2">
-                <Label className="text-white">Conditions de règlement (affichées sur chaque document)</Label>
-                <Textarea
-                  value={invoiceSettings.default_conditions}
-                  onChange={(e) => setInvoiceSettings(prev => ({ ...prev, default_conditions: e.target.value }))}
-                  rows={5}
-                  className="bg-white/5 border-white/10 text-white"
-                  placeholder="• Ce devis est valable 30 jours...&#10;• Paiement par virement bancaire..."
-                />
-                <p className="text-xs text-white/40">Chaque ligne commençant par • sera affichée comme une condition</p>
-              </div>
-
-              {/* Bank Details */}
-              <div className="space-y-2">
-                <Label className="text-white">Coordonnées bancaires</Label>
-                <Textarea
-                  value={invoiceSettings.bank_details}
-                  onChange={(e) => setInvoiceSettings(prev => ({ ...prev, bank_details: e.target.value }))}
-                  rows={3}
-                  className="bg-white/5 border-white/10 text-white"
-                  placeholder="IBAN: FR76 XXXX...&#10;BIC: XXXXXX&#10;Banque: Votre banque"
-                />
-              </div>
-
-              {/* Footer & Signature */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-white">Texte de pied de page</Label>
-                  <Input
-                    value={invoiceSettings.footer_text}
-                    onChange={(e) => setInvoiceSettings(prev => ({ ...prev, footer_text: e.target.value }))}
-                    className="bg-white/5 border-white/10 text-white"
-                    placeholder="Merci de votre confiance"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-white">Texte avant signature client</Label>
-                  <Input
-                    value={invoiceSettings.signature_text}
-                    onChange={(e) => setInvoiceSettings(prev => ({ ...prev, signature_text: e.target.value }))}
-                    className="bg-white/5 border-white/10 text-white"
-                    placeholder="Bon pour accord, le client :"
-                  />
-                </div>
-              </div>
-
-              {/* Save Button */}
-              <div className="flex justify-end pt-4 border-t border-white/10">
-                <Button 
-                  onClick={handleSaveInvoiceSettings}
-                  disabled={savingInvoiceSettings}
-                  className="bg-indigo-600 hover:bg-indigo-500"
-                >
-                  {savingInvoiceSettings ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4 mr-2" />
-                  )}
-                  Sauvegarder
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* API Keys Tab */}
         <TabsContent value="api-keys">
