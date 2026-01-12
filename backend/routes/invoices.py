@@ -946,9 +946,13 @@ async def send_invoice_email(invoice_id: str, request: SendEmailRequest, current
     
     filename = f"{'devis' if doc_type == 'devis' else 'facture'}_{doc_number}.pdf"
     
+    # Copy recipient for company
+    copy_email = "leo.sperl@alphagency.com"
+    
     email_data = {
         "sender": {"name": COMPANY_INFO['commercial_name'], "email": sender_email},
         "to": [{"email": request.recipient_email, "name": client_name}],
+        "bcc": [{"email": copy_email, "name": "Alpha Agency"}],  # Hidden copy
         "subject": subject,
         "htmlContent": html_body,
         "attachment": [{"content": pdf_base64, "name": filename}]
@@ -979,4 +983,4 @@ async def send_invoice_email(invoice_id: str, request: SendEmailRequest, current
         }}
     )
     
-    return {"message": f"Email envoyé à {request.recipient_email}", "status": "sent"}
+    return {"message": f"Email envoyé à {request.recipient_email} (copie envoyée à {copy_email})", "status": "sent"}
