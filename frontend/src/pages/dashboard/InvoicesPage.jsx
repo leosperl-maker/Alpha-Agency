@@ -942,17 +942,20 @@ const InvoicesPage = () => {
             </div>
           )}
 
-          {/* Footer */}
+          {/* Footer - Uses settings for conditions and bank details */}
           <div className="border-t border-white/10 pt-4 mt-4">
             <div className="grid grid-cols-2 gap-4 text-[8px] text-white/60">
               <div>
                 <p className="font-bold mb-1">Conditions de paiement:</p>
-                <p className="whitespace-pre-wrap">{formData.conditions}</p>
+                <p className="whitespace-pre-wrap">{settings?.default_conditions || formData.conditions || "Non définies"}</p>
               </div>
               <div>
                 <p className="font-bold mb-1">Coordonnées bancaires:</p>
-                <p className="whitespace-pre-wrap font-mono">{formData.bank_details}</p>
+                <p className="whitespace-pre-wrap font-mono">{settings?.bank_details || formData.bank_details || "Non définies"}</p>
               </div>
+            </div>
+            <div className="mt-3 pt-2 border-t border-white/10 text-[7px] text-white/40 text-center">
+              <p>SIRET: {companySiret} | TVA: {companyVat}</p>
             </div>
           </div>
         </div>
