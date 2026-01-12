@@ -2510,6 +2510,8 @@ async def update_settings_integrations(integrations: SettingsIntegrations, curre
 class InvoiceSettingsUpdate(BaseModel):
     company_name: Optional[str] = None
     company_address: Optional[str] = None
+    company_phone: Optional[str] = None
+    company_email: Optional[str] = None
     company_siret: Optional[str] = None
     company_vat: Optional[str] = None
     default_payment_terms: Optional[str] = "30"
@@ -2530,6 +2532,8 @@ async def get_invoice_settings(current_user: dict = Depends(get_current_user)):
         return {
             "company_name": COMPANY_INFO['commercial_name'],
             "company_address": f"{COMPANY_INFO['address']}, {COMPANY_INFO['city']}",
+            "company_phone": COMPANY_INFO['phone'],
+            "company_email": COMPANY_INFO['email'],
             "company_siret": COMPANY_INFO['siret'],
             "company_vat": COMPANY_INFO['tva_intra'],
             "default_payment_terms": "30",
