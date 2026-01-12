@@ -983,32 +983,52 @@ const InvoicesPage = () => {
         <>
           {/* Mobile Card View */}
           <div className="sm:hidden space-y-2">
+            {/* Mobile Bulk actions bar */}
+            {selectedIds.length > 0 && (
+              <div className="bg-indigo-600/20 border border-indigo-500/30 rounded-lg px-3 py-2 flex items-center gap-2 sticky top-0 z-10">
+                <span className="text-xs text-white">{selectedIds.length} sélectionné(s)</span>
+                <Button size="sm" variant="ghost" onClick={handleBulkDownload} disabled={isDownloading} className="text-white hover:bg-white/10 h-7 px-2">
+                  <Download className="w-3 h-3" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={handleBulkDelete} className="text-red-400 hover:bg-red-500/10 h-7 px-2">
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="text-white/60 hover:bg-white/10 h-7 px-2 ml-auto">
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
             {filteredInvoices.map((invoice) => {
               const status = statusConfig[invoice.status] || statusConfig.brouillon;
               const StatusIcon = status.icon;
               const totalPaid = invoice.total_paid || 0;
-              // Use invoice_number prefix as source of truth (more reliable than document_type for legacy data)
               const isDevis = invoice.invoice_number?.startsWith('DEV-') || invoice.document_type === 'devis';
+              const isSelected = selectedIds.includes(invoice.id);
               return (
-                <div key={invoice.id} className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-4">
+                <div key={invoice.id} className={`bg-white/5 backdrop-blur-xl rounded-lg border ${isSelected ? 'border-indigo-500' : 'border-white/10'} p-4`}>
                   <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${invoice.invoice_number?.startsWith('DEV-') ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                          {invoice.invoice_number?.startsWith('DEV-') ? 'DEVIS' : 'FACTURE'}
-                        </span>
-                        <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
+                    <div className="flex items-start gap-3">
+                      <button onClick={() => toggleSelect(invoice.id)} className="mt-0.5 text-white/60 hover:text-white">
+                        {isSelected ? <CheckSquare className="w-4 h-4 text-indigo-400" /> : <Square className="w-4 h-4" />}
+                      </button>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${invoice.invoice_number?.startsWith('DEV-') ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                            {invoice.invoice_number?.startsWith('DEV-') ? 'DEVIS' : 'FACTURE'}
+                          </span>
+                          <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
+                        </div>
+                        <p className="text-xs text-white/60 mt-0.5">{formatDate(invoice.created_at)}</p>
                       </div>
-                      <p className="text-xs text-white/60 mt-0.5">{formatDate(invoice.created_at)}</p>
                     </div>
                     <Badge className={`${status.color} text-xs`}>
                       <StatusIcon className="w-3 h-3 mr-1" />
                       {status.label}
                     </Badge>
                   </div>
-                  <p className="font-medium text-white text-sm">{getContactName(invoice.contact_id)}</p>
+                  <p className="font-medium text-white text-sm ml-7">{getContactName(invoice.contact_id)}</p>
                   {getContactCompany(invoice.contact_id) && (
-                    <p className="text-xs text-white/50">{getContactCompany(invoice.contact_id)}</p>
+                    <p className="text-xs text-white/50 ml-7">{getContactCompany(invoice.contact_id)}</p>
                   )}
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
                     <div>
@@ -1021,25 +1041,36 @@ const InvoicesPage = () => {
                         {formatCurrency(totalPaid)}
                       </p>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreVertical className="w-4 h-4 text-white/60" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-[#1a1a2e] border-white/10">
-                        <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-white">
-                          <Eye className="w-4 h-4 mr-2" /> Voir
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-green-400">
-                          <CreditCard className="w-4 h-4 mr-2" /> Paiement
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-white/10" />
-                        <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-red-400">
-                          <Trash2 className="w-4 h-4 mr-2" /> Supprimer
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10" onClick={() => handleDownloadPDF(invoice)} title="Télécharger">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10" onClick={() => handleSendEmail(invoice)} title="Envoyer par email">
+                        <Mail className="w-4 h-4" />
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="w-4 h-4 text-white/60" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-[#1a1a2e] border-white/10">
+                          <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-white">
+                            <Eye className="w-4 h-4 mr-2" /> Voir
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleChangeStatus(invoice)} className="text-white">
+                            <Clock className="w-4 h-4 mr-2" /> Changer statut
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-green-400">
+                            <CreditCard className="w-4 h-4 mr-2" /> Paiement
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-white/10" />
+                          <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-red-400">
+                            <Trash2 className="w-4 h-4 mr-2" /> Supprimer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </div>
               );
