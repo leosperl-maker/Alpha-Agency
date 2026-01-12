@@ -1727,12 +1727,70 @@ const InvoicesPage = () => {
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">Nom de l'entreprise</Label>
+                    <Input
+                      value={invoiceSettings?.company_name || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, company_name: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                      placeholder="Alpha Agency"
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label className="text-white/60 text-xs">Email de contact</Label>
                     <Input
                       value={invoiceSettings?.contact_email || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, contact_email: e.target.value})}
                       className="bg-white/5 border-white/10 text-white text-sm"
                       placeholder="contact@alphagency.fr"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-white/60 text-xs">Adresse</Label>
+                  <Input
+                    value={invoiceSettings?.company_address || ""}
+                    onChange={(e) => setInvoiceSettings({...invoiceSettings, company_address: e.target.value})}
+                    className="bg-white/5 border-white/10 text-white text-sm"
+                    placeholder="Immeuble Hibiscus, Route de Montebello"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">Code postal</Label>
+                    <Input
+                      value={invoiceSettings?.company_postal_code || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, company_postal_code: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                      placeholder="97170"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">Ville</Label>
+                    <Input
+                      value={invoiceSettings?.company_city || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, company_city: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                      placeholder="Petit-Bourg"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">Téléphone</Label>
+                    <Input
+                      value={invoiceSettings?.company_phone || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, company_phone: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                      placeholder="06 90 55 30 18"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">SIRET</Label>
+                    <Input
+                      value={invoiceSettings?.siret || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, siret: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                      placeholder="123 456 789 00012"
                     />
                   </div>
                   <div className="space-y-2">
@@ -1745,15 +1803,6 @@ const InvoicesPage = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Capital social</Label>
-                    <Input
-                      value={invoiceSettings?.capital || ""}
-                      onChange={(e) => setInvoiceSettings({...invoiceSettings, capital: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
-                      placeholder="1000"
-                    />
-                  </div>
-                  <div className="space-y-2">
                     <Label className="text-white/60 text-xs">RCS</Label>
                     <Input
                       value={invoiceSettings?.rcs || ""}
@@ -1762,6 +1811,15 @@ const InvoicesPage = () => {
                       placeholder="Pointe-à-Pitre A 123 456 789"
                     />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-white/60 text-xs">Capital social (€)</Label>
+                  <Input
+                    value={invoiceSettings?.capital || ""}
+                    onChange={(e) => setInvoiceSettings({...invoiceSettings, capital: e.target.value})}
+                    className="bg-white/5 border-white/10 text-white text-sm"
+                    placeholder="1000"
+                  />
                 </div>
               </div>
               
@@ -1790,14 +1848,15 @@ BANQUE : ..."
                 />
               </div>
               
-              {/* Legal Mentions */}
-              <div className="space-y-4">
-                <h3 className="text-white font-semibold">Mentions légales</h3>
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Conditions de remise</Label>
-                    <Input
-                      value={invoiceSettings?.discount_conditions || "Pas d'escompte accordé pour paiement anticipé."}
+              {/* Signature Text */}
+              <div className="space-y-2">
+                <h3 className="text-white font-semibold">Texte avant signature (devis)</h3>
+                <Input
+                  value={invoiceSettings?.signature_text || "Bon pour accord"}
+                  onChange={(e) => setInvoiceSettings({...invoiceSettings, signature_text: e.target.value})}
+                  className="bg-white/5 border-white/10 text-white text-sm"
+                />
+              </div>
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, discount_conditions: e.target.value})}
                       className="bg-white/5 border-white/10 text-white text-sm"
                     />
