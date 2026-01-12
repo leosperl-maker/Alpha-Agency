@@ -1660,17 +1660,20 @@ const InvoicesPage = () => {
 
       {/* Settings Dialog - Full Page Style like Qonto */}
       <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
-        <DialogContent className="bg-[#0f0f1a] border-white/10 max-w-6xl h-[95vh] p-0 overflow-hidden">
-          <div className="flex h-full">
-            {/* Left Panel - Settings */}
-            <div className="w-full lg:w-1/2 overflow-y-auto p-6 space-y-6">
-              <DialogHeader className="pb-4 border-b border-white/10">
+        <DialogContent className="bg-[#0f0f1a] border-white/10 max-w-6xl h-[90vh] p-0 flex flex-col">
+          <div className="flex flex-1 min-h-0">
+            {/* Left Panel - Settings with SCROLL */}
+            <div className="w-full lg:w-1/2 flex flex-col min-h-0">
+              <DialogHeader className="p-6 pb-4 border-b border-white/10 flex-shrink-0">
                 <DialogTitle className="text-white flex items-center gap-2 text-xl">
                   <Settings className="w-6 h-6 text-indigo-400" />
                   Paramètres de facturation
                 </DialogTitle>
                 <p className="text-white/50 text-sm">Configurez les valeurs par défaut pour vos documents</p>
               </DialogHeader>
+              
+              {/* Scrollable content area */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
               
               {/* Numbering Section */}
               <div className="space-y-4">
