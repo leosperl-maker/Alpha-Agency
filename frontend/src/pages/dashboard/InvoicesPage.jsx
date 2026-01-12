@@ -1190,10 +1190,22 @@ const InvoicesPage = () => {
             {/* Form Side - Full width on mobile, 50% on desktop */}
             <div className="w-full lg:w-1/2 p-4 sm:p-6 overflow-y-auto bg-white/5 backdrop-blur-xl border-r border-white/10">
               <SheetHeader className="mb-4 sm:mb-6">
-                <SheetTitle className="text-white flex items-center gap-2">
-                  {documentType === 'devis' ? <FileText className="w-5 h-5" /> : <Receipt className="w-5 h-5" />}
-                  {editingInvoice ? `Modifier ${documentType === 'devis' ? 'le devis' : 'la facture'}` : `Nouvelle ${documentType === 'devis' ? 'devis' : 'facture'}`}
-                </SheetTitle>
+                <div className="flex items-center justify-between">
+                  <SheetTitle className="text-white flex items-center gap-2">
+                    {documentType === 'devis' ? <FileText className="w-5 h-5" /> : <Receipt className="w-5 h-5" />}
+                    {editingInvoice ? `Modifier ${documentType === 'devis' ? 'le devis' : 'la facture'}` : `Nouvelle ${documentType === 'devis' ? 'devis' : 'facture'}`}
+                  </SheetTitle>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSettingsDialogOpen(true)}
+                    className="text-white/60 hover:text-white hover:bg-white/10"
+                    title="Paramètres du document"
+                  >
+                    <Settings className="w-5 h-5" />
+                  </Button>
+                </div>
               </SheetHeader>
               
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
