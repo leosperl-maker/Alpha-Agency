@@ -1368,23 +1368,38 @@ const InvoicesPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-white">Client *</Label>
-                    <Select
-                      value={formData.contact_id}
-                      onValueChange={(value) => setFormData({...formData, contact_id: value})}
-                      required
-                    >
-                      <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                        <SelectValue placeholder="Sélectionner" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-[#1a1a2e] border-white/10">
-                        {contacts.map((contact) => (
-                          <SelectItem key={contact.id} value={contact.id}>
-                            {contact.first_name} {contact.last_name}
-                            {contact.company && <span className="text-white/60 ml-1">({contact.company})</span>}
+                    <div className="flex gap-2">
+                      <Select
+                        value={formData.contact_id}
+                        onValueChange={(value) => {
+                          if (value === "new") {
+                            setNewContactDialogOpen(true);
+                          } else {
+                            setFormData({...formData, contact_id: value});
+                          }
+                        }}
+                        required
+                      >
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white flex-1">
+                          <SelectValue placeholder="Sélectionner un client" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#1a1a2e] border-white/10 max-h-60">
+                          <SelectItem value="new" className="text-indigo-400 font-medium">
+                            <div className="flex items-center gap-2">
+                              <Plus className="w-4 h-4" />
+                              Créer un nouveau client
+                            </div>
                           </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                          <div className="border-t border-white/10 my-1"></div>
+                          {contacts.map((contact) => (
+                            <SelectItem key={contact.id} value={contact.id}>
+                              {contact.first_name} {contact.last_name}
+                              {contact.company && <span className="text-white/60 ml-1">({contact.company})</span>}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label className="text-white">Échéance</Label>
