@@ -1043,8 +1043,14 @@ const InvoicesPage = () => {
                   const paymentProgress = invoice.total > 0 ? (totalPaid / invoice.total) * 100 : 0;
                   // Use invoice_number prefix as source of truth
                   const isDevis = invoice.invoice_number?.startsWith('DEV-');
+                  const isSelected = selectedIds.includes(invoice.id);
                   return (
-                    <tr key={invoice.id} className="hover:bg-white/5 transition-colors">
+                    <tr key={invoice.id} className={`hover:bg-white/5 transition-colors ${isSelected ? 'bg-indigo-600/10' : ''}`}>
+                      <td className="w-10 px-3 py-4">
+                        <button onClick={() => toggleSelect(invoice.id)} className="text-white/60 hover:text-white">
+                          {isSelected ? <CheckSquare className="w-4 h-4 text-indigo-400" /> : <Square className="w-4 h-4" />}
+                        </button>
+                      </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-2">
                           <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap ${isDevis ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
@@ -1092,22 +1098,26 @@ const InvoicesPage = () => {
                         </Badge>
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="w-4 h-4 text-white/60" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-[#1a1a2e] border-white/10 w-48">
-                            <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-white">
-                              <Eye className="w-4 h-4 mr-2" /> Voir le document
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDuplicate(invoice)} className="text-white">
-                              <Copy className="w-4 h-4 mr-2" /> Dupliquer
-                            </DropdownMenuItem>
-                            {invoice.document_type === 'devis' && invoice.status !== 'payée' && (
-                              <DropdownMenuItem onClick={() => handleConvertToInvoice(invoice)} className="text-green-400">
-                                <ArrowRightLeft className="w-4 h-4 mr-2" /> Convertir en facture
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10" onClick={() => handleDownloadPDF(invoice)} title="Télécharger PDF">
+                            <Download className="w-4 h-4" />
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="w-4 h-4 text-white/60" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-[#1a1a2e] border-white/10 w-48">
+                              <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-white">
+                                <Eye className="w-4 h-4 mr-2" /> Voir le document
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDuplicate(invoice)} className="text-white">
+                                <Copy className="w-4 h-4 mr-2" /> Dupliquer
+                              </DropdownMenuItem>
+                              {invoice.document_type === 'devis' && invoice.status !== 'payée' && (
+                                <DropdownMenuItem onClick={() => handleConvertToInvoice(invoice)} className="text-green-400">
+                                  <ArrowRightLeft className="w-4 h-4 mr-2" /> Convertir en facture
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator className="bg-white/10" />
