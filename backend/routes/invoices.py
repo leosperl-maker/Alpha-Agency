@@ -1018,7 +1018,7 @@ Cordialement,
     copy_email = "leo.sperl@alphagency.com"
     
     email_data = {
-        "sender": {"name": COMPANY_INFO['commercial_name'], "email": sender_email},
+        "sender": {"name": company_name, "email": sender_email},
         "to": [{"email": request.recipient_email, "name": client_name}],
         "bcc": [{"email": copy_email, "name": "Alpha Agency"}],  # Hidden copy
         "subject": subject,
