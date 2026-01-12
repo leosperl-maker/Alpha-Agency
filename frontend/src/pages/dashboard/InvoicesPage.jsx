@@ -1959,9 +1959,9 @@ BANQUE : ..."
                 
                 {/* Footer */}
                 <div className="border-t mt-4 pt-3 text-[7px] text-gray-500 text-center">
-                  <p>{COMPANY_INFO.name} - {COMPANY_INFO.address}, {COMPANY_INFO.city}</p>
-                  <p>SIRET: {COMPANY_INFO.siret} | TVA: {invoiceSettings?.tva_number || COMPANY_INFO.tva} | RCS: {invoiceSettings?.rcs || COMPANY_INFO.rcs}</p>
-                  <p className="mt-1">{invoiceSettings?.discount_conditions || 'Pas d\'escompte pour paiement anticipé.'} {invoiceSettings?.late_penalty || ''}</p>
+                  <p>{invoiceSettings?.company_name || COMPANY_INFO.name} - {invoiceSettings?.company_address || `${COMPANY_INFO.address}, ${COMPANY_INFO.city}`}</p>
+                  <p>SIRET: {invoiceSettings?.company_siret || COMPANY_INFO.siret} | TVA: {invoiceSettings?.company_vat || COMPANY_INFO.tva}</p>
+                  <p className="mt-1">En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement.</p>
                 </div>
               </div>
             </div>
