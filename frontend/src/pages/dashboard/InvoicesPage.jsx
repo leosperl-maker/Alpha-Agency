@@ -112,6 +112,25 @@ const InvoicesPage = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
   
+  // Phase 2: After creation dialog
+  const [phase2DialogOpen, setPhase2DialogOpen] = useState(false);
+  const [createdInvoice, setCreatedInvoice] = useState(null);
+  
+  // Email dialog with confirmation
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailRecipient, setEmailRecipient] = useState("");
+  const [emailInvoice, setEmailInvoice] = useState(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  
+  // New contact dialog
+  const [newContactDialogOpen, setNewContactDialogOpen] = useState(false);
+  const [newContactData, setNewContactData] = useState({
+    first_name: "", last_name: "", email: "", phone: "", company: "", 
+    position: "", address: "", city: "", postal_code: "", country: "France",
+    type: "client", status: "actif", notes: ""
+  });
+  const [savingContact, setSavingContact] = useState(false);
+  
   const [items, setItems] = useState([{ title: "", description: "", quantity: 1, unit_price: 0, discount: 0, discountType: "percent" }]);
   const [globalDiscount, setGlobalDiscount] = useState({ type: "percent", value: 0 }); // type: "percent" or "fixed"
   const [invoiceSettings, setInvoiceSettings] = useState(null);
