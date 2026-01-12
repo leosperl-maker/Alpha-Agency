@@ -390,77 +390,127 @@ const EmailCampaignsTab = () => {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Campagne</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Date de création</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {campaigns.map((campaign) => {
-                const status = campaign.status || "draft";
-                const colors = statusColors[status] || statusColors.draft;
-                return (
-                  <TableRow key={campaign.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium text-white">{campaign.name}</p>
-                        <p className="text-sm text-white/60">{campaign.subject}</p>
+        <>
+          {/* Desktop Table View */}
+          <Card className="hidden md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Campagne</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead>Date de création</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {campaigns.map((campaign) => {
+                  const status = campaign.status || "draft";
+                  const colors = statusColors[status] || statusColors.draft;
+                  return (
+                    <TableRow key={campaign.id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium text-white">{campaign.name}</p>
+                          <p className="text-sm text-white/60">{campaign.subject}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={`${colors.bg} ${colors.text} border-0`}>
+                          {statusLabels[status] || status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-white/60">
+                        {formatDate(campaign.createdAt)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setSelectedCampaign(campaign)}>
+                              <Eye className="w-4 h-4 mr-2" />
+                              Voir les détails
+                            </DropdownMenuItem>
+                            {status === "draft" && (
+                              <>
+                                <DropdownMenuItem onClick={() => handleSendNow(campaign.id)}>
+                                  <Send className="w-4 h-4 mr-2" />
+                                  Envoyer maintenant
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Calendar className="w-4 h-4 mr-2" />
+                                  Programmer
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => handleDelete(campaign.id)}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Supprimer
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </Card>
+          
+          {/* Mobile Cards View */}
+          <div className="md:hidden space-y-3">
+            {campaigns.map((campaign) => {
+              const status = campaign.status || "draft";
+              const colors = statusColors[status] || statusColors.draft;
+              return (
+                <Card key={campaign.id} className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-white truncate">{campaign.name}</p>
+                      <p className="text-sm text-white/60 truncate">{campaign.subject}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge className={`${colors.bg} ${colors.text} border-0 text-xs`}>
+                          {statusLabels[status] || status}
+                        </Badge>
+                        <span className="text-xs text-white/50">{formatDate(campaign.createdAt)}</span>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={`${colors.bg} ${colors.text} border-0`}>
-                        {statusLabels[status] || status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-white/60">
-                      {formatDate(campaign.createdAt)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setSelectedCampaign(campaign)}>
-                            <Eye className="w-4 h-4 mr-2" />
-                            Voir les détails
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="shrink-0">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setSelectedCampaign(campaign)}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          Voir
+                        </DropdownMenuItem>
+                        {status === "draft" && (
+                          <DropdownMenuItem onClick={() => handleSendNow(campaign.id)}>
+                            <Send className="w-4 h-4 mr-2" />
+                            Envoyer
                           </DropdownMenuItem>
-                          {status === "draft" && (
-                            <>
-                              <DropdownMenuItem onClick={() => handleSendNow(campaign.id)}>
-                                <Send className="w-4 h-4 mr-2" />
-                                Envoyer maintenant
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Calendar className="w-4 h-4 mr-2" />
-                                Programmer
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() => handleDelete(campaign.id)}
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </Card>
+                        )}
+                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(campaign.id)}>
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Supprimer
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );
