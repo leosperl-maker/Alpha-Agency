@@ -179,14 +179,18 @@ const InvoicesPage = () => {
 
   const fetchData = async () => {
     try {
-      const [invoicesRes, contactsRes, servicesRes] = await Promise.all([
+      const [invoicesRes, contactsRes, servicesRes, settingsRes] = await Promise.all([
         invoicesAPI.getAll(),
         contactsAPI.getAll(),
-        servicesAPI.getAll()
+        servicesAPI.getAll(),
+        api.get('/settings/invoice').catch(() => ({ data: null }))
       ]);
       setInvoices(invoicesRes.data);
       setContacts(contactsRes.data);
       setSavedServices(servicesRes.data);
+      if (settingsRes.data) {
+        setInvoiceSettings(settingsRes.data);
+      }
     } catch (error) {
       toast.error("Erreur lors du chargement");
     } finally {
