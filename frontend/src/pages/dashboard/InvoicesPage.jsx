@@ -495,6 +495,37 @@ const InvoicesPage = () => {
     setEditingInvoice(null);
   };
 
+  // Create new contact from invoice form
+  const handleCreateNewContact = async () => {
+    if (!newContactData.first_name && !newContactData.last_name && !newContactData.company) {
+      toast.error("Veuillez renseigner au moins un nom ou une entreprise");
+      return;
+    }
+    
+    setSavingContact(true);
+    try {
+      const response = await contactsAPI.create(newContactData);
+      const newContact = response.data;
+      
+      // Refresh contacts list and select the new contact
+      const contactsRes = await contactsAPI.getAll();
+      setContacts(contactsRes.data);
+      setFormData(prev => ({ ...prev, contact_id: newContact.id }));
+      
+      toast.success("Contact créé et sélectionné");
+      setNewContactDialogOpen(false);
+      setNewContactData({
+        first_name: "", last_name: "", email: "", phone: "", company: "", 
+        position: "", address: "", city: "", postal_code: "", country: "France",
+        type: "client", status: "actif", notes: ""
+      });
+    } catch (error) {
+      toast.error("Erreur lors de la création du contact");
+    } finally {
+      setSavingContact(false);
+    }
+  };
+
   const saveSettings = async () => {
     try {
       await api.put('/settings/invoice', {
