@@ -29,7 +29,9 @@ import {
   CalendarDays,
   PiggyBank,
   ArrowRightLeft,
-  Percent
+  Percent,
+  CheckSquare,
+  Square
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
