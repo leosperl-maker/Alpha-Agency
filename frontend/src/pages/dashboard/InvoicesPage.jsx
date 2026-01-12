@@ -1562,51 +1562,299 @@ const InvoicesPage = () => {
         </SheetContent>
       </Sheet>
 
-      {/* Settings Dialog */}
+      {/* Settings Dialog - Full Page Style like Qonto */}
       <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <Settings className="w-5 h-5 text-indigo-400" />
-              Paramètres du document
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-white">Conditions de règlement</Label>
-              <Textarea
-                value={formData.conditions}
-                onChange={(e) => setFormData({...formData, conditions: e.target.value})}
-                placeholder="• Ce devis est valable 30 jours...
+        <DialogContent className="bg-[#0f0f1a] border-white/10 max-w-6xl h-[95vh] p-0 overflow-hidden">
+          <div className="flex h-full">
+            {/* Left Panel - Settings */}
+            <div className="w-full lg:w-1/2 overflow-y-auto p-6 space-y-6">
+              <DialogHeader className="pb-4 border-b border-white/10">
+                <DialogTitle className="text-white flex items-center gap-2 text-xl">
+                  <Settings className="w-6 h-6 text-indigo-400" />
+                  Paramètres de facturation
+                </DialogTitle>
+                <p className="text-white/50 text-sm">Configurez les valeurs par défaut pour vos documents</p>
+              </DialogHeader>
+              
+              {/* Numbering Section */}
+              <div className="space-y-4">
+                <h3 className="text-white font-semibold flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-indigo-400" />
+                  Numérotation automatique
+                </h3>
+                <p className="text-white/50 text-xs">Assurez-vous que vos documents portent un numéro unique et séquentiel.</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-3 p-4 bg-white/5 rounded-lg">
+                    <Label className="text-white text-sm font-medium">Factures</Label>
+                    <div className="space-y-2">
+                      <Label className="text-white/60 text-xs">Préfixe</Label>
+                      <Input
+                        value={invoiceSettings?.invoice_prefix || "FAC-(AAAA)-"}
+                        onChange={(e) => setInvoiceSettings({...invoiceSettings, invoice_prefix: e.target.value})}
+                        className="bg-white/5 border-white/10 text-white text-sm"
+                        placeholder="FAC-(AAAA)-"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-white/60 text-xs">Prochain numéro</Label>
+                      <Input
+                        type="number"
+                        value={invoiceSettings?.invoice_next_number || "1"}
+                        onChange={(e) => setInvoiceSettings({...invoiceSettings, invoice_next_number: e.target.value})}
+                        className="bg-white/5 border-white/10 text-white text-sm"
+                      />
+                    </div>
+                    <p className="text-xs text-indigo-400">Aperçu: FAC-2026-001</p>
+                  </div>
+                  
+                  <div className="space-y-3 p-4 bg-white/5 rounded-lg">
+                    <Label className="text-white text-sm font-medium">Devis</Label>
+                    <div className="space-y-2">
+                      <Label className="text-white/60 text-xs">Préfixe</Label>
+                      <Input
+                        value={invoiceSettings?.quote_prefix || "DEV-(AAAA)-"}
+                        onChange={(e) => setInvoiceSettings({...invoiceSettings, quote_prefix: e.target.value})}
+                        className="bg-white/5 border-white/10 text-white text-sm"
+                        placeholder="DEV-(AAAA)-"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-white/60 text-xs">Prochain numéro</Label>
+                      <Input
+                        type="number"
+                        value={invoiceSettings?.quote_next_number || "1"}
+                        onChange={(e) => setInvoiceSettings({...invoiceSettings, quote_next_number: e.target.value})}
+                        className="bg-white/5 border-white/10 text-white text-sm"
+                      />
+                    </div>
+                    <p className="text-xs text-indigo-400">Aperçu: DEV-2026-001</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Company Info Section */}
+              <div className="space-y-4">
+                <h3 className="text-white font-semibold flex items-center gap-2">
+                  <Receipt className="w-4 h-4 text-indigo-400" />
+                  Informations entreprise
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">Email de contact</Label>
+                    <Input
+                      value={invoiceSettings?.contact_email || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, contact_email: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                      placeholder="contact@alphagency.fr"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">N° TVA</Label>
+                    <Input
+                      value={invoiceSettings?.tva_number || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, tva_number: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                      placeholder="FR32123456789"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">Capital social</Label>
+                    <Input
+                      value={invoiceSettings?.capital || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, capital: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                      placeholder="1000"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">RCS</Label>
+                    <Input
+                      value={invoiceSettings?.rcs || ""}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, rcs: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                      placeholder="Pointe-à-Pitre A 123 456 789"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Conditions Section */}
+              <div className="space-y-4">
+                <h3 className="text-white font-semibold">Conditions de règlement</h3>
+                <Textarea
+                  value={invoiceSettings?.default_conditions || formData.conditions || ""}
+                  onChange={(e) => setInvoiceSettings({...invoiceSettings, default_conditions: e.target.value})}
+                  placeholder="• Ce devis est valable 30 jours...
 • Paiement par virement bancaire..."
-                className="bg-white/5 border-white/10 text-white min-h-[150px]"
-              />
-              <p className="text-xs text-white/40">Ces conditions seront affichées sur le document PDF</p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label className="text-white">Coordonnées bancaires</Label>
-              <Textarea
-                value={formData.bank_details}
-                onChange={(e) => setFormData({...formData, bank_details: e.target.value})}
-                placeholder="IBAN : FR76 ...
+                  className="bg-white/5 border-white/10 text-white min-h-[120px] text-sm"
+                />
+              </div>
+              
+              {/* Bank Details Section */}
+              <div className="space-y-4">
+                <h3 className="text-white font-semibold">Coordonnées bancaires</h3>
+                <Textarea
+                  value={invoiceSettings?.bank_details || formData.bank_details || ""}
+                  onChange={(e) => setInvoiceSettings({...invoiceSettings, bank_details: e.target.value})}
+                  placeholder="IBAN : FR76 ...
 BIC/SWIFT : ...
 BANQUE : ..."
-                className="bg-white/5 border-white/10 text-white min-h-[100px]"
-              />
-              <p className="text-xs text-white/40">Ces coordonnées seront affichées dans la section "Détails du paiement"</p>
+                  className="bg-white/5 border-white/10 text-white min-h-[80px] text-sm"
+                />
+              </div>
+              
+              {/* Legal Mentions */}
+              <div className="space-y-4">
+                <h3 className="text-white font-semibold">Mentions légales</h3>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">Conditions de remise</Label>
+                    <Input
+                      value={invoiceSettings?.discount_conditions || "Pas d'escompte accordé pour paiement anticipé."}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, discount_conditions: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">Pénalités de retard</Label>
+                    <Input
+                      value={invoiceSettings?.late_penalty || "En cas de non-paiement à la date d'échéance, des pénalités calculées à trois fois le taux d'intérêt légal seront appliquées."}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, late_penalty: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white/60 text-xs">Indemnité forfaitaire</Label>
+                    <Input
+                      value={invoiceSettings?.recovery_fee || "Tout retard de paiement entraînera une indemnité forfaitaire pour frais de recouvrement de 40€."}
+                      onChange={(e) => setInvoiceSettings({...invoiceSettings, recovery_fee: e.target.value})}
+                      className="bg-white/5 border-white/10 text-white text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Signature Text */}
+              <div className="space-y-2">
+                <h3 className="text-white font-semibold">Texte avant signature</h3>
+                <Input
+                  value={invoiceSettings?.signature_text || "Bon pour accord"}
+                  onChange={(e) => setInvoiceSettings({...invoiceSettings, signature_text: e.target.value})}
+                  className="bg-white/5 border-white/10 text-white text-sm"
+                />
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-white/10 sticky bottom-0 bg-[#0f0f1a] py-4">
+                <Button variant="outline" onClick={() => setSettingsDialogOpen(false)} className="flex-1 border-white/10 text-white hover:bg-white/5">
+                  Annuler
+                </Button>
+                <Button onClick={saveSettings} className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                  <Save className="w-4 h-4 mr-2" /> Enregistrer
+                </Button>
+              </div>
+            </div>
+            
+            {/* Right Panel - Preview */}
+            <div className="hidden lg:block lg:w-1/2 bg-white/5 border-l border-white/10 overflow-y-auto p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-white font-semibold">Aperçu du document</h3>
+                <div className="flex gap-2">
+                  <Button 
+                    variant={documentType === 'devis' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => setDocumentType('devis')}
+                    className={documentType === 'devis' ? 'bg-indigo-600' : 'border-white/10 text-white hover:bg-white/5'}
+                  >
+                    Devis
+                  </Button>
+                  <Button 
+                    variant={documentType === 'facture' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => setDocumentType('facture')}
+                    className={documentType === 'facture' ? 'bg-indigo-600' : 'border-white/10 text-white hover:bg-white/5'}
+                  >
+                    Facture
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Mini Preview */}
+              <div className="bg-white rounded-lg shadow-lg p-6 text-black text-xs scale-90 origin-top">
+                <div className="flex justify-between mb-4">
+                  <div>
+                    <h4 className="font-bold text-red-600">ALPHA AGENCY</h4>
+                    <p className="text-gray-600">123 Rue Example</p>
+                    <p className="text-gray-600">97100 Basse-Terre</p>
+                  </div>
+                  <div className="text-right">
+                    <h4 className="font-bold">{documentType === 'devis' ? 'DEVIS' : 'FACTURE'}</h4>
+                    <p className="text-gray-600">{invoiceSettings?.invoice_prefix || 'FAC-'}001</p>
+                    <p className="text-gray-600">{new Date().toLocaleDateString('fr-FR')}</p>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between mb-4 text-[10px]">
+                  <div className="w-1/2">
+                    <p className="font-bold mb-1">ÉMETTEUR</p>
+                    <p>Alpha Agency</p>
+                    <p>Email: {invoiceSettings?.contact_email || 'contact@alphagency.fr'}</p>
+                    <p>TVA: {invoiceSettings?.tva_number || 'FR...'}</p>
+                  </div>
+                  <div className="w-1/2 text-right">
+                    <p className="font-bold mb-1">DESTINATAIRE</p>
+                    <p>Nom du client</p>
+                    <p>Adresse client</p>
+                  </div>
+                </div>
+                
+                <table className="w-full mb-4 text-[10px]">
+                  <thead className="bg-gray-800 text-white">
+                    <tr>
+                      <th className="p-1 text-left">Description</th>
+                      <th className="p-1 text-right">Qté</th>
+                      <th className="p-1 text-right">PU</th>
+                      <th className="p-1 text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b">
+                      <td className="p-1">Service exemple</td>
+                      <td className="p-1 text-right">1</td>
+                      <td className="p-1 text-right">500,00 €</td>
+                      <td className="p-1 text-right">500,00 €</td>
+                    </tr>
+                  </tbody>
+                </table>
+                
+                <div className="text-right mb-4 text-[10px]">
+                  <p>Total HT: 500,00 €</p>
+                  <p>TVA (8.5%): 42,50 €</p>
+                  <p className="font-bold text-red-600">Total TTC: 542,50 €</p>
+                </div>
+                
+                {invoiceSettings?.default_conditions && (
+                  <div className="text-[8px] text-gray-600 mb-2">
+                    <p className="font-bold">Conditions:</p>
+                    <p className="whitespace-pre-wrap">{invoiceSettings.default_conditions.substring(0, 150)}...</p>
+                  </div>
+                )}
+                
+                {invoiceSettings?.bank_details && (
+                  <div className="text-[8px] text-gray-600 mb-2">
+                    <p className="font-bold">Coordonnées bancaires:</p>
+                    <p className="whitespace-pre-wrap">{invoiceSettings.bank_details}</p>
+                  </div>
+                )}
+                
+                <div className="border-t pt-2 text-[7px] text-gray-500 text-center">
+                  <p>Alpha Agency - SIRET: 123456789 | TVA: {invoiceSettings?.tva_number || 'FR...'}</p>
+                  <p>{invoiceSettings?.discount_conditions || 'Pas d\'escompte pour paiement anticipé.'}</p>
+                </div>
+              </div>
             </div>
           </div>
-          
-          <DialogFooter className="flex gap-2">
-            <Button variant="outline" onClick={() => setSettingsDialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
-              Annuler
-            </Button>
-            <Button onClick={saveSettings} className="bg-indigo-600 hover:bg-indigo-700">
-              <Save className="w-4 h-4 mr-2" /> Enregistrer comme défaut
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
