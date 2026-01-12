@@ -149,8 +149,10 @@ def fetch_logo_image():
         return None
 
 def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "facture", invoice_settings: dict = None) -> BytesIO:
-    """Generate professional PDF for invoice or quote matching the Alpha Agency design"""
-    # Default settings if none provided
+    """
+    Generate professional PDF for invoice or quote matching the Alpha Agency / GHI style.
+    NO BLANK PAGES - content flows naturally across pages.
+    """
     if not invoice_settings:
         invoice_settings = {}
     
@@ -161,7 +163,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         rightMargin=1.5*cm, 
         leftMargin=1.5*cm, 
         topMargin=1.5*cm, 
-        bottomMargin=3.5*cm  # More space for footer
+        bottomMargin=2.5*cm
     )
     styles = getSampleStyleSheet()
     elements = []
@@ -179,196 +181,178 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     company_phone = COMPANY_INFO['phone']
     company_email = COMPANY_INFO['email']
     
-    # Styles
-    company_name_style = ParagraphStyle('CompanyName', parent=styles['Heading1'], fontSize=20, textColor=BRAND_RED, spaceAfter=0)
-    company_info_style = ParagraphStyle('CompanyInfo', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=12)
-    doc_title_style = ParagraphStyle('DocTitle', parent=styles['Heading1'], fontSize=16, textColor=DARK_GRAY, alignment=TA_RIGHT, spaceAfter=5)
-    doc_info_style = ParagraphStyle('DocInfo', parent=styles['Normal'], fontSize=10, textColor=DARK_GRAY, alignment=TA_RIGHT, leading=14)
-    client_header_style = ParagraphStyle('ClientHeader', parent=styles['Normal'], fontSize=10, textColor=BRAND_RED, spaceAfter=5)
-    client_info_style = ParagraphStyle('ClientInfo', parent=styles['Normal'], fontSize=10, textColor=DARK_GRAY, leading=14)
-    table_header_style = ParagraphStyle('TableHeader', parent=styles['Normal'], fontSize=9, textColor=colors.white, alignment=TA_CENTER)
-    table_cell_style = ParagraphStyle('TableCell', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=12)
-    table_cell_right_style = ParagraphStyle('TableCellRight', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT)
-    totals_style = ParagraphStyle('Totals', parent=styles['Normal'], fontSize=10, textColor=DARK_GRAY, alignment=TA_RIGHT)
-    totals_bold_style = ParagraphStyle('TotalsBold', parent=styles['Normal'], fontSize=11, textColor=BRAND_RED, alignment=TA_RIGHT)
-    footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=LIGHT_GRAY, alignment=TA_CENTER, leading=10)
-    section_style = ParagraphStyle('Section', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=13)
+    # ===== STYLES =====
+    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=14, textColor=BRAND_RED, alignment=TA_RIGHT, spaceAfter=3)
+    info_style = ParagraphStyle('Info', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT, leading=12)
+    company_style = ParagraphStyle('Company', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=12)
+    client_header = ParagraphStyle('ClientHeader', parent=styles['Normal'], fontSize=9, textColor=BRAND_RED, fontName='Helvetica-Bold')
+    client_style = ParagraphStyle('Client', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=12)
     
-    # Item styles for flowable approach
-    item_title_style = ParagraphStyle('ItemTitle', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=12)
-    item_desc_style = ParagraphStyle('ItemDesc', parent=styles['Normal'], fontSize=8, textColor=DARK_GRAY, leading=11)
-    item_info_style = ParagraphStyle('ItemInfo', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT, leading=12)
+    # Table styles
+    th_style = ParagraphStyle('TableHeader', fontSize=8, textColor=colors.white, alignment=TA_CENTER, fontName='Helvetica-Bold')
+    td_style = ParagraphStyle('TableCell', fontSize=8, textColor=DARK_GRAY, leading=11)
+    td_right = ParagraphStyle('TableCellRight', fontSize=8, textColor=DARK_GRAY, alignment=TA_RIGHT, leading=11)
+    td_center = ParagraphStyle('TableCellCenter', fontSize=8, textColor=DARK_GRAY, alignment=TA_CENTER, leading=11)
     
-    # Header with Logo and Document Info
+    # Content styles
+    section_style = ParagraphStyle('Section', fontSize=9, textColor=DARK_GRAY, leading=12, spaceBefore=6, spaceAfter=3)
+    totals_style = ParagraphStyle('Totals', fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT)
+    totals_bold = ParagraphStyle('TotalsBold', fontSize=10, textColor=BRAND_RED, alignment=TA_RIGHT, fontName='Helvetica-Bold')
+    
+    # ===== HEADER: Logo + Doc Info =====
     logo_path = fetch_logo_image()
     header_left = []
     if logo_path:
         try:
-            header_left.append(Image(logo_path, width=6*cm, height=2.2*cm))
+            header_left.append(Image(logo_path, width=5*cm, height=1.8*cm))
         except:
-            header_left.append(Paragraph(f"<b>{company_name}</b>", company_name_style))
+            header_left.append(Paragraph(f"<b>{company_name}</b>", ParagraphStyle('', fontSize=16, textColor=BRAND_RED)))
     else:
-        header_left.append(Paragraph(f"<b>{company_name}</b>", company_name_style))
+        header_left.append(Paragraph(f"<b>{company_name}</b>", ParagraphStyle('', fontSize=16, textColor=BRAND_RED)))
     
     doc_number = doc_data.get('invoice_number') or doc_data.get('quote_number', '')
     doc_date = doc_data.get('created_at', '')[:10]
     
     if doc_type == "devis":
-        title_text = f"Devis {doc_number}"
+        doc_title = f"Devis {doc_number}"
         date_label = "En date du"
-        validity = doc_data.get('valid_until', '')
-        validity_text = f"Validité: {validity}" if validity else ""
     else:
-        title_text = f"Facture {doc_number}"
+        doc_title = f"Facture {doc_number}"
         date_label = "Date"
-        due_date = doc_data.get('due_date', '')
-        validity_text = f"Échéance: {due_date}" if due_date else ""
     
-    header_right = []
-    header_right.append(Paragraph(f"<b>{title_text}</b>", doc_title_style))
-    header_right.append(Paragraph(f"{date_label}: {doc_date}", doc_info_style))
-    if validity_text:
-        header_right.append(Paragraph(validity_text, doc_info_style))
+    header_right = [
+        Paragraph(f"<b>{doc_title}</b>", title_style),
+        Paragraph(f"{date_label}: {doc_date}", info_style),
+    ]
+    if doc_type == "devis" and doc_data.get('valid_until'):
+        header_right.append(Paragraph(f"Validité: {doc_data['valid_until']}", info_style))
+    elif doc_type == "facture" and doc_data.get('due_date'):
+        header_right.append(Paragraph(f"Échéance: {doc_data['due_date']}", info_style))
     
-    header_table_data = [[header_left, header_right]]
-    header_table = Table(header_table_data, colWidths=[10*cm, 7*cm])
-    header_table.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP'), ('ALIGN', (1, 0), (1, 0), 'RIGHT')]))
+    header_table = Table([[header_left, header_right]], colWidths=[9*cm, 8*cm])
+    header_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
+    ]))
     elements.append(header_table)
+    elements.append(Spacer(1, 0.5*cm))
+    
+    # ===== SENDER & RECIPIENT SIDE BY SIDE =====
+    sender_info = [
+        Paragraph(f"<b>{company_name}</b>", company_style),
+        Paragraph(company_address, company_style),
+        Paragraph(f"Tél: {company_phone}", company_style),
+        Paragraph(f"Email: {company_email}", company_style),
+    ]
+    
+    client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+    recipient_info = [Paragraph("<b>DESTINATAIRE</b>", client_header)]
+    if client_name:
+        recipient_info.append(Paragraph(f"<b>{client_name}</b>", client_style))
+    if contact.get('company'):
+        recipient_info.append(Paragraph(contact['company'], client_style))
+    if contact.get('email'):
+        recipient_info.append(Paragraph(contact['email'], client_style))
+    if contact.get('phone'):
+        recipient_info.append(Paragraph(f"Tél: {contact['phone']}", client_style))
+    
+    addr_table = Table([[sender_info, recipient_info]], colWidths=[8.5*cm, 8.5*cm])
+    addr_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
+    ]))
+    elements.append(addr_table)
     elements.append(Spacer(1, 0.6*cm))
     
-    # ===== SENDER (left) and RECIPIENT (right) side by side =====
-    # Sender info block - use settings values
-    sender_content = []
-    sender_content.append(Paragraph(f"<b>{company_name}</b>", client_info_style))
-    sender_content.append(Paragraph(company_address, company_info_style))
-    sender_content.append(Spacer(1, 0.15*cm))
-    sender_content.append(Paragraph(f"Tél: {company_phone}", company_info_style))
-    sender_content.append(Paragraph(f"Email: {company_email}", company_info_style))
+    # ===== ITEMS TABLE =====
+    # Column widths like GHI: Nom/Code | Description | Qté | Remise | PU HT | TVA | Total HT
+    col_widths = [2.5*cm, 6.5*cm, 1.2*cm, 1.5*cm, 2*cm, 1.8*cm, 1.8*cm]
     
-    # Recipient info block
-    recipient_content = []
-    recipient_content.append(Paragraph("<b>DESTINATAIRE</b>", client_header_style))
-    client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
-    if client_name:
-        recipient_content.append(Paragraph(f"<b>{client_name}</b>", client_info_style))
-    if contact.get('company'):
-        recipient_content.append(Paragraph(contact['company'], client_info_style))
-    if contact.get('email'):
-        recipient_content.append(Paragraph(contact['email'], client_info_style))
-    if contact.get('phone'):
-        recipient_content.append(Paragraph(contact['phone'], client_info_style))
-    
-    # Create a two-column table: Sender (left) | Recipient (right)
-    address_table_data = [[sender_content, recipient_content]]
-    address_table = Table(address_table_data, colWidths=[8.5*cm, 8.5*cm])
-    address_table.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('ALIGN', (0, 0), (0, 0), 'LEFT'),
-        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 0),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-    ]))
-    elements.append(address_table)
-    elements.append(Spacer(1, 0.8*cm))
-    
-    # Items table - build header first
-    table_header = [[
-        Paragraph("<b>Description</b>", table_header_style),
-        Paragraph("<b>Qté</b>", table_header_style),
-        Paragraph("<b>PU HT</b>", table_header_style),
-        Paragraph("<b>TVA</b>", table_header_style),
-        Paragraph("<b>Total HT</b>", table_header_style)
+    # Header row
+    table_data = [[
+        Paragraph("<b>Nom/Code</b>", th_style),
+        Paragraph("<b>Description</b>", th_style),
+        Paragraph("<b>Qté</b>", th_style),
+        Paragraph("<b>Remise</b>", th_style),
+        Paragraph("<b>PU HT</b>", th_style),
+        Paragraph("<b>TVA</b>", th_style),
+        Paragraph("<b>Total HT</b>", th_style),
     ]]
-    
-    header_table = Table(table_header, colWidths=[9*cm, 1.2*cm, 2.3*cm, 2.3*cm, 2.2*cm])
-    header_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), BRAND_RED),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-        ('TOPPADDING', (0, 0), (-1, 0), 10),
-        ('ALIGN', (1, 0), (-1, 0), 'CENTER'),
-        ('ALIGN', (0, 0), (0, 0), 'CENTER'),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-    ]))
-    elements.append(header_table)
     
     subtotal = 0
     tva_rate = 0.085
     
-    # Build each item as separate flowables
-    # This approach allows long descriptions to flow across pages
-    for idx, item in enumerate(doc_data.get('items', [])):
+    # Build data rows - each item gets its own row(s)
+    for item in doc_data.get('items', []):
         qty = item.get('quantity', 1)
         unit_price = item.get('unit_price', 0)
         discount = item.get('discount', 0)
         discount_type = item.get('discountType', 'percent')
         
         line_total = qty * unit_price
-        discount_amount = 0
         if discount:
             if discount_type == 'percent' or discount_type == '%':
-                discount_amount = line_total * (discount / 100)
-                line_total -= discount_amount
-            else:  # fixed amount
-                discount_amount = discount
+                line_total -= line_total * (discount / 100)
+            else:
                 line_total -= discount
         
         subtotal += line_total
         tva_amount = line_total * tva_rate
         
-        title = item.get('title', '').strip()
+        title = item.get('title', '').strip() or "Service"
         desc = item.get('description', '').strip()
         
-        # Build description content
-        desc_parts = []
-        if title:
-            desc_parts.append(Paragraph(f"<b>{title}</b>", item_title_style))
-        
+        # Format description - allow it to be long and wrap naturally
         if desc:
-            # Replace newlines for proper display
             desc_formatted = desc.replace('\n', '<br/>')
-            desc_parts.append(Paragraph(desc_formatted, item_desc_style))
+            desc_para = Paragraph(desc_formatted, td_style)
+        else:
+            desc_para = Paragraph("-", td_style)
         
-        # Format discount correctly
+        # Format discount
         if discount:
             if discount_type == 'percent' or discount_type == '%':
-                desc_parts.append(Paragraph(f"<font color='#CE0202'>Remise: -{discount:.0f}%</font>", item_desc_style))
+                discount_str = f"-{discount:.0f}%"
             else:
-                desc_parts.append(Paragraph(f"<font color='#CE0202'>Remise: -{discount:.2f} €</font>", item_desc_style))
+                discount_str = f"-{discount:.2f}€"
+        else:
+            discount_str = "-"
         
-        # Create numeric data for the right columns
-        row_bg = colors.white if idx % 2 == 0 else colors.HexColor('#F8F8F8')
-        
-        # Put description as list of flowables (can split across pages)
-        item_row = [[
-            desc_parts,  # This is a list of flowables that can flow
-            Paragraph(str(qty), table_cell_right_style),
-            Paragraph(f"{unit_price:.2f} €", table_cell_right_style),
-            Paragraph(f"8.5%<br/>({tva_amount:.2f} €)", table_cell_right_style),
-            Paragraph(f"{line_total:.2f} €", table_cell_right_style)
-        ]]
-        
-        item_table = Table(item_row, colWidths=[9*cm, 1.2*cm, 2.3*cm, 2.3*cm, 2.2*cm])
-        item_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), row_bg),
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-            ('TOPPADDING', (0, 0), (-1, -1), 8),
-            ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
-            ('ALIGN', (0, 0), (0, -1), 'LEFT'),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-        ]))
-        
-        # Add directly without KeepTogether to allow splitting
-        elements.append(item_table)
+        table_data.append([
+            Paragraph(f"<b>{title[:20]}</b>" if len(title) > 20 else f"<b>{title}</b>", td_style),
+            desc_para,
+            Paragraph(str(qty), td_center),
+            Paragraph(discount_str, td_center),
+            Paragraph(f"{unit_price:.2f} €", td_right),
+            Paragraph(f"8.5%<br/><font size='6'>({tva_amount:.2f}€)</font>", td_center),
+            Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
+        ])
     
-    elements.append(Spacer(1, 0.5*cm))
+    # Create table with repeatRows=1 so header repeats on each page
+    items_table = Table(table_data, colWidths=col_widths, repeatRows=1, splitByRow=True)
+    items_table.setStyle(TableStyle([
+        # Header
+        ('BACKGROUND', (0, 0), (-1, 0), BRAND_RED),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('TOPPADDING', (0, 0), (-1, 0), 8),
+        # Body
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('TOPPADDING', (0, 1), (-1, -1), 6),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        # Alternating colors
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F5F5F5')]),
+        # Grid
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+    ]))
+    elements.append(items_table)
+    elements.append(Spacer(1, 0.4*cm))
     
-    # Apply global discount
+    # ===== GLOBAL DISCOUNT =====
     global_discount = doc_data.get('globalDiscount', 0)
     global_discount_type = doc_data.get('globalDiscountType', '%')
     if global_discount:
@@ -377,109 +361,101 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         else:
             subtotal -= global_discount
     
-    # Totals
+    # ===== TOTALS =====
     tva_total = subtotal * tva_rate
     total_ttc = subtotal + tva_total
     
-    totals_data = [
-        ['', '', '', Paragraph("Total net HT:", totals_style), Paragraph(f"<b>{subtotal:.2f} €</b>", totals_style)],
-    ]
+    totals_data = []
     if global_discount:
         if global_discount_type == '%':
-            totals_data.insert(0, ['', '', '', Paragraph(f"Remise globale ({global_discount:.0f}%):", totals_style), Paragraph("<b>appliquée</b>", totals_style)])
+            totals_data.append(['', '', Paragraph(f"Remise globale ({global_discount:.0f}%):", totals_style), Paragraph("appliquée", totals_style)])
         else:
-            totals_data.insert(0, ['', '', '', Paragraph(f"Remise globale ({global_discount:.2f} €):", totals_style), Paragraph("<b>appliquée</b>", totals_style)])
+            totals_data.append(['', '', Paragraph(f"Remise globale ({global_discount:.2f} €):", totals_style), Paragraph("appliquée", totals_style)])
     
     totals_data.extend([
-        ['', '', '', Paragraph("TVA 8.50%:", totals_style), Paragraph(f"<b>{tva_total:.2f} €</b>", totals_style)],
-        ['', '', '', Paragraph("<b>TOTAL TTC:</b>", totals_bold_style), Paragraph(f"<b>{total_ttc:.2f} €</b>", totals_bold_style)],
+        ['', '', Paragraph("Total net HT:", totals_style), Paragraph(f"<b>{subtotal:.2f} €</b>", totals_style)],
+        ['', '', Paragraph("TVA 8.50%:", totals_style), Paragraph(f"<b>{tva_total:.2f} €</b>", totals_style)],
+        ['', '', Paragraph("<b>Montant total TTC:</b>", totals_bold), Paragraph(f"<b>{total_ttc:.2f} €</b>", totals_bold)],
     ])
     
-    totals_table = Table(totals_data, colWidths=[8*cm, 1.5*cm, 2.5*cm, 2.5*cm, 2.5*cm])
+    totals_table = Table(totals_data, colWidths=[8*cm, 3*cm, 3.5*cm, 2.8*cm])
     totals_table.setStyle(TableStyle([
-        ('ALIGN', (3, 0), (-1, -1), 'RIGHT'),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ('LINEABOVE', (3, -1), (-1, -1), 1, BRAND_RED),
+        ('ALIGN', (2, 0), (-1, -1), 'RIGHT'),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LINEABOVE', (2, -1), (-1, -1), 1.5, BRAND_RED),
     ]))
     elements.append(totals_table)
-    elements.append(Spacer(1, 0.8*cm))
+    elements.append(Spacer(1, 0.5*cm))
     
-    # Conditions for quotes
+    # ===== CONDITIONS & SIGNATURE (for devis) =====
     if doc_type == "devis":
-        elements.append(Spacer(1, 0.5*cm))
-        elements.append(Paragraph("<b>Conditions de règlement:</b>", section_style))
-        
-        # Use custom conditions from settings or document
         conditions_text = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
         if conditions_text:
+            elements.append(Paragraph("<b>Conditions de règlement:</b>", section_style))
             for line in conditions_text.strip().split('\n'):
                 if line.strip():
-                    elements.append(Paragraph(line.strip(), section_style))
+                    elements.append(Paragraph(f"• {line.strip()}", section_style))
+            elements.append(Spacer(1, 0.3*cm))
         
-        elements.append(Spacer(1, 0.6*cm))
-        
-        # Signature section
-        signature_text = invoice_settings.get('signature_text', "Bon pour accord")
-        elements.append(Paragraph(f"<b>{signature_text}</b>", section_style))
-        elements.append(Spacer(1, 1.5*cm))
-        elements.append(Paragraph("_" * 50, section_style))
+        # Signature section - side by side like GHI
+        sig_left = [
+            Paragraph("<b>Pour Alpha Agency</b>", section_style),
+            Spacer(1, 1*cm),
+            Paragraph("_" * 30, section_style),
+        ]
+        sig_right = [
+            Paragraph("<b>Bon pour accord, le client</b>", section_style),
+            Spacer(1, 1*cm),
+            Paragraph("_" * 30, section_style),
+        ]
+        sig_table = Table([[sig_left, sig_right]], colWidths=[8.5*cm, 8.5*cm])
+        sig_table.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP')]))
+        elements.append(sig_table)
+        elements.append(Spacer(1, 0.3*cm))
     
-    # Payment info for invoices
+    # ===== PAYMENT CONDITIONS (for facture) =====
     if doc_type == "facture":
-        elements.append(Spacer(1, 0.5*cm))
-        
-        # Conditions from document or settings
         conditions = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
         if conditions:
             elements.append(Paragraph("<b>Conditions de paiement:</b>", section_style))
             for line in conditions.split('\n'):
                 if line.strip():
-                    elements.append(Paragraph(line.strip(), section_style))
-            elements.append(Spacer(1, 0.4*cm))
+                    elements.append(Paragraph(f"• {line.strip()}", section_style))
+            elements.append(Spacer(1, 0.3*cm))
     
-    # Bank details section (for both)
-    elements.append(Spacer(1, 0.3*cm))
+    # ===== BANK DETAILS =====
     bank_details = doc_data.get('bank_details') or invoice_settings.get('bank_details', '')
     if bank_details:
-        elements.append(Paragraph("<b>Détails du paiement:</b>", section_style))
+        elements.append(Paragraph("<b>Détails du règlement:</b>", section_style))
         elements.append(Paragraph(f"Bénéficiaire: {company_name}", section_style))
         for line in bank_details.split('\n'):
             if line.strip():
                 elements.append(Paragraph(line.strip(), section_style))
     
-    # Build document with footer - use settings values
-    def footer_canvas(canvas, doc_obj):
+    # ===== FOOTER on every page =====
+    def add_footer(canvas, doc_obj):
         canvas.saveState()
-        # Footer line
         canvas.setStrokeColor(colors.HexColor('#CCCCCC'))
-        canvas.line(1.5*cm, 2.8*cm, A4[0] - 1.5*cm, 2.8*cm)
+        canvas.line(1.5*cm, 2.2*cm, A4[0] - 1.5*cm, 2.2*cm)
         
-        # Footer text
-        canvas.setFont('Helvetica', 7)
+        canvas.setFont('Helvetica', 6)
         canvas.setFillColor(colors.HexColor('#666666'))
         
-        # Line 1: Company info
-        footer_line1 = f"{COMPANY_INFO['name']} - {COMPANY_INFO['legal_form']} au capital de {COMPANY_INFO['capital']} €"
-        canvas.drawCentredString(A4[0]/2, 2.4*cm, footer_line1)
-        
-        # Line 2: Address from settings
-        canvas.drawCentredString(A4[0]/2, 2.0*cm, company_address)
-        
-        # Line 3: Legal info from settings
-        footer_line3 = f"SIRET: {company_siret} | TVA: {company_vat}"
-        canvas.drawCentredString(A4[0]/2, 1.6*cm, footer_line3)
-        
-        # Line 4: Legal mentions (removed "Pas d'escompte")
-        footer_line4 = "En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement."
-        canvas.drawCentredString(A4[0]/2, 1.2*cm, footer_line4)
+        footer1 = f"{COMPANY_INFO['name']} - {COMPANY_INFO['legal_form']} au capital de {COMPANY_INFO['capital']} €"
+        canvas.drawCentredString(A4[0]/2, 1.9*cm, footer1)
+        canvas.drawCentredString(A4[0]/2, 1.6*cm, company_address)
+        footer3 = f"SIRET: {company_siret} | TVA: {company_vat}"
+        canvas.drawCentredString(A4[0]/2, 1.3*cm, footer3)
+        footer4 = "En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement."
+        canvas.drawCentredString(A4[0]/2, 1.0*cm, footer4)
         
         # Page number
-        canvas.drawRightString(A4[0] - 1.5*cm, 0.8*cm, f"Page {doc_obj.page}")
+        canvas.drawRightString(A4[0] - 1.5*cm, 0.7*cm, f"Page {doc_obj.page}")
         
         canvas.restoreState()
     
-    doc.build(elements, onFirstPage=footer_canvas, onLaterPages=footer_canvas)
+    doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
     buffer.seek(0)
     return buffer
 
