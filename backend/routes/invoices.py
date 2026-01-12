@@ -293,7 +293,11 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         title = item.get('title', '').strip()
         desc = item.get('description', '').strip()
         
-        # Format description - allow longer text with proper line breaks
+        # Limit very long descriptions to prevent page overflow (max ~1500 chars)
+        if len(desc) > 1500:
+            desc = desc[:1497] + "..."
+        
+        # Format description with proper line breaks
         desc = desc.replace('\n', '<br/>')
         
         # Adjust font size based on description length
