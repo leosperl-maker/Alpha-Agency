@@ -928,9 +928,9 @@ const InvoicesPage = () => {
                 <span className="text-white/60">TVA (8.5%)</span>
                 <span>{formatCurrency(calculateTVA())}</span>
               </div>
-              <div className="flex justify-between py-2 text-sm font-bold border-t-2 border-indigo-500/50 mt-1">
-                <span>Total TTC</span>
-                <span className="text-indigo-400">{formatCurrency(calculateTotal())}</span>
+              <div className="flex justify-between py-2 text-sm font-bold border-t-2 border-green-500/50 mt-1">
+                <span className="text-green-500 text-[10px] leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
+                <span className="text-green-500">{formatCurrency(calculateTotal())}</span>
               </div>
             </div>
           </div>
@@ -938,7 +938,7 @@ const InvoicesPage = () => {
           {/* Conditions */}
           {(settings?.default_conditions || formData.conditions) && (
             <div className="bg-white/5 p-3 rounded mb-4">
-              <p className="font-bold text-[10px] mb-1">Conditions de paiement:</p>
+              <p className="font-bold text-[10px] mb-1">Conditions de règlement:</p>
               <p className="text-[10px] text-white/60 whitespace-pre-wrap">{settings?.default_conditions || formData.conditions}</p>
             </div>
           )}
@@ -960,19 +960,11 @@ const InvoicesPage = () => {
             </div>
           )}
           
-          {/* Signature for devis */}
+          {/* Signature for devis - simplified */}
           {documentType === 'devis' && (
             <div className="border-t border-white/10 pt-4 mt-4">
-              <div className="grid grid-cols-2 gap-8">
-                <div>
-                  <p className="font-bold text-[10px] mb-2">Pour Alpha Agency</p>
-                  <div className="h-12 border-b border-white/30"></div>
-                </div>
-                <div>
-                  <p className="font-bold text-[10px] mb-2">{settings?.signature_text || "Bon pour accord, le client"}</p>
-                  <div className="h-12 border-b border-white/30"></div>
-                </div>
-              </div>
+              <p className="font-bold text-[10px] mb-2">Bon pour accord &amp; signature :</p>
+              <div className="h-8 border-b border-white/30 w-64"></div>
             </div>
           )}
 
