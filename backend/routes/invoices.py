@@ -418,17 +418,8 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(totals_table)
     elements.append(Spacer(1, 0.5*cm))
     
-    # ===== CONDITIONS & SIGNATURE (for devis) =====
+    # ===== SIGNATURE SECTION (for devis only) =====
     if doc_type == "devis":
-        conditions_text = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
-        if conditions_text:
-            elements.append(Paragraph("<b>Conditions de règlement:</b>", section_style))
-            for line in conditions_text.strip().split('\n'):
-                if line.strip():
-                    elements.append(Paragraph(f"• {line.strip()}", section_style))
-            elements.append(Spacer(1, 0.3*cm))
-        
-        # Signature section - side by side like GHI
         sig_left = [
             Paragraph("<b>Pour Alpha Agency</b>", section_style),
             Spacer(1, 1*cm),
@@ -444,24 +435,87 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         elements.append(sig_table)
         elements.append(Spacer(1, 0.3*cm))
     
-    # ===== PAYMENT CONDITIONS (for facture) =====
-    if doc_type == "facture":
-        conditions = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
-        if conditions:
-            elements.append(Paragraph("<b>Conditions de paiement:</b>", section_style))
-            for line in conditions.split('\n'):
-                if line.strip():
-                    elements.append(Paragraph(f"• {line.strip()}", section_style))
-            elements.append(Spacer(1, 0.3*cm))
-    
-    # ===== BANK DETAILS =====
+    # ===== CONDITIONS DE RÈGLEMENT & DÉTAILS DE PAIEMENT - Fond gris clair =====
+    # Récupérer les données depuis les paramètres
+    conditions_text = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
     bank_details = doc_data.get('bank_details') or invoice_settings.get('bank_details', '')
-    if bank_details:
-        elements.append(Paragraph("<b>Détails du règlement:</b>", section_style))
-        elements.append(Paragraph(f"Bénéficiaire: {company_name}", section_style))
-        for line in bank_details.split('\n'):
+    
+    # Style pour le texte dans les blocs gris
+    grey_header_style = ParagraphStyle(
+        'GreyHeader', 
+        fontSize=10, 
+        textColor=colors.HexColor('#333333'), 
+        fontName='Helvetica-Bold',
+        spaceBefore=0,
+        spaceAfter=6
+    )
+    grey_text_style = ParagraphStyle(
+        'GreyText', 
+        fontSize=9, 
+        textColor=colors.HexColor('#333333'),
+        leading=12
+    )
+    grey_bullet_style = ParagraphStyle(
+        'GreyBullet', 
+        fontSize=9, 
+        textColor=colors.HexColor('#333333'),
+        leading=12,
+        leftIndent=10,
+        bulletIndent=0
+    )
+    
+    # Couleur de fond gris clair
+    GREY_BG = colors.HexColor('#F5F5F5')
+    
+    # === Section Conditions de Règlement ===
+    if conditions_text:
+        conditions_content = []
+        conditions_content.append(Paragraph("<b>Conditions de règlement:</b>", grey_header_style))
+        for line in conditions_text.strip().split('\n'):
             if line.strip():
-                elements.append(Paragraph(line.strip(), section_style))
+                conditions_content.append(Paragraph(f"• {line.strip()}", grey_bullet_style))
+        
+        # Créer un tableau avec fond gris pour contenir les conditions
+        conditions_table = Table([[conditions_content]], colWidths=[17*cm])
+        conditions_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), GREY_BG),
+            ('TOPPADDING', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+            ('LEFTPADDING', (0, 0), (-1, -1), 15),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 15),
+            ('ROUNDEDCORNERS', [5, 5, 5, 5]),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+        elements.append(conditions_table)
+        elements.append(Spacer(1, 0.3*cm))
+    
+    # === Section Détails du Paiement ===
+    if bank_details:
+        payment_content = []
+        payment_content.append(Paragraph("<b>Détails du paiement:</b>", grey_header_style))
+        payment_content.append(Paragraph(f"<b>Bénéficiaire:</b> {company_name}", grey_text_style))
+        for line in bank_details.strip().split('\n'):
+            if line.strip():
+                # Formater les lignes IBAN, BIC, etc.
+                if ':' in line:
+                    payment_content.append(Paragraph(f"<b>{line.split(':')[0]}:</b> {':'.join(line.split(':')[1:])}", grey_text_style))
+                else:
+                    payment_content.append(Paragraph(line.strip(), grey_text_style))
+        
+        # Créer un tableau avec fond gris pour contenir les détails de paiement
+        payment_table = Table([[payment_content]], colWidths=[17*cm])
+        payment_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), GREY_BG),
+            ('TOPPADDING', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+            ('LEFTPADDING', (0, 0), (-1, -1), 15),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 15),
+            ('ROUNDEDCORNERS', [5, 5, 5, 5]),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+        elements.append(payment_table)
+    
+    elements.append(Spacer(1, 0.3*cm))
     
     # ===== FOOTER on every page =====
     def add_footer(canvas, doc_obj):
