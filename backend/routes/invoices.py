@@ -272,13 +272,16 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(addr_table)
     elements.append(Spacer(1, 0.6*cm))
     
-    # ===== TABLE APPROACH: Flow naturally across pages =====
-    # Colonnes: Désignation | Qté | Remise | PU HT | TVA | Total HT
+    # ===== TABLE APPROACH: Use a frameless design for long descriptions =====
+    # For items with very long descriptions, we use a different approach:
+    # - Header row as a Table
+    # - Each item row: compact info table + description as Paragraph (for natural flow)
+    
     col_widths = [9*cm, 1.3*cm, 1.3*cm, 2*cm, 1.2*cm, 2.2*cm]
     
-    from reportlab.platypus import LongTable
+    from reportlab.platypus import LongTable, KeepTogether
     
-    # Style pour la cellule Désignation (titre + description)
+    # Style pour la cellule Désignation
     designation_style = ParagraphStyle(
         'Designation', 
         fontSize=9, 
@@ -287,7 +290,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         wordWrap='LTR'
     )
     
-    # Header row only
+    # Header row only - Dark navy blue
     header_data = [[
         Paragraph("<b>Désignation</b>", th_style),
         Paragraph("<b>Qté</b>", th_style),
@@ -299,7 +302,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     
     header_table = Table(header_data, colWidths=col_widths)
     header_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), NAVY_BLUE),  # Dark navy blue
+        ('BACKGROUND', (0, 0), (-1, 0), NAVY_BLUE),  # Dark navy blue header
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 9),
@@ -312,7 +315,10 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     subtotal = 0
     tva_rate = 0.085
     
-    # ===== ITEMS - Each as a separate flowable for natural page flow =====
+    # Threshold for long descriptions (> 500 chars means it might overflow a page)
+    LONG_DESC_THRESHOLD = 500
+    
+    # ===== ITEMS =====
     for idx, item in enumerate(doc_data.get('items', [])):
         qty = item.get('quantity', 1)
         unit_price = item.get('unit_price', 0)
@@ -342,39 +348,94 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
             discount_str = "-"
         
         row_bg = colors.white if idx % 2 == 0 else colors.HexColor('#F9F9F9')
-        
-        # === Cellule Désignation: Titre en GRAS + Description en dessous ===
         desc_formatted = desc.replace('\n', '<br/>') if desc else ""
         
-        if desc:
-            designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
+        # For short descriptions, use standard table row
+        if len(desc) <= LONG_DESC_THRESHOLD:
+            if desc:
+                designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
+            else:
+                designation_content = f"<b>{title}</b>"
+            
+            designation_para = Paragraph(designation_content, designation_style)
+            
+            data_row = [[
+                designation_para,
+                Paragraph(f"{qty:.2f}", td_center),
+                Paragraph(discount_str, td_center),
+                Paragraph(f"{unit_price:.2f} €", td_right),
+                Paragraph("8.5%", td_center),
+                Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
+            ]]
+            
+            item_table = Table(data_row, colWidths=col_widths)
+            item_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), row_bg),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+                ('TOPPADDING', (0, 0), (-1, -1), 8),
+                ('VALIGN', (0, 0), (0, 0), 'TOP'),
+                ('VALIGN', (1, 0), (-1, -1), 'MIDDLE'),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+            ]))
+            elements.append(item_table)
         else:
-            designation_content = f"<b>{title}</b>"
-        
-        designation_para = Paragraph(designation_content, designation_style)
-        
-        # Create row with designation paragraph that can flow naturally
-        data_row = [[
-            designation_para,
-            Paragraph(f"{qty:.2f}", td_center),
-            Paragraph(discount_str, td_center),
-            Paragraph(f"{unit_price:.2f} €", td_right),
-            Paragraph("8.5%", td_center),
-            Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
-        ]]
-        
-        item_table = Table(data_row, colWidths=col_widths)
-        item_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), row_bg),
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-            ('TOPPADDING', (0, 0), (-1, -1), 8),
-            ('VALIGN', (0, 0), (0, 0), 'TOP'),  # Designation top-aligned
-            ('VALIGN', (1, 0), (-1, -1), 'MIDDLE'),  # Others middle-aligned
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-        ]))
-        elements.append(item_table)
+            # For long descriptions, use a different approach:
+            # 1. Title row with numeric values (compact)
+            # 2. Description as a flowing Paragraph with border
+            
+            # Title row with numeric values
+            title_row = [[
+                Paragraph(f"<b>{title}</b>", designation_style),
+                Paragraph(f"{qty:.2f}", td_center),
+                Paragraph(discount_str, td_center),
+                Paragraph(f"{unit_price:.2f} €", td_right),
+                Paragraph("8.5%", td_center),
+                Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
+            ]]
+            
+            title_table = Table(title_row, colWidths=col_widths)
+            title_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), row_bg),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                ('TOPPADDING', (0, 0), (-1, -1), 8),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+                ('LINEBELOW', (0, 0), (-1, -1), 0, colors.white),  # Remove bottom border
+            ]))
+            elements.append(title_table)
+            
+            # Description as a flowing paragraph with left border
+            desc_para_style = ParagraphStyle(
+                'LongDesc', 
+                fontSize=8, 
+                textColor=LIGHT_GRAY, 
+                leading=11,
+                leftIndent=10,
+                rightIndent=10,
+                spaceBefore=0,
+                spaceAfter=0,
+            )
+            
+            # Description in a bordered container that flows across pages
+            desc_para = Paragraph(desc_formatted, desc_para_style)
+            
+            # Wrap description in a table for the border
+            desc_table = Table([[desc_para]], colWidths=[col_widths[0]])
+            desc_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), row_bg),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+                ('LEFTPADDING', (0, 0), (-1, -1), 10),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+                ('LINEBEFORE', (0, 0), (0, -1), 0.5, colors.HexColor('#CCCCCC')),
+                ('LINEAFTER', (0, 0), (0, -1), 0.5, colors.HexColor('#CCCCCC')),
+                ('LINEBELOW', (0, -1), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+            ]))
+            elements.append(desc_table)
     
     elements.append(Spacer(1, 0.4*cm))
     
