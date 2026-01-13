@@ -519,19 +519,26 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Suppression de la colonne "Code"
   - Colonnes: Désignation | Qté | Remise | P.U. HT | TVA | Total HT
   - Titre en gras + description en dessous dans la même cellule Désignation
-  - Descriptions courtes (<200 car) restent dans la cellule
-  - Descriptions longues (>200 car) sont ajoutées comme Paragraphes séparés (peuvent couler sur plusieurs pages)
+  - Descriptions courtes (<1800 car) restent dans une seule ligne
+  - Descriptions très longues découpées en lignes de continuation (évite LayoutError)
   - "Montant total TTC" affiché sur une seule ligne
-  - Bug LayoutError résolu pour les très longues descriptions
-- ✅ **Interface Templates Email (Frontend)**
-  - Nouvel onglet "Emails" dans les Paramètres (/admin/parametres)
-  - Édition des templates Devis et Facture avec variables disponibles affichées
-  - Boutons Tester et Sauvegarder pour chaque template
+- ✅ **Sections Conditions et Détails de Paiement avec fond gris clair** (comme le modèle)
+  - "Conditions de règlement" avec fond gris et liste à puces
+  - "Détails de paiement" avec fond gris et infos IBAN formatées
+  - Connectées aux paramètres de facturation
+- ✅ **Interface Templates Email Améliorée**
+  - Champ "Adresse email de test" pour envoyer les tests
+  - Champ "Logo pour les emails" avec bouton Upload
+  - Bouton "Aperçu" pour prévisualiser l'email avec données exemple
+  - Variables {{numero}}, {{client_name}}, {{montant}}, etc. clairement affichées
 - ✅ **Corrections Responsive Mobile**
-  - Page Campagnes: Tabs en icônes sur mobile, stats en grille 2x2, cards au lieu de tables
-  - Page AI Assistant: Sélecteurs de contexte/modèle non coupés, meilleur scroll horizontal
-  - Page Social Media: Vérifiée OK
-  - Page Pipeline: Stats cards non coupées
+  - Page Campagnes: tabs en icônes sur mobile, stats 2x2, cards mobiles
+  - Page AI Assistant: sélecteurs de contexte/modèle non coupés
+  - Page Pipeline/Social Media: vérifiées OK
+- ✅ **Tâches confirmées déjà faites** (retirées de la liste):
+  - Flux "Phase 2" post-création (Envoyer, Télécharger)
+  - Création de contact "en ligne"
+  - Modale de confirmation avant envoi
 
 ## Test Results
 - Session 15: Tests manuels passés
