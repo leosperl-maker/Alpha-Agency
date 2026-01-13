@@ -751,53 +751,201 @@ const AgendaPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Settings Modal */}
+      {/* Settings Modal - Expanded with Email/SMS Templates */}
       <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-lg">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5 text-indigo-400" />
-              Paramètres des relances
+              <Settings className="w-5 h-5 text-indigo-400" />
+              Paramètres Agenda / RDV
             </DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4">
-            <p className="text-sm text-white/60">
-              Configurez jusqu'à 4 relances automatiques avant chaque RDV.
-            </p>
+          <div className="space-y-6">
+            {/* Section 1: Relances */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Bell className="w-5 h-5 text-indigo-400" />
+                Relances automatiques
+              </h3>
+              <p className="text-sm text-white/60">
+                Configurez jusqu'à 4 relances avant chaque RDV.
+              </p>
+              
+              {reminderSettings.map((reminder, index) => (
+                <div key={index} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <Input 
+                      value={reminder.name}
+                      onChange={(e) => {
+                        const updated = [...reminderSettings];
+                        updated[index].name = e.target.value;
+                        setReminderSettings(updated);
+                      }}
+                      className="bg-white/5 border-white/20 text-white w-20"
+                    />
+                    <Select 
+                      value={String(reminder.delay_minutes)} 
+                      onValueChange={(v) => {
+                        const updated = [...reminderSettings];
+                        updated[index].delay_minutes = parseInt(v);
+                        setReminderSettings(updated);
+                      }}
+                    >
+                      <SelectTrigger className="bg-white/5 border-white/20 text-white w-40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#1a1a2e] border-white/20">
+                        <SelectItem value="0" className="text-white hover:bg-white/10">À l'heure (H-0)</SelectItem>
+                        <SelectItem value="30" className="text-white hover:bg-white/10">30 min avant</SelectItem>
+                        <SelectItem value="60" className="text-white hover:bg-white/10">1h avant</SelectItem>
+                        <SelectItem value="120" className="text-white hover:bg-white/10">2h avant</SelectItem>
+                        <SelectItem value="180" className="text-white hover:bg-white/10">3h avant</SelectItem>
+                        <SelectItem value="1440" className="text-white hover:bg-white/10">1 jour avant (J-1)</SelectItem>
+                        <SelectItem value="2880" className="text-white hover:bg-white/10">2 jours avant (J-2)</SelectItem>
+                        <SelectItem value="4320" className="text-white hover:bg-white/10">3 jours avant (J-3)</SelectItem>
+                        <SelectItem value="10080" className="text-white hover:bg-white/10">1 semaine avant</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={reminder.email}
+                        onChange={(e) => {
+                          const updated = [...reminderSettings];
+                          updated[index].email = e.target.checked;
+                          setReminderSettings(updated);
+                        }}
+                        className="rounded bg-white/10 border-white/20"
+                      />
+                      <Mail className="w-4 h-4 text-indigo-400" />
+                      <span className="text-sm text-white/80">Email</span>
+                    </label>
+                    
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={reminder.sms}
+                        onChange={(e) => {
+                          const updated = [...reminderSettings];
+                          updated[index].sms = e.target.checked;
+                          setReminderSettings(updated);
+                        }}
+                        className="rounded bg-white/10 border-white/20"
+                      />
+                      <MessageSquare className="w-4 h-4 text-green-400" />
+                      <span className="text-sm text-white/80">SMS</span>
+                    </label>
+                  </div>
+                </div>
+              ))}
+            </div>
             
-            {reminderSettings.map((reminder, index) => (
-              <div key={index} className="bg-white/5 rounded-lg p-4 border border-white/10">
-                <div className="flex items-center justify-between mb-3">
-                  <Input 
-                    value={reminder.name}
-                    onChange={(e) => {
-                      const updated = [...reminderSettings];
-                      updated[index].name = e.target.value;
-                      setReminderSettings(updated);
-                    }}
-                    className="bg-white/5 border-white/20 text-white w-20"
-                  />
-                  <Select 
-                    value={String(reminder.delay_minutes)} 
-                    onValueChange={(v) => {
-                      const updated = [...reminderSettings];
-                      updated[index].delay_minutes = parseInt(v);
-                      setReminderSettings(updated);
-                    }}
-                  >
-                    <SelectTrigger className="bg-white/5 border-white/20 text-white w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#1a1a2e] border-white/20">
-                      <SelectItem value="0" className="text-white hover:bg-white/10">À l'heure (H-0)</SelectItem>
-                      <SelectItem value="30" className="text-white hover:bg-white/10">30 min avant</SelectItem>
-                      <SelectItem value="60" className="text-white hover:bg-white/10">1h avant</SelectItem>
-                      <SelectItem value="120" className="text-white hover:bg-white/10">2h avant</SelectItem>
-                      <SelectItem value="180" className="text-white hover:bg-white/10">3h avant</SelectItem>
-                      <SelectItem value="1440" className="text-white hover:bg-white/10">1 jour avant (J-1)</SelectItem>
-                      <SelectItem value="2880" className="text-white hover:bg-white/10">2 jours avant (J-2)</SelectItem>
-                      <SelectItem value="4320" className="text-white hover:bg-white/10">3 jours avant (J-3)</SelectItem>
+            {/* Section 2: Template Email */}
+            <div className="space-y-4 pt-4 border-t border-white/10">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Mail className="w-5 h-5 text-indigo-400" />
+                Template Email d'invitation
+              </h3>
+              <p className="text-sm text-white/60">
+                L'email d'invitation est envoyé manuellement au client. Il contient automatiquement :
+              </p>
+              <div className="bg-white/5 rounded-lg p-4 border border-white/10 space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <Check className="w-4 h-4 text-green-400" />
+                  <span className="text-white/80">Titre et description du RDV</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Check className="w-4 h-4 text-green-400" />
+                  <span className="text-white/80">Date, heure et durée</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Check className="w-4 h-4 text-green-400" />
+                  <span className="text-white/80">Lien Google Meet (si généré)</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Check className="w-4 h-4 text-green-400" />
+                  <span className="text-white/80">N° de devis/facture associé</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Check className="w-4 h-4 text-green-400" />
+                  <span className="text-white/80">Lien vers le document joint</span>
+                </div>
+              </div>
+              <p className="text-xs text-white/50">
+                Pour personnaliser le template, modifiez le fichier <code className="bg-white/10 px-1 rounded">/backend/routes/appointments.py</code> fonction <code className="bg-white/10 px-1 rounded">send_invitation_email</code>
+              </p>
+            </div>
+            
+            {/* Section 3: Template SMS */}
+            <div className="space-y-4 pt-4 border-t border-white/10">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-green-400" />
+                Template SMS de rappel
+              </h3>
+              <p className="text-sm text-white/60">
+                Format du SMS envoyé :
+              </p>
+              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                <code className="text-sm text-green-300">
+                  Rappel RDV Alpha Agency: [Titre] le [Date] à [Heure]. Meet: [Lien]
+                </code>
+              </div>
+              <p className="text-xs text-white/50">
+                Expéditeur SMS : <strong>AlphaAgency</strong>
+              </p>
+            </div>
+            
+            {/* Section 4: Google Meet */}
+            <div className="space-y-4 pt-4 border-t border-white/10">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Video className="w-5 h-5 text-green-400" />
+                Google Meet
+              </h3>
+              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                {googleConnected ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-green-400">
+                      <Check className="w-5 h-5" />
+                      <span>Google Calendar connecté : {googleEmail}</span>
+                    </div>
+                    <p className="text-sm text-white/60">
+                      Un lien Google Meet sera automatiquement généré à chaque création de RDV.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-yellow-400">
+                      <AlertCircle className="w-5 h-5" />
+                      <span>Google Calendar non connecté</span>
+                    </div>
+                    <p className="text-sm text-white/60">
+                      Connectez Google Calendar pour générer automatiquement des liens Meet.
+                    </p>
+                    <Button onClick={connectGoogle} className="mt-2 bg-white/10 hover:bg-white/20">
+                      <Video className="w-4 h-4 mr-2" />
+                      Connecter Google Calendar
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setShowSettingsModal(false)} className="text-white">
+              Annuler
+            </Button>
+            <Button onClick={saveReminderSettings} className="bg-gradient-to-r from-indigo-500 to-purple-500">
+              <Check className="w-4 h-4 mr-2" />
+              Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
                       <SelectItem value="10080" className="text-white hover:bg-white/10">1 semaine avant</SelectItem>
                     </SelectContent>
                   </Select>
