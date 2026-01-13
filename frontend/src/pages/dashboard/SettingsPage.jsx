@@ -85,6 +85,16 @@ Banque: Votre Banque`,
   const [loadingApiKeys, setLoadingApiKeys] = useState(false);
   const [testingService, setTestingService] = useState(null);
 
+  // Email Templates state
+  const [emailTemplates, setEmailTemplates] = useState({
+    devis: { subject: "", body: "" },
+    facture: { subject: "", body: "" }
+  });
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [savingTemplate, setSavingTemplate] = useState(null);
+  const [testingTemplate, setTestingTemplate] = useState(null);
+  const [previewTemplate, setPreviewTemplate] = useState(null);
+
   useEffect(() => {
     fetchNotificationSettings();
     fetchApiKeys();
