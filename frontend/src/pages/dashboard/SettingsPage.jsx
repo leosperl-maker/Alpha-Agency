@@ -114,6 +114,8 @@ Banque: Votre Banque`,
           devis: res.data.devis || { subject: "", body: "" },
           facture: res.data.facture || { subject: "", body: "" }
         });
+        setTestEmailAddress(res.data.test_email || "");
+        setEmailLogo(res.data.logo_url || "");
       }
     } catch (error) {
       console.error("Error fetching email templates:", error);
@@ -125,7 +127,11 @@ Banque: Votre Banque`,
   const handleSaveEmailTemplate = async (templateType) => {
     setSavingTemplate(templateType);
     try {
-      await api.put(`/settings/email-templates/${templateType}`, emailTemplates[templateType]);
+      await api.put(`/settings/email-templates/${templateType}`, {
+        ...emailTemplates[templateType],
+        test_email: testEmailAddress,
+        logo_url: emailLogo
+      });
       toast.success(`Template ${templateType === 'devis' ? 'Devis' : 'Facture'} sauvegardé`);
     } catch (error) {
       toast.error("Erreur lors de la sauvegarde");
@@ -135,15 +141,71 @@ Banque: Votre Banque`,
   };
 
   const handleTestEmailTemplate = async (templateType) => {
+    if (!testEmailAddress) {
+      toast.error("Veuillez entrer une adresse email de test");
+      return;
+    }
     setTestingTemplate(templateType);
     try {
-      const res = await api.post('/settings/email-templates/test', { template_type: templateType });
+      const res = await api.post('/settings/email-templates/test', { 
+        template_type: templateType,
+        test_email: testEmailAddress
+      });
       toast.success(res.data.message || "Email de test envoyé");
     } catch (error) {
       toast.error(error.response?.data?.detail || "Erreur lors de l'envoi du test");
     } finally {
       setTestingTemplate(null);
     }
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingLogo(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'email_logo');
+      
+      const res = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      if (res.data.url) {
+        setEmailLogo(res.data.url);
+        toast.success("Logo uploadé avec succès");
+      }
+    } catch (error) {
+      toast.error("Erreur lors de l'upload du logo");
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  // Fonction pour générer une prévisualisation de l'email
+  const generateEmailPreview = (templateType) => {
+    const template = emailTemplates[templateType];
+    const sampleData = {
+      numero: templateType === 'devis' ? 'DEV-2026-0001' : 'FAC-2026-0001',
+      client_name: 'Jean Dupont',
+      montant: '1 250.00',
+      company_name: 'Alpha Agency',
+      company_phone: '0590 68 00 01',
+      company_email: 'contact@alphagency.fr'
+    };
+    
+    let subject = template.subject || `Votre ${templateType} {{numero}} - {{company_name}}`;
+    let body = template.body || `Bonjour {{client_name}},\n\nVeuillez trouver ci-joint votre ${templateType} {{numero}} d'un montant de {{montant}} €.\n\nCordialement,\n{{company_name}}`;
+    
+    // Remplacer les variables
+    Object.entries(sampleData).forEach(([key, value]) => {
+      subject = subject.replace(new RegExp(`{{${key}}}`, 'g'), value);
+      body = body.replace(new RegExp(`{{${key}}}`, 'g'), value);
+    });
+    
+    return { subject, body };
   };
 
   const fetchInvoiceSettings = async () => {
