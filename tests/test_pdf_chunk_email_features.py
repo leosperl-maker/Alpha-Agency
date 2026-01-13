@@ -237,13 +237,13 @@ class TestEmailTemplatesAPI:
     
     def test_send_test_email_with_dynamic_email(self, headers):
         """Test POST /api/settings/email-templates/test accepts dynamic email"""
-        # Test with a specific email address
+        # Test with a specific email address - using correct param name 'test_email'
         test_email_address = "test@example.com"
         
         response = requests.post(
             f"{BASE_URL}/api/settings/email-templates/test",
             headers=headers,
-            params={"template_type": "devis", "to_email": test_email_address}
+            params={"template_type": "devis", "test_email": test_email_address}
         )
         
         # The endpoint should accept the dynamic email parameter
