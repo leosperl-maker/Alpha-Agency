@@ -153,40 +153,25 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     Generate professional PDF for invoice or quote matching the Alpha Agency / GHI style.
     100% conforme au modèle de référence DEV-20231124-00060.pdf
     
-    Key features:
-    - Services start IMMEDIATELY after header (no blank page)
-    - No grey backgrounds except for "Conditions" and "Paiement" sections
-    - "Remise" header on ONE line (no word-break)
-    - Headers centered horizontally AND vertically
-    - Descriptions stay INSIDE the table cell (no external blocks)
-    - Navy blue header background
-    - Green TTC total
-    - Dates displayed (creation date and due date/validity)
+    NEW APPROACH: Each item is a flowable block that can naturally flow across pages.
+    The table appearance is achieved using styled Paragraphs with a pseudo-table layout.
+    Long descriptions stay in ONE cell that continues on the next page.
     """
     if not invoice_settings:
         invoice_settings = {}
     
     buffer = BytesIO()
-    doc = SimpleDocTemplate(
-        buffer, 
-        pagesize=A4, 
-        rightMargin=1.5*cm, 
-        leftMargin=1.5*cm, 
-        topMargin=1.5*cm, 
-        bottomMargin=2.5*cm
-    )
-    styles = getSampleStyleSheet()
-    elements = []
     
     # Colors
     BRAND_RED = colors.HexColor('#CE0202')
     DARK_GRAY = colors.HexColor('#333333')
     LIGHT_GRAY = colors.HexColor('#666666')
-    NAVY_BLUE = colors.HexColor('#1a1a2e')  # Dark navy blue for table header
-    GREEN_POSITIVE = colors.HexColor('#22c55e')  # Green for TTC
-    GREY_BG = colors.HexColor('#F5F5F5')  # ONLY for Conditions and Paiement sections
+    NAVY_BLUE = colors.HexColor('#1a1a2e')
+    GREEN_POSITIVE = colors.HexColor('#22c55e')
+    GREY_BG = colors.HexColor('#F5F5F5')
+    BORDER_COLOR = colors.HexColor('#CCCCCC')
     
-    # Get company info from settings or fallback to defaults
+    # Get company info
     company_name = invoice_settings.get('company_name') or COMPANY_INFO['commercial_name']
     company_address = invoice_settings.get('company_address') or f"{COMPANY_INFO['address']}, {COMPANY_INFO['city']}"
     company_siret = invoice_settings.get('company_siret') or COMPANY_INFO['siret']
@@ -194,45 +179,15 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     company_phone = invoice_settings.get('company_phone') or COMPANY_INFO['phone']
     company_email = invoice_settings.get('company_email') or COMPANY_INFO['email']
     
-    # ===== STYLES =====
-    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=14, textColor=BRAND_RED, alignment=TA_RIGHT, spaceAfter=2)
-    info_style = ParagraphStyle('Info', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT, leading=11)
-    company_style = ParagraphStyle('Company', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=11)
-    client_header = ParagraphStyle('ClientHeader', parent=styles['Normal'], fontSize=9, textColor=BRAND_RED, fontName='Helvetica-Bold')
-    client_style = ParagraphStyle('Client', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=11)
-    
-    # Table header style - centered, white text on navy blue
-    th_centered = ParagraphStyle('TableHeaderCentered', fontSize=8, textColor=colors.white, alignment=TA_CENTER, fontName='Helvetica-Bold')
-    
-    # Table cell styles
-    td_style = ParagraphStyle('TableCell', fontSize=9, textColor=DARK_GRAY, leading=12)
-    td_right = ParagraphStyle('TableCellRight', fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT, leading=12)
-    td_center = ParagraphStyle('TableCellCenter', fontSize=9, textColor=DARK_GRAY, alignment=TA_CENTER, leading=12)
-    
-    # Totals styles
-    totals_style = ParagraphStyle('Totals', fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT)
-    totals_green = ParagraphStyle('TotalsGreen', fontSize=10, textColor=GREEN_POSITIVE, fontName='Helvetica-Bold', alignment=TA_RIGHT)
-    
-    # Grey box styles (ONLY for Conditions and Paiement)
-    grey_header_style = ParagraphStyle('GreyHeader', fontSize=10, textColor=DARK_GRAY, fontName='Helvetica-Bold', spaceBefore=0, spaceAfter=4)
-    grey_text_style = ParagraphStyle('GreyText', fontSize=9, textColor=DARK_GRAY, leading=11)
-    grey_bullet_style = ParagraphStyle('GreyBullet', fontSize=9, textColor=DARK_GRAY, leading=11, leftIndent=10, bulletIndent=0)
-    
-    # ===== Document data =====
+    # Document info with date formatting
     doc_number = doc_data.get('invoice_number') or doc_data.get('quote_number', '')
-    
-    # Parse dates properly
     created_at_raw = doc_data.get('created_at', '')
     if created_at_raw:
-        if 'T' in created_at_raw:
-            doc_date = created_at_raw.split('T')[0]  # ISO format
-        else:
-            doc_date = created_at_raw[:10]
+        doc_date = created_at_raw.split('T')[0] if 'T' in created_at_raw else created_at_raw[:10]
     else:
         from datetime import datetime
         doc_date = datetime.now().strftime('%Y-%m-%d')
     
-    # Format date to French format (DD/MM/YYYY)
     try:
         from datetime import datetime
         dt = datetime.strptime(doc_date, '%Y-%m-%d')
@@ -247,7 +202,121 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         doc_title = f"Facture {doc_number}"
         date_label = "Date d'émission"
     
-    # ===== HEADER: Logo + Doc Info (COMPACT) =====
+    # Format validity/due date
+    valid_until = doc_data.get('valid_until', '')
+    due_date = doc_data.get('due_date', '')
+    validity_text = ""
+    
+    if doc_type == "devis" and valid_until:
+        try:
+            if 'T' in valid_until:
+                valid_until = valid_until.split('T')[0]
+            dt = datetime.strptime(valid_until, '%Y-%m-%d')
+            validity_text = f"Date de validité: {dt.strftime('%d/%m/%Y')}"
+        except:
+            validity_text = f"Date de validité: {valid_until}"
+    elif doc_type == "facture" and due_date:
+        try:
+            if 'T' in due_date:
+                due_date = due_date.split('T')[0]
+            dt = datetime.strptime(due_date, '%Y-%m-%d')
+            validity_text = f"Échéance: {dt.strftime('%d/%m/%Y')}"
+        except:
+            validity_text = f"Échéance: {due_date}"
+    
+    # Calculate totals
+    subtotal = 0
+    tva_rate = 0.085
+    items_data = []
+    
+    for item in doc_data.get('items', []):
+        qty = item.get('quantity', 1)
+        unit_price = item.get('unit_price', 0)
+        discount = item.get('discount', 0)
+        discount_type = item.get('discountType', 'percent')
+        
+        line_total = qty * unit_price
+        if discount:
+            if discount_type == 'percent' or discount_type == '%':
+                line_total -= line_total * (discount / 100)
+            else:
+                line_total -= discount
+        
+        subtotal += line_total
+        
+        title = item.get('title', '').strip() or "Service"
+        desc = item.get('description', '').strip()
+        
+        if discount:
+            if discount_type == 'percent' or discount_type == '%':
+                discount_str = f"{discount:.0f}%"
+            else:
+                discount_str = f"{discount:.2f}€"
+        else:
+            discount_str = "-"
+        
+        items_data.append({
+            'title': title,
+            'description': desc,
+            'qty': qty,
+            'unit_price': unit_price,
+            'discount_str': discount_str,
+            'total': line_total
+        })
+    
+    # Apply global discount
+    global_discount = doc_data.get('globalDiscount', 0)
+    global_discount_type = doc_data.get('globalDiscountType', '%')
+    if global_discount:
+        if global_discount_type == '%':
+            subtotal -= subtotal * (global_discount / 100)
+        else:
+            subtotal -= global_discount
+    
+    tva_total = subtotal * tva_rate
+    total_ttc = subtotal + tva_total
+    
+    # Create document
+    doc = SimpleDocTemplate(
+        buffer, 
+        pagesize=A4, 
+        rightMargin=1.5*cm, 
+        leftMargin=1.5*cm, 
+        topMargin=1.5*cm, 
+        bottomMargin=2.5*cm
+    )
+    
+    styles = getSampleStyleSheet()
+    elements = []
+    
+    # ===== STYLES =====
+    title_style = ParagraphStyle('Title', fontSize=14, textColor=BRAND_RED, alignment=TA_RIGHT, spaceAfter=2)
+    info_style = ParagraphStyle('Info', fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT, leading=11)
+    company_style = ParagraphStyle('Company', fontSize=9, textColor=DARK_GRAY, leading=11)
+    client_header = ParagraphStyle('ClientHeader', fontSize=9, textColor=BRAND_RED, fontName='Helvetica-Bold')
+    client_style = ParagraphStyle('Client', fontSize=9, textColor=DARK_GRAY, leading=11)
+    
+    # Table header style
+    th_centered = ParagraphStyle('TableHeaderCentered', fontSize=8, textColor=colors.white, alignment=TA_CENTER, fontName='Helvetica-Bold')
+    
+    # Item styles
+    item_title_style = ParagraphStyle('ItemTitle', fontSize=9, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=12)
+    item_desc_style = ParagraphStyle('ItemDesc', fontSize=8, textColor=LIGHT_GRAY, leading=11, spaceBefore=3)
+    
+    # Cell styles
+    td_center = ParagraphStyle('TDCenter', fontSize=9, textColor=DARK_GRAY, alignment=TA_CENTER)
+    td_right = ParagraphStyle('TDRight', fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT)
+    
+    # Totals styles
+    totals_style = ParagraphStyle('Totals', fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT)
+    totals_green = ParagraphStyle('TotalsGreen', fontSize=10, textColor=GREEN_POSITIVE, fontName='Helvetica-Bold', alignment=TA_RIGHT)
+    
+    # Grey box styles
+    grey_header_style = ParagraphStyle('GreyHeader', fontSize=10, textColor=DARK_GRAY, fontName='Helvetica-Bold', spaceAfter=4)
+    grey_text_style = ParagraphStyle('GreyText', fontSize=9, textColor=DARK_GRAY, leading=11)
+    grey_bullet_style = ParagraphStyle('GreyBullet', fontSize=9, textColor=DARK_GRAY, leading=11, leftIndent=10)
+    
+    # ===== HEADER =====
     logo_path = fetch_logo_image()
     header_left = []
     if logo_path:
@@ -258,38 +327,12 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     else:
         header_left.append(Paragraph(f"<b>{company_name}</b>", ParagraphStyle('', fontSize=14, textColor=BRAND_RED)))
     
-    # Header right with dates
     header_right = [
         Paragraph(f"<b>{doc_title}</b>", title_style),
         Paragraph(f"{date_label}: {doc_date_formatted}", info_style),
     ]
-    
-    # Add validity/due date if available
-    valid_until = doc_data.get('valid_until', '')
-    due_date = doc_data.get('due_date', '')
-    
-    if doc_type == "devis" and valid_until:
-        # Format validity date
-        try:
-            from datetime import datetime
-            if 'T' in valid_until:
-                valid_until = valid_until.split('T')[0]
-            dt = datetime.strptime(valid_until, '%Y-%m-%d')
-            valid_formatted = dt.strftime('%d/%m/%Y')
-        except:
-            valid_formatted = valid_until
-        header_right.append(Paragraph(f"Date de validité: {valid_formatted}", info_style))
-    elif doc_type == "facture" and due_date:
-        # Format due date
-        try:
-            from datetime import datetime
-            if 'T' in due_date:
-                due_date = due_date.split('T')[0]
-            dt = datetime.strptime(due_date, '%Y-%m-%d')
-            due_formatted = dt.strftime('%d/%m/%Y')
-        except:
-            due_formatted = due_date
-        header_right.append(Paragraph(f"Échéance: {due_formatted}", info_style))
+    if validity_text:
+        header_right.append(Paragraph(validity_text, info_style))
     
     header_table = Table([[header_left, header_right]], colWidths=[9*cm, 8*cm])
     header_table.setStyle(TableStyle([
@@ -297,9 +340,9 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
     ]))
     elements.append(header_table)
-    elements.append(Spacer(1, 0.2*cm))  # Minimal spacing
+    elements.append(Spacer(1, 0.2*cm))
     
-    # ===== SENDER & RECIPIENT SIDE BY SIDE (COMPACT) =====
+    # ===== ADDRESSES =====
     sender_info = [
         Paragraph(f"<b>{company_name}</b>", company_style),
         Paragraph(company_address, company_style),
@@ -324,19 +367,12 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
     ]))
     elements.append(addr_table)
-    elements.append(Spacer(1, 0.3*cm))  # Minimal spacing - table starts RIGHT after
+    elements.append(Spacer(1, 0.3*cm))
     
-    # ===== ITEMS TABLE =====
-    # Column widths adjusted so "Remise" fits on ONE line
+    # ===== TABLE HEADER (always visible) =====
     col_widths = [8.0*cm, 1.2*cm, 1.6*cm, 2.0*cm, 1.3*cm, 2.4*cm]
     
-    # Maximum characters per description chunk
-    # Reduced to 800 chars to ensure first row fits on page 1 with header
-    # This allows the table to START on page 1 even with very long descriptions
-    MAX_DESC_CHARS_PER_ROW = 800
-    
-    # Build table data - header row first
-    table_data = [[
+    header_row = [[
         Paragraph("<b>Désignation</b>", th_centered),
         Paragraph("<b>Qté</b>", th_centered),
         Paragraph("<b>Remise</b>", th_centered),
@@ -345,106 +381,8 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         Paragraph("<b>Total HT</b>", th_centered),
     ]]
     
-    subtotal = 0
-    tva_rate = 0.085
-    
-    # ===== BUILD ITEMS ROWS =====
-    for idx, item in enumerate(doc_data.get('items', [])):
-        qty = item.get('quantity', 1)
-        unit_price = item.get('unit_price', 0)
-        discount = item.get('discount', 0)
-        discount_type = item.get('discountType', 'percent')
-        
-        # Calculate line total
-        line_total = qty * unit_price
-        if discount:
-            if discount_type == 'percent' or discount_type == '%':
-                line_total -= line_total * (discount / 100)
-            else:
-                line_total -= discount
-        
-        subtotal += line_total
-        
-        title = item.get('title', '').strip() or "Service"
-        desc = item.get('description', '').strip()
-        
-        # Format discount string
-        if discount:
-            if discount_type == 'percent' or discount_type == '%':
-                discount_str = f"{discount:.0f}%"
-            else:
-                discount_str = f"{discount:.2f}€"
-        else:
-            discount_str = "-"
-        
-        # For very long descriptions, split into multiple rows
-        if desc and len(desc) > MAX_DESC_CHARS_PER_ROW:
-            desc_chunks = []
-            remaining = desc
-            while remaining:
-                if len(remaining) <= MAX_DESC_CHARS_PER_ROW:
-                    desc_chunks.append(remaining)
-                    break
-                cut_point = MAX_DESC_CHARS_PER_ROW
-                newline_pos = remaining.rfind('\n', 0, cut_point)
-                if newline_pos > cut_point * 0.5:
-                    cut_point = newline_pos + 1
-                else:
-                    space_pos = remaining.rfind(' ', 0, cut_point)
-                    if space_pos > cut_point * 0.7:
-                        cut_point = space_pos + 1
-                desc_chunks.append(remaining[:cut_point])
-                remaining = remaining[cut_point:]
-            
-            # First row: Title + first chunk + numeric data
-            first_chunk_formatted = desc_chunks[0].replace('\n', '<br/>')
-            first_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{first_chunk_formatted}</font>"
-            
-            table_data.append([
-                Paragraph(first_content, td_style),
-                Paragraph(f"{qty:.2f}", td_center),
-                Paragraph(discount_str, td_center),
-                Paragraph(f"{unit_price:.2f} €", td_right),
-                Paragraph("8.5%", td_center),
-                Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
-            ])
-            
-            # Continuation rows
-            for chunk in desc_chunks[1:]:
-                chunk_formatted = chunk.replace('\n', '<br/>')
-                continuation_content = f"<font size='8' color='#666666'>{chunk_formatted}</font>"
-                table_data.append([
-                    Paragraph(continuation_content, td_style),
-                    Paragraph("", td_center),
-                    Paragraph("", td_center),
-                    Paragraph("", td_right),
-                    Paragraph("", td_center),
-                    Paragraph("", td_right),
-                ])
-        else:
-            # Normal case: description fits in one row
-            if desc:
-                desc_formatted = desc.replace('\n', '<br/>')
-                designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
-            else:
-                designation_content = f"<b>{title}</b>"
-            
-            table_data.append([
-                Paragraph(designation_content, td_style),
-                Paragraph(f"{qty:.2f}", td_center),
-                Paragraph(discount_str, td_center),
-                Paragraph(f"{unit_price:.2f} €", td_right),
-                Paragraph("8.5%", td_center),
-                Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
-            ])
-    
-    # Create the table
-    from reportlab.platypus import LongTable
-    items_table = LongTable(table_data, colWidths=col_widths, repeatRows=1, splitByRow=1)
-    
-    # Table styling - NO grey backgrounds for alternating rows
-    table_style_list = [
-        # Header row - navy blue background
+    header_table = Table(header_row, colWidths=col_widths)
+    header_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), NAVY_BLUE),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
@@ -453,35 +391,47 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ('TOPPADDING', (0, 0), (-1, 0), 8),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
         ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
-        # Data rows - NO alternating grey backgrounds
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
-        ('TOPPADDING', (0, 1), (-1, -1), 6),
-        ('VALIGN', (0, 1), (0, -1), 'TOP'),
-        ('VALIGN', (1, 1), (-1, -1), 'MIDDLE'),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-    ]
+        ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
+    ]))
+    elements.append(header_table)
     
-    # NO alternating row colors - all white background
+    # ===== ITEMS - Each item as a separate table row that can flow =====
+    from reportlab.platypus import LongTable
     
-    items_table.setStyle(TableStyle(table_style_list))
-    elements.append(items_table)
-    elements.append(Spacer(1, 0.3*cm))  # REDUCED spacing
-    
-    # ===== GLOBAL DISCOUNT =====
-    global_discount = doc_data.get('globalDiscount', 0)
-    global_discount_type = doc_data.get('globalDiscountType', '%')
-    if global_discount:
-        if global_discount_type == '%':
-            subtotal -= subtotal * (global_discount / 100)
+    for idx, item in enumerate(items_data):
+        # Build designation content - title + description as ONE Paragraph
+        if item['description']:
+            desc_formatted = item['description'].replace('\n', '<br/>')
+            designation_content = f"<b>{item['title']}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
         else:
-            subtotal -= global_discount
+            designation_content = f"<b>{item['title']}</b>"
+        
+        # Create a single row for this item
+        item_row = [[
+            Paragraph(designation_content, ParagraphStyle('Designation', fontSize=9, textColor=DARK_GRAY, leading=12)),
+            Paragraph(f"{item['qty']:.2f}", td_center),
+            Paragraph(item['discount_str'], td_center),
+            Paragraph(f"{item['unit_price']:.2f} €", td_right),
+            Paragraph("8.5%", td_center),
+            Paragraph(f"<b>{item['total']:.2f} €</b>", td_right),
+        ]]
+        
+        # Create a LongTable for this single item - it can split if needed
+        item_table = LongTable(item_row, colWidths=col_widths, splitByRow=0)
+        item_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('VALIGN', (0, 0), (0, -1), 'TOP'),
+            ('VALIGN', (1, 0), (-1, -1), 'MIDDLE'),
+            ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
+        ]))
+        elements.append(item_table)
     
-    # ===== TOTALS - with green TTC =====
-    tva_total = subtotal * tva_rate
-    total_ttc = subtotal + tva_total
+    elements.append(Spacer(1, 0.3*cm))
     
+    # ===== TOTALS =====
     totals_data = []
     if global_discount:
         if global_discount_type == '%':
@@ -504,9 +454,9 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ('LINEABOVE', (1, -1), (-1, -1), 1.5, GREEN_POSITIVE),
     ]))
     elements.append(totals_table)
-    elements.append(Spacer(1, 0.3*cm))  # REDUCED spacing
+    elements.append(Spacer(1, 0.3*cm))
     
-    # ===== CONDITIONS DE RÈGLEMENT (with grey background) =====
+    # ===== CONDITIONS DE RÈGLEMENT =====
     conditions_text = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
     if conditions_text:
         conditions_content = []
@@ -517,7 +467,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         
         conditions_table = Table([[conditions_content]], colWidths=[17*cm])
         conditions_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), GREY_BG),  # GREY background for this section only
+            ('BACKGROUND', (0, 0), (-1, -1), GREY_BG),
             ('TOPPADDING', (0, 0), (-1, -1), 8),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
             ('LEFTPADDING', (0, 0), (-1, -1), 12),
@@ -527,7 +477,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         elements.append(conditions_table)
         elements.append(Spacer(1, 0.2*cm))
     
-    # ===== DÉTAILS DU PAIEMENT (with grey background) =====
+    # ===== DÉTAILS DU PAIEMENT =====
     bank_details = doc_data.get('bank_details') or invoice_settings.get('bank_details', '')
     if bank_details:
         payment_content = []
@@ -542,7 +492,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         
         payment_table = Table([[payment_content]], colWidths=[17*cm])
         payment_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), GREY_BG),  # GREY background for this section only
+            ('BACKGROUND', (0, 0), (-1, -1), GREY_BG),
             ('TOPPADDING', (0, 0), (-1, -1), 8),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
             ('LEFTPADDING', (0, 0), (-1, -1), 12),
@@ -553,7 +503,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     
     elements.append(Spacer(1, 0.3*cm))
     
-    # ===== SIGNATURE SECTION (devis only) =====
+    # ===== SIGNATURE =====
     if doc_type == "devis":
         accord_style = ParagraphStyle('Accord', fontSize=9, textColor=DARK_GRAY, leading=12)
         accord_content = [
@@ -568,7 +518,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ]))
         elements.append(accord_table)
     
-    # ===== FOOTER on every page =====
+    # ===== FOOTER =====
     def add_footer(canvas, doc_obj):
         canvas.saveState()
         canvas.setStrokeColor(colors.HexColor('#CCCCCC'))
@@ -585,9 +535,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         footer4 = "En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement."
         canvas.drawCentredString(A4[0]/2, 1.0*cm, footer4)
         
-        # Page number
         canvas.drawRightString(A4[0] - 1.5*cm, 0.7*cm, f"Page {doc_obj.page}")
-        
         canvas.restoreState()
     
     doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
