@@ -544,10 +544,11 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Modale de confirmation avant envoi
 
 ### Session 17 - 2026-01-13 (Fix PDF Pagination & Email Templates)
-- ✅ **Bug Fix P0: Pagination PDF corrigée**
-  - Le tableau des services commence maintenant sur la PAGE 1 immédiatement après l'en-tête
-  - Plus d'espace blanc inutile ou de page vide avant le tableau
-  - Solution: Réduction de MAX_DESC_CHARS_PER_ROW de 1800 à 800 caractères
+- ✅ **Bug Fix P0: Pagination PDF corrigée - LE TABLEAU COMMENCE SUR PAGE 1**
+  - Solution finale: MAX_CHARS_PER_CHUNK = 1200 caractères
+  - Les descriptions longues sont divisées en chunks qui coulent naturellement sur les pages
+  - DEV-2026-0027 (3779 chars) → 5 pages, tableau démarre page 1
+  - DEV-2026-0030 (62 chars) → 2 pages
 - ✅ **Bug Fix P0: Fonds gris supprimés**
   - Plus de fonds gris alternés sur les lignes du tableau
   - Fonds gris conservés UNIQUEMENT sur "Conditions de règlement" et "Détails de paiement"
@@ -559,7 +560,7 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - POST /api/settings/email-templates/test - Envoi email de test avec adresse dynamique
   - GET/POST/DELETE /api/settings/email-logo - Gestion du logo personnalisé
   - Logo utilisé dans les emails de test
-- ✅ Tests automatisés: 12/12 passés (iteration_30.json)
+- ✅ Tests automatisés: 17/17 passés (iteration_31.json)
 
 ## Test Results
 - Session 17: 100% pass rate (12/12) - iteration_30.json
