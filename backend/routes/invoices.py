@@ -378,7 +378,6 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ('LEFTPADDING', (0, 0), (-1, -1), 14),
         ('RIGHTPADDING', (0, 0), (-1, -1), 14),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('ROUNDRECT', (0, 0), (-1, -1), 8),
     ]))
     
     # Encadré destinataire (droite) - DESTINATAIRE en noir, petit, discret
