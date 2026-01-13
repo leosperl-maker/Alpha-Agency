@@ -105,21 +105,18 @@ def calculate_invoice_totals(items: list, global_discount: float = 0, global_dis
     return subtotal, tva, total
 
 
-# ==================== PDF GENERATION ====================
+# ==================== PDF GENERATION (WeasyPrint) ====================
 
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, KeepTogether
-from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
 import urllib.request
+from weasyprint import HTML, CSS
+import html
 
 def fetch_logo_image():
     """Fetch, resize and cache the logo image for PDF generation"""
     try:
         from PIL import Image as PILImage
         import io
+        import base64
         
         logo_path = "/tmp/alpha_logo.png"
         resized_path = "/tmp/alpha_logo_resized.png"
@@ -143,38 +140,22 @@ def fetch_logo_image():
             img.thumbnail((max_width, max_height), PILImage.Resampling.LANCZOS)
             img.save(resized_path, 'PNG', optimize=True)
         
-        return resized_path
+        # Convert to base64 for embedding in HTML
+        with open(resized_path, 'rb') as f:
+            logo_data = base64.b64encode(f.read()).decode('utf-8')
+        return f"data:image/png;base64,{logo_data}"
     except Exception as e:
         logger.error(f"Failed to fetch/resize logo: {e}")
         return None
 
 def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "facture", invoice_settings: dict = None) -> BytesIO:
     """
-    Generate professional PDF for invoice or quote matching the Alpha Agency / GHI style.
-    NO BLANK PAGES - content flows naturally across pages.
-    Uses separate flowables for each item to allow proper page breaks.
+    Generate professional PDF using WeasyPrint (HTML/CSS).
+    Handles long descriptions naturally - text flows across pages inside table cells.
+    100% conforme au modèle de référence DEV-20231124-00060.pdf
     """
     if not invoice_settings:
         invoice_settings = {}
-    
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(
-        buffer, 
-        pagesize=A4, 
-        rightMargin=1.5*cm, 
-        leftMargin=1.5*cm, 
-        topMargin=1.5*cm, 
-        bottomMargin=2.5*cm
-    )
-    styles = getSampleStyleSheet()
-    elements = []
-    
-    # Colors - Updated to match preview
-    BRAND_RED = colors.HexColor('#CE0202')
-    DARK_GRAY = colors.HexColor('#333333')
-    LIGHT_GRAY = colors.HexColor('#666666')
-    NAVY_BLUE = colors.HexColor('#1a1a2e')  # Dark navy blue for table header
-    GREEN_POSITIVE = colors.HexColor('#22c55e')  # Green for TTC
     
     # Get company info from settings or fallback to defaults
     company_name = invoice_settings.get('company_name') or COMPANY_INFO['commercial_name']
@@ -184,40 +165,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     company_phone = invoice_settings.get('company_phone') or COMPANY_INFO['phone']
     company_email = invoice_settings.get('company_email') or COMPANY_INFO['email']
     
-    # ===== STYLES =====
-    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=14, textColor=BRAND_RED, alignment=TA_RIGHT, spaceAfter=3)
-    info_style = ParagraphStyle('Info', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT, leading=12)
-    company_style = ParagraphStyle('Company', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=12)
-    client_header = ParagraphStyle('ClientHeader', parent=styles['Normal'], fontSize=9, textColor=BRAND_RED, fontName='Helvetica-Bold')
-    client_style = ParagraphStyle('Client', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=12)
-    
-    # Table styles - Navy blue header
-    th_style = ParagraphStyle('TableHeader', fontSize=8, textColor=colors.white, alignment=TA_CENTER, fontName='Helvetica-Bold')
-    td_style = ParagraphStyle('TableCell', fontSize=8, textColor=DARK_GRAY, leading=11)
-    td_right = ParagraphStyle('TableCellRight', fontSize=8, textColor=DARK_GRAY, alignment=TA_RIGHT, leading=11)
-    td_center = ParagraphStyle('TableCellCenter', fontSize=8, textColor=DARK_GRAY, alignment=TA_CENTER, leading=11)
-    
-    # Item styles
-    item_title_style = ParagraphStyle('ItemTitle', fontSize=9, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=12, spaceBefore=6)
-    item_desc_style = ParagraphStyle('ItemDesc', fontSize=8, textColor=DARK_GRAY, leading=11, leftIndent=10)
-    item_meta_style = ParagraphStyle('ItemMeta', fontSize=8, textColor=LIGHT_GRAY, leading=10, leftIndent=10)
-    
-    # Content styles
-    section_style = ParagraphStyle('Section', fontSize=9, textColor=DARK_GRAY, leading=12, spaceBefore=6, spaceAfter=3)
-    totals_style = ParagraphStyle('Totals', fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT)
-    totals_bold = ParagraphStyle('TotalsBold', fontSize=10, textColor=BRAND_RED, alignment=TA_RIGHT, fontName='Helvetica-Bold')
-    
-    # ===== HEADER: Logo + Doc Info =====
-    logo_path = fetch_logo_image()
-    header_left = []
-    if logo_path:
-        try:
-            header_left.append(Image(logo_path, width=5*cm, height=1.8*cm))
-        except:
-            header_left.append(Paragraph(f"<b>{company_name}</b>", ParagraphStyle('', fontSize=16, textColor=BRAND_RED)))
-    else:
-        header_left.append(Paragraph(f"<b>{company_name}</b>", ParagraphStyle('', fontSize=16, textColor=BRAND_RED)))
-    
+    # Document info
     doc_number = doc_data.get('invoice_number') or doc_data.get('quote_number', '')
     doc_date = doc_data.get('created_at', '')[:10]
     
@@ -228,103 +176,27 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         doc_title = f"Facture {doc_number}"
         date_label = "Date"
     
-    header_right = [
-        Paragraph(f"<b>{doc_title}</b>", title_style),
-        Paragraph(f"{date_label}: {doc_date}", info_style),
-    ]
-    if doc_type == "devis" and doc_data.get('valid_until'):
-        header_right.append(Paragraph(f"Validité: {doc_data['valid_until']}", info_style))
-    elif doc_type == "facture" and doc_data.get('due_date'):
-        header_right.append(Paragraph(f"Échéance: {doc_data['due_date']}", info_style))
-    
-    header_table = Table([[header_left, header_right]], colWidths=[9*cm, 8*cm])
-    header_table.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
-    ]))
-    elements.append(header_table)
-    elements.append(Spacer(1, 0.5*cm))
-    
-    # ===== SENDER & RECIPIENT SIDE BY SIDE =====
-    sender_info = [
-        Paragraph(f"<b>{company_name}</b>", company_style),
-        Paragraph(company_address, company_style),
-        Paragraph(f"Tél: {company_phone}", company_style),
-        Paragraph(f"Email: {company_email}", company_style),
-    ]
-    
+    # Client info
     client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
-    recipient_info = [Paragraph("<b>DESTINATAIRE</b>", client_header)]
-    if client_name:
-        recipient_info.append(Paragraph(f"<b>{client_name}</b>", client_style))
-    if contact.get('company'):
-        recipient_info.append(Paragraph(contact['company'], client_style))
-    if contact.get('email'):
-        recipient_info.append(Paragraph(contact['email'], client_style))
-    if contact.get('phone'):
-        recipient_info.append(Paragraph(f"Tél: {contact['phone']}", client_style))
+    client_company = contact.get('company', '')
+    client_email = contact.get('email', '')
+    client_phone = contact.get('phone', '')
     
-    addr_table = Table([[sender_info, recipient_info]], colWidths=[8.5*cm, 8.5*cm])
-    addr_table.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
-    ]))
-    elements.append(addr_table)
-    elements.append(Spacer(1, 0.6*cm))
+    # Logo
+    logo_src = fetch_logo_image() or ""
     
-    # ===== TABLE - Tout dans le tableau =====
-    # Colonnes ajustées pour que "Remise" ne soit pas coupé
-    # Désignation | Qté | Remise | P.U. HT | TVA | Total HT
-    col_widths = [8.5*cm, 1.2*cm, 1.5*cm, 2.2*cm, 1.3*cm, 2.3*cm]
-    
-    from reportlab.platypus import LongTable
-    
-    # Style pour la cellule Désignation
-    designation_style = ParagraphStyle(
-        'Designation', 
-        fontSize=9, 
-        textColor=DARK_GRAY, 
-        leading=12,
-        wordWrap='LTR'
-    )
-    
-    # Style pour en-têtes centrés horizontalement ET verticalement
-    th_centered = ParagraphStyle(
-        'TableHeaderCentered', 
-        fontSize=8, 
-        textColor=colors.white, 
-        alignment=TA_CENTER, 
-        fontName='Helvetica-Bold'
-    )
-    
-    # Construire les données du tableau complet
-    table_data = []
-    row_spans = []  # Pour tracker les cellules à fusionner
-    
-    # Header row
-    table_data.append([
-        Paragraph("<b>Désignation</b>", th_centered),
-        Paragraph("<b>Qté</b>", th_centered),
-        Paragraph("<b>Remise</b>", th_centered),
-        Paragraph("<b>P.U. HT</b>", th_centered),
-        Paragraph("<b>TVA</b>", th_centered),
-        Paragraph("<b>Total HT</b>", th_centered),
-    ])
-    
+    # Calculate totals
     subtotal = 0
     tva_rate = 0.085
     
-    # Limite de caractères par segment de description (pour éviter les cellules trop hautes)
-    MAX_DESC_SEGMENT = 1500
-    
-    # ===== ITEMS =====
+    items_html = ""
     for idx, item in enumerate(doc_data.get('items', [])):
         qty = item.get('quantity', 1)
         unit_price = item.get('unit_price', 0)
         discount = item.get('discount', 0)
         discount_type = item.get('discountType', 'percent')
         
-        # Calcul: Total HT = Qté × PU HT - Remise
+        # Calculate line total
         line_total = qty * unit_price
         if discount:
             if discount_type == 'percent' or discount_type == '%':
@@ -334,8 +206,11 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         
         subtotal += line_total
         
-        title = item.get('title', '').strip() or "Service"
+        title = html.escape(item.get('title', '').strip() or "Service")
         desc = item.get('description', '').strip()
+        
+        # Format description with line breaks (escape HTML but keep line breaks)
+        desc_html = html.escape(desc).replace('\n', '<br>') if desc else ""
         
         # Format discount
         if discount:
@@ -346,270 +221,405 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         else:
             discount_str = "-"
         
-        # Pour les descriptions très longues, les diviser en segments
-        if len(desc) > MAX_DESC_SEGMENT:
-            # Diviser la description en segments par paragraphes/lignes
-            segments = []
-            current_segment = ""
-            
-            for line in desc.split('\n'):
-                if len(current_segment) + len(line) + 1 <= MAX_DESC_SEGMENT:
-                    current_segment = current_segment + '\n' + line if current_segment else line
-                else:
-                    if current_segment:
-                        segments.append(current_segment)
-                    current_segment = line
-            if current_segment:
-                segments.append(current_segment)
-            
-            # Si un seul segment trop long, le couper manuellement
-            if len(segments) == 1 and len(segments[0]) > MAX_DESC_SEGMENT:
-                text = segments[0]
-                segments = []
-                while text:
-                    segments.append(text[:MAX_DESC_SEGMENT])
-                    text = text[MAX_DESC_SEGMENT:]
-            
-            # Première ligne avec titre + premier segment + données numériques
-            first_segment = segments[0].replace('\n', '<br/>')
-            first_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{first_segment}</font>"
-            
-            table_data.append([
-                Paragraph(first_content, designation_style),
-                Paragraph(f"{qty:.2f}", td_center),
-                Paragraph(discount_str, td_center),
-                Paragraph(f"{unit_price:.2f} €", td_right),
-                Paragraph("8.5%", td_center),
-                Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
-            ])
-            
-            # Lignes de continuation avec le reste de la description
-            for segment in segments[1:]:
-                segment_formatted = segment.replace('\n', '<br/>')
-                continuation_content = f"<font size='8' color='#666666'>{segment_formatted}</font>"
-                
-                table_data.append([
-                    Paragraph(continuation_content, designation_style),
-                    Paragraph("", td_center),  # Cellules vides pour les continuations
-                    Paragraph("", td_center),
-                    Paragraph("", td_right),
-                    Paragraph("", td_center),
-                    Paragraph("", td_right),
-                ])
-        else:
-            # Description normale, tout dans une ligne
-            desc_formatted = desc.replace('\n', '<br/>') if desc else ""
-            
-            if desc:
-                designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
-            else:
-                designation_content = f"<b>{title}</b>"
-            
-            table_data.append([
-                Paragraph(designation_content, designation_style),
-                Paragraph(f"{qty:.2f}", td_center),
-                Paragraph(discount_str, td_center),
-                Paragraph(f"{unit_price:.2f} €", td_right),
-                Paragraph("8.5%", td_center),
-                Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
-            ])
+        # Alternating row colors
+        row_bg = "#f9f9f9" if idx % 2 == 1 else "#ffffff"
+        
+        items_html += f"""
+        <tr style="background-color: {row_bg};">
+            <td class="designation">
+                <strong>{title}</strong>
+                {f'<br><span class="description">{desc_html}</span>' if desc_html else ''}
+            </td>
+            <td class="center">{qty:.2f}</td>
+            <td class="center">{discount_str}</td>
+            <td class="right">{unit_price:.2f} €</td>
+            <td class="center">8.5%</td>
+            <td class="right"><strong>{line_total:.2f} €</strong></td>
+        </tr>
+        """
     
-    # Créer la LongTable
-    items_table = LongTable(table_data, colWidths=col_widths, repeatRows=1)
-    
-    # Style du tableau
-    table_style_list = [
-        # Header style
-        ('BACKGROUND', (0, 0), (-1, 0), NAVY_BLUE),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-        ('TOPPADDING', (0, 0), (-1, 0), 10),
-        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
-        # Data rows style
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
-        ('TOPPADDING', (0, 1), (-1, -1), 8),
-        ('VALIGN', (0, 1), (0, -1), 'TOP'),  # Désignation en haut
-        ('VALIGN', (1, 1), (-1, -1), 'MIDDLE'),  # Autres colonnes centrées
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-    ]
-    
-    # Alternance de couleurs (simplifiée - toutes les lignes impaires)
-    for i in range(1, len(table_data)):
-        if i % 2 == 0:
-            table_style_list.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor('#F9F9F9')))
-    
-    items_table.setStyle(TableStyle(table_style_list))
-    elements.append(items_table)
-    
-    elements.append(Spacer(1, 0.4*cm))
-    
-    # ===== GLOBAL DISCOUNT =====
+    # Apply global discount
     global_discount = doc_data.get('globalDiscount', 0)
     global_discount_type = doc_data.get('globalDiscountType', '%')
+    global_discount_html = ""
     if global_discount:
         if global_discount_type == '%':
             subtotal -= subtotal * (global_discount / 100)
+            global_discount_html = f'<tr><td colspan="2"></td><td colspan="3" class="right">Remise globale ({global_discount:.0f}%):</td><td class="right">appliquée</td></tr>'
         else:
             subtotal -= global_discount
+            global_discount_html = f'<tr><td colspan="2"></td><td colspan="3" class="right">Remise globale ({global_discount:.2f} €):</td><td class="right">appliquée</td></tr>'
     
-    # ===== TOTALS - with green TTC =====
     tva_total = subtotal * tva_rate
     total_ttc = subtotal + tva_total
     
-    # Style for green TTC
-    totals_green = ParagraphStyle('TotalsGreen', fontSize=10, textColor=GREEN_POSITIVE, fontName='Helvetica-Bold', alignment=TA_RIGHT)
-    
-    totals_data = []
-    if global_discount:
-        if global_discount_type == '%':
-            totals_data.append(['', Paragraph(f"Remise globale ({global_discount:.0f}%):", totals_style), Paragraph("appliquée", totals_style)])
-        else:
-            totals_data.append(['', Paragraph(f"Remise globale ({global_discount:.2f} €):", totals_style), Paragraph("appliquée", totals_style)])
-    
-    totals_data.extend([
-        ['', Paragraph("Total HT:", totals_style), Paragraph(f"<b>{subtotal:.2f} €</b>", totals_style)],
-        ['', Paragraph("TVA 8.50%:", totals_style), Paragraph(f"<b>{tva_total:.2f} €</b>", totals_style)],
-        ['', Paragraph("<font color='#22c55e'><b>Montant Total de votre<br/>investissement (TTC):</b></font>", totals_green), 
-         Paragraph(f"<font color='#22c55e'><b>{total_ttc:.2f} €</b></font>", totals_green)],
-    ])
-    
-    totals_table = Table(totals_data, colWidths=[9*cm, 5*cm, 3*cm])
-    totals_table.setStyle(TableStyle([
-        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ('LINEABOVE', (1, -1), (-1, -1), 1.5, GREEN_POSITIVE),
-    ]))
-    elements.append(totals_table)
-    elements.append(Spacer(1, 0.5*cm))
-    
-    # ===== CONDITIONS DE RÈGLEMENT & DÉTAILS DE PAIEMENT - Fond gris clair =====
-    # (Pas de section "Pour Alpha Agency / Bon pour accord" - directement les conditions)
-    
-    # Récupérer les données depuis les paramètres
+    # Conditions and bank details
     conditions_text = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
     bank_details = doc_data.get('bank_details') or invoice_settings.get('bank_details', '')
     
-    # Style pour le texte dans les blocs gris
-    grey_header_style = ParagraphStyle(
-        'GreyHeader', 
-        fontSize=10, 
-        textColor=colors.HexColor('#333333'), 
-        fontName='Helvetica-Bold',
-        spaceBefore=0,
-        spaceAfter=6
-    )
-    grey_text_style = ParagraphStyle(
-        'GreyText', 
-        fontSize=9, 
-        textColor=colors.HexColor('#333333'),
-        leading=12
-    )
-    grey_bullet_style = ParagraphStyle(
-        'GreyBullet', 
-        fontSize=9, 
-        textColor=colors.HexColor('#333333'),
-        leading=12,
-        leftIndent=10,
-        bulletIndent=0
-    )
-    
-    # Couleur de fond gris clair
-    GREY_BG = colors.HexColor('#F5F5F5')
-    
-    # === Section Conditions de Règlement ===
+    conditions_html = ""
     if conditions_text:
-        conditions_content = []
-        conditions_content.append(Paragraph("<b>Conditions de règlement:</b>", grey_header_style))
-        for line in conditions_text.strip().split('\n'):
-            if line.strip():
-                conditions_content.append(Paragraph(f"• {line.strip()}", grey_bullet_style))
-        
-        # Créer un tableau avec fond gris pour contenir les conditions
-        conditions_table = Table([[conditions_content]], colWidths=[17*cm])
-        conditions_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), GREY_BG),
-            ('TOPPADDING', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-            ('LEFTPADDING', (0, 0), (-1, -1), 15),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 15),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ]))
-        elements.append(conditions_table)
-        elements.append(Spacer(1, 0.3*cm))
+        conditions_items = "".join([f"<li>{html.escape(line.strip())}</li>" for line in conditions_text.strip().split('\n') if line.strip()])
+        conditions_html = f"""
+        <div class="grey-box">
+            <h4>Conditions de règlement:</h4>
+            <ul>{conditions_items}</ul>
+        </div>
+        """
     
-    # === Section Détails du Paiement ===
+    bank_html = ""
     if bank_details:
-        payment_content = []
-        payment_content.append(Paragraph("<b>Détails du paiement:</b>", grey_header_style))
-        payment_content.append(Paragraph(f"<b>Bénéficiaire:</b> {company_name}", grey_text_style))
+        bank_lines = ""
         for line in bank_details.strip().split('\n'):
             if line.strip():
-                # Formater les lignes IBAN, BIC, etc.
                 if ':' in line:
-                    payment_content.append(Paragraph(f"<b>{line.split(':')[0]}:</b> {':'.join(line.split(':')[1:])}", grey_text_style))
+                    parts = line.split(':', 1)
+                    bank_lines += f"<p><strong>{html.escape(parts[0])}:</strong> {html.escape(parts[1])}</p>"
                 else:
-                    payment_content.append(Paragraph(line.strip(), grey_text_style))
-        
-        # Créer un tableau avec fond gris pour contenir les détails de paiement
-        payment_table = Table([[payment_content]], colWidths=[17*cm])
-        payment_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), GREY_BG),
-            ('TOPPADDING', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-            ('LEFTPADDING', (0, 0), (-1, -1), 15),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 15),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ]))
-        elements.append(payment_table)
+                    bank_lines += f"<p>{html.escape(line.strip())}</p>"
+        bank_html = f"""
+        <div class="grey-box">
+            <h4>Détails du paiement:</h4>
+            <p><strong>Bénéficiaire:</strong> {html.escape(company_name)}</p>
+            {bank_lines}
+        </div>
+        """
     
-    elements.append(Spacer(1, 0.5*cm))
-    
-    # === Section Bon pour accord (for devis) ===
+    # Signature section for devis only
+    signature_html = ""
     if doc_type == "devis":
-        accord_style = ParagraphStyle('Accord', fontSize=9, textColor=DARK_GRAY, leading=12)
-        accord_content = [
-            Paragraph("<b>Bon pour accord &amp; signature :</b>", accord_style),
-            Spacer(1, 0.8*cm),
-            Paragraph("_" * 50, accord_style),
-        ]
-        accord_table = Table([[accord_content]], colWidths=[17*cm])
-        accord_table.setStyle(TableStyle([
-            ('TOPPADDING', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-        ]))
-        elements.append(accord_table)
+        signature_html = """
+        <div class="signature-section">
+            <p><strong>Bon pour accord & signature :</strong></p>
+            <div class="signature-line"></div>
+        </div>
+        """
     
-    elements.append(Spacer(1, 0.3*cm))
+    # Additional info (validity/due date)
+    additional_info = ""
+    if doc_type == "devis" and doc_data.get('valid_until'):
+        additional_info = f"<p>Validité: {doc_data['valid_until']}</p>"
+    elif doc_type == "facture" and doc_data.get('due_date'):
+        additional_info = f"<p>Échéance: {doc_data['due_date']}</p>"
     
-    # ===== FOOTER on every page =====
-    def add_footer(canvas, doc_obj):
-        canvas.saveState()
-        canvas.setStrokeColor(colors.HexColor('#CCCCCC'))
-        canvas.line(1.5*cm, 2.2*cm, A4[0] - 1.5*cm, 2.2*cm)
+    # Build the complete HTML
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            @page {{
+                size: A4;
+                margin: 1.5cm 1.5cm 2.5cm 1.5cm;
+                @bottom-center {{
+                    content: none;
+                }}
+            }}
+            
+            * {{
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }}
+            
+            body {{
+                font-family: Helvetica, Arial, sans-serif;
+                font-size: 9pt;
+                color: #333333;
+                line-height: 1.4;
+            }}
+            
+            .header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 15px;
+            }}
+            
+            .header-left {{
+                width: 50%;
+            }}
+            
+            .header-right {{
+                width: 45%;
+                text-align: right;
+            }}
+            
+            .logo {{
+                max-width: 180px;
+                max-height: 70px;
+            }}
+            
+            .doc-title {{
+                font-size: 14pt;
+                color: #CE0202;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }}
+            
+            .doc-info {{
+                font-size: 9pt;
+                color: #333333;
+            }}
+            
+            .addresses {{
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 20px;
+            }}
+            
+            .sender, .recipient {{
+                width: 48%;
+            }}
+            
+            .recipient {{
+                text-align: right;
+            }}
+            
+            .recipient-label {{
+                color: #CE0202;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }}
+            
+            /* TABLE STYLES - CRITICAL FOR PROPER LAYOUT */
+            table.items {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 15px;
+                table-layout: fixed;
+            }}
+            
+            table.items thead th {{
+                background-color: #1a1a2e;
+                color: white;
+                font-weight: bold;
+                font-size: 8pt;
+                padding: 10px 5px;
+                text-align: center;
+                vertical-align: middle;
+                border: 0.5px solid #cccccc;
+                /* NO word-wrap on headers */
+                white-space: nowrap;
+            }}
+            
+            /* Column widths - adjusted so "Remise" fits on one line */
+            table.items th:nth-child(1),
+            table.items td:nth-child(1) {{ width: 48%; }}  /* Désignation */
+            table.items th:nth-child(2),
+            table.items td:nth-child(2) {{ width: 7%; }}   /* Qté */
+            table.items th:nth-child(3),
+            table.items td:nth-child(3) {{ width: 10%; }}  /* Remise */
+            table.items th:nth-child(4),
+            table.items td:nth-child(4) {{ width: 12%; }}  /* P.U. HT */
+            table.items th:nth-child(5),
+            table.items td:nth-child(5) {{ width: 8%; }}   /* TVA */
+            table.items th:nth-child(6),
+            table.items td:nth-child(6) {{ width: 15%; }}  /* Total HT */
+            
+            table.items td {{
+                padding: 8px 5px;
+                border: 0.5px solid #cccccc;
+                vertical-align: top;
+                font-size: 9pt;
+            }}
+            
+            table.items td.designation {{
+                text-align: left;
+                /* Allow text to wrap naturally inside the cell */
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }}
+            
+            table.items td.designation .description {{
+                font-size: 8pt;
+                color: #666666;
+                display: block;
+                margin-top: 5px;
+            }}
+            
+            table.items td.center {{
+                text-align: center;
+                vertical-align: middle;
+            }}
+            
+            table.items td.right {{
+                text-align: right;
+                vertical-align: middle;
+            }}
+            
+            /* TOTALS TABLE */
+            table.totals {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 15px;
+            }}
+            
+            table.totals td {{
+                padding: 4px 5px;
+                font-size: 9pt;
+            }}
+            
+            table.totals td.label {{
+                text-align: right;
+                width: 75%;
+            }}
+            
+            table.totals td.value {{
+                text-align: right;
+                width: 25%;
+            }}
+            
+            table.totals tr.ttc td {{
+                color: #22c55e;
+                font-weight: bold;
+                font-size: 10pt;
+                border-top: 2px solid #22c55e;
+                padding-top: 8px;
+            }}
+            
+            /* GREY BOXES */
+            .grey-box {{
+                background-color: #f5f5f5;
+                padding: 10px 15px;
+                margin-bottom: 10px;
+            }}
+            
+            .grey-box h4 {{
+                font-size: 10pt;
+                margin-bottom: 6px;
+            }}
+            
+            .grey-box ul {{
+                margin-left: 20px;
+            }}
+            
+            .grey-box li, .grey-box p {{
+                font-size: 9pt;
+                margin-bottom: 3px;
+            }}
+            
+            /* SIGNATURE */
+            .signature-section {{
+                margin-top: 20px;
+            }}
+            
+            .signature-line {{
+                border-bottom: 1px solid #333;
+                width: 200px;
+                height: 30px;
+                margin-top: 10px;
+            }}
+            
+            /* FOOTER */
+            .footer {{
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                text-align: center;
+                font-size: 6pt;
+                color: #666666;
+                border-top: 1px solid #cccccc;
+                padding-top: 5px;
+            }}
+            
+            .page-number {{
+                position: fixed;
+                bottom: 5px;
+                right: 1.5cm;
+                font-size: 6pt;
+                color: #666666;
+            }}
+        </style>
+    </head>
+    <body>
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-left">
+                {f'<img src="{logo_src}" class="logo" alt="Logo">' if logo_src else f'<div class="doc-title">{html.escape(company_name)}</div>'}
+            </div>
+            <div class="header-right">
+                <div class="doc-title">{doc_title}</div>
+                <div class="doc-info">{date_label}: {doc_date}</div>
+                {additional_info}
+            </div>
+        </div>
         
-        canvas.setFont('Helvetica', 6)
-        canvas.setFillColor(colors.HexColor('#666666'))
+        <!-- ADDRESSES -->
+        <div class="addresses">
+            <div class="sender">
+                <strong>{html.escape(company_name)}</strong><br>
+                {html.escape(company_address)}<br>
+                Tél: {html.escape(company_phone)}<br>
+                Email: {html.escape(company_email)}
+            </div>
+            <div class="recipient">
+                <div class="recipient-label">DESTINATAIRE</div>
+                {f'<strong>{html.escape(client_name)}</strong><br>' if client_name else ''}
+                {f'{html.escape(client_company)}<br>' if client_company else ''}
+                {f'{html.escape(client_email)}<br>' if client_email else ''}
+                {f'Tél: {html.escape(client_phone)}' if client_phone else ''}
+            </div>
+        </div>
         
-        footer1 = f"{COMPANY_INFO['name']} - {COMPANY_INFO['legal_form']} au capital de {COMPANY_INFO['capital']} €"
-        canvas.drawCentredString(A4[0]/2, 1.9*cm, footer1)
-        canvas.drawCentredString(A4[0]/2, 1.6*cm, company_address)
-        footer3 = f"SIRET: {company_siret} | TVA: {company_vat}"
-        canvas.drawCentredString(A4[0]/2, 1.3*cm, footer3)
-        footer4 = "En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement."
-        canvas.drawCentredString(A4[0]/2, 1.0*cm, footer4)
+        <!-- ITEMS TABLE -->
+        <table class="items">
+            <thead>
+                <tr>
+                    <th>Désignation</th>
+                    <th>Qté</th>
+                    <th>Remise</th>
+                    <th>P.U. HT</th>
+                    <th>TVA</th>
+                    <th>Total HT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {items_html}
+            </tbody>
+        </table>
         
-        # Page number
-        canvas.drawRightString(A4[0] - 1.5*cm, 0.7*cm, f"Page {doc_obj.page}")
+        <!-- TOTALS -->
+        <table class="totals">
+            {global_discount_html}
+            <tr>
+                <td class="label">Total HT:</td>
+                <td class="value"><strong>{subtotal:.2f} €</strong></td>
+            </tr>
+            <tr>
+                <td class="label">TVA 8.50%:</td>
+                <td class="value"><strong>{tva_total:.2f} €</strong></td>
+            </tr>
+            <tr class="ttc">
+                <td class="label">Montant Total de votre investissement (TTC):</td>
+                <td class="value">{total_ttc:.2f} €</td>
+            </tr>
+        </table>
         
-        canvas.restoreState()
+        <!-- CONDITIONS & BANK DETAILS -->
+        {conditions_html}
+        {bank_html}
+        
+        <!-- SIGNATURE (devis only) -->
+        {signature_html}
+        
+        <!-- FOOTER -->
+        <div class="footer">
+            {COMPANY_INFO['name']} - {COMPANY_INFO['legal_form']} au capital de {COMPANY_INFO['capital']} €<br>
+            {html.escape(company_address)}<br>
+            SIRET: {company_siret} | TVA: {company_vat}<br>
+            En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement.
+        </div>
+    </body>
+    </html>
+    """
     
-    doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
+    # Generate PDF with WeasyPrint
+    buffer = BytesIO()
+    html_doc = HTML(string=html_content)
+    html_doc.write_pdf(buffer)
     buffer.seek(0)
     return buffer
 
