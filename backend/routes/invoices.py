@@ -272,11 +272,10 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(addr_table)
     elements.append(Spacer(1, 0.6*cm))
     
-    # ===== TABLE APPROACH: Split long descriptions into multiple rows =====
+    # ===== TABLE APPROACH: Flow naturally across pages =====
     # Colonnes: Désignation | Qté | Remise | PU HT | TVA | Total HT
     col_widths = [9*cm, 1.3*cm, 1.3*cm, 2*cm, 1.2*cm, 2.2*cm]
     
-    # Import LongTable for automatic page splitting
     from reportlab.platypus import LongTable
     
     # Style pour la cellule Désignation (titre + description)
@@ -288,28 +287,32 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         wordWrap='LTR'
     )
     
-    # Construire toutes les données du tableau
-    table_data = []
-    row_is_continuation = []  # Track which rows are continuation rows
-    
-    # Header row
-    table_data.append([
+    # Header row only
+    header_data = [[
         Paragraph("<b>Désignation</b>", th_style),
         Paragraph("<b>Qté</b>", th_style),
         Paragraph("<b>Remise</b>", th_style),
         Paragraph("<b>P.U. HT</b>", th_style),
         Paragraph("<b>TVA</b>", th_style),
         Paragraph("<b>Total HT</b>", th_style),
-    ])
-    row_is_continuation.append(False)
+    ]]
+    
+    header_table = Table(header_data, colWidths=col_widths)
+    header_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), NAVY_BLUE),  # Dark navy blue
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('TOPPADDING', (0, 0), (-1, 0), 8),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+    ]))
+    elements.append(header_table)
     
     subtotal = 0
     tva_rate = 0.085
     
-    # Maximum characters per cell to avoid overflow (approximately 2000 chars = ~600pt height, safe for A4)
-    MAX_DESC_CHARS = 1800
-    
-    # Data rows - split very long descriptions into multiple rows
+    # ===== ITEMS - Each as a separate flowable for natural page flow =====
     for idx, item in enumerate(doc_data.get('items', [])):
         qty = item.get('quantity', 1)
         unit_price = item.get('unit_price', 0)
@@ -338,122 +341,40 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         else:
             discount_str = "-"
         
-        # === Handle long descriptions by splitting into multiple rows ===
-        # First row always has title + beginning of description
-        # Continuation rows only have description text
+        row_bg = colors.white if idx % 2 == 0 else colors.HexColor('#F9F9F9')
         
+        # === Cellule Désignation: Titre en GRAS + Description en dessous ===
         desc_formatted = desc.replace('\n', '<br/>') if desc else ""
         
-        if len(desc) <= MAX_DESC_CHARS:
-            # Short description - single row
-            if desc:
-                designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
-            else:
-                designation_content = f"<b>{title}</b>"
-            
-            designation_para = Paragraph(designation_content, designation_style)
-            
-            table_data.append([
-                designation_para,
-                Paragraph(f"{qty:.2f}", td_center),
-                Paragraph(discount_str, td_center),
-                Paragraph(f"{unit_price:.2f} €", td_right),
-                Paragraph("8.5%", td_center),
-                Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
-            ])
-            row_is_continuation.append(False)
+        if desc:
+            designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
         else:
-            # Long description - split into multiple rows
-            # Split by paragraphs (newlines) or by character count
-            desc_parts = []
-            current_part = ""
-            
-            for line in desc.split('\n'):
-                if len(current_part) + len(line) + 1 <= MAX_DESC_CHARS:
-                    if current_part:
-                        current_part += '\n' + line
-                    else:
-                        current_part = line
-                else:
-                    if current_part:
-                        desc_parts.append(current_part)
-                    current_part = line
-            if current_part:
-                desc_parts.append(current_part)
-            
-            # If no natural splits, force split by character count
-            if len(desc_parts) == 1 and len(desc_parts[0]) > MAX_DESC_CHARS:
-                text = desc_parts[0]
-                desc_parts = []
-                while text:
-                    desc_parts.append(text[:MAX_DESC_CHARS])
-                    text = text[MAX_DESC_CHARS:]
-            
-            # First part includes title
-            first_part = desc_parts[0].replace('\n', '<br/>')
-            designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{first_part}</font>"
-            designation_para = Paragraph(designation_content, designation_style)
-            
-            table_data.append([
-                designation_para,
-                Paragraph(f"{qty:.2f}", td_center),
-                Paragraph(discount_str, td_center),
-                Paragraph(f"{unit_price:.2f} €", td_right),
-                Paragraph("8.5%", td_center),
-                Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
-            ])
-            row_is_continuation.append(False)
-            
-            # Continuation rows only have description
-            for part in desc_parts[1:]:
-                part_formatted = part.replace('\n', '<br/>')
-                cont_para = Paragraph(f"<font size='8' color='#666666'>{part_formatted}</font>", designation_style)
-                table_data.append([
-                    cont_para,
-                    Paragraph("", td_center),  # Empty for continuation
-                    Paragraph("", td_center),
-                    Paragraph("", td_right),
-                    Paragraph("", td_center),
-                    Paragraph("", td_right),
-                ])
-                row_is_continuation.append(True)
-    
-    # Créer la LongTable avec repeatRows pour les en-têtes répétées sur chaque page
-    items_table = LongTable(table_data, colWidths=col_widths, repeatRows=1)
-    
-    # Style du tableau
-    table_style = [
-        # Header style
-        ('BACKGROUND', (0, 0), (-1, 0), BRAND_RED),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-        ('TOPPADDING', (0, 0), (-1, 0), 8),
-        # Data rows style
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
-        ('TOPPADDING', (0, 1), (-1, -1), 8),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('VALIGN', (1, 1), (-1, -1), 'MIDDLE'),  # Centrer verticalement les colonnes numériques
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-    ]
-    
-    # Apply alternating background colors (skip continuation rows)
-    current_row_idx = 0
-    for i in range(1, len(table_data)):
-        if not row_is_continuation[i]:
-            if current_row_idx % 2 == 1:
-                table_style.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor('#F9F9F9')))
-            current_row_idx += 1
-        else:
-            # Continuation rows get same color as their parent
-            if current_row_idx % 2 == 0:
-                table_style.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor('#F9F9F9')))
-    
-    items_table.setStyle(TableStyle(table_style))
-    elements.append(items_table)
+            designation_content = f"<b>{title}</b>"
+        
+        designation_para = Paragraph(designation_content, designation_style)
+        
+        # Create row with designation paragraph that can flow naturally
+        data_row = [[
+            designation_para,
+            Paragraph(f"{qty:.2f}", td_center),
+            Paragraph(discount_str, td_center),
+            Paragraph(f"{unit_price:.2f} €", td_right),
+            Paragraph("8.5%", td_center),
+            Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
+        ]]
+        
+        item_table = Table(data_row, colWidths=col_widths)
+        item_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), row_bg),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('VALIGN', (0, 0), (0, 0), 'TOP'),  # Designation top-aligned
+            ('VALIGN', (1, 0), (-1, -1), 'MIDDLE'),  # Others middle-aligned
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+        ]))
+        elements.append(item_table)
     
     elements.append(Spacer(1, 0.4*cm))
     
