@@ -543,19 +543,23 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Création de contact "en ligne"
   - Modale de confirmation avant envoi
 
-### Session 17 - 2026-01-13 (Fix PDF Descriptions Longues)
-- ✅ **Bug Fix P0 CRITIQUE: Génération PDF pour descriptions longues**
-  - **Cause racine:** ReportLab ne peut pas diviser une cellule unique sur plusieurs pages (LayoutError)
-  - **Solution:** Division des descriptions >1800 caractères en plusieurs lignes de tableau
-  - **Méthode:** Les chunks sont créés aux points de coupure naturels (newlines, espaces)
-  - **Résultat:** DEV-2026-0027 (2123 chars, 1656 chars) génère maintenant un PDF valide de 25KB
-- ✅ **En-tête du tableau:**
-  - Fond bleu marine foncé (#1a1a2e)
-  - "Remise" sur une seule ligne (colonne élargie à 1.6cm)
-  - Titres centrés horizontalement et verticalement
-- ✅ **Total TTC en vert (#22c55e)**
-- ✅ **Descriptions DANS le tableau** - Plus de bloc encadré externe
-- ✅ Tests automatisés: 8/8 passés (iteration_29.json)
+### Session 17 - 2026-01-13 (Fix PDF Pagination & Email Templates)
+- ✅ **Bug Fix P0: Pagination PDF corrigée**
+  - Le tableau des services commence maintenant sur la PAGE 1 immédiatement après l'en-tête
+  - Plus d'espace blanc inutile ou de page vide avant le tableau
+  - Solution: Réduction de MAX_DESC_CHARS_PER_ROW de 1800 à 800 caractères
+- ✅ **Bug Fix P0: Fonds gris supprimés**
+  - Plus de fonds gris alternés sur les lignes du tableau
+  - Fonds gris conservés UNIQUEMENT sur "Conditions de règlement" et "Détails de paiement"
+- ✅ **Bug Fix P0: Dates affichées sur le PDF**
+  - Format français: DD/MM/YYYY
+  - "En date du" pour la date de création
+  - "Date de validité" ou "Échéance" selon le type de document
+- ✅ **P1: Backend templates d'email finalisé**
+  - POST /api/settings/email-templates/test - Envoi email de test avec adresse dynamique
+  - GET/POST/DELETE /api/settings/email-logo - Gestion du logo personnalisé
+  - Logo utilisé dans les emails de test
+- ✅ Tests automatisés: 12/12 passés (iteration_30.json)
 
 ## Test Results
 - Session 17: 100% pass rate (8/8) - iteration_29.json
