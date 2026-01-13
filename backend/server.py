@@ -6449,6 +6449,9 @@ app.include_router(qonto_router, prefix="/api", tags=["qonto"])
 from routes.transfers import router as transfers_router
 app.include_router(transfers_router, prefix="/api", tags=["transfers"])
 
+from routes.appointments import router as appointments_router
+app.include_router(appointments_router, prefix="/api", tags=["appointments"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
