@@ -185,6 +185,7 @@ const DashboardLayout = () => {
     { path: "/admin/pipeline", icon: Kanban, label: "Pipeline" },
     { path: "/admin/taches", icon: CheckSquare, label: "Tâches" },
     { path: "/admin/things", icon: ListTodo, label: "Things" },
+    { path: "/admin/agenda", icon: Calendar, label: "Agenda / RDV" },
     { path: "/admin/facturation", icon: Receipt, label: "Facturation" },
     { path: "/admin/budget", icon: Wallet, label: "Budget" },
     { path: "/admin/abonnements", icon: CreditCard, label: "Abonnements" },
