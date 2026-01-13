@@ -20,9 +20,13 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - Colonnes personnalisables
 - Drag & drop
 
-### 4. Facturation ✅ UPDATED 2026-01-12
+### 4. Facturation ✅ UPDATED 2026-01-13
 - Devis et factures avec prévisualisation PDF
-- **Services avec titre séparé de la description**
+- **Structure PDF conforme au modèle GHI:** ✅
+  - **Pas de colonne "Code"** - uniquement Désignation | Qté | Remise | P.U. HT | TVA | Total HT
+  - **Titre en gras + description en dessous dans la même cellule Désignation** ✅
+  - **Descriptions longues continuent sur les pages suivantes** (sans LayoutError) ✅
+  - **"Montant total TTC" sur une seule ligne** ✅
 - **Remises par ligne (% ou €)** ✅
 - **Remise globale (% ou montant fixe)**
 - Suivi des paiements
@@ -37,6 +41,7 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - **Changement de statut facile** ✅
 - **Icône réglages sur page principale** ✅
 - **Paramètres du document (conditions, IBAN) modifiables** ✅
+- **Templates d'email modifiables (Paramètres > Emails)** ✅ NEW 2026-01-13
 
 ### 5. Budget & Trésorerie
 - Graphique évolution mensuelle (combine budget + bank_transactions)
