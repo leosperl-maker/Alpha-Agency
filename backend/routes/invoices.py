@@ -169,10 +169,12 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     styles = getSampleStyleSheet()
     elements = []
     
-    # Colors
+    # Colors - Updated to match preview
     BRAND_RED = colors.HexColor('#CE0202')
     DARK_GRAY = colors.HexColor('#333333')
     LIGHT_GRAY = colors.HexColor('#666666')
+    NAVY_BLUE = colors.HexColor('#1a1a2e')  # Dark navy blue for table header
+    GREEN_POSITIVE = colors.HexColor('#22c55e')  # Green for TTC
     
     # Get company info from settings or fallback to defaults
     company_name = invoice_settings.get('company_name') or COMPANY_INFO['commercial_name']
@@ -189,7 +191,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     client_header = ParagraphStyle('ClientHeader', parent=styles['Normal'], fontSize=9, textColor=BRAND_RED, fontName='Helvetica-Bold')
     client_style = ParagraphStyle('Client', parent=styles['Normal'], fontSize=9, textColor=DARK_GRAY, leading=12)
     
-    # Table styles
+    # Table styles - Navy blue header
     th_style = ParagraphStyle('TableHeader', fontSize=8, textColor=colors.white, alignment=TA_CENTER, fontName='Helvetica-Bold')
     td_style = ParagraphStyle('TableCell', fontSize=8, textColor=DARK_GRAY, leading=11)
     td_right = ParagraphStyle('TableCellRight', fontSize=8, textColor=DARK_GRAY, alignment=TA_RIGHT, leading=11)
