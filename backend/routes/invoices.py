@@ -468,7 +468,6 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
             ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
             ('LEFTPADDING', (0, 0), (-1, -1), 15),
             ('RIGHTPADDING', (0, 0), (-1, -1), 15),
-            ('ROUNDEDCORNERS', [5, 5, 5, 5]),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ]))
         elements.append(conditions_table)
@@ -495,10 +494,26 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
             ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
             ('LEFTPADDING', (0, 0), (-1, -1), 15),
             ('RIGHTPADDING', (0, 0), (-1, -1), 15),
-            ('ROUNDEDCORNERS', [5, 5, 5, 5]),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ]))
         elements.append(payment_table)
+    
+    elements.append(Spacer(1, 0.5*cm))
+    
+    # === Section Bon pour accord (for devis) ===
+    if doc_type == "devis":
+        accord_style = ParagraphStyle('Accord', fontSize=9, textColor=DARK_GRAY, leading=12)
+        accord_content = [
+            Paragraph("<b>Bon pour accord &amp; signature :</b>", accord_style),
+            Spacer(1, 0.8*cm),
+            Paragraph("_" * 50, accord_style),
+        ]
+        accord_table = Table([[accord_content]], colWidths=[17*cm])
+        accord_table.setStyle(TableStyle([
+            ('TOPPADDING', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+        ]))
+        elements.append(accord_table)
     
     elements.append(Spacer(1, 0.3*cm))
     
