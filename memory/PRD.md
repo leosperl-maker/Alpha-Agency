@@ -22,12 +22,15 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 
 ### 4. Facturation ✅ UPDATED 2026-01-13
 - Devis et factures avec prévisualisation PDF
-- **Structure PDF conforme au modèle GHI:** ✅ CORRIGÉ 2026-01-13
+- **Structure PDF conforme au modèle de référence:** ✅ FINAL 2026-01-13
+  - **Header tableau BLEU MARINE FONCÉ** (comme preview paramètres) ✅
   - **Pas de colonne "Code"** - uniquement Désignation | Qté | Remise | P.U. HT | TVA | Total HT
-  - **Titre en gras + description en dessous dans la même cellule Désignation** ✅
-  - **Descriptions très longues découpées en lignes de continuation** (évite LayoutError) ✅
-  - **"Montant total TTC" sur une seule ligne** ✅
-  - **Sections "Conditions de règlement" et "Détails de paiement" avec fond gris clair** ✅ NEW
+  - **Titre en gras + description dans la même cellule Désignation** ✅
+  - **Descriptions longues:** titre séparé + description comme paragraph flowable ✅
+  - **"Montant Total de votre investissement (TTC)" en VERT** ✅
+  - **Prix TTC en VERT** ✅
+  - **Section "Bon pour accord & signature"** (simplifiée, une seule ligne) ✅
+  - **Sections "Conditions de règlement" et "Détails de paiement" avec fond gris clair** ✅
 - **Remises par ligne (% ou €)** ✅
 - **Remise globale (% ou montant fixe)**
 - Suivi des paiements
@@ -42,7 +45,7 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - **Changement de statut facile** ✅
 - **Icône réglages sur page principale** ✅
 - **Paramètres du document (conditions, IBAN) modifiables** ✅
-- **Templates d'email modifiables avec aperçu et logo** ✅ ENHANCED 2026-01-13
+- **Templates d'email modifiables avec aperçu et logo** ✅
 - **Flux "Phase 2" post-création (actions: Envoyer, Télécharger)** ✅ DÉJÀ FAIT
 - **Création de contact "en ligne" dans le formulaire** ✅ DÉJÀ FAIT
 - **Modale de confirmation avant envoi d'email** ✅ DÉJÀ FAIT
