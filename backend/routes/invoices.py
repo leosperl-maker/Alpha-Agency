@@ -387,9 +387,12 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         else:
             subtotal -= global_discount
     
-    # ===== TOTALS - Présentation claire comme le modèle GHI =====
+    # ===== TOTALS - with green TTC =====
     tva_total = subtotal * tva_rate
     total_ttc = subtotal + tva_total
+    
+    # Style for green TTC
+    totals_green = ParagraphStyle('TotalsGreen', fontSize=10, textColor=GREEN_POSITIVE, fontName='Helvetica-Bold', alignment=TA_RIGHT)
     
     totals_data = []
     if global_discount:
@@ -401,15 +404,16 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     totals_data.extend([
         ['', Paragraph("Total HT:", totals_style), Paragraph(f"<b>{subtotal:.2f} €</b>", totals_style)],
         ['', Paragraph("TVA 8.50%:", totals_style), Paragraph(f"<b>{tva_total:.2f} €</b>", totals_style)],
-        ['', Paragraph("<b>Montant total TTC:</b>", totals_bold), Paragraph(f"<b>{total_ttc:.2f} €</b>", totals_bold)],
+        ['', Paragraph("<font color='#22c55e'><b>Montant Total de votre<br/>investissement (TTC):</b></font>", totals_green), 
+         Paragraph(f"<font color='#22c55e'><b>{total_ttc:.2f} €</b></font>", totals_green)],
     ])
     
-    totals_table = Table(totals_data, colWidths=[10*cm, 4*cm, 3*cm])
+    totals_table = Table(totals_data, colWidths=[9*cm, 5*cm, 3*cm])
     totals_table.setStyle(TableStyle([
         ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
         ('TOPPADDING', (0, 0), (-1, -1), 4),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ('LINEABOVE', (1, -1), (-1, -1), 1.5, BRAND_RED),
+        ('LINEABOVE', (1, -1), (-1, -1), 1.5, GREEN_POSITIVE),
     ]))
     elements.append(totals_table)
     elements.append(Spacer(1, 0.5*cm))
