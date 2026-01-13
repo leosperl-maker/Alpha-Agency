@@ -1203,56 +1203,53 @@ const StatisticsTab = () => {
                     {emailStats?.requests || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Send className="w-6 h-6 text-blue-600" />
-                </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-white/60">Délivrés</p>
-                  <p className="text-2xl font-bold text-white">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+            <CardContent className="p-3 sm:pt-6 sm:p-6">
+              <div className="flex items-center gap-2 sm:justify-between">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="w-4 h-4 sm:w-6 sm:h-6 text-green-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-white/60">Délivrés</p>
+                  <p className="text-lg sm:text-2xl font-bold text-white">
                     {emailStats?.delivered || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-white/60">Ouvertures</p>
-                  <p className="text-2xl font-bold text-white">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+            <CardContent className="p-3 sm:pt-6 sm:p-6">
+              <div className="flex items-center gap-2 sm:justify-between">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+                  <Eye className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-white/60">Ouvertures</p>
+                  <p className="text-lg sm:text-2xl font-bold text-white">
                     {emailStats?.opens || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                  <Eye className="w-6 h-6 text-purple-600" />
-                </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-white/60">Clics</p>
-                  <p className="text-2xl font-bold text-white">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+            <CardContent className="p-3 sm:pt-6 sm:p-6">
+              <div className="flex items-center gap-2 sm:justify-between">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+                  <ExternalLink className="w-4 h-4 sm:w-6 sm:h-6 text-orange-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-white/60">Clics</p>
+                  <p className="text-lg sm:text-2xl font-bold text-white">
                     {emailStats?.clicks || 0}
                   </p>
-                </div>
-                <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
-                  <ExternalLink className="w-6 h-6 text-orange-600" />
                 </div>
               </div>
             </CardContent>
