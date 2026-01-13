@@ -270,48 +270,36 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(addr_table)
     elements.append(Spacer(1, 0.6*cm))
     
-    # ===== TABLE HEADER - Sans colonne Code, comme le modèle GHI =====
+    # ===== TABLE HEADER + DATA - Une seule Table avec splitByRow pour les descriptions longues =====
     # Colonnes: Désignation | Qté | Remise | PU HT | TVA | Total HT
-    col_widths = [8.5*cm, 1.5*cm, 1.5*cm, 2*cm, 1.5*cm, 2*cm]
+    col_widths = [9*cm, 1.3*cm, 1.3*cm, 2*cm, 1.2*cm, 2.2*cm]
     
-    header_row = [[
+    # Style pour la cellule Désignation (titre + description)
+    designation_style = ParagraphStyle(
+        'Designation', 
+        fontSize=9, 
+        textColor=DARK_GRAY, 
+        leading=12,
+        wordWrap='LTR'
+    )
+    
+    # Construire toutes les données du tableau
+    table_data = []
+    
+    # Header row
+    table_data.append([
         Paragraph("<b>Désignation</b>", th_style),
         Paragraph("<b>Qté</b>", th_style),
         Paragraph("<b>Remise</b>", th_style),
         Paragraph("<b>P.U. HT</b>", th_style),
         Paragraph("<b>TVA</b>", th_style),
         Paragraph("<b>Total HT</b>", th_style),
-    ]]
-    
-    header_table = Table(header_row, colWidths=col_widths)
-    header_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), BRAND_RED),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-        ('TOPPADDING', (0, 0), (-1, 0), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-    ]))
-    elements.append(header_table)
+    ])
     
     subtotal = 0
     tva_rate = 0.085
     
-    # Style pour description longue sous la ligne du tableau
-    long_desc_style = ParagraphStyle(
-        'LongDesc', 
-        fontSize=8, 
-        textColor=LIGHT_GRAY, 
-        leading=11,
-        leftIndent=10,
-        rightIndent=10,
-        spaceBefore=2,
-        spaceAfter=6,
-        borderPadding=4
-    )
-    
-    # ===== ITEMS - Approche hybride: ligne tableau + description séparée pour les longues descriptions =====
+    # Data rows - chaque item avec sa description DANS la cellule
     for idx, item in enumerate(doc_data.get('items', [])):
         qty = item.get('quantity', 1)
         unit_price = item.get('unit_price', 0)
@@ -340,58 +328,57 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         else:
             discount_str = "-"
         
-        row_bg = colors.white if idx % 2 == 0 else colors.HexColor('#F9F9F9')
+        # === Cellule Désignation: Titre en GRAS + Description en dessous ===
+        # Convertir les retours à la ligne en <br/>
+        desc_formatted = desc.replace('\n', '<br/>') if desc else ""
         
-        # Déterminer si la description est longue (plus de 200 caractères ou plus de 3 lignes)
-        is_long_desc = len(desc) > 200 or desc.count('\n') > 3
-        
-        # === Ligne de tableau: Titre + courte description ou juste titre ===
-        if is_long_desc:
-            # Pour les longues descriptions, on met juste le titre en gras dans la cellule
-            designation_content = f"<b>{title}</b>"
+        # Construire le contenu: titre en gras, puis description (tout DANS la cellule)
+        if desc:
+            designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
         else:
-            # Pour les courtes descriptions, on met tout dans la cellule
-            desc_formatted = desc.replace('\n', '<br/>') if desc else ""
-            if desc:
-                designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
-            else:
-                designation_content = f"<b>{title}</b>"
+            designation_content = f"<b>{title}</b>"
         
-        designation_para = Paragraph(designation_content, ParagraphStyle(
-            'Designation', fontSize=9, textColor=DARK_GRAY, leading=12
-        ))
+        designation_para = Paragraph(designation_content, designation_style)
         
-        data_row = [[
+        # Ajouter la ligne au tableau
+        table_data.append([
             designation_para,
             Paragraph(f"{qty:.2f}", td_center),
             Paragraph(discount_str, td_center),
             Paragraph(f"{unit_price:.2f} €", td_right),
             Paragraph("8.5%", td_center),
             Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
-        ]]
-        
-        item_table = Table(data_row, colWidths=col_widths)
-        item_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), row_bg),
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-            ('TOPPADDING', (0, 0), (-1, -1), 8),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('VALIGN', (1, 0), (-1, -1), 'MIDDLE'),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-        ]))
-        elements.append(item_table)
-        
-        # === Pour les longues descriptions, ajouter un Paragraph séparé qui peut couler sur plusieurs pages ===
-        if is_long_desc and desc:
-            desc_formatted = desc.replace('\n', '<br/>')
-            # Créer une bordure légère autour de la description
-            desc_para = Paragraph(
-                f"<font size='8' color='#666666'>{desc_formatted}</font>", 
-                long_desc_style
-            )
-            elements.append(desc_para)
+        ])
+    
+    # Créer la table avec splitByRow=True pour permettre le passage sur plusieurs pages
+    items_table = Table(table_data, colWidths=col_widths, repeatRows=1, splitByRow=True)
+    
+    # Style du tableau
+    table_style = [
+        # Header style
+        ('BACKGROUND', (0, 0), (-1, 0), BRAND_RED),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('TOPPADDING', (0, 0), (-1, 0), 8),
+        # Data rows style
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+        ('TOPPADDING', (0, 1), (-1, -1), 8),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('VALIGN', (1, 1), (-1, -1), 'MIDDLE'),  # Centrer verticalement les colonnes numériques
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+    ]
+    
+    # Alternance de couleur de fond pour les lignes de données
+    for i in range(1, len(table_data)):
+        if i % 2 == 0:
+            table_style.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor('#F9F9F9')))
+    
+    items_table.setStyle(TableStyle(table_style))
+    elements.append(items_table)
     
     elements.append(Spacer(1, 0.4*cm))
     
