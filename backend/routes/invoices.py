@@ -601,11 +601,12 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(totals_table)
     elements.append(Spacer(1, 0.4*cm))
     
-    # ===== CONDITIONS DE RÈGLEMENT (rouge pastel, coins arrondis, pas de bordure) =====
-    conditions_text = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
+    # ===== CONDITIONS DE RÈGLEMENT (rouge pastel, pas de bordure) =====
+    # TOUJOURS utiliser les conditions des settings de facturation
+    conditions_text = invoice_settings.get('default_conditions', '')
     if conditions_text:
         conditions_content = []
-        conditions_content.append(Paragraph("<b>Conditions de règlement:</b>", pastel_header_style))
+        conditions_content.append(Paragraph("<b>Conditions de règlement :</b>", pastel_header_style))
         for line in conditions_text.strip().split('\n'):
             if line.strip():
                 conditions_content.append(Paragraph(f"• {line.strip()}", pastel_bullet_style))
@@ -623,16 +624,18 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         elements.append(conditions_table)
         elements.append(Spacer(1, 0.2*cm))
     
-    # ===== DÉTAILS DU PAIEMENT (rouge pastel, coins arrondis, pas de bordure) =====
-    bank_details = doc_data.get('bank_details') or invoice_settings.get('bank_details', '')
+    # ===== DÉTAILS DU PAIEMENT (rouge pastel, pas de bordure) =====
+    # TOUJOURS utiliser les détails bancaires des settings de facturation
+    bank_details = invoice_settings.get('bank_details', '')
     if bank_details:
         payment_content = []
-        payment_content.append(Paragraph("<b>Détails du paiement:</b>", pastel_header_style))
-        payment_content.append(Paragraph(f"<b>Bénéficiaire:</b> {company_name}", pastel_text_style))
+        payment_content.append(Paragraph("<b>Détails du paiement :</b>", pastel_header_style))
+        payment_content.append(Paragraph(f"<b>Bénéficiaire :</b> {company_name}", pastel_text_style))
         for line in bank_details.strip().split('\n'):
             if line.strip():
                 if ':' in line:
-                    payment_content.append(Paragraph(f"<b>{line.split(':')[0]}:</b> {':'.join(line.split(':')[1:])}", pastel_text_style))
+                    parts = line.split(':', 1)
+                    payment_content.append(Paragraph(f"<b>{parts[0].strip()} :</b> {parts[1].strip()}", pastel_text_style))
                 else:
                     payment_content.append(Paragraph(line.strip(), pastel_text_style))
         
