@@ -668,11 +668,40 @@ async def send_sms(phone: str, message: str):
     if not phone:
         return False
     
-    # Format phone number (add +33 if needed for France)
+    # Format phone number
+    phone = phone.replace(' ', '').replace('.', '').replace('-', '')
+    
+    # Detect French overseas territories (DOM-TOM)
+    # 0690, 0691 = Guadeloupe (+590)
+    # 0694 = Martinique (+596)
+    # 0693 = Guyane (+594)
+    # 0692 = Réunion (+262)
+    # 0639 = Mayotte (+262)
+    
     if phone.startswith('0'):
-        phone = '+33' + phone[1:]
+        prefix = phone[:4]
+        if prefix in ['0690', '0691']:
+            # Guadeloupe
+            phone = '+590' + phone[1:]
+        elif prefix == '0694':
+            # Martinique
+            phone = '+596' + phone[1:]
+        elif prefix == '0693':
+            # Guyane
+            phone = '+594' + phone[1:]
+        elif prefix in ['0692', '0693']:
+            # Réunion
+            phone = '+262' + phone[1:]
+        elif prefix == '0639':
+            # Mayotte
+            phone = '+262' + phone[1:]
+        else:
+            # France métropolitaine
+            phone = '+33' + phone[1:]
     elif not phone.startswith('+'):
         phone = '+33' + phone
+    
+    logger.info(f"Sending SMS to: {phone}")
     
     try:
         response = requests.post(
@@ -689,8 +718,11 @@ async def send_sms(phone: str, message: str):
             }
         )
         
-        if response.status_code in [200, 201, 202]:
-            logger.info(f"SMS sent to {phone}")
+        result = response.json()
+        logger.info(f"SMS response: {result}")
+        
+        if response.status_code in [200, 201, 202] and result.get('usedCredits', 0) > 0:
+            logger.info(f"SMS sent successfully to {phone}")
             return True
         else:
             logger.error(f"Brevo SMS error: {response.text}")
