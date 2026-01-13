@@ -568,7 +568,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(totals_table)
     elements.append(Spacer(1, 0.4*cm))
     
-    # ===== CONDITIONS DE RÈGLEMENT (rouge pastel) =====
+    # ===== CONDITIONS DE RÈGLEMENT (rouge pastel, coins arrondis, pas de bordure) =====
     conditions_text = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
     if conditions_text:
         conditions_content = []
@@ -580,17 +580,18 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         conditions_table = Table([[conditions_content]], colWidths=[17*cm])
         conditions_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
-            ('BOX', (0, 0), (-1, -1), 1, PASTEL_PINK_BORDER),
-            ('TOPPADDING', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-            ('LEFTPADDING', (0, 0), (-1, -1), 15),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 15),
+            # Pas de bordure foncée - coins arrondis simulés via padding
+            ('TOPPADDING', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('LEFTPADDING', (0, 0), (-1, -1), 14),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 14),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('ROUNDRECT', (0, 0), (-1, -1), 8),
         ]))
         elements.append(conditions_table)
         elements.append(Spacer(1, 0.2*cm))
     
-    # ===== DÉTAILS DU PAIEMENT (rouge pastel) =====
+    # ===== DÉTAILS DU PAIEMENT (rouge pastel, coins arrondis, pas de bordure) =====
     bank_details = doc_data.get('bank_details') or invoice_settings.get('bank_details', '')
     if bank_details:
         payment_content = []
@@ -606,12 +607,13 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         payment_table = Table([[payment_content]], colWidths=[17*cm])
         payment_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
-            ('BOX', (0, 0), (-1, -1), 1, PASTEL_PINK_BORDER),
-            ('TOPPADDING', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-            ('LEFTPADDING', (0, 0), (-1, -1), 15),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 15),
+            # Pas de bordure foncée - coins arrondis simulés via padding
+            ('TOPPADDING', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('LEFTPADDING', (0, 0), (-1, -1), 14),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 14),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('ROUNDRECT', (0, 0), (-1, -1), 8),
         ]))
         elements.append(payment_table)
     
