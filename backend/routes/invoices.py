@@ -591,40 +591,6 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
     buffer.seek(0)
     return buffer
-        accord_table = Table([[accord_content]], colWidths=[17*cm])
-        accord_table.setStyle(TableStyle([
-            ('TOPPADDING', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-        ]))
-        elements.append(accord_table)
-    
-    elements.append(Spacer(1, 0.3*cm))
-    
-    # ===== FOOTER on every page =====
-    def add_footer(canvas, doc_obj):
-        canvas.saveState()
-        canvas.setStrokeColor(colors.HexColor('#CCCCCC'))
-        canvas.line(1.5*cm, 2.2*cm, A4[0] - 1.5*cm, 2.2*cm)
-        
-        canvas.setFont('Helvetica', 6)
-        canvas.setFillColor(colors.HexColor('#666666'))
-        
-        footer1 = f"{COMPANY_INFO['name']} - {COMPANY_INFO['legal_form']} au capital de {COMPANY_INFO['capital']} €"
-        canvas.drawCentredString(A4[0]/2, 1.9*cm, footer1)
-        canvas.drawCentredString(A4[0]/2, 1.6*cm, company_address)
-        footer3 = f"SIRET: {company_siret} | TVA: {company_vat}"
-        canvas.drawCentredString(A4[0]/2, 1.3*cm, footer3)
-        footer4 = "En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement."
-        canvas.drawCentredString(A4[0]/2, 1.0*cm, footer4)
-        
-        # Page number
-        canvas.drawRightString(A4[0] - 1.5*cm, 0.7*cm, f"Page {doc_obj.page}")
-        
-        canvas.restoreState()
-    
-    doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
-    buffer.seek(0)
-    return buffer
 
 
 # ==================== ROUTES ====================
