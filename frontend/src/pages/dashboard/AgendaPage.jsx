@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Calendar, Plus, Video, Mail, MessageSquare, Clock, User, FileText, 
   Paperclip, Settings, RefreshCw, Check, X, Bell, ChevronLeft, ChevronRight,
-  Link as LinkIcon, Send, Trash2, Edit, ExternalLink
+  Link as LinkIcon, Send, Trash2, Edit, ExternalLink, AlertCircle
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
