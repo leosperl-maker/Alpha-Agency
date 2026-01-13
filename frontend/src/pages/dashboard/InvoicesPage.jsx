@@ -2207,9 +2207,9 @@ BANQUE : ..."
                       <span className="text-white/60">TVA (8.5%)</span>
                       <span className="font-mono">{formatCurrency(selectedInvoice.tax)}</span>
                     </div>
-                    <div className="flex justify-between text-lg font-bold border-t border-white/10 pt-2">
-                      <span className="text-white">Total TTC</span>
-                      <span className="font-mono text-indigo-400">{formatCurrency(selectedInvoice.total)}</span>
+                    <div className="flex justify-between text-lg font-bold border-t border-green-500/50 pt-2">
+                      <span className="text-green-500 text-sm leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
+                      <span className="font-mono text-green-500">{formatCurrency(selectedInvoice.total)}</span>
                     </div>
                   </div>
                 </div>
