@@ -1645,9 +1645,9 @@ const InvoicesPage = () => {
                     <span className="text-white/70">TVA (8.5%)</span>
                     <span className="font-mono">{formatCurrency(calculateTVA())}</span>
                   </div>
-                  <div className="flex justify-between py-2 text-xl font-bold border-t border-white/20 mt-2">
-                    <span>Total TTC</span>
-                    <span className="font-mono text-indigo-400">{formatCurrency(calculateTotal())}</span>
+                  <div className="flex justify-between py-2 text-xl font-bold border-t border-green-500/50 mt-2">
+                    <span className="text-green-500 text-sm leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
+                    <span className="font-mono text-green-500">{formatCurrency(calculateTotal())}</span>
                   </div>
                 </div>
 
