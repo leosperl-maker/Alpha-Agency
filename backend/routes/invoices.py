@@ -270,9 +270,12 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(addr_table)
     elements.append(Spacer(1, 0.6*cm))
     
-    # ===== TABLE HEADER + DATA - Une seule Table avec splitByRow pour les descriptions longues =====
+    # ===== TABLE APPROACH: LongTables for automatic page splitting =====
     # Colonnes: Désignation | Qté | Remise | PU HT | TVA | Total HT
     col_widths = [9*cm, 1.3*cm, 1.3*cm, 2*cm, 1.2*cm, 2.2*cm]
+    
+    # Import LongTable for automatic page splitting
+    from reportlab.platypus import LongTable
     
     # Style pour la cellule Désignation (titre + description)
     designation_style = ParagraphStyle(
@@ -350,8 +353,8 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
             Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
         ])
     
-    # Créer la table avec splitByRow=True pour permettre le passage sur plusieurs pages
-    items_table = Table(table_data, colWidths=col_widths, repeatRows=1, splitByRow=True)
+    # Créer la LongTable avec repeatRows pour les en-têtes répétées sur chaque page
+    items_table = LongTable(table_data, colWidths=col_widths, repeatRows=1)
     
     # Style du tableau
     table_style = [
