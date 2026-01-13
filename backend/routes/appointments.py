@@ -498,9 +498,56 @@ async def delete_appointment(appointment_id: str, current_user: dict = Depends(g
 
 # ==================== EMAIL INVITATION ====================
 
+def generate_ics_content(apt: dict, contact: dict, organizer_email: str = "noreply@alphagency.fr") -> str:
+    """Generate ICS calendar file content"""
+    import base64
+    
+    # Parse dates
+    start_dt = datetime.fromisoformat(apt['start_datetime'].replace('Z', '+00:00'))
+    end_dt = datetime.fromisoformat(apt['end_datetime'].replace('Z', '+00:00'))
+    
+    # Format for ICS (YYYYMMDDTHHMMSSZ)
+    start_ics = start_dt.strftime('%Y%m%dT%H%M%S')
+    end_ics = end_dt.strftime('%Y%m%dT%H%M%S')
+    now_ics = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+    
+    client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+    client_email = contact.get('email', '')
+    
+    # Build description
+    description = apt.get('description', '')
+    if apt.get('google_meet_link'):
+        description += f"\\n\\nLien Google Meet: {apt['google_meet_link']}"
+    
+    # Escape special characters for ICS
+    description = description.replace('\n', '\\n').replace(',', '\\,').replace(';', '\\;')
+    title = apt['title'].replace(',', '\\,').replace(';', '\\;')
+    
+    ics_content = f"""BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Alpha Agency//CRM//FR
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:{apt['id']}@alphagency.fr
+DTSTAMP:{now_ics}
+DTSTART;TZID=Europe/Paris:{start_ics}
+DTEND;TZID=Europe/Paris:{end_ics}
+SUMMARY:{title}
+DESCRIPTION:{description}
+ORGANIZER;CN=Alpha Agency:mailto:{organizer_email}
+ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN={client_name}:mailto:{client_email}
+{f'LOCATION:{apt["google_meet_link"]}' if apt.get('google_meet_link') else ''}
+STATUS:CONFIRMED
+SEQUENCE:0
+END:VEVENT
+END:VCALENDAR"""
+    
+    return ics_content
+
 @router.post("/{appointment_id}/send-invitation")
 async def send_invitation_email(appointment_id: str, current_user: dict = Depends(get_current_user)):
-    """Send invitation email to contact (manual trigger)"""
+    """Send invitation email to contact with ICS calendar attachment"""
     apt = await db.appointments.find_one({"id": appointment_id}, {"_id": 0})
     if not apt:
         raise HTTPException(status_code=404, detail="RDV non trouvé")
@@ -528,6 +575,7 @@ async def send_invitation_email(appointment_id: str, current_user: dict = Depend
     start_dt = datetime.fromisoformat(apt['start_datetime'].replace('Z', '+00:00'))
     date_str = start_dt.strftime('%d/%m/%Y')
     time_str = start_dt.strftime('%H:%M')
+    day_name = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'][start_dt.weekday()]
     
     # Meet link
     meet_link = apt.get('google_meet_link', '')
@@ -535,6 +583,11 @@ async def send_invitation_email(appointment_id: str, current_user: dict = Depend
     
     # Build email
     client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+    
+    # Generate ICS content
+    ics_content = generate_ics_content(apt, contact, BREVO_SENDER_EMAIL)
+    import base64
+    ics_base64 = base64.b64encode(ics_content.encode('utf-8')).decode('utf-8')
     
     html_content = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -546,7 +599,7 @@ async def send_invitation_email(appointment_id: str, current_user: dict = Depend
         
         <div style="background-color: #FFF0F5; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #333;">{apt['title']}</h3>
-            <p><strong>📆 Date :</strong> {date_str}</p>
+            <p><strong>📆 Date :</strong> {day_name} {date_str}</p>
             <p><strong>🕐 Heure :</strong> {time_str}</p>
             <p><strong>⏱️ Durée :</strong> {apt['duration_minutes']} minutes</p>
             {meet_section}
@@ -556,6 +609,11 @@ async def send_invitation_email(appointment_id: str, current_user: dict = Depend
         
         {invoice_info}
         {document_info}
+        
+        <p style="margin-top: 20px;">
+            <strong>📎 Un fichier .ics est joint à cet email.</strong><br>
+            <span style="color: #666;">Ouvrez-le pour ajouter ce rendez-vous à votre agenda (Google Calendar, Outlook, Apple Calendar...)</span>
+        </p>
         
         <p>À très bientôt !</p>
         
@@ -567,7 +625,7 @@ async def send_invitation_email(appointment_id: str, current_user: dict = Depend
     </div>
     """
     
-    # Send via Brevo
+    # Send via Brevo with ICS attachment
     try:
         response = requests.post(
             'https://api.brevo.com/v3/smtp/email',
@@ -578,8 +636,14 @@ async def send_invitation_email(appointment_id: str, current_user: dict = Depend
             json={
                 'sender': {'name': BREVO_SENDER_NAME, 'email': BREVO_SENDER_EMAIL},
                 'to': [{'email': contact['email'], 'name': client_name}],
-                'subject': f"📅 RDV - {apt['title']} - {date_str} à {time_str}",
-                'htmlContent': html_content
+                'subject': f"📅 RDV - {apt['title']} - {day_name} {date_str} à {time_str}",
+                'htmlContent': html_content,
+                'attachment': [
+                    {
+                        'content': ics_base64,
+                        'name': f"rdv_{date_str.replace('/', '-')}.ics"
+                    }
+                ]
             }
         )
         
@@ -588,7 +652,7 @@ async def send_invitation_email(appointment_id: str, current_user: dict = Depend
                 {"id": appointment_id},
                 {"$set": {"email_sent": True, "email_sent_at": datetime.now(timezone.utc).isoformat()}}
             )
-            return {"message": f"Invitation envoyée à {contact['email']}"}
+            return {"message": f"Invitation envoyée à {contact['email']} avec fichier calendrier"}
         else:
             logger.error(f"Brevo email error: {response.text}")
             raise HTTPException(status_code=500, detail=f"Erreur envoi email: {response.text}")
