@@ -339,9 +339,74 @@ async def create_appointment(
     if data.reminders:
         background_tasks.add_task(schedule_reminders, appointment_id, data.reminders)
     
+    # Send confirmation email to admin
+    background_tasks.add_task(send_admin_confirmation_email, appointment, contact)
+    
     # Return without _id
     appointment.pop('_id', None)
     return appointment
+
+async def send_admin_confirmation_email(appointment: dict, contact: dict):
+    """Send confirmation email to admin when appointment is created"""
+    try:
+        # Get admin email from settings or use default
+        admin_email = BREVO_SENDER_EMAIL  # Or you can get it from settings
+        
+        # Format date
+        start_dt = datetime.fromisoformat(appointment['start_datetime'].replace('Z', '+00:00'))
+        date_str = start_dt.strftime('%d/%m/%Y')
+        time_str = start_dt.strftime('%H:%M')
+        
+        client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+        meet_link = appointment.get('google_meet_link', '')
+        
+        html_content = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #22c55e;">✅ Nouveau RDV créé</h2>
+            
+            <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
+                <h3 style="margin-top: 0; color: #333;">{appointment['title']}</h3>
+                <p><strong>📆 Date :</strong> {date_str}</p>
+                <p><strong>🕐 Heure :</strong> {time_str}</p>
+                <p><strong>⏱️ Durée :</strong> {appointment['duration_minutes']} minutes</p>
+                <p><strong>👤 Client :</strong> {client_name}</p>
+                {f'<p><strong>📧 Email client :</strong> {contact.get("email", "-")}</p>' if contact.get('email') else ''}
+                {f'<p><strong>📱 Tél client :</strong> {contact.get("phone", "-")}</p>' if contact.get('phone') else ''}
+            </div>
+            
+            {f'<p><strong>🎥 Lien Google Meet :</strong> <a href="{meet_link}">{meet_link}</a></p>' if meet_link else '<p style="color: #666;">⚠️ Pas de lien Meet généré</p>'}
+            
+            {f'<p><strong>📝 Description :</strong> {appointment.get("description", "-")}</p>' if appointment.get('description') else ''}
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            <p style="color: #666; font-size: 12px;">
+                Ce RDV a été ajouté à votre Google Calendar.<br>
+                Connectez-vous au CRM pour envoyer l'invitation au client.
+            </p>
+        </div>
+        """
+        
+        response = requests.post(
+            'https://api.brevo.com/v3/smtp/email',
+            headers={
+                'api-key': BREVO_API_KEY,
+                'Content-Type': 'application/json'
+            },
+            json={
+                'sender': {'name': BREVO_SENDER_NAME, 'email': BREVO_SENDER_EMAIL},
+                'to': [{'email': admin_email, 'name': 'Admin Alpha Agency'}],
+                'subject': f"✅ RDV créé - {appointment['title']} - {date_str} à {time_str} avec {client_name}",
+                'htmlContent': html_content
+            }
+        )
+        
+        if response.status_code in [200, 201, 202]:
+            logger.info(f"Admin confirmation email sent for appointment {appointment['id']}")
+        else:
+            logger.error(f"Failed to send admin confirmation email: {response.text}")
+            
+    except Exception as e:
+        logger.error(f"Error sending admin confirmation email: {e}")
 
 @router.put("/{appointment_id}")
 async def update_appointment(
