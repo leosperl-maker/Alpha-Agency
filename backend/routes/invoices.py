@@ -439,13 +439,9 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
     
-    # Aligner les pastilles - décalées vers la droite pour respecter la marge gauche du tableau
-    # Espace à gauche pour aligner avec la colonne Désignation
-    dates_row = Table([['', emission_table, echeance_table, '']], colWidths=[0*cm, 4.2*cm, 3.7*cm, 9.1*cm])
-    dates_row.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-    ]))
-    elements.append(dates_row)
+    # Ajouter un Spacer à gauche pour décaler les pastilles vers la droite
+    # Elles doivent commencer après la marge gauche du document
+    elements.append(Table([['', emission_table, '', echeance_table]], colWidths=[0.05*cm, 4.1*cm, 0.3*cm, 3.6*cm]))
     elements.append(Spacer(1, 0.4*cm))
     
     # ===== TABLE HEADER =====
