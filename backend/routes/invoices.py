@@ -411,13 +411,13 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(address_row)
     elements.append(Spacer(1, 0.3*cm))
     
-    # ===== DEUX PASTILLES DE DATES COMPACTES - ROUGE PASTEL - SUR UNE SEULE LIGNE =====
+    # ===== DEUX PASTILLES DE DATES - ALIGNÉES AVEC LA COLONNE DÉSIGNATION =====
     echeance_label = "Échéance :" if doc_type == "facture" else "Validité :"
     
     # Style pour les pastilles - tout sur une ligne
     date_pill_style = ParagraphStyle('DatePill', fontSize=8, textColor=DARK_GRAY, leading=10)
     
-    # Pastille 1: Date d'émission - label en gras, date normale, SUR UNE LIGNE
+    # Pastille 1: Date d'émission
     emission_table = Table([[Paragraph(f"<b>Date d'émission :</b> {doc_date_formatted}", date_pill_style)]], colWidths=[4*cm])
     emission_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
@@ -428,7 +428,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
     
-    # Pastille 2: Validité/Échéance - label en gras, date normale, SUR UNE LIGNE
+    # Pastille 2: Validité/Échéance
     echeance_table = Table([[Paragraph(f"<b>{echeance_label}</b> {due_date_formatted or '-'}", date_pill_style)]], colWidths=[3.5*cm])
     echeance_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
@@ -439,9 +439,20 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
     
-    # Ajouter un Spacer à gauche pour décaler les pastilles vers la droite
-    # Elles doivent commencer après la marge gauche du document
-    elements.append(Table([['', emission_table, '', echeance_table]], colWidths=[0.05*cm, 4.1*cm, 0.3*cm, 3.6*cm]))
+    # Les pastilles doivent être alignées à GAUCHE, au même niveau que le début de la colonne Désignation
+    # Total largeur disponible = 17cm (A4 - marges). Largeur colonne Désignation = 8cm
+    # On utilise la même largeur totale que le tableau (16.5cm) pour garantir l'alignement
+    dates_row = Table(
+        [[emission_table, Spacer(0.3*cm, 0), echeance_table, '']], 
+        colWidths=[4*cm, 0.3*cm, 3.5*cm, 8.7*cm]
+    )
+    dates_row.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    elements.append(dates_row)
     elements.append(Spacer(1, 0.4*cm))
     
     # ===== TABLE HEADER =====
