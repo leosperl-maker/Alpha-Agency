@@ -380,29 +380,29 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         else:
             subtotal -= global_discount
     
-    # ===== TOTALS =====
+    # ===== TOTALS - Présentation claire comme le modèle GHI =====
     tva_total = subtotal * tva_rate
     total_ttc = subtotal + tva_total
     
     totals_data = []
     if global_discount:
         if global_discount_type == '%':
-            totals_data.append(['', '', Paragraph(f"Remise globale ({global_discount:.0f}%):", totals_style), Paragraph("appliquée", totals_style)])
+            totals_data.append(['', Paragraph(f"Remise globale ({global_discount:.0f}%):", totals_style), Paragraph("appliquée", totals_style)])
         else:
-            totals_data.append(['', '', Paragraph(f"Remise globale ({global_discount:.2f} €):", totals_style), Paragraph("appliquée", totals_style)])
+            totals_data.append(['', Paragraph(f"Remise globale ({global_discount:.2f} €):", totals_style), Paragraph("appliquée", totals_style)])
     
     totals_data.extend([
-        ['', '', Paragraph("Total net HT:", totals_style), Paragraph(f"<b>{subtotal:.2f} €</b>", totals_style)],
-        ['', '', Paragraph("TVA 8.50%:", totals_style), Paragraph(f"<b>{tva_total:.2f} €</b>", totals_style)],
-        ['', '', Paragraph("<b>Montant total TTC:</b>", totals_bold), Paragraph(f"<b>{total_ttc:.2f} €</b>", totals_bold)],
+        ['', Paragraph("Total HT:", totals_style), Paragraph(f"<b>{subtotal:.2f} €</b>", totals_style)],
+        ['', Paragraph("TVA 8.50%:", totals_style), Paragraph(f"<b>{tva_total:.2f} €</b>", totals_style)],
+        ['', Paragraph("<b>Montant total TTC:</b>", totals_bold), Paragraph(f"<b>{total_ttc:.2f} €</b>", totals_bold)],
     ])
     
-    totals_table = Table(totals_data, colWidths=[8*cm, 3*cm, 3.5*cm, 2.8*cm])
+    totals_table = Table(totals_data, colWidths=[10*cm, 4*cm, 3*cm])
     totals_table.setStyle(TableStyle([
-        ('ALIGN', (2, 0), (-1, -1), 'RIGHT'),
+        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
         ('TOPPADDING', (0, 0), (-1, -1), 4),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ('LINEABOVE', (2, -1), (-1, -1), 1.5, BRAND_RED),
+        ('LINEABOVE', (1, -1), (-1, -1), 1.5, BRAND_RED),
     ]))
     elements.append(totals_table)
     elements.append(Spacer(1, 0.5*cm))
