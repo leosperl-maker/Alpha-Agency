@@ -398,6 +398,199 @@ Banque: Votre Banque`,
           </TabsTrigger>
         </TabsList>
 
+        {/* Email Templates Tab */}
+        <TabsContent value="email-templates">
+          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
+                <div>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Mail className="w-5 h-5 text-indigo-400" />
+                    Templates d'e-mail
+                  </CardTitle>
+                  <CardDescription>
+                    Personnalisez les e-mails envoyés avec vos devis et factures
+                  </CardDescription>
+                </div>
+                <Button variant="outline" size="sm" onClick={fetchEmailTemplates} disabled={loadingTemplates}>
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loadingTemplates ? "animate-spin" : ""}`} />
+                  Actualiser
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {loadingTemplates ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {/* Variables disponibles */}
+                  <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                    <h4 className="font-medium text-indigo-900 mb-2">Variables disponibles</h4>
+                    <p className="text-sm text-indigo-700 mb-2">
+                      Utilisez ces variables dans vos templates. Elles seront remplacées automatiquement :
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {["{{numero}}", "{{client_name}}", "{{montant}}", "{{company_name}}", "{{company_phone}}", "{{company_email}}"].map(v => (
+                        <Badge key={v} variant="outline" className="bg-white text-indigo-700 border-indigo-300 font-mono text-xs">
+                          {v}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Template Devis */}
+                  <div className="border border-white/10 rounded-lg p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-blue-500/20 text-blue-400 border-0">DEVIS</Badge>
+                        <h3 className="font-medium text-white">Template e-mail Devis</h3>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleTestEmailTemplate('devis')}
+                          disabled={testingTemplate === 'devis'}
+                        >
+                          {testingTemplate === 'devis' ? (
+                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                          ) : (
+                            <TestTube className="w-4 h-4 mr-1" />
+                          )}
+                          <span className="hidden sm:inline">Tester</span>
+                        </Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => handleSaveEmailTemplate('devis')}
+                          disabled={savingTemplate === 'devis'}
+                          className="bg-indigo-600 hover:bg-indigo-500"
+                        >
+                          {savingTemplate === 'devis' ? (
+                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                          ) : (
+                            <Save className="w-4 h-4 mr-1" />
+                          )}
+                          <span className="hidden sm:inline">Sauvegarder</span>
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-white">Objet de l'email</Label>
+                        <Input
+                          value={emailTemplates.devis.subject}
+                          onChange={(e) => setEmailTemplates(prev => ({
+                            ...prev,
+                            devis: { ...prev.devis, subject: e.target.value }
+                          }))}
+                          placeholder="Votre devis {{numero}} - {{company_name}}"
+                          className="bg-white/5 border-white/10 text-white mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-white">Corps du message</Label>
+                        <Textarea
+                          value={emailTemplates.devis.body}
+                          onChange={(e) => setEmailTemplates(prev => ({
+                            ...prev,
+                            devis: { ...prev.devis, body: e.target.value }
+                          }))}
+                          placeholder={`Bonjour {{client_name}},
+
+Veuillez trouver ci-joint votre devis {{numero}} d'un montant de {{montant}} €.
+
+N'hésitez pas à nous contacter pour toute question.
+
+Cordialement,
+{{company_name}}
+{{company_phone}} - {{company_email}}`}
+                          rows={8}
+                          className="bg-white/5 border-white/10 text-white mt-1 font-mono text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Template Facture */}
+                  <div className="border border-white/10 rounded-lg p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-500/20 text-green-400 border-0">FACTURE</Badge>
+                        <h3 className="font-medium text-white">Template e-mail Facture</h3>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleTestEmailTemplate('facture')}
+                          disabled={testingTemplate === 'facture'}
+                        >
+                          {testingTemplate === 'facture' ? (
+                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                          ) : (
+                            <TestTube className="w-4 h-4 mr-1" />
+                          )}
+                          <span className="hidden sm:inline">Tester</span>
+                        </Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => handleSaveEmailTemplate('facture')}
+                          disabled={savingTemplate === 'facture'}
+                          className="bg-indigo-600 hover:bg-indigo-500"
+                        >
+                          {savingTemplate === 'facture' ? (
+                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                          ) : (
+                            <Save className="w-4 h-4 mr-1" />
+                          )}
+                          <span className="hidden sm:inline">Sauvegarder</span>
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-white">Objet de l'email</Label>
+                        <Input
+                          value={emailTemplates.facture.subject}
+                          onChange={(e) => setEmailTemplates(prev => ({
+                            ...prev,
+                            facture: { ...prev.facture, subject: e.target.value }
+                          }))}
+                          placeholder="Votre facture {{numero}} - {{company_name}}"
+                          className="bg-white/5 border-white/10 text-white mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-white">Corps du message</Label>
+                        <Textarea
+                          value={emailTemplates.facture.body}
+                          onChange={(e) => setEmailTemplates(prev => ({
+                            ...prev,
+                            facture: { ...prev.facture, body: e.target.value }
+                          }))}
+                          placeholder={`Bonjour {{client_name}},
+
+Veuillez trouver ci-joint votre facture {{numero}} d'un montant de {{montant}} €.
+
+Nous vous remercions de procéder au règlement dans les meilleurs délais.
+
+Cordialement,
+{{company_name}}
+{{company_phone}} - {{company_email}}`}
+                          rows={8}
+                          className="bg-white/5 border-white/10 text-white mt-1 font-mono text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* API Keys Tab */}
         <TabsContent value="api-keys">
           <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
