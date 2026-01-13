@@ -1958,8 +1958,8 @@ BANQUE : ..."
                       <span>TVA (8.5%)</span>
                       <span>42,50 €</span>
                     </div>
-                    <div className="flex justify-between py-1 font-bold text-red-600">
-                      <span>Total TTC</span>
+                    <div className="flex justify-between py-1 font-bold text-green-500">
+                      <span className="text-xs leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
                       <span>542,50 €</span>
                     </div>
                   </div>
