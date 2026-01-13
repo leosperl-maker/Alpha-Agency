@@ -604,14 +604,29 @@ async def schedule_reminders(appointment_id: str, reminders: List[dict]):
     if not apt:
         return
     
-    start_dt = datetime.fromisoformat(apt['start_datetime'].replace('Z', '+00:00'))
+    start_str = apt['start_datetime']
+    # Ensure timezone awareness
+    if 'Z' in start_str:
+        start_dt = datetime.fromisoformat(start_str.replace('Z', '+00:00'))
+    elif '+' in start_str or start_str.endswith('00'):
+        start_dt = datetime.fromisoformat(start_str)
+    else:
+        # Assume UTC if no timezone
+        start_dt = datetime.fromisoformat(start_str).replace(tzinfo=timezone.utc)
+    
+    now = datetime.now(timezone.utc)
     
     for reminder in reminders:
         delay_minutes = reminder.get('delay_minutes', 60)
         remind_at = start_dt - timedelta(minutes=delay_minutes)
         
+        # Ensure remind_at is timezone aware for comparison
+        if remind_at.tzinfo is None:
+            remind_at = remind_at.replace(tzinfo=timezone.utc)
+        
         # Don't schedule if in the past
-        if remind_at < datetime.now(timezone.utc):
+        if remind_at < now:
+            logger.info(f"Skipping past reminder for {appointment_id}: {remind_at}")
             continue
         
         reminder_doc = {
