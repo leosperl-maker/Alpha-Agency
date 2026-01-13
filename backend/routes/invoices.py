@@ -153,9 +153,10 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     Generate professional PDF for invoice or quote matching the Alpha Agency / GHI style.
     100% conforme au modèle de référence DEV-20231124-00060.pdf
     
-    NEW APPROACH: Each item is a flowable block that can naturally flow across pages.
-    The table appearance is achieved using styled Paragraphs with a pseudo-table layout.
-    Long descriptions stay in ONE cell that continues on the next page.
+    APPROACH: Since ReportLab cannot split a single cell across pages, we use a hybrid approach:
+    - Header row as a table
+    - Each item: Title + numerics as a narrow row, then description as a flowing Paragraph
+    - This allows long descriptions to flow naturally across pages
     """
     if not invoice_settings:
         invoice_settings = {}
@@ -215,7 +216,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
             validity_text = f"Date de validité: {dt.strftime('%d/%m/%Y')}"
         except:
             validity_text = f"Date de validité: {valid_until}"
-    elif doc_type == "facture" and due_date:
+    elif doc_type == "factura" and due_date:
         try:
             if 'T' in due_date:
                 due_date = due_date.split('T')[0]
@@ -299,13 +300,14 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     # Table header style
     th_centered = ParagraphStyle('TableHeaderCentered', fontSize=8, textColor=colors.white, alignment=TA_CENTER, fontName='Helvetica-Bold')
     
-    # Item styles
-    item_title_style = ParagraphStyle('ItemTitle', fontSize=9, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=12)
-    item_desc_style = ParagraphStyle('ItemDesc', fontSize=8, textColor=LIGHT_GRAY, leading=11, spaceBefore=3)
-    
     # Cell styles
     td_center = ParagraphStyle('TDCenter', fontSize=9, textColor=DARK_GRAY, alignment=TA_CENTER)
     td_right = ParagraphStyle('TDRight', fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT)
+    
+    # Description style - can flow across pages
+    desc_style = ParagraphStyle('Description', fontSize=8, textColor=LIGHT_GRAY, leading=11, 
+                                 leftIndent=0.3*cm, spaceBefore=2, spaceAfter=2,
+                                 borderWidth=0.5, borderColor=BORDER_COLOR, borderPadding=5)
     
     # Totals styles
     totals_style = ParagraphStyle('Totals', fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT)
@@ -369,7 +371,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(addr_table)
     elements.append(Spacer(1, 0.3*cm))
     
-    # ===== TABLE HEADER (always visible) =====
+    # ===== TABLE HEADER =====
     col_widths = [8.0*cm, 1.2*cm, 1.6*cm, 2.0*cm, 1.3*cm, 2.4*cm]
     
     header_row = [[
@@ -395,40 +397,98 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     ]))
     elements.append(header_table)
     
-    # ===== ITEMS - Each item as a separate table row that can flow =====
+    # ===== ITEMS - Split into chunks that fit on one page =====
+    # Maximum chars per chunk (to ensure each chunk fits on one page)
+    MAX_CHARS_PER_CHUNK = 1200
+    
     from reportlab.platypus import LongTable
     
-    for idx, item in enumerate(items_data):
-        # Build designation content - title + description as ONE Paragraph
-        if item['description']:
-            desc_formatted = item['description'].replace('\n', '<br/>')
-            designation_content = f"<b>{item['title']}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
-        else:
-            designation_content = f"<b>{item['title']}</b>"
-        
-        # Create a single row for this item
-        item_row = [[
-            Paragraph(designation_content, ParagraphStyle('Designation', fontSize=9, textColor=DARK_GRAY, leading=12)),
-            Paragraph(f"{item['qty']:.2f}", td_center),
-            Paragraph(item['discount_str'], td_center),
-            Paragraph(f"{item['unit_price']:.2f} €", td_right),
-            Paragraph("8.5%", td_center),
-            Paragraph(f"<b>{item['total']:.2f} €</b>", td_right),
-        ]]
-        
-        # Create a LongTable for this single item - it can split if needed
-        item_table = LongTable(item_row, colWidths=col_widths, splitByRow=0)
-        item_table.setStyle(TableStyle([
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
-            ('VALIGN', (0, 0), (0, -1), 'TOP'),
-            ('VALIGN', (1, 0), (-1, -1), 'MIDDLE'),
-            ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
-        ]))
-        elements.append(item_table)
+    table_data = []
     
+    for idx, item in enumerate(items_data):
+        title = item['title']
+        desc = item['description']
+        
+        # Split very long descriptions into chunks
+        if desc and len(desc) > MAX_CHARS_PER_CHUNK:
+            desc_chunks = []
+            remaining = desc
+            while remaining:
+                if len(remaining) <= MAX_CHARS_PER_CHUNK:
+                    desc_chunks.append(remaining)
+                    break
+                # Find a good break point
+                cut_point = MAX_CHARS_PER_CHUNK
+                # Try to break at a newline
+                newline_pos = remaining.rfind('\n', 0, cut_point)
+                if newline_pos > cut_point * 0.6:
+                    cut_point = newline_pos + 1
+                else:
+                    # Try to break at a period or space
+                    period_pos = remaining.rfind('.', 0, cut_point)
+                    if period_pos > cut_point * 0.7:
+                        cut_point = period_pos + 1
+                    else:
+                        space_pos = remaining.rfind(' ', 0, cut_point)
+                        if space_pos > cut_point * 0.5:
+                            cut_point = space_pos + 1
+                desc_chunks.append(remaining[:cut_point])
+                remaining = remaining[cut_point:]
+            
+            # First row: title + first chunk + numeric values
+            first_chunk = desc_chunks[0].replace('\n', '<br/>')
+            designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{first_chunk}</font>"
+            
+            table_data.append([
+                Paragraph(designation_content, ParagraphStyle('Des', fontSize=9, textColor=DARK_GRAY, leading=12)),
+                Paragraph(f"{item['qty']:.2f}", td_center),
+                Paragraph(item['discount_str'], td_center),
+                Paragraph(f"{item['unit_price']:.2f} €", td_right),
+                Paragraph("8.5%", td_center),
+                Paragraph(f"<b>{item['total']:.2f} €</b>", td_right),
+            ])
+            
+            # Continuation rows: just description continuation, empty other cells
+            for chunk in desc_chunks[1:]:
+                chunk_formatted = chunk.replace('\n', '<br/>')
+                continuation_content = f"<font size='8' color='#666666'>{chunk_formatted}</font>"
+                table_data.append([
+                    Paragraph(continuation_content, ParagraphStyle('Des', fontSize=8, textColor=LIGHT_GRAY, leading=11)),
+                    Paragraph("", td_center),
+                    Paragraph("", td_center),
+                    Paragraph("", td_right),
+                    Paragraph("", td_center),
+                    Paragraph("", td_right),
+                ])
+        else:
+            # Normal case - fits in one row
+            if desc:
+                desc_formatted = desc.replace('\n', '<br/>')
+                designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
+            else:
+                designation_content = f"<b>{title}</b>"
+            
+            table_data.append([
+                Paragraph(designation_content, ParagraphStyle('Des', fontSize=9, textColor=DARK_GRAY, leading=12)),
+                Paragraph(f"{item['qty']:.2f}", td_center),
+                Paragraph(item['discount_str'], td_center),
+                Paragraph(f"{item['unit_price']:.2f} €", td_right),
+                Paragraph("8.5%", td_center),
+                Paragraph(f"<b>{item['total']:.2f} €</b>", td_right),
+            ])
+    
+    # Create LongTable for items
+    items_table = LongTable(table_data, colWidths=col_widths, repeatRows=0, splitByRow=1)
+    items_table.setStyle(TableStyle([
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('VALIGN', (0, 0), (0, -1), 'TOP'),
+        ('VALIGN', (1, 0), (-1, -1), 'MIDDLE'),
+        ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
+    ]))
+    elements.append(items_table)
     elements.append(Spacer(1, 0.3*cm))
     
     # ===== TOTALS =====
