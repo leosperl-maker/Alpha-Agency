@@ -270,15 +270,15 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(addr_table)
     elements.append(Spacer(1, 0.6*cm))
     
-    # ===== TABLE HEADER (just the header row) =====
-    col_widths = [2.5*cm, 6.5*cm, 1.2*cm, 1.5*cm, 2*cm, 1.5*cm, 1.8*cm]
+    # ===== TABLE HEADER - Sans colonne Code, comme le modèle GHI =====
+    # Colonnes: Désignation | Qté | Remise | PU HT | TVA | Total HT
+    col_widths = [8.5*cm, 1.5*cm, 1.5*cm, 2*cm, 1.5*cm, 2*cm]
     
     header_row = [[
-        Paragraph("<b>Code</b>", th_style),
-        Paragraph("<b>Description</b>", th_style),
+        Paragraph("<b>Désignation</b>", th_style),
         Paragraph("<b>Qté</b>", th_style),
         Paragraph("<b>Remise</b>", th_style),
-        Paragraph("<b>PU HT</b>", th_style),
+        Paragraph("<b>P.U. HT</b>", th_style),
         Paragraph("<b>TVA</b>", th_style),
         Paragraph("<b>Total HT</b>", th_style),
     ]]
@@ -288,7 +288,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ('BACKGROUND', (0, 0), (-1, 0), BRAND_RED),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 8),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
         ('TOPPADDING', (0, 0), (-1, 0), 8),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
@@ -298,13 +298,18 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     subtotal = 0
     tva_rate = 0.085
     
-    # ===== ITEMS - Each as separate flowable for proper page breaks =====
+    # Style pour titre en gras dans la cellule
+    title_cell_style = ParagraphStyle('TitleCell', fontSize=9, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=12)
+    desc_cell_style = ParagraphStyle('DescCell', fontSize=8, textColor=LIGHT_GRAY, leading=10, spaceBefore=3)
+    
+    # ===== ITEMS - Description complète dans la cellule, continue sur pages suivantes =====
     for idx, item in enumerate(doc_data.get('items', [])):
         qty = item.get('quantity', 1)
         unit_price = item.get('unit_price', 0)
         discount = item.get('discount', 0)
         discount_type = item.get('discountType', 'percent')
         
+        # Calcul: Total HT = Qté × PU HT - Remise
         line_total = qty * unit_price
         if discount:
             if discount_type == 'percent' or discount_type == '%':
@@ -313,7 +318,6 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
                 line_total -= discount
         
         subtotal += line_total
-        tva_amount = line_total * tva_rate
         
         title = item.get('title', '').strip() or "Service"
         desc = item.get('description', '').strip()
@@ -321,26 +325,34 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         # Format discount
         if discount:
             if discount_type == 'percent' or discount_type == '%':
-                discount_str = f"-{discount:.0f}%"
+                discount_str = f"{discount:.0f}%"
             else:
-                discount_str = f"-{discount:.2f}€"
+                discount_str = f"{discount:.2f}€"
         else:
             discount_str = "-"
         
-        row_bg = colors.white if idx % 2 == 0 else colors.HexColor('#F5F5F5')
+        row_bg = colors.white if idx % 2 == 0 else colors.HexColor('#F9F9F9')
         
-        # Create a compact row with just the numeric data
-        # Description will be a separate Paragraph below if it's long
-        short_desc = desc[:80] + "..." if len(desc) > 80 else desc
-        short_desc = short_desc.replace('\n', ' ')
+        # === Cellule Désignation: Titre en gras + Description en dessous ===
+        # Convertir les retours à la ligne en <br/>
+        desc_formatted = desc.replace('\n', '<br/>') if desc else ""
+        
+        # Construire le contenu de la cellule: titre en gras, puis description
+        if desc:
+            designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
+        else:
+            designation_content = f"<b>{title}</b>"
+        
+        designation_para = Paragraph(designation_content, ParagraphStyle(
+            'Designation', fontSize=9, textColor=DARK_GRAY, leading=12
+        ))
         
         data_row = [[
-            Paragraph(f"<b>{title[:15]}</b>" if len(title) > 15 else f"<b>{title}</b>", td_style),
-            Paragraph(short_desc if len(desc) <= 80 else f"{short_desc}", td_style),
-            Paragraph(str(qty), td_center),
+            designation_para,
+            Paragraph(f"{qty:.2f}", td_center),
             Paragraph(discount_str, td_center),
             Paragraph(f"{unit_price:.2f} €", td_right),
-            Paragraph(f"8.5%", td_center),
+            Paragraph("8.5%", td_center),
             Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
         ]]
         
@@ -348,24 +360,14 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         item_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), row_bg),
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('VALIGN', (1, 0), (-1, -1), 'MIDDLE'),  # Centrer verticalement les autres colonnes
             ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
         ]))
         elements.append(item_table)
-        
-        # If description is long, add it as a separate Paragraph that can flow across pages
-        if len(desc) > 80:
-            desc_formatted = desc.replace('\n', '<br/>')
-            elements.append(Paragraph(f"<font color='#666666' size='7'><i>{desc_formatted}</i></font>", 
-                ParagraphStyle('LongDesc', fontSize=7, textColor=LIGHT_GRAY, leading=9, leftIndent=15, rightIndent=15, spaceBefore=2, spaceAfter=4)))
-        
-        # Add discount info if present
-        if discount:
-            elements.append(Paragraph(f"<font color='#CE0202' size='7'>↳ Remise appliquée: {discount_str}</font>", 
-                ParagraphStyle('Discount', fontSize=7, textColor=BRAND_RED, leftIndent=15, spaceAfter=4)))
     
     elements.append(Spacer(1, 0.4*cm))
     
