@@ -543,7 +543,22 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Création de contact "en ligne"
   - Modale de confirmation avant envoi
 
+### Session 17 - 2026-01-13 (Fix PDF Descriptions Longues)
+- ✅ **Bug Fix P0 CRITIQUE: Génération PDF pour descriptions longues**
+  - **Cause racine:** ReportLab ne peut pas diviser une cellule unique sur plusieurs pages (LayoutError)
+  - **Solution:** Division des descriptions >1800 caractères en plusieurs lignes de tableau
+  - **Méthode:** Les chunks sont créés aux points de coupure naturels (newlines, espaces)
+  - **Résultat:** DEV-2026-0027 (2123 chars, 1656 chars) génère maintenant un PDF valide de 25KB
+- ✅ **En-tête du tableau:**
+  - Fond bleu marine foncé (#1a1a2e)
+  - "Remise" sur une seule ligne (colonne élargie à 1.6cm)
+  - Titres centrés horizontalement et verticalement
+- ✅ **Total TTC en vert (#22c55e)**
+- ✅ **Descriptions DANS le tableau** - Plus de bloc encadré externe
+- ✅ Tests automatisés: 8/8 passés (iteration_29.json)
+
 ## Test Results
+- Session 17: 100% pass rate (8/8) - iteration_29.json
 - Session 15: Tests manuels passés
 - Session 14: 100% pass rate (12/12) - iteration_27.json
 - Session 13: 100% pass rate (10/10) - iteration_25.json
