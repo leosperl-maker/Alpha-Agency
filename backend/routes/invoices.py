@@ -411,54 +411,49 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(address_row)
     elements.append(Spacer(1, 0.3*cm))
     
-    # ===== DEUX PASTILLES DE DATES STYLE CAPTURE #3 =====
-    # Couleur foncée bleu/violet pour les pastilles comme dans la capture de référence
-    DATE_PILL_BG = colors.HexColor('#2E3A59')        # Fond bleu foncé des pastilles
-    DATE_LABEL_COLOR = colors.HexColor('#8B9DC3')   # Labels en bleu clair
-    DATE_VALUE_COLOR = colors.white                  # Valeurs en blanc
-    
+    # ===== DEUX PASTILLES DE DATES COMPACTES - ROUGE PASTEL =====
     echeance_label = "Échéance :" if doc_type == "facture" else "Validité :"
     
-    # Style pour les pastilles de dates
-    date_pill_label = ParagraphStyle('DatePillLabel', fontSize=7, textColor=DATE_LABEL_COLOR, leading=9)
-    date_pill_value = ParagraphStyle('DatePillValue', fontSize=8, textColor=DATE_VALUE_COLOR, fontName='Helvetica-Bold', leading=10)
+    # Style pour les pastilles de dates - FOND ROUGE PASTEL, TEXTE NOIR
+    date_pill_label = ParagraphStyle('DatePillLabel', fontSize=7, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=9)
+    date_pill_value = ParagraphStyle('DatePillValue', fontSize=8, textColor=DARK_GRAY, fontName='Helvetica', leading=10)
     
-    # Pastille 1: Date d'émission
+    # Pastille 1: Date d'émission (compacte)
     emission_content = [
-        Paragraph("Date d'émission :", date_pill_label),
-        Paragraph(f"<b>{doc_date_formatted}</b>", date_pill_value),
+        Paragraph("<b>Date d'émission :</b>", date_pill_label),
+        Paragraph(doc_date_formatted, date_pill_value),
     ]
-    emission_table = Table([[emission_content]], colWidths=[4*cm])
+    emission_table = Table([[emission_content]], colWidths=[3.2*cm])
     emission_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), DATE_PILL_BG),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('LEFTPADDING', (0, 0), (-1, -1), 10),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+        ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
     
-    # Pastille 2: Échéance/Validité
+    # Pastille 2: Échéance/Validité (compacte)
     echeance_content = [
-        Paragraph(echeance_label, date_pill_label),
-        Paragraph(f"<b>{due_date_formatted or '-'}</b>", date_pill_value),
+        Paragraph(f"<b>{echeance_label}</b>", date_pill_label),
+        Paragraph(due_date_formatted or '-', date_pill_value),
     ]
-    echeance_table = Table([[echeance_content]], colWidths=[4*cm])
+    echeance_table = Table([[echeance_content]], colWidths=[3.2*cm])
     echeance_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), DATE_PILL_BG),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('LEFTPADDING', (0, 0), (-1, -1), 10),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+        ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
     
-    # Aligner les deux pastilles à gauche avec un espacement
-    dates_row = Table([[emission_table, echeance_table, '']], colWidths=[4.3*cm, 4.3*cm, 8.4*cm])
+    # Aligner les deux pastilles à gauche, respectant les marges (8.5cm x 2 = 17cm total)
+    dates_row = Table([[emission_table, echeance_table, '']], colWidths=[3.5*cm, 3.5*cm, 10*cm])
     dates_row.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('LEFTPADDING', (0, 0), (0, 0), 0),
-        ('RIGHTPADDING', (0, 0), (0, 0), 8),
+        ('RIGHTPADDING', (0, 0), (0, 0), 6),
     ]))
     elements.append(dates_row)
     elements.append(Spacer(1, 0.4*cm))
