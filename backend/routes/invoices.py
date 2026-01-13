@@ -288,6 +288,11 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     # Désignation(large) | Qté | Remise | P.U. HT | TVA | Total HT
     col_widths = [8.0*cm, 1.2*cm, 1.6*cm, 2.0*cm, 1.3*cm, 2.4*cm]
     
+    # Maximum characters per description chunk to fit in a page
+    # A single cell cannot be taller than ~680 points (page height minus margins)
+    # Approximately 50-60 characters per line, ~40 lines per page = ~2000 chars max
+    MAX_DESC_CHARS_PER_ROW = 1800
+    
     # Build table data - header row first
     table_data = [[
         Paragraph("<b>Désignation</b>", th_centered),
@@ -330,24 +335,71 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         else:
             discount_str = "-"
         
-        # Build the designation cell content - title in bold + description below
-        # Description stays INSIDE the cell, formatted as smaller gray text
-        if desc:
-            # Convert newlines to <br/> for proper formatting
-            desc_formatted = desc.replace('\n', '<br/>')
-            designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
+        # For very long descriptions, we need to split into multiple rows
+        # to avoid ReportLab LayoutError (cell too tall for page)
+        if desc and len(desc) > MAX_DESC_CHARS_PER_ROW:
+            # Split description into chunks that fit in a page
+            desc_chunks = []
+            remaining = desc
+            while remaining:
+                if len(remaining) <= MAX_DESC_CHARS_PER_ROW:
+                    desc_chunks.append(remaining)
+                    break
+                # Find a good breaking point (newline or space)
+                cut_point = MAX_DESC_CHARS_PER_ROW
+                # Look for a newline near the cut point
+                newline_pos = remaining.rfind('\n', 0, cut_point)
+                if newline_pos > cut_point * 0.5:  # If newline is in second half
+                    cut_point = newline_pos + 1
+                else:
+                    # Look for a space
+                    space_pos = remaining.rfind(' ', 0, cut_point)
+                    if space_pos > cut_point * 0.7:
+                        cut_point = space_pos + 1
+                desc_chunks.append(remaining[:cut_point])
+                remaining = remaining[cut_point:]
+            
+            # First row: Title + first chunk + all numeric data
+            first_chunk_formatted = desc_chunks[0].replace('\n', '<br/>')
+            first_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{first_chunk_formatted}</font>"
+            
+            table_data.append([
+                Paragraph(first_content, td_style),
+                Paragraph(f"{qty:.2f}", td_center),
+                Paragraph(discount_str, td_center),
+                Paragraph(f"{unit_price:.2f} €", td_right),
+                Paragraph("8.5%", td_center),
+                Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
+            ])
+            
+            # Continuation rows: just the description text, empty cells for other columns
+            for chunk in desc_chunks[1:]:
+                chunk_formatted = chunk.replace('\n', '<br/>')
+                continuation_content = f"<font size='8' color='#666666'>{chunk_formatted}</font>"
+                table_data.append([
+                    Paragraph(continuation_content, td_style),
+                    Paragraph("", td_center),
+                    Paragraph("", td_center),
+                    Paragraph("", td_right),
+                    Paragraph("", td_center),
+                    Paragraph("", td_right),
+                ])
         else:
-            designation_content = f"<b>{title}</b>"
-        
-        # Create the row - ALL content inside the table cells
-        table_data.append([
-            Paragraph(designation_content, td_style),
-            Paragraph(f"{qty:.2f}", td_center),
-            Paragraph(discount_str, td_center),
-            Paragraph(f"{unit_price:.2f} €", td_right),
-            Paragraph("8.5%", td_center),
-            Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
-        ])
+            # Normal case: description fits in one row
+            if desc:
+                desc_formatted = desc.replace('\n', '<br/>')
+                designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
+            else:
+                designation_content = f"<b>{title}</b>"
+            
+            table_data.append([
+                Paragraph(designation_content, td_style),
+                Paragraph(f"{qty:.2f}", td_center),
+                Paragraph(discount_str, td_center),
+                Paragraph(f"{unit_price:.2f} €", td_right),
+                Paragraph("8.5%", td_center),
+                Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
+            ])
     
     # Create the table with splitByRow enabled
     # splitByRow=1 tells ReportLab to split the table between rows if needed
