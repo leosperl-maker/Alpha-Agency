@@ -946,57 +946,6 @@ const AgendaPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-                      <SelectItem value="10080" className="text-white hover:bg-white/10">1 semaine avant</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={reminder.email}
-                      onChange={(e) => {
-                        const updated = [...reminderSettings];
-                        updated[index].email = e.target.checked;
-                        setReminderSettings(updated);
-                      }}
-                      className="rounded bg-white/10 border-white/20"
-                    />
-                    <Mail className="w-4 h-4 text-indigo-400" />
-                    <span className="text-sm text-white/80">Email</span>
-                  </label>
-                  
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={reminder.sms}
-                      onChange={(e) => {
-                        const updated = [...reminderSettings];
-                        updated[index].sms = e.target.checked;
-                        setReminderSettings(updated);
-                      }}
-                      className="rounded bg-white/10 border-white/20"
-                    />
-                    <MessageSquare className="w-4 h-4 text-green-400" />
-                    <span className="text-sm text-white/80">SMS</span>
-                  </label>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowSettingsModal(false)} className="text-white">
-              Annuler
-            </Button>
-            <Button onClick={saveReminderSettings} className="bg-gradient-to-r from-indigo-500 to-purple-500">
-              <Check className="w-4 h-4 mr-2" />
-              Enregistrer
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
