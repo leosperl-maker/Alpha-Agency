@@ -417,8 +417,8 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     # Style pour les pastilles - tout sur une ligne
     date_pill_style = ParagraphStyle('DatePill', fontSize=8, textColor=DARK_GRAY, leading=10)
     
-    # Pastille 1: Date d'émission
-    emission_table = Table([[Paragraph(f"<b>Date d'émission :</b> {doc_date_formatted}", date_pill_style)]], colWidths=[4*cm])
+    # Pastille 1: Date d'émission - ÉLARGIE pour tenir sur une seule ligne
+    emission_table = Table([[Paragraph(f"<b>Date d'émission :</b> {doc_date_formatted}", date_pill_style)]], colWidths=[4.8*cm])
     emission_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
         ('TOPPADDING', (0, 0), (-1, -1), 5),
@@ -440,11 +440,9 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     ]))
     
     # Les pastilles doivent être alignées à GAUCHE, au même niveau que le début de la colonne Désignation
-    # Total largeur disponible = 17cm (A4 - marges). Largeur colonne Désignation = 8cm
-    # On utilise la même largeur totale que le tableau (16.5cm) pour garantir l'alignement
     dates_row = Table(
         [[emission_table, Spacer(0.3*cm, 0), echeance_table, '']], 
-        colWidths=[4*cm, 0.3*cm, 3.5*cm, 8.7*cm]
+        colWidths=[4.8*cm, 0.3*cm, 3.5*cm, 7.9*cm]
     )
     dates_row.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
