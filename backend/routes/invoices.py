@@ -331,7 +331,9 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     col_widths = [8.0*cm, 1.2*cm, 1.6*cm, 2.0*cm, 1.3*cm, 2.4*cm]
     
     # Maximum characters per description chunk
-    MAX_DESC_CHARS_PER_ROW = 1800
+    # Reduced to 800 chars to ensure first row fits on page 1 with header
+    # This allows the table to START on page 1 even with very long descriptions
+    MAX_DESC_CHARS_PER_ROW = 800
     
     # Build table data - header row first
     table_data = [[
