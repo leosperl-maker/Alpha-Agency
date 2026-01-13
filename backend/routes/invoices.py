@@ -381,9 +381,9 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
             ]))
             elements.append(item_table)
         else:
-            # For long descriptions, use a different approach:
+            # For long descriptions:
             # 1. Title row with numeric values (compact)
-            # 2. Description as a flowing Paragraph with border
+            # 2. Description as a pure flowing Paragraph (can span pages naturally)
             
             # Title row with numeric values
             title_row = [[
@@ -400,42 +400,32 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
                 ('BACKGROUND', (0, 0), (-1, -1), row_bg),
                 ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
                 ('FONTSIZE', (0, 0), (-1, -1), 9),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
                 ('TOPPADDING', (0, 0), (-1, -1), 8),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-                ('LINEBELOW', (0, 0), (-1, -1), 0, colors.white),  # Remove bottom border
+                ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+                ('LINEBEFORE', (1, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
             ]))
             elements.append(title_table)
             
-            # Description as a flowing paragraph with left border
+            # Description as a pure flowing paragraph (can span pages naturally)
             desc_para_style = ParagraphStyle(
                 'LongDesc', 
                 fontSize=8, 
                 textColor=LIGHT_GRAY, 
                 leading=11,
-                leftIndent=10,
-                rightIndent=10,
-                spaceBefore=0,
-                spaceAfter=0,
+                leftIndent=12,
+                rightIndent=12,
+                spaceBefore=4,
+                spaceAfter=8,
+                backColor=row_bg,
+                borderWidth=0.5,
+                borderColor=colors.HexColor('#CCCCCC'),
+                borderPadding=8,
             )
             
-            # Description in a bordered container that flows across pages
             desc_para = Paragraph(desc_formatted, desc_para_style)
-            
-            # Wrap description in a table for the border
-            desc_table = Table([[desc_para]], colWidths=[col_widths[0]])
-            desc_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, -1), row_bg),
-                ('TOPPADDING', (0, 0), (-1, -1), 4),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-                ('LEFTPADDING', (0, 0), (-1, -1), 10),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 10),
-                ('LINEBEFORE', (0, 0), (0, -1), 0.5, colors.HexColor('#CCCCCC')),
-                ('LINEAFTER', (0, 0), (0, -1), 0.5, colors.HexColor('#CCCCCC')),
-                ('LINEBELOW', (0, -1), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-            ]))
-            elements.append(desc_table)
+            elements.append(desc_para)
     
     elements.append(Spacer(1, 0.4*cm))
     
