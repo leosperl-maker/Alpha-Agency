@@ -302,6 +302,49 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Bouton de synchronisation manuelle
   - Cache local MongoDB des transactions
 
+### Session 19 - 2026-01-13 (Agenda / RDV avec Google Calendar & Meet)
+- ✅ **Nouvelle page Agenda / RDV** (`/admin/agenda`)
+  - Calendrier mensuel interactif avec navigation (mois précédent/suivant, aujourd'hui)
+  - Vue Liste alternative
+  - Statistiques: Total RDV, À venir, Avec Meet, Invitations envoyées
+- ✅ **Création de RDV complète**
+  - Sélection d'un contact existant
+  - Date, heure, durée configurable
+  - Association optionnelle d'un devis/facture
+  - Association optionnelle d'un document
+  - Génération automatique d'événement Google Calendar avec lien Google Meet
+- ✅ **Intégration Google Calendar** (OAuth2)
+  - Connexion/déconnexion Google Calendar
+  - Création d'événements avec conférence Meet
+  - Mise à jour et suppression synchronisées
+- ✅ **Système de relances configurables**
+  - Jusqu'à 4 relances (J-3, J-1, H-2, H-0 par défaut)
+  - Délais modifiables dans les paramètres
+  - Email et/ou SMS par relance
+- ✅ **Envoi d'invitations email** (manuel, via Brevo)
+  - Template HTML professionnel avec:
+    - Date, heure, durée du RDV
+    - Lien Google Meet
+    - Document associé
+    - N° de devis/facture
+- ✅ **Envoi de SMS de rappel** (via Brevo SMS)
+  - Expéditeur: "AlphaAgency"
+  - Message compact avec infos RDV + lien Meet
+- ✅ **Backend complet** (`/app/backend/routes/appointments.py`)
+  - CRUD rendez-vous
+  - Auth Google OAuth2
+  - Gestion des relances programmées
+  - Endpoints: GET/POST/PUT/DELETE /api/appointments
+  - Settings: GET/PUT /api/appointments/settings/reminders
+
+**⚠️ Configuration requise:**
+Pour activer Google Calendar, ajouter dans `/app/backend/.env`:
+```
+GOOGLE_CLIENT_ID=votre_client_id
+GOOGLE_CLIENT_SECRET=votre_client_secret
+GOOGLE_REDIRECT_URI=https://invoice-export-1.preview.emergentagent.com/api/appointments/auth/callback
+```
+
 ## Known Issues
 - Routes dupliquées temporairement dans server.py et modules séparés
 - server.py encore partiellement monolithique (~6000 lignes) mais 10 modules extraits
