@@ -411,49 +411,39 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(address_row)
     elements.append(Spacer(1, 0.3*cm))
     
-    # ===== DEUX PASTILLES DE DATES COMPACTES - ROUGE PASTEL =====
+    # ===== DEUX PASTILLES DE DATES COMPACTES - ROUGE PASTEL - SUR UNE SEULE LIGNE =====
     echeance_label = "Échéance :" if doc_type == "facture" else "Validité :"
     
-    # Style pour les pastilles de dates - FOND ROUGE PASTEL, TEXTE NOIR
-    date_pill_label = ParagraphStyle('DatePillLabel', fontSize=7, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=9)
-    date_pill_value = ParagraphStyle('DatePillValue', fontSize=8, textColor=DARK_GRAY, fontName='Helvetica', leading=10)
+    # Style pour les pastilles - tout sur une ligne
+    date_pill_style = ParagraphStyle('DatePill', fontSize=8, textColor=DARK_GRAY, leading=10)
     
-    # Pastille 1: Date d'émission (compacte)
-    emission_content = [
-        Paragraph("<b>Date d'émission :</b>", date_pill_label),
-        Paragraph(doc_date_formatted, date_pill_value),
-    ]
-    emission_table = Table([[emission_content]], colWidths=[3.2*cm])
+    # Pastille 1: Date d'émission - label en gras, date normale, SUR UNE LIGNE
+    emission_table = Table([[Paragraph(f"<b>Date d'émission :</b> {doc_date_formatted}", date_pill_style)]], colWidths=[4*cm])
     emission_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
         ('LEFTPADDING', (0, 0), (-1, -1), 8),
         ('RIGHTPADDING', (0, 0), (-1, -1), 8),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
     
-    # Pastille 2: Échéance/Validité (compacte)
-    echeance_content = [
-        Paragraph(f"<b>{echeance_label}</b>", date_pill_label),
-        Paragraph(due_date_formatted or '-', date_pill_value),
-    ]
-    echeance_table = Table([[echeance_content]], colWidths=[3.2*cm])
+    # Pastille 2: Validité/Échéance - label en gras, date normale, SUR UNE LIGNE
+    echeance_table = Table([[Paragraph(f"<b>{echeance_label}</b> {due_date_formatted or '-'}", date_pill_style)]], colWidths=[3.5*cm])
     echeance_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
         ('LEFTPADDING', (0, 0), (-1, -1), 8),
         ('RIGHTPADDING', (0, 0), (-1, -1), 8),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
     
-    # Aligner les deux pastilles à gauche, respectant les marges (8.5cm x 2 = 17cm total)
-    dates_row = Table([[emission_table, echeance_table, '']], colWidths=[3.5*cm, 3.5*cm, 10*cm])
+    # Aligner les pastilles - décalées vers la droite pour respecter la marge gauche du tableau
+    # Espace à gauche pour aligner avec la colonne Désignation
+    dates_row = Table([['', emission_table, echeance_table, '']], colWidths=[0*cm, 4.2*cm, 3.7*cm, 9.1*cm])
     dates_row.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('LEFTPADDING', (0, 0), (0, 0), 0),
-        ('RIGHTPADDING', (0, 0), (0, 0), 6),
     ]))
     elements.append(dates_row)
     elements.append(Spacer(1, 0.4*cm))
