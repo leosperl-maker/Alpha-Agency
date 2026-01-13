@@ -272,12 +272,12 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(addr_table)
     elements.append(Spacer(1, 0.6*cm))
     
-    # ===== TABLE - Tout dans le tableau, pas de bloc séparé =====
+    # ===== TABLE - Tout dans le tableau =====
     # Colonnes ajustées pour que "Remise" ne soit pas coupé
     # Désignation | Qté | Remise | P.U. HT | TVA | Total HT
     col_widths = [8.5*cm, 1.2*cm, 1.5*cm, 2.2*cm, 1.3*cm, 2.3*cm]
     
-    from reportlab.platypus import LongTable, KeepTogether
+    from reportlab.platypus import LongTable
     
     # Style pour la cellule Désignation
     designation_style = ParagraphStyle(
@@ -297,34 +297,27 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         fontName='Helvetica-Bold'
     )
     
-    # Header row - Dark navy blue, centré
-    header_data = [[
+    # Construire les données du tableau complet
+    table_data = []
+    row_spans = []  # Pour tracker les cellules à fusionner
+    
+    # Header row
+    table_data.append([
         Paragraph("<b>Désignation</b>", th_centered),
         Paragraph("<b>Qté</b>", th_centered),
         Paragraph("<b>Remise</b>", th_centered),
         Paragraph("<b>P.U. HT</b>", th_centered),
         Paragraph("<b>TVA</b>", th_centered),
         Paragraph("<b>Total HT</b>", th_centered),
-    ]]
-    
-    header_table = Table(header_data, colWidths=col_widths)
-    header_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), NAVY_BLUE),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-        ('TOPPADDING', (0, 0), (-1, 0), 10),
-        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # Centrer horizontalement
-        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),  # Centrer verticalement
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-    ]))
-    elements.append(header_table)
+    ])
     
     subtotal = 0
     tva_rate = 0.085
     
-    # ===== ITEMS - TOUT dans le tableau, descriptions incluses =====
+    # Limite de caractères par segment de description (pour éviter les cellules trop hautes)
+    MAX_DESC_SEGMENT = 1500
+    
+    # ===== ITEMS =====
     for idx, item in enumerate(doc_data.get('items', [])):
         qty = item.get('quantity', 1)
         unit_price = item.get('unit_price', 0)
@@ -353,39 +346,105 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         else:
             discount_str = "-"
         
-        row_bg = colors.white if idx % 2 == 0 else colors.HexColor('#F9F9F9')
-        desc_formatted = desc.replace('\n', '<br/>') if desc else ""
-        
-        # Construire le contenu de la cellule Désignation (titre + description)
-        if desc:
-            designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
+        # Pour les descriptions très longues, les diviser en segments
+        if len(desc) > MAX_DESC_SEGMENT:
+            # Diviser la description en segments par paragraphes/lignes
+            segments = []
+            current_segment = ""
+            
+            for line in desc.split('\n'):
+                if len(current_segment) + len(line) + 1 <= MAX_DESC_SEGMENT:
+                    current_segment = current_segment + '\n' + line if current_segment else line
+                else:
+                    if current_segment:
+                        segments.append(current_segment)
+                    current_segment = line
+            if current_segment:
+                segments.append(current_segment)
+            
+            # Si un seul segment trop long, le couper manuellement
+            if len(segments) == 1 and len(segments[0]) > MAX_DESC_SEGMENT:
+                text = segments[0]
+                segments = []
+                while text:
+                    segments.append(text[:MAX_DESC_SEGMENT])
+                    text = text[MAX_DESC_SEGMENT:]
+            
+            # Première ligne avec titre + premier segment + données numériques
+            first_segment = segments[0].replace('\n', '<br/>')
+            first_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{first_segment}</font>"
+            
+            table_data.append([
+                Paragraph(first_content, designation_style),
+                Paragraph(f"{qty:.2f}", td_center),
+                Paragraph(discount_str, td_center),
+                Paragraph(f"{unit_price:.2f} €", td_right),
+                Paragraph("8.5%", td_center),
+                Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
+            ])
+            
+            # Lignes de continuation avec le reste de la description
+            for segment in segments[1:]:
+                segment_formatted = segment.replace('\n', '<br/>')
+                continuation_content = f"<font size='8' color='#666666'>{segment_formatted}</font>"
+                
+                table_data.append([
+                    Paragraph(continuation_content, designation_style),
+                    Paragraph("", td_center),  # Cellules vides pour les continuations
+                    Paragraph("", td_center),
+                    Paragraph("", td_right),
+                    Paragraph("", td_center),
+                    Paragraph("", td_right),
+                ])
         else:
-            designation_content = f"<b>{title}</b>"
-        
-        designation_para = Paragraph(designation_content, designation_style)
-        
-        # Créer la ligne du tableau - TOUT dans le tableau
-        data_row = [[
-            designation_para,
-            Paragraph(f"{qty:.2f}", td_center),
-            Paragraph(discount_str, td_center),
-            Paragraph(f"{unit_price:.2f} €", td_right),
-            Paragraph("8.5%", td_center),
-            Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
-        ]]
-        
-        item_table = Table(data_row, colWidths=col_widths)
-        item_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), row_bg),
-            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-            ('TOPPADDING', (0, 0), (-1, -1), 8),
-            ('VALIGN', (0, 0), (0, 0), 'TOP'),  # Désignation en haut
-            ('VALIGN', (1, 0), (-1, -1), 'MIDDLE'),  # Autres colonnes centrées
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
-        ]))
-        elements.append(item_table)
+            # Description normale, tout dans une ligne
+            desc_formatted = desc.replace('\n', '<br/>') if desc else ""
+            
+            if desc:
+                designation_content = f"<b>{title}</b><br/><font size='8' color='#666666'>{desc_formatted}</font>"
+            else:
+                designation_content = f"<b>{title}</b>"
+            
+            table_data.append([
+                Paragraph(designation_content, designation_style),
+                Paragraph(f"{qty:.2f}", td_center),
+                Paragraph(discount_str, td_center),
+                Paragraph(f"{unit_price:.2f} €", td_right),
+                Paragraph("8.5%", td_center),
+                Paragraph(f"<b>{line_total:.2f} €</b>", td_right),
+            ])
+    
+    # Créer la LongTable
+    items_table = LongTable(table_data, colWidths=col_widths, repeatRows=1)
+    
+    # Style du tableau
+    table_style_list = [
+        # Header style
+        ('BACKGROUND', (0, 0), (-1, 0), NAVY_BLUE),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('TOPPADDING', (0, 0), (-1, 0), 10),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+        # Data rows style
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+        ('TOPPADDING', (0, 1), (-1, -1), 8),
+        ('VALIGN', (0, 1), (0, -1), 'TOP'),  # Désignation en haut
+        ('VALIGN', (1, 1), (-1, -1), 'MIDDLE'),  # Autres colonnes centrées
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CCCCCC')),
+    ]
+    
+    # Alternance de couleurs (simplifiée - toutes les lignes impaires)
+    for i in range(1, len(table_data)):
+        if i % 2 == 0:
+            table_style_list.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor('#F9F9F9')))
+    
+    items_table.setStyle(TableStyle(table_style_list))
+    elements.append(items_table)
     
     elements.append(Spacer(1, 0.4*cm))
     
