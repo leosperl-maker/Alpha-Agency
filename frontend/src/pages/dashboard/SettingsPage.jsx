@@ -94,6 +94,9 @@ Banque: Votre Banque`,
   const [savingTemplate, setSavingTemplate] = useState(null);
   const [testingTemplate, setTestingTemplate] = useState(null);
   const [previewTemplate, setPreviewTemplate] = useState(null);
+  const [testEmailAddress, setTestEmailAddress] = useState("");
+  const [emailLogo, setEmailLogo] = useState("");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   useEffect(() => {
     fetchNotificationSettings();
