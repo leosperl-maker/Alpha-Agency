@@ -161,6 +161,7 @@ async def get_google_credentials():
     """Get valid Google credentials, refreshing if needed"""
     settings = await db.settings.find_one({"type": "google_calendar_tokens"})
     if not settings or not settings.get('access_token'):
+        logger.warning("No Google credentials found")
         return None
     
     creds = Credentials(
@@ -171,17 +172,18 @@ async def get_google_credentials():
         client_secret=GOOGLE_CLIENT_SECRET
     )
     
-    # Refresh if expired
-    if creds.expired and creds.refresh_token:
+    # Try to refresh if we have a refresh token
+    if settings.get('refresh_token'):
         try:
             creds.refresh(GoogleRequest())
             await db.settings.update_one(
                 {"type": "google_calendar_tokens"},
                 {"$set": {"access_token": creds.token}}
             )
+            logger.info("Google credentials refreshed successfully")
         except Exception as e:
             logger.error(f"Token refresh failed: {e}")
-            return None
+            # Continue with existing token, it might still work
     
     return creds
 
