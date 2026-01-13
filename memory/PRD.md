@@ -562,7 +562,29 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Logo utilisé dans les emails de test
 - ✅ Tests automatisés: 17/17 passés (iteration_31.json)
 
-## Test Results
+### Session 18 - 2026-01-13 (Refonte Visuelle PDF - Charte Rouge Pastel)
+- ✅ **Refonte visuelle complète du PDF**
+  - **Logo à GAUCHE** (agrandi à 5cm x 1.75cm), **titre DEVIS/FACTURE à DROITE** (grande typo rouge)
+  - **DESTINATAIRE** en petit, noir, pas gras (plus discret comme étiquette)
+  - **Textes plus fins et petits** dans les sections info (fontSize 8-9)
+  - **Fond rouge pastel (#FFF0F5)** sur sections info, dates, conditions, paiement
+  - **PAS DE BORDURE FONCÉE** sur les sections pastel (suppression des BOX styles)
+- ✅ **Dates sur une seule ligne avec labels en rouge foncé**
+  - Format: `Date d'émission: 13/01/2026    Validité: 12/02/2026`
+  - Labels en couleur #B85050 (rouge foncé pour contraste)
+  - Suppression de la date en doublon (en haut à droite)
+- ✅ **Sections Conditions et Paiement affinées**
+  - Même style pastel sans bordure
+  - Textes plus compacts (fontSize 8)
+- ✅ Backend testé via curl: PDF généré sans erreur
+- ✅ Analyse du PDF validant tous les changements:
+  - ✅ Logo à gauche: CONFORME
+  - ✅ DEVIS à droite: CONFORME
+  - ✅ DESTINATAIRE petit/noir/pas gras: CONFORME
+  - ✅ Dates sur même ligne avec labels rouge foncé: CONFORME
+  - ✅ Sections sans bordure foncée: CONFORME
+
+## Known Issues
 - Session 17: 100% pass rate (17/17) - iteration_31.json (PDF + Email templates)
 - Session 17: 100% pass rate (12/12) - iteration_30.json
 - Session 17: 100% pass rate (8/8) - iteration_29.json
