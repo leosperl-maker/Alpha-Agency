@@ -99,7 +99,49 @@ Banque: Votre Banque`,
     fetchNotificationSettings();
     fetchApiKeys();
     fetchInvoiceSettings();
+    fetchEmailTemplates();
   }, []);
+
+  const fetchEmailTemplates = async () => {
+    setLoadingTemplates(true);
+    try {
+      const res = await api.get('/settings/email-templates');
+      if (res.data) {
+        setEmailTemplates({
+          devis: res.data.devis || { subject: "", body: "" },
+          facture: res.data.facture || { subject: "", body: "" }
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching email templates:", error);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  const handleSaveEmailTemplate = async (templateType) => {
+    setSavingTemplate(templateType);
+    try {
+      await api.put(`/settings/email-templates/${templateType}`, emailTemplates[templateType]);
+      toast.success(`Template ${templateType === 'devis' ? 'Devis' : 'Facture'} sauvegardé`);
+    } catch (error) {
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setSavingTemplate(null);
+    }
+  };
+
+  const handleTestEmailTemplate = async (templateType) => {
+    setTestingTemplate(templateType);
+    try {
+      const res = await api.post('/settings/email-templates/test', { template_type: templateType });
+      toast.success(res.data.message || "Email de test envoyé");
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Erreur lors de l'envoi du test");
+    } finally {
+      setTestingTemplate(null);
+    }
+  };
 
   const fetchInvoiceSettings = async () => {
     try {
