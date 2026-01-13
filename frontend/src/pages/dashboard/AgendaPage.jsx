@@ -585,12 +585,12 @@ const AgendaPage = () => {
                 <FileText className="w-4 h-4" />
                 Associer un devis/facture
               </Label>
-              <Select value={formData.invoice_id} onValueChange={(v) => setFormData({...formData, invoice_id: v})}>
+              <Select value={formData.invoice_id || "none"} onValueChange={(v) => setFormData({...formData, invoice_id: v === "none" ? "" : v})}>
                 <SelectTrigger className="bg-white/5 border-white/20 text-white">
                   <SelectValue placeholder="Aucun" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1a1a2e] border-white/20">
-                  <SelectItem value="" className="text-white hover:bg-white/10">Aucun</SelectItem>
+                  <SelectItem value="none" className="text-white hover:bg-white/10">Aucun</SelectItem>
                   {invoices.map(inv => (
                     <SelectItem key={inv.id} value={inv.id} className="text-white hover:bg-white/10">
                       {inv.invoice_number || inv.quote_number} - {inv.contact_name || 'Sans nom'}
@@ -606,12 +606,12 @@ const AgendaPage = () => {
                 <Paperclip className="w-4 h-4" />
                 Joindre un document
               </Label>
-              <Select value={formData.document_id} onValueChange={(v) => setFormData({...formData, document_id: v})}>
+              <Select value={formData.document_id || "none"} onValueChange={(v) => setFormData({...formData, document_id: v === "none" ? "" : v})}>
                 <SelectTrigger className="bg-white/5 border-white/20 text-white">
                   <SelectValue placeholder="Aucun" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1a1a2e] border-white/20">
-                  <SelectItem value="" className="text-white hover:bg-white/10">Aucun</SelectItem>
+                  <SelectItem value="none" className="text-white hover:bg-white/10">Aucun</SelectItem>
                   {documents.map(doc => (
                     <SelectItem key={doc.id} value={doc.id} className="text-white hover:bg-white/10">
                       {doc.name}
