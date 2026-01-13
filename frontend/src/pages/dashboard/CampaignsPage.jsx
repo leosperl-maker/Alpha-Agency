@@ -1179,10 +1179,10 @@ const StatisticsTab = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-white">Statistiques des campagnes</h3>
-        <p className="text-sm text-white/60">Suivez les performances de vos campagnes</p>
+        <h3 className="text-base sm:text-lg font-semibold text-white">Statistiques des campagnes</h3>
+        <p className="text-xs sm:text-sm text-white/60">Suivez les performances de vos campagnes</p>
       </div>
 
       {loading ? (
@@ -1190,13 +1190,16 @@ const StatisticsTab = () => {
           <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-white/60">Emails envoyés</p>
-                  <p className="text-2xl font-bold text-white">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+            <CardContent className="p-3 sm:pt-6 sm:p-6">
+              <div className="flex items-center gap-2 sm:justify-between">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <Send className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-white/60">Emails envoyés</p>
+                  <p className="text-lg sm:text-2xl font-bold text-white">
                     {emailStats?.requests || 0}
                   </p>
                 </div>
