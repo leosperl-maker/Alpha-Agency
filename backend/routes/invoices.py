@@ -297,7 +297,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
     ]))
     elements.append(header_table)
-    elements.append(Spacer(1, 0.3*cm))  # REDUCED spacing
+    elements.append(Spacer(1, 0.2*cm))  # Minimal spacing
     
     # ===== SENDER & RECIPIENT SIDE BY SIDE (COMPACT) =====
     sender_info = [
@@ -324,7 +324,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
     ]))
     elements.append(addr_table)
-    elements.append(Spacer(1, 0.4*cm))  # REDUCED spacing - items start RIGHT after
+    elements.append(Spacer(1, 0.3*cm))  # Minimal spacing - table starts RIGHT after
     
     # ===== ITEMS TABLE =====
     # Column widths adjusted so "Remise" fits on ONE line
