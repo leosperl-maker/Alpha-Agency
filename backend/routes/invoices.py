@@ -418,24 +418,9 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(totals_table)
     elements.append(Spacer(1, 0.5*cm))
     
-    # ===== SIGNATURE SECTION (for devis only) =====
-    if doc_type == "devis":
-        sig_left = [
-            Paragraph("<b>Pour Alpha Agency</b>", section_style),
-            Spacer(1, 1*cm),
-            Paragraph("_" * 30, section_style),
-        ]
-        sig_right = [
-            Paragraph("<b>Bon pour accord, le client</b>", section_style),
-            Spacer(1, 1*cm),
-            Paragraph("_" * 30, section_style),
-        ]
-        sig_table = Table([[sig_left, sig_right]], colWidths=[8.5*cm, 8.5*cm])
-        sig_table.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP')]))
-        elements.append(sig_table)
-        elements.append(Spacer(1, 0.3*cm))
-    
     # ===== CONDITIONS DE RÈGLEMENT & DÉTAILS DE PAIEMENT - Fond gris clair =====
+    # (Pas de section "Pour Alpha Agency / Bon pour accord" - directement les conditions)
+    
     # Récupérer les données depuis les paramètres
     conditions_text = doc_data.get('conditions') or invoice_settings.get('default_conditions', '')
     bank_details = doc_data.get('bank_details') or invoice_settings.get('bank_details', '')
