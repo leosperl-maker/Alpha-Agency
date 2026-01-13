@@ -151,31 +151,32 @@ def fetch_logo_image():
 def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "facture", invoice_settings: dict = None) -> BytesIO:
     """
     Generate professional PDF for invoice or quote.
-    NOUVELLE CHARTE COULEURS ROUGE PASTEL.
+    NOUVELLE CHARTE COULEURS ROUGE PASTEL - VERSION AFFINÉE.
     
     Features:
-    - Gros titre "DEVIS" ou "FACTURE" en haut à gauche
-    - Dates affichées (Date d'émission + Échéance) avec pastilles rouge pastel
-    - Encadrés agence/destinataire en rouge pastel
-    - Conditions et Paiement en rouge pastel
-    - Synchronized with preview design
+    - Logo à gauche, titre "DEVIS"/"FACTURE" à droite
+    - Coins arrondis sur toutes les sections pastel (simulé)
+    - DESTINATAIRE en noir, petit, discret
+    - Textes plus fins et petits
+    - Dates sur une seule ligne avec labels en rouge foncé
+    - Pas de bordure foncée, juste fond pastel
     """
     if not invoice_settings:
         invoice_settings = {}
     
     buffer = BytesIO()
     
-    # ===== NOUVELLE CHARTE COULEURS ROUGE PASTEL =====
-    BRAND_RED = colors.HexColor('#CE0202')          # Rouge brand pour textes importants
+    # ===== NOUVELLE CHARTE COULEURS ROUGE PASTEL AFFINÉE =====
+    BRAND_RED = colors.HexColor('#CE0202')          # Rouge brand pour titre DEVIS/FACTURE
     DARK_GRAY = colors.HexColor('#333333')          # Texte principal
     LIGHT_GRAY = colors.HexColor('#666666')         # Texte secondaire
     NAVY_BLUE = colors.HexColor('#1a1a2e')          # En-tête du tableau des articles
     GREEN_POSITIVE = colors.HexColor('#22c55e')     # Total TTC
-    BORDER_COLOR = colors.HexColor('#CCCCCC')       # Bordures
+    BORDER_COLOR = colors.HexColor('#CCCCCC')       # Bordures tableau
     
-    # NOUVELLE COULEUR PASTEL ROSE/ROUGE
+    # COULEUR PASTEL ROSE/ROUGE
     PASTEL_PINK = colors.HexColor('#FFF0F5')        # Fond des encadrés (LavenderBlush)
-    PASTEL_PINK_BORDER = colors.HexColor('#FADADD') # Bordure des encadrés
+    DATE_LABEL_RED = colors.HexColor('#B85050')     # Rouge foncé pour labels de dates
     
     # Get company info
     company_name = invoice_settings.get('company_name') or COMPANY_INFO['commercial_name']
@@ -203,12 +204,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         doc_date_formatted = doc_date
     
     # Doc title and type
-    if doc_type == "devis":
-        doc_type_title = "DEVIS"
-        date_label = "Date d'émission"
-    else:
-        doc_type_title = "FACTURE"
-        date_label = "Date d'émission"
+    doc_type_title = "DEVIS" if doc_type == "devis" else "FACTURE"
     
     # Format validity/due date
     valid_until = doc_data.get('valid_until', '')
@@ -297,22 +293,24 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     styles = getSampleStyleSheet()
     elements = []
     
-    # ===== STYLES =====
-    # Gros titre DEVIS/FACTURE
-    big_title_style = ParagraphStyle('BigTitle', fontSize=28, textColor=BRAND_RED, fontName='Helvetica-Bold', leading=32)
+    # ===== STYLES AFFINÉS =====
+    # Titre DEVIS/FACTURE - plus grand, à droite
+    big_title_style = ParagraphStyle('BigTitle', fontSize=32, textColor=BRAND_RED, fontName='Helvetica-Bold', leading=36, alignment=TA_RIGHT)
     
-    # Infos document
-    doc_info_style = ParagraphStyle('DocInfo', fontSize=10, textColor=DARK_GRAY, leading=12)
-    doc_number_style = ParagraphStyle('DocNumber', fontSize=11, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=14)
+    # Numéro de document - discret
+    doc_number_style = ParagraphStyle('DocNumber', fontSize=9, textColor=LIGHT_GRAY, leading=11, alignment=TA_RIGHT)
     
-    # Styles pour les encadrés
-    company_style = ParagraphStyle('Company', fontSize=9, textColor=DARK_GRAY, leading=11)
-    client_header = ParagraphStyle('ClientHeader', fontSize=10, textColor=BRAND_RED, fontName='Helvetica-Bold')
-    client_style = ParagraphStyle('Client', fontSize=9, textColor=DARK_GRAY, leading=11)
+    # Styles pour les encadrés - PLUS FINS
+    company_name_style = ParagraphStyle('CompanyName', fontSize=9, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=11)
+    company_style = ParagraphStyle('Company', fontSize=8, textColor=LIGHT_GRAY, leading=10)
     
-    # Date pill style
-    date_label_style = ParagraphStyle('DateLabel', fontSize=8, textColor=LIGHT_GRAY, leading=10)
-    date_value_style = ParagraphStyle('DateValue', fontSize=9, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=11)
+    # DESTINATAIRE - petit, noir, discret (pas en rouge, pas gras)
+    client_header = ParagraphStyle('ClientHeader', fontSize=8, textColor=DARK_GRAY, fontName='Helvetica', leading=10)
+    client_name_style = ParagraphStyle('ClientName', fontSize=9, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=11)
+    client_style = ParagraphStyle('Client', fontSize=8, textColor=LIGHT_GRAY, leading=10)
+    
+    # Date inline style - labels en rouge foncé
+    date_inline_style = ParagraphStyle('DateInline', fontSize=8, textColor=DATE_LABEL_RED, leading=10)
     
     # Table header style
     th_centered = ParagraphStyle('TableHeaderCentered', fontSize=8, textColor=colors.white, alignment=TA_CENTER, fontName='Helvetica-Bold')
@@ -325,64 +323,48 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     totals_style = ParagraphStyle('Totals', fontSize=9, textColor=DARK_GRAY, alignment=TA_RIGHT)
     totals_green = ParagraphStyle('TotalsGreen', fontSize=10, textColor=GREEN_POSITIVE, fontName='Helvetica-Bold', alignment=TA_RIGHT)
     
-    # Pastel box styles (rouge pastel)
-    pastel_header_style = ParagraphStyle('PastelHeader', fontSize=10, textColor=DARK_GRAY, fontName='Helvetica-Bold', spaceAfter=4)
-    pastel_text_style = ParagraphStyle('PastelText', fontSize=9, textColor=DARK_GRAY, leading=11)
-    pastel_bullet_style = ParagraphStyle('PastelBullet', fontSize=9, textColor=DARK_GRAY, leading=11, leftIndent=10)
+    # Pastel box styles
+    pastel_header_style = ParagraphStyle('PastelHeader', fontSize=9, textColor=DARK_GRAY, fontName='Helvetica-Bold', spaceAfter=4)
+    pastel_text_style = ParagraphStyle('PastelText', fontSize=8, textColor=DARK_GRAY, leading=10)
+    pastel_bullet_style = ParagraphStyle('PastelBullet', fontSize=8, textColor=DARK_GRAY, leading=10, leftIndent=10)
     
-    # ===== HEADER: GROS TITRE + LOGO + INFOS =====
-    
-    # Ligne 1: DEVIS/FACTURE à gauche + Logo à droite
+    # ===== HEADER: LOGO À GAUCHE + TITRE À DROITE =====
     logo_path = fetch_logo_image()
     
-    # Titre gauche
-    title_left = [
-        Paragraph(f"<b>{doc_type_title}</b>", big_title_style),
-    ]
-    
-    # Logo droite
-    logo_right = []
+    # Logo à gauche (plus grand)
+    logo_left = []
     if logo_path:
         try:
-            logo_right.append(Image(logo_path, width=4*cm, height=1.4*cm))
+            logo_left.append(Image(logo_path, width=5*cm, height=1.75*cm))
         except:
-            logo_right.append(Paragraph(f"<b>{company_name}</b>", ParagraphStyle('', fontSize=12, textColor=BRAND_RED)))
+            logo_left.append(Paragraph(f"<b>{company_name}</b>", ParagraphStyle('', fontSize=14, textColor=BRAND_RED)))
     else:
-        logo_right.append(Paragraph(f"<b>{company_name}</b>", ParagraphStyle('', fontSize=12, textColor=BRAND_RED)))
+        logo_left.append(Paragraph(f"<b>{company_name}</b>", ParagraphStyle('', fontSize=14, textColor=BRAND_RED)))
     
-    header_row1 = Table([[title_left, logo_right]], colWidths=[10*cm, 7*cm])
+    # Titre + numéro à droite
+    title_right = [
+        Paragraph(f"<b>{doc_type_title}</b>", big_title_style),
+        Paragraph(f"N° {doc_number}", doc_number_style),
+    ]
+    
+    header_row1 = Table([[logo_left, title_right]], colWidths=[10*cm, 7*cm])
     header_row1.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('ALIGN', (0, 0), (0, 0), 'LEFT'),
         ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
     ]))
     elements.append(header_row1)
-    elements.append(Spacer(1, 0.1*cm))
+    elements.append(Spacer(1, 0.4*cm))
     
-    # Ligne 2: Numéro de document + Date
-    doc_info_left = [
-        Paragraph(f"<b>N° {doc_number}</b>", doc_number_style),
-    ]
-    doc_info_right = [
-        Paragraph(f"Date: {doc_date_formatted}", doc_info_style),
-    ]
+    # ===== ENCADRÉS AGENCE + DESTINATAIRE (coins arrondis simulés, pas de bordure foncée) =====
     
-    header_row2 = Table([[doc_info_left, doc_info_right]], colWidths=[10*cm, 7*cm])
-    header_row2.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
-    ]))
-    elements.append(header_row2)
-    elements.append(Spacer(1, 0.3*cm))
-    
-    # ===== ENCADRÉS AGENCE + DESTINATAIRE (rouge pastel) =====
-    
-    # Encadré agence (gauche)
+    # Encadré agence (gauche) - textes plus fins
     sender_content = [
-        Paragraph(f"<b>{company_name}</b>", ParagraphStyle('', fontSize=10, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=12)),
+        Paragraph(f"<b>{company_name}</b>", company_name_style),
         Paragraph(company_address, company_style),
         Paragraph(f"Tél: {company_phone}", company_style),
-        Paragraph(f"Email: {company_email}", company_style),
+        Paragraph(company_email, company_style),
+        Spacer(1, 0.1*cm),
         Paragraph(f"SIRET: {company_siret}", company_style),
         Paragraph(f"TVA: {company_vat}", company_style),
     ]
@@ -390,19 +372,20 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     sender_table = Table([[sender_content]], colWidths=[8*cm])
     sender_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
-        ('BOX', (0, 0), (-1, -1), 1, PASTEL_PINK_BORDER),
-        ('TOPPADDING', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-        ('LEFTPADDING', (0, 0), (-1, -1), 12),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+        # Pas de bordure foncée - juste fond pastel
+        ('TOPPADDING', (0, 0), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+        ('LEFTPADDING', (0, 0), (-1, -1), 14),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 14),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('ROUNDRECT', (0, 0), (-1, -1), 8),
     ]))
     
-    # Encadré destinataire (droite)
+    # Encadré destinataire (droite) - DESTINATAIRE en noir, petit, discret
     client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
-    recipient_content = [Paragraph("<b>DESTINATAIRE</b>", client_header)]
+    recipient_content = [Paragraph("DESTINATAIRE", client_header)]  # Petit, noir, pas gras
     if client_name:
-        recipient_content.append(Paragraph(f"<b>{client_name}</b>", ParagraphStyle('', fontSize=10, textColor=DARK_GRAY, fontName='Helvetica-Bold', leading=12)))
+        recipient_content.append(Paragraph(f"<b>{client_name}</b>", client_name_style))
     if contact.get('company'):
         recipient_content.append(Paragraph(contact['company'], client_style))
     if contact.get('email'):
@@ -413,12 +396,13 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     recipient_table = Table([[recipient_content]], colWidths=[8*cm])
     recipient_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
-        ('BOX', (0, 0), (-1, -1), 1, PASTEL_PINK_BORDER),
-        ('TOPPADDING', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-        ('LEFTPADDING', (0, 0), (-1, -1), 12),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+        # Pas de bordure foncée
+        ('TOPPADDING', (0, 0), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+        ('LEFTPADDING', (0, 0), (-1, -1), 14),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 14),
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('ROUNDRECT', (0, 0), (-1, -1), 8),
     ]))
     
     # Combiner les deux encadrés côte à côte
@@ -429,44 +413,21 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(address_row)
     elements.append(Spacer(1, 0.3*cm))
     
-    # ===== PASTILLES DE DATES (rouge pastel) =====
-    date_emission_content = [
-        Paragraph("Date d'émission", date_label_style),
-        Paragraph(f"<b>{doc_date_formatted}</b>", date_value_style),
-    ]
+    # ===== DATES SUR UNE LIGNE (labels en rouge foncé) =====
+    echeance_label = "Échéance:" if doc_type == "facture" else "Validité:"
+    date_text = f"<font color='#B85050'>Date d'émission:</font> {doc_date_formatted}    <font color='#B85050'>{echeance_label}</font> {due_date_formatted or '-'}"
     
-    date_emission_table = Table([[date_emission_content]], colWidths=[4*cm])
-    date_emission_table.setStyle(TableStyle([
+    dates_table = Table([[Paragraph(date_text, date_inline_style)]], colWidths=[17*cm])
+    dates_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
-        ('BOX', (0, 0), (-1, -1), 1, PASTEL_PINK_BORDER),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('LEFTPADDING', (0, 0), (-1, -1), 10),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 14),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 14),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ROUNDRECT', (0, 0), (-1, -1), 8),
     ]))
-    
-    echeance_content = [
-        Paragraph("Échéance" if doc_type == "facture" else "Validité", date_label_style),
-        Paragraph(f"<b>{due_date_formatted or '-'}</b>", date_value_style),
-    ]
-    
-    echeance_table = Table([[echeance_content]], colWidths=[4*cm])
-    echeance_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
-        ('BOX', (0, 0), (-1, -1), 1, PASTEL_PINK_BORDER),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('LEFTPADDING', (0, 0), (-1, -1), 10),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-    ]))
-    
-    dates_row = Table([[date_emission_table, Spacer(0.5*cm, 0), echeance_table, '']], colWidths=[4.2*cm, 0.5*cm, 4.2*cm, 8*cm])
-    dates_row.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-    ]))
-    elements.append(dates_row)
+    elements.append(dates_table)
     elements.append(Spacer(1, 0.4*cm))
     
     # ===== TABLE HEADER =====
