@@ -603,13 +603,12 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         payment_table = Table([[payment_content]], colWidths=[17*cm])
         payment_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
-            # Pas de bordure foncée - coins arrondis simulés via padding
+            # Pas de bordure foncée
             ('TOPPADDING', (0, 0), (-1, -1), 12),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
             ('LEFTPADDING', (0, 0), (-1, -1), 14),
             ('RIGHTPADDING', (0, 0), (-1, -1), 14),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-            ('ROUNDRECT', (0, 0), (-1, -1), 8),
         ]))
         elements.append(payment_table)
     
