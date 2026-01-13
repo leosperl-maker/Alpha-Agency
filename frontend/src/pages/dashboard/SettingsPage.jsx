@@ -775,68 +775,6 @@ Cordialement,
             </CardContent>
           </Card>
         </TabsContent>
-                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                          ) : (
-                            <TestTube className="w-4 h-4 mr-1" />
-                          )}
-                          <span className="hidden sm:inline">Tester</span>
-                        </Button>
-                        <Button 
-                          size="sm"
-                          onClick={() => handleSaveEmailTemplate('facture')}
-                          disabled={savingTemplate === 'facture'}
-                          className="bg-indigo-600 hover:bg-indigo-500"
-                        >
-                          {savingTemplate === 'facture' ? (
-                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                          ) : (
-                            <Save className="w-4 h-4 mr-1" />
-                          )}
-                          <span className="hidden sm:inline">Sauvegarder</span>
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <Label className="text-white">Objet de l'email</Label>
-                        <Input
-                          value={emailTemplates.facture.subject}
-                          onChange={(e) => setEmailTemplates(prev => ({
-                            ...prev,
-                            facture: { ...prev.facture, subject: e.target.value }
-                          }))}
-                          placeholder="Votre facture {{numero}} - {{company_name}}"
-                          className="bg-white/5 border-white/10 text-white mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-white">Corps du message</Label>
-                        <Textarea
-                          value={emailTemplates.facture.body}
-                          onChange={(e) => setEmailTemplates(prev => ({
-                            ...prev,
-                            facture: { ...prev.facture, body: e.target.value }
-                          }))}
-                          placeholder={`Bonjour {{client_name}},
-
-Veuillez trouver ci-joint votre facture {{numero}} d'un montant de {{montant}} €.
-
-Nous vous remercions de procéder au règlement dans les meilleurs délais.
-
-Cordialement,
-{{company_name}}
-{{company_phone}} - {{company_email}}`}
-                          rows={8}
-                          className="bg-white/5 border-white/10 text-white mt-1 font-mono text-sm"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* API Keys Tab */}
         <TabsContent value="api-keys">
