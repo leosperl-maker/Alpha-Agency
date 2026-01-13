@@ -510,6 +510,25 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Endpoint de test `POST /api/settings/email-templates/test` envoyé à leo.sperl@alphagency.com
 - ✅ **Correction Assistant IA** - Élargi les sélecteurs de contexte/modèle pour éviter le coupure
 
+### Session 16 - 2026-01-13 (PDF Conforme GHI & Responsive Mobile)
+- ✅ **Structure PDF conforme au modèle GHI**
+  - Suppression de la colonne "Code"
+  - Colonnes: Désignation | Qté | Remise | P.U. HT | TVA | Total HT
+  - Titre en gras + description en dessous dans la même cellule Désignation
+  - Descriptions courtes (<200 car) restent dans la cellule
+  - Descriptions longues (>200 car) sont ajoutées comme Paragraphes séparés (peuvent couler sur plusieurs pages)
+  - "Montant total TTC" affiché sur une seule ligne
+  - Bug LayoutError résolu pour les très longues descriptions
+- ✅ **Interface Templates Email (Frontend)**
+  - Nouvel onglet "Emails" dans les Paramètres (/admin/parametres)
+  - Édition des templates Devis et Facture avec variables disponibles affichées
+  - Boutons Tester et Sauvegarder pour chaque template
+- ✅ **Corrections Responsive Mobile**
+  - Page Campagnes: Tabs en icônes sur mobile, stats en grille 2x2, cards au lieu de tables
+  - Page AI Assistant: Sélecteurs de contexte/modèle non coupés, meilleur scroll horizontal
+  - Page Social Media: Vérifiée OK
+  - Page Pipeline: Stats cards non coupées
+
 ## Test Results
 - Session 15: Tests manuels passés
 - Session 14: 100% pass rate (12/12) - iteration_27.json
