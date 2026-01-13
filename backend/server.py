@@ -2641,14 +2641,18 @@ async def update_email_template(
 
 @api_router.post("/settings/email-templates/test", response_model=dict)
 async def send_test_email(
+    test_email: Optional[str] = None,
+    template_type: str = "devis",
     current_user: dict = Depends(get_current_user)
 ):
-    """Send test emails to leo.sperl@alphagency.com"""
+    """Send a test email to verify template configuration"""
     import httpx
     
     brevo_api_key = os.environ.get('BREVO_API_KEY')
     sender_email = os.environ.get('BREVO_SENDER_EMAIL', COMPANY_INFO['email'])
-    test_recipient = "leo.sperl@alphagency.com"
+    
+    # Use provided email or default to current user's email
+    test_recipient = test_email if test_email else current_user.get('email', 'leo.sperl@alphagency.com')
     
     if not brevo_api_key:
         raise HTTPException(status_code=500, detail="Clé API Brevo non configurée")
@@ -2667,67 +2671,133 @@ async def send_test_email(
     company_phone = inv_settings.get('company_phone', COMPANY_INFO['phone']) if inv_settings else COMPANY_INFO['phone']
     company_email = inv_settings.get('company_email', COMPANY_INFO['email']) if inv_settings else COMPANY_INFO['email']
     
-    results = []
+    # Get custom logo if uploaded
+    logo_settings = await db.settings.find_one({"type": "email_logo"}, {"_id": 0})
+    logo_url = logo_settings.get('url') if logo_settings else "https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png"
     
-    for doc_type in ['devis', 'facture']:
-        template = templates.get(doc_type, {})
-        subject = template.get('subject', f'Test {doc_type}')
-        body = template.get('body', f'Corps du {doc_type}')
-        
-        # Replace variables
-        replacements = {
-            '{{numero}}': f'{doc_type.upper()[:3]}-2026-TEST',
-            '{{client_name}}': 'Client Test',
-            '{{montant}}': '500.00',
-            '{{company_name}}': company_name,
-            '{{company_phone}}': company_phone,
-            '{{company_email}}': company_email
-        }
-        
-        for var, val in replacements.items():
-            subject = subject.replace(var, val)
-            body = body.replace(var, val)
-        
-        # Convert newlines to HTML
-        html_body = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <img src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png" alt="{company_name}" style="max-height: 60px;">
-                </div>
-                <div style="white-space: pre-wrap;">{body}</div>
-                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-                <p style="font-size: 12px; color: #999; text-align: center;">
-                    Ceci est un email de test depuis les paramètres de template.
-                </p>
+    template = templates.get(template_type, {})
+    subject = template.get('subject', f'Test {template_type}')
+    body = template.get('body', f'Corps du {template_type}')
+    
+    # Replace variables
+    replacements = {
+        '{{numero}}': f'{template_type.upper()[:3]}-2026-TEST',
+        '{{client_name}}': 'Client Test',
+        '{{montant}}': '500.00',
+        '{{company_name}}': company_name,
+        '{{company_phone}}': company_phone,
+        '{{company_email}}': company_email
+    }
+    
+    for var, val in replacements.items():
+        subject = subject.replace(var, val)
+        body = body.replace(var, val)
+    
+    # Convert newlines to HTML
+    html_body = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <img src="{logo_url}" alt="{company_name}" style="max-height: 60px;">
             </div>
-        </body>
-        </html>
-        """
-        
-        email_data = {
-            "sender": {"name": company_name, "email": sender_email},
-            "to": [{"email": test_recipient, "name": "Test"}],
-            "subject": f"[TEST] {subject}",
-            "htmlContent": html_body
-        }
-        
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    "https://api.brevo.com/v3/smtp/email",
-                    headers={"api-key": brevo_api_key, "Content-Type": "application/json"},
-                    json=email_data
-                )
-                if response.status_code in [200, 201]:
-                    results.append({"type": doc_type, "status": "success"})
-                else:
-                    results.append({"type": doc_type, "status": "error", "message": response.text})
-        except Exception as e:
-            results.append({"type": doc_type, "status": "error", "message": str(e)})
+            <div style="white-space: pre-wrap;">{body}</div>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            <p style="font-size: 12px; color: #999; text-align: center;">
+                Ceci est un email de test depuis les paramètres de template.
+            </p>
+        </div>
+    </body>
+    </html>
+    """
     
-    return {"results": results, "sent_to": test_recipient}
+    email_data = {
+        "sender": {"name": company_name, "email": sender_email},
+        "to": [{"email": test_recipient, "name": "Test"}],
+        "subject": f"[TEST] {subject}",
+        "htmlContent": html_body
+    }
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.brevo.com/v3/smtp/email",
+                headers={"api-key": brevo_api_key, "Content-Type": "application/json"},
+                json=email_data
+            )
+            if response.status_code in [200, 201]:
+                return {"success": True, "message": f"Email de test envoyé à {test_recipient}", "sent_to": test_recipient}
+            else:
+                raise HTTPException(status_code=500, detail=f"Erreur Brevo: {response.text}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur d'envoi: {str(e)}")
+
+
+@api_router.post("/settings/email-logo", response_model=dict)
+async def upload_email_logo(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload a custom logo for email templates"""
+    import cloudinary
+    import cloudinary.uploader
+    
+    # Validate file type
+    if not file.content_type.startswith('image/'):
+        raise HTTPException(status_code=400, detail="Le fichier doit être une image")
+    
+    # Check file size (max 2MB)
+    contents = await file.read()
+    if len(contents) > 2 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Le fichier ne doit pas dépasser 2MB")
+    
+    # Configure Cloudinary
+    cloudinary.config(
+        cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+        api_key=os.environ.get('CLOUDINARY_API_KEY'),
+        api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+    )
+    
+    try:
+        # Upload to Cloudinary
+        result = cloudinary.uploader.upload(
+            contents,
+            folder="email_logos",
+            public_id=f"email_logo_{current_user['user_id']}",
+            overwrite=True,
+            resource_type="image"
+        )
+        
+        logo_url = result.get('secure_url')
+        
+        # Save to database
+        await db.settings.update_one(
+            {"type": "email_logo"},
+            {"$set": {"type": "email_logo", "url": logo_url, "updated_at": datetime.now(timezone.utc).isoformat()}},
+            upsert=True
+        )
+        
+        return {"success": True, "url": logo_url, "message": "Logo uploadé avec succès"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur d'upload: {str(e)}")
+
+
+@api_router.get("/settings/email-logo", response_model=dict)
+async def get_email_logo(current_user: dict = Depends(get_current_user)):
+    """Get the current email logo URL"""
+    logo_settings = await db.settings.find_one({"type": "email_logo"}, {"_id": 0})
+    if logo_settings and logo_settings.get('url'):
+        return {"url": logo_settings['url'], "has_custom_logo": True}
+    return {"url": "https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png", "has_custom_logo": False}
+
+
+@api_router.delete("/settings/email-logo", response_model=dict)
+async def delete_email_logo(current_user: dict = Depends(get_current_user)):
+    """Remove custom email logo and revert to default"""
+    await db.settings.delete_one({"type": "email_logo"})
+    return {"success": True, "message": "Logo supprimé, logo par défaut restauré"}
 
 
 # ==================== API KEYS MANAGEMENT ====================
