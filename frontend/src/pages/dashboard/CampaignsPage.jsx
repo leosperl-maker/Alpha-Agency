@@ -1292,54 +1292,56 @@ const CampaignsPage = () => {
   const [activeTab, setActiveTab] = useState("email");
 
   return (
-    <div data-testid="campaigns-page" className="space-y-6">
+    <div data-testid="campaigns-page" className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
-                <Mail className="w-5 h-5 text-white" />
-              </div>
-              Campagnes Marketing
-            </h1>
-            <p className="text-white/60 text-sm mt-1 ml-13">
-              Créez et gérez vos campagnes Email et SMS via Brevo
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 flex items-center justify-center flex-shrink-0">
+              <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-2xl font-bold text-white">
+                Campagnes Marketing
+              </h1>
+              <p className="text-white/60 text-xs sm:text-sm">
+                Créez et gérez vos campagnes Email et SMS via Brevo
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-1 w-full sm:w-auto">
+        <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-1 w-full grid grid-cols-4 sm:flex sm:w-auto overflow-x-auto">
           <TabsTrigger
             value="email"
-            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4"
+            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-2 sm:px-4 text-xs sm:text-sm"
           >
-            <Mail className="w-4 h-4 mr-2" />
-            Email
+            <Mail className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Email</span>
           </TabsTrigger>
           <TabsTrigger
             value="sms"
-            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4"
+            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-2 sm:px-4 text-xs sm:text-sm"
           >
-            <MessageSquare className="w-4 h-4 mr-2" />
-            SMS
+            <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">SMS</span>
           </TabsTrigger>
           <TabsTrigger
             value="contacts"
-            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4"
+            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-2 sm:px-4 text-xs sm:text-sm"
           >
-            <Users className="w-4 h-4 mr-2" />
-            Contacts
+            <Users className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Contacts</span>
           </TabsTrigger>
           <TabsTrigger
             value="stats"
-            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-4"
+            className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-2 sm:px-4 text-xs sm:text-sm"
           >
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Statistiques
+            <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Stats</span>
           </TabsTrigger>
         </TabsList>
 
