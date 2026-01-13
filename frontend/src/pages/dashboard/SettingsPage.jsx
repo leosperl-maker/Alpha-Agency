@@ -375,6 +375,10 @@ Banque: Votre Banque`,
             <Bell className="w-4 h-4 mr-2" />
             Notifications
           </TabsTrigger>
+          <TabsTrigger value="email-templates" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+            <Mail className="w-4 h-4 mr-2" />
+            Emails
+          </TabsTrigger>
           <TabsTrigger value="social" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             Réseaux sociaux
           </TabsTrigger>
