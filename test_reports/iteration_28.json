@@ -1,0 +1,55 @@
+{
+  "summary": "Tested PDF facturation corrections and responsive mobile features. PDF structure is correct (no Code column, title+description in same cell, Total TTC on single line). CRITICAL BUG: PDF generation fails with LayoutError for very long descriptions (>30 lines). Mobile responsive for Campaigns page works (tabs show as icons). Settings Email Templates tab is functional.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "GET /api/invoices/{id}/pdf",
+        "issue": "LayoutError when description is very long (>30 lines). Error: 'tallest cell X points, too large on page Y in frame'. The table cell cannot split across pages.",
+        "priority": "CRITICAL",
+        "root_cause": "ReportLab Table with long Paragraph in cell cannot split across pages. Need to use splitFirst=True or split long descriptions manually.",
+        "test_case": "Create devis with 50-line description, then download PDF -> 520 Internal Server Error"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/tests/test_pdf_facturation.py",
+    "/app/test_reports/pytest/pytest_pdf_facturation.xml"
+  ],
+  "action_items": [
+    "FIX CRITICAL: In /app/backend/routes/invoices.py, modify PDF generation to handle very long descriptions. Options: 1) Use Table with splitByRow=True and splitFirst=True, 2) Split long descriptions into multiple rows, 3) Truncate descriptions with '...' after certain length"
+  ],
+  "critical_code_review_comments": [
+    "PDF generation in invoices.py line ~273-380 uses ReportLab Table which cannot split cells across pages by default. When a cell (Désignation with long description) exceeds page height, LayoutError is thrown.",
+    "The fix should use Table(..., splitByRow=True) and ensure Paragraph elements can flow across pages"
+  ],
+  "updated_files": [
+    "/app/tests/test_pdf_facturation.py"
+  ],
+  "success_rate": {
+    "backend": "82% (9/11 tests passed)",
+    "frontend": "100%"
+  },
+  "test_credentials": {
+    "email": "admin@alphagency.fr",
+    "password": "superpassword"
+  },
+  "seed_data_creation": "Created test devis DEV-2026-0025 (moderate description) and DEV-2026-0026 (very long description - causes PDF error)",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "PDF generation works for normal descriptions but fails for very long ones (>30 lines). The LayoutError in ReportLab needs to be fixed. Test with DEV-2026-0026 to verify fix. Mobile responsive for Campaigns and AI Assistant pages is working. Settings Email Templates tab is functional.",
+  "verified_features": {
+    "pdf_no_code_column": "PASS - Table headers are: Désignation, Qté, Remise, P.U. HT, TVA, Total HT",
+    "pdf_title_description_same_cell": "PASS - Title in bold + description text in same Désignation cell",
+    "pdf_total_ttc_single_line": "PASS - Shows 'Montant total TTC: X €' on single line",
+    "pdf_calculations_correct": "PASS - Qté × PU HT - Remise = Total HT, TVA 8.5%, Total TTC",
+    "pdf_long_descriptions": "FAIL - LayoutError for descriptions >30 lines",
+    "campaigns_mobile_responsive": "PASS - Tabs show as icons on mobile (390x844)",
+    "settings_email_templates": "PASS - Tab functional with devis/facture templates"
+  }
+}
