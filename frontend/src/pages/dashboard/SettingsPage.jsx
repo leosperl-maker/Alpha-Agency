@@ -471,7 +471,7 @@ Banque: Votre Banque`,
                 <div>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Mail className="w-5 h-5 text-indigo-400" />
-                    Templates d'e-mail
+                    Templates d&apos;e-mail
                   </CardTitle>
                   <CardDescription>
                     Personnalisez les e-mails envoyés avec vos devis et factures
@@ -490,6 +490,60 @@ Banque: Votre Banque`,
                 </div>
               ) : (
                 <div className="space-y-8">
+                  {/* Paramètres généraux */}
+                  <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                    <h4 className="font-medium text-white mb-4 flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      Paramètres généraux
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Email de test */}
+                      <div>
+                        <Label className="text-white">Adresse email de test</Label>
+                        <Input
+                          type="email"
+                          value={testEmailAddress}
+                          onChange={(e) => setTestEmailAddress(e.target.value)}
+                          placeholder="test@exemple.com"
+                          className="bg-white/5 border-white/10 text-white mt-1"
+                        />
+                        <p className="text-xs text-white/40 mt-1">
+                          Les emails de test seront envoyés à cette adresse
+                        </p>
+                      </div>
+                      {/* Logo */}
+                      <div>
+                        <Label className="text-white">Logo pour les emails</Label>
+                        <div className="flex gap-2 mt-1">
+                          <Input
+                            value={emailLogo}
+                            onChange={(e) => setEmailLogo(e.target.value)}
+                            placeholder="URL du logo ou glissez un fichier"
+                            className="bg-white/5 border-white/10 text-white flex-1"
+                          />
+                          <label className="cursor-pointer">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleLogoUpload}
+                              className="hidden"
+                            />
+                            <Button variant="outline" size="sm" asChild disabled={uploadingLogo}>
+                              <span>
+                                {uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : "Upload"}
+                              </span>
+                            </Button>
+                          </label>
+                        </div>
+                        {emailLogo && (
+                          <div className="mt-2 p-2 bg-white rounded">
+                            <img src={emailLogo} alt="Logo email" className="max-h-12 object-contain" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Variables disponibles */}
                   <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
                     <h4 className="font-medium text-indigo-900 mb-2">Variables disponibles</h4>
@@ -516,8 +570,16 @@ Banque: Votre Banque`,
                         <Button 
                           variant="outline" 
                           size="sm"
+                          onClick={() => setPreviewTemplate(previewTemplate === 'devis' ? null : 'devis')}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          <span className="hidden sm:inline">{previewTemplate === 'devis' ? 'Masquer' : 'Aperçu'}</span>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
                           onClick={() => handleTestEmailTemplate('devis')}
-                          disabled={testingTemplate === 'devis'}
+                          disabled={testingTemplate === 'devis' || !testEmailAddress}
                         >
                           {testingTemplate === 'devis' ? (
                             <Loader2 className="w-4 h-4 mr-1 animate-spin" />
@@ -541,9 +603,34 @@ Banque: Votre Banque`,
                         </Button>
                       </div>
                     </div>
+                    
+                    {/* Preview email devis */}
+                    {previewTemplate === 'devis' && (
+                      <div className="mb-4 border border-indigo-500/30 rounded-lg overflow-hidden">
+                        <div className="bg-indigo-500/20 px-4 py-2 text-sm text-indigo-300">
+                          Aperçu de l&apos;email (avec données exemple)
+                        </div>
+                        <div className="bg-white p-4">
+                          {emailLogo && (
+                            <img src={emailLogo} alt="Logo" className="max-h-12 mb-4" />
+                          )}
+                          <p className="text-xs text-gray-500 mb-1">Objet:</p>
+                          <p className="font-medium text-gray-800 mb-4 pb-2 border-b">
+                            {generateEmailPreview('devis').subject}
+                          </p>
+                          <div className="text-gray-700 whitespace-pre-wrap text-sm">
+                            {generateEmailPreview('devis').body}
+                          </div>
+                          <div className="mt-4 pt-4 border-t text-xs text-gray-400">
+                            <p>📎 Pièce jointe: devis_DEV-2026-0001.pdf</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="space-y-4">
                       <div>
-                        <Label className="text-white">Objet de l'email</Label>
+                        <Label className="text-white">Objet de l&apos;email</Label>
                         <Input
                           value={emailTemplates.devis.subject}
                           onChange={(e) => setEmailTemplates(prev => ({
@@ -589,10 +676,105 @@ Cordialement,
                         <Button 
                           variant="outline" 
                           size="sm"
+                          onClick={() => setPreviewTemplate(previewTemplate === 'facture' ? null : 'facture')}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          <span className="hidden sm:inline">{previewTemplate === 'facture' ? 'Masquer' : 'Aperçu'}</span>
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
                           onClick={() => handleTestEmailTemplate('facture')}
-                          disabled={testingTemplate === 'facture'}
+                          disabled={testingTemplate === 'facture' || !testEmailAddress}
                         >
                           {testingTemplate === 'facture' ? (
+                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                          ) : (
+                            <TestTube className="w-4 h-4 mr-1" />
+                          )}
+                          <span className="hidden sm:inline">Tester</span>
+                        </Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => handleSaveEmailTemplate('facture')}
+                          disabled={savingTemplate === 'facture'}
+                          className="bg-indigo-600 hover:bg-indigo-500"
+                        >
+                          {savingTemplate === 'facture' ? (
+                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                          ) : (
+                            <Save className="w-4 h-4 mr-1" />
+                          )}
+                          <span className="hidden sm:inline">Sauvegarder</span>
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Preview email facture */}
+                    {previewTemplate === 'facture' && (
+                      <div className="mb-4 border border-green-500/30 rounded-lg overflow-hidden">
+                        <div className="bg-green-500/20 px-4 py-2 text-sm text-green-300">
+                          Aperçu de l&apos;email (avec données exemple)
+                        </div>
+                        <div className="bg-white p-4">
+                          {emailLogo && (
+                            <img src={emailLogo} alt="Logo" className="max-h-12 mb-4" />
+                          )}
+                          <p className="text-xs text-gray-500 mb-1">Objet:</p>
+                          <p className="font-medium text-gray-800 mb-4 pb-2 border-b">
+                            {generateEmailPreview('facture').subject}
+                          </p>
+                          <div className="text-gray-700 whitespace-pre-wrap text-sm">
+                            {generateEmailPreview('facture').body}
+                          </div>
+                          <div className="mt-4 pt-4 border-t text-xs text-gray-400">
+                            <p>📎 Pièce jointe: facture_FAC-2026-0001.pdf</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-white">Objet de l&apos;email</Label>
+                        <Input
+                          value={emailTemplates.facture.subject}
+                          onChange={(e) => setEmailTemplates(prev => ({
+                            ...prev,
+                            facture: { ...prev.facture, subject: e.target.value }
+                          }))}
+                          placeholder="Votre facture {{numero}} - {{company_name}}"
+                          className="bg-white/5 border-white/10 text-white mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-white">Corps du message</Label>
+                        <Textarea
+                          value={emailTemplates.facture.body}
+                          onChange={(e) => setEmailTemplates(prev => ({
+                            ...prev,
+                            facture: { ...prev.facture, body: e.target.value }
+                          }))}
+                          placeholder={`Bonjour {{client_name}},
+
+Veuillez trouver ci-joint votre facture {{numero}} d'un montant de {{montant}} €.
+
+Nous vous remercions de procéder au règlement dans les meilleurs délais.
+
+Cordialement,
+{{company_name}}
+{{company_phone}} - {{company_email}}`}
+                          rows={8}
+                          className="bg-white/5 border-white/10 text-white mt-1 font-mono text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
                             <Loader2 className="w-4 h-4 mr-1 animate-spin" />
                           ) : (
                             <TestTube className="w-4 h-4 mr-1" />
