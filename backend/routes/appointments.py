@@ -349,13 +349,15 @@ async def create_appointment(
 async def send_admin_confirmation_email(appointment: dict, contact: dict):
     """Send confirmation email to admin when appointment is created"""
     try:
-        # Get admin email from settings or use default
-        admin_email = BREVO_SENDER_EMAIL  # Or you can get it from settings
+        # Get admin email - use leo.sperl@alphagency.fr or from Google auth
+        settings = await db.settings.find_one({"type": "google_calendar_tokens"})
+        admin_email = settings.get('google_email', 'leo.sperl@alphagency.fr') if settings else 'leo.sperl@alphagency.fr'
         
         # Format date
         start_dt = datetime.fromisoformat(appointment['start_datetime'].replace('Z', '+00:00'))
         date_str = start_dt.strftime('%d/%m/%Y')
         time_str = start_dt.strftime('%H:%M')
+        day_name = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'][start_dt.weekday()]
         
         client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
         meet_link = appointment.get('google_meet_link', '')
@@ -366,7 +368,7 @@ async def send_admin_confirmation_email(appointment: dict, contact: dict):
             
             <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #22c55e;">
                 <h3 style="margin-top: 0; color: #333;">{appointment['title']}</h3>
-                <p><strong>📆 Date :</strong> {date_str}</p>
+                <p><strong>📆 Date :</strong> {day_name} {date_str}</p>
                 <p><strong>🕐 Heure :</strong> {time_str}</p>
                 <p><strong>⏱️ Durée :</strong> {appointment['duration_minutes']} minutes</p>
                 <p><strong>👤 Client :</strong> {client_name}</p>
@@ -395,13 +397,13 @@ async def send_admin_confirmation_email(appointment: dict, contact: dict):
             json={
                 'sender': {'name': BREVO_SENDER_NAME, 'email': BREVO_SENDER_EMAIL},
                 'to': [{'email': admin_email, 'name': 'Admin Alpha Agency'}],
-                'subject': f"✅ RDV créé - {appointment['title']} - {date_str} à {time_str} avec {client_name}",
+                'subject': f"✅ RDV créé - {appointment['title']} - {day_name} {date_str} à {time_str} avec {client_name}",
                 'htmlContent': html_content
             }
         )
         
         if response.status_code in [200, 201, 202]:
-            logger.info(f"Admin confirmation email sent for appointment {appointment['id']}")
+            logger.info(f"Admin confirmation email sent to {admin_email} for appointment {appointment['id']}")
         else:
             logger.error(f"Failed to send admin confirmation email: {response.text}")
             
