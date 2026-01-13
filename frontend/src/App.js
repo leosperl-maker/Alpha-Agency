@@ -112,6 +112,7 @@ function App() {
             <Route path="things" element={<ThingsPage />} />
             <Route path="mindmap" element={<MindMapPage />} />
             <Route path="transfer" element={<TransfersPage />} />
+            <Route path="agenda" element={<AgendaPage />} />
           </Route>
           
           {/* Public transfer download page */}
