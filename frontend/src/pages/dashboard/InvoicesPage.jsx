@@ -2348,8 +2348,8 @@ BANQUE : ..."
                   <span className="font-mono font-medium">{selectedInvoiceForPayment.invoice_number}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/60">Total TTC</span>
-                  <span className="font-mono">{formatCurrency(selectedInvoiceForPayment.total)}</span>
+                  <span className="text-green-500 text-xs leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
+                  <span className="font-mono text-green-500">{formatCurrency(selectedInvoiceForPayment.total)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-white/60">Déjà payé</span>
