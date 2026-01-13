@@ -280,9 +280,12 @@ async def create_appointment(
     
     # Try to create Google Calendar event with Meet
     creds = await get_google_credentials()
+    logger.info(f"Google credentials available: {creds is not None}")
+    
     if creds:
         try:
             service = build('calendar', 'v3', credentials=creds)
+            logger.info("Google Calendar service built successfully")
             
             # Build event with Google Meet
             event_body = {
