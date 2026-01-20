@@ -126,7 +126,7 @@ async def google_auth_callback(code: str = None, error: str = None):
         
         if 'error' in token_resp:
             logger.error(f"Token exchange error: {token_resp}")
-            return RedirectResponse(f"/admin/agenda?error={token_resp.get('error_description', token_resp['error'])}")
+            return RedirectResponse(f"{redirect_base}/admin/agenda?error={token_resp.get('error_description', token_resp['error'])}")
         
         # Get user info
         user_info = requests.get(
@@ -149,11 +149,11 @@ async def google_auth_callback(code: str = None, error: str = None):
         )
         
         logger.info(f"Google Calendar connected for: {user_info.get('email')}")
-        return RedirectResponse("/admin/agenda?success=connected")
+        return RedirectResponse(f"{redirect_base}/admin/agenda?success=connected")
         
     except Exception as e:
         logger.error(f"Google auth callback error: {e}")
-        return RedirectResponse(f"/admin/agenda?error={str(e)}")
+        return RedirectResponse(f"{redirect_base}/admin/agenda?error={str(e)}")
 
 @router.post("/auth/disconnect")
 async def google_auth_disconnect(current_user: dict = Depends(get_current_user)):
