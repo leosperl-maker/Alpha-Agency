@@ -29,7 +29,25 @@ const ThingsPage = () => {
   useEffect(() => {
     const saved = localStorage.getItem("alpha-things-todos");
     if (saved) {
-      setTodos(JSON.parse(saved));
+      let loadedTodos = JSON.parse(saved);
+      
+      // REPORT AUTOMATIQUE: Reporter les tâches non terminées des jours passés à aujourd'hui
+      const today = new Date().toISOString().split('T')[0];
+      loadedTodos = loadedTodos.map(todo => {
+        // Si la tâche a une date passée, n'est pas terminée et n'est pas archivée
+        if (todo.dueDate && todo.dueDate < today && !todo.completed && !todo.archived) {
+          // Reporter à aujourd'hui
+          return {
+            ...todo,
+            dueDate: today,
+            rescheduledFrom: todo.dueDate, // Garder une trace de la date originale
+            rescheduledAt: new Date().toISOString()
+          };
+        }
+        return todo;
+      });
+      
+      setTodos(loadedTodos);
     }
   }, []);
 
