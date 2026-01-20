@@ -342,7 +342,7 @@ Pour activer Google Calendar, ajouter dans `/app/backend/.env`:
 ```
 GOOGLE_CLIENT_ID=votre_client_id
 GOOGLE_CLIENT_SECRET=votre_client_secret
-GOOGLE_REDIRECT_URI=https://invoice-export-1.preview.emergentagent.com/api/appointments/auth/callback
+GOOGLE_REDIRECT_URI=https://task-calendar-45.preview.emergentagent.com/api/appointments/auth/callback
 ```
 
 ## Known Issues

@@ -29,7 +29,7 @@ router = APIRouter(prefix="/appointments", tags=["Appointments"])
 
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
-GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI', 'https://invoice-export-1.preview.emergentagent.com/api/appointments/auth/callback')
+GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI', 'https://task-calendar-45.preview.emergentagent.com/api/appointments/auth/callback')
 
 BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
 BREVO_SMS_SENDER = "AlphaAgency"  # Max 11 chars for alphanumeric sender

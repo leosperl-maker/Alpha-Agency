@@ -1,142 +1,249 @@
 <analysis>**original_problem_statement:**
-L'utilisateur a demandé plusieurs corrections et fonctionnalités pour son CRM, avec une priorité sur l'unification et la correction du système de facturation.
+L'utilisateur a demandé plusieurs évolutions et corrections majeures :
 
-**Exigences Principales (P0):**
-1.  **Cohérence des Devis/Factures :** L'utilisateur exige qu'il n'y ait qu'UN SEUL design cohérent pour les devis et factures. Ce design doit être utilisé pour :
-    *   La prévisualisation dans la modale des paramètres.
-    *   La prévisualisation lors de la création/modification.
-    *   Le fichier PDF final généré.
-    Toutes ces versions doivent être **identiques**.
-2.  **Informations d'entreprise modifiables :** Les informations de l'entreprise affichées en haut des PDF (Nom, Adresse, Téléphone, Email) doivent être entièrement modifiables depuis la modale des paramètres de facturation et les changements doivent se refléter partout.
-3.  **Correction des PDF :**
-    *   Pas de page blanche superflue, même avec des descriptions très longues. Le contenu doit continuer sur la page suivante de manière fluide.
-    *   La mise en page doit s'inspirer du PDF d'exemple devis signé GHI.pdf.
-4.  **Scrollbar dans les paramètres :** La modale des paramètres de facturation n'a pas de barre de défilement, empêchant l'accès aux boutons de sauvegarde si le contenu est trop long.
+1.  **Module Agenda / RDV (Nouvelle Fonctionnalité) :**
+    *   Créer un nouvel onglet Agenda / RDV dans le dashboard.
+    *   Intégrer Google Agenda pour créer des événements, générer des liens Google Meet, et synchroniser les rendez-vous.
+    *   Permettre la création de RDV en associant un contact du CRM, un devis/facture, et des pièces jointes.
+    *   Mettre en place un système de relances automatiques (J-3, J-1, etc.) par email et SMS via Brevo.
+    *   L'envoi de l'invitation initiale au client n'est pas automatique, mais déclenché manuellement par l'utilisateur.
+    *   L'invitation email au client doit contenir un fichier  pour l'ajouter facilement à son calendrier.
+    *   Envoyer un email de confirmation à l'administrateur (l'utilisateur) lors de la création d'un RDV.
+    *   Permettre la personnalisation des templates d'email et SMS depuis le dashboard.
 
-**Autres demandes importantes (P1 & P2):**
-1.  **Templates d'e-mail modifiables (P1) :** L'utilisateur veut une interface pour voir et modifier le contenu des e-mails de devis et de facture envoyés via Brevo, sans que le texte soit codé en dur.
-2.  **Correction massive de la réactivité mobile (P2) :** De nombreuses pages sont mal agencées ou coupées sur mobile/tablette (Pipeline, Contacts, Tâches, Budget, Assistant IA, Campagnes, Social Media, Mindmap).
-3.  **Module de Transfert (P2) :** L'utilisateur demande une analyse des fonctionnalités du module de transfert de fichiers par rapport à WeTransfer, notamment la prévisualisation et l'expiration des liens.
-4.  **Données Tâches récentes (P2) :** L'utilisateur pense que les tâches sur le tableau de bord sont codées en dur, car il voit des données alors qu'il pense ne pas avoir de tâches.
+2.  **Affinage de la Mise en Page PDF (Itératif) :**
+    *   Refonte visuelle continue des devis/factures avec une charte rouge pastel ().
+    *   Ajustements précis des coins arrondis, de la typographie (taille, graisse), du positionnement des éléments (titre DEVIS à droite, logo à gauche).
+    *   Les dates émission et échéance doivent être dans des pastilles séparées, alignées correctement, avec des labels en gras et les dates en texte normal, le tout sur une seule ligne.
+    *   Les conditions de règlement et détails de paiement affichés sur le PDF doivent provenir des paramètres de facturation et non de données statiques.
+
+3.  **Corrections de Bugs et Améliorations :**
+    *   **Système de Paiement :** Gérer les paiements partiels (Acompte/Solde) et mettre à jour le statut des factures en partiel ou payée en conséquence.
+    *   **Statistiques :** Le calcul du CA Encaissé sur le dashboard doit se baser sur la somme des paiements réels et non sur le total des factures marquées payée.
+    *   **Module Things :** Les tâches non terminées d'un jour doivent être automatiquement reportées au lendemain.
+    *   **Affichage PDF :** Les paiements effectués (acompte, solde) doivent être listés sur le PDF de la facture.
+    *   **Problème SMS :** L'utilisateur ne reçoit pas les SMS de rappel envoyés via Brevo sur son numéro en Guadeloupe (0691266003).
 
 **User's preferred language**: Français
 
 **what currently exists?**
-L'application est un CRM full-stack React/FastAPI/MongoDB. L'agent précédent a effectué un travail considérable pour répondre aux demandes de l'utilisateur :
--   **Génération PDF :** Le bug  a été résolu en refondant la logique de génération dans  pour qu'elle gère correctement les descriptions d'articles très longues sans planter.
--   **Cohérence des Previews :** Une grande partie du travail a été faite pour unifier les aperçus. Les champs  et  ont été ajoutés aux paramètres, le backend a été mis à jour, et le frontend a été modifié pour utiliser un composant de prévisualisation plus cohérent qui se met à jour en temps réel dans la modale des paramètres. La scrollbar a aussi été corrigée.
--   **Templates d'e-mail :** Le backend a été préparé. Des endpoints API () ont été créés et la logique d'envoi d'e-mails a été modifiée pour utiliser des templates depuis la base de données au lieu de contenu codé en dur.
--   **Analyse des autres points :** L'agent a confirmé que les Tâches récentes ne sont pas codées en dur et que le module de transfert possède déjà la plupart des fonctionnalités demandées (prévisualisation, expiration). Il a également commencé à investiguer et appliquer des correctifs mineurs sur les problèmes de responsive.
+-   **PDF Generation:** La génération de PDF dans  a été intensivement modifiée pour répondre aux exigences visuelles de l'utilisateur. Elle utilise une charte rouge pastel, un en-tête personnalisé, et des pastilles de dates stylisées. Les conditions de paiement sont désormais dynamiques. Cependant, l'implémentation des coins arrondis reste une approximation car  ne le supporte pas nativement dans les .
+-   **Agenda / RDV Feature:** Une nouvelle route () et une nouvelle page frontend () ont été créées. L'intégration avec Google Calendar via OAuth2 est fonctionnelle (création d'événements, génération de liens Meet). L'envoi d'emails via Brevo fonctionne, y compris l'envoi de confirmations à l'admin et d'invitations avec pièce jointe  aux clients. L'interface permet de créer des RDV, de les lier à des contacts/documents et de configurer des relances.
+-   **Système de Paiement:** Le backend a été mis à jour pour gérer les paiements partiels (/) et le statut partiel. Le calcul des statistiques a été corrigé. Le frontend de la page facturation a été mis à jour pour permettre la saisie de ces nouveaux types de paiement.
+-   **Module Things:** La page () a été modifiée pour reporter les tâches inachevées et archiver les tâches terminées.
+-   **Problème SMS Brevo:** L'agent a identifié que le numéro de l'utilisateur est en Guadeloupe et a corrigé le code pour utiliser l'indicatif . Malgré que l'API Brevo retourne un succès et débite des crédits, l'utilisateur ne reçoit toujours pas les SMS. Des tests avec un expéditeur numérique (numéro court) au lieu d'alphanumérique (AlphaAgency) ont également été tentés sans succès.
 
 **Last working item**:
--   **Last item agent was working:** L'agent était en train d'effectuer une analyse et une correction en masse des nombreux problèmes de réactivité (responsive design) sur mobile signalés par l'utilisateur sur une dizaine de pages. Il avait commencé par les pages , ,  et .
+-   **Last item agent was working:** L'agent a implémenté une série de quatre corrections demandées par l'utilisateur :
+    1.  Mise à jour du système de paiement pour gérer les acomptes/soldes et le statut partiel.
+    2.  Correction du calcul du CA encaissé dans les statistiques du dashboard.
+    3.  Ajout de la liste des paiements reçus sur le PDF de la facture.
+    4.  Modification du module Things pour reporter les tâches non terminées.
 -   **Status:** IN PROGRESS
--   **Agent Testing Done:** Y (Pour la partie backend/facturation. Le  a validé la génération de PDF et l'envoi d'e-mails. Des captures d'écran ont validé les changements sur la modale des paramètres de facturation.)
--   **Which testing method agent to use?** frontend testing agent. La correction des problèmes de réactivité sur de nombreuses pages est une tâche d'envergure. Il est impératif d'utiliser un agent de test pour vérifier systématiquement le rendu et le comportement sur un viewport mobile pour chaque page corrigée.
--   **User Testing Done:** N (L'utilisateur n'a pas encore validé les dernières corrections sur l'unification des factures et la réactivité mobile).
+-   **Agent Testing Done:** N (Le code a été écrit, mais pas de cycle complet de test et de validation utilisateur)
+-   **Which testing method agent to use?** both. Il faut utiliser  pour valider les endpoints backend (ajout de paiement, stats) et l'agent de test frontend pour valider les nouvelles UI sur les pages  et .
+-   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: (P1, Mobile) Pipeline Page Layout:** La carte Valeur moyenne est coupée sur mobile.
--   **Issue 2: (P1, Mobile) Contacts Page Layout:** La page est coupée et n'est pas utilisable sur mobile.
--   **Issue 3: (P1, Mobile) Tasks Page Layout:** La page s'affiche comme sur un ordinateur et n'est pas responsive. Elle devrait adopter une disposition en cartes comme la page Pipeline.
--   **Issue 4: (P1, Mobile) Budget Page Layout:** L'agencement est mauvais sur mobile. Doit être repris sur le modèle de la page Pipeline.
--   **Issue 5: (P1, Mobile) AI Assistant UI:** L'icône de sélection du modèle d'IA est coupée sur mobile.
--   **Issue 6: (P1, Mobile) Campaigns Page Layout:** La page n'est pas du tout adaptée pour mobile/tablette.
--   **Issue 7: (P1, Mobile) Social Media Page Layout:** Non adaptée pour mobile/tablette.
--   **Issue 8: (P1, Mobile) Mindmap Page Layout:** Non adaptée pour mobile/tablette.
--   **Issue 9: (P0, Clarification) Dashboard Tasks Data:** L'utilisateur croit que les données des Tâches récentes sont fausses. L'agent a vérifié que les données sont réelles. Il faut clarifier ce point avec l'utilisateur.
--   **Issue 10: (P0, PDF) Blank Page Verification:** L'utilisateur a insisté sur le fait de ne pas avoir de page blanche. Bien que la génération de PDF soit fonctionnelle, une vérification finale est nécessaire pour confirmer qu'aucun cas de figure ne génère de page vide à la fin du document.
--   **Issue 11: (P1, Bug) Bulk Delete:** Une ancienne issue mentionnée dans le précédent handoff. Sa fonctionnalité n'a pas été vérifiée dans cette session.
+-   **Issue 1: (P0, BLOCKER) Échec de la livraison des SMS en Guadeloupe.**
+-   **Issue 2: (P1) Problème fondamental de mise en page des descriptions longues dans les PDF.**
+-   **Issue 3: (P2) Instabilité du Frontend.**
+
+  **Issues Detail:**
+  - **Issue 1: (P0, BLOCKER) Échec de la livraison des SMS en Guadeloupe.**
+     - **Attempted fixes:**
+        - Correction de l'indicatif téléphonique de  à  pour la Guadeloupe.
+        - Tentative d'envoi avec un expéditeur numérique (short code) au lieu d'un expéditeur alphanumérique (AlphaAgency).
+        - L'API Brevo retourne un succès et des statuts Délivré ou Bloqué, mais l'utilisateur ne reçoit rien. Le problème est très probablement lié à l'opérateur mobile de l'utilisateur qui filtre ces SMS.
+     - **Next debug checklist:**
+        1.  Confirmer avec l'utilisateur son opérateur mobile (Digicel, Orange Caraïbes, etc.).
+        2.  Suggérer à l'utilisateur de contacter son opérateur pour vérifier s'ils bloquent les SMS transactionnels provenant de Brevo.
+        3.  Proposer une alternative comme l'intégration de **Twilio**, qui a souvent une meilleure couverture dans les DOM-TOM.
+        4.  En dernier recours, proposer de remplacer les rappels SMS par des rappels via l'API WhatsApp Business si l'utilisateur est ouvert à cette solution.
+     - **Why fix this issue and what will be achieved with the fix?** C'est une fonctionnalité clé du module Agenda qui ne fonctionne pas.
+     - **Status:** BLOCKED
+     - **Is recurring issue?** Y
+     - **Should Test frontend/backend/both after fix?** Backend
+     - **Blocked on other issue:** Non. Bloqué par une potentielle limitation externe (opérateur/Brevo).
+
+ - **Issue 2: (P1) Problème fondamental de mise en page des descriptions longues dans les PDF.**
+    - **Description:** C'est le problème le plus critique et récurrent. L'approche actuelle de l'agent consiste à diviser une longue description en plusieurs *lignes* de tableau. L'utilisateur a explicitement rejeté cette solution et veut que le texte reste dans une *seule et unique cellule* qui s'étend sur plusieurs pages. La bibliothèque  avec son objet  ne peut pas gérer ce cas de figure, ce qui a causé tous les blocages jusqu'à présent.
+    - **Next debug checklist:**
+        1.  **Abandonner définitivement **. C'est une impasse confirmée.
+        2.  Implémenter une **approche hybride avec ReportLab** : utiliser des  flowables (qui peuvent s'étendre sur plusieurs pages) pour la description et dessiner manuellement les lignes du tableau autour d'eux à chaque saut de page.
+        3.  Ou alors, retenter l'intégration d'une bibliothèque HTML-to-PDF comme **** en résolvant les dépendances système (peut nécessiter de demander à l'utilisateur d'installer des paquets via apt 2.6.1 (arm64)
+Usage: apt-get [options] command
+       apt-get [options] install|remove pkg1 [pkg2 ...]
+       apt-get [options] source pkg1 [pkg2 ...]
+
+apt-get is a command line interface for retrieval of packages
+and information about them from authenticated sources and
+for installation, upgrade and removal of packages together
+with their dependencies.
+
+Most used commands:
+  update - Retrieve new lists of packages
+  upgrade - Perform an upgrade
+  install - Install new packages (pkg is libc6 not libc6.deb)
+  reinstall - Reinstall packages (pkg is libc6 not libc6.deb)
+  remove - Remove packages
+  purge - Remove packages and config files
+  autoremove - Remove automatically all unused packages
+  dist-upgrade - Distribution upgrade, see apt-get(8)
+  dselect-upgrade - Follow dselect selections
+  build-dep - Configure build-dependencies for source packages
+  satisfy - Satisfy dependency strings
+  clean - Erase downloaded archive files
+  autoclean - Erase old downloaded archive files
+  check - Verify that there are no broken dependencies
+  source - Download source archives
+  download - Download the binary package into the current directory
+  changelog - Download and display the changelog for the given package
+
+See apt-get(8) for more information about the available commands.
+Configuration options and syntax is detailed in apt.conf(5).
+Information about how to configure sources can be found in sources.list(5).
+Package and version choices can be expressed via apt_preferences(5).
+Security details are available in apt-secure(8).
+                                        This APT has Super Cow Powers. si l'environnement le permet).
+        4.  Cette correction doit être faite en même temps que la refonte visuelle demandée.
+    - **Why fix this issue and what will be achieved with the fix?** C'est la demande la plus importante de l'utilisateur et le principal bloqueur du projet. Sa résolution validera la fonctionnalité de facturation.
+    - **Status:** BLOCKED
+    - **Is recurring issue?** Y
+    - **Should Test frontend/backend/both after fix?** Backend
+    - **Blocked on other issue:** Non.
+
+  - **Issue 3: (P2) Instabilité du Frontend.**
+     - **Attempted fixes:** L'agent a observé le problème (écran noir sur , erreur ) mais s'est concentré sur les tâches backend. Aucune tentative de correction n'a été faite.
+     - **Next debug checklist:**
+        1.  Investiguer  pour les configurations de  et .
+        2.  Vérifier la logique d'authentification et de redirection dans  ou un hook similaire.
+        3.  Analyser les logs de la console du navigateur au moment où l'écran noir apparaît.
+     - **Why fix this issue and what will be achieved with the fix?** Un frontend stable est essentiel pour que l'utilisateur puisse tester et utiliser l'application.
+     - **Status:** NOT STARTED
+     - **Is recurring issue?** Y
+     - **Should Test frontend/backend/both after fix?** Frontend
+     - **Blocked on other issue:** Non.
 
 **In progress Task List**:
--   **Task 1: Finir la correction de la réactivité mobile (P1, HIGHEST PRIORITY)**
-    -   **Where to resume:** L'agent doit reprendre son travail systématique sur les pages listées dans les issues ci-dessus (, , , etc.).
-    -   **What will be achieved with this?** L'application deviendra utilisable et professionnelle sur les appareils mobiles, ce qui est une demande forte de l'utilisateur.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Frontend
-
--   **Task 2: Créer l'interface pour les templates d'e-mail (P1)**
-    -   **Where to resume:** Le backend est prêt. Il faut maintenant créer une nouvelle section dans le frontend (probablement dans les paramètres) pour permettre à l'utilisateur de lister, voir et modifier les templates d'e-mail de devis et de facture via les endpoints .
-    -   **What will be achieved with this?** L'utilisateur pourra personnaliser sa communication client directement depuis l'application.
-    -   **Status:** NOT STARTED
-    -   **Should Test frontend/backend/both after fix?** Both
+  - **Task 1: (P0) Finaliser et valider le nouveau système de paiement et le module Things.**
+     - **Where to resume:** Le code backend et frontend a été écrit. Il faut maintenant lancer un cycle de test complet :
+        1.  Via l'UI (), ajouter un acompte à une facture, vérifier que son statut passe à partiel.
+        2.  Ajouter le solde, vérifier que le statut passe à payée.
+        3.  Générer le PDF de la facture et s'assurer que la section Paiements Reçus s'affiche correctement.
+        4.  Vérifier sur le dashboard principal que le KPI CA Encaissé a été mis à jour correctement avec la somme des paiements.
+        5.  Sur la page Things, créer des tâches, en laisser une non terminée, et vérifier le lendemain qu'elle a bien été reportée.
+     - **What will be achieved with this?** Compléter les 4 points de la dernière demande de l'utilisateur.
+     - **Status:** IN PROGRESS
+     - **Should Test frontend/backend/both after fix?** Both
+     - **Blocked on something:** Non.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   **(P1) Flux Phase 2 post-création :** Afficher une vue d'actions (Envoyer, Télécharger) après la création d'un devis/facture.
-    -   **(P1) Création de contact en ligne :** Ajouter une option Créer un contact dans le formulaire de facture.
-    -   **(P1) Modale de confirmation d'e-mail :** Afficher une confirmation avant l'envoi pour vérifier l'adresse du destinataire.
-    -   **(P2) Améliorations MindMap :** Export PDF, raccourcis, etc.
-    -   **(P2) Notifications Push.**
+    -   (P1) **Personnalisation des Templates d'email/SMS :** L'UI a été créée dans l'Agenda, mais le backend doit être implémenté pour sauvegarder et utiliser ces templates personnalisés.
+    -   (P1) **Vérifier la fonctionnalité Bulk Delete** (suppression en masse) qui n'a jamais été testée.
+    -   (P2) Améliorations de la MindMap : Export PDF, raccourcis, etc.
+    -   (P2) Mettre en place les Notifications Push.
 -   **Future Tasks:**
-    -   Intégration Qonto.
-    -   Refactorisation du système de thèmes.
+    -   Intégration avec Qonto.
+    -   Refactorisation du système de thèmes (clair/sombre).
 
 **Completed work in this session**
--   **Unification de la facturation :**
-    -   La prévisualisation des devis/factures est maintenant unifiée et se met à jour en temps réel dans la modale des paramètres.
-    -   Les informations de l'entreprise (nom, adresse, tél, email) sont désormais modifiables depuis les paramètres et sont utilisées dans les PDF et les prévisualisations.
-    -   La modale des paramètres a été corrigée pour inclure une barre de défilement.
--   **Correction critique de la génération PDF :**
-    -   La  qui bloquait la génération de PDF avec de longues descriptions a été définitivement résolue par une refonte complète de la logique dans .
--   **Préparation des templates d'e-mail :**
-    -   Le backend a été développé pour gérer des templates d'e-mail dynamiques stockés en base de données.
--   **Analyse et début des corrections responsive.**
--   **Analyse du module de transfert de fichiers.**
+-   **Implémentation du Module Agenda/RDV:**
+    -   Création du backend () et frontend ().
+    -   Intégration fonctionnelle de Google Calendar API (OAuth, création d'événement, génération de lien Meet).
+    -   Intégration de l'envoi d'emails via Brevo pour les invitations (avec fichier ) et les confirmations admin.
+    -   Mise en place de la structure pour les relances SMS (même si la livraison échoue).
+-   **Refonte Avancée du PDF de Facture:**
+    -   Mise en place des pastilles de dates séparées et stylisées.
+    -   Correction de l'affichage des conditions de paiement et détails bancaires pour qu'ils soient dynamiques.
+    -   Multiples ajustements fins de l'alignement, de la couleur et de la typographie selon les retours de l'utilisateur.
+-   **Correction de Bug Critique:** L'erreur  lors de la création d'événements Google a été résolue.
+
+**Earlier issues found/mentioned but not fixed**
+-   Voir **All Pending/In progress Issue list**. Les principaux sont l'instabilité du frontend et le problème de fond avec la mise en page des longs textes dans les PDF.
+
+**Known issue recurrence from previous fork**
+-   **Issue recurrence in previous fork:** L'erreur  due à une cellule de tableau trop haute pour une page.
+-   **Recurrence count:** Élevé.
+-   **Status:** BLOCKED
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **ReportLab:** La solution finale pour les descriptions longues consiste à ne pas utiliser de  pour le contenu principal, mais à construire le document comme une liste de flowables (, ) pour chaque ligne d'article, le tout enveloppé dans un .
--   **React/TailwindCSS:** Le travail à venir est un exercice majeur de design responsive, impliquant l'utilisation de media queries (, ), de Flexbox/Grid, et le passage de tables à des listes de cartes pour les vues mobiles.
+-   **Google OAuth 2.0 Flow:** Authentification de l'utilisateur, obtention et rafraîchissement des tokens pour interagir avec l'API Google Calendar.
+-   **Brevo API:** Utilisation pour l'envoi d'emails transactionnels (avec pièces jointes) et de SMS.
+-   **ICS File Generation:** Création dynamique de fichiers  (iCalendar) en Python pour les invitations d'agenda.
+-   **Timezone Handling:** Correction des erreurs  vs  en s'assurant que tous les  objets ont une information de timezone (UTC) avant les comparaisons ou les interactions avec des API externes.
+-   **DOM-TOM Phone Numbers:** Identification de la nécessité d'utiliser des indicatifs pays spécifiques (ex:  pour la Guadeloupe) pour les numéros de téléphone des départements d'outre-mer.
+
+**key DB schema**
+-   **appointments:** (nouvelle collection)
+    -   uid=0(root) gid=0(root) groups=0(root), , , , , , , , , , , .
+-   **invoices:** (modifié)
+    -   Ajout/utilisation de  pour suivre le montant payé.
+    -   Ajout de .
+    -   Ajout d'une liste  contenant des objets .
+-   **settings:** (modifié)
+    -   Utilisation des champs  et .
+
+**changes in tech stack**
+-   Aucun changement de stack, mais des intégrations majeures ont été ajoutées.
 
 **All files of reference**
 -   
--   
--   
--   
--   
--   
--   
--   
+-    (nouveau)
+-    (nouveau)
 -   
 -   
 -   
 
 **Critical Info for New Agent**
--   La priorité absolue est de terminer le travail sur la réactivité mobile. L'utilisateur est très exigeant sur la qualité de l'interface et l'application est actuellement inutilisable sur de nombreuses pages en version mobile.
--   Communiquez clairement avec l'utilisateur sur les points qu'il a soulevés mais qui fonctionnent déjà (Tâches récentes, fonctionnalités de Transfert). Expliquez ce qui a été vérifié pour éviter de refaire le travail.
--   Validez systématiquement chaque page corrigée pour la réactivité mobile, idéalement avec le  configuré pour un viewport mobile.
--   Une fois la réactivité corrigée, implémentez l'interface pour les templates d'e-mail, car le backend est déjà prêt.
+-   **Le problème des SMS est un bloqueur P0.** Ne perdez pas trop de temps à débugger le code, qui semble correct. Le problème est externe. Proposez rapidement des solutions alternatives à l'utilisateur (contacter l'opérateur, changer de service pour Twilio).
+-   **Le frontend est instable.** Fiez-vous aux tests backend () et à l'analyse directe des artefacts (PDF) pour valider votre travail. La résolution des bugs du frontend est une tâche distincte (P2).
+-   **L'utilisateur est très exigeant sur le design du PDF.** Attendez-vous à des retours itératifs et précis. Pour les coins réellement arrondis, il faudra abandonner  et dessiner les formes manuellement sur le  de ReportLab.
+-   **Validez le cycle de paiement complet.** La dernière tâche n'a pas été testée de bout en bout. C'est la première chose à faire pour finaliser le travail en cours.
+
+**documents and test reports created in this job**
+-    (mis à jour avec les nouvelles fonctionnalités)
 
 **Last 10 User Messages and any pending HUMAN messages**
-10. **User:** Demande la poursuite du travail sur les corrections responsive. (Pending)
-9.  **User:** Apporte des précisions cruciales : il veut une seule preview cohérente partout (paramètres, création, PDF) et que TOUTES les infos de l'en-tête (nom, adresse, tel, email) soient modifiables. Confirme la priorité : Facturation > P1 > P2 > Module de transfert. (PENDING)
-8.  **User:** Fournit une liste massive de retours : demande de templates email modifiables, signale des données hardcodées sur le dashboard, et liste de nombreux bugs de responsive mobile sur presque toutes les pages. Demande une analyse du module de transfert. (PENDING)
-7.  **Agent:** Termine la session après avoir corrigé les problèmes de PDF/preview.
-6.  **User:** Signale un manque de scrollbar dans la modale des paramètres, et que le PDF génère des pages blanches et ne ressemble pas à l'exemple fourni.
-5.  **Agent:** Annonce la fin des corrections P0.
-4.  **User:** Valide le fonctionnement de la sélection multiple.
-3.  **User:** Signale que la suppression multiple ne fonctionne pas.
-2.  **User:** Signale de multiples erreurs dans le PDF (descriptions, remise, pied de page). Demande de nouvelles fonctionnalités (Phase 2, etc.).
-1.  **User:** Signale des erreurs de téléchargement PDF et d'envoi d'email.
+1.  **User:** Signale qu'il ne reçoit aucun SMS, bien qu'il ait essayé d'en envoyer depuis Brevo directement. Fournit des captures d'écran. (PENDING)
+2.  **Agent:** Suggère que le problème vient de l'opérateur qui bloque l'expéditeur alphanumérique et tente un envoi avec un numéro court.
+3.  **User:** Signale qu'il ne reçoit toujours pas les SMS. (PENDING)
+4.  **Agent:** Conclut que le problème vient de l'opérateur en Guadeloupe et demande quel est son opérateur.
+5.  **User:** Demande la correction de 4 problèmes : paiements partiels, CA encaissé, affichage des paiements sur PDF, et report des tâches Things. (PENDING - Work In Progress)
+6.  **Agent:** Propose un plan pour corriger les 4 problèmes.
+7.  **User:** Accepte le plan.
+8.  **User:** Signale que l'invitation client doit être ajoutable à l'agenda (demande pour le ) et qu'il n'a reçu aucun SMS de test.
+9.  **Agent:** Confirme la bonne création du RDV avec lien Meet.
+10. **User:** Signale que le RDV qu'il a créé n'apparaît pas et qu'il souhaite recevoir une confirmation par email lors de la création d'un RDV.
 
 **Project Health Check:**
 -   **Broken:**
-    -   L'expérience utilisateur sur mobile est très dégradée sur de nombreuses pages.
+    -   **Envoi de SMS :** La fonctionnalité est implémentée mais ne fonctionne pas pour l'utilisateur. C'est un point de blocage majeur pour le module Agenda.
 -   **Mocked:**
-    -   La gestion des templates d'e-mail a un backend fonctionnel mais pas d'interface utilisateur pour le moment.
+    -   Rien.
+-   **Needs Verification:**
+    -   **Flux de paiement complet :** Les modifications pour les paiements partiels et les statuts partiel n'ont pas été validées par l'utilisateur.
+    -   **Module Things :** La nouvelle logique de report de tâches doit être testée par l'utilisateur.
 
 **3rd Party Integrations**
--   **Brevo (Sendinblue):** Actif pour l'envoi d'e-mails. La prochaine étape est de permettre la gestion des templates.
--   **ReportLab:** Actif pour la génération de PDF. La logique a été stabilisée.
+-   **Brevo (Sendinblue):** Utilisé pour les emails (fonctionnel) et les SMS (problématique). Clé API configurée.
+-   **Google Calendar API:** Intégration via OAuth2. Fonctionnelle pour la création d'événements et de liens Meet. Clés client configurées.
+-   **ReportLab:** Pour la génération de PDF. Source de problèmes récurrents de mise en page.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES (pour la partie backend/facturation).
+-   **Testing agent used after significant changes:** NO
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** Le  a généré .
--   **Known regressions:** Aucune régression critique connue, les corrections sur le PDF ont résolu la régression précédente.
+-   **Test files created:** []
+-   **Known regressions:** Aucun.
+
+**Credentials to test flow:**
+-   email: 
+-   password: 
 
 **What agent forgot to execute**
--   L'agent a bien suivi les dernières demandes de l'utilisateur. Cependant, l'ancienne issue concernant la **suppression multiple** n'a pas été formellement testée et clôturée. Il serait bon de la vérifier lors des tests de réactivité de la page de facturation.</analysis>
+-   L'agent n'a pas encore résolu la cause première de l'échec de la livraison des SMS, se contentant de confirmer que le problème est probablement externe. Une proposition d'alternative (comme Twilio) n'a pas été faite.
+-   L'agent n'a pas lancé un cycle de test complet pour les 4 corrections qu'il a implémentées à la fin de la session.</analysis>

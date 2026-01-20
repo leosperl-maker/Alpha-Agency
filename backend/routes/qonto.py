@@ -27,7 +27,7 @@ QONTO_CLIENT_ID = os.environ.get("QONTO_CLIENT_ID", "e140adc5-560d-4bed-8dbf-850
 QONTO_CLIENT_SECRET = os.environ.get("QONTO_CLIENT_SECRET", "S3vc0ir927G37S8AOZSU2SzQpD")
 QONTO_AUTH_URL = "https://oauth.qonto.com/oauth2/auth"
 QONTO_TOKEN_URL = "https://oauth.qonto.com/oauth2/token"
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://invoice-export-1.preview.emergentagent.com")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://task-calendar-45.preview.emergentagent.com")
 
 # Scopes needed for Qonto API
 QONTO_SCOPES = "organization.read offline_access"
