@@ -56,6 +56,8 @@ class PaymentCreate(BaseModel):
     amount: float
     payment_date: str
     payment_method: Optional[str] = "virement"  # virement, chèque, carte, espèces
+    payment_type: Optional[str] = "solde"  # acompte, solde
+    acompte_percent: Optional[float] = None  # Pourcentage d'acompte (30, 40, 50, etc.)
     notes: Optional[str] = None
 
 
