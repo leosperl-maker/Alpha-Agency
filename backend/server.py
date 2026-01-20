@@ -2071,21 +2071,26 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     overdue_invoices = await db.invoices.count_documents({"status": "en_retard"})
     paid_invoices = await db.invoices.count_documents({"status": "payée"})
     
-    # Invoices totals
+    # Invoices totals - Inclure les factures FAC- ou document_type=facture (compatibilité anciennes données)
+    facture_filter = {"$or": [
+        {"document_type": "facture"},
+        {"invoice_number": {"$regex": "^FAC-"}}
+    ]}
+    
     total_invoiced = await db.invoices.aggregate([
-        {"$match": {"document_type": "facture"}},  # Seulement les factures, pas les devis
+        {"$match": facture_filter},
         {"$group": {"_id": None, "total": {"$sum": "$total"}}}
     ]).to_list(1)
     
     # CA encaissé = somme de tous les total_paid (paiements réels reçus)
     total_paid = await db.invoices.aggregate([
-        {"$match": {"document_type": "facture"}},  # Seulement les factures
+        {"$match": facture_filter},
         {"$group": {"_id": None, "total": {"$sum": {"$ifNull": ["$total_paid", 0]}}}}
     ]).to_list(1)
     
     # Factures avec statut "payée" ou "partiel"
-    paid_invoices = await db.invoices.count_documents({"status": "payée", "document_type": "facture"})
-    partial_invoices = await db.invoices.count_documents({"status": "partiel", "document_type": "facture"})
+    paid_invoices = await db.invoices.count_documents({"$and": [facture_filter, {"status": "payée"}]})
+    partial_invoices = await db.invoices.count_documents({"$and": [facture_filter, {"status": "partiel"}]})
     
     # KPIs from settings
     kpis = await db.settings.find_one({"type": "kpis"}, {"_id": 0})
