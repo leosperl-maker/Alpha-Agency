@@ -256,14 +256,20 @@ class TestCAEncaisseCalculation:
         
         # KEY ASSERTION: total_paid should exist and be based on sum of payments
         assert 'total_paid' in invoices_stats, "Missing 'total_paid' in invoices stats"
-        assert 'total' in invoices_stats, "Missing 'total' in invoices stats"
+        assert 'total_invoiced' in invoices_stats, "Missing 'total_invoiced' in invoices stats"
         
         print(f"✓ Dashboard stats retrieved successfully")
-        print(f"  CA Facturé (total): {invoices_stats['total']}€")
+        print(f"  CA Facturé (total_invoiced): {invoices_stats['total_invoiced']}€")
         print(f"  CA Encaissé (total_paid): {invoices_stats['total_paid']}€")
         
         # Verify total_paid is a number
         assert isinstance(invoices_stats['total_paid'], (int, float)), "total_paid should be a number"
+        
+        # Verify partial and paid counts
+        assert 'partial' in invoices_stats, "Missing 'partial' count in invoices stats"
+        assert 'paid' in invoices_stats, "Missing 'paid' count in invoices stats"
+        print(f"  Factures partiellement payées: {invoices_stats.get('partial', 0)}")
+        print(f"  Factures payées: {invoices_stats.get('paid', 0)}")
     
     def test_02_verify_ca_encaisse_matches_payments(self):
         """Verify CA encaissé matches sum of all invoice payments"""
