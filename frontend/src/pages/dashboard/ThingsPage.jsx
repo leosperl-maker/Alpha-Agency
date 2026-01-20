@@ -79,17 +79,17 @@ const ThingsPage = () => {
     setTodos(prev => prev.map(t => {
       if (t.id === id) {
         const isNowCompleted = !t.completed;
-        // When completing, mark as archived too (will appear in Archives/Logbook)
         return { 
           ...t, 
           completed: isNowCompleted, 
-          archived: isNowCompleted, // Auto-archive when completed
+          // Garder dans les archives quand terminé (historique visible)
+          archived: isNowCompleted,
           completedAt: isNowCompleted ? new Date().toISOString() : null 
         };
       }
       return t;
     }));
-    toast.success("Tâche terminée et archivée");
+    toast.success("Tâche mise à jour");
   };
 
   const toggleStar = (id) => {
