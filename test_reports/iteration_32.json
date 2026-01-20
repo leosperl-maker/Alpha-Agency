@@ -1,0 +1,119 @@
+{
+  "summary": "Backend-only testing for 4 corrections in CRM AlphaAgency. All 14 tests PASSED: 1) Partial payment system (acompte/solde) with 'partiel' status works correctly, 2) CA Encaissé calculation based on sum of total_paid is correct, 3) PDF contains 'Paiements reçus' section with payment details, 4) ThingsPage.jsx auto-reschedule code for past tasks is present.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/tests/test_partial_payments_ca_encaisse.py",
+    "/app/test_reports/pytest/pytest_partial_payments.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "POST /api/invoices/{id}/payments correctly handles payment_type='acompte' with acompte_percent parameter",
+    "Invoice status correctly transitions: brouillon → partiel (after acompte) → payée (after solde)",
+    "CA Encaissé in dashboard stats uses $sum of total_paid field with facture_filter (FAC- prefix OR document_type=facture)",
+    "PDF generation (lines 596-652) includes 'Paiements reçus' section when payments exist and total_paid > 0",
+    "ThingsPage.jsx (lines 34-48) contains auto-reschedule logic for past incomplete tasks"
+  ],
+  "updated_files": [
+    "/app/tests/test_partial_payments_ca_encaisse.py"
+  ],
+  "success_rate": {
+    "backend": "100% (14/14 tests passed)",
+    "frontend": "N/A (backend-only testing, code review for ThingsPage)"
+  },
+  "test_credentials": {
+    "email": "admin@alphagency.fr",
+    "password": "superpassword"
+  },
+  "seed_data_creation": "Created and deleted 1 test invoice (FAC-2026-XXXX) with acompte (30%) and solde payments during testing",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All 4 corrections verified: 1) Partial payments with acompte/solde types work, status transitions correctly to 'partiel' then 'payée', 2) Dashboard CA Encaissé = sum of total_paid from FAC- invoices, 3) PDF shows 'Paiements reçus' section with payment details, 4) ThingsPage auto-reschedules past incomplete tasks to today.",
+  "verified_features": {
+    "login_api": "PASS - admin@alphagency.fr / superpassword works",
+    "partial_payment_acompte": "PASS - POST /api/invoices/{id}/payments with payment_type='acompte' and acompte_percent=30 works",
+    "partial_payment_status_partiel": "PASS - Invoice status changes to 'partiel' after acompte payment",
+    "partial_payment_solde": "PASS - POST /api/invoices/{id}/payments with payment_type='solde' works",
+    "partial_payment_status_payee": "PASS - Invoice status changes to 'payée' after solde payment",
+    "dashboard_stats_total_paid": "PASS - GET /api/dashboard/stats returns total_paid (CA Encaissé)",
+    "ca_encaisse_calculation": "PASS - total_paid matches sum of payments from FAC- invoices",
+    "pdf_generation": "PASS - GET /api/invoices/{id}/pdf returns valid PDF",
+    "pdf_payments_section": "PASS - PDF contains 'Paiements reçus' section when payments exist",
+    "pdf_url_cloudinary": "PASS - GET /api/invoices/{id}/pdf-url returns Cloudinary URL",
+    "things_page_auto_reschedule": "PASS - Code review confirms auto-reschedule logic for past tasks"
+  },
+  "test_results_detail": {
+    "TestAuthentication::test_login_success": "PASSED",
+    "TestPartialPaymentSystem::test_01_create_invoice_for_partial_payment_test": "PASSED",
+    "TestPartialPaymentSystem::test_02_add_acompte_payment_30_percent": "PASSED",
+    "TestPartialPaymentSystem::test_03_verify_invoice_status_is_partiel": "PASSED",
+    "TestPartialPaymentSystem::test_04_add_solde_payment": "PASSED",
+    "TestPartialPaymentSystem::test_05_verify_invoice_status_is_payee": "PASSED",
+    "TestCAEncaisseCalculation::test_01_get_dashboard_stats": "PASSED",
+    "TestCAEncaisseCalculation::test_02_verify_ca_encaisse_matches_payments": "PASSED",
+    "TestPDFPaymentsSection::test_01_find_invoice_with_payments": "PASSED",
+    "TestPDFPaymentsSection::test_02_generate_pdf_with_payments": "PASSED",
+    "TestPDFPaymentsSection::test_03_verify_pdf_contains_payments_section": "PASSED",
+    "TestPDFPaymentsSection::test_04_pdf_url_generation": "PASSED",
+    "TestCleanup::test_cleanup_test_invoice": "PASSED",
+    "TestCodeReviewThingsPage::test_things_page_auto_reschedule_code_exists": "PASSED"
+  },
+  "code_verification": {
+    "payment_endpoint": {
+      "file": "/app/backend/routes/invoices.py",
+      "lines": "1059-1117",
+      "features": [
+        "Accepts payment_type (acompte/solde)",
+        "Accepts acompte_percent for acompte payments",
+        "Updates status to 'partiel' for partial payments",
+        "Updates status to 'payée' when fully paid"
+      ]
+    },
+    "ca_encaisse_calculation": {
+      "file": "/app/backend/server.py",
+      "lines": "2074-2089",
+      "features": [
+        "Uses facture_filter with $or for FAC- prefix OR document_type=facture",
+        "Calculates total_paid using $sum of $ifNull['$total_paid', 0]"
+      ]
+    },
+    "pdf_payments_section": {
+      "file": "/app/backend/routes/invoices.py",
+      "lines": "596-652",
+      "features": [
+        "Shows 'Paiements reçus' section when payments exist",
+        "Displays acompte with percentage",
+        "Shows payment date in French format (DD/MM/YYYY)",
+        "Shows 'FACTURE SOLDÉE' or 'Reste à payer'"
+      ]
+    },
+    "things_auto_reschedule": {
+      "file": "/app/frontend/src/pages/dashboard/ThingsPage.jsx",
+      "lines": "34-48",
+      "features": [
+        "Checks if task dueDate < today",
+        "Checks if task is not completed and not archived",
+        "Reschedules past tasks to today",
+        "Tracks original date in rescheduledFrom field"
+      ]
+    }
+  },
+  "dashboard_stats_sample": {
+    "invoices": {
+      "brouillon": 43,
+      "pending": 2,
+      "overdue": 0,
+      "paid": 2,
+      "partial": 2,
+      "total_invoiced": 27244.35,
+      "total_paid": 1608.5
+    }
+  }
+}
