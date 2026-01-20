@@ -105,11 +105,14 @@ async def google_auth_login(current_user: dict = Depends(get_current_user)):
 @router.get("/auth/callback")
 async def google_auth_callback(code: str = None, error: str = None):
     """Handle Google OAuth callback"""
+    # Construire l'URL de base pour les redirections
+    redirect_base = FRONTEND_URL if FRONTEND_URL else ""
+    
     if error:
-        return RedirectResponse(f"/admin/agenda?error={error}")
+        return RedirectResponse(f"{redirect_base}/admin/agenda?error={error}")
     
     if not code:
-        return RedirectResponse("/admin/agenda?error=no_code")
+        return RedirectResponse(f"{redirect_base}/admin/agenda?error=no_code")
     
     try:
         # Exchange code for tokens
