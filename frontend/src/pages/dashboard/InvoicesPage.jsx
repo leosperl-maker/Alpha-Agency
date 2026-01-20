@@ -105,6 +105,8 @@ const InvoicesPage = () => {
     amount: "",
     payment_date: new Date().toISOString().split('T')[0],
     payment_method: "virement",
+    payment_type: "solde", // acompte ou solde
+    acompte_percent: "", // Pourcentage d'acompte
     notes: ""
   });
   const [savingPayment, setSavingPayment] = useState(false);
