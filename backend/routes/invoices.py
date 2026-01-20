@@ -591,7 +591,67 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         ('LINEABOVE', (1, -1), (-1, -1), 1.5, GREEN_POSITIVE),
     ]))
     elements.append(totals_table)
-    elements.append(Spacer(1, 0.4*cm))
+    elements.append(Spacer(1, 0.3*cm))
+    
+    # ===== SECTION PAIEMENTS REÇUS =====
+    payments = doc_data.get('payments', [])
+    total_paid = doc_data.get('total_paid', 0)
+    
+    if payments and total_paid > 0:
+        # Style pour les paiements
+        payment_title_style = ParagraphStyle('PaymentTitle', fontSize=10, textColor=DARK_GRAY, fontName='Helvetica-Bold', spaceAfter=4)
+        payment_line_style = ParagraphStyle('PaymentLine', fontSize=9, textColor=DARK_GRAY, leading=12)
+        payment_total_style = ParagraphStyle('PaymentTotal', fontSize=10, textColor=GREEN_POSITIVE, fontName='Helvetica-Bold')
+        
+        payment_content = []
+        payment_content.append(Paragraph("<b>💳 Paiements reçus :</b>", payment_title_style))
+        
+        for pmt in payments:
+            # Formater la date
+            pmt_date = pmt.get('payment_date', '')
+            if pmt_date:
+                try:
+                    dt = datetime.strptime(pmt_date.split('T')[0], '%Y-%m-%d')
+                    pmt_date = dt.strftime('%d/%m/%Y')
+                except:
+                    pass
+            
+            pmt_amount = pmt.get('amount', 0)
+            pmt_method = pmt.get('payment_method', 'virement')
+            pmt_type = pmt.get('payment_type', 'solde')
+            pmt_percent = pmt.get('acompte_percent')
+            
+            # Formater le texte selon le type
+            if pmt_type == 'acompte' and pmt_percent:
+                pmt_text = f"• <b>Acompte de {pmt_amount:.2f} € ({pmt_percent}%)</b> reçu le {pmt_date} ({pmt_method})"
+            else:
+                pmt_text = f"• Paiement de <b>{pmt_amount:.2f} €</b> reçu le {pmt_date} ({pmt_method})"
+            
+            payment_content.append(Paragraph(pmt_text, payment_line_style))
+        
+        # Afficher le solde restant
+        remaining = max(0, total_ttc - total_paid)
+        if remaining > 0:
+            payment_content.append(Spacer(1, 0.2*cm))
+            payment_content.append(Paragraph(f"<b>Reste à payer : {remaining:.2f} €</b>", payment_line_style))
+        else:
+            payment_content.append(Spacer(1, 0.2*cm))
+            payment_content.append(Paragraph(f"<font color='#22c55e'><b>✓ FACTURE SOLDÉE</b></font>", payment_total_style))
+        
+        # Créer la table avec fond pastel
+        payments_table = Table([[payment_content]], colWidths=[17*cm])
+        payments_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), PASTEL_PINK),
+            ('TOPPADDING', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('LEFTPADDING', (0, 0), (-1, -1), 14),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 14),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+        elements.append(payments_table)
+        elements.append(Spacer(1, 0.3*cm))
+    
+    elements.append(Spacer(1, 0.1*cm))
     
     # ===== CONDITIONS DE RÈGLEMENT (rouge pastel, pas de bordure) =====
     # TOUJOURS utiliser les conditions des settings de facturation
