@@ -998,7 +998,7 @@ async def get_invoice_pdf_url(invoice_id: str, current_user: dict = Depends(get_
 
 @router.post("/{invoice_id}/payments", response_model=dict)
 async def add_payment(invoice_id: str, payment: PaymentCreate, current_user: dict = Depends(get_current_user)):
-    """Add a payment to an invoice"""
+    """Add a payment to an invoice (Acompte or Solde)"""
     invoice = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
     if not invoice:
         raise HTTPException(status_code=404, detail="Facture non trouvée")
@@ -1010,6 +1010,8 @@ async def add_payment(invoice_id: str, payment: PaymentCreate, current_user: dic
         "amount": payment.amount,
         "payment_date": payment.payment_date,
         "payment_method": payment.payment_method,
+        "payment_type": payment.payment_type or "solde",  # acompte ou solde
+        "acompte_percent": payment.acompte_percent,  # Pourcentage si acompte
         "notes": payment.notes,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
@@ -1019,13 +1021,15 @@ async def add_payment(invoice_id: str, payment: PaymentCreate, current_user: dic
     
     total_paid = sum(p['amount'] for p in existing_payments)
     total_due = invoice.get('total', 0)
-    remaining = total_due - total_paid
+    remaining = max(0, total_due - total_paid)
     
+    # Déterminer le nouveau statut
     new_status = invoice.get('status', 'en_attente')
     if total_paid >= total_due:
         new_status = "payée"
     elif total_paid > 0:
-        new_status = "partiellement_payée"
+        # Si c'est un acompte, statut "partiel"
+        new_status = "partiel"
     
     await db.invoices.update_one(
         {"id": invoice_id},
@@ -1038,12 +1042,18 @@ async def add_payment(invoice_id: str, payment: PaymentCreate, current_user: dic
         }}
     )
     
+    # Déterminer le message selon le type de paiement
+    if payment.payment_type == "acompte" and payment.acompte_percent:
+        message = f"Acompte de {payment.amount:.2f}€ ({payment.acompte_percent}%) enregistré"
+    else:
+        message = f"Paiement de {payment.amount:.2f}€ enregistré"
+    
     return {
         "payment_id": payment_id,
         "total_paid": total_paid,
         "remaining": remaining,
         "status": new_status,
-        "message": "Paiement enregistré"
+        "message": message
     }
 
 
@@ -1068,13 +1078,14 @@ async def delete_payment(invoice_id: str, payment_id: str, current_user: dict = 
     
     total_paid = sum(p['amount'] for p in payments)
     total_due = invoice.get('total', 0)
-    remaining = total_due - total_paid
+    remaining = max(0, total_due - total_paid)
     
+    # Déterminer le nouveau statut
     new_status = "en_attente"
     if total_paid >= total_due:
         new_status = "payée"
     elif total_paid > 0:
-        new_status = "partiellement_payée"
+        new_status = "partiel"
     
     await db.invoices.update_one(
         {"id": invoice_id},
