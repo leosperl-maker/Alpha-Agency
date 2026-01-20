@@ -2088,9 +2088,9 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         {"$group": {"_id": None, "total": {"$sum": {"$ifNull": ["$total_paid", 0]}}}}
     ]).to_list(1)
     
-    # Factures avec statut "payée" ou "partiel"
-    paid_invoices = await db.invoices.count_documents({"$and": [facture_filter, {"status": "payée"}]})
-    partial_invoices = await db.invoices.count_documents({"$and": [facture_filter, {"status": "partiel"}]})
+    # Factures avec statut "payée" ou "partiel" (incluant variantes legacy)
+    paid_invoices = await db.invoices.count_documents({"$and": [facture_filter, {"status": {"$in": ["payée", "payee"]}}]})
+    partial_invoices = await db.invoices.count_documents({"$and": [facture_filter, {"status": {"$in": ["partiel", "partiellement_payée"]}}]})
     
     # KPIs from settings
     kpis = await db.settings.find_one({"type": "kpis"}, {"_id": 0})
