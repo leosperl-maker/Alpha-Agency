@@ -2131,6 +2131,7 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
             "pending": pending_invoices,
             "overdue": overdue_invoices,
             "paid": paid_invoices,
+            "partial": partial_invoices,
             "total_invoiced": total_invoiced[0]['total'] if total_invoiced else 0,
             "total_paid": total_paid[0]['total'] if total_paid else 0
         },
