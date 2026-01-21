@@ -43,7 +43,11 @@ const SettingsPage = () => {
   const [integrations, setIntegrations] = useState({
     ga4_id: "",
     resend_api_key: "",
-    stripe_api_key: ""
+    stripe_api_key: "",
+    google_client_id: "",
+    google_client_secret: "",
+    google_redirect_uri: "",
+    frontend_url: ""
   });
 
   // Invoice/Quote default settings
