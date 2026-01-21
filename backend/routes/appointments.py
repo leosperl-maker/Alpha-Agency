@@ -125,8 +125,10 @@ async def google_auth_login(current_user: dict = Depends(get_current_user)):
 @router.get("/auth/callback")
 async def google_auth_callback(code: str = None, error: str = None):
     """Handle Google OAuth callback"""
+    config = await get_google_config()
+    
     # Construire l'URL de base pour les redirections
-    redirect_base = FRONTEND_URL if FRONTEND_URL else ""
+    redirect_base = config["frontend_url"] if config["frontend_url"] else ""
     
     if error:
         return RedirectResponse(f"{redirect_base}/admin/agenda?error={error}")
@@ -138,9 +140,9 @@ async def google_auth_callback(code: str = None, error: str = None):
         # Exchange code for tokens
         token_resp = requests.post('https://oauth2.googleapis.com/token', data={
             'code': code,
-            'client_id': GOOGLE_CLIENT_ID,
-            'client_secret': GOOGLE_CLIENT_SECRET,
-            'redirect_uri': GOOGLE_REDIRECT_URI,
+            'client_id': config["client_id"],
+            'client_secret': config["client_secret"],
+            'redirect_uri': config["redirect_uri"],
             'grant_type': 'authorization_code'
         }).json()
         
