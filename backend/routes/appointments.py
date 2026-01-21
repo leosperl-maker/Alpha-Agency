@@ -190,12 +190,14 @@ async def get_google_credentials():
         logger.warning("No Google credentials found")
         return None
     
+    config = await get_google_config()
+    
     creds = Credentials(
         token=settings['access_token'],
         refresh_token=settings.get('refresh_token'),
         token_uri='https://oauth2.googleapis.com/token',
-        client_id=GOOGLE_CLIENT_ID,
-        client_secret=GOOGLE_CLIENT_SECRET
+        client_id=config["client_id"],
+        client_secret=config["client_secret"]
     )
     
     # Try to refresh if we have a refresh token
