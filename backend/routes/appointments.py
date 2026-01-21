@@ -48,13 +48,15 @@ GOOGLE_SCOPES = [
 
 async def get_google_config():
     """Get Google OAuth config from database, fallback to env vars"""
-    settings = await db.settings.find_one({"type": "integrations"})
-    if settings:
+    # Les intégrations sont stockées dans settings avec type: "global" sous l'objet "integrations"
+    settings = await db.settings.find_one({"type": "global"})
+    if settings and settings.get("integrations"):
+        integrations = settings.get("integrations", {})
         return {
-            "client_id": settings.get("google_client_id") or GOOGLE_CLIENT_ID_DEFAULT,
-            "client_secret": settings.get("google_client_secret") or GOOGLE_CLIENT_SECRET_DEFAULT,
-            "redirect_uri": settings.get("google_redirect_uri") or GOOGLE_REDIRECT_URI_DEFAULT,
-            "frontend_url": settings.get("frontend_url") or FRONTEND_URL_DEFAULT
+            "client_id": integrations.get("google_client_id") or GOOGLE_CLIENT_ID_DEFAULT,
+            "client_secret": integrations.get("google_client_secret") or GOOGLE_CLIENT_SECRET_DEFAULT,
+            "redirect_uri": integrations.get("google_redirect_uri") or GOOGLE_REDIRECT_URI_DEFAULT,
+            "frontend_url": integrations.get("frontend_url") or FRONTEND_URL_DEFAULT
         }
     return {
         "client_id": GOOGLE_CLIENT_ID_DEFAULT,
