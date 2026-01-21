@@ -2439,6 +2439,10 @@ class SettingsIntegrations(BaseModel):
     ga4_id: Optional[str] = None
     resend_api_key: Optional[str] = None
     stripe_api_key: Optional[str] = None
+    google_client_id: Optional[str] = None
+    google_client_secret: Optional[str] = None
+    google_redirect_uri: Optional[str] = None
+    frontend_url: Optional[str] = None
 
 class APIKeysUpdate(BaseModel):
     brevo_api_key: Optional[str] = None
