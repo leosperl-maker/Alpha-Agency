@@ -1352,7 +1352,7 @@ Cordialement,
                   <div className="space-y-2">
                     <Label className="text-white">Google Client ID</Label>
                     <Input
-                      value={integrations.google_client_id}
+                      value={integrations.google_client_id || ""}
                       onChange={(e) => setIntegrations({...integrations, google_client_id: e.target.value})}
                       placeholder="xxxxxxxxxxxx.apps.googleusercontent.com"
                       className="bg-white/5 backdrop-blur-xl border-white/10"
@@ -1363,7 +1363,7 @@ Cordialement,
                     <Label className="text-white">Google Client Secret</Label>
                     <Input
                       type="password"
-                      value={integrations.google_client_secret}
+                      value={integrations.google_client_secret || ""}
                       onChange={(e) => setIntegrations({...integrations, google_client_secret: e.target.value})}
                       placeholder="GOCSPX-xxxxxxxxxxxx"
                       className="bg-white/5 backdrop-blur-xl border-white/10"
@@ -1373,7 +1373,7 @@ Cordialement,
                   <div className="space-y-2">
                     <Label className="text-white">Google Redirect URI</Label>
                     <Input
-                      value={integrations.google_redirect_uri}
+                      value={integrations.google_redirect_uri || ""}
                       onChange={(e) => setIntegrations({...integrations, google_redirect_uri: e.target.value})}
                       placeholder="https://votre-domaine.fr/api/appointments/auth/callback"
                       className="bg-white/5 backdrop-blur-xl border-white/10"
@@ -1386,7 +1386,7 @@ Cordialement,
                   <div className="space-y-2">
                     <Label className="text-white">URL Frontend (redirection après connexion)</Label>
                     <Input
-                      value={integrations.frontend_url}
+                      value={integrations.frontend_url || ""}
                       onChange={(e) => setIntegrations({...integrations, frontend_url: e.target.value})}
                       placeholder="https://votre-domaine.fr"
                       className="bg-white/5 backdrop-blur-xl border-white/10"
