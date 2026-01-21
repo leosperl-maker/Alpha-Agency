@@ -27,10 +27,11 @@ router = APIRouter(prefix="/appointments", tags=["Appointments"])
 
 # ==================== CONFIG ====================
 
-GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
-GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
-GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI', '')
-FRONTEND_URL = os.environ.get('FRONTEND_URL', '')  # URL de redirection frontend après OAuth
+# Fallback to env vars if not in database
+GOOGLE_CLIENT_ID_DEFAULT = os.environ.get('GOOGLE_CLIENT_ID', '')
+GOOGLE_CLIENT_SECRET_DEFAULT = os.environ.get('GOOGLE_CLIENT_SECRET', '')
+GOOGLE_REDIRECT_URI_DEFAULT = os.environ.get('GOOGLE_REDIRECT_URI', '')
+FRONTEND_URL_DEFAULT = os.environ.get('FRONTEND_URL', '')
 
 BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
 BREVO_SMS_SENDER = "AlphaAgency"  # Max 11 chars for alphanumeric sender
@@ -44,6 +45,23 @@ GOOGLE_SCOPES = [
     'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/userinfo.profile'
 ]
+
+async def get_google_config():
+    """Get Google OAuth config from database, fallback to env vars"""
+    settings = await db.settings.find_one({"type": "integrations"})
+    if settings:
+        return {
+            "client_id": settings.get("google_client_id") or GOOGLE_CLIENT_ID_DEFAULT,
+            "client_secret": settings.get("google_client_secret") or GOOGLE_CLIENT_SECRET_DEFAULT,
+            "redirect_uri": settings.get("google_redirect_uri") or GOOGLE_REDIRECT_URI_DEFAULT,
+            "frontend_url": settings.get("frontend_url") or FRONTEND_URL_DEFAULT
+        }
+    return {
+        "client_id": GOOGLE_CLIENT_ID_DEFAULT,
+        "client_secret": GOOGLE_CLIENT_SECRET_DEFAULT,
+        "redirect_uri": GOOGLE_REDIRECT_URI_DEFAULT,
+        "frontend_url": FRONTEND_URL_DEFAULT
+    }
 
 # ==================== MODELS ====================
 
