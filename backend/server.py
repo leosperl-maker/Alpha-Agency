@@ -2476,7 +2476,11 @@ async def get_settings(current_user: dict = Depends(get_current_user)):
             "integrations": {
                 "ga4_id": "",
                 "resend_api_key": "",
-                "stripe_api_key": ""
+                "stripe_api_key": "",
+                "google_client_id": "",
+                "google_client_secret": "",
+                "google_redirect_uri": "",
+                "frontend_url": ""
             }
         }
     return settings
