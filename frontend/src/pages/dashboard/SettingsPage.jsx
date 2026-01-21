@@ -1341,6 +1341,63 @@ Cordialement,
                 </p>
               </div>
 
+              {/* Google Calendar Section */}
+              <div className="border-t border-white/10 pt-6 mt-6">
+                <h3 className="text-white font-medium mb-4 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-indigo-400" />
+                  Google Calendar / Agenda
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-white">Google Client ID</Label>
+                    <Input
+                      value={integrations.google_client_id}
+                      onChange={(e) => setIntegrations({...integrations, google_client_id: e.target.value})}
+                      placeholder="xxxxxxxxxxxx.apps.googleusercontent.com"
+                      className="bg-white/5 backdrop-blur-xl border-white/10"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-white">Google Client Secret</Label>
+                    <Input
+                      type="password"
+                      value={integrations.google_client_secret}
+                      onChange={(e) => setIntegrations({...integrations, google_client_secret: e.target.value})}
+                      placeholder="GOCSPX-xxxxxxxxxxxx"
+                      className="bg-white/5 backdrop-blur-xl border-white/10"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-white">Google Redirect URI</Label>
+                    <Input
+                      value={integrations.google_redirect_uri}
+                      onChange={(e) => setIntegrations({...integrations, google_redirect_uri: e.target.value})}
+                      placeholder="https://votre-domaine.fr/api/appointments/auth/callback"
+                      className="bg-white/5 backdrop-blur-xl border-white/10"
+                    />
+                    <p className="text-xs text-white/60">
+                      L'URL de callback OAuth. Doit correspondre exactement à celle configurée dans Google Cloud Console.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-white">URL Frontend (redirection après connexion)</Label>
+                    <Input
+                      value={integrations.frontend_url}
+                      onChange={(e) => setIntegrations({...integrations, frontend_url: e.target.value})}
+                      placeholder="https://votre-domaine.fr"
+                      className="bg-white/5 backdrop-blur-xl border-white/10"
+                    />
+                    <p className="text-xs text-white/60">
+                      L'URL de votre site où l'utilisateur sera redirigé après connexion Google.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex justify-end">
                 <Button 
                   onClick={handleSaveIntegrations}
