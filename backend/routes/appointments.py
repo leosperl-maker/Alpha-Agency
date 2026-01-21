@@ -103,14 +103,16 @@ async def get_google_auth_status(current_user: dict = Depends(get_current_user))
 @router.get("/auth/login")
 async def google_auth_login(current_user: dict = Depends(get_current_user)):
     """Start Google OAuth flow"""
-    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+    config = await get_google_config()
+    
+    if not config["client_id"] or not config["client_secret"]:
         raise HTTPException(status_code=500, detail="Google OAuth non configuré. Ajoutez GOOGLE_CLIENT_ID et GOOGLE_CLIENT_SECRET dans .env")
     
     # Build authorization URL
     auth_url = "https://accounts.google.com/o/oauth2/v2/auth"
     params = {
-        "client_id": GOOGLE_CLIENT_ID,
-        "redirect_uri": GOOGLE_REDIRECT_URI,
+        "client_id": config["client_id"],
+        "redirect_uri": config["redirect_uri"],
         "response_type": "code",
         "scope": " ".join(GOOGLE_SCOPES),
         "access_type": "offline",
