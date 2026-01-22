@@ -1542,7 +1542,7 @@ const EditorialCalendarPage = () => {
               </div>
               
               <div className="text-xs text-white/50">
-                <p>LL'IA tiendraapos;IA tiendra compte des paramètres sélectionnés dans le formulaire du post :</p>
+                <p>L&apos;IA tiendra compte des paramètres sélectionnés dans le formulaire du post :</p>
                 <ul className="mt-1 ml-4 list-disc">
                   {postForm.networks.length > 0 && <li>Réseaux : {postForm.networks.join(', ')}</li>}
                   {postForm.format_type && <li>Format : {postForm.format_type}</li>}
