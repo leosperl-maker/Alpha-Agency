@@ -261,6 +261,53 @@ const EditorialCalendarPage = () => {
     }
   };
 
+  // AI Assistant
+  const handleAIAssist = async () => {
+    if (!aiTopic.trim()) {
+      toast.error('Veuillez entrer un sujet');
+      return;
+    }
+
+    setAiLoading(true);
+    setAiResult(null);
+
+    try {
+      const response = await api.post('/editorial/ai/assist', {
+        topic: aiTopic,
+        networks: postForm.networks,
+        format_type: postForm.format_type,
+        content_pillar: postForm.content_pillar,
+        objective: postForm.objective,
+        client_context: ''
+      });
+
+      if (response.data.success) {
+        setAiResult(response.data.data);
+        toast.success('Suggestions générées !');
+      } else {
+        toast.error('Erreur lors de la génération');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur IA');
+    }
+
+    setAiLoading(false);
+  };
+
+  const applyAICaption = () => {
+    if (aiResult?.caption) {
+      setPostForm(prev => ({ ...prev, caption: aiResult.caption }));
+      toast.success('Légende appliquée');
+    }
+  };
+
+  const applyAICTA = () => {
+    if (aiResult?.cta) {
+      setPostForm(prev => ({ ...prev, cta: aiResult.cta }));
+      toast.success('CTA appliqué');
+    }
+  };
+
   // Form helpers
   const resetCalendarForm = () => {
     setCalendarForm({ title: '', contact_id: '', description: '', color: '#6366f1' });
