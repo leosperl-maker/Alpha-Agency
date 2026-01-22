@@ -1,0 +1,115 @@
+{
+  "summary": "Comprehensive testing of Editorial Calendar module (Calendrier Éditorial). All 22 backend tests PASSED. Frontend testing confirmed: Calendar view, Trello view with weekly columns, Key dates display, Post creation from key dates, Social preview mockups (Instagram, Facebook, LinkedIn, TikTok, YouTube), Filters (network, status, format), and Move API. Fixed minor bug with None time in calendar view.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "/api/editorial/calendar-view",
+        "issue": "When scheduled_time was None, calendar view showed 'TNone:00' instead of default time",
+        "status": "FIXED",
+        "fix_applied": "Changed time_str = post.get('scheduled_time', '09:00') to time_str = post.get('scheduled_time') or '09:00'"
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_editorial_calendar.py",
+    "/app/test_reports/pytest/pytest_editorial_calendar.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "EditorialCalendarPage.jsx is 1809 lines - consider splitting into smaller components (CalendarView, TrelloView, PostModal, etc.)",
+    "Only 1 data-testid found in EditorialCalendarPage.jsx - add more for better test automation",
+    "SocialPreviewModal.jsx has no data-testid attributes - add for testing social preview tabs"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_editorial_calendar.py",
+    "/app/backend/routes/editorial.py"
+  ],
+  "success_rate": {
+    "backend": "100% (22/22 tests passed)",
+    "frontend": "100% (all features verified via Playwright)"
+  },
+  "test_credentials": {
+    "email": "admin@alphagency.fr",
+    "password": "superpassword"
+  },
+  "seed_data_creation": "Created TEST_Editorial_Calendar (beaute niche) and TEST_Automobile_Calendar during testing - cleaned up after tests",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Editorial Calendar module fully tested. Key features: AI-generated key dates (20-25 dates per calendar based on niche/country), Social preview mockups for 5 platforms, Trello view with weekly columns, drag-drop via move API. Login URL is /admin/login, Editorial Calendar is at /admin/editorial.",
+  "verified_features": {
+    "login_api": "PASS - admin@alphagency.fr / superpassword works",
+    "get_niches": "PASS - 15 niches, 6 countries available",
+    "get_settings": "PASS - 5 networks, 5 formats, 7 statuses",
+    "list_calendars": "PASS - Returns calendars with post_count and key_dates",
+    "create_calendar_with_key_dates": "PASS - AI generates 20-25 key dates based on niche",
+    "get_calendar_key_dates": "PASS - Returns key dates with date, title, category, icon, content_angle",
+    "create_post_from_key_date": "PASS - Creates post pre-filled with key date info",
+    "list_posts": "PASS - Returns posts with calendar info",
+    "create_post": "PASS - Creates post with networks, format, pillar, objective",
+    "update_post": "PASS - Updates post fields",
+    "move_post": "PASS - Moves post to new date/time (drag-drop support)",
+    "filter_by_status": "PASS - Filters posts by status",
+    "filter_by_network": "PASS - Filters posts by network",
+    "filter_by_format": "PASS - Filters posts by format_type",
+    "filter_by_calendar": "PASS - Filters posts by calendar_id",
+    "filter_by_date_range": "PASS - Filters posts by start_date/end_date",
+    "calendar_view": "PASS - Returns events formatted for calendar display",
+    "frontend_calendar_view": "PASS - Calendar displays posts and key dates",
+    "frontend_trello_view": "PASS - Weekly columns with draggable post cards",
+    "frontend_filters": "PASS - Network, status, format dropdowns work",
+    "frontend_new_calendar_modal": "PASS - Shows niche/country selection with AI key dates option",
+    "frontend_new_post_modal": "PASS - Shows all fields including AI assist button",
+    "frontend_social_preview": "PASS - Instagram, Facebook, LinkedIn, TikTok, YouTube mockups"
+  },
+  "test_results_detail": {
+    "TestAuthentication::test_login_success": "PASSED",
+    "TestEditorialNichesAndSettings::test_get_available_niches": "PASSED",
+    "TestEditorialNichesAndSettings::test_get_editorial_settings": "PASSED",
+    "TestCalendarCRUD::test_list_calendars": "PASSED",
+    "TestCalendarCRUD::test_create_calendar_with_key_dates": "PASSED",
+    "TestCalendarCRUD::test_get_single_calendar": "PASSED",
+    "TestKeyDates::test_get_calendar_key_dates": "PASSED",
+    "TestKeyDates::test_create_post_from_key_date": "PASSED",
+    "TestPostsCRUD::test_list_posts": "PASSED",
+    "TestPostsCRUD::test_create_post": "PASSED",
+    "TestPostsCRUD::test_get_single_post": "PASSED",
+    "TestPostsCRUD::test_update_post": "PASSED",
+    "TestMovePostAPI::test_move_post_to_new_date": "PASSED",
+    "TestMovePostAPI::test_move_post_date_only": "PASSED",
+    "TestPostFilters::test_filter_by_status": "PASSED",
+    "TestPostFilters::test_filter_by_network": "PASSED",
+    "TestPostFilters::test_filter_by_format": "PASSED",
+    "TestPostFilters::test_filter_by_calendar": "PASSED",
+    "TestPostFilters::test_filter_by_date_range": "PASSED",
+    "TestCalendarView::test_calendar_view_endpoint": "PASSED",
+    "TestCleanup::test_cleanup_test_calendar": "PASSED",
+    "TestCleanup::test_cleanup_test_posts": "PASSED"
+  },
+  "frontend_screenshots": {
+    "editorial_calendar_page": "Calendar view with posts and key dates displayed",
+    "trello_view": "Weekly columns (29-4 janv, 5-11 janv, etc.) with draggable cards",
+    "network_filter_dropdown": "Shows Instagram, Facebook, LinkedIn, TikTok, YouTube options",
+    "new_calendar_modal": "Shows niche/country selection with AI key dates checkbox",
+    "new_post_modal": "Shows content/planning/media tabs with all fields",
+    "post_edit_modal": "Shows existing post with Prévisualiser button",
+    "social_preview_modal": "Instagram mockup with profile, image, likes, caption"
+  },
+  "existing_test_data": {
+    "calendars": [
+      {"title": "Test Restaurant 2026", "niche": "restaurant", "key_dates": 24},
+      {"title": "Test Calendar", "niche": null, "key_dates": 0},
+      {"title": "TEST_Automobile_Calendar", "niche": "automobile", "key_dates": 24}
+    ],
+    "posts": [
+      {"title": "Saint-Valentin", "status": "idea", "networks": []},
+      {"title": "Test Post", "status": "idea", "networks": ["instagram", "facebook"]},
+      {"title": "Jour de l'An", "status": "idea", "scheduled_date": "2026-01-15"}
+    ]
+  }
+}
