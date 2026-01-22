@@ -1171,7 +1171,7 @@ async def get_calendar_view(
         
         # Build datetime
         date_str = post.get("scheduled_date", "")
-        time_str = post.get("scheduled_time", "09:00")
+        time_str = post.get("scheduled_time") or "09:00"
         
         events.append({
             "id": post["id"],
