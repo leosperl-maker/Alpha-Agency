@@ -360,6 +360,10 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                   <FileText className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Docs</span>
                 </TabsTrigger>
+                <TabsTrigger value="editorial" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
+                  <CalendarDays className="w-3.5 h-3.5 sm:mr-1" />
+                  <span className="hidden sm:inline">Éditorial</span>
+                </TabsTrigger>
               </TabsList>
 
               {/* Overview Tab */}
