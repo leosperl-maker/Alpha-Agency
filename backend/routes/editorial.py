@@ -272,18 +272,36 @@ async def get_calendar(calendar_id: str, current_user: dict = Depends(get_curren
 @router.post("/calendars")
 async def create_calendar(calendar: CalendarCreate, current_user: dict = Depends(get_current_user)):
     """Create a new editorial calendar"""
+    calendar_id = str(uuid.uuid4())
+    
     calendar_data = {
-        "id": str(uuid.uuid4()),
+        "id": calendar_id,
         "title": calendar.title,
         "contact_id": calendar.contact_id,
         "description": calendar.description,
         "color": calendar.color,
+        "country": calendar.country or "FR",
+        "niche": calendar.niche or "general",
+        "key_dates": [],  # Will be populated by AI
         "archived": False,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.editorial_calendars.insert_one(calendar_data)
+    
+    # Generate key dates if requested
+    if calendar.generate_key_dates:
+        try:
+            key_dates = await generate_key_dates_for_calendar(
+                calendar_id=calendar_id,
+                country=calendar.country or "FR",
+                niche=calendar.niche or "general"
+            )
+            calendar_data["key_dates"] = key_dates
+        except Exception as e:
+            logger.warning(f"Failed to generate key dates: {e}")
+            # Calendar is still created, just without key dates
     
     # Remove _id for response
     calendar_data.pop("_id", None)
