@@ -35,6 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/ta
 import { ScrollArea } from '../../components/ui/scroll-area';
 import { toast } from 'sonner';
 import api from '../../lib/api';
+import SocialPreviewModal from '../../components/SocialPreviewModal';
 
 // Network icons mapping
 const NetworkIcon = ({ network, className = "w-4 h-4" }) => {
