@@ -44,6 +44,7 @@ import ThingsPage from "./pages/dashboard/ThingsPage";
 import MindMapPage from "./pages/dashboard/MindMapPage";
 import TransfersPage from "./pages/dashboard/TransfersPage";
 import AgendaPage from "./pages/dashboard/AgendaPage";
+import EditorialCalendarPage from "./pages/dashboard/EditorialCalendarPage";
 
 // Public pages
 import TransferDownloadPage from "./pages/TransferDownloadPage";
