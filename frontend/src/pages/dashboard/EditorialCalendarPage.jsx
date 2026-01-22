@@ -78,6 +78,150 @@ const FormatIcon = ({ format, className = "w-4 h-4" }) => {
   return icons[format] || <Image className={className} />;
 };
 
+// Draggable Post Card Component for Trello View
+const DraggablePostCard = ({ post, settings, onEdit, onPreview, getNetworkColor, getStatusColor }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: post.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-colors border border-white/10 ${isDragging ? 'ring-2 ring-indigo-500 shadow-lg' : ''}`}
+    >
+      {/* Drag handle */}
+      <div 
+        {...attributes} 
+        {...listeners}
+        className="flex items-center gap-2 mb-2 cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical className="w-4 h-4 text-white/30" />
+        <span className="text-white/30 text-xs">Glisser pour déplacer</span>
+      </div>
+      
+      {/* Thumbnail */}
+      {post.medias?.[0]?.url && (
+        <div 
+          className="w-full h-24 rounded-lg overflow-hidden mb-2 cursor-pointer" 
+          onClick={() => onEdit(post)}
+        >
+          {post.medias[0].type === 'video' ? (
+            <video src={post.medias[0].url} className="w-full h-full object-cover" />
+          ) : (
+            <img src={post.medias[0].url} alt="" className="w-full h-full object-cover" />
+          )}
+        </div>
+      )}
+      
+      {/* Title */}
+      <h4 
+        className="text-white text-sm font-medium mb-2 truncate cursor-pointer hover:text-indigo-400"
+        onClick={() => onEdit(post)}
+      >
+        {post.title}
+      </h4>
+      
+      {/* Networks */}
+      <div className="flex items-center gap-1 mb-2">
+        {post.networks?.map(n => (
+          <span key={n} style={{ color: getNetworkColor(n) }}>
+            <NetworkIcon network={n} className="w-4 h-4" />
+          </span>
+        ))}
+      </div>
+      
+      {/* Meta */}
+      <div className="flex items-center justify-between">
+        <Badge 
+          variant="outline" 
+          className="text-xs"
+          style={{ borderColor: getStatusColor(post.status), color: getStatusColor(post.status) }}
+        >
+          {settings.statuses?.find(s => s.id === post.status)?.name || post.status}
+        </Badge>
+        
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-6 w-6 p-0 text-white/40 hover:text-white hover:bg-white/10"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPreview(post);
+            }}
+            title="Prévisualiser"
+          >
+            <Eye className="w-3 h-3" />
+          </Button>
+          <span className="text-white/40 text-xs">
+            {post.scheduled_time || ''}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Droppable Column Component for Trello View
+const DroppableColumn = ({ column, posts, settings, onEdit, onPreview, onAddPost, getNetworkColor, getStatusColor }) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id: column.id,
+    data: { column }
+  });
+
+  return (
+    <div className="flex-shrink-0 w-72">
+      <div className={`bg-white/5 backdrop-blur-xl rounded-xl border transition-colors ${isOver ? 'border-indigo-500 bg-indigo-500/10' : 'border-white/10'} p-3`}>
+        <h3 className="text-white font-medium mb-3 text-sm flex items-center justify-between">
+          {column.label}
+          <span className="text-white/40 text-xs">{posts.length}</span>
+        </h3>
+        
+        <div 
+          ref={setNodeRef}
+          className="space-y-2 min-h-[200px]"
+        >
+          <SortableContext items={posts.map(p => p.id)} strategy={verticalListSortingStrategy}>
+            {posts.map(post => (
+              <DraggablePostCard
+                key={post.id}
+                post={post}
+                settings={settings}
+                onEdit={onEdit}
+                onPreview={onPreview}
+                getNetworkColor={getNetworkColor}
+                getStatusColor={getStatusColor}
+              />
+            ))}
+          </SortableContext>
+          
+          {/* Add button */}
+          <Button
+            variant="ghost"
+            className="w-full border-dashed border border-white/10 text-white/40 hover:text-white hover:border-white/20"
+            onClick={() => onAddPost(column.start)}
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Ajouter
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const EditorialCalendarPage = () => {
   // State
   const [calendars, setCalendars] = useState([]);
