@@ -46,14 +46,30 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - `PUT /api/editorial/posts/{id}/move` - Drag & drop
   - `GET /api/editorial/settings` - Réseaux, formats, statuts configurables
   - `GET /api/editorial/contact/{id}/calendars` - Calendriers d'un contact
+  - **`POST /api/editorial/ai/assist`** - IA d'aide rédactionnelle (GPT-5.2) ✅
+  - **`POST /api/editorial/ai/improve-caption`** - Amélioration de légende ✅
+
+#### IA d'aide rédactionnelle ✅ 2026-01-22
+- **Modèle:** GPT-5.2 via Emergent LLM Key
+- **Génère:**
+  - 3 angles/idées de post
+  - Légende complète adaptée aux réseaux ciblés
+  - 3 hooks accrocheurs
+  - 5 hashtags pertinents
+  - Call-to-Action suggéré
+- **Paramètres pris en compte:**
+  - Sujet/thème
+  - Réseaux sociaux ciblés
+  - Format de post
+  - Pilier de contenu
+  - Objectif marketing
 
 #### Frontend (`/app/frontend/src/pages/dashboard/EditorialCalendarPage.jsx`)
 - **Vue Calendrier** (mois) avec navigation et posts colorés
 - **Vue Trello/Kanban** avec colonnes par semaine
 - **Modal Post** avec 3 onglets (Contenu, Planification, Médias)
-- **Modal Calendrier** (création/édition avec couleur et contact lié)
-- **Filtres:** par calendrier, réseau, statut
-- **Upload direct** images/vidéos vers Cloudinary
+- **Bouton "Aide IA"** dans l'onglet Contenu
+- **Modal IA** avec résultats cliquables pour appliquer
 
 #### Réseaux sociaux configurés
 - Instagram, Facebook, LinkedIn, TikTok, YouTube
