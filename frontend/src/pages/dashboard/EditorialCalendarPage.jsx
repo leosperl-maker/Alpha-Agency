@@ -3,7 +3,8 @@ import {
   Calendar as CalendarIcon, Plus, Grid3X3, List, ChevronLeft, ChevronRight,
   Image, Video, Film, Circle, Images, Trash2, Edit, Eye, MoreVertical,
   Copy, Archive, Clock, User, Link as LinkIcon, MessageSquare, Target,
-  Sparkles, Upload, X, Check, GripVertical, Instagram, Facebook, Linkedin, Youtube
+  Sparkles, Upload, X, Check, GripVertical, Instagram, Facebook, Linkedin, Youtube,
+  Wand2, Loader2, Lightbulb, Hash, MousePointerClick
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -31,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import { ScrollArea } from '../../components/ui/scroll-area';
 import { toast } from 'sonner';
 import api from '../../lib/api';
 
