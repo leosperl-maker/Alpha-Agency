@@ -705,12 +705,11 @@ const EditorialCalendarPage = () => {
                     {columnPosts.map(post => (
                       <div
                         key={post.id}
-                        onClick={() => openEditPost(post)}
-                        className="bg-white/5 rounded-lg p-3 cursor-pointer hover:bg-white/10 transition-colors border border-white/10"
+                        className="bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-colors border border-white/10"
                       >
                         {/* Thumbnail */}
                         {post.medias?.[0]?.url && (
-                          <div className="w-full h-24 rounded-lg overflow-hidden mb-2">
+                          <div className="w-full h-24 rounded-lg overflow-hidden mb-2 cursor-pointer" onClick={() => openEditPost(post)}>
                             {post.medias[0].type === 'video' ? (
                               <video src={post.medias[0].url} className="w-full h-full object-cover" />
                             ) : (
@@ -720,7 +719,12 @@ const EditorialCalendarPage = () => {
                         )}
                         
                         {/* Title */}
-                        <h4 className="text-white text-sm font-medium mb-2 truncate">{post.title}</h4>
+                        <h4 
+                          className="text-white text-sm font-medium mb-2 truncate cursor-pointer"
+                          onClick={() => openEditPost(post)}
+                        >
+                          {post.title}
+                        </h4>
                         
                         {/* Networks */}
                         <div className="flex items-center gap-1 mb-2">
@@ -741,9 +745,24 @@ const EditorialCalendarPage = () => {
                             {settings.statuses?.find(s => s.id === post.status)?.name || post.status}
                           </Badge>
                           
-                          <span className="text-white/40 text-xs">
-                            {post.scheduled_time || ''}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0 text-white/40 hover:text-white hover:bg-white/10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPreviewPost(post);
+                                setShowPreviewModal(true);
+                              }}
+                              title="Prévisualiser"
+                            >
+                              <Eye className="w-3 h-3" />
+                            </Button>
+                            <span className="text-white/40 text-xs">
+                              {post.scheduled_time || ''}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     ))}
