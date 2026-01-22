@@ -97,8 +97,16 @@ const EditorialCalendarPage = () => {
     title: '',
     contact_id: '',
     description: '',
-    color: '#6366f1'
+    color: '#6366f1',
+    country: 'FR',
+    niche: 'general',
+    generate_key_dates: true
   });
+
+  // Available niches and countries
+  const [niches, setNiches] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [generatingKeyDates, setGeneratingKeyDates] = useState(false);
   
   const [postForm, setPostForm] = useState({
     calendar_id: '',
