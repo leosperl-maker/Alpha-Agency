@@ -195,20 +195,37 @@ const EditorialCalendarPage = () => {
     }
   }, [loadPosts, selectedCalendarId, filters, currentDate, loading]);
 
-  // Calendar CRUD
   const handleSaveCalendar = async () => {
     try {
       if (editingCalendar) {
         await api.put(`/editorial/calendars/${editingCalendar.id}`, calendarForm);
         toast.success('Calendrier mis à jour');
+        setShowCalendarModal(false);
+        resetCalendarForm();
+        loadData();
       } else {
-        await api.post('/editorial/calendars', calendarForm);
-        toast.success('Calendrier créé');
+        // Creating new calendar - might take time if generating key dates
+        if (calendarForm.generate_key_dates) {
+          setGeneratingKeyDates(true);
+          toast.info('Création du calendrier et génération des dates fortes...');
+        }
+        
+        const response = await api.post('/editorial/calendars', calendarForm);
+        
+        if (calendarForm.generate_key_dates) {
+          const keyDatesCount = response.data?.key_dates?.length || 0;
+          toast.success(`Calendrier créé avec ${keyDatesCount} dates fortes !`);
+        } else {
+          toast.success('Calendrier créé');
+        }
+        
+        setGeneratingKeyDates(false);
+        setShowCalendarModal(false);
+        resetCalendarForm();
+        loadData();
       }
-      setShowCalendarModal(false);
-      resetCalendarForm();
-      loadData();
     } catch (error) {
+      setGeneratingKeyDates(false);
       toast.error(error.response?.data?.detail || 'Erreur');
     }
   };
