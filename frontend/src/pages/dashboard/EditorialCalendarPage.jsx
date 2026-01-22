@@ -297,6 +297,12 @@ const EditorialCalendarPage = () => {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewPost, setPreviewPost] = useState(null);
 
+  // Statistics state
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [statsCalendar, setStatsCalendar] = useState(null);
+  const [statsData, setStatsData] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+
   // DnD state
   const [activeId, setActiveId] = useState(null);
   const [activePost, setActivePost] = useState(null);
