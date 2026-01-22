@@ -37,11 +37,42 @@ cloudinary.config(
 
 # ==================== MODELS ====================
 
+# Available niches for key dates generation
+AVAILABLE_NICHES = [
+    {"id": "restaurant", "name": "Restaurant / Bar", "icon": "🍽️"},
+    {"id": "automobile", "name": "Automobile", "icon": "🚗"},
+    {"id": "retail", "name": "Retail / Commerce", "icon": "🛍️"},
+    {"id": "immobilier", "name": "Immobilier", "icon": "🏠"},
+    {"id": "beaute", "name": "Beauté / Bien-être", "icon": "💄"},
+    {"id": "fitness", "name": "Fitness / Sport", "icon": "💪"},
+    {"id": "media", "name": "Médias / Entertainment", "icon": "🎬"},
+    {"id": "tech", "name": "Tech / Startup", "icon": "💻"},
+    {"id": "mode", "name": "Mode / Fashion", "icon": "👗"},
+    {"id": "tourisme", "name": "Tourisme / Hôtellerie", "icon": "✈️"},
+    {"id": "sante", "name": "Santé / Médical", "icon": "🏥"},
+    {"id": "education", "name": "Éducation / Formation", "icon": "📚"},
+    {"id": "artisanat", "name": "Artisanat / Local", "icon": "🎨"},
+    {"id": "bnb", "name": "B2B / Services", "icon": "🤝"},
+    {"id": "general", "name": "Généraliste", "icon": "📱"},
+]
+
+AVAILABLE_COUNTRIES = [
+    {"id": "FR", "name": "France", "flag": "🇫🇷"},
+    {"id": "GP", "name": "Guadeloupe", "flag": "🇬🇵"},
+    {"id": "MQ", "name": "Martinique", "flag": "🇲🇶"},
+    {"id": "BE", "name": "Belgique", "flag": "🇧🇪"},
+    {"id": "CH", "name": "Suisse", "flag": "🇨🇭"},
+    {"id": "CA", "name": "Canada", "flag": "🇨🇦"},
+]
+
 class CalendarCreate(BaseModel):
     title: str
     contact_id: Optional[str] = None
     description: Optional[str] = ""
-    color: Optional[str] = "#6366f1"  # Indigo default
+    color: Optional[str] = "#6366f1"
+    country: Optional[str] = "FR"  # Country code
+    niche: Optional[str] = "general"  # Niche for key dates
+    generate_key_dates: Optional[bool] = True  # Auto-generate key dates
 
 class CalendarUpdate(BaseModel):
     title: Optional[str] = None
@@ -49,6 +80,8 @@ class CalendarUpdate(BaseModel):
     description: Optional[str] = None
     color: Optional[str] = None
     archived: Optional[bool] = None
+    country: Optional[str] = None
+    niche: Optional[str] = None
 
 class PostCreate(BaseModel):
     calendar_id: str
