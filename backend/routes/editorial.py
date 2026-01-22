@@ -805,39 +805,6 @@ Améliore cette légende en gardant le message principal mais en la rendant plus
         logger.error(f"AI improve caption error: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur IA: {str(e)}")
 
-    post_id: str,
-    reorder: MediaReorder,
-    current_user: dict = Depends(get_current_user)
-):
-    """Reorder medias in a post (for carousel order)"""
-    existing = await db.editorial_posts.find_one({"id": post_id})
-    if not existing:
-        raise HTTPException(status_code=404, detail="Post non trouvé")
-    
-    # Create a map of media by id
-    media_map = {m["id"]: m for m in existing.get("medias", [])}
-    
-    # Reorder based on the provided order
-    reordered = []
-    for idx, media_id in enumerate(reorder.media_ids):
-        if media_id in media_map:
-            media = media_map[media_id]
-            media["order"] = idx
-            reordered.append(media)
-    
-    # Update post with reordered medias
-    await db.editorial_posts.update_one(
-        {"id": post_id},
-        {
-            "$set": {
-                "medias": reordered,
-                "updated_at": datetime.now(timezone.utc).isoformat()
-            }
-        }
-    )
-    
-    return {"message": "Ordre des médias mis à jour", "medias": reordered}
-
 # ==================== CALENDAR VIEW HELPERS ====================
 
 @router.get("/calendar-view")
