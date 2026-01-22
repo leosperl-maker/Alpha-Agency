@@ -827,7 +827,7 @@ const EditorialCalendarPage = () => {
             <SelectValue placeholder="Réseau" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous les réseaux</SelectItem>
+            <SelectItem value="all">Tous les réseaux</SelectItem>
             {settings.networks?.map(n => (
               <SelectItem key={n.id} value={n.id}>{n.name}</SelectItem>
             ))}
@@ -839,7 +839,7 @@ const EditorialCalendarPage = () => {
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous les statuts</SelectItem>
+            <SelectItem value="all">Tous les statuts</SelectItem>
             {settings.statuses?.map(s => (
               <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
             ))}
@@ -852,7 +852,7 @@ const EditorialCalendarPage = () => {
             <SelectValue placeholder="Format" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Tous les formats</SelectItem>
+            <SelectItem value="all">Tous les formats</SelectItem>
             {settings.formats?.map(f => (
               <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
             ))}
@@ -1114,7 +1114,7 @@ const EditorialCalendarPage = () => {
                   <SelectValue placeholder="Sélectionner un contact" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Aucun</SelectItem>
+                  <SelectItem value="none">Aucun</SelectItem>
                   {contacts.map(c => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name} {c.company ? `(${c.company})` : ''}
@@ -1363,7 +1363,7 @@ const EditorialCalendarPage = () => {
                       <SelectValue placeholder="Choisir..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Aucun</SelectItem>
+                      <SelectItem value="none">Aucun</SelectItem>
                       {settings.pillars?.map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                       ))}
@@ -1381,7 +1381,7 @@ const EditorialCalendarPage = () => {
                       <SelectValue placeholder="Choisir..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Aucun</SelectItem>
+                      <SelectItem value="none">Aucun</SelectItem>
                       {settings.objectives?.map(o => (
                         <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
                       ))}
