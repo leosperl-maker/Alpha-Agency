@@ -618,6 +618,67 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                   </div>
                 </ScrollArea>
               </TabsContent>
+
+              {/* Editorial Calendar Tab */}
+              <TabsContent value="editorial" className="flex-1 overflow-hidden mt-0 px-3 sm:px-4 pb-4">
+                <ScrollArea className="h-full">
+                  <div className="space-y-4 pt-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-white font-medium">Calendriers Éditoriaux</h3>
+                      <Button
+                        size="sm"
+                        onClick={() => navigate('/admin/editorial')}
+                        className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Nouveau
+                      </Button>
+                    </div>
+
+                    {editorialCalendars.length > 0 ? (
+                      <div className="space-y-3">
+                        {editorialCalendars.map((calendar) => (
+                          <Card key={calendar.id} className="border-white/10 hover:border-white/20 transition-colors cursor-pointer" onClick={() => navigate('/admin/editorial')}>
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-3">
+                                <div 
+                                  className="w-4 h-4 rounded-full flex-shrink-0" 
+                                  style={{ backgroundColor: calendar.color || '#6366f1' }}
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-white font-medium truncate">{calendar.title}</h4>
+                                  {calendar.description && (
+                                    <p className="text-white/60 text-sm truncate">{calendar.description}</p>
+                                  )}
+                                </div>
+                                <Badge variant="outline" className="border-white/20 text-white/60">
+                                  {calendar.post_count || 0} posts
+                                </Badge>
+                                <ChevronRight className="w-4 h-4 text-white/40" />
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <Card className="border-white/10 border-dashed">
+                        <CardContent className="p-8 text-center">
+                          <CalendarDays className="w-12 h-12 mx-auto text-white/20 mb-3" />
+                          <p className="text-white/60 mb-4">Aucun calendrier éditorial pour ce contact</p>
+                          <Button
+                            size="sm"
+                            onClick={() => navigate('/admin/editorial')}
+                            className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Créer un calendrier
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
             </Tabs>
           </div>
         ) : (
