@@ -1006,102 +1006,57 @@ const EditorialCalendarPage = () => {
         </div>
       )}
 
-      {/* Trello View */}
+      {/* Trello View with Drag & Drop */}
       {viewMode === 'trello' && (
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {getTrelloColumns().map((column, idx) => {
-            const columnPosts = getPostsForWeek(column.start, column.end);
-            
-            return (
-              <div key={idx} className="flex-shrink-0 w-72">
-                <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-3">
-                  <h3 className="text-white font-medium mb-3 text-sm">{column.label}</h3>
-                  
-                  <div className="space-y-2 min-h-[200px]">
-                    {columnPosts.map(post => (
-                      <div
-                        key={post.id}
-                        className="bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-colors border border-white/10"
-                      >
-                        {/* Thumbnail */}
-                        {post.medias?.[0]?.url && (
-                          <div className="w-full h-24 rounded-lg overflow-hidden mb-2 cursor-pointer" onClick={() => openEditPost(post)}>
-                            {post.medias[0].type === 'video' ? (
-                              <video src={post.medias[0].url} className="w-full h-full object-cover" />
-                            ) : (
-                              <img src={post.medias[0].url} alt="" className="w-full h-full object-cover" />
-                            )}
-                          </div>
-                        )}
-                        
-                        {/* Title */}
-                        <h4 
-                          className="text-white text-sm font-medium mb-2 truncate cursor-pointer"
-                          onClick={() => openEditPost(post)}
-                        >
-                          {post.title}
-                        </h4>
-                        
-                        {/* Networks */}
-                        <div className="flex items-center gap-1 mb-2">
-                          {post.networks?.map(n => (
-                            <span key={n} style={{ color: getNetworkColor(n) }}>
-                              <NetworkIcon network={n} className="w-4 h-4" />
-                            </span>
-                          ))}
-                        </div>
-                        
-                        {/* Meta */}
-                        <div className="flex items-center justify-between">
-                          <Badge 
-                            variant="outline" 
-                            className="text-xs"
-                            style={{ borderColor: getStatusColor(post.status), color: getStatusColor(post.status) }}
-                          >
-                            {settings.statuses?.find(s => s.id === post.status)?.name || post.status}
-                          </Badge>
-                          
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-6 w-6 p-0 text-white/40 hover:text-white hover:bg-white/10"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setPreviewPost(post);
-                                setShowPreviewModal(true);
-                              }}
-                              title="Prévisualiser"
-                            >
-                              <Eye className="w-3 h-3" />
-                            </Button>
-                            <span className="text-white/40 text-xs">
-                              {post.scheduled_time || ''}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {/* Add button */}
-                    <Button
-                      variant="ghost"
-                      className="w-full border-dashed border border-white/10 text-white/40 hover:text-white hover:border-white/20"
-                      onClick={() => {
-                        resetPostForm();
-                        setPostForm(prev => ({ ...prev, scheduled_date: column.start.toISOString().split('T')[0] }));
-                        setShowPostModal(true);
-                      }}
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Ajouter
-                    </Button>
-                  </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex gap-4 overflow-x-auto pb-4">
+            {getTrelloColumns().map((column, idx) => {
+              const columnPosts = getPostsForWeek(column.start, column.end);
+              
+              return (
+                <DroppableColumn
+                  key={column.id}
+                  column={column}
+                  posts={columnPosts}
+                  settings={settings}
+                  onEdit={openEditPost}
+                  onPreview={(post) => {
+                    setPreviewPost(post);
+                    setShowPreviewModal(true);
+                  }}
+                  onAddPost={(startDate) => {
+                    resetPostForm();
+                    setPostForm(prev => ({ ...prev, scheduled_date: startDate.toISOString().split('T')[0] }));
+                    setShowPostModal(true);
+                  }}
+                  getNetworkColor={getNetworkColor}
+                  getStatusColor={getStatusColor}
+                />
+              );
+            })}
+          </div>
+          
+          {/* Drag Overlay - Shows while dragging */}
+          <DragOverlay>
+            {activePost ? (
+              <div className="bg-white/10 backdrop-blur-xl rounded-lg p-3 border-2 border-indigo-500 shadow-xl w-72 transform rotate-3">
+                <h4 className="text-white text-sm font-medium truncate">{activePost.title}</h4>
+                <div className="flex items-center gap-1 mt-2">
+                  {activePost.networks?.map(n => (
+                    <span key={n} style={{ color: getNetworkColor(n) }}>
+                      <NetworkIcon network={n} className="w-4 h-4" />
+                    </span>
+                  ))}
                 </div>
               </div>
-            );
-          })}
-        </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {/* Calendar Modal */}
