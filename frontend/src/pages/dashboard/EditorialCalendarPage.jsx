@@ -922,6 +922,12 @@ const EditorialCalendarPage = () => {
                   <DropdownMenuItem onClick={() => handleDuplicateCalendar(cal.id)}>
                     <Copy className="w-4 h-4 mr-2" /> Dupliquer
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExportPDF(cal.id)}>
+                    <Download className="w-4 h-4 mr-2" /> Exporter PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleShowStats(cal)}>
+                    <BarChart3 className="w-4 h-4 mr-2" /> Statistiques
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleDeleteCalendar(cal.id)} className="text-red-500">
                     <Trash2 className="w-4 h-4 mr-2" /> Supprimer
                   </DropdownMenuItem>
