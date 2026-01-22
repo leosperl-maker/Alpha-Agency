@@ -51,6 +51,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
   const navigate = useNavigate();
   const [contact, setContact] = useState(null);
   const [history, setHistory] = useState(null);
+  const [editorialCalendars, setEditorialCalendars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -63,12 +64,14 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [contactRes, historyRes] = await Promise.all([
+      const [contactRes, historyRes, calendarsRes] = await Promise.all([
         contactsAPI.getOne(contactId),
-        contactsAPI.getHistory(contactId)
+        contactsAPI.getHistory(contactId),
+        api.get(`/editorial/contact/${contactId}/calendars`).catch(() => ({ data: [] }))
       ]);
       setContact(contactRes.data);
       setHistory(historyRes.data);
+      setEditorialCalendars(calendarsRes.data || []);
     } catch (error) {
       toast.error("Erreur lors du chargement des données");
     } finally {
