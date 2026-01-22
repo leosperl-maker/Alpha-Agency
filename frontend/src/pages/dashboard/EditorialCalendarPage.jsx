@@ -296,6 +296,62 @@ const EditorialCalendarPage = () => {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewPost, setPreviewPost] = useState(null);
 
+  // DnD state
+  const [activeId, setActiveId] = useState(null);
+  const [activePost, setActivePost] = useState(null);
+
+  // DnD Sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Minimum drag distance before activation
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag start
+  const handleDragStart = (event) => {
+    const { active } = event;
+    setActiveId(active.id);
+    const post = posts.find(p => p.id === active.id);
+    setActivePost(post);
+  };
+
+  // Handle drag end
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    
+    setActiveId(null);
+    setActivePost(null);
+    
+    if (!over) return;
+    
+    // Check if dropped over a column
+    const overId = over.id;
+    const activePostId = active.id;
+    
+    // Find the target column
+    const columns = getTrelloColumns();
+    const targetColumn = columns.find(col => col.id === overId);
+    
+    if (targetColumn) {
+      // Calculate the new date (use the middle of the week)
+      const newDate = new Date(targetColumn.start);
+      newDate.setDate(newDate.getDate() + 3); // Wednesday of the week
+      const dateStr = newDate.toISOString().split('T')[0];
+      
+      try {
+        await handleMovePost(activePostId, dateStr);
+        toast.success('Post déplacé');
+      } catch (error) {
+        toast.error('Erreur lors du déplacement');
+      }
+    }
+  };
+
   // Load data
   const loadData = useCallback(async () => {
     setLoading(true);
