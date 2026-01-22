@@ -139,15 +139,18 @@ const EditorialCalendarPage = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [calendarsRes, settingsRes, contactsRes] = await Promise.all([
+      const [calendarsRes, settingsRes, contactsRes, nichesRes] = await Promise.all([
         api.get('/editorial/calendars'),
         api.get('/editorial/settings'),
-        api.get('/contacts')
+        api.get('/contacts'),
+        api.get('/editorial/niches')
       ]);
       
       setCalendars(calendarsRes.data || []);
       setSettings(settingsRes.data || {});
       setContacts(contactsRes.data || []);
+      setNiches(nichesRes.data?.niches || []);
+      setCountries(nichesRes.data?.countries || []);
       
       // Load posts based on current view
       await loadPosts();
