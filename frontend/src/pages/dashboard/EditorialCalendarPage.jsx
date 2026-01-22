@@ -462,6 +462,39 @@ const EditorialCalendarPage = () => {
     return posts.filter(p => p.scheduled_date === dateStr);
   };
 
+  // Get key dates for a specific day (from all calendars or selected calendar)
+  const getKeyDatesForDay = (date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    const keyDates = [];
+    
+    const calendarsToCheck = selectedCalendarId === 'all' 
+      ? calendars 
+      : calendars.filter(c => c.id === selectedCalendarId);
+    
+    for (const cal of calendarsToCheck) {
+      for (const kd of (cal.key_dates || [])) {
+        if (kd.date === dateStr && kd.enabled) {
+          keyDates.push({ ...kd, calendar: cal });
+        }
+      }
+    }
+    
+    return keyDates;
+  };
+
+  // Handle creating post from key date
+  const handleCreatePostFromKeyDate = async (calendarId, dateId) => {
+    try {
+      const response = await api.post(`/editorial/calendars/${calendarId}/key-dates/${dateId}/create-post`);
+      toast.success('Post créé depuis la date forte !');
+      loadPosts();
+      // Open the post for editing
+      openEditPost(response.data);
+    } catch (error) {
+      toast.error('Erreur lors de la création du post');
+    }
+  };
+
   // Get status color
   const getStatusColor = (statusId) => {
     const status = settings.statuses?.find(s => s.id === statusId);
