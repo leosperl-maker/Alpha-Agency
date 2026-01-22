@@ -568,6 +568,211 @@ async def delete_media(
 
 @router.put("/posts/{post_id}/media/reorder")
 async def reorder_media(
+
+
+# ==================== AI ASSISTANCE ====================
+
+class AIAssistRequest(BaseModel):
+    topic: str  # Sujet ou thème du post
+    networks: List[str] = []  # Réseaux sociaux ciblés
+    format_type: str = "post"  # Type de format
+    content_pillar: Optional[str] = ""  # Pilier de contenu
+    objective: Optional[str] = ""  # Objectif
+    client_context: Optional[str] = ""  # Contexte client/niche
+    language: str = "fr"  # Langue
+
+@router.post("/ai/assist")
+async def ai_writing_assist(
+    request: AIAssistRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    AI Writing Assistant - Generates social media content ideas
+    Returns: post angles, captions, hooks, and hashtags
+    """
+    if not EMERGENT_LLM_KEY:
+        raise HTTPException(status_code=500, detail="Clé API LLM non configurée")
+    
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        # Build network-specific instructions
+        network_names = {
+            "instagram": "Instagram (visuel, émojis, hashtags importants, 2200 chars max)",
+            "facebook": "Facebook (plus long, engageant, appel à l'action)",
+            "linkedin": "LinkedIn (professionnel, valeur ajoutée, moins d'émojis)",
+            "tiktok": "TikTok (court, tendance, hooks accrocheurs)",
+            "youtube": "YouTube (description, mots-clés, appel à s'abonner)"
+        }
+        
+        networks_str = ", ".join([network_names.get(n, n) for n in request.networks]) if request.networks else "réseaux sociaux en général"
+        
+        # Build objective context
+        objective_context = ""
+        if request.objective:
+            objectives = {
+                "visibility": "augmenter la visibilité et la portée",
+                "engagement": "maximiser l'engagement (likes, commentaires, partages)",
+                "leads": "générer des leads et des contacts qualifiés",
+                "sales": "convertir et vendre",
+                "branding": "renforcer l'image de marque"
+            }
+            objective_context = f"Objectif principal: {objectives.get(request.objective, request.objective)}"
+        
+        # Build pillar context
+        pillar_context = ""
+        if request.content_pillar:
+            pillars = {
+                "education": "contenu éducatif et informatif",
+                "social_proof": "preuve sociale et témoignages",
+                "offer": "offre promotionnelle ou commerciale",
+                "behind_scenes": "coulisses et authenticité",
+                "entertainment": "divertissement et humour",
+                "inspiration": "inspiration et motivation"
+            }
+            pillar_context = f"Type de contenu: {pillars.get(request.content_pillar, request.content_pillar)}"
+        
+        # System prompt for social media expert
+        system_message = """Tu es un expert en stratégie social media et copywriting pour les réseaux sociaux.
+Tu aides les community managers à créer du contenu engageant et performant.
+
+Tes réponses doivent être:
+- Pratiques et directement utilisables
+- Adaptées au ton de chaque réseau social
+- Créatives et originales
+- En français sauf si spécifié autrement
+
+Format de réponse en JSON strict:
+{
+    "angles": ["angle 1", "angle 2", "angle 3"],
+    "caption": "Légende complète adaptée au réseau principal",
+    "hooks": ["hook 1", "hook 2", "hook 3"],
+    "hashtags": ["hashtag1", "hashtag2", "hashtag3", "hashtag4", "hashtag5"],
+    "cta": "Appel à l'action suggéré"
+}"""
+
+        # User prompt
+        user_prompt = f"""Génère du contenu pour un post social media avec ces paramètres:
+
+📌 SUJET/THÈME: {request.topic}
+📱 RÉSEAUX CIBLÉS: {networks_str}
+📝 FORMAT: {request.format_type}
+{pillar_context}
+{objective_context}
+{f"🏢 CONTEXTE CLIENT: {request.client_context}" if request.client_context else ""}
+
+Génère:
+1. 3 angles/idées différentes pour aborder ce sujet
+2. Une légende complète et engageante (adaptée au réseau principal)
+3. 3 hooks accrocheurs (premières phrases pour capter l'attention)
+4. 5 hashtags pertinents et populaires
+5. Un appel à l'action efficace
+
+Réponds UNIQUEMENT avec le JSON, sans texte avant ou après."""
+
+        # Initialize chat
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"editorial-ai-{uuid.uuid4()}",
+            system_message=system_message
+        ).with_model("openai", "gpt-5.2")
+        
+        # Send message
+        user_message = UserMessage(text=user_prompt)
+        response = await chat.send_message(user_message)
+        
+        # Parse JSON response
+        import json
+        
+        # Clean response if needed
+        response_text = response.strip()
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.startswith("```"):
+            response_text = response_text[3:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+        response_text = response_text.strip()
+        
+        try:
+            result = json.loads(response_text)
+        except json.JSONDecodeError:
+            # If JSON parsing fails, return raw response
+            result = {
+                "angles": [],
+                "caption": response_text,
+                "hooks": [],
+                "hashtags": [],
+                "cta": "",
+                "raw_response": response_text
+            }
+        
+        return {
+            "success": True,
+            "data": result,
+            "request": {
+                "topic": request.topic,
+                "networks": request.networks,
+                "format_type": request.format_type
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"AI assist error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur IA: {str(e)}")
+
+@router.post("/ai/improve-caption")
+async def ai_improve_caption(
+    caption: str,
+    network: str = "instagram",
+    current_user: dict = Depends(get_current_user)
+):
+    """Improve an existing caption for a specific network"""
+    if not EMERGENT_LLM_KEY:
+        raise HTTPException(status_code=500, detail="Clé API LLM non configurée")
+    
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        network_tips = {
+            "instagram": "Optimise pour Instagram: émojis stratégiques, structure aérée, hashtags pertinents, max 2200 caractères",
+            "facebook": "Optimise pour Facebook: plus conversationnel, question engageante, appel à l'action clair",
+            "linkedin": "Optimise pour LinkedIn: ton professionnel, valeur ajoutée, crédibilité, moins d'émojis",
+            "tiktok": "Optimise pour TikTok: très court, tendance, hashtags viraux",
+            "youtube": "Optimise pour YouTube: mots-clés SEO, description complète, timestamps si pertinent"
+        }
+        
+        system_message = """Tu es un expert en copywriting social media.
+Tu améliores les légendes pour les rendre plus engageantes et performantes.
+Réponds uniquement avec la légende améliorée, sans explication."""
+
+        user_prompt = f"""{network_tips.get(network, "Optimise cette légende")}
+
+LÉGENDE ORIGINALE:
+{caption}
+
+Améliore cette légende en gardant le message principal mais en la rendant plus engageante et adaptée à {network}."""
+
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"improve-caption-{uuid.uuid4()}",
+            system_message=system_message
+        ).with_model("openai", "gpt-5.2")
+        
+        user_message = UserMessage(text=user_prompt)
+        response = await chat.send_message(user_message)
+        
+        return {
+            "success": True,
+            "improved_caption": response.strip(),
+            "original_caption": caption,
+            "network": network
+        }
+        
+    except Exception as e:
+        logger.error(f"AI improve caption error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur IA: {str(e)}")
+
     post_id: str,
     reorder: MediaReorder,
     current_user: dict = Depends(get_current_user)
