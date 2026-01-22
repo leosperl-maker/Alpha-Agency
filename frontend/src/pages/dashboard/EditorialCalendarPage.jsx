@@ -1311,6 +1311,13 @@ const EditorialCalendarPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Social Preview Modal */}
+      <SocialPreviewModal 
+        open={showPreviewModal} 
+        onOpenChange={setShowPreviewModal} 
+        post={previewPost}
+      />
     </div>
   );
 };
