@@ -1746,6 +1746,118 @@ const EditorialCalendarPage = () => {
       </Dialog>
 
       {/* Social Preview Modal */}
+      {/* Statistics Modal */}
+      <Dialog open={showStatsModal} onOpenChange={setShowStatsModal}>
+        <DialogContent className="max-w-2xl bg-slate-900 border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-indigo-400" />
+              Statistiques - {statsCalendar?.title}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {statsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+            </div>
+          ) : statsData ? (
+            <div className="space-y-6">
+              {/* Summary Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white/5 rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold text-indigo-400">{statsData.summary?.total_posts || 0}</div>
+                  <div className="text-white/60 text-sm">Posts totaux</div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold text-green-400">{statsData.summary?.completion_rate || 0}%</div>
+                  <div className="text-white/60 text-sm">Taux de complétion</div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold text-purple-400">{statsData.summary?.posts_with_media || 0}</div>
+                  <div className="text-white/60 text-sm">Avec médias</div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold text-yellow-400">{statsData.summary?.key_dates_count || 0}</div>
+                  <div className="text-white/60 text-sm">Dates fortes</div>
+                </div>
+              </div>
+              
+              {/* Status Breakdown */}
+              <div className="bg-white/5 rounded-lg p-4">
+                <h4 className="text-white font-medium mb-3">Par statut</h4>
+                <div className="space-y-2">
+                  {statsData.status_breakdown?.map(item => (
+                    <div key={item.status} className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-white/80">
+                            {settings.statuses?.find(s => s.id === item.status)?.name || item.status}
+                          </span>
+                          <span className="text-white/60">{item.count} ({item.percentage}%)</span>
+                        </div>
+                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-indigo-500 rounded-full transition-all"
+                            style={{ width: `${item.percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Networks Breakdown */}
+              {statsData.network_breakdown?.length > 0 && (
+                <div className="bg-white/5 rounded-lg p-4">
+                  <h4 className="text-white font-medium mb-3">Par réseau social</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {statsData.network_breakdown.map(item => (
+                      <Badge 
+                        key={item.network} 
+                        variant="outline" 
+                        className="text-white border-white/20"
+                        style={{ borderColor: getNetworkColor(item.network), color: getNetworkColor(item.network) }}
+                      >
+                        <NetworkIcon network={item.network} className="w-3 h-3 mr-1" />
+                        {settings.networks?.find(n => n.id === item.network)?.name || item.network}: {item.count}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Format Breakdown */}
+              <div className="bg-white/5 rounded-lg p-4">
+                <h4 className="text-white font-medium mb-3">Par format</h4>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(statsData.by_format || {}).map(([format, count]) => (
+                    <Badge key={format} variant="outline" className="text-white/80 border-white/20">
+                      <FormatIcon format={format} className="w-3 h-3 mr-1" />
+                      {settings.formats?.find(f => f.id === format)?.name || format}: {count}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center text-white/60 py-8">
+              Aucune donnée disponible
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStatsModal(false)} className="text-white border-white/20">
+              Fermer
+            </Button>
+            <Button onClick={() => handleExportPDF(statsCalendar?.id)} className="bg-indigo-600">
+              <Download className="w-4 h-4 mr-2" />
+              Exporter PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <SocialPreviewModal 
         open={showPreviewModal} 
         onOpenChange={setShowPreviewModal} 
