@@ -826,7 +826,7 @@ const EditorialCalendarPage = () => {
 
       {/* Calendar Modal */}
       <Dialog open={showCalendarModal} onOpenChange={setShowCalendarModal}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-md">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingCalendar ? 'Modifier le calendrier' : 'Nouveau calendrier'}</DialogTitle>
           </DialogHeader>
@@ -862,6 +862,72 @@ const EditorialCalendarPage = () => {
               </Select>
             </div>
             
+            {/* Country & Niche for Key Dates */}
+            {!editingCalendar && (
+              <div className="p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/20 space-y-4">
+                <div className="flex items-center gap-2 text-indigo-400">
+                  <Sparkles className="w-4 h-4" />
+                  <span className="font-medium text-sm">Dates fortes intelligentes (IA)</span>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-white/70">Pays / Marché</Label>
+                    <Select 
+                      value={calendarForm.country} 
+                      onValueChange={(v) => setCalendarForm({ ...calendarForm, country: v })}
+                    >
+                      <SelectTrigger className="bg-white/5 border-white/10 h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countries.map(c => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.flag} {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-xs text-white/70">Secteur / Niche</Label>
+                    <Select 
+                      value={calendarForm.niche} 
+                      onValueChange={(v) => setCalendarForm({ ...calendarForm, niche: v })}
+                    >
+                      <SelectTrigger className="bg-white/5 border-white/10 h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {niches.map(n => (
+                          <SelectItem key={n.id} value={n.id}>
+                            {n.icon} {n.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={calendarForm.generate_key_dates}
+                    onChange={(e) => setCalendarForm({ ...calendarForm, generate_key_dates: e.target.checked })}
+                    className="w-4 h-4 rounded border-white/20 bg-white/5 text-indigo-600"
+                  />
+                  <span className="text-sm text-white/80">
+                    Générer automatiquement les dates fortes 2026
+                  </span>
+                </label>
+                
+                <p className="text-xs text-white/50">
+                  L'IA va créer ~20-25 dates clés adaptées à votre secteur (jours fériés, événements marketing, dates spécifiques au secteur)
+                </p>
+              </div>
+            )}
+            
             <div className="space-y-2">
               <Label>Couleur</Label>
               <div className="flex gap-2">
@@ -889,9 +955,20 @@ const EditorialCalendarPage = () => {
           </div>
           
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowCalendarModal(false)}>Annuler</Button>
-            <Button onClick={handleSaveCalendar} className="bg-indigo-600 hover:bg-indigo-500">
-              {editingCalendar ? 'Enregistrer' : 'Créer'}
+            <Button variant="ghost" onClick={() => setShowCalendarModal(false)} disabled={generatingKeyDates}>
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleSaveCalendar} 
+              className="bg-indigo-600 hover:bg-indigo-500"
+              disabled={generatingKeyDates}
+            >
+              {generatingKeyDates ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Génération en cours...
+                </>
+              ) : editingCalendar ? 'Enregistrer' : 'Créer'}
             </Button>
           </DialogFooter>
         </DialogContent>
