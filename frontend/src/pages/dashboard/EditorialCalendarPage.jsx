@@ -1107,17 +1107,30 @@ const EditorialCalendarPage = () => {
           
           <DialogFooter className="flex justify-between">
             {editingPost && (
-              <Button 
-                variant="ghost" 
-                className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                onClick={() => {
-                  handleDeletePost(editingPost.id);
-                  setShowPostModal(false);
-                }}
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Supprimer
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="ghost" 
+                  className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                  onClick={() => {
+                    handleDeletePost(editingPost.id);
+                    setShowPostModal(false);
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Supprimer
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/10"
+                  onClick={() => {
+                    setPreviewPost({...editingPost, ...postForm});
+                    setShowPreviewModal(true);
+                  }}
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  Prévisualiser
+                </Button>
+              </div>
             )}
             <div className="flex gap-2">
               <Button variant="ghost" onClick={() => setShowPostModal(false)}>Annuler</Button>
