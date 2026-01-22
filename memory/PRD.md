@@ -131,7 +131,6 @@ GET    /api/editorial/contact/:contactId/calendars
 ## Prochaines Étapes (Phase 2)
 
 ### P1 - À implémenter
-- **IA d'aide rédactionnelle** (GPT-5.2)
 - **Prévisualisations** par réseau (Instagram, Facebook, TikTok, LinkedIn)
 - **Dates fortes 2026** (marronniers marketing)
 - **Drag & drop** amélioré entre colonnes Trello
@@ -149,7 +148,7 @@ GET    /api/editorial/contact/:contactId/calendars
 - **Cloudinary:** Upload médias ✅
 - **Google Calendar:** OAuth2 ✅
 - **Brevo:** Emails ✅, SMS ⚠️ (Guadeloupe)
-- **GPT-5.2:** À intégrer (Phase 2)
+- **GPT-5.2:** IA rédactionnelle ✅
 
 ## Files Modified This Session
 - `/app/backend/routes/editorial.py` (NEW)
