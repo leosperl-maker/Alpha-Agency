@@ -123,6 +123,10 @@ const EditorialCalendarPage = () => {
   const [aiTopic, setAiTopic] = useState('');
   const [aiResult, setAiResult] = useState(null);
 
+  // Preview state
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewPost, setPreviewPost] = useState(null);
+
   // Load data
   const loadData = useCallback(async () => {
     setLoading(true);
