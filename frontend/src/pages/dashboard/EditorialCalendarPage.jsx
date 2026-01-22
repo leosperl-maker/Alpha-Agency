@@ -931,7 +931,19 @@ const EditorialCalendarPage = () => {
               </div>
               
               <div className="space-y-2">
-                <Label>Légende / Texte du post</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Légende / Texte du post</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowAIModal(true)}
+                    className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/10"
+                  >
+                    <Wand2 className="w-4 h-4 mr-1" />
+                    Aide IA
+                  </Button>
+                </div>
                 <Textarea
                   value={postForm.caption}
                   onChange={(e) => setPostForm({ ...postForm, caption: e.target.value })}
