@@ -4,7 +4,8 @@ import {
   Image, Video, Film, Circle, Images, Trash2, Edit, Eye, MoreVertical,
   Copy, Archive, Clock, User, Link as LinkIcon, MessageSquare, Target,
   Sparkles, Upload, X, Check, GripVertical, Instagram, Facebook, Linkedin, Youtube,
-  Wand2, Loader2, Lightbulb, Hash, MousePointerClick, Filter, RotateCcw
+  Wand2, Loader2, Lightbulb, Hash, MousePointerClick, Filter, RotateCcw,
+  Download, BarChart3, FileText
 } from 'lucide-react';
 import {
   DndContext,
