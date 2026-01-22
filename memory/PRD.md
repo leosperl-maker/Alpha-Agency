@@ -28,11 +28,13 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - Liste de tâches journalière
 - Report automatique des tâches non terminées
 
-### 6. Module Agenda / RDV ✅
+### 6. Module Agenda / RDV ✅ UPDATED 2026-01-22
 - Google Calendar API (OAuth2)
 - Lien Google Meet automatique
 - Invitations email avec .ics
-- **Configuration Google depuis Paramètres > Intégrations** ✅ 2026-01-21
+- **Fuseau horaire Guadeloupe (America/Guadeloupe)** ✅ FIXED
+- **Envoi email invitation Brevo** ✅ FIXED
+- Configuration Google depuis Paramètres > Intégrations
 
 ### 7. Calendrier Éditorial ✅ COMPLETE 2026-01-22
 
@@ -40,79 +42,71 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 
 #### Fonctionnalités Terminées
 
-1. **Dates Fortes Intelligentes (IA)** ✅ 2026-01-22
+1. **Dates Fortes Intelligentes (IA)** ✅
    - Génération automatique de 20-25 dates marketing par calendrier
    - Basé sur la niche (Restaurant, Beauté, Auto, etc.) et le pays
-   - Dates génériques (jours fériés, Black Friday) + dates spécifiques au secteur
-   - Endpoint: `POST /api/editorial/calendars` avec `generate_key_dates: true`
    - Création de post pré-rempli depuis une date forte
 
 2. **Vue Calendrier** ✅
    - Affichage mensuel avec navigation
    - Posts colorés par calendrier
    - Dates fortes affichées avec icône 📅
-   - Clic sur une date = créer un nouveau post
 
-3. **Vue Trello/Kanban avec Drag & Drop** ✅ 2026-01-22
-   - Colonnes par semaine
-   - Cartes draggables avec @dnd-kit
-   - Déplacement de posts entre semaines
-   - Endpoint: `PUT /api/editorial/posts/{id}/move`
+3. **Vue Trello avec Drag & Drop** ✅
+   - Colonnes par semaine avec cartes draggables (@dnd-kit)
+   - API Move pour déplacer les posts entre semaines
 
-4. **Filtres Avancés** ✅ 2026-01-22
-   - Filtre par calendrier
-   - Filtre par réseau social (Instagram, Facebook, LinkedIn, TikTok, YouTube)
-   - Filtre par statut (Idée, À rédiger, En cours, À valider, Validé, Programmé, Publié)
-   - Filtre par format (Post, Carrousel, Reel, Vidéo, Story)
+4. **Filtres Avancés** ✅
+   - Filtre par calendrier, réseau social, statut, format
    - Bouton de réinitialisation des filtres
 
-5. **Prévisualisations Social Media** ✅ 2026-01-22
-   - Mockups réalistes pour 5 plateformes:
-     - **Instagram:** Feed post avec avatar, likes, caption, hashtags
-     - **Facebook:** Publication de page avec réactions
-     - **LinkedIn:** Post professionnel
-     - **TikTok:** Mockup mobile vertical
-     - **YouTube:** Thumbnail avec titre et vues
-   - Accessible via bouton œil ou "Prévisualiser" dans l'éditeur
+5. **Prévisualisations Social Media** ✅
+   - Mockups réalistes pour Instagram, Facebook, LinkedIn, TikTok, YouTube
 
 6. **IA d'Aide à la Rédaction** ✅
-   - Génère 3 angles/idées, légende, hooks, hashtags, CTA
+   - Génère idées, légende, hooks, hashtags, CTA
    - Utilise GPT-5.2 via Emergent LLM Key
-   - Endpoint: `POST /api/editorial/ai/assist`
 
-7. **Upload Médias** ✅
-   - Intégration Cloudinary
-   - Support images et vidéos
-   - Réorganisation de l'ordre des médias (carrousels)
+7. **Export PDF du Planning** ✅ NEW 2026-01-22
+   - Export par calendrier avec filtres de dates
+   - Export global multi-calendriers
+   - Format tableau avec statuts et réseaux
+
+8. **Statistiques par Calendrier** ✅ NEW 2026-01-22
+   - Posts par statut, réseau, format, pilier
+   - Taux de complétion
+   - Timeline par semaine
+   - Modal de statistiques dans le frontend
 
 #### API Routes - Calendrier Éditorial
 ```
-GET    /api/editorial/niches              # Liste des niches disponibles
-GET    /api/editorial/settings            # Réseaux, formats, statuts
-GET    /api/editorial/calendars           # Liste calendriers
-POST   /api/editorial/calendars           # Créer calendrier (+ dates fortes IA)
-GET    /api/editorial/calendars/:id       # Détail calendrier
-PUT    /api/editorial/calendars/:id       # Modifier calendrier
-DELETE /api/editorial/calendars/:id       # Supprimer calendrier
-POST   /api/editorial/calendars/:id/duplicate
-GET    /api/editorial/calendars/:id/key-dates      # Dates fortes
-POST   /api/editorial/calendars/:id/key-dates/regenerate
-POST   /api/editorial/calendars/:id/key-dates/:dateId/create-post
-GET    /api/editorial/posts               # Liste posts (avec filtres)
-POST   /api/editorial/posts               # Créer post
-GET    /api/editorial/posts/:id
-PUT    /api/editorial/posts/:id
-DELETE /api/editorial/posts/:id
-PUT    /api/editorial/posts/:id/move      # Drag & drop
-POST   /api/editorial/posts/:id/media     # Upload média
-POST   /api/editorial/ai/assist           # Aide IA
+GET    /api/editorial/niches
+GET    /api/editorial/settings
+GET    /api/editorial/calendars
+POST   /api/editorial/calendars
+GET    /api/editorial/calendars/{id}
+PUT    /api/editorial/calendars/{id}
+DELETE /api/editorial/calendars/{id}
+POST   /api/editorial/calendars/{id}/duplicate
+GET    /api/editorial/calendars/{id}/key-dates
+POST   /api/editorial/calendars/{id}/key-dates/regenerate
+POST   /api/editorial/calendars/{id}/key-dates/{dateId}/create-post
+GET    /api/editorial/calendars/{id}/stats        # NEW
+GET    /api/editorial/calendars/{id}/export/pdf   # NEW
+GET    /api/editorial/stats/global                # NEW
+GET    /api/editorial/export/pdf                  # NEW (multi-calendars)
+GET    /api/editorial/posts
+POST   /api/editorial/posts
+PUT    /api/editorial/posts/{id}
+DELETE /api/editorial/posts/{id}
+PUT    /api/editorial/posts/{id}/move
+POST   /api/editorial/ai/assist
 POST   /api/editorial/ai/improve-caption
 ```
 
 ## Tests Effectués ✅
-- 22/22 tests backend passés
-- Rapport: `/app/test_reports/iteration_33.json`
-- Tests: `/app/backend/tests/test_editorial_calendar.py`
+- iteration_33.json: 22/22 tests backend calendrier éditorial
+- iteration_34.json: 15/15 tests nouvelles fonctionnalités (stats, PDF, email, timezone)
 
 ## Environment
 - Backend: FastAPI (port 8001)
@@ -121,18 +115,24 @@ POST   /api/editorial/ai/improve-caption
 - Auth: JWT
 - Admin: admin@alphagency.fr / superpassword
 
+## Bugs Corrigés 2026-01-22
+
+1. **Fuseau horaire RDV** ✅
+   - Problème: RDV à 11h Guadeloupe → 6h sur Google Calendar
+   - Solution: Changé `Europe/Paris` → `America/Guadeloupe` dans appointments.py
+   - Fichier ICS également mis à jour
+
+2. **Envoi email invitation Brevo** ✅
+   - Problème: Erreur 500 `{"message":"Key not found","code":"unauthorized"}`
+   - Solution: Ajouté `load_dotenv()` dans appointments.py pour charger BREVO_API_KEY
+
 ## Prochaines Étapes
 
 ### P1 - Prioritaire
 - ❌ **SMS Guadeloupe** - Brevo bloqué, proposer Twilio comme alternative
 
-### P2 - Améliorations Calendrier Éditorial
-- Intégration avec module Things (tâches liées aux posts) - **En attente à la demande de l'utilisateur**
-- Export PDF du planning
-- Statistiques par calendrier
+### P2 - Backlog
 - Templates de posts réutilisables
-
-### P3 - Backlog
 - API Meta/LinkedIn/TikTok pour publication directe
 - Vérifier fonctionnalité "Bulk Delete"
 - Améliorations MindMap (Export PDF, raccourcis)
@@ -141,13 +141,14 @@ POST   /api/editorial/ai/improve-caption
 
 ## 3rd Party Integrations
 - **Cloudinary:** Upload médias ✅
-- **Google Calendar:** OAuth2 ✅
+- **Google Calendar:** OAuth2 ✅ (fuseau Guadeloupe)
 - **Brevo:** Emails ✅, SMS ⚠️ (Guadeloupe bloqué)
 - **GPT-5.2:** IA rédactionnelle ✅
+- **ReportLab:** Export PDF ✅
 - **@dnd-kit:** Drag & drop ✅
 
-## Files Modified This Session (2026-01-22)
-- `/app/backend/routes/editorial.py` - Ajout endpoints key-dates, fix calendar-view
-- `/app/frontend/src/pages/dashboard/EditorialCalendarPage.jsx` - Drag & drop, filtres avancés
-- `/app/frontend/src/components/SocialPreviewModal.jsx` - Mockups complets
-- `/app/backend/tests/test_editorial_calendar.py` - Tests complets (22 tests)
+## Files Modified 2026-01-22
+- `/app/backend/routes/appointments.py` - Fuseau horaire + load_dotenv
+- `/app/backend/routes/editorial.py` - Stats + Export PDF
+- `/app/frontend/src/pages/dashboard/EditorialCalendarPage.jsx` - Modal stats + boutons export
+- `/app/backend/tests/test_new_features_iteration34.py` - Tests nouvelles fonctionnalités
