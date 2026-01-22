@@ -116,6 +116,12 @@ const EditorialCalendarPage = () => {
     notes: ''
   });
 
+  // AI Assistant states
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiTopic, setAiTopic] = useState('');
+  const [aiResult, setAiResult] = useState(null);
+
   // Load data
   const loadData = useCallback(async () => {
     setLoading(true);
