@@ -36,9 +36,9 @@ class TestAuthentication:
         })
         assert response.status_code == 200, f"Login failed: {response.text}"
         data = response.json()
-        assert "access_token" in data, "No access_token in response"
+        assert "token" in data, "No token in response"
         print(f"✅ Login successful, token received")
-        return data["access_token"]
+        return data["token"]
 
 
 class TestCalendarStatistics:
@@ -51,7 +51,7 @@ class TestCalendarStatistics:
             "email": TEST_EMAIL,
             "password": TEST_PASSWORD
         })
-        self.token = response.json().get("access_token")
+        self.token = response.json().get("token")
         self.headers = {"Authorization": f"Bearer {self.token}"}
     
     def test_get_calendar_stats_success(self):
@@ -152,7 +152,7 @@ class TestPDFExport:
             "email": TEST_EMAIL,
             "password": TEST_PASSWORD
         })
-        self.token = response.json().get("access_token")
+        self.token = response.json().get("token")
         self.headers = {"Authorization": f"Bearer {self.token}"}
     
     def test_export_pdf_success(self):
@@ -220,7 +220,7 @@ class TestAppointmentCreation:
             "email": TEST_EMAIL,
             "password": TEST_PASSWORD
         })
-        self.token = response.json().get("access_token")
+        self.token = response.json().get("token")
         self.headers = {"Authorization": f"Bearer {self.token}"}
         self.created_appointment_ids = []
     
@@ -335,7 +335,7 @@ class TestEmailInvitation:
             "email": TEST_EMAIL,
             "password": TEST_PASSWORD
         })
-        self.token = response.json().get("access_token")
+        self.token = response.json().get("token")
         self.headers = {"Authorization": f"Bearer {self.token}"}
     
     def test_send_invitation_endpoint_exists(self):
@@ -424,7 +424,7 @@ class TestGlobalStats:
             "email": TEST_EMAIL,
             "password": TEST_PASSWORD
         })
-        self.token = response.json().get("access_token")
+        self.token = response.json().get("token")
         self.headers = {"Authorization": f"Bearer {self.token}"}
     
     def test_get_global_stats(self):
