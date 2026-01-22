@@ -490,12 +490,12 @@ async def update_appointment(
                 if 'start_datetime' in update_data:
                     event_update['start'] = {
                         'dateTime': update_data['start_datetime'],
-                        'timeZone': 'Europe/Paris'
+                        'timeZone': GUADELOUPE_TIMEZONE
                     }
                 if 'end_datetime' in update_data:
                     event_update['end'] = {
                         'dateTime': update_data['end_datetime'],
-                        'timeZone': 'Europe/Paris'
+                        'timeZone': GUADELOUPE_TIMEZONE
                     }
                 
                 if event_update:
