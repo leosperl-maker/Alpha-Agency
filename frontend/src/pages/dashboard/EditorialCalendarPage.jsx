@@ -242,9 +242,9 @@ const EditorialCalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedCalendarId, setSelectedCalendarId] = useState('all');
   const [filters, setFilters] = useState({
-    network: '',
-    format: '',
-    status: ''
+    network: 'all',
+    format: 'all',
+    status: 'all'
   });
   
   // Modal states
