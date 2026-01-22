@@ -163,7 +163,25 @@ DEFAULT_OBJECTIVES = [
     {"id": "branding", "name": "Image de marque"},
 ]
 
+# Key Date model
+class KeyDateCreate(BaseModel):
+    date: str  # YYYY-MM-DD
+    title: str
+    category: str  # "generic" or "niche"
+    niche_specific: Optional[str] = None  # Which niche this is for
+    content_angle: Optional[str] = ""  # AI suggestion
+    enabled: bool = True
+    icon: Optional[str] = None
+
 # ==================== SETTINGS ENDPOINTS ====================
+
+@router.get("/niches")
+async def get_available_niches(current_user: dict = Depends(get_current_user)):
+    """Get available niches for calendar creation"""
+    return {
+        "niches": AVAILABLE_NICHES,
+        "countries": AVAILABLE_COUNTRIES
+    }
 
 @router.get("/settings")
 async def get_editorial_settings(current_user: dict = Depends(get_current_user)):
