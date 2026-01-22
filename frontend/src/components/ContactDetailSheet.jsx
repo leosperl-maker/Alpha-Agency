@@ -15,6 +15,7 @@ import {
   Phone, 
   Building, 
   Calendar,
+  CalendarDays,
   FileText,
   Receipt,
   CheckSquare,
@@ -42,6 +43,7 @@ import {
   Star
 } from "lucide-react";
 import { contactsAPI, quotesAPI, invoicesAPI } from "../lib/api";
+import api from "../lib/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
