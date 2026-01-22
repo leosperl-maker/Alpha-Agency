@@ -1,0 +1,127 @@
+{
+  "summary": "Backend testing of 4 new features: Calendar Statistics, PDF Export, Email Invitation with ICS, and Appointment creation with Guadeloupe timezone. All 15 tests PASSED (100% success rate).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_new_features_iteration34.py",
+    "/app/test_reports/pytest/pytest_new_features_iteration34.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_new_features_iteration34.py"
+  ],
+  "success_rate": {
+    "backend": "100% (15/15 tests passed)",
+    "frontend": "N/A (backend only testing requested)"
+  },
+  "test_credentials": {
+    "email": "admin@alphagency.fr",
+    "password": "superpassword"
+  },
+  "seed_data_creation": "Created TEST_RDV_Guadeloupe_Timezone appointment during testing - cleaned up after test",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "4 new features fully tested and working: 1) GET /api/editorial/calendars/{id}/stats returns statistics with summary, by_status, by_network, by_format, by_pillar, timeline, status_breakdown, network_breakdown. 2) GET /api/editorial/calendars/{id}/export/pdf returns downloadable PDF (2.7KB). 3) POST /api/appointments/{id}/send-invitation sends email with ICS attachment via Brevo. 4) POST /api/appointments creates appointments with America/Guadeloupe timezone. Test calendar ID: a5c7e3b8-2e65-4b19-a8ca-9434a0d60370. Test appointment ID: 350ab69d-f8c3-41cd-8f9d-f6199d08b7aa.",
+  "verified_features": {
+    "calendar_stats_api": {
+      "endpoint": "GET /api/editorial/calendars/{id}/stats",
+      "status": "PASS",
+      "response_structure": {
+        "calendar_id": "string",
+        "calendar_title": "string",
+        "period": {"start_date": "string|null", "end_date": "string|null"},
+        "summary": {
+          "total_posts": "number",
+          "completion_rate": "number",
+          "posts_with_media": "number",
+          "media_rate": "number",
+          "key_dates_count": "number"
+        },
+        "by_status": "object",
+        "by_network": "object",
+        "by_format": "object",
+        "by_pillar": "object",
+        "timeline": "object",
+        "status_breakdown": "array",
+        "network_breakdown": "array"
+      },
+      "test_result": {
+        "total_posts": 3,
+        "completion_rate": 0,
+        "key_dates_count": 24
+      }
+    },
+    "pdf_export_api": {
+      "endpoint": "GET /api/editorial/calendars/{id}/export/pdf",
+      "status": "PASS",
+      "content_type": "application/pdf",
+      "content_disposition": "attachment; filename=planning_*.pdf",
+      "pdf_size": "2720 bytes"
+    },
+    "email_invitation_api": {
+      "endpoint": "POST /api/appointments/{id}/send-invitation",
+      "status": "PASS",
+      "features": [
+        "Sends email via Brevo API",
+        "Includes ICS calendar attachment",
+        "ICS uses America/Guadeloupe timezone",
+        "Includes Google Meet link if available"
+      ],
+      "error_handling": {
+        "404_for_non_existent": "PASS",
+        "400_for_contact_without_email": "PASS"
+      }
+    },
+    "appointment_creation_api": {
+      "endpoint": "POST /api/appointments",
+      "status": "PASS",
+      "timezone": "America/Guadeloupe",
+      "features": [
+        "Creates appointment in database",
+        "Creates Google Calendar event with Meet link",
+        "Uses GUADELOUPE_TIMEZONE constant",
+        "Sends admin confirmation email"
+      ],
+      "test_appointment": {
+        "id": "350ab69d-f8c3-41cd-8f9d-f6199d08b7aa",
+        "title": "Test RDV Guadeloupe 11h",
+        "start_datetime": "2026-01-25T11:00:00",
+        "google_meet_link": "https://meet.google.com/puf-togq-hdm"
+      }
+    },
+    "global_stats_api": {
+      "endpoint": "GET /api/editorial/stats/global",
+      "status": "PASS",
+      "test_result": {
+        "total_calendars": 3,
+        "total_posts": 4,
+        "avg_posts_per_calendar": 1.3
+      }
+    }
+  },
+  "test_results_detail": {
+    "TestAuthentication::test_login_success": "PASSED",
+    "TestCalendarStatistics::test_get_calendar_stats_success": "PASSED",
+    "TestCalendarStatistics::test_get_calendar_stats_with_date_filter": "PASSED",
+    "TestCalendarStatistics::test_get_calendar_stats_not_found": "PASSED",
+    "TestCalendarStatistics::test_stats_breakdown_structure": "PASSED",
+    "TestPDFExport::test_export_pdf_success": "PASSED",
+    "TestPDFExport::test_export_pdf_with_date_filter": "PASSED",
+    "TestPDFExport::test_export_pdf_not_found": "PASSED",
+    "TestAppointmentCreation::test_get_existing_appointment": "PASSED",
+    "TestAppointmentCreation::test_create_appointment_with_guadeloupe_timezone": "PASSED",
+    "TestAppointmentCreation::test_list_appointments": "PASSED",
+    "TestEmailInvitation::test_send_invitation_endpoint_exists": "PASSED",
+    "TestEmailInvitation::test_send_invitation_not_found": "PASSED",
+    "TestEmailInvitation::test_send_invitation_contact_without_email": "PASSED",
+    "TestGlobalStats::test_get_global_stats": "PASSED"
+  }
+}
