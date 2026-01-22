@@ -34,68 +34,85 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - Invitations email avec .ics
 - **Configuration Google depuis Paramètres > Intégrations** ✅ 2026-01-21
 
-### 7. Calendrier Éditorial ✅ NEW 2026-01-22
+### 7. Calendrier Éditorial ✅ COMPLETE 2026-01-22
+
 **Multi-calendar system pour planification social media**
 
-#### Backend (`/app/backend/routes/editorial.py`)
-- **Collections:** `editorial_calendars`, `editorial_posts`
-- **Endpoints:**
-  - `GET/POST /api/editorial/calendars` - CRUD calendriers
-  - `GET/POST /api/editorial/posts` - CRUD posts
-  - `POST /api/editorial/posts/{id}/media` - Upload médias (Cloudinary)
-  - `PUT /api/editorial/posts/{id}/move` - Drag & drop
-  - `GET /api/editorial/settings` - Réseaux, formats, statuts configurables
-  - `GET /api/editorial/contact/{id}/calendars` - Calendriers d'un contact
-  - **`POST /api/editorial/ai/assist`** - IA d'aide rédactionnelle (GPT-5.2) ✅
-  - **`POST /api/editorial/ai/improve-caption`** - Amélioration de légende ✅
+#### Fonctionnalités Terminées
 
-#### IA d'aide rédactionnelle ✅ 2026-01-22
-- **Modèle:** GPT-5.2 via Emergent LLM Key
-- **Génère:**
-  - 3 angles/idées de post
-  - Légende complète adaptée aux réseaux ciblés
-  - 3 hooks accrocheurs
-  - 5 hashtags pertinents
-  - Call-to-Action suggéré
-- **Paramètres pris en compte:**
-  - Sujet/thème
-  - Réseaux sociaux ciblés
-  - Format de post
-  - Pilier de contenu
-  - Objectif marketing
+1. **Dates Fortes Intelligentes (IA)** ✅ 2026-01-22
+   - Génération automatique de 20-25 dates marketing par calendrier
+   - Basé sur la niche (Restaurant, Beauté, Auto, etc.) et le pays
+   - Dates génériques (jours fériés, Black Friday) + dates spécifiques au secteur
+   - Endpoint: `POST /api/editorial/calendars` avec `generate_key_dates: true`
+   - Création de post pré-rempli depuis une date forte
 
-#### Prévisualisations Social Media ✅ 2026-01-22
-- **Composant:** `/app/frontend/src/components/SocialPreviewModal.jsx`
-- **Mockups réalistes pour:**
-  - **Instagram:** Post avec avatar, caption tronquée, icônes like/comment/share, indicateur carrousel
-  - **Facebook:** Publication de page avec réactions, commentaires, partages
-  - **LinkedIn:** Post professionnel avec style fil d'actualité
-  - **TikTok:** Mockup mobile vertical avec overlay vidéo, boutons latéraux, barre de navigation
-  - **YouTube:** Thumbnail avec titre, vues, durée
-- **Accessible via:**
-  - Bouton œil sur les cartes Trello
-  - Bouton "Prévisualiser" dans le modal d'édition
+2. **Vue Calendrier** ✅
+   - Affichage mensuel avec navigation
+   - Posts colorés par calendrier
+   - Dates fortes affichées avec icône 📅
+   - Clic sur une date = créer un nouveau post
 
-#### Frontend (`/app/frontend/src/pages/dashboard/EditorialCalendarPage.jsx`)
-- **Vue Calendrier** (mois) avec navigation et posts colorés
-- **Vue Trello/Kanban** avec colonnes par semaine
-- **Modal Post** avec 3 onglets (Contenu, Planification, Médias)
-- **Bouton "Aide IA"** dans l'onglet Contenu
-- **Modal IA** avec résultats cliquables pour appliquer
+3. **Vue Trello/Kanban avec Drag & Drop** ✅ 2026-01-22
+   - Colonnes par semaine
+   - Cartes draggables avec @dnd-kit
+   - Déplacement de posts entre semaines
+   - Endpoint: `PUT /api/editorial/posts/{id}/move`
 
-#### Réseaux sociaux configurés
-- Instagram, Facebook, LinkedIn, TikTok, YouTube
+4. **Filtres Avancés** ✅ 2026-01-22
+   - Filtre par calendrier
+   - Filtre par réseau social (Instagram, Facebook, LinkedIn, TikTok, YouTube)
+   - Filtre par statut (Idée, À rédiger, En cours, À valider, Validé, Programmé, Publié)
+   - Filtre par format (Post, Carrousel, Reel, Vidéo, Story)
+   - Bouton de réinitialisation des filtres
 
-#### Formats de post
-- Post simple, Carrousel, Reel/Short, Vidéo, Story
+5. **Prévisualisations Social Media** ✅ 2026-01-22
+   - Mockups réalistes pour 5 plateformes:
+     - **Instagram:** Feed post avec avatar, likes, caption, hashtags
+     - **Facebook:** Publication de page avec réactions
+     - **LinkedIn:** Post professionnel
+     - **TikTok:** Mockup mobile vertical
+     - **YouTube:** Thumbnail avec titre et vues
+   - Accessible via bouton œil ou "Prévisualiser" dans l'éditeur
 
-#### Statuts
-- Idée → À rédiger → En cours → À valider → Validé → Programmé → Publié
+6. **IA d'Aide à la Rédaction** ✅
+   - Génère 3 angles/idées, légende, hooks, hashtags, CTA
+   - Utilise GPT-5.2 via Emergent LLM Key
+   - Endpoint: `POST /api/editorial/ai/assist`
 
-#### Intégration Contact
-- Onglet "Éditorial" dans la fiche contact
-- Affiche les calendriers liés au contact
-- Bouton pour créer un nouveau calendrier
+7. **Upload Médias** ✅
+   - Intégration Cloudinary
+   - Support images et vidéos
+   - Réorganisation de l'ordre des médias (carrousels)
+
+#### API Routes - Calendrier Éditorial
+```
+GET    /api/editorial/niches              # Liste des niches disponibles
+GET    /api/editorial/settings            # Réseaux, formats, statuts
+GET    /api/editorial/calendars           # Liste calendriers
+POST   /api/editorial/calendars           # Créer calendrier (+ dates fortes IA)
+GET    /api/editorial/calendars/:id       # Détail calendrier
+PUT    /api/editorial/calendars/:id       # Modifier calendrier
+DELETE /api/editorial/calendars/:id       # Supprimer calendrier
+POST   /api/editorial/calendars/:id/duplicate
+GET    /api/editorial/calendars/:id/key-dates      # Dates fortes
+POST   /api/editorial/calendars/:id/key-dates/regenerate
+POST   /api/editorial/calendars/:id/key-dates/:dateId/create-post
+GET    /api/editorial/posts               # Liste posts (avec filtres)
+POST   /api/editorial/posts               # Créer post
+GET    /api/editorial/posts/:id
+PUT    /api/editorial/posts/:id
+DELETE /api/editorial/posts/:id
+PUT    /api/editorial/posts/:id/move      # Drag & drop
+POST   /api/editorial/posts/:id/media     # Upload média
+POST   /api/editorial/ai/assist           # Aide IA
+POST   /api/editorial/ai/improve-caption
+```
+
+## Tests Effectués ✅
+- 22/22 tests backend passés
+- Rapport: `/app/test_reports/iteration_33.json`
+- Tests: `/app/backend/tests/test_editorial_calendar.py`
 
 ## Environment
 - Backend: FastAPI (port 8001)
@@ -104,69 +121,33 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - Auth: JWT
 - Admin: admin@alphagency.fr / superpassword
 
-## API Routes - Calendrier Éditorial
-```
-GET    /api/editorial/settings
-PUT    /api/editorial/settings
-GET    /api/editorial/calendars
-POST   /api/editorial/calendars
-GET    /api/editorial/calendars/:id
-PUT    /api/editorial/calendars/:id
-DELETE /api/editorial/calendars/:id
-POST   /api/editorial/calendars/:id/duplicate
-GET    /api/editorial/posts
-POST   /api/editorial/posts
-GET    /api/editorial/posts/:id
-PUT    /api/editorial/posts/:id
-DELETE /api/editorial/posts/:id
-PUT    /api/editorial/posts/:id/move
-POST   /api/editorial/posts/:id/media
-DELETE /api/editorial/posts/:id/media/:mediaId
-PUT    /api/editorial/posts/:id/media/reorder
-GET    /api/editorial/calendar-view
-GET    /api/editorial/contact/:contactId/calendars
-```
+## Prochaines Étapes
 
-## Session 2026-01-22 - Travail Complété
+### P1 - Prioritaire
+- ❌ **SMS Guadeloupe** - Brevo bloqué, proposer Twilio comme alternative
 
-### 1. Configuration Google Calendar depuis l'interface ✅
-- Ajout des champs dans Paramètres > Intégrations
-- Backend lit la config depuis la base de données (pas les env vars)
-- Résout le problème de redirect_uri_mismatch
-
-### 2. Module Calendrier Éditorial MVP ✅
-- Backend complet avec CRUD calendriers et posts
-- Upload médias via Cloudinary
-- Frontend avec vue calendrier et vue Trello
-- Intégration dans la fiche Contact
-
-## Prochaines Étapes (Phase 2)
-
-### P1 - À implémenter
-- **Dates fortes 2026** (marronniers marketing)
-- **Drag & drop** amélioré entre colonnes Trello
-
-### P2 - Améliorations
-- Intégration avec module Things (tâches liées aux posts)
+### P2 - Améliorations Calendrier Éditorial
+- Intégration avec module Things (tâches liées aux posts) - **En attente à la demande de l'utilisateur**
 - Export PDF du planning
 - Statistiques par calendrier
-
-### P3 - Futur
-- API Meta/LinkedIn/TikTok pour publication directe
 - Templates de posts réutilisables
+
+### P3 - Backlog
+- API Meta/LinkedIn/TikTok pour publication directe
+- Vérifier fonctionnalité "Bulk Delete"
+- Améliorations MindMap (Export PDF, raccourcis)
+- Notifications Push
+- Intégration Qonto (banque)
 
 ## 3rd Party Integrations
 - **Cloudinary:** Upload médias ✅
 - **Google Calendar:** OAuth2 ✅
-- **Brevo:** Emails ✅, SMS ⚠️ (Guadeloupe)
+- **Brevo:** Emails ✅, SMS ⚠️ (Guadeloupe bloqué)
 - **GPT-5.2:** IA rédactionnelle ✅
+- **@dnd-kit:** Drag & drop ✅
 
-## Files Modified This Session
-- `/app/backend/routes/editorial.py` (NEW)
-- `/app/backend/server.py` (router added)
-- `/app/frontend/src/pages/dashboard/EditorialCalendarPage.jsx` (NEW)
-- `/app/frontend/src/pages/dashboard/DashboardLayout.jsx` (menu link)
-- `/app/frontend/src/components/ContactDetailSheet.jsx` (editorial tab)
-- `/app/frontend/src/App.js` (route)
-- `/app/frontend/src/pages/dashboard/SettingsPage.jsx` (Google config fields)
-- `/app/backend/routes/appointments.py` (get_google_config from DB)
+## Files Modified This Session (2026-01-22)
+- `/app/backend/routes/editorial.py` - Ajout endpoints key-dates, fix calendar-view
+- `/app/frontend/src/pages/dashboard/EditorialCalendarPage.jsx` - Drag & drop, filtres avancés
+- `/app/frontend/src/components/SocialPreviewModal.jsx` - Mockups complets
+- `/app/backend/tests/test_editorial_calendar.py` - Tests complets (22 tests)
