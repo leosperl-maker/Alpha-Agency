@@ -336,11 +336,11 @@ async def create_appointment(
                 'description': data.description or "",
                 'start': {
                     'dateTime': start_dt.isoformat(),
-                    'timeZone': 'Europe/Paris'
+                    'timeZone': GUADELOUPE_TIMEZONE
                 },
                 'end': {
                     'dateTime': end_dt.isoformat(),
-                    'timeZone': 'Europe/Paris'
+                    'timeZone': GUADELOUPE_TIMEZONE
                 },
                 'attendees': [
                     {'email': contact.get('email')} if contact.get('email') else None
