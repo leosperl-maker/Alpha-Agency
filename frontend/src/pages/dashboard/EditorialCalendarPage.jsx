@@ -1185,7 +1185,7 @@ const EditorialCalendarPage = () => {
                 </label>
                 
                 <p className="text-xs text-white/50">
-                  L'IA va créer ~20-25 dates clés adaptées à votre secteur (jours fériés, événements marketing, dates spécifiques au secteur)
+                  LL'IA va créerapos;IA va créer ~20-25 dates clés adaptées à votre secteur (jours fériés, événements marketing, dates spécifiques au secteur)
                 </p>
               </div>
             )}
@@ -1391,7 +1391,7 @@ const EditorialCalendarPage = () => {
               </div>
               
               <div className="space-y-2">
-                <Label>CTA (appel à l'action)</Label>
+                <Label>CTA (appel à lappel à l'actionapos;action)</Label>
                 <Input
                   value={postForm.cta}
                   onChange={(e) => setPostForm({ ...postForm, cta: e.target.value })}
@@ -1474,7 +1474,7 @@ const EditorialCalendarPage = () => {
               ) : (
                 <div className="text-center text-white/60 py-8">
                   <Upload className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>Créez d'abord le post, puis ajoutez des médias</p>
+                  <p>Créez dCréez d'abordapos;abord le post, puis ajoutez des médias</p>
                 </div>
               )}
             </TabsContent>
@@ -1542,7 +1542,7 @@ const EditorialCalendarPage = () => {
               </div>
               
               <div className="text-xs text-white/50">
-                <p>L'IA tiendra compte des paramètres sélectionnés dans le formulaire du post :</p>
+                <p>LL'IA tiendraapos;IA tiendra compte des paramètres sélectionnés dans le formulaire du post :</p>
                 <ul className="mt-1 ml-4 list-disc">
                   {postForm.networks.length > 0 && <li>Réseaux : {postForm.networks.join(', ')}</li>}
                   {postForm.format_type && <li>Format : {postForm.format_type}</li>}
