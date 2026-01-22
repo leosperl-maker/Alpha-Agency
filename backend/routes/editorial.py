@@ -671,6 +671,269 @@ async def reorder_media(
     return {"message": "Ordre des médias mis à jour", "medias": reordered}
 
 
+# ==================== KEY DATES GENERATION ====================
+
+async def generate_key_dates_for_calendar(calendar_id: str, country: str, niche: str) -> list:
+    """
+    Generate key dates for a calendar based on country and niche using AI
+    Returns a list of key dates with titles, categories, and content angles
+    """
+    if not EMERGENT_LLM_KEY:
+        logger.warning("No LLM key configured, skipping key dates generation")
+        return []
+    
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        import json
+        
+        # Get niche name
+        niche_info = next((n for n in AVAILABLE_NICHES if n["id"] == niche), {"name": "Généraliste"})
+        country_info = next((c for c in AVAILABLE_COUNTRIES if c["id"] == country), {"name": "France"})
+        
+        system_message = """Tu es un expert en marketing et community management.
+Tu génères des listes de dates fortes (marronniers) pour les calendriers éditoriaux social media.
+
+IMPORTANT:
+- Génère UNIQUEMENT des dates pour l'année 2026
+- Format de date OBLIGATOIRE: YYYY-MM-DD (ex: 2026-01-15)
+- Sois précis sur les dates (pas de "début janvier", mais "2026-01-05")
+- Inclus à la fois des dates génériques et des dates spécifiques au secteur
+
+Réponds UNIQUEMENT en JSON valide, sans texte avant ou après."""
+
+        user_prompt = f"""Génère une liste de dates fortes 2026 pour un calendrier éditorial.
+
+PARAMÈTRES:
+- Pays/Marché: {country_info['name']}
+- Secteur/Niche: {niche_info['name']}
+
+GÉNÈRE:
+1. Dates GÉNÉRIQUES (10-15 dates):
+   - Jours fériés du pays
+   - Événements marketing majeurs (soldes, Black Friday, etc.)
+   - Journées mondiales importantes
+   - Grands événements sportifs/culturels
+
+2. Dates SPÉCIFIQUES au secteur "{niche_info['name']}" (8-12 dates):
+   - Événements clés du secteur
+   - Périodes fortes commerciales
+   - Journées thématiques liées
+   - Salons/événements professionnels
+
+FORMAT JSON ATTENDU:
+{{
+    "key_dates": [
+        {{
+            "date": "2026-01-01",
+            "title": "Nouvel An",
+            "category": "generic",
+            "icon": "🎉",
+            "content_angle": "Voeux, rétrospective 2025, objectifs 2026"
+        }},
+        {{
+            "date": "2026-02-14",
+            "title": "Saint-Valentin",
+            "category": "niche",
+            "icon": "❤️",
+            "content_angle": "Menu spécial couple, ambiance romantique"
+        }}
+    ]
+}}
+
+Génère la liste complète (20-25 dates au total)."""
+
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"keydates-{calendar_id}",
+            system_message=system_message
+        ).with_model("openai", "gpt-5.2")
+        
+        user_message = UserMessage(text=user_prompt)
+        response = await chat.send_message(user_message)
+        
+        # Clean and parse response
+        response_text = response.strip()
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.startswith("```"):
+            response_text = response_text[3:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+        response_text = response_text.strip()
+        
+        result = json.loads(response_text)
+        key_dates = result.get("key_dates", [])
+        
+        # Add IDs and enabled flag to each date
+        for date in key_dates:
+            date["id"] = str(uuid.uuid4())
+            date["enabled"] = True
+            date["niche_specific"] = niche if date.get("category") == "niche" else None
+        
+        # Save to calendar
+        await db.editorial_calendars.update_one(
+            {"id": calendar_id},
+            {"$set": {"key_dates": key_dates}}
+        )
+        
+        logger.info(f"Generated {len(key_dates)} key dates for calendar {calendar_id}")
+        return key_dates
+        
+    except Exception as e:
+        logger.error(f"Error generating key dates: {e}")
+        return []
+
+@router.get("/calendars/{calendar_id}/key-dates")
+async def get_calendar_key_dates(
+    calendar_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get key dates for a calendar"""
+    calendar = await db.editorial_calendars.find_one({"id": calendar_id}, {"_id": 0})
+    if not calendar:
+        raise HTTPException(status_code=404, detail="Calendrier non trouvé")
+    
+    return {
+        "calendar_id": calendar_id,
+        "country": calendar.get("country", "FR"),
+        "niche": calendar.get("niche", "general"),
+        "key_dates": calendar.get("key_dates", [])
+    }
+
+@router.post("/calendars/{calendar_id}/key-dates/regenerate")
+async def regenerate_key_dates(
+    calendar_id: str,
+    niche: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Regenerate key dates for a calendar (optionally with a new niche)"""
+    calendar = await db.editorial_calendars.find_one({"id": calendar_id})
+    if not calendar:
+        raise HTTPException(status_code=404, detail="Calendrier non trouvé")
+    
+    # Use new niche if provided, otherwise keep existing
+    target_niche = niche or calendar.get("niche", "general")
+    country = calendar.get("country", "FR")
+    
+    # Update niche if changed
+    if niche and niche != calendar.get("niche"):
+        await db.editorial_calendars.update_one(
+            {"id": calendar_id},
+            {"$set": {"niche": niche, "updated_at": datetime.now(timezone.utc).isoformat()}}
+        )
+    
+    # Generate new key dates
+    key_dates = await generate_key_dates_for_calendar(calendar_id, country, target_niche)
+    
+    return {
+        "message": f"Dates fortes régénérées pour la niche '{target_niche}'",
+        "key_dates_count": len(key_dates),
+        "key_dates": key_dates
+    }
+
+@router.put("/calendars/{calendar_id}/key-dates/{date_id}")
+async def update_key_date(
+    calendar_id: str,
+    date_id: str,
+    enabled: Optional[bool] = None,
+    title: Optional[str] = None,
+    content_angle: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update a specific key date (enable/disable, edit title or angle)"""
+    calendar = await db.editorial_calendars.find_one({"id": calendar_id})
+    if not calendar:
+        raise HTTPException(status_code=404, detail="Calendrier non trouvé")
+    
+    key_dates = calendar.get("key_dates", [])
+    
+    for date in key_dates:
+        if date.get("id") == date_id:
+            if enabled is not None:
+                date["enabled"] = enabled
+            if title is not None:
+                date["title"] = title
+            if content_angle is not None:
+                date["content_angle"] = content_angle
+            break
+    
+    await db.editorial_calendars.update_one(
+        {"id": calendar_id},
+        {"$set": {"key_dates": key_dates, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Date mise à jour", "key_dates": key_dates}
+
+@router.delete("/calendars/{calendar_id}/key-dates/{date_id}")
+async def delete_key_date(
+    calendar_id: str,
+    date_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a specific key date"""
+    calendar = await db.editorial_calendars.find_one({"id": calendar_id})
+    if not calendar:
+        raise HTTPException(status_code=404, detail="Calendrier non trouvé")
+    
+    key_dates = [d for d in calendar.get("key_dates", []) if d.get("id") != date_id]
+    
+    await db.editorial_calendars.update_one(
+        {"id": calendar_id},
+        {"$set": {"key_dates": key_dates, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Date supprimée"}
+
+@router.post("/calendars/{calendar_id}/key-dates/{date_id}/create-post")
+async def create_post_from_key_date(
+    calendar_id: str,
+    date_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a pre-filled post from a key date"""
+    calendar = await db.editorial_calendars.find_one({"id": calendar_id})
+    if not calendar:
+        raise HTTPException(status_code=404, detail="Calendrier non trouvé")
+    
+    # Find the key date
+    key_date = None
+    for d in calendar.get("key_dates", []):
+        if d.get("id") == date_id:
+            key_date = d
+            break
+    
+    if not key_date:
+        raise HTTPException(status_code=404, detail="Date non trouvée")
+    
+    # Create post with pre-filled data
+    post_data = {
+        "id": str(uuid.uuid4()),
+        "calendar_id": calendar_id,
+        "title": key_date.get("title", "Nouveau post"),
+        "caption": f"{key_date.get('icon', '📅')} {key_date.get('title', '')}\n\n{key_date.get('content_angle', '')}",
+        "scheduled_date": key_date.get("date"),
+        "scheduled_time": "10:00",
+        "networks": [],
+        "format_type": "post",
+        "content_pillar": "",
+        "objective": "engagement",
+        "cta": "",
+        "status": "idea",
+        "assigned_to": None,
+        "external_links": "",
+        "notes": f"Créé depuis la date forte: {key_date.get('title')}",
+        "medias": [],
+        "key_date_id": date_id,  # Reference to the key date
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.editorial_posts.insert_one(post_data)
+    post_data.pop("_id", None)
+    
+    return post_data
+
+
 # ==================== AI ASSISTANCE ====================
 
 class AIAssistRequest(BaseModel):
