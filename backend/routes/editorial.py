@@ -1200,3 +1200,507 @@ async def get_contact_calendars(contact_id: str, current_user: dict = Depends(ge
         cal["post_count"] = post_count
     
     return calendars
+
+
+
+# ==================== STATISTICS ====================
+
+@router.get("/calendars/{calendar_id}/stats")
+async def get_calendar_statistics(
+    calendar_id: str,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get statistics for a calendar
+    Returns: post counts by status, network, format, and timeline
+    """
+    calendar = await db.editorial_calendars.find_one({"id": calendar_id}, {"_id": 0})
+    if not calendar:
+        raise HTTPException(status_code=404, detail="Calendrier non trouvé")
+    
+    # Build query
+    query = {"calendar_id": calendar_id}
+    if start_date:
+        query["scheduled_date"] = {"$gte": start_date}
+    if end_date:
+        if "scheduled_date" in query:
+            query["scheduled_date"]["$lte"] = end_date
+        else:
+            query["scheduled_date"] = {"$lte": end_date}
+    
+    # Get all posts for this calendar
+    posts = await db.editorial_posts.find(query, {"_id": 0}).to_list(1000)
+    
+    # Calculate statistics
+    total_posts = len(posts)
+    
+    # Posts by status
+    status_counts = {}
+    for post in posts:
+        status = post.get("status", "idea")
+        status_counts[status] = status_counts.get(status, 0) + 1
+    
+    # Posts by network
+    network_counts = {}
+    for post in posts:
+        for network in post.get("networks", []):
+            network_counts[network] = network_counts.get(network, 0) + 1
+    
+    # Posts by format
+    format_counts = {}
+    for post in posts:
+        fmt = post.get("format_type", "post")
+        format_counts[fmt] = format_counts.get(fmt, 0) + 1
+    
+    # Posts by content pillar
+    pillar_counts = {}
+    for post in posts:
+        pillar = post.get("content_pillar", "")
+        if pillar:
+            pillar_counts[pillar] = pillar_counts.get(pillar, 0) + 1
+    
+    # Posts by week (for timeline chart)
+    weekly_posts = {}
+    for post in posts:
+        date_str = post.get("scheduled_date", "")
+        if date_str:
+            try:
+                date = datetime.fromisoformat(date_str)
+                week_start = date - timedelta(days=date.weekday())
+                week_key = week_start.strftime("%Y-%m-%d")
+                weekly_posts[week_key] = weekly_posts.get(week_key, 0) + 1
+            except:
+                pass
+    
+    # Calculate completion rate
+    completed_statuses = ["scheduled", "published"]
+    completed_count = sum(status_counts.get(s, 0) for s in completed_statuses)
+    completion_rate = round((completed_count / total_posts * 100), 1) if total_posts > 0 else 0
+    
+    # Calculate posts with media
+    posts_with_media = sum(1 for p in posts if p.get("medias") and len(p.get("medias", [])) > 0)
+    media_rate = round((posts_with_media / total_posts * 100), 1) if total_posts > 0 else 0
+    
+    return {
+        "calendar_id": calendar_id,
+        "calendar_title": calendar.get("title", ""),
+        "period": {
+            "start_date": start_date,
+            "end_date": end_date
+        },
+        "summary": {
+            "total_posts": total_posts,
+            "completion_rate": completion_rate,
+            "posts_with_media": posts_with_media,
+            "media_rate": media_rate,
+            "key_dates_count": len(calendar.get("key_dates", []))
+        },
+        "by_status": status_counts,
+        "by_network": network_counts,
+        "by_format": format_counts,
+        "by_pillar": pillar_counts,
+        "timeline": weekly_posts,
+        "status_breakdown": [
+            {"status": k, "count": v, "percentage": round(v/total_posts*100, 1) if total_posts > 0 else 0}
+            for k, v in sorted(status_counts.items(), key=lambda x: -x[1])
+        ],
+        "network_breakdown": [
+            {"network": k, "count": v}
+            for k, v in sorted(network_counts.items(), key=lambda x: -x[1])
+        ]
+    }
+
+@router.get("/stats/global")
+async def get_global_statistics(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get global statistics across all calendars
+    """
+    # Build query
+    query = {}
+    if start_date:
+        query["scheduled_date"] = {"$gte": start_date}
+    if end_date:
+        if "scheduled_date" in query:
+            query["scheduled_date"]["$lte"] = end_date
+        else:
+            query["scheduled_date"] = {"$lte": end_date}
+    
+    # Get all posts
+    posts = await db.editorial_posts.find(query, {"_id": 0}).to_list(5000)
+    calendars = await db.editorial_calendars.find({"archived": {"$ne": True}}, {"_id": 0}).to_list(100)
+    
+    total_posts = len(posts)
+    total_calendars = len(calendars)
+    
+    # Posts by status
+    status_counts = {}
+    for post in posts:
+        status = post.get("status", "idea")
+        status_counts[status] = status_counts.get(status, 0) + 1
+    
+    # Posts by calendar
+    calendar_counts = {}
+    for post in posts:
+        cal_id = post.get("calendar_id", "")
+        calendar_counts[cal_id] = calendar_counts.get(cal_id, 0) + 1
+    
+    # Get calendar names
+    calendar_map = {c["id"]: c.get("title", "Sans nom") for c in calendars}
+    
+    return {
+        "period": {"start_date": start_date, "end_date": end_date},
+        "summary": {
+            "total_calendars": total_calendars,
+            "total_posts": total_posts,
+            "avg_posts_per_calendar": round(total_posts / total_calendars, 1) if total_calendars > 0 else 0
+        },
+        "by_status": status_counts,
+        "by_calendar": [
+            {"calendar_id": k, "calendar_name": calendar_map.get(k, k), "count": v}
+            for k, v in sorted(calendar_counts.items(), key=lambda x: -x[1])
+        ]
+    }
+
+# ==================== PDF EXPORT ====================
+
+@router.get("/calendars/{calendar_id}/export/pdf")
+async def export_calendar_pdf(
+    calendar_id: str,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Export calendar planning to PDF
+    Returns a downloadable PDF file
+    """
+    from fastapi.responses import Response
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import cm, mm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+    from reportlab.lib.enums import TA_LEFT, TA_CENTER
+    from io import BytesIO
+    
+    calendar = await db.editorial_calendars.find_one({"id": calendar_id}, {"_id": 0})
+    if not calendar:
+        raise HTTPException(status_code=404, detail="Calendrier non trouvé")
+    
+    # Get posts
+    query = {"calendar_id": calendar_id}
+    if start_date:
+        query["scheduled_date"] = {"$gte": start_date}
+    if end_date:
+        if "scheduled_date" in query:
+            query["scheduled_date"]["$lte"] = end_date
+        else:
+            query["scheduled_date"] = {"$lte": end_date}
+    
+    posts = await db.editorial_posts.find(query, {"_id": 0}).sort("scheduled_date", 1).to_list(500)
+    
+    # Get settings for status/network names
+    settings = await db.settings.find_one({"type": "editorial_settings"})
+    status_names = {s["id"]: s["name"] for s in (settings or {}).get("statuses", DEFAULT_STATUSES)}
+    network_names = {n["id"]: n["name"] for n in (settings or {}).get("networks", DEFAULT_NETWORKS)}
+    
+    # Create PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=landscape(A4),
+        rightMargin=1*cm,
+        leftMargin=1*cm,
+        topMargin=1*cm,
+        bottomMargin=1*cm
+    )
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Title style
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        textColor=colors.HexColor('#1a1a2e'),
+        spaceAfter=20
+    )
+    
+    # Header
+    period_text = ""
+    if start_date or end_date:
+        period_text = f" ({start_date or '...'} - {end_date or '...'})"
+    
+    elements.append(Paragraph(f"📅 Planning Éditorial - {calendar.get('title', 'Calendrier')}{period_text}", title_style))
+    elements.append(Spacer(1, 10))
+    
+    # Statistics summary
+    stats_text = f"Total: {len(posts)} posts"
+    if calendar.get("niche"):
+        niche_info = next((n for n in AVAILABLE_NICHES if n["id"] == calendar.get("niche")), {})
+        stats_text += f" | Secteur: {niche_info.get('name', calendar.get('niche'))}"
+    
+    elements.append(Paragraph(stats_text, styles['Normal']))
+    elements.append(Spacer(1, 15))
+    
+    if posts:
+        # Table headers
+        headers = ['Date', 'Heure', 'Titre', 'Réseaux', 'Format', 'Statut', 'Légende (extrait)']
+        
+        # Table data
+        data = [headers]
+        for post in posts:
+            # Format date
+            date_str = post.get("scheduled_date", "-")
+            if date_str and date_str != "-":
+                try:
+                    dt = datetime.fromisoformat(date_str)
+                    date_str = dt.strftime("%d/%m/%Y")
+                except:
+                    pass
+            
+            # Format networks
+            networks = post.get("networks", [])
+            networks_str = ", ".join([network_names.get(n, n) for n in networks[:3]])
+            if len(networks) > 3:
+                networks_str += f" +{len(networks)-3}"
+            
+            # Format caption (truncate)
+            caption = post.get("caption", "")
+            if len(caption) > 80:
+                caption = caption[:77] + "..."
+            caption = caption.replace('\n', ' ')
+            
+            row = [
+                date_str,
+                post.get("scheduled_time", "-"),
+                Paragraph(post.get("title", "Sans titre")[:40], styles['Normal']),
+                networks_str,
+                post.get("format_type", "post"),
+                status_names.get(post.get("status"), post.get("status", "-")),
+                Paragraph(caption, styles['Normal'])
+            ]
+            data.append(row)
+        
+        # Create table
+        col_widths = [2.2*cm, 1.5*cm, 4*cm, 3*cm, 2*cm, 2.5*cm, 8*cm]
+        table = Table(data, colWidths=col_widths, repeatRows=1)
+        
+        # Table style
+        table.setStyle(TableStyle([
+            # Header
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#6366f1')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('TOPPADDING', (0, 0), (-1, 0), 8),
+            
+            # Body
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('ALIGN', (0, 1), (1, -1), 'CENTER'),  # Date & Time centered
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+            ('TOPPADDING', (0, 1), (-1, -1), 6),
+            
+            # Grid
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e5e7eb')),
+            
+            # Alternating rows
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9fafb')]),
+        ]))
+        
+        elements.append(table)
+    else:
+        elements.append(Paragraph("Aucun post trouvé pour cette période.", styles['Normal']))
+    
+    # Footer
+    elements.append(Spacer(1, 20))
+    footer_style = ParagraphStyle(
+        'Footer',
+        parent=styles['Normal'],
+        fontSize=8,
+        textColor=colors.grey
+    )
+    elements.append(Paragraph(f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')} - Alpha Agency CRM", footer_style))
+    
+    # Build PDF
+    doc.build(elements)
+    
+    # Return PDF
+    buffer.seek(0)
+    filename = f"planning_{calendar.get('title', 'calendar').replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.pdf"
+    
+    return Response(
+        content=buffer.getvalue(),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )
+
+@router.get("/export/pdf")
+async def export_all_calendars_pdf(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    calendar_ids: Optional[str] = None,  # Comma-separated
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Export multiple calendars planning to PDF
+    """
+    from fastapi.responses import Response
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import cm
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+    from io import BytesIO
+    
+    # Get calendars
+    query = {"archived": {"$ne": True}}
+    if calendar_ids:
+        cal_list = [c.strip() for c in calendar_ids.split(",")]
+        query["id"] = {"$in": cal_list}
+    
+    calendars = await db.editorial_calendars.find(query, {"_id": 0}).to_list(100)
+    
+    if not calendars:
+        raise HTTPException(status_code=404, detail="Aucun calendrier trouvé")
+    
+    # Get settings
+    settings = await db.settings.find_one({"type": "editorial_settings"})
+    status_names = {s["id"]: s["name"] for s in (settings or {}).get("statuses", DEFAULT_STATUSES)}
+    network_names = {n["id"]: n["name"] for n in (settings or {}).get("networks", DEFAULT_NETWORKS)}
+    
+    # Create PDF
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=landscape(A4),
+        rightMargin=1*cm,
+        leftMargin=1*cm,
+        topMargin=1*cm,
+        bottomMargin=1*cm
+    )
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        textColor=colors.HexColor('#1a1a2e'),
+        spaceAfter=15
+    )
+    
+    subtitle_style = ParagraphStyle(
+        'Subtitle',
+        parent=styles['Heading2'],
+        fontSize=12,
+        textColor=colors.HexColor('#6366f1'),
+        spaceAfter=10
+    )
+    
+    # Main title
+    period_text = ""
+    if start_date or end_date:
+        period_text = f" ({start_date or '...'} - {end_date or '...'})"
+    
+    elements.append(Paragraph(f"📅 Planning Éditorial Global{period_text}", title_style))
+    elements.append(Spacer(1, 10))
+    
+    for cal_idx, calendar in enumerate(calendars):
+        if cal_idx > 0:
+            elements.append(PageBreak())
+        
+        # Calendar header
+        elements.append(Paragraph(f"📁 {calendar.get('title', 'Calendrier')}", subtitle_style))
+        
+        # Get posts
+        post_query = {"calendar_id": calendar["id"]}
+        if start_date:
+            post_query["scheduled_date"] = {"$gte": start_date}
+        if end_date:
+            if "scheduled_date" in post_query:
+                post_query["scheduled_date"]["$lte"] = end_date
+            else:
+                post_query["scheduled_date"] = {"$lte": end_date}
+        
+        posts = await db.editorial_posts.find(post_query, {"_id": 0}).sort("scheduled_date", 1).to_list(200)
+        
+        if posts:
+            # Table
+            headers = ['Date', 'Titre', 'Réseaux', 'Format', 'Statut']
+            data = [headers]
+            
+            for post in posts:
+                date_str = post.get("scheduled_date", "-")
+                if date_str and date_str != "-":
+                    try:
+                        dt = datetime.fromisoformat(date_str)
+                        date_str = dt.strftime("%d/%m")
+                    except:
+                        pass
+                
+                networks = post.get("networks", [])
+                networks_str = ", ".join([network_names.get(n, n)[:3] for n in networks[:2]])
+                
+                row = [
+                    date_str,
+                    post.get("title", "Sans titre")[:35],
+                    networks_str,
+                    post.get("format_type", "-"),
+                    status_names.get(post.get("status"), post.get("status", "-"))
+                ]
+                data.append(row)
+            
+            col_widths = [2*cm, 8*cm, 4*cm, 3*cm, 3*cm]
+            table = Table(data, colWidths=col_widths, repeatRows=1)
+            
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#6366f1')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 8),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 7),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e5e7eb')),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9fafb')]),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ]))
+            
+            elements.append(table)
+            elements.append(Paragraph(f"{len(posts)} posts", styles['Normal']))
+        else:
+            elements.append(Paragraph("Aucun post.", styles['Normal']))
+        
+        elements.append(Spacer(1, 15))
+    
+    # Footer
+    footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=colors.grey)
+    elements.append(Spacer(1, 20))
+    elements.append(Paragraph(f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')} - Alpha Agency CRM", footer_style))
+    
+    doc.build(elements)
+    
+    buffer.seek(0)
+    filename = f"planning_global_{datetime.now().strftime('%Y%m%d')}.pdf"
+    
+    return Response(
+        content=buffer.getvalue(),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
