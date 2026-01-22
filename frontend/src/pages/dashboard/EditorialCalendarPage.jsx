@@ -848,6 +848,32 @@ const EditorialCalendarPage = () => {
           </SelectContent>
         </Select>
 
+        {/* Format filter */}
+        <Select value={filters.format} onValueChange={(v) => setFilters(f => ({ ...f, format: v }))}>
+          <SelectTrigger className="w-40 bg-white/5 border-white/10 text-white">
+            <SelectValue placeholder="Format" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Tous les formats</SelectItem>
+            {settings.formats?.map(f => (
+              <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Reset filters */}
+        {(filters.network || filters.status || filters.format) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setFilters({ network: '', status: '', format: '' })}
+            className="text-white/60 hover:text-white"
+            title="Réinitialiser les filtres"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </Button>
+        )}
+
         <div className="flex-1" />
 
         {/* View toggle */}
