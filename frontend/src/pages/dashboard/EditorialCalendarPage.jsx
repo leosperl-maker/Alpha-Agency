@@ -1474,7 +1474,7 @@ const EditorialCalendarPage = () => {
               ) : (
                 <div className="text-center text-white/60 py-8">
                   <Upload className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>Créez dCréez d'abordapos;abord le post, puis ajoutez des médias</p>
+                  <p>Créez d&apos;abord le post, puis ajoutez des médias</p>
                 </div>
               )}
             </TabsContent>
