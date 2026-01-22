@@ -143,7 +143,6 @@ GET    /api/editorial/contact/:contactId/calendars
 ## Prochaines Étapes (Phase 2)
 
 ### P1 - À implémenter
-- **Prévisualisations** par réseau (Instagram, Facebook, TikTok, LinkedIn)
 - **Dates fortes 2026** (marronniers marketing)
 - **Drag & drop** amélioré entre colonnes Trello
 
