@@ -1185,7 +1185,7 @@ const EditorialCalendarPage = () => {
                 </label>
                 
                 <p className="text-xs text-white/50">
-                  LL'IA va créerapos;IA va créer ~20-25 dates clés adaptées à votre secteur (jours fériés, événements marketing, dates spécifiques au secteur)
+                  L&apos;IA va créer ~20-25 dates clés adaptées à votre secteur (jours fériés, événements marketing, dates spécifiques au secteur)
                 </p>
               </div>
             )}
