@@ -1,76 +1,73 @@
 # Alpha Agency CRM - Product Requirements Document
 
 ## Overview
-Application CRM complète pour agence de communication en Guadeloupe (Alpha Agency). Gestion des contacts, leads, facturation, portfolio, blog, actualités locales et campagnes marketing.
+Application CRM complète pour agence de communication en Guadeloupe (Alpha Agency). Gestion des contacts, leads, facturation, portfolio, blog, calendrier éditorial, et campagnes marketing.
 
 ## Core Features
 
-### 1. Dashboard & Analytics
-- KPIs principaux (sessions, leads, taux conversion, MRR)
+### 1. Dashboard & Analytics ✅
+- KPIs principaux
 - Graphiques d'évolution
-- Notifications et alertes
+- Notifications
 
-### 2. Contacts Management
+### 2. Contacts Management ✅
 - CRUD contacts avec filtres
 - Import/export
-- Tags et catégorisation
+- Fiche contact avec onglets (Overview, Activité, Affaires, Docs, Éditorial)
 
-### 3. Pipeline (CRM)
+### 3. Pipeline (CRM) ✅
 - Kanban des opportunités
 - Colonnes personnalisables
-- Drag & drop
 
-### 4. Facturation ✅ UPDATED 2026-01-20
-- Devis et factures avec prévisualisation PDF
-- **Paiements partiels (Acompte/Solde)** ✅
-  - `payment_type`: "acompte" ou "solde"
-  - `acompte_percent`: pourcentage d'acompte (30, 40, 50...)
-  - Statut "partiel" quand partiellement payé
-  - Statut "payée" quand totalement payé
-- **CA Encaissé dans statistiques** ✅
-  - Calcul basé sur `$sum(total_paid)` et non sur le total des factures "payées"
-  - Filtre `facture_filter` inclut `document_type=facture` OU `invoice_number` commençant par "FAC-"
-- **Affichage des paiements sur le PDF** ✅
-  - Section "💳 Paiements reçus" listant tous les paiements
-  - Format: Acompte X% ou Paiement de X€, date, méthode
-  - Affiche "FACTURE SOLDÉE" ou "Reste à payer: X€"
-- PDF avec descriptions longues divisées en chunks (utilisateur satisfait du rendu actuel)
+### 4. Facturation ✅
+- Devis et factures PDF
+- Paiements partiels (Acompte/Solde)
+- CA Encaissé calculé sur total_paid
 
-### 5. Budget & Trésorerie
-- Graphique évolution mensuelle
-- Catégories de dépenses
-- Prévisionnel
+### 5. Module "Things" ✅
+- Liste de tâches journalière
+- Report automatique des tâches non terminées
 
-### 6. Portfolio (Réalisations)
-- Éditeur de blocs avancé (15 types)
-- Page publique haut de gamme avec filtres
-- Page détail avec métadonnées
+### 6. Module Agenda / RDV ✅
+- Google Calendar API (OAuth2)
+- Lien Google Meet automatique
+- Invitations email avec .ics
+- **Configuration Google depuis Paramètres > Intégrations** ✅ 2026-01-21
 
-### 7. Blog
-- Articles avec éditeur riche
-- Tags et catégories
-- SEO optimisé
+### 7. Calendrier Éditorial ✅ NEW 2026-01-22
+**Multi-calendar system pour planification social media**
 
-### 8. Actualités Locales
-- Intégration NewsAPI avec mots-clés locaux
+#### Backend (`/app/backend/routes/editorial.py`)
+- **Collections:** `editorial_calendars`, `editorial_posts`
+- **Endpoints:**
+  - `GET/POST /api/editorial/calendars` - CRUD calendriers
+  - `GET/POST /api/editorial/posts` - CRUD posts
+  - `POST /api/editorial/posts/{id}/media` - Upload médias (Cloudinary)
+  - `PUT /api/editorial/posts/{id}/move` - Drag & drop
+  - `GET /api/editorial/settings` - Réseaux, formats, statuts configurables
+  - `GET /api/editorial/contact/{id}/calendars` - Calendriers d'un contact
 
-### 9. Campagnes Email/SMS
-- Templates prédéfinis
-- Éditeur visuel drag-and-drop
-- Intégration Brevo
+#### Frontend (`/app/frontend/src/pages/dashboard/EditorialCalendarPage.jsx`)
+- **Vue Calendrier** (mois) avec navigation et posts colorés
+- **Vue Trello/Kanban** avec colonnes par semaine
+- **Modal Post** avec 3 onglets (Contenu, Planification, Médias)
+- **Modal Calendrier** (création/édition avec couleur et contact lié)
+- **Filtres:** par calendrier, réseau, statut
+- **Upload direct** images/vidéos vers Cloudinary
 
-### 10. Module "Things" ✅ UPDATED 2026-01-20
-- Liste de tâches journalière style "Things app"
-- **Report automatique des tâches non terminées** ✅
+#### Réseaux sociaux configurés
+- Instagram, Facebook, LinkedIn, TikTok, YouTube
 
-### 11. Module Agenda / RDV ✅ TESTED 2026-01-20
-- **Intégration Google Calendar API (OAuth2)** ✅
-- **Création d'événements avec lien Google Meet** ✅
-- **Envoi d'invitations email avec fichier .ics** ✅
-- **Confirmation email à l'admin** ✅
-- **Redirection vers alphagency.fr après OAuth** ✅ (nécessite config Google Console)
-- Relances SMS configurables (via Brevo)
-- **⚠️ SMS Guadeloupe**: Bloqué par opérateur mobile
+#### Formats de post
+- Post simple, Carrousel, Reel/Short, Vidéo, Story
+
+#### Statuts
+- Idée → À rédiger → En cours → À valider → Validé → Programmé → Publié
+
+#### Intégration Contact
+- Onglet "Éditorial" dans la fiche contact
+- Affiche les calendriers liés au contact
+- Bouton pour créer un nouveau calendrier
 
 ## Environment
 - Backend: FastAPI (port 8001)
@@ -79,52 +76,71 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - Auth: JWT
 - Admin: admin@alphagency.fr / superpassword
 
-## Completed Work - Session 2026-01-20
+## API Routes - Calendrier Éditorial
+```
+GET    /api/editorial/settings
+PUT    /api/editorial/settings
+GET    /api/editorial/calendars
+POST   /api/editorial/calendars
+GET    /api/editorial/calendars/:id
+PUT    /api/editorial/calendars/:id
+DELETE /api/editorial/calendars/:id
+POST   /api/editorial/calendars/:id/duplicate
+GET    /api/editorial/posts
+POST   /api/editorial/posts
+GET    /api/editorial/posts/:id
+PUT    /api/editorial/posts/:id
+DELETE /api/editorial/posts/:id
+PUT    /api/editorial/posts/:id/move
+POST   /api/editorial/posts/:id/media
+DELETE /api/editorial/posts/:id/media/:mediaId
+PUT    /api/editorial/posts/:id/media/reorder
+GET    /api/editorial/calendar-view
+GET    /api/editorial/contact/:contactId/calendars
+```
 
-### 4 Corrections validées (14/14 tests passés)
-1. ✅ Paiements partiels (Acompte/Solde)
-2. ✅ CA Encaissé corrigé (filtre élargi pour anciennes factures)
-3. ✅ Paiements affichés sur PDF
-4. ✅ Report tâches Things
+## Session 2026-01-22 - Travail Complété
 
-### Agenda corrigé
-- ✅ `GOOGLE_REDIRECT_URI` → `https://alphagency.fr/api/appointments/auth/callback`
-- ✅ `FRONTEND_URL` → `https://alphagency.fr`
-- ✅ Redirections après OAuth vers alphagency.fr
+### 1. Configuration Google Calendar depuis l'interface ✅
+- Ajout des champs dans Paramètres > Intégrations
+- Backend lit la config depuis la base de données (pas les env vars)
+- Résout le problème de redirect_uri_mismatch
 
-### Tests Agenda validés
-- ✅ Connexion Google Calendar (leo.sperl@alphagency.fr)
-- ✅ Création RDV avec lien Meet
-- ✅ Envoi invitation avec .ics
-- ✅ Suppression RDV
+### 2. Module Calendrier Éditorial MVP ✅
+- Backend complet avec CRUD calendriers et posts
+- Upload médias via Cloudinary
+- Frontend avec vue calendrier et vue Trello
+- Intégration dans la fiche Contact
 
-## Action requise utilisateur
-**Console Google Cloud** : Ajouter `https://alphagency.fr/api/appointments/auth/callback` dans les Authorized redirect URIs
+## Prochaines Étapes (Phase 2)
 
-## Pending Tasks
+### P1 - À implémenter
+- **IA d'aide rédactionnelle** (GPT-5.2)
+- **Prévisualisations** par réseau (Instagram, Facebook, TikTok, LinkedIn)
+- **Dates fortes 2026** (marronniers marketing)
+- **Drag & drop** amélioré entre colonnes Trello
 
-### P0 - Bloqueurs
-- **SMS Guadeloupe**: Bloqué par opérateur - alternatives: Twilio ou WhatsApp Business
+### P2 - Améliorations
+- Intégration avec module Things (tâches liées aux posts)
+- Export PDF du planning
+- Statistiques par calendrier
 
-### P1 - Priorité haute (RÉSOLU ou différé)
-- ~~PDF descriptions longues~~ → Utilisateur satisfait du rendu actuel
-
-### P2 - Priorité moyenne
-- Personnalisation des templates email/SMS
-- Vérification "Bulk Delete"
-- Améliorations MindMap
-- Notifications Push
-
-### P3 - Backlog
-- Intégration Qonto Phase 3
-- Import Gmail factures
-- Google Ads / META Ads invoices
+### P3 - Futur
+- API Meta/LinkedIn/TikTok pour publication directe
+- Templates de posts réutilisables
 
 ## 3rd Party Integrations
-- **Brevo**: Emails ✅, SMS ⚠️ (Guadeloupe)
-- **Google Calendar API**: OAuth2 ✅, événements ✅, Meet ✅
-- **Cloudinary**: Upload fichiers ✅
-- **ReportLab**: PDF ✅
+- **Cloudinary:** Upload médias ✅
+- **Google Calendar:** OAuth2 ✅
+- **Brevo:** Emails ✅, SMS ⚠️ (Guadeloupe)
+- **GPT-5.2:** À intégrer (Phase 2)
 
-## Test Reports
-- Session 20: 100% (14/14) - `/app/test_reports/iteration_32.json`
+## Files Modified This Session
+- `/app/backend/routes/editorial.py` (NEW)
+- `/app/backend/server.py` (router added)
+- `/app/frontend/src/pages/dashboard/EditorialCalendarPage.jsx` (NEW)
+- `/app/frontend/src/pages/dashboard/DashboardLayout.jsx` (menu link)
+- `/app/frontend/src/components/ContactDetailSheet.jsx` (editorial tab)
+- `/app/frontend/src/App.js` (route)
+- `/app/frontend/src/pages/dashboard/SettingsPage.jsx` (Google config fields)
+- `/app/backend/routes/appointments.py` (get_google_config from DB)
