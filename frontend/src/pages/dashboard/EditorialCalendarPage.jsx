@@ -343,7 +343,15 @@ const EditorialCalendarPage = () => {
 
   // Form helpers
   const resetCalendarForm = () => {
-    setCalendarForm({ title: '', contact_id: '', description: '', color: '#6366f1' });
+    setCalendarForm({ 
+      title: '', 
+      contact_id: '', 
+      description: '', 
+      color: '#6366f1',
+      country: 'FR',
+      niche: 'general',
+      generate_key_dates: true
+    });
     setEditingCalendar(null);
   };
 
