@@ -64,6 +64,18 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
   - Pilier de contenu
   - Objectif marketing
 
+#### Prévisualisations Social Media ✅ 2026-01-22
+- **Composant:** `/app/frontend/src/components/SocialPreviewModal.jsx`
+- **Mockups réalistes pour:**
+  - **Instagram:** Post avec avatar, caption tronquée, icônes like/comment/share, indicateur carrousel
+  - **Facebook:** Publication de page avec réactions, commentaires, partages
+  - **LinkedIn:** Post professionnel avec style fil d'actualité
+  - **TikTok:** Mockup mobile vertical avec overlay vidéo, boutons latéraux, barre de navigation
+  - **YouTube:** Thumbnail avec titre, vues, durée
+- **Accessible via:**
+  - Bouton œil sur les cartes Trello
+  - Bouton "Prévisualiser" dans le modal d'édition
+
 #### Frontend (`/app/frontend/src/pages/dashboard/EditorialCalendarPage.jsx`)
 - **Vue Calendrier** (mois) avec navigation et posts colorés
 - **Vue Trello/Kanban** avec colonnes par semaine
