@@ -714,6 +714,7 @@ const EditorialCalendarPage = () => {
           <div className="grid grid-cols-7">
             {getCalendarDays().map((day, idx) => {
               const dayPosts = getPostsForDay(day.date);
+              const dayKeyDates = getKeyDatesForDay(day.date);
               const isToday = day.date.toDateString() === new Date().toDateString();
               
               return (
@@ -721,17 +722,46 @@ const EditorialCalendarPage = () => {
                   key={idx}
                   className={`min-h-[120px] p-2 border-b border-r border-white/5 ${
                     !day.isCurrentMonth ? 'bg-white/[0.02]' : ''
-                  } ${isToday ? 'bg-indigo-500/10' : ''}`}
+                  } ${isToday ? 'bg-indigo-500/10' : ''} ${dayKeyDates.length > 0 ? 'bg-amber-500/5' : ''}`}
                   onClick={() => openNewPost(day.date.toISOString().split('T')[0])}
                 >
-                  <div className={`text-sm mb-1 ${
+                  <div className={`text-sm mb-1 flex items-center justify-between ${
                     day.isCurrentMonth ? 'text-white' : 'text-white/30'
                   } ${isToday ? 'font-bold text-indigo-400' : ''}`}>
-                    {day.date.getDate()}
+                    <span>{day.date.getDate()}</span>
+                    {dayKeyDates.length > 0 && (
+                      <span className="text-amber-400 text-xs">📅</span>
+                    )}
                   </div>
                   
+                  {/* Key Dates */}
+                  {dayKeyDates.length > 0 && (
+                    <div className="mb-1 space-y-0.5">
+                      {dayKeyDates.slice(0, 1).map(kd => (
+                        <div
+                          key={kd.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCreatePostFromKeyDate(kd.calendar.id, kd.id);
+                          }}
+                          className="text-xs p-1 rounded cursor-pointer bg-amber-500/20 border border-amber-500/30 hover:bg-amber-500/30 transition-colors"
+                          title={`${kd.title}\n${kd.content_angle || ''}\nCliquez pour créer un post`}
+                        >
+                          <div className="flex items-center gap-1 text-amber-300">
+                            <span>{kd.icon || '📅'}</span>
+                            <span className="truncate">{kd.title}</span>
+                          </div>
+                        </div>
+                      ))}
+                      {dayKeyDates.length > 1 && (
+                        <div className="text-xs text-amber-400/60">+{dayKeyDates.length - 1} date(s)</div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Posts */}
                   <div className="space-y-1">
-                    {dayPosts.slice(0, 3).map(post => (
+                    {dayPosts.slice(0, dayKeyDates.length > 0 ? 2 : 3).map(post => (
                       <div
                         key={post.id}
                         onClick={(e) => { e.stopPropagation(); openEditPost(post); }}
@@ -748,8 +778,8 @@ const EditorialCalendarPage = () => {
                         </div>
                       </div>
                     ))}
-                    {dayPosts.length > 3 && (
-                      <div className="text-xs text-white/40">+{dayPosts.length - 3} autres</div>
+                    {dayPosts.length > (dayKeyDates.length > 0 ? 2 : 3) && (
+                      <div className="text-xs text-white/40">+{dayPosts.length - (dayKeyDates.length > 0 ? 2 : 3)} autres</div>
                     )}
                   </div>
                 </div>
