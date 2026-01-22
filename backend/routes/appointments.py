@@ -574,8 +574,8 @@ METHOD:REQUEST
 BEGIN:VEVENT
 UID:{apt['id']}@alphagency.fr
 DTSTAMP:{now_ics}
-DTSTART;TZID=Europe/Paris:{start_ics}
-DTEND;TZID=Europe/Paris:{end_ics}
+DTSTART;TZID=America/Guadeloupe:{start_ics}
+DTEND;TZID=America/Guadeloupe:{end_ics}
 SUMMARY:{title}
 DESCRIPTION:{description}
 ORGANIZER;CN=Alpha Agency:mailto:{organizer_email}
