@@ -1391,7 +1391,7 @@ const EditorialCalendarPage = () => {
               </div>
               
               <div className="space-y-2">
-                <Label>CTA (appel à lappel à l'actionapos;action)</Label>
+                <Label>CTA (appel à l&apos;action)</Label>
                 <Input
                   value={postForm.cta}
                   onChange={(e) => setPostForm({ ...postForm, cta: e.target.value })}
