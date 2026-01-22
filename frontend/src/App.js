@@ -114,6 +114,7 @@ function App() {
             <Route path="mindmap" element={<MindMapPage />} />
             <Route path="transfer" element={<TransfersPage />} />
             <Route path="agenda" element={<AgendaPage />} />
+            <Route path="editorial" element={<EditorialCalendarPage />} />
           </Route>
           
           {/* Public transfer download page */}
