@@ -860,11 +860,11 @@ const EditorialCalendarPage = () => {
         </Select>
 
         {/* Reset filters */}
-        {(filters.network || filters.status || filters.format) && (
+        {(filters.network !== 'all' || filters.status !== 'all' || filters.format !== 'all') && (
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setFilters({ network: '', status: '', format: '' })}
+            onClick={() => setFilters({ network: 'all', status: 'all', format: 'all' })}
             className="text-white/60 hover:text-white"
             title="Réinitialiser les filtres"
           >
