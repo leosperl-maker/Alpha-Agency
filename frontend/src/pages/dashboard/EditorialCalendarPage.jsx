@@ -735,17 +735,20 @@ const EditorialCalendarPage = () => {
     let weekStart = new Date(firstDay);
     weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1); // Start from Monday
     
+    let weekIndex = 0;
     while (weekStart <= lastDay) {
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekEnd.getDate() + 6);
       
       columns.push({
+        id: `week-${year}-${month}-${weekIndex}`,
         start: new Date(weekStart),
         end: weekEnd,
         label: `${weekStart.getDate()} - ${weekEnd.getDate()} ${weekEnd.toLocaleDateString('fr-FR', { month: 'short' })}`
       });
       
       weekStart.setDate(weekStart.getDate() + 7);
+      weekIndex++;
     }
     
     return columns;
