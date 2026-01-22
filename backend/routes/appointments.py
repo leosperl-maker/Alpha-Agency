@@ -14,6 +14,10 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 import requests
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request as GoogleRequest
@@ -27,6 +31,9 @@ router = APIRouter(prefix="/appointments", tags=["Appointments"])
 
 # ==================== CONFIG ====================
 
+# Timezone for Guadeloupe (UTC-4)
+GUADELOUPE_TIMEZONE = "America/Guadeloupe"
+
 # Fallback to env vars if not in database
 GOOGLE_CLIENT_ID_DEFAULT = os.environ.get('GOOGLE_CLIENT_ID', '')
 GOOGLE_CLIENT_SECRET_DEFAULT = os.environ.get('GOOGLE_CLIENT_SECRET', '')
@@ -37,6 +44,12 @@ BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
 BREVO_SMS_SENDER = "AlphaAgency"  # Max 11 chars for alphanumeric sender
 BREVO_SENDER_EMAIL = os.environ.get('BREVO_SENDER_EMAIL', 'noreply@alphagency.fr')
 BREVO_SENDER_NAME = os.environ.get('BREVO_SENDER_NAME', 'Alpha Agency')
+
+# Log Brevo key status on import
+if BREVO_API_KEY:
+    logger.info(f"Brevo API key loaded: {BREVO_API_KEY[:20]}...")
+else:
+    logger.warning("BREVO_API_KEY not found in environment!")
 
 GOOGLE_SCOPES = [
     'https://www.googleapis.com/auth/calendar',
