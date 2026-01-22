@@ -352,6 +352,31 @@ const EditorialCalendarPage = () => {
     }
   };
 
+  // Load posts
+  const loadPosts = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      
+      if (selectedCalendarId && selectedCalendarId !== 'all') {
+        params.append('calendar_id', selectedCalendarId);
+      }
+      if (filters.network && filters.network !== 'all') params.append('network', filters.network);
+      if (filters.format && filters.format !== 'all') params.append('format_type', filters.format);
+      if (filters.status && filters.status !== 'all') params.append('status', filters.status);
+      
+      // Date range based on view
+      const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0);
+      params.append('start_date', startDate.toISOString().split('T')[0]);
+      params.append('end_date', endDate.toISOString().split('T')[0]);
+      
+      const response = await api.get(`/editorial/posts?${params.toString()}`);
+      setPosts(response.data || []);
+    } catch (error) {
+      console.error('Error loading posts:', error);
+    }
+  }, [selectedCalendarId, filters, currentDate]);
+
   // Load data
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -368,39 +393,12 @@ const EditorialCalendarPage = () => {
       setContacts(contactsRes.data || []);
       setNiches(nichesRes.data?.niches || []);
       setCountries(nichesRes.data?.countries || []);
-      
-      // Load posts based on current view
-      await loadPosts();
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Erreur lors du chargement');
     }
     setLoading(false);
   }, []);
-
-  const loadPosts = useCallback(async () => {
-    try {
-      const params = new URLSearchParams();
-      
-      if (selectedCalendarId && selectedCalendarId !== 'all') {
-        params.append('calendar_id', selectedCalendarId);
-      }
-      if (filters.network) params.append('network', filters.network);
-      if (filters.format) params.append('format_type', filters.format);
-      if (filters.status) params.append('status', filters.status);
-      
-      // Date range based on view
-      const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-      const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0);
-      params.append('start_date', startDate.toISOString().split('T')[0]);
-      params.append('end_date', endDate.toISOString().split('T')[0]);
-      
-      const response = await api.get(`/editorial/posts?${params.toString()}`);
-      setPosts(response.data || []);
-    } catch (error) {
-      console.error('Error loading posts:', error);
-    }
-  }, [selectedCalendarId, filters, currentDate]);
 
   useEffect(() => {
     loadData();
@@ -410,7 +408,7 @@ const EditorialCalendarPage = () => {
     if (!loading) {
       loadPosts();
     }
-  }, [loadPosts, selectedCalendarId, filters, currentDate, loading]);
+  }, [loadPosts, loading]);
 
   const handleSaveCalendar = async () => {
     try {
