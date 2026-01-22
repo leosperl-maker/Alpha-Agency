@@ -6,18 +6,26 @@ Multi-calendar system linked to contacts with posts management
 import os
 import uuid
 import logging
+import asyncio
 from datetime import datetime, timezone
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 import cloudinary
 import cloudinary.uploader
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from .database import db, get_current_user
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/editorial", tags=["Editorial Calendar"])
+
+# ==================== LLM CONFIG ====================
+
+EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 
 # ==================== CLOUDINARY CONFIG ====================
 
