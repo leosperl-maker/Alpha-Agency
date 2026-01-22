@@ -637,6 +637,51 @@ const EditorialCalendarPage = () => {
     setShowPostModal(true);
   };
 
+  // Export PDF
+  const handleExportPDF = async (calendarId) => {
+    try {
+      const url = `${api.defaults.baseURL}/editorial/calendars/${calendarId}/export/pdf`;
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (!response.ok) throw new Error('Export failed');
+      
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `planning_${calendarId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(downloadUrl);
+      
+      toast.success('PDF exporté avec succès');
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast.error('Erreur lors de l\'export PDF');
+    }
+  };
+
+  // Show Statistics
+  const handleShowStats = async (calendar) => {
+    setStatsCalendar(calendar);
+    setStatsLoading(true);
+    setShowStatsModal(true);
+    
+    try {
+      const response = await api.get(`/editorial/calendars/${calendar.id}/stats`);
+      setStatsData(response.data);
+    } catch (error) {
+      console.error('Stats error:', error);
+      toast.error('Erreur lors du chargement des statistiques');
+    }
+    setStatsLoading(false);
+  };
+
   // Calendar navigation
   const navigateMonth = (direction) => {
     setCurrentDate(prev => {
