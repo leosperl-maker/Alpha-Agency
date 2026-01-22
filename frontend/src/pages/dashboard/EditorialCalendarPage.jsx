@@ -1104,6 +1104,176 @@ const EditorialCalendarPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* AI Assistant Modal */}
+      <Dialog open={showAIModal} onOpenChange={setShowAIModal}>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wand2 className="w-5 h-5 text-indigo-400" />
+              Assistant IA - Aide rédactionnelle
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+            {/* Input section */}
+            <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/10">
+              <div className="space-y-2">
+                <Label>Sujet / Thème du post *</Label>
+                <Textarea
+                  value={aiTopic}
+                  onChange={(e) => setAiTopic(e.target.value)}
+                  placeholder="Ex: Lancement de notre nouvelle offre de création de site web, Témoignage client satisfait, Astuce marketing pour les entrepreneurs..."
+                  className="bg-white/5 border-white/10"
+                  rows={2}
+                />
+              </div>
+              
+              <div className="text-xs text-white/50">
+                <p>L'IA tiendra compte des paramètres sélectionnés dans le formulaire du post :</p>
+                <ul className="mt-1 ml-4 list-disc">
+                  {postForm.networks.length > 0 && <li>Réseaux : {postForm.networks.join(', ')}</li>}
+                  {postForm.format_type && <li>Format : {postForm.format_type}</li>}
+                  {postForm.content_pillar && <li>Pilier : {postForm.content_pillar}</li>}
+                  {postForm.objective && <li>Objectif : {postForm.objective}</li>}
+                </ul>
+              </div>
+              
+              <Button
+                onClick={handleAIAssist}
+                disabled={aiLoading || !aiTopic.trim()}
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500"
+              >
+                {aiLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Génération en cours...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Générer des suggestions
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            {/* Results section */}
+            {aiResult && (
+              <div className="space-y-4">
+                {/* Angles */}
+                <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Lightbulb className="w-4 h-4 text-yellow-400" />
+                    <h3 className="font-medium text-white">Angles / Idées de post</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {aiResult.angles?.map((angle, idx) => (
+                      <div key={idx} className="p-3 bg-white/5 rounded-lg text-sm text-white/80">
+                        <span className="text-indigo-400 font-medium mr-2">{idx + 1}.</span>
+                        {angle}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Caption */}
+                <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-blue-400" />
+                      <h3 className="font-medium text-white">Légende suggérée</h3>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={applyAICaption} className="text-xs">
+                      <Check className="w-3 h-3 mr-1" /> Utiliser
+                    </Button>
+                  </div>
+                  <div className="p-3 bg-white/5 rounded-lg text-sm text-white/80 whitespace-pre-wrap">
+                    {aiResult.caption}
+                  </div>
+                </div>
+                
+                {/* Hooks */}
+                <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Target className="w-4 h-4 text-red-400" />
+                    <h3 className="font-medium text-white">Hooks accrocheurs</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {aiResult.hooks?.map((hook, idx) => (
+                      <div 
+                        key={idx} 
+                        className="p-2 bg-white/5 rounded-lg text-sm text-white/80 cursor-pointer hover:bg-white/10 transition-colors"
+                        onClick={() => {
+                          setPostForm(prev => ({ 
+                            ...prev, 
+                            caption: hook + '\n\n' + (prev.caption || '') 
+                          }));
+                          toast.success('Hook ajouté au début de la légende');
+                        }}
+                      >
+                        <span className="text-red-400 mr-2">→</span>
+                        {hook}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Hashtags */}
+                <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Hash className="w-4 h-4 text-green-400" />
+                    <h3 className="font-medium text-white">Hashtags recommandés</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {aiResult.hashtags?.map((tag, idx) => (
+                      <Badge 
+                        key={idx} 
+                        variant="outline" 
+                        className="border-green-500/50 text-green-400 cursor-pointer hover:bg-green-500/10"
+                        onClick={() => {
+                          const hashtag = tag.startsWith('#') ? tag : `#${tag}`;
+                          setPostForm(prev => ({ 
+                            ...prev, 
+                            caption: (prev.caption || '') + ' ' + hashtag 
+                          }));
+                          toast.success(`${hashtag} ajouté`);
+                        }}
+                      >
+                        #{tag.replace('#', '')}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* CTA */}
+                {aiResult.cta && (
+                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <MousePointerClick className="w-4 h-4 text-purple-400" />
+                        <h3 className="font-medium text-white">Call-to-Action</h3>
+                      </div>
+                      <Button size="sm" variant="outline" onClick={applyAICTA} className="text-xs">
+                        <Check className="w-3 h-3 mr-1" /> Utiliser
+                      </Button>
+                    </div>
+                    <div className="p-3 bg-white/5 rounded-lg text-sm text-white/80">
+                      {aiResult.cta}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter className="mt-4">
+            <Button variant="ghost" onClick={() => { setShowAIModal(false); setAiResult(null); setAiTopic(''); }}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
