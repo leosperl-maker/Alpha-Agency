@@ -1,249 +1,191 @@
 <analysis>**original_problem_statement:**
-L'utilisateur a demandé plusieurs évolutions et corrections majeures :
-
-1.  **Module Agenda / RDV (Nouvelle Fonctionnalité) :**
-    *   Créer un nouvel onglet Agenda / RDV dans le dashboard.
-    *   Intégrer Google Agenda pour créer des événements, générer des liens Google Meet, et synchroniser les rendez-vous.
-    *   Permettre la création de RDV en associant un contact du CRM, un devis/facture, et des pièces jointes.
-    *   Mettre en place un système de relances automatiques (J-3, J-1, etc.) par email et SMS via Brevo.
-    *   L'envoi de l'invitation initiale au client n'est pas automatique, mais déclenché manuellement par l'utilisateur.
-    *   L'invitation email au client doit contenir un fichier  pour l'ajouter facilement à son calendrier.
-    *   Envoyer un email de confirmation à l'administrateur (l'utilisateur) lors de la création d'un RDV.
-    *   Permettre la personnalisation des templates d'email et SMS depuis le dashboard.
-
-2.  **Affinage de la Mise en Page PDF (Itératif) :**
-    *   Refonte visuelle continue des devis/factures avec une charte rouge pastel ().
-    *   Ajustements précis des coins arrondis, de la typographie (taille, graisse), du positionnement des éléments (titre DEVIS à droite, logo à gauche).
-    *   Les dates émission et échéance doivent être dans des pastilles séparées, alignées correctement, avec des labels en gras et les dates en texte normal, le tout sur une seule ligne.
-    *   Les conditions de règlement et détails de paiement affichés sur le PDF doivent provenir des paramètres de facturation et non de données statiques.
-
-3.  **Corrections de Bugs et Améliorations :**
-    *   **Système de Paiement :** Gérer les paiements partiels (Acompte/Solde) et mettre à jour le statut des factures en partiel ou payée en conséquence.
-    *   **Statistiques :** Le calcul du CA Encaissé sur le dashboard doit se baser sur la somme des paiements réels et non sur le total des factures marquées payée.
-    *   **Module Things :** Les tâches non terminées d'un jour doivent être automatiquement reportées au lendemain.
-    *   **Affichage PDF :** Les paiements effectués (acompte, solde) doivent être listés sur le PDF de la facture.
-    *   **Problème SMS :** L'utilisateur ne reçoit pas les SMS de rappel envoyés via Brevo sur son numéro en Guadeloupe (0691266003).
+L'utilisateur a demandé plusieurs fonctionnalités et corrections :
+1.  **Module Agenda / RDV (Terminé):** Intégration de Google Agenda pour la création de RDV, la génération de liens Meet, et la synchronisation. L'envoi d'invitations manuelles avec des fichiers  est fonctionnel. La configuration de l'intégration Google a été déplacée de variables d'environnement codées en dur vers l'interface utilisateur des paramètres pour plus de flexibilité.
+2.  **Affinage PDF (En Attente):** L'utilisateur a accepté la solution de contournement actuelle pour l'affichage des descriptions longues et a demandé de mettre cette tâche en attente.
+3.  **Corrections (Terminé):**
+    *   Le système de paiement gère maintenant les acomptes/soldes et le statut partiel.
+    *   Le calcul du CA Encaissé sur le tableau de bord a été corrigé pour être basé sur les paiements réels.
+    *   La liste des paiements s'affiche désormais correctement sur les PDF des factures.
+    *   Le module Things reporte les tâches non terminées au jour suivant.
+4.  **Problème SMS (Bloqué):** Les SMS envoyés via Brevo ne sont pas reçus en Guadeloupe. Ce problème est identifié comme un blocage externe (probablement un filtrage de l'opérateur).
+5.  **NOUVEAU - Module Calendrier Éditorial (En Cours):** L'utilisateur a demandé un module complet de calendrier éditorial pour gérer le contenu des réseaux sociaux pour plusieurs clients.
+    **PRODUCT REQUIREMENTS (PRD):**
+    *   **Structure :** Gestion de plusieurs calendriers (par client/marque) avec des actions CRUD.
+    *   **Vues :** Une vue calendrier (mois/semaine) et une vue type Kanban (Trello) avec drag & drop.
+    *   **Posts :** Une fiche de post détaillée avec des champs pour le réseau social, le format, la légende, le statut, les médias, etc.
+    *   **Médias :** Intégration avec Cloudinary pour l'upload d'images/vidéos, y compris les carrousels.
+    *   **IA d'aide à la rédaction :** Un assistant basé sur GPT-5.2 pour générer des idées, des légendes et des hashtags.
+    *   **Prévisualisation :** Des mockups réalistes pour prévisualiser le rendu des posts sur Instagram, Facebook, TikTok, et LinkedIn.
+    *   **Dates Fortes Intelligentes :** Une IA pour pré-remplir le calendrier avec des dates clés marketing (génériques et spécifiques à une niche) lors de la création d'un calendrier.
+    *   **Intégration Things :** Lier les posts à des tâches.
 
 **User's preferred language**: Français
 
 **what currently exists?**
--   **PDF Generation:** La génération de PDF dans  a été intensivement modifiée pour répondre aux exigences visuelles de l'utilisateur. Elle utilise une charte rouge pastel, un en-tête personnalisé, et des pastilles de dates stylisées. Les conditions de paiement sont désormais dynamiques. Cependant, l'implémentation des coins arrondis reste une approximation car  ne le supporte pas nativement dans les .
--   **Agenda / RDV Feature:** Une nouvelle route () et une nouvelle page frontend () ont été créées. L'intégration avec Google Calendar via OAuth2 est fonctionnelle (création d'événements, génération de liens Meet). L'envoi d'emails via Brevo fonctionne, y compris l'envoi de confirmations à l'admin et d'invitations avec pièce jointe  aux clients. L'interface permet de créer des RDV, de les lier à des contacts/documents et de configurer des relances.
--   **Système de Paiement:** Le backend a été mis à jour pour gérer les paiements partiels (/) et le statut partiel. Le calcul des statistiques a été corrigé. Le frontend de la page facturation a été mis à jour pour permettre la saisie de ces nouveaux types de paiement.
--   **Module Things:** La page () a été modifiée pour reporter les tâches inachevées et archiver les tâches terminées.
--   **Problème SMS Brevo:** L'agent a identifié que le numéro de l'utilisateur est en Guadeloupe et a corrigé le code pour utiliser l'indicatif . Malgré que l'API Brevo retourne un succès et débite des crédits, l'utilisateur ne reçoit toujours pas les SMS. Des tests avec un expéditeur numérique (numéro court) au lieu d'alphanumérique (AlphaAgency) ont également été tentés sans succès.
+-   **Fonctionnalités de base :** Le CRM inclut la gestion de contacts, devis, factures, et un module de tâches Things. La génération de PDF est fonctionnelle, bien que la gestion des textes très longs soit une solution de contournement acceptée.
+-   **Module Agenda/RDV :** Entièrement fonctionnel. L'intégration avec Google Calendar est terminée et les problèmes de redirection ont été résolus en rendant la configuration dynamique via l'interface des Paramètres.
+-   **Paiements & Statistiques :** Le système gère correctement les paiements partiels et les statistiques du tableau de bord sont maintenant exactes. Ces corrections ont été validées par des tests backend.
+-   **Module Calendrier Éditorial (MVP+) :**
+    -   La structure backend () et frontend () est en place.
+    -   Le CRUD pour les calendriers et les posts est fonctionnel.
+    -   L'**IA d'aide à la rédaction** est intégrée et fonctionnelle (endpoint et UI).
+    -   La structure pour la **prévisualisation des posts** a été créée (), mais les mockups visuels ne sont pas encore implémentés.
+    -   La fonctionnalité de **Dates Fortes Intelligentes** a été implémentée (backend et frontend) mais n'a pas encore été testée de bout en bout.
 
 **Last working item**:
--   **Last item agent was working:** L'agent a implémenté une série de quatre corrections demandées par l'utilisateur :
-    1.  Mise à jour du système de paiement pour gérer les acomptes/soldes et le statut partiel.
-    2.  Correction du calcul du CA encaissé dans les statistiques du dashboard.
-    3.  Ajout de la liste des paiements reçus sur le PDF de la facture.
-    4.  Modification du module Things pour reporter les tâches non terminées.
+-   **Last item agent was working:** Implémentation de la fonctionnalité Dates fortes intelligentes par niche pour le module de Calendrier Éditorial. L'agent a créé les modèles de données, les endpoints backend pour générer les dates via l'IA lors de la création d'un calendrier, et a mis à jour l'interface frontend pour inclure les champs de niche/pays et afficher les dates générées sur le calendrier.
 -   **Status:** IN PROGRESS
--   **Agent Testing Done:** N (Le code a été écrit, mais pas de cycle complet de test et de validation utilisateur)
--   **Which testing method agent to use?** both. Il faut utiliser  pour valider les endpoints backend (ajout de paiement, stats) et l'agent de test frontend pour valider les nouvelles UI sur les pages  et .
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** both. Il faut tester la création d'un calendrier avec une niche pour vérifier que l'appel IA est déclenché et que les dates sont créées en base de données (test backend avec ). Ensuite, il faut valider que le frontend affiche correctement ces nouvelles dates sur la vue calendrier (test frontend).
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
 -   **Issue 1: (P0, BLOCKER) Échec de la livraison des SMS en Guadeloupe.**
--   **Issue 2: (P1) Problème fondamental de mise en page des descriptions longues dans les PDF.**
--   **Issue 3: (P2) Instabilité du Frontend.**
+-   **Issue 2: (P2) Instabilité du Frontend lors des tests automatisés.**
 
   **Issues Detail:**
   - **Issue 1: (P0, BLOCKER) Échec de la livraison des SMS en Guadeloupe.**
-     - **Attempted fixes:**
-        - Correction de l'indicatif téléphonique de  à  pour la Guadeloupe.
-        - Tentative d'envoi avec un expéditeur numérique (short code) au lieu d'un expéditeur alphanumérique (AlphaAgency).
-        - L'API Brevo retourne un succès et des statuts Délivré ou Bloqué, mais l'utilisateur ne reçoit rien. Le problème est très probablement lié à l'opérateur mobile de l'utilisateur qui filtre ces SMS.
+     - **Attempted fixes:** L'indicatif a été corrigé (), et différentes configurations d'expéditeur ont été testées. Le problème est externe (opérateur mobile/Brevo).
      - **Next debug checklist:**
-        1.  Confirmer avec l'utilisateur son opérateur mobile (Digicel, Orange Caraïbes, etc.).
-        2.  Suggérer à l'utilisateur de contacter son opérateur pour vérifier s'ils bloquent les SMS transactionnels provenant de Brevo.
-        3.  Proposer une alternative comme l'intégration de **Twilio**, qui a souvent une meilleure couverture dans les DOM-TOM.
-        4.  En dernier recours, proposer de remplacer les rappels SMS par des rappels via l'API WhatsApp Business si l'utilisateur est ouvert à cette solution.
-     - **Why fix this issue and what will be achieved with the fix?** C'est une fonctionnalité clé du module Agenda qui ne fonctionne pas.
+        1. Proposer activement à l'utilisateur de mettre en place une solution alternative.
+        2. Invoquer  pour **Twilio**, qui a une meilleure couverture dans les DOM-TOM.
+        3. Implémenter Twilio comme alternative ou remplacement de Brevo pour les SMS.
+     - **Why fix this issue and what will be achieved with the fix?** C'est une fonctionnalité de rappel essentielle pour le module Agenda. La résoudre débloquera pleinement ce module.
      - **Status:** BLOCKED
      - **Is recurring issue?** Y
      - **Should Test frontend/backend/both after fix?** Backend
-     - **Blocked on other issue:** Non. Bloqué par une potentielle limitation externe (opérateur/Brevo).
+     - **Blocked on other issue:** Non.
 
- - **Issue 2: (P1) Problème fondamental de mise en page des descriptions longues dans les PDF.**
-    - **Description:** C'est le problème le plus critique et récurrent. L'approche actuelle de l'agent consiste à diviser une longue description en plusieurs *lignes* de tableau. L'utilisateur a explicitement rejeté cette solution et veut que le texte reste dans une *seule et unique cellule* qui s'étend sur plusieurs pages. La bibliothèque  avec son objet  ne peut pas gérer ce cas de figure, ce qui a causé tous les blocages jusqu'à présent.
-    - **Next debug checklist:**
-        1.  **Abandonner définitivement **. C'est une impasse confirmée.
-        2.  Implémenter une **approche hybride avec ReportLab** : utiliser des  flowables (qui peuvent s'étendre sur plusieurs pages) pour la description et dessiner manuellement les lignes du tableau autour d'eux à chaque saut de page.
-        3.  Ou alors, retenter l'intégration d'une bibliothèque HTML-to-PDF comme **** en résolvant les dépendances système (peut nécessiter de demander à l'utilisateur d'installer des paquets via apt 2.6.1 (arm64)
-Usage: apt-get [options] command
-       apt-get [options] install|remove pkg1 [pkg2 ...]
-       apt-get [options] source pkg1 [pkg2 ...]
-
-apt-get is a command line interface for retrieval of packages
-and information about them from authenticated sources and
-for installation, upgrade and removal of packages together
-with their dependencies.
-
-Most used commands:
-  update - Retrieve new lists of packages
-  upgrade - Perform an upgrade
-  install - Install new packages (pkg is libc6 not libc6.deb)
-  reinstall - Reinstall packages (pkg is libc6 not libc6.deb)
-  remove - Remove packages
-  purge - Remove packages and config files
-  autoremove - Remove automatically all unused packages
-  dist-upgrade - Distribution upgrade, see apt-get(8)
-  dselect-upgrade - Follow dselect selections
-  build-dep - Configure build-dependencies for source packages
-  satisfy - Satisfy dependency strings
-  clean - Erase downloaded archive files
-  autoclean - Erase old downloaded archive files
-  check - Verify that there are no broken dependencies
-  source - Download source archives
-  download - Download the binary package into the current directory
-  changelog - Download and display the changelog for the given package
-
-See apt-get(8) for more information about the available commands.
-Configuration options and syntax is detailed in apt.conf(5).
-Information about how to configure sources can be found in sources.list(5).
-Package and version choices can be expressed via apt_preferences(5).
-Security details are available in apt-secure(8).
-                                        This APT has Super Cow Powers. si l'environnement le permet).
-        4.  Cette correction doit être faite en même temps que la refonte visuelle demandée.
-    - **Why fix this issue and what will be achieved with the fix?** C'est la demande la plus importante de l'utilisateur et le principal bloqueur du projet. Sa résolution validera la fonctionnalité de facturation.
-    - **Status:** BLOCKED
-    - **Is recurring issue?** Y
-    - **Should Test frontend/backend/both after fix?** Backend
-    - **Blocked on other issue:** Non.
-
-  - **Issue 3: (P2) Instabilité du Frontend.**
-     - **Attempted fixes:** L'agent a observé le problème (écran noir sur , erreur ) mais s'est concentré sur les tâches backend. Aucune tentative de correction n'a été faite.
+  - **Issue 2: (P2) Instabilité du Frontend lors des tests automatisés.**
+     - **Attempted fixes:** L'agent a résolu un crash spécifique sur la page . Cependant, le framework de test  échoue systématiquement à se connecter, renvoyant des captures d'écran noires ou de la page de login, ce qui empêche la validation visuelle automatisée.
      - **Next debug checklist:**
-        1.  Investiguer  pour les configurations de  et .
-        2.  Vérifier la logique d'authentification et de redirection dans  ou un hook similaire.
-        3.  Analyser les logs de la console du navigateur au moment où l'écran noir apparaît.
-     - **Why fix this issue and what will be achieved with the fix?** Un frontend stable est essentiel pour que l'utilisateur puisse tester et utiliser l'application.
-     - **Status:** NOT STARTED
+        1.  Analyser les logs de la console lors des tentatives de connexion de Playwright pour identifier l'erreur (ex: ).
+        2.  S'assurer que les URL de navigation dans les tests correspondent exactement aux routes définies dans  (ex:  vs ).
+        3.  Vérifier la logique d'authentification dans le frontend qui pourrait interférer avec l'automatisation.
+     - **Why fix this issue and what will be achieved with the fix?** Permettra des cycles de tests frontend fiables et plus rapides.
+     - **Status:** IN PROGRESS
      - **Is recurring issue?** Y
      - **Should Test frontend/backend/both after fix?** Frontend
      - **Blocked on other issue:** Non.
 
 **In progress Task List**:
-  - **Task 1: (P0) Finaliser et valider le nouveau système de paiement et le module Things.**
-     - **Where to resume:** Le code backend et frontend a été écrit. Il faut maintenant lancer un cycle de test complet :
-        1.  Via l'UI (), ajouter un acompte à une facture, vérifier que son statut passe à partiel.
-        2.  Ajouter le solde, vérifier que le statut passe à payée.
-        3.  Générer le PDF de la facture et s'assurer que la section Paiements Reçus s'affiche correctement.
-        4.  Vérifier sur le dashboard principal que le KPI CA Encaissé a été mis à jour correctement avec la somme des paiements.
-        5.  Sur la page Things, créer des tâches, en laisser une non terminée, et vérifier le lendemain qu'elle a bien été reportée.
-     - **What will be achieved with this?** Compléter les 4 points de la dernière demande de l'utilisateur.
+  - **Task 1: (P0) Finaliser et tester la fonctionnalité Dates fortes intelligentes.**
+     - **Where to resume:** Le code est écrit. Il faut maintenant lancer un cycle de test complet.
+        1.  Ouvrir l'interface de création de calendrier, remplir les champs , ,  (ex: Restauration) et  (ex: France).
+        2.  Valider la création et observer l'indicateur de chargement (Génération des dates clés...).
+        3.  Une fois terminé, vérifier que le calendrier affiche de nouveaux événements correspondant à des dates clés (ex: Saint-Valentin).
+        4.  Cliquer sur une de ces dates pour vérifier que cela ouvre une suggestion de post.
+     - **What will be achieved with this?** Complète une fonctionnalité clé du nouveau module de calendrier éditorial, apportant une grande valeur ajoutée.
      - **Status:** IN PROGRESS
      - **Should Test frontend/backend/both after fix?** Both
      - **Blocked on something:** Non.
 
 **Upcoming and Future Tasks**
--   **Upcoming Tasks:**
-    -   (P1) **Personnalisation des Templates d'email/SMS :** L'UI a été créée dans l'Agenda, mais le backend doit être implémenté pour sauvegarder et utiliser ces templates personnalisés.
-    -   (P1) **Vérifier la fonctionnalité Bulk Delete** (suppression en masse) qui n'a jamais été testée.
-    -   (P2) Améliorations de la MindMap : Export PDF, raccourcis, etc.
+-   **Upcoming Tasks (Calendrier Éditorial):**
+    -   (P0) **Implémenter les mockups de prévisualisation :** Remplir le composant  avec des rendus visuels réalistes pour Instagram, Facebook, TikTok et LinkedIn.
+    -   (P1) **Intégrer le module de Tâches Things :** Permettre de créer/lier des tâches (rédaction, design) à un post.
+    -   (P1) **Finaliser les vues Calendrier/Trello :** Implémenter le drag & drop pour reprogrammer les posts et les filtres avancés (par statut, réseau, etc.).
+    -   (P2) **Gestion des filtres :** Créer une interface dans les paramètres pour permettre à l'utilisateur de gérer dynamiquement la liste des réseaux sociaux et des formats de post.
+
+-   **Future Tasks (Backlog):**
+    -   (P1) **Vérifier la fonctionnalité Bulk Delete** (jamais testée).
+    -   (P2) Améliorations de la MindMap (Export PDF, raccourcis).
     -   (P2) Mettre en place les Notifications Push.
--   **Future Tasks:**
-    -   Intégration avec Qonto.
-    -   Refactorisation du système de thèmes (clair/sombre).
+    -   (P3) Intégration avec Qonto (banque).
+    -   (P3) Refactorisation du système de thèmes (clair/sombre).
 
 **Completed work in this session**
--   **Implémentation du Module Agenda/RDV:**
-    -   Création du backend () et frontend ().
-    -   Intégration fonctionnelle de Google Calendar API (OAuth, création d'événement, génération de lien Meet).
-    -   Intégration de l'envoi d'emails via Brevo pour les invitations (avec fichier ) et les confirmations admin.
-    -   Mise en place de la structure pour les relances SMS (même si la livraison échoue).
--   **Refonte Avancée du PDF de Facture:**
-    -   Mise en place des pastilles de dates séparées et stylisées.
-    -   Correction de l'affichage des conditions de paiement et détails bancaires pour qu'ils soient dynamiques.
-    -   Multiples ajustements fins de l'alignement, de la couleur et de la typographie selon les retours de l'utilisateur.
--   **Correction de Bug Critique:** L'erreur  lors de la création d'événements Google a été résolue.
+-   **Paiements & Stats :** Le système de paiement partiel (acompte/solde) et le calcul du CA Encaissé ont été corrigés et entièrement validés par des tests.
+-   **Affichage PDF :** L'affichage des paiements sur le PDF de la facture est fonctionnel.
+-   **Module Agenda :** Le bug de redirection Google OAuth a été résolu en déplaçant la configuration du  vers la base de données, modifiable depuis l'interface des paramètres.
+-   **Bug Frontend :** Un crash qui rendait la page Paramètres blanche a été corrigé.
+-   **Module Calendrier Éditorial (Phases 1-3) :**
+    -   **Phase 1 :** Création de l'architecture de base (backend/frontend) pour les calendriers et les posts.
+    -   **Phase 2 :** Intégration réussie d'une IA (GPT-5.2) pour l'aide à la rédaction.
+    -   **Phase 3 :** Création de la structure pour la prévisualisation des posts et implémentation de la fonctionnalité de Dates fortes intelligentes.
 
 **Earlier issues found/mentioned but not fixed**
--   Voir **All Pending/In progress Issue list**. Les principaux sont l'instabilité du frontend et le problème de fond avec la mise en page des longs textes dans les PDF.
+-   Aucun problème majeur n'a été oublié, les problèmes restants sont listés dans la section All Pending/In progress Issue list.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** L'erreur  due à une cellule de tableau trop haute pour une page.
+-   **Issue recurrence in previous fork:** Problème de rendu des PDF avec de longues descriptions ().
 -   **Recurrence count:** Élevé.
--   **Status:** BLOCKED
+-   **Status:** RESOLVED (L'utilisateur a accepté la solution de contournement pour le moment, la tâche est donc en attente).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Google OAuth 2.0 Flow:** Authentification de l'utilisateur, obtention et rafraîchissement des tokens pour interagir avec l'API Google Calendar.
--   **Brevo API:** Utilisation pour l'envoi d'emails transactionnels (avec pièces jointes) et de SMS.
--   **ICS File Generation:** Création dynamique de fichiers  (iCalendar) en Python pour les invitations d'agenda.
--   **Timezone Handling:** Correction des erreurs  vs  en s'assurant que tous les  objets ont une information de timezone (UTC) avant les comparaisons ou les interactions avec des API externes.
--   **DOM-TOM Phone Numbers:** Identification de la nécessité d'utiliser des indicatifs pays spécifiques (ex:  pour la Guadeloupe) pour les numéros de téléphone des départements d'outre-mer.
+-   **Configuration Dynamique :** Les secrets et URL de l'API Google ont été déplacés du fichier  vers la collection  de MongoDB, les rendant modifiables par l'utilisateur via l'interface sans nécessiter de redéploiement.
+-   **Intégration IA :** Utilisation de la librairie  pour appeler un modèle LLM (GPT-5.2) afin de générer du contenu créatif (idées de posts, légendes, dates clés marketing).
+-   **Développement par Phases :** La demande complexe du Calendrier Éditorial a été découpée en phases successives (MVP, Aide IA, Prévisualisations, Dates Fortes), permettant de livrer de la valeur de manière incrémentale.
 
 **key DB schema**
--   **appointments:** (nouvelle collection)
-    -   uid=0(root) gid=0(root) groups=0(root), , , , , , , , , , , .
--   **invoices:** (modifié)
-    -   Ajout/utilisation de  pour suivre le montant payé.
-    -   Ajout de .
-    -   Ajout d'une liste  contenant des objets .
--   **settings:** (modifié)
-    -   Utilisation des champs  et .
-
-**changes in tech stack**
--   Aucun changement de stack, mais des intégrations majeures ont été ajoutées.
+-   **settings:** Le document  contient maintenant un objet  avec les clés , , , et .
+-   **editorial_calendars:** 
+-   **editorial_posts:** 
+-   **key_dates:** 
 
 **All files of reference**
 -   
--    (nouveau)
--    (nouveau)
 -   
 -   
 -   
+-   
+-   
+-   
+
+**Areas that need refactoring**:
+-   Le composant  est actuellement une coquille vide et doit être implémenté avec les mockups visuels pour chaque réseau social.
 
 **Critical Info for New Agent**
--   **Le problème des SMS est un bloqueur P0.** Ne perdez pas trop de temps à débugger le code, qui semble correct. Le problème est externe. Proposez rapidement des solutions alternatives à l'utilisateur (contacter l'opérateur, changer de service pour Twilio).
--   **Le frontend est instable.** Fiez-vous aux tests backend () et à l'analyse directe des artefacts (PDF) pour valider votre travail. La résolution des bugs du frontend est une tâche distincte (P2).
--   **L'utilisateur est très exigeant sur le design du PDF.** Attendez-vous à des retours itératifs et précis. Pour les coins réellement arrondis, il faudra abandonner  et dessiner les formes manuellement sur le  de ReportLab.
--   **Validez le cycle de paiement complet.** La dernière tâche n'a pas été testée de bout en bout. C'est la première chose à faire pour finaliser le travail en cours.
+-   La fonctionnalité la plus importante sur laquelle se concentrer est le **Calendrier Éditorial**. La prochaine étape est de **tester la fonctionnalité des Dates fortes** puis d'**implémenter les mockups de prévisualisation**.
+-   Le problème des SMS est un **bloqueur externe**. Ne perdez pas de temps à débugger Brevo. La bonne approche est de proposer et d'implémenter une alternative comme **Twilio**.
+-   Le problème des descriptions longues en PDF est **en attente** à la demande de l'utilisateur. Ne travaillez pas dessus.
+-   La configuration de l'API Google Calendar se fait désormais via l'interface des **Paramètres**, pas dans le fichier .
 
 **documents and test reports created in this job**
--    (mis à jour avec les nouvelles fonctionnalités)
+-    (mis à jour avec les exigences du Calendrier Éditorial)
+-    (rapport de test pour les corrections backend)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Signale qu'il ne reçoit aucun SMS, bien qu'il ait essayé d'en envoyer depuis Brevo directement. Fournit des captures d'écran. (PENDING)
-2.  **Agent:** Suggère que le problème vient de l'opérateur qui bloque l'expéditeur alphanumérique et tente un envoi avec un numéro court.
-3.  **User:** Signale qu'il ne reçoit toujours pas les SMS. (PENDING)
-4.  **Agent:** Conclut que le problème vient de l'opérateur en Guadeloupe et demande quel est son opérateur.
-5.  **User:** Demande la correction de 4 problèmes : paiements partiels, CA encaissé, affichage des paiements sur PDF, et report des tâches Things. (PENDING - Work In Progress)
-6.  **Agent:** Propose un plan pour corriger les 4 problèmes.
-7.  **User:** Accepte le plan.
-8.  **User:** Signale que l'invitation client doit être ajoutable à l'agenda (demande pour le ) et qu'il n'a reçu aucun SMS de test.
-9.  **Agent:** Confirme la bonne création du RDV avec lien Meet.
-10. **User:** Signale que le RDV qu'il a créé n'apparaît pas et qu'il souhaite recevoir une confirmation par email lors de la création d'un RDV.
+1.  **User:** Fournit des spécifications détaillées pour la fonctionnalité Dates fortes intelligentes par niche.
+2.  **Agent:** Accuse réception et commence l'implémentation.
+3.  **User:** Approuve le plan pour implémenter les prévisualisations des posts.
+4.  **Agent:** Termine l'implémentation de l'aide IA et propose d'ajouter les prévisualisations.
+5.  **User:** Approuve le plan pour implémenter l'aide à la rédaction IA.
+6.  **Agent:** Termine le MVP du calendrier et propose d'ajouter l'aide IA.
+7.  **User:** Approuve le plan pour le MVP du calendrier éditorial.
+8.  **Agent:** Pose des questions de clarification sur le brief du calendrier éditorial.
+9.  **User:** Fournit le brief initial complet pour le nouveau module de Calendrier Éditorial.
+10. **User:** Confirme que le problème de redirection Google est résolu et demande à passer à la suite.
 
 **Project Health Check:**
 -   **Broken:**
-    -   **Envoi de SMS :** La fonctionnalité est implémentée mais ne fonctionne pas pour l'utilisateur. C'est un point de blocage majeur pour le module Agenda.
+    -   Envoi de SMS via Brevo.
 -   **Mocked:**
-    -   Rien.
+    -   Le composant  existe mais est vide.
 -   **Needs Verification:**
-    -   **Flux de paiement complet :** Les modifications pour les paiements partiels et les statuts partiel n'ont pas été validées par l'utilisateur.
-    -   **Module Things :** La nouvelle logique de report de tâches doit être testée par l'utilisateur.
+    -   La fonctionnalité de Dates fortes intelligentes doit être testée de bout en bout.
 
 **3rd Party Integrations**
--   **Brevo (Sendinblue):** Utilisé pour les emails (fonctionnel) et les SMS (problématique). Clé API configurée.
--   **Google Calendar API:** Intégration via OAuth2. Fonctionnelle pour la création d'événements et de liens Meet. Clés client configurées.
--   **ReportLab:** Pour la génération de PDF. Source de problèmes récurrents de mise en page.
+-   **Brevo (Sendinblue):** Utilisé pour les emails (fonctionnel) et les SMS (défectueux).
+-   **Google Calendar API:** Intégration fonctionnelle, configurable via l'UI.
+-   **ReportLab:** Utilisé pour la génération de PDF (solution de contournement en place).
+-   **OpenAI GPT-5.2:** Intégré via  pour l'assistant de rédaction. Utilise la clé LLM Emergent.
+-   **Cloudinary:** Prévu pour le stockage des médias du calendrier éditorial, la structure est en place mais l'intégration n'est pas finalisée.
 
 **Testing status**
--   **Testing agent used after significant changes:** NO
+-   **Testing agent used after significant changes:** YES (pour valider les corrections du système de paiement et des statistiques).
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** []
--   **Known regressions:** Aucun.
+-   **Test files created:** ['/app/test_reports/iteration_32.json']
+-   **Known regressions:** Le login via les outils de test automatisé (Playwright) est instable.
 
 **Credentials to test flow:**
 -   email: 
 -   password: 
 
 **What agent forgot to execute**
--   L'agent n'a pas encore résolu la cause première de l'échec de la livraison des SMS, se contentant de confirmer que le problème est probablement externe. Une proposition d'alternative (comme Twilio) n'a pas été faite.
--   L'agent n'a pas lancé un cycle de test complet pour les 4 corrections qu'il a implémentées à la fin de la session.</analysis>
+-   L'agent a implémenté la fonctionnalité Dates fortes intelligentes mais n'a pas effectué de cycle de test pour la valider.
+-   L'agent a créé le composant  mais ne l'a pas rempli avec les mockups visuels, le laissant comme une coquille vide.
+-   L'agent n'a pas activement proposé d'implémenter l'alternative Twilio pour résoudre le blocage des SMS.</analysis>
