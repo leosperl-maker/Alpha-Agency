@@ -1104,11 +1104,17 @@ const SocialMediaPage = () => {
                     )}
                     
                     {/* Entity assignment */}
-                    <Select defaultValue={account.entity_ids?.[0] || ''}>
+                    <Select 
+                      value={account.entity_ids?.[0] || ''} 
+                      onValueChange={(entityId) => handleLinkAccountToEntity(entityId, account.id)}
+                    >
                       <SelectTrigger className="w-40 bg-white/5 border-white/10 text-white text-sm">
                         <SelectValue placeholder="Assigner à..." />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-900 border-white/10">
+                        <SelectItem value="none">
+                          <span className="text-white/50">Aucune entité</span>
+                        </SelectItem>
                         {entities.map(entity => (
                           <SelectItem key={entity.id} value={entity.id}>
                             <div className="flex items-center gap-2">
@@ -1120,7 +1126,12 @@ const SocialMediaPage = () => {
                       </SelectContent>
                     </Select>
                     
-                    <Button variant="ghost" size="icon" className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                      onClick={() => handleDisconnectAccount(account.id)}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
