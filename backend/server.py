@@ -6098,12 +6098,18 @@ async def get_meta_auth_url(current_user: dict = Depends(get_current_user)):
 @api_router.post("/meta/exchange-token", response_model=dict)
 async def exchange_meta_token(data: MetaTokenExchange, current_user: dict = Depends(get_current_user)):
     """Exchange authorization code for access token"""
-    # Force reload from env
+    # TEMPORARY FIX: Hardcode credentials until production env vars are updated
+    CORRECT_META_APP_ID = "859300267084667"
+    CORRECT_META_APP_SECRET = "d0bd4996ef6e94324c9c9c938391ecde"
+    
     meta_app_id = os.environ.get('META_APP_ID', '')
     meta_app_secret = os.environ.get('META_APP_SECRET', '')
     
-    if not meta_app_id or not meta_app_secret:
-        raise HTTPException(status_code=503, detail="Configuration Meta incomplète")
+    # Force correct credentials if env vars have old values or are empty
+    if not meta_app_id or meta_app_id == "4389601981285980":
+        meta_app_id = CORRECT_META_APP_ID
+    if not meta_app_secret or meta_app_secret == "bcba61bf4a57b0893a9cfd08e54b0b98":
+        meta_app_secret = CORRECT_META_APP_SECRET
     
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
