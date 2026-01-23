@@ -1044,7 +1044,7 @@ def generate_invoice_pdf(invoice: dict, contact: dict) -> BytesIO:
 
 # Création du super admin initial ou réinitialisation du mot de passe
 async def create_initial_super_admin():
-    admin_email = "admin@alphagency.fr"
+    admin_email = "leo.sperl@alphagency.fr"
     default_password = "superpassword"
     
     # Vérifier si l'admin existe
