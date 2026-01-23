@@ -6230,8 +6230,11 @@ async def get_meta_auth_url(
     if not meta_app_id or meta_app_id == "4389601981285980":
         meta_app_id = CORRECT_META_APP_ID
     
-    frontend_url = os.environ.get('FRONTEND_URL', 'https://alphagency.fr')
-    redirect_uri = f"{frontend_url}/admin/social-media?meta_callback=true"
+    # Use provided redirect_uri or fallback to FRONTEND_URL
+    if not redirect_uri:
+        frontend_url = os.environ.get('FRONTEND_URL', 'https://alphagency.fr')
+        redirect_uri = f"{frontend_url}/admin/social-media?meta_callback=true"
+    
     scope = "pages_manage_posts,pages_read_engagement,pages_show_list,instagram_basic,instagram_content_publish,business_management"
     state = str(uuid.uuid4())
     
