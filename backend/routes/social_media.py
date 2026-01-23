@@ -707,6 +707,8 @@ async def create_template(data: PostTemplateCreate, current_user: dict = Depends
     }
     
     await db.social_templates.insert_one(template)
+    # Remove _id from response
+    template.pop("_id", None)
     return template
 
 @router.delete("/templates/{template_id}")
