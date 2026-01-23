@@ -10,9 +10,19 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
 from typing import Optional, List
-from server import get_current_user, db
+from motor.motor_asyncio import AsyncIOMotorClient
 
 router = APIRouter(prefix="/linkedin", tags=["LinkedIn"])
+
+# Database connection
+MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+DB_NAME = os.environ.get("DB_NAME", "test_database")
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DB_NAME]
+
+# Import auth dependency after db setup
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # LinkedIn OAuth2 Configuration
 LINKEDIN_CLIENT_ID = os.environ.get("LINKEDIN_CLIENT_ID")
@@ -44,6 +54,24 @@ class LinkedInPostRequest(BaseModel):
     content: str
     visibility: str = "PUBLIC"  # PUBLIC, CONNECTIONS
     media_urls: List[str] = []
+
+
+# Auth dependency - imported from server
+def get_current_user_from_token(token: str):
+    """Simplified token verification"""
+    import jwt
+    JWT_SECRET = os.environ.get('JWT_SECRET', 'alpha-agency-secret-key-2024')
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        return payload
+    except:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+security = HTTPBearer()
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    return get_current_user_from_token(credentials.credentials)
 
 
 @router.get("/auth-url")
