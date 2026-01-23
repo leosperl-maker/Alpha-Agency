@@ -1,0 +1,121 @@
+{
+  "summary": "Backend testing of Social Media module (Agorapulse-style refactoring). All 20 tests PASSED (100% success rate). Fixed MongoDB ObjectId serialization bug in social_media.py router.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_social_media_module.py",
+    "/app/test_reports/pytest/pytest_social_media_module.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Fixed: MongoDB _id ObjectId serialization bug in /app/backend/routes/social_media.py - added entity.pop('_id', None) after insert_one operations in create_entity, create_social_account, create_post, and create_template functions"
+  ],
+  "updated_files": [
+    "/app/backend/routes/social_media.py",
+    "/app/backend/tests/test_social_media_module.py"
+  ],
+  "success_rate": {
+    "backend": "100% (20/20 tests passed)",
+    "frontend": "N/A (backend only testing requested)"
+  },
+  "test_credentials": {
+    "email": "admin@alphagency.fr",
+    "password": "superpassword"
+  },
+  "seed_data_creation": "Created and cleaned up TEST_ prefixed posts and entities during testing",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Social Media module fully tested. Two endpoint systems exist: 1) Original /api/social/posts in server.py (ScheduledPost model) - used for basic post scheduling. 2) New multi-entity system in routes/social_media.py with /api/social/entities, /api/social/accounts, /api/social/posts (SocialPostCreate model), /api/social/queue, /api/social/capabilities, /api/social/stats. The original endpoint in server.py takes precedence for /api/social/posts due to router registration order.",
+  "verified_features": {
+    "POST /api/social/posts - draft without scheduled_at": {
+      "status": "PASS",
+      "expected": "status=draft",
+      "actual": "status=draft"
+    },
+    "POST /api/social/posts - scheduled with scheduled_at": {
+      "status": "PASS",
+      "expected": "status=scheduled",
+      "actual": "status=scheduled"
+    },
+    "POST /api/social/posts - is_draft=true takes precedence": {
+      "status": "PASS",
+      "expected": "status=draft even with scheduled_at",
+      "actual": "status=draft"
+    },
+    "GET /api/social/entities": {
+      "status": "PASS",
+      "returns": "list of entities with account_count and account_ids"
+    },
+    "POST /api/social/entities": {
+      "status": "PASS",
+      "returns": "created entity with id, name, color, account_count=0"
+    },
+    "PUT /api/social/entities/{id}": {
+      "status": "PASS",
+      "returns": "updated entity"
+    },
+    "DELETE /api/social/entities/{id}": {
+      "status": "PASS",
+      "returns": "message: Entity deleted"
+    },
+    "GET /api/social/accounts": {
+      "status": "PASS",
+      "returns": "list of accounts without encrypted tokens"
+    },
+    "POST /api/social/sync-meta-accounts": {
+      "status": "PASS",
+      "returns": "404 if no Meta account connected, 200 with synced count otherwise"
+    },
+    "GET /api/social/capabilities": {
+      "status": "PASS",
+      "returns": "platform capability matrix"
+    },
+    "GET /api/social/capabilities/{platform}/{account_type}": {
+      "status": "PASS",
+      "returns": "specific platform capabilities"
+    },
+    "GET /api/social/queue": {
+      "status": "PASS",
+      "returns": "list of posts by status"
+    },
+    "GET /api/social/stats/overview": {
+      "status": "PASS",
+      "returns": "total_posts, entities_count, accounts_count"
+    }
+  },
+  "test_results_detail": {
+    "TestAuthentication::test_login_success": "PASSED",
+    "TestSocialPostsEndpoint::test_create_draft_post_without_scheduled_at": "PASSED",
+    "TestSocialPostsEndpoint::test_create_draft_post_without_is_draft_flag": "PASSED",
+    "TestSocialPostsEndpoint::test_create_scheduled_post_with_scheduled_at": "PASSED",
+    "TestSocialPostsEndpoint::test_create_post_with_scheduled_at_but_is_draft_true": "PASSED",
+    "TestSocialPostsEndpoint::test_get_social_posts": "PASSED",
+    "TestSocialPostsEndpoint::test_get_social_posts_filter_by_status": "PASSED",
+    "TestSocialEntitiesEndpoint::test_get_entities": "PASSED",
+    "TestSocialEntitiesEndpoint::test_create_entity": "PASSED",
+    "TestSocialEntitiesEndpoint::test_update_entity": "PASSED",
+    "TestSocialEntitiesEndpoint::test_delete_entity": "PASSED",
+    "TestSocialAccountsEndpoint::test_get_accounts": "PASSED",
+    "TestSyncMetaAccounts::test_sync_meta_accounts_no_meta_connected": "PASSED",
+    "TestSocialCapabilities::test_get_all_capabilities": "PASSED",
+    "TestSocialCapabilities::test_get_platform_capabilities": "PASSED",
+    "TestSocialQueue::test_get_queue_scheduled": "PASSED",
+    "TestSocialQueue::test_get_queue_drafts": "PASSED",
+    "TestSocialStats::test_get_stats_overview": "PASSED",
+    "TestCleanup::test_cleanup_test_posts": "PASSED",
+    "TestCleanup::test_cleanup_test_entities": "PASSED"
+  },
+  "bug_fixed": {
+    "issue": "MongoDB ObjectId serialization error in social_media.py router",
+    "root_cause": "After insert_one(), MongoDB adds _id field to the document. When returning the document directly, FastAPI's jsonable_encoder fails to serialize ObjectId",
+    "fix": "Added entity.pop('_id', None) after insert_one() in create_entity, create_social_account, create_post, and create_template functions",
+    "files_modified": ["/app/backend/routes/social_media.py"]
+  }
+}
