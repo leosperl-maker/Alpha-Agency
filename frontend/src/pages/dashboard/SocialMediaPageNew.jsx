@@ -680,7 +680,8 @@ const SocialMediaPage = () => {
 
   const handleConnectLinkedIn = async () => {
     try {
-      const response = await api.get('/linkedin/auth-url');
+      const redirectUri = `${window.location.origin}/admin/social-media?linkedin_callback=true`;
+      const response = await api.get('/linkedin/auth-url', { params: { redirect_uri: redirectUri } });
       window.location.href = response.data.auth_url;
     } catch (error) {
       console.error('Error getting LinkedIn auth URL:', error);
@@ -690,7 +691,8 @@ const SocialMediaPage = () => {
 
   const handleConnectTikTok = async () => {
     try {
-      const response = await api.get('/tiktok/auth-url');
+      const redirectUri = `${window.location.origin}/admin/social-media?tiktok_callback=true`;
+      const response = await api.get('/tiktok/auth-url', { params: { redirect_uri: redirectUri } });
       window.location.href = response.data.auth_url;
     } catch (error) {
       console.error('Error getting TikTok auth URL:', error);
