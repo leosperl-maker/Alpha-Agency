@@ -38,7 +38,7 @@ import {
   Tabs, TabsContent, TabsList, TabsTrigger
 } from './ui/tabs';
 import { toast } from 'sonner';
-import api from '../../lib/api';
+import api from '../lib/api';
 
 // ==================== CONSTANTS ====================
 
