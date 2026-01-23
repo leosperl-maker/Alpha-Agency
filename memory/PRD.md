@@ -139,6 +139,74 @@ POST   /api/editorial/ai/improve-caption
 - Notifications Push
 - Intégration Qonto (banque)
 
+### 8. Module Social Media (Agorapulse-style) 🔄 IN PROGRESS 2026-01-23
+
+**Refonte complète du module pour gestion multi-entités et multi-comptes**
+
+#### Fonctionnalités Terminées ✅
+
+1. **Architecture Multi-Entités** ✅
+   - Création/modification/suppression d'entités (marques/clients)
+   - Association comptes sociaux ↔ entités
+   - Entités initiales: West Witch, Alpha Agency, Antilla
+
+2. **Gestion des Comptes Sociaux** ✅
+   - Connexion Facebook/Instagram via OAuth Meta
+   - Synchronisation automatique des pages Facebook
+   - Assignation de comptes aux entités
+   - Déconnexion de comptes
+
+3. **Composer Pro** ✅
+   - Création de posts (brouillons et programmés)
+   - Bug Pydantic `scheduled_at` CORRIGÉ (Optional[str] = None)
+   - Statut automatique: draft si pas de date, scheduled si date
+
+4. **Matrice des Capacités** ✅
+   - Capacités par plateforme (canPublishFeed, canPublishStory, etc.)
+   - API endpoint pour récupérer les capacités
+
+5. **File d'Attente & Stats** ✅
+   - Queue par statut (draft, scheduled, published)
+   - Statistiques globales (posts, entités, comptes)
+
+#### En Cours / À Faire
+
+1. **Stories Editor** (P1) - Style Storrito, éditeur vertical
+2. **Inbox unifiée** (P1) - Messages et commentaires
+3. **Reports & Analytics** (P2) - Dashboards statistiques détaillés
+4. **Workers Backend** (P2) - Publication programmée automatique
+
+#### API Routes - Social Media
+```
+GET    /api/social/entities
+POST   /api/social/entities
+PUT    /api/social/entities/{id}
+DELETE /api/social/entities/{id}
+GET    /api/social/accounts
+POST   /api/social/accounts
+DELETE /api/social/accounts/{id}
+DELETE /api/social/accounts/{id}/entities
+POST   /api/social/entities/{id}/accounts/{account_id}
+DELETE /api/social/entities/{id}/accounts/{account_id}
+POST   /api/social/sync-meta-accounts
+GET    /api/social/capabilities
+GET    /api/social/capabilities/{platform}/{account_type}
+GET    /api/social/posts
+POST   /api/social/posts
+PUT    /api/social/posts/{id}
+DELETE /api/social/posts/{id}
+GET    /api/social/queue
+GET    /api/social/stats/overview
+GET    /api/meta/auth-url
+POST   /api/meta/exchange-token
+GET    /api/meta/pages
+```
+
+## Tests Effectués ✅
+- iteration_33.json: 22/22 tests backend calendrier éditorial
+- iteration_34.json: 15/15 tests nouvelles fonctionnalités (stats, PDF, email, timezone)
+- iteration_35.json: 20/20 tests backend Social Media module
+
 ## 3rd Party Integrations
 - **Cloudinary:** Upload médias ✅
 - **Google Calendar:** OAuth2 ✅ (fuseau Guadeloupe)
