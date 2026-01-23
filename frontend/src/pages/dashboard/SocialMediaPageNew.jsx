@@ -361,6 +361,55 @@ const SocialMediaPage = () => {
   // Stats
   const [stats, setStats] = useState(null);
 
+  // ==================== META OAUTH HANDLING ====================
+  
+  // Handle OAuth callback on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const metaCallback = urlParams.get('meta_callback');
+    const code = urlParams.get('code');
+    
+    if (metaCallback && code) {
+      handleMetaCallback(code);
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+  
+  const handleMetaCallback = async (code) => {
+    setLoading(true);
+    try {
+      const redirectUri = `${window.location.origin}/admin/social-media?meta_callback=true`;
+      const response = await api.post('/meta/exchange-token', { code, redirect_uri: redirectUri });
+      
+      if (response.data.success) {
+        toast.success(response.data.message || 'Compte Meta connecté avec succès !');
+        // Fetch pages after successful connection
+        await fetchMetaPages();
+        // Reload all data
+        await loadData();
+      }
+    } catch (error) {
+      console.error("Meta callback error:", error);
+      toast.error(error.response?.data?.detail || "Erreur lors de la connexion Meta");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const fetchMetaPages = async () => {
+    try {
+      const response = await api.get('/meta/pages');
+      if (response.data && response.data.length > 0) {
+        toast.success(`${response.data.length} page(s) Facebook récupérée(s)`);
+      }
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching Meta pages:", error);
+      // Not an error if not connected
+    }
+  };
+
   // ==================== DATA LOADING ====================
   
   const loadData = useCallback(async () => {
@@ -379,6 +428,17 @@ const SocialMediaPage = () => {
       // Auto-select first entity if available
       if (entitiesRes.data?.length > 0 && !selectedEntity) {
         setSelectedEntity(entitiesRes.data[0]);
+      }
+      
+      // Also check for Meta pages
+      try {
+        const pagesRes = await api.get('/meta/pages');
+        if (pagesRes.data && pagesRes.data.length > 0) {
+          // Meta is connected, we have pages
+          console.log('Meta pages available:', pagesRes.data.length);
+        }
+      } catch (e) {
+        // Meta not connected, that's fine
       }
     } catch (error) {
       console.error('Error loading data:', error);
