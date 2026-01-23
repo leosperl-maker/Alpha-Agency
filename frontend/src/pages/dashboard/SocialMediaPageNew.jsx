@@ -1388,60 +1388,60 @@ const SocialMediaPage = () => {
   };
 
   const renderReports = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Overview Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         <Card className="bg-white/5 border-white/10">
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/50 text-xs">Posts totaux</p>
-                <p className="text-2xl font-bold text-white">{stats?.total_posts || 0}</p>
+                <p className="text-white/50 text-[10px] sm:text-xs">Posts totaux</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{stats?.total_posts || 0}</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-indigo-400" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
               </div>
             </div>
           </CardContent>
         </Card>
         
         <Card className="bg-white/5 border-white/10">
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/50 text-xs">Publiés</p>
-                <p className="text-2xl font-bold text-green-400">{stats?.published || 0}</p>
+                <p className="text-white/50 text-[10px] sm:text-xs">Publiés</p>
+                <p className="text-xl sm:text-2xl font-bold text-green-400">{stats?.published || 0}</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
-                <CheckCircle className="w-5 h-5 text-green-400" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
               </div>
             </div>
           </CardContent>
         </Card>
         
         <Card className="bg-white/5 border-white/10">
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/50 text-xs">Programmés</p>
-                <p className="text-2xl font-bold text-blue-400">{stats?.scheduled || 0}</p>
+                <p className="text-white/50 text-[10px] sm:text-xs">Programmés</p>
+                <p className="text-xl sm:text-2xl font-bold text-blue-400">{stats?.scheduled || 0}</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-blue-400" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
               </div>
             </div>
           </CardContent>
         </Card>
         
         <Card className="bg-white/5 border-white/10">
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/50 text-xs">Entités</p>
-                <p className="text-2xl font-bold text-purple-400">{stats?.entities_count || 0}</p>
+                <p className="text-white/50 text-[10px] sm:text-xs">Entités</p>
+                <p className="text-xl sm:text-2xl font-bold text-purple-400">{stats?.entities_count || 0}</p>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-purple-400" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
               </div>
             </div>
           </CardContent>
@@ -1450,14 +1450,14 @@ const SocialMediaPage = () => {
       
       {/* Charts placeholder */}
       <Card className="bg-white/5 border-white/10">
-        <CardHeader>
-          <CardTitle className="text-white text-lg">Performance par entité</CardTitle>
+        <CardHeader className="p-3 sm:p-6">
+          <CardTitle className="text-white text-sm sm:text-lg">Performance par entité</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="h-64 flex items-center justify-center text-white/40">
+        <CardContent className="p-3 sm:p-6 pt-0">
+          <div className="h-40 sm:h-64 flex items-center justify-center text-white/40">
             <div className="text-center">
-              <BarChart3 className="w-16 h-16 mx-auto mb-4 opacity-30" />
-              <p>Les statistiques détaillées seront disponibles après les premières publications</p>
+              <BarChart3 className="w-10 h-10 sm:w-16 sm:h-16 mx-auto mb-2 sm:mb-4 opacity-30" />
+              <p className="text-xs sm:text-base">Les statistiques détaillées seront disponibles après les premières publications</p>
             </div>
           </div>
         </CardContent>
