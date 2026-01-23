@@ -6518,8 +6518,10 @@ from routes.tiktok import router as tiktok_router
 app.include_router(tiktok_router, prefix="/api", tags=["tiktok"])
 
 # Social Inbox
-from routes.inbox import router as inbox_router
-app.include_router(inbox_router, prefix="/api", tags=["social-inbox"])
+# Using enhanced inbox from server.py - routes/inbox.py provides additional sync functions
+from routes.inbox import _sync_meta_inbox, _sync_linkedin_inbox, _sync_tiktok_inbox
+
+# Removed inbox router to avoid conflict - existing /social/inbox endpoints in server.py are used
 
 # Publication Worker
 from routes.publication_worker import worker_router
