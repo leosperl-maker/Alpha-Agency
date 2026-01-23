@@ -169,6 +169,15 @@ POST   /api/editorial/ai/improve-caption
    - Queue par statut (draft, scheduled, published)
    - Statistiques globales (posts, entités, comptes)
 
+6. **Design Responsive Mobile** ✅ NEW 2026-01-23
+   - Navigation principale avec icônes sur mobile
+   - EntitySelector vertical sur mobile
+   - Calendrier compact avec indicateurs dots
+   - Inbox full-width avec panneau détail overlay
+   - Cards et grilles adaptatives
+   - Typographie responsive (text-xs → text-base)
+   - Touch-friendly: boutons min 7x7 → 10x10
+
 #### En Cours / À Faire
 
 1. **Stories Editor** (P1) - Style Storrito, éditeur vertical
