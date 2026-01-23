@@ -5123,7 +5123,6 @@ async def sync_inbox_messages(current_user: dict = Depends(get_current_user)):
 
 async def sync_meta_comments(account: dict, user_id: str) -> int:
     """Sync comments from Facebook/Instagram pages"""
-    import httpx
     
     access_token = account.get("access_token")
     pages = account.get("pages", [])
