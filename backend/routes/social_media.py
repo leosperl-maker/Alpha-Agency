@@ -439,7 +439,8 @@ async def create_social_account(
     
     await db.social_accounts.insert_one(account)
     
-    # Return without sensitive data
+    # Return without sensitive data and _id
+    account.pop("_id", None)
     account.pop("access_token_encrypted")
     account.pop("refresh_token_encrypted", None)
     account["capabilities"] = get_capabilities(data.platform, data.account_type)
