@@ -172,9 +172,11 @@ POST   /api/editorial/ai/improve-caption
 #### En Cours / À Faire
 
 1. **Stories Editor** (P1) - Style Storrito, éditeur vertical
-2. **Inbox unifiée** (P1) - Messages et commentaires
-3. **Reports & Analytics** (P2) - Dashboards statistiques détaillés
-4. **Workers Backend** (P2) - Publication programmée automatique
+2. ~~**Inbox unifiée**~~ ✅ DONE - Messages et commentaires avec sync Meta
+3. ~~**Reports & Analytics**~~ (P2) - Dashboards statistiques détaillés (Basique implémenté)
+4. ~~**Workers Backend**~~ ✅ DONE - Publication programmée automatique
+5. ~~**LinkedIn Integration**~~ ✅ DONE - OAuth et publication
+6. ~~**TikTok Integration**~~ ✅ DONE - OAuth connecté (publication nécessite review TikTok)
 
 #### API Routes - Social Media
 ```
@@ -197,9 +199,32 @@ PUT    /api/social/posts/{id}
 DELETE /api/social/posts/{id}
 GET    /api/social/queue
 GET    /api/social/stats/overview
+GET    /api/social/inbox
+GET    /api/social/inbox/stats
+POST   /api/social/inbox/sync
+POST   /api/social/inbox/mark-all-read
+PUT    /api/social/inbox/{id}/status
+PUT    /api/social/inbox/{id}/priority
+POST   /api/social/inbox/{id}/reply
+POST   /api/social/inbox/{id}/suggest-reply
+GET    /api/social/worker/status
+POST   /api/social/worker/start
+POST   /api/social/worker/stop
+POST   /api/social/worker/process-now
+GET    /api/social/worker/queue
 GET    /api/meta/auth-url
 POST   /api/meta/exchange-token
 GET    /api/meta/pages
+GET    /api/linkedin/auth-url
+POST   /api/linkedin/exchange-token
+GET    /api/linkedin/profile
+POST   /api/linkedin/post
+DELETE /api/linkedin/disconnect
+GET    /api/tiktok/auth-url
+POST   /api/tiktok/exchange-token
+GET    /api/tiktok/profile
+POST   /api/tiktok/refresh-token
+DELETE /api/tiktok/disconnect
 ```
 
 ## Tests Effectués ✅
