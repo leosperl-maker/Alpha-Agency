@@ -6215,7 +6215,10 @@ class InstagramPublishPost(BaseModel):
     location_id: Optional[str] = None
 
 @api_router.get("/meta/auth-url", response_model=dict)
-async def get_meta_auth_url(current_user: dict = Depends(get_current_user)):
+async def get_meta_auth_url(
+    redirect_uri: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
     """Get Meta OAuth authorization URL"""
     # TEMPORARY FIX: Hardcode App ID until production env vars are updated
     # Production env vars still have old App ID, so we force the correct one
