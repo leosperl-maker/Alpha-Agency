@@ -35,7 +35,7 @@ import BackupPage from "./pages/dashboard/BackupPage";
 import UsersPage from "./pages/dashboard/UsersPage";
 import AIAssistantPage from "./pages/dashboard/AIAssistantPageNew";
 import NewsPage from "./pages/dashboard/NewsPage";
-import SocialMediaPage from "./pages/dashboard/SocialMediaPage";
+import SocialMediaPage from "./pages/dashboard/SocialMediaPageNew";
 import BlogAdminPage from "./pages/dashboard/BlogAdminPage";
 import TagsManagePage from "./pages/dashboard/TagsManagePage";
 import CampaignsPage from "./pages/dashboard/CampaignsPage";
