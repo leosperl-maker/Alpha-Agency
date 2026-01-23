@@ -6484,6 +6484,10 @@ app.include_router(appointments_router, prefix="/api", tags=["appointments"])
 from routes.editorial import router as editorial_router
 app.include_router(editorial_router, prefix="/api", tags=["editorial"])
 
+# Social Media Management (Agorapulse-style)
+from routes.social_media import router as social_media_router
+app.include_router(social_media_router, prefix="/api", tags=["social-media"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
