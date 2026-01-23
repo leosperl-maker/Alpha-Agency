@@ -75,18 +75,26 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 
 @router.get("/auth-url")
-async def get_linkedin_auth_url(current_user: dict = Depends(get_current_user)):
+async def get_linkedin_auth_url(
+    redirect_uri: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
     """Generate LinkedIn OAuth2 authorization URL"""
     if not LINKEDIN_CLIENT_ID:
         raise HTTPException(status_code=500, detail="LinkedIn Client ID not configured")
     
     state = str(uuid.uuid4())
     
+    # Use provided redirect_uri or default
+    if not redirect_uri:
+        redirect_uri = REDIRECT_URI
+    
     # Store state in database for verification
     await db.oauth_states.insert_one({
         "state": state,
         "platform": "linkedin",
         "user_id": current_user["user_id"],
+        "redirect_uri": redirect_uri,
         "created_at": datetime.now(timezone.utc).isoformat()
     })
     
