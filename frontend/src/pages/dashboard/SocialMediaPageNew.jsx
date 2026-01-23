@@ -1581,67 +1581,83 @@ const SocialMediaPage = () => {
         </CardHeader>
         <CardContent className="p-3 sm:p-6 pt-0">
           {accounts.length === 0 ? (
-            <div className="text-center py-8 text-white/40">
-              <Link2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>Aucun compte connecté</p>
-              <p className="text-sm mt-1">Connectez vos réseaux sociaux pour commencer</p>
+            <div className="text-center py-6 sm:py-8 text-white/40">
+              <Link2 className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 opacity-50" />
+              <p className="text-sm sm:text-base">Aucun compte connecté</p>
+              <p className="text-xs sm:text-sm mt-1">Connectez vos réseaux sociaux pour commencer</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {accounts.map(account => (
                 <div 
                   key={account.id}
-                  className="flex items-center gap-4 p-4 rounded-xl border border-white/10 bg-white/5"
+                  className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border border-white/10 bg-white/5"
                 >
-                  <div className="relative">
-                    {account.profile_picture_url ? (
-                      <img 
-                        src={account.profile_picture_url} 
-                        alt={account.display_name}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${PLATFORMS[account.platform]?.bgColor || 'bg-white/10'}`}>
-                        <PlatformIcon platform={account.platform} className="w-6 h-6 text-white" />
+                  {/* Avatar et info */}
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex-shrink-0">
+                      {account.profile_picture_url ? (
+                        <img 
+                          src={account.profile_picture_url} 
+                          alt={account.display_name}
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${PLATFORMS[account.platform]?.bgColor || 'bg-white/10'}`}>
+                          <PlatformIcon platform={account.platform} className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        </div>
+                      )}
+                      <div 
+                        className="absolute -bottom-0.5 -right-0.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border-2 border-slate-900"
+                        style={{ backgroundColor: PLATFORMS[account.platform]?.color }}
+                      >
+                        <PlatformIcon platform={account.platform} className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
                       </div>
-                    )}
-                    <div 
-                      className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2 border-slate-900"
-                      style={{ backgroundColor: PLATFORMS[account.platform]?.color }}
-                    >
-                      <PlatformIcon platform={account.platform} className="w-3 h-3 text-white" />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-white font-medium text-sm sm:text-base truncate">{account.display_name}</h4>
+                      <p className="text-white/50 text-xs sm:text-sm truncate">@{account.username || account.external_id}</p>
+                    </div>
+                    
+                    {/* Status badge - visible on mobile inline */}
+                    <div className="sm:hidden">
+                      {account.status === 'active' ? (
+                        <Badge className="bg-green-500/20 text-green-400 border-none text-[10px]">Actif</Badge>
+                      ) : (
+                        <Badge className="bg-red-500/20 text-red-400 border-none text-[10px]">Erreur</Badge>
+                      )}
                     </div>
                   </div>
                   
-                  <div className="flex-1">
-                    <h4 className="text-white font-medium">{account.display_name}</h4>
-                    <p className="text-white/50 text-sm">@{account.username || account.external_id}</p>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    {account.status === 'active' ? (
-                      <Badge className="bg-green-500/20 text-green-400 border-none">Actif</Badge>
-                    ) : (
-                      <Badge className="bg-red-500/20 text-red-400 border-none">Erreur</Badge>
-                    )}
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 justify-between sm:justify-end">
+                    {/* Status badge - hidden on mobile */}
+                    <div className="hidden sm:block">
+                      {account.status === 'active' ? (
+                        <Badge className="bg-green-500/20 text-green-400 border-none">Actif</Badge>
+                      ) : (
+                        <Badge className="bg-red-500/20 text-red-400 border-none">Erreur</Badge>
+                      )}
+                    </div>
                     
                     {/* Entity assignment */}
                     <Select 
                       value={account.entity_ids?.[0] || ''} 
                       onValueChange={(entityId) => handleLinkAccountToEntity(entityId, account.id)}
                     >
-                      <SelectTrigger className="w-40 bg-white/5 border-white/10 text-white text-sm">
-                        <SelectValue placeholder="Assigner à..." />
+                      <SelectTrigger className="w-28 sm:w-40 bg-white/5 border-white/10 text-white text-xs sm:text-sm h-8 sm:h-10">
+                        <SelectValue placeholder="Entité..." />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-900 border-white/10">
                         <SelectItem value="none">
-                          <span className="text-white/50">Aucune entité</span>
+                          <span className="text-white/50">Aucune</span>
                         </SelectItem>
                         {entities.map(entity => (
                           <SelectItem key={entity.id} value={entity.id}>
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entity.color }} />
-                              {entity.name}
+                              <span className="truncate">{entity.name}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -1651,10 +1667,10 @@ const SocialMediaPage = () => {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8 sm:h-10 sm:w-10"
                       onClick={() => handleDisconnectAccount(account.id)}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Button>
                   </div>
                 </div>
