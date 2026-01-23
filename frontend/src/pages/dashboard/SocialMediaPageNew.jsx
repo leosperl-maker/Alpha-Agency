@@ -1027,30 +1027,273 @@ const SocialMediaPage = () => {
   const renderInbox = () => (
     <div className="flex h-[calc(100vh-280px)] bg-white/5 rounded-xl border border-white/10 overflow-hidden">
       {/* Thread list */}
-      <div className="w-80 border-r border-white/10">
-        <div className="p-3 border-b border-white/10">
+      <div className="w-96 border-r border-white/10 flex flex-col">
+        {/* Header */}
+        <div className="p-3 border-b border-white/10 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h3 className="text-white font-medium">Inbox</h3>
+              {inboxStats.unread > 0 && (
+                <Badge className="bg-red-500/20 text-red-400 border-none text-xs">
+                  {inboxStats.unread}
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white/50 hover:text-white h-8 w-8"
+                onClick={handleSyncInbox}
+                disabled={inboxLoading}
+              >
+                <RefreshCw className={`w-4 h-4 ${inboxLoading ? 'animate-spin' : ''}`} />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-white/50 hover:text-white text-xs"
+                onClick={handleMarkAllAsRead}
+              >
+                Tout lire
+              </Button>
+            </div>
+          </div>
+          
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
             <Input 
               placeholder="Rechercher..." 
-              className="pl-9 bg-white/5 border-white/10"
+              className="pl-9 bg-white/5 border-white/10 h-8 text-sm"
             />
+          </div>
+          
+          {/* Filters */}
+          <div className="flex gap-1">
+            {[
+              { key: 'all', label: 'Tout' },
+              { key: 'unread', label: 'Non lus' },
+              { key: 'comments', label: 'Commentaires' },
+              { key: 'dms', label: 'Messages' }
+            ].map(filter => (
+              <Button
+                key={filter.key}
+                variant="ghost"
+                size="sm"
+                className={`text-xs h-7 ${inboxFilter === filter.key ? 'bg-white/10 text-white' : 'text-white/50'}`}
+                onClick={() => {
+                  setInboxFilter(filter.key);
+                  loadInbox();
+                }}
+              >
+                {filter.label}
+              </Button>
+            ))}
           </div>
         </div>
         
-        <div className="p-4 text-center text-white/40">
-          <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-50" />
-          <p className="text-sm">Aucune conversation</p>
-          <p className="text-xs mt-1">Les commentaires et messages apparaîtront ici</p>
-        </div>
+        {/* Messages list */}
+        <ScrollArea className="flex-1">
+          {inboxLoading ? (
+            <div className="p-4 text-center">
+              <Loader2 className="w-6 h-6 animate-spin mx-auto text-white/40" />
+            </div>
+          ) : inboxMessages.length === 0 ? (
+            <div className="p-4 text-center text-white/40">
+              <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p className="text-sm">Aucun message</p>
+              <p className="text-xs mt-1">Les commentaires et messages apparaîtront ici</p>
+              <Button 
+                className="mt-4 bg-indigo-600 text-sm"
+                size="sm"
+                onClick={handleSyncInbox}
+              >
+                <RefreshCw className="w-3 h-3 mr-1" />
+                Synchroniser
+              </Button>
+            </div>
+          ) : (
+            <div className="divide-y divide-white/5">
+              {inboxMessages.map(message => (
+                <div
+                  key={message.id}
+                  className={`p-3 cursor-pointer transition-colors ${
+                    selectedMessage?.id === message.id 
+                      ? 'bg-indigo-500/20' 
+                      : message.status === 'unread' 
+                        ? 'bg-white/5 hover:bg-white/10' 
+                        : 'hover:bg-white/5'
+                  }`}
+                  onClick={() => {
+                    setSelectedMessage(message);
+                    if (message.status === 'unread') {
+                      handleMarkAsRead(message.id);
+                    }
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="relative">
+                      {message.sender_avatar ? (
+                        <img 
+                          src={message.sender_avatar} 
+                          alt={message.sender_name}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                          <Users className="w-5 h-5 text-white/50" />
+                        </div>
+                      )}
+                      <div 
+                        className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: PLATFORMS[message.platform]?.color || '#666' }}
+                      >
+                        <PlatformIcon platform={message.platform} className="w-2.5 h-2.5 text-white" />
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className={`text-sm ${message.status === 'unread' ? 'text-white font-medium' : 'text-white/80'}`}>
+                          {message.sender_name}
+                        </span>
+                        <span className="text-xs text-white/40">
+                          {new Date(message.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                        </span>
+                      </div>
+                      <p className="text-xs text-white/50 truncate mt-0.5">
+                        {message.content}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge className="text-[10px] h-4 bg-white/10 text-white/60 border-none">
+                          {message.message_type === 'comment' ? 'Commentaire' : 'Message'}
+                        </Badge>
+                        {message.status === 'replied' && (
+                          <Badge className="text-[10px] h-4 bg-green-500/20 text-green-400 border-none">
+                            Répondu
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {message.status === 'unread' && (
+                      <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2" />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
       </div>
       
       {/* Message detail */}
-      <div className="flex-1 flex items-center justify-center text-white/40">
-        <div className="text-center">
-          <Mail className="w-16 h-16 mx-auto mb-4 opacity-30" />
-          <p>Sélectionnez une conversation</p>
-        </div>
+      <div className="flex-1 flex flex-col">
+        {selectedMessage ? (
+          <>
+            {/* Message header */}
+            <div className="p-4 border-b border-white/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {selectedMessage.sender_avatar ? (
+                    <img 
+                      src={selectedMessage.sender_avatar} 
+                      alt={selectedMessage.sender_name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-white/50" />
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="text-white font-medium">{selectedMessage.sender_name}</h4>
+                    <p className="text-xs text-white/50">
+                      via {PLATFORMS[selectedMessage.platform]?.name} • {selectedMessage.account_name}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="icon" className="text-white/50 hover:text-white">
+                    <Archive className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="text-white/50 hover:text-white">
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Message content */}
+            <div className="flex-1 p-4 overflow-auto">
+              {selectedMessage.post_content && (
+                <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
+                  <p className="text-xs text-white/50 mb-1">En réponse à :</p>
+                  <p className="text-sm text-white/70">{selectedMessage.post_content}</p>
+                </div>
+              )}
+              
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <Users className="w-4 h-4 text-white/50" />
+                </div>
+                <div className="flex-1">
+                  <div className="bg-white/5 rounded-lg p-3 inline-block max-w-[80%]">
+                    <p className="text-white text-sm">{selectedMessage.content}</p>
+                  </div>
+                  <p className="text-xs text-white/40 mt-1">
+                    {new Date(selectedMessage.created_at).toLocaleString('fr-FR')}
+                  </p>
+                </div>
+              </div>
+              
+              {selectedMessage.reply_content && (
+                <div className="flex gap-3 mt-4 justify-end">
+                  <div className="flex-1 text-right">
+                    <div className="bg-indigo-500/20 rounded-lg p-3 inline-block max-w-[80%]">
+                      <p className="text-white text-sm">{selectedMessage.reply_content}</p>
+                    </div>
+                    <p className="text-xs text-white/40 mt-1">
+                      Vous • {selectedMessage.replied_at ? new Date(selectedMessage.replied_at).toLocaleString('fr-FR') : 'Répondu'}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Reply input */}
+            <div className="p-4 border-t border-white/10">
+              <div className="flex gap-2">
+                <Textarea
+                  placeholder="Écrire une réponse..."
+                  className="bg-white/5 border-white/10 text-white resize-none"
+                  rows={2}
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                />
+                <Button 
+                  className="bg-indigo-600 hover:bg-indigo-700 self-end"
+                  onClick={handleReplyToMessage}
+                  disabled={!replyContent.trim() || sendingReply}
+                >
+                  {sendingReply ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-white/40">
+            <div className="text-center">
+              <Mail className="w-16 h-16 mx-auto mb-4 opacity-30" />
+              <p>Sélectionnez une conversation</p>
+              <p className="text-sm mt-1">pour voir les détails</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
