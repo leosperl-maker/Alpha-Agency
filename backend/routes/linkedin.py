@@ -104,7 +104,7 @@ async def get_linkedin_auth_url(
         f"{LINKEDIN_AUTH_URL}"
         f"?response_type=code"
         f"&client_id={LINKEDIN_CLIENT_ID}"
-        f"&redirect_uri={REDIRECT_URI}"
+        f"&redirect_uri={redirect_uri}"
         f"&scope={scope}"
         f"&state={state}"
     )
