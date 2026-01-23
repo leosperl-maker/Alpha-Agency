@@ -240,14 +240,20 @@ DELETE /api/tiktok/disconnect
 - **ReportLab:** Export PDF ✅
 - **@dnd-kit:** Drag & drop ✅
 - **Meta API:** OAuth Facebook/Instagram ✅ (App ID: 859300267084667)
+- **LinkedIn API:** OAuth ✅ (Client ID: 78o6g7zdfql0bg)
+- **TikTok API:** OAuth ✅ (Client Key: awz0lr5px7ek23jj) - Publication nécessite review
 - **Cryptography:** Chiffrement tokens ✅
 
 ## Files Modified 2026-01-23
-- `/app/backend/server.py` - ScheduledPost model (scheduled_at Optional), status logic
-- `/app/backend/routes/social_media.py` - Module complet entités/comptes/posts + fix ObjectId
-- `/app/backend/routes/meta.py` - Redirect URI production
-- `/app/frontend/src/pages/dashboard/SocialMediaPageNew.jsx` - Nouvelle page Social Media
-- `/app/frontend/src/components/SocialComposer.jsx` - Composer Pro
+- `/app/backend/server.py` - ScheduledPost model, inbox sync, mark-all-read
+- `/app/backend/routes/social_media.py` - Module complet entités/comptes/posts
+- `/app/backend/routes/linkedin.py` - NEW: LinkedIn OAuth2 integration
+- `/app/backend/routes/tiktok.py` - NEW: TikTok OAuth2 integration
+- `/app/backend/routes/inbox.py` - NEW: Inbox sync functions
+- `/app/backend/routes/publication_worker.py` - NEW: Scheduled post worker
+- `/app/backend/.env` - LinkedIn/TikTok credentials
+- `/app/frontend/src/pages/dashboard/SocialMediaPageNew.jsx` - Inbox UI, LinkedIn/TikTok connect
+- `/app/frontend/src/components/SocialComposer.jsx` - Fix imports
 - `/app/backend/tests/test_social_media_module.py` - 20 tests backend
 
 ## Files Modified 2026-01-22
