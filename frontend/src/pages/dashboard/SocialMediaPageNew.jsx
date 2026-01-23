@@ -839,24 +839,24 @@ const SocialMediaPage = () => {
     return (
       <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10">
         {/* Calendar Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 sm:p-4 border-b border-white/10">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCurrentDate(new Date(year, month - 1))}
-              className="text-white/60 hover:text-white"
+              className="text-white/60 hover:text-white h-8 w-8"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <h3 className="text-white font-medium min-w-[150px] text-center">
+            <h3 className="text-white font-medium min-w-[140px] sm:min-w-[150px] text-center text-sm sm:text-base capitalize">
               {currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
             </h3>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCurrentDate(new Date(year, month + 1))}
-              className="text-white/60 hover:text-white"
+              className="text-white/60 hover:text-white h-8 w-8"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
@@ -864,19 +864,21 @@ const SocialMediaPage = () => {
           
           <Button
             onClick={() => setShowComposer(true)}
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto"
+            size="sm"
           >
             <Plus className="w-4 h-4 mr-1" />
-            Créer un post
+            <span className="sm:inline">Créer un post</span>
           </Button>
         </div>
         
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7">
+        <div className="grid grid-cols-7 overflow-x-auto">
           {/* Weekday headers */}
-          {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
-            <div key={day} className="p-2 text-center text-xs font-medium text-white/50 border-b border-white/10">
-              {day}
+          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => (
+            <div key={idx} className="p-1 sm:p-2 text-center text-[10px] sm:text-xs font-medium text-white/50 border-b border-white/10">
+              <span className="sm:hidden">{day}</span>
+              <span className="hidden sm:inline">{['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'][idx]}</span>
             </div>
           ))}
           
@@ -889,7 +891,7 @@ const SocialMediaPage = () => {
             return (
               <div
                 key={idx}
-                className={`min-h-[100px] p-1 border-b border-r border-white/5 
+                className={`min-h-[60px] sm:min-h-[100px] p-0.5 sm:p-1 border-b border-r border-white/5 
                   ${day.isCurrentMonth ? '' : 'bg-white/[0.02]'}
                   ${isToday ? 'bg-indigo-500/10' : ''}
                   hover:bg-white/5 transition-colors cursor-pointer`}
@@ -898,7 +900,48 @@ const SocialMediaPage = () => {
                   setShowComposer(true);
                 }}
               >
-                <div className={`text-xs p-1 ${day.isCurrentMonth ? 'text-white/80' : 'text-white/30'}
+                <div className={`text-[10px] sm:text-xs p-0.5 sm:p-1 ${day.isCurrentMonth ? 'text-white/80' : 'text-white/30'}
+                  ${isToday ? 'bg-indigo-500 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center mx-auto sm:mx-0' : ''}`}
+                >
+                  {day.date.getDate()}
+                </div>
+                
+                {/* Post indicators - simplified on mobile */}
+                <div className="hidden sm:block space-y-0.5 mt-1">
+                  {dayPosts.slice(0, 2).map((post, i) => (
+                    <div 
+                      key={i}
+                      className="text-[10px] px-1 py-0.5 rounded bg-indigo-500/20 text-indigo-300 truncate"
+                    >
+                      {post.content?.substring(0, 15)}...
+                    </div>
+                  ))}
+                  {dayPosts.length > 2 && (
+                    <div className="text-[10px] text-white/40 px-1">
+                      +{dayPosts.length - 2}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Mobile: just show dots */}
+                <div className="sm:hidden flex gap-0.5 mt-1 justify-center flex-wrap">
+                  {dayPosts.slice(0, 3).map((post, i) => (
+                    <div 
+                      key={i}
+                      className="w-1.5 h-1.5 rounded-full bg-indigo-500"
+                    />
+                  ))}
+                  {dayPosts.length > 3 && (
+                    <span className="text-[8px] text-white/40">+{dayPosts.length - 3}</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
                   ${isToday ? 'bg-indigo-500 text-white rounded-full w-6 h-6 flex items-center justify-center' : ''}`}>
                   {day.date.getDate()}
                 </div>
