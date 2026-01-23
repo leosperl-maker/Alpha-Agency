@@ -12,31 +12,31 @@ import {
   Play, Film, Layers, FileImage, Globe, MoreHorizontal, Info,
   RefreshCw, Wand2, ExternalLink, ImagePlus, Type, Palette
 } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Card, CardContent } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
-import { Input } from '../../components/ui/input';
-import { Textarea } from '../../components/ui/textarea';
-import { Label } from '../../components/ui/label';
-import { Checkbox } from '../../components/ui/checkbox';
-import { Switch } from '../../components/ui/switch';
-import { Separator } from '../../components/ui/separator';
-import { ScrollArea } from '../../components/ui/scroll-area';
+import { Button } from './ui/button';
+import { Card, CardContent } from './ui/card';
+import { Badge } from './ui/badge';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import { Label } from './ui/label';
+import { Checkbox } from './ui/checkbox';
+import { Switch } from './ui/switch';
+import { Separator } from './ui/separator';
+import { ScrollArea } from './ui/scroll-area';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
-} from '../../components/ui/dialog';
+} from './ui/dialog';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
-} from '../../components/ui/select';
+} from './ui/select';
 import {
   Popover, PopoverContent, PopoverTrigger
-} from '../../components/ui/popover';
+} from './ui/popover';
 import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger
-} from '../../components/ui/tooltip';
+} from './ui/tooltip';
 import {
   Tabs, TabsContent, TabsList, TabsTrigger
-} from '../../components/ui/tabs';
+} from './ui/tabs';
 import { toast } from 'sonner';
 import api from '../../lib/api';
 
