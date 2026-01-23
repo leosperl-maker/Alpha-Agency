@@ -226,10 +226,10 @@ class SocialPostCreate(BaseModel):
     post_type: PostType = PostType.FEED
     content: str = ""
     media_urls: List[str] = []
-    link_url: str | None = None
+    link_url: Optional[str] = Field(default=None)
     hashtags: List[str] = []
-    location: str | None = None
-    scheduled_at: str | None = None
+    location: Optional[str] = Field(default=None)
+    scheduled_at: Optional[str] = Field(default=None)
     is_draft: bool = False
     platform_variations: Dict[str, Any] = {}
 
