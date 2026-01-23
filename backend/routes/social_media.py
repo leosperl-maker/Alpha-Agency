@@ -288,6 +288,8 @@ async def create_entity(data: EntityCreate, current_user: dict = Depends(get_cur
     }
     
     await db.social_entities.insert_one(entity)
+    # Remove _id from response (MongoDB adds it after insert)
+    entity.pop("_id", None)
     return {**entity, "account_count": 0, "account_ids": []}
 
 @router.put("/entities/{entity_id}")
