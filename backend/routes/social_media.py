@@ -25,10 +25,10 @@ router = APIRouter(prefix="/social", tags=["Social Media"])
 
 # Helper to get user_id from current_user dict
 def get_user_id(current_user: dict) -> str:
-    return current_user.get("id", current_user.get("user_id", "unknown"))
+    return current_user.get("id", get_user_id(current_user))
 
 def get_workspace_id(current_user: dict) -> str:
-    return current_user.get("workspace_id", "default")
+    return get_workspace_id(current_user)
 
 # ==================== ENCRYPTION ====================
 # Generate key: Fernet.generate_key()
@@ -257,7 +257,7 @@ class PostTemplateCreate(BaseModel):
 async def get_entities(current_user: dict = Depends(get_current_user)):
     """Get all entities for the workspace"""
     entities = await db.social_entities.find(
-        {"workspace_id": current_user.get("workspace_id", "default")},
+        {"workspace_id": get_workspace_id(current_user)},
         {"_id": 0}
     ).to_list(100)
     
@@ -278,13 +278,13 @@ async def create_entity(data: EntityCreate, current_user: dict = Depends(get_cur
     entity_id = str(uuid.uuid4())
     entity = {
         "id": entity_id,
-        "workspace_id": current_user.get("workspace_id", "default"),
+        "workspace_id": get_workspace_id(current_user),
         "name": data.name,
         "color": data.color,
         "logo_url": data.logo_url,
         "description": data.description,
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "created_by": current_user["user_id"]
+        "created_by": get_user_id(current_user)
     }
     
     await db.social_entities.insert_one(entity)
@@ -337,7 +337,7 @@ async def get_social_accounts(
     current_user: dict = Depends(get_current_user)
 ):
     """Get all connected social accounts"""
-    query = {"workspace_id": current_user.get("workspace_id", "default")}
+    query = {"workspace_id": get_workspace_id(current_user)}
     
     if platform:
         query["platform"] = platform
@@ -397,7 +397,7 @@ async def create_social_account(
     existing = await db.social_accounts.find_one({
         "platform": data.platform,
         "external_id": data.external_id,
-        "workspace_id": current_user.get("workspace_id", "default")
+        "workspace_id": get_workspace_id(current_user)
     })
     
     if existing:
@@ -418,7 +418,7 @@ async def create_social_account(
     account_id = str(uuid.uuid4())
     account = {
         "id": account_id,
-        "workspace_id": current_user.get("workspace_id", "default"),
+        "workspace_id": get_workspace_id(current_user),
         "platform": data.platform,
         "account_type": data.account_type,
         "external_id": data.external_id,
@@ -432,7 +432,7 @@ async def create_social_account(
         "metadata": data.metadata,
         "status": AccountStatus.ACTIVE,
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "created_by": current_user["user_id"]
+        "created_by": get_user_id(current_user)
     }
     
     await db.social_accounts.insert_one(account)
@@ -543,7 +543,7 @@ async def get_posts(
     current_user: dict = Depends(get_current_user)
 ):
     """Get posts with filters"""
-    query = {"workspace_id": current_user.get("workspace_id", "default")}
+    query = {"workspace_id": get_workspace_id(current_user)}
     
     if entity_id:
         query["entity_id"] = entity_id
@@ -607,7 +607,7 @@ async def create_post(data: SocialPostCreate, current_user: dict = Depends(get_c
     
     post = {
         "id": post_id,
-        "workspace_id": current_user.get("workspace_id", "default"),
+        "workspace_id": get_workspace_id(current_user),
         "entity_id": data.entity_id,
         "account_ids": data.account_ids,
         "post_type": data.post_type,
@@ -621,7 +621,7 @@ async def create_post(data: SocialPostCreate, current_user: dict = Depends(get_c
         "platform_variations": data.platform_variations,
         "publish_results": {},  # Will store result per account
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "created_by": current_user["user_id"]
+        "created_by": get_user_id(current_user)
     }
     
     await db.social_posts.insert_one(post)
@@ -677,7 +677,7 @@ async def get_templates(
     current_user: dict = Depends(get_current_user)
 ):
     """Get post templates"""
-    query = {"workspace_id": current_user.get("workspace_id", "default")}
+    query = {"workspace_id": get_workspace_id(current_user)}
     if entity_id:
         query["entity_id"] = entity_id
     
@@ -690,7 +690,7 @@ async def create_template(data: PostTemplateCreate, current_user: dict = Depends
     template_id = str(uuid.uuid4())
     template = {
         "id": template_id,
-        "workspace_id": current_user.get("workspace_id", "default"),
+        "workspace_id": get_workspace_id(current_user),
         "entity_id": data.entity_id,
         "name": data.name,
         "content": data.content,
@@ -698,7 +698,7 @@ async def create_template(data: PostTemplateCreate, current_user: dict = Depends
         "media_urls": data.media_urls,
         "platforms": data.platforms,
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "created_by": current_user["user_id"]
+        "created_by": get_user_id(current_user)
     }
     
     await db.social_templates.insert_one(template)
@@ -722,7 +722,7 @@ async def get_queue(
 ):
     """Get posts queue (scheduled, drafts, failed, published)"""
     query = {
-        "workspace_id": current_user.get("workspace_id", "default"),
+        "workspace_id": get_workspace_id(current_user),
         "status": status
     }
     
@@ -750,7 +750,7 @@ async def get_calendar_posts(
 ):
     """Get posts for calendar view"""
     query = {
-        "workspace_id": current_user.get("workspace_id", "default"),
+        "workspace_id": get_workspace_id(current_user),
         "scheduled_at": {"$gte": start_date, "$lte": end_date}
     }
     
@@ -783,7 +783,7 @@ async def get_stats_overview(
     current_user: dict = Depends(get_current_user)
 ):
     """Get overview statistics"""
-    query = {"workspace_id": current_user.get("workspace_id", "default")}
+    query = {"workspace_id": get_workspace_id(current_user)}
     
     if entity_id:
         query["entity_id"] = entity_id
@@ -808,12 +808,12 @@ async def get_stats_overview(
     
     # Entities count
     entities_count = await db.social_entities.count_documents(
-        {"workspace_id": current_user.get("workspace_id", "default")}
+        {"workspace_id": get_workspace_id(current_user)}
     )
     
     # Accounts count
     accounts_count = await db.social_accounts.count_documents(
-        {"workspace_id": current_user.get("workspace_id", "default"), "status": "active"}
+        {"workspace_id": get_workspace_id(current_user), "status": "active"}
     )
     
     return {
@@ -835,7 +835,7 @@ async def get_stats_per_entity(
 ):
     """Get statistics grouped by entity"""
     entities = await db.social_entities.find(
-        {"workspace_id": current_user.get("workspace_id", "default")},
+        {"workspace_id": get_workspace_id(current_user)},
         {"_id": 0}
     ).to_list(100)
     
@@ -868,8 +868,8 @@ async def get_stats_per_entity(
 @router.post("/seed-entities")
 async def seed_initial_entities(current_user: dict = Depends(get_current_user)):
     """Seed initial entities - run once"""
-    workspace_id = current_user.get("workspace_id", "default")
-    user_id = current_user.get("id", current_user.get("user_id", "unknown"))
+    workspace_id = get_workspace_id(current_user)
+    user_id = current_user.get("id", get_user_id(current_user))
     
     # Check if entities already exist
     existing = await db.social_entities.count_documents({"workspace_id": workspace_id})
