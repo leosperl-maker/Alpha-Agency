@@ -566,6 +566,94 @@ const SocialMediaPage = () => {
     }
   }, [selectedEntity, loadPosts, loadCalendarPosts]);
 
+  // Load inbox when section changes to inbox
+  useEffect(() => {
+    if (activeSection === 'inbox') {
+      loadInbox();
+    }
+  }, [activeSection]);
+
+  // ==================== INBOX FUNCTIONS ====================
+
+  const loadInbox = async () => {
+    setInboxLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (inboxFilter === 'unread') params.append('status', 'unread');
+      if (inboxFilter === 'comments') params.append('message_type', 'comment');
+      if (inboxFilter === 'dms') params.append('message_type', 'dm');
+      
+      const [messagesRes, statsRes] = await Promise.all([
+        api.get(`/social/inbox?${params.toString()}`),
+        api.get('/social/inbox/stats')
+      ]);
+      
+      setInboxMessages(messagesRes.data.messages || []);
+      setInboxStats(statsRes.data || { unread: 0, total: 0 });
+    } catch (error) {
+      console.error('Error loading inbox:', error);
+    } finally {
+      setInboxLoading(false);
+    }
+  };
+
+  const handleSyncInbox = async () => {
+    setInboxLoading(true);
+    try {
+      const response = await api.post('/social/inbox/sync');
+      toast.success(`${response.data.total_new} nouveaux messages synchronisés`);
+      await loadInbox();
+    } catch (error) {
+      console.error('Error syncing inbox:', error);
+      toast.error('Erreur lors de la synchronisation');
+    } finally {
+      setInboxLoading(false);
+    }
+  };
+
+  const handleMarkAsRead = async (messageId) => {
+    try {
+      await api.put(`/social/inbox/${messageId}/status`, null, { params: { status: 'read' } });
+      setInboxMessages(prev => prev.map(m => 
+        m.id === messageId ? { ...m, status: 'read' } : m
+      ));
+      setInboxStats(prev => ({ ...prev, unread: Math.max(0, prev.unread - 1) }));
+    } catch (error) {
+      console.error('Error marking as read:', error);
+    }
+  };
+
+  const handleReplyToMessage = async () => {
+    if (!selectedMessage || !replyContent.trim()) return;
+    
+    setSendingReply(true);
+    try {
+      await api.post(`/social/inbox/${selectedMessage.id}/reply`, { content: replyContent });
+      toast.success('Réponse envoyée !');
+      setReplyContent('');
+      // Update message status
+      setInboxMessages(prev => prev.map(m => 
+        m.id === selectedMessage.id ? { ...m, status: 'replied', reply_content: replyContent } : m
+      ));
+      setSelectedMessage(prev => prev ? { ...prev, status: 'replied', reply_content: replyContent } : null);
+    } catch (error) {
+      console.error('Error sending reply:', error);
+      toast.error(error.response?.data?.detail || 'Erreur lors de l\'envoi');
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await api.post('/social/inbox/mark-all-read');
+      toast.success('Tous les messages marqués comme lus');
+      await loadInbox();
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+  };
+
   // ==================== HANDLERS ====================
 
   const handleEntitySelect = (entity) => {
