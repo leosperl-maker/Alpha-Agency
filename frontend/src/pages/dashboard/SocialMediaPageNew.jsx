@@ -1068,17 +1068,17 @@ const SocialMediaPage = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-slate-900 border-white/10">
               <DropdownMenuLabel className="text-white/50">Plateformes</DropdownMenuLabel>
-              <DropdownMenuItem onClick={handleConnectMeta} className="text-white/80">
+              <DropdownMenuItem onClick={handleConnectMeta} className="text-white/80 cursor-pointer">
                 <Facebook className="w-4 h-4 mr-2 text-[#1877F2]" />
                 Facebook / Instagram
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-white/50" disabled>
-                <Linkedin className="w-4 h-4 mr-2" />
-                LinkedIn (bientôt)
+              <DropdownMenuItem onClick={handleConnectLinkedIn} className="text-white/80 cursor-pointer">
+                <Linkedin className="w-4 h-4 mr-2 text-[#0A66C2]" />
+                LinkedIn
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-white/50" disabled>
+              <DropdownMenuItem onClick={handleConnectTikTok} className="text-white/80 cursor-pointer">
                 <Play className="w-4 h-4 mr-2" />
-                TikTok (bientôt)
+                TikTok
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
