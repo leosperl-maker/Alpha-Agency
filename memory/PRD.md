@@ -261,7 +261,7 @@ DELETE /api/tiktok/disconnect
 - `/app/backend/routes/inbox.py` - NEW: Inbox sync functions
 - `/app/backend/routes/publication_worker.py` - NEW: Scheduled post worker
 - `/app/backend/.env` - LinkedIn/TikTok credentials
-- `/app/frontend/src/pages/dashboard/SocialMediaPageNew.jsx` - Inbox UI, LinkedIn/TikTok connect
+- `/app/frontend/src/pages/dashboard/SocialMediaPageNew.jsx` - Inbox UI, LinkedIn/TikTok connect, **RESPONSIVE MOBILE**
 - `/app/frontend/src/components/SocialComposer.jsx` - Fix imports
 - `/app/backend/tests/test_social_media_module.py` - 20 tests backend
 
