@@ -1338,53 +1338,54 @@ const SocialMediaPage = () => {
                 {selectedMessage.reply_content && (
                   <div className="flex gap-2 sm:gap-3 mt-3 sm:mt-4 justify-end">
                     <div className="flex-1 text-right">
-                    <div className="bg-indigo-500/20 rounded-lg p-3 inline-block max-w-[80%]">
-                      <p className="text-white text-sm">{selectedMessage.reply_content}</p>
+                      <div className="bg-indigo-500/20 rounded-lg p-2 sm:p-3 inline-block max-w-[85%] sm:max-w-[80%]">
+                        <p className="text-white text-xs sm:text-sm">{selectedMessage.reply_content}</p>
+                      </div>
+                      <p className="text-[10px] sm:text-xs text-white/40 mt-1">
+                        Vous • {selectedMessage.replied_at ? new Date(selectedMessage.replied_at).toLocaleString('fr-FR') : 'Répondu'}
+                      </p>
                     </div>
-                    <p className="text-xs text-white/40 mt-1">
-                      Vous • {selectedMessage.replied_at ? new Date(selectedMessage.replied_at).toLocaleString('fr-FR') : 'Répondu'}
-                    </p>
                   </div>
+                )}
+              </div>
+              
+              {/* Reply input */}
+              <div className="p-2 sm:p-4 border-t border-white/10">
+                <div className="flex gap-2">
+                  <Textarea
+                    placeholder="Écrire une réponse..."
+                    className="bg-white/5 border-white/10 text-white resize-none text-xs sm:text-sm"
+                    rows={2}
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                  />
+                  <Button 
+                    className="bg-indigo-600 hover:bg-indigo-700 self-end h-8 w-8 sm:h-10 sm:w-10 p-0"
+                    onClick={handleReplyToMessage}
+                    disabled={!replyContent.trim() || sendingReply}
+                  >
+                    {sendingReply ? (
+                      <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
+                    ) : (
+                      <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    )}
+                  </Button>
                 </div>
-              )}
-            </div>
-            
-            {/* Reply input */}
-            <div className="p-4 border-t border-white/10">
-              <div className="flex gap-2">
-                <Textarea
-                  placeholder="Écrire une réponse..."
-                  className="bg-white/5 border-white/10 text-white resize-none"
-                  rows={2}
-                  value={replyContent}
-                  onChange={(e) => setReplyContent(e.target.value)}
-                />
-                <Button 
-                  className="bg-indigo-600 hover:bg-indigo-700 self-end"
-                  onClick={handleReplyToMessage}
-                  disabled={!replyContent.trim() || sendingReply}
-                >
-                  {sendingReply ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Send className="w-4 h-4" />
-                  )}
-                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="hidden md:flex flex-1 items-center justify-center text-white/40">
+              <div className="text-center">
+                <Mail className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 opacity-30" />
+                <p className="text-sm sm:text-base">Sélectionnez une conversation</p>
+                <p className="text-xs sm:text-sm mt-1">pour voir les détails</p>
               </div>
             </div>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-white/40">
-            <div className="text-center">
-              <Mail className="w-16 h-16 mx-auto mb-4 opacity-30" />
-              <p>Sélectionnez une conversation</p>
-              <p className="text-sm mt-1">pour voir les détails</p>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderReports = () => (
     <div className="space-y-6">
