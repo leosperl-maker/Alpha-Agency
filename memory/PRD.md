@@ -214,6 +214,16 @@ GET    /api/meta/pages
 - **GPT-5.2:** IA rédactionnelle ✅
 - **ReportLab:** Export PDF ✅
 - **@dnd-kit:** Drag & drop ✅
+- **Meta API:** OAuth Facebook/Instagram ✅ (App ID: 859300267084667)
+- **Cryptography:** Chiffrement tokens ✅
+
+## Files Modified 2026-01-23
+- `/app/backend/server.py` - ScheduledPost model (scheduled_at Optional), status logic
+- `/app/backend/routes/social_media.py` - Module complet entités/comptes/posts + fix ObjectId
+- `/app/backend/routes/meta.py` - Redirect URI production
+- `/app/frontend/src/pages/dashboard/SocialMediaPageNew.jsx` - Nouvelle page Social Media
+- `/app/frontend/src/components/SocialComposer.jsx` - Composer Pro
+- `/app/backend/tests/test_social_media_module.py` - 20 tests backend
 
 ## Files Modified 2026-01-22
 - `/app/backend/routes/appointments.py` - Fuseau horaire + load_dotenv
