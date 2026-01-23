@@ -45,6 +45,7 @@ import {
 } from '../../components/ui/tooltip';
 import { toast } from 'sonner';
 import api from '../../lib/api';
+import SocialComposer from '../../components/SocialComposer';
 
 // ==================== CONSTANTS ====================
 
