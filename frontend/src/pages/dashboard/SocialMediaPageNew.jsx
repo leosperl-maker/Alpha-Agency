@@ -386,6 +386,8 @@ const SocialMediaPage = () => {
         toast.success(response.data.message || 'Compte Meta connecté avec succès !');
         // Fetch pages after successful connection
         await fetchMetaPages();
+        // Sync Meta accounts to new social system
+        await syncMetaAccounts();
         // Reload all data
         await loadData();
       }
@@ -407,6 +409,19 @@ const SocialMediaPage = () => {
     } catch (error) {
       console.error("Error fetching Meta pages:", error);
       // Not an error if not connected
+    }
+  };
+  
+  const syncMetaAccounts = async () => {
+    try {
+      const response = await api.post('/social/sync-meta-accounts');
+      if (response.data.synced > 0) {
+        toast.success(`${response.data.synced} compte(s) synchronisé(s)`);
+      }
+      return response.data;
+    } catch (error) {
+      console.error("Error syncing Meta accounts:", error);
+      // Try again on next load
     }
   };
 
