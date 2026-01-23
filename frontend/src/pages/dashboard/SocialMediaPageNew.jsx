@@ -1043,21 +1043,20 @@ const SocialMediaPage = () => {
         {activeSection === 'accounts' && renderAccounts()}
       </div>
       
-      {/* Composer Modal - Will be implemented separately */}
-      {showComposer && (
-        <Dialog open={showComposer} onOpenChange={setShowComposer}>
-          <DialogContent className="max-w-4xl bg-slate-900 border-white/10">
-            <DialogHeader>
-              <DialogTitle className="text-white">
-                {editingPost ? 'Modifier le post' : 'Créer un nouveau post'}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="text-white/60 text-center py-8">
-              Composer complet en cours de développement...
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* Composer Pro Modal */}
+      <SocialComposer
+        open={showComposer}
+        onOpenChange={setShowComposer}
+        entities={entities}
+        accounts={accounts}
+        selectedEntity={selectedEntity}
+        selectedAccountIds={selectedAccountIds}
+        editingPost={editingPost}
+        onSuccess={() => {
+          loadPosts();
+          loadCalendarPosts();
+        }}
+      />
     </div>
   );
 };
