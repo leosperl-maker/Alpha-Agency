@@ -6063,13 +6063,17 @@ class InstagramPublishPost(BaseModel):
 @api_router.get("/meta/auth-url", response_model=dict)
 async def get_meta_auth_url(current_user: dict = Depends(get_current_user)):
     """Get Meta OAuth authorization URL"""
-    # Force reload from env to ensure latest value
+    # TEMPORARY FIX: Hardcode App ID until production env vars are updated
+    # Production env vars still have old App ID, so we force the correct one
+    CORRECT_META_APP_ID = "859300267084667"
+    CORRECT_META_APP_SECRET = "d0bd4996ef6e94324c9c9c938391ecde"
+    
     meta_app_id = os.environ.get('META_APP_ID', '')
+    # Force correct App ID if env var has old value or is empty
+    if not meta_app_id or meta_app_id == "4389601981285980":
+        meta_app_id = CORRECT_META_APP_ID
     
-    if not meta_app_id:
-        raise HTTPException(status_code=503, detail="Meta App ID non configuré")
-    
-    frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+    frontend_url = os.environ.get('FRONTEND_URL', 'https://alphagency.fr')
     redirect_uri = f"{frontend_url}/admin/social-media?meta_callback=true"
     scope = "pages_manage_posts,pages_read_engagement,pages_show_list,instagram_basic,instagram_content_publish,business_management"
     state = str(uuid.uuid4())
