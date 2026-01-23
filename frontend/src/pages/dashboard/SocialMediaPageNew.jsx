@@ -370,6 +370,7 @@ const SocialMediaPage = () => {
   const [inboxLoading, setInboxLoading] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
+  const [showMobileDetail, setShowMobileDetail] = useState(false);
   
   // Stats
   const [stats, setStats] = useState(null);
