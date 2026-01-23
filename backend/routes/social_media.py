@@ -863,6 +863,117 @@ async def get_stats_per_entity(
     
     return stats
 
+# ==================== SYNC META PAGES TO SOCIAL ACCOUNTS ====================
+
+@router.post("/sync-meta-accounts")
+async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
+    """Sync Meta (Facebook/Instagram) pages to social accounts system"""
+    workspace_id = get_workspace_id(current_user)
+    user_id = get_user_id(current_user)
+    
+    # Get Meta account from old system
+    meta_account = await db.social_accounts_legacy.find_one({
+        "user_id": user_id,
+        "platform": "meta",
+        "is_active": True
+    }) or await db.social_accounts.find_one({
+        "user_id": user_id,
+        "platform": "meta",
+        "is_active": True
+    })
+    
+    if not meta_account:
+        raise HTTPException(status_code=404, detail="No Meta account connected. Please connect via Facebook first.")
+    
+    pages = meta_account.get("pages", [])
+    if not pages:
+        return {"message": "No pages found. Please refresh your Meta pages.", "synced": 0}
+    
+    synced_accounts = []
+    
+    for page in pages:
+        # Check if this page is already in the new system
+        existing = await db.social_accounts.find_one({
+            "platform": "facebook",
+            "external_id": page["page_id"],
+            "workspace_id": workspace_id
+        })
+        
+        if existing:
+            # Update existing
+            await db.social_accounts.update_one(
+                {"id": existing["id"]},
+                {"$set": {
+                    "display_name": page["page_name"],
+                    "profile_picture_url": page.get("picture_url"),
+                    "status": "active",
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            synced_accounts.append({**existing, "updated": True})
+        else:
+            # Create new social account for this page
+            account_id = str(uuid.uuid4())
+            access_token = page.get("access_token", meta_account.get("access_token", ""))
+            
+            new_account = {
+                "id": account_id,
+                "workspace_id": workspace_id,
+                "platform": "facebook",
+                "account_type": "page",
+                "external_id": page["page_id"],
+                "display_name": page["page_name"],
+                "username": page.get("page_name", "").lower().replace(" ", ""),
+                "profile_picture_url": page.get("picture_url"),
+                "access_token_encrypted": encrypt_token(access_token) if access_token else None,
+                "token_expires_at": meta_account.get("token_expires_at"),
+                "metadata": {
+                    "category": page.get("category"),
+                    "meta_user_id": meta_account.get("meta_user_id"),
+                    "has_instagram": page.get("has_instagram", False),
+                    "instagram_id": page.get("instagram_id")
+                },
+                "status": "active",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_by": user_id
+            }
+            
+            await db.social_accounts.insert_one(new_account)
+            new_account.pop("access_token_encrypted", None)
+            synced_accounts.append({**new_account, "created": True})
+            
+            # Also create Instagram account if available
+            if page.get("has_instagram") and page.get("instagram_id"):
+                ig_account_id = str(uuid.uuid4())
+                ig_account = {
+                    "id": ig_account_id,
+                    "workspace_id": workspace_id,
+                    "platform": "instagram",
+                    "account_type": "business",
+                    "external_id": page["instagram_id"],
+                    "display_name": f"{page['page_name']} (Instagram)",
+                    "username": page.get("page_name", "").lower().replace(" ", ""),
+                    "profile_picture_url": page.get("picture_url"),
+                    "access_token_encrypted": encrypt_token(access_token) if access_token else None,
+                    "token_expires_at": meta_account.get("token_expires_at"),
+                    "metadata": {
+                        "linked_facebook_page_id": page["page_id"],
+                        "meta_user_id": meta_account.get("meta_user_id")
+                    },
+                    "status": "active",
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "created_by": user_id
+                }
+                await db.social_accounts.insert_one(ig_account)
+                ig_account.pop("access_token_encrypted", None)
+                synced_accounts.append({**ig_account, "created": True})
+    
+    return {
+        "message": f"Synced {len(synced_accounts)} accounts from Meta",
+        "synced": len(synced_accounts),
+        "accounts": synced_accounts
+    }
+
 # ==================== SEED INITIAL ENTITIES ====================
 
 @router.post("/seed-entities")
