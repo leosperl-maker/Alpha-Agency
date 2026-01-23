@@ -5038,6 +5038,149 @@ Propose 3 réponses adaptées."""
         logging.error(f"AI suggestion error: {str(e)}")
         raise HTTPException(status_code=500, detail="Erreur lors de la génération des suggestions")
 
+# Inbox Stats
+@api_router.get("/social/inbox/stats")
+async def get_inbox_stats(current_user: dict = Depends(get_current_user)):
+    """Get inbox statistics"""
+    user_id = current_user["user_id"]
+    
+    total = await db.social_messages.count_documents({"user_id": user_id})
+    unread = await db.social_messages.count_documents({"user_id": user_id, "status": "unread"})
+    
+    # By platform
+    pipeline = [
+        {"$match": {"user_id": user_id}},
+        {"$group": {"_id": "$platform", "count": {"$sum": 1}}}
+    ]
+    by_platform = {}
+    async for doc in db.social_messages.aggregate(pipeline):
+        by_platform[doc["_id"]] = doc["count"]
+    
+    return {
+        "total": total,
+        "unread": unread,
+        "by_platform": by_platform,
+        "by_type": {},
+        "by_status": {"unread": unread, "read": total - unread}
+    }
+
+# Mark all as read
+@api_router.post("/social/inbox/mark-all-read")
+async def mark_all_inbox_read(
+    platform: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Mark all messages as read"""
+    query = {"user_id": current_user["user_id"], "status": "unread"}
+    if platform:
+        query["platform"] = platform
+    
+    result = await db.social_messages.update_many(
+        query,
+        {"$set": {"status": "read", "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": f"Marked {result.modified_count} messages as read"}
+
+# Sync inbox from platforms
+@api_router.post("/social/inbox/sync")
+async def sync_inbox_messages(current_user: dict = Depends(get_current_user)):
+    """Sync messages from all connected social accounts"""
+    user_id = current_user["user_id"]
+    
+    # Get all connected accounts
+    accounts = await db.social_accounts.find(
+        {"user_id": user_id, "is_active": True},
+        {"_id": 0}
+    ).to_list(length=50)
+    
+    total_new = 0
+    sync_results = {}
+    
+    for account in accounts:
+        platform = account.get("platform")
+        try:
+            if platform in ["meta", "facebook"]:
+                # Sync Facebook comments
+                new_count = await sync_meta_comments(account, user_id)
+                sync_results[platform] = new_count
+                total_new += new_count
+            else:
+                sync_results[platform] = 0
+        except Exception as e:
+            sync_results[platform] = f"Error: {str(e)}"
+    
+    return {
+        "total_new": total_new,
+        "by_platform": sync_results
+    }
+
+async def sync_meta_comments(account: dict, user_id: str) -> int:
+    """Sync comments from Facebook/Instagram pages"""
+    import httpx
+    
+    access_token = account.get("access_token")
+    pages = account.get("pages", [])
+    new_count = 0
+    
+    async with httpx.AsyncClient() as client:
+        for page in pages:
+            page_id = page.get("page_id")
+            page_token = page.get("access_token", access_token)
+            page_name = page.get("page_name", "Page")
+            
+            try:
+                # Get recent posts with comments
+                response = await client.get(
+                    f"https://graph.facebook.com/v20.0/{page_id}/feed",
+                    params={
+                        "fields": "id,message,created_time,comments.limit(25){id,from,message,created_time}",
+                        "limit": 5,
+                        "access_token": page_token
+                    },
+                    timeout=30.0
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    for post in data.get("data", []):
+                        post_id = post.get("id")
+                        post_content = (post.get("message") or "")[:100]
+                        
+                        for comment in post.get("comments", {}).get("data", []):
+                            comment_id = comment.get("id")
+                            
+                            # Check if exists
+                            existing = await db.social_messages.find_one({"external_id": comment_id})
+                            if not existing:
+                                sender = comment.get("from", {})
+                                
+                                msg = {
+                                    "id": str(uuid.uuid4()),
+                                    "user_id": user_id,
+                                    "external_id": comment_id,
+                                    "platform": "facebook",
+                                    "account_id": account.get("id"),
+                                    "account_name": page_name,
+                                    "sender_id": sender.get("id", "unknown"),
+                                    "sender_name": sender.get("name", "Unknown"),
+                                    "message_type": "comment",
+                                    "content": comment.get("message", ""),
+                                    "post_id": post_id,
+                                    "post_content": post_content,
+                                    "status": "unread",
+                                    "priority": "normal",
+                                    "created_at": comment.get("created_time", datetime.now(timezone.utc).isoformat()),
+                                    "updated_at": datetime.now(timezone.utc).isoformat()
+                                }
+                                await db.social_messages.insert_one(msg)
+                                new_count += 1
+            except Exception as e:
+                logging.error(f"Error syncing page {page_id}: {e}")
+    
+    return new_count
+
 # Calendar View Data
 @api_router.get("/social/calendar", response_model=dict)
 async def get_social_calendar(
