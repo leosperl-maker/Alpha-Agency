@@ -949,12 +949,13 @@ const SocialMediaPage = () => {
     return (
       <div className="space-y-3">
         {filteredPosts.length === 0 ? (
-          <div className="text-center py-12 text-white/40">
-            <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>Aucun post {status === 'draft' ? 'en brouillon' : status === 'scheduled' ? 'programmé' : 'publié'}</p>
+          <div className="text-center py-8 sm:py-12 text-white/40">
+            <FileText className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 opacity-50" />
+            <p className="text-sm sm:text-base">Aucun post {status === 'draft' ? 'en brouillon' : status === 'scheduled' ? 'programmé' : 'publié'}</p>
             <Button 
               onClick={() => setShowComposer(true)}
               className="mt-4 bg-indigo-600"
+              size="sm"
             >
               <Plus className="w-4 h-4 mr-1" />
               Créer un post
@@ -964,23 +965,39 @@ const SocialMediaPage = () => {
           filteredPosts.map(post => (
             <div 
               key={post.id}
-              className="flex items-start gap-4 p-4 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+              className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
             >
               {/* Media preview */}
-              {post.media_urls?.[0] ? (
-                <img 
-                  src={post.media_urls[0]} 
-                  alt=""
-                  className="w-20 h-20 rounded-lg object-cover"
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-lg bg-white/10 flex items-center justify-center">
-                  <FileText className="w-8 h-8 text-white/30" />
+              <div className="flex items-start gap-3 w-full sm:w-auto">
+                {post.media_urls?.[0] ? (
+                  <img 
+                    src={post.media_urls[0]} 
+                    alt=""
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-white/30" />
+                  </div>
+                )}
+                
+                {/* Content - Mobile only inline */}
+                <div className="flex-1 min-w-0 sm:hidden">
+                  <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                    <StatusBadge status={post.status} />
+                    {post.account_ids?.slice(0, 2).map(accId => {
+                      const acc = accounts.find(a => a.id === accId);
+                      return acc ? (
+                        <PlatformIcon key={accId} platform={acc.platform} className="w-3.5 h-3.5" />
+                      ) : null;
+                    })}
+                  </div>
+                  <p className="text-white text-xs line-clamp-2">{post.content}</p>
                 </div>
-              )}
+              </div>
               
-              {/* Content */}
-              <div className="flex-1 min-w-0">
+              {/* Content - Desktop */}
+              <div className="hidden sm:block flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <StatusBadge status={post.status} />
                   {post.account_ids?.map(accId => {
@@ -1008,10 +1025,47 @@ const SocialMediaPage = () => {
                 </div>
               </div>
               
-              {/* Actions */}
+              {/* Mobile footer */}
+              <div className="flex items-center justify-between w-full sm:hidden pt-2 border-t border-white/5">
+                {post.scheduled_at && (
+                  <span className="flex items-center gap-1 text-[10px] text-white/50">
+                    <Clock className="w-3 h-3" />
+                    {new Date(post.scheduled_at).toLocaleDateString('fr-FR', {
+                      day: 'numeric',
+                      month: 'short',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-white/40 hover:text-white h-7 w-7">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-slate-900 border-white/10">
+                    <DropdownMenuItem className="text-white/80">
+                      <Edit className="w-4 h-4 mr-2" />
+                      Modifier
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-white/80">
+                      <Copy className="w-4 h-4 mr-2" />
+                      Dupliquer
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem className="text-red-400">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Supprimer
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              
+              {/* Actions - Desktop */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-white/40 hover:text-white">
+                  <Button variant="ghost" size="icon" className="hidden sm:flex text-white/40 hover:text-white">
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
