@@ -6094,7 +6094,11 @@ async def get_meta_auth_url(current_user: dict = Depends(get_current_user)):
 @api_router.post("/meta/exchange-token", response_model=dict)
 async def exchange_meta_token(data: MetaTokenExchange, current_user: dict = Depends(get_current_user)):
     """Exchange authorization code for access token"""
-    if not META_APP_ID or not META_APP_SECRET:
+    # Force reload from env
+    meta_app_id = os.environ.get('META_APP_ID', '')
+    meta_app_secret = os.environ.get('META_APP_SECRET', '')
+    
+    if not meta_app_id or not meta_app_secret:
         raise HTTPException(status_code=503, detail="Configuration Meta incomplète")
     
     try:
@@ -6103,8 +6107,8 @@ async def exchange_meta_token(data: MetaTokenExchange, current_user: dict = Depe
             token_response = await client.get(
                 f"https://graph.facebook.com/{META_API_VERSION}/oauth/access_token",
                 params={
-                    "client_id": META_APP_ID,
-                    "client_secret": META_APP_SECRET,
+                    "client_id": meta_app_id,
+                    "client_secret": meta_app_secret,
                     "redirect_uri": data.redirect_uri,
                     "code": data.code
                 }
@@ -6122,8 +6126,8 @@ async def exchange_meta_token(data: MetaTokenExchange, current_user: dict = Depe
                 f"https://graph.facebook.com/{META_API_VERSION}/oauth/access_token",
                 params={
                     "grant_type": "fb_exchange_token",
-                    "client_id": META_APP_ID,
-                    "client_secret": META_APP_SECRET,
+                    "client_id": meta_app_id,
+                    "client_secret": meta_app_secret,
                     "fb_exchange_token": short_lived_token
                 }
             )
