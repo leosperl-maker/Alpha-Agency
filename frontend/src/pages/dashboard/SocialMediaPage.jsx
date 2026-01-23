@@ -835,7 +835,7 @@ const SocialMediaPage = () => {
   const handleMetaCallback = async (code) => {
     setMetaLoading(true);
     try {
-      const redirectUri = `${window.location.origin}/admin/social?meta_callback=true`;
+      const redirectUri = `${window.location.origin}/admin/social-media?meta_callback=true`;
       const res = await metaAPI.exchangeToken(code, redirectUri);
       
       if (res.data.success) {
