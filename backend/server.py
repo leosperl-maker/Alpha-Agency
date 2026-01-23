@@ -6509,6 +6509,22 @@ app.include_router(editorial_router, prefix="/api", tags=["editorial"])
 from routes.social_media import router as social_media_router
 app.include_router(social_media_router, prefix="/api", tags=["social-media"])
 
+# LinkedIn Integration
+from routes.linkedin import router as linkedin_router
+app.include_router(linkedin_router, prefix="/api", tags=["linkedin"])
+
+# TikTok Integration
+from routes.tiktok import router as tiktok_router
+app.include_router(tiktok_router, prefix="/api", tags=["tiktok"])
+
+# Social Inbox
+from routes.inbox import router as inbox_router
+app.include_router(inbox_router, prefix="/api", tags=["social-inbox"])
+
+# Publication Worker
+from routes.publication_worker import worker_router
+app.include_router(worker_router, prefix="/api", tags=["publication-worker"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
