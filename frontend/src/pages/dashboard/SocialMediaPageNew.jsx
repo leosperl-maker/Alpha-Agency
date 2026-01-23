@@ -357,6 +357,9 @@ const SocialMediaPage = () => {
   const [loading, setLoading] = useState(true);
   const [showComposer, setShowComposer] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
+  const [showEntityModal, setShowEntityModal] = useState(false);
+  const [newEntity, setNewEntity] = useState({ name: '', color: '#6366f1', description: '' });
+  const [savingEntity, setSavingEntity] = useState(false);
   
   // Stats
   const [stats, setStats] = useState(null);
