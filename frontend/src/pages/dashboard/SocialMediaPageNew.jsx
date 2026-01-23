@@ -533,6 +533,55 @@ const SocialMediaPage = () => {
     }
   };
 
+  const handleCreateEntity = async () => {
+    if (!newEntity.name.trim()) {
+      toast.error('Le nom de l\'entité est requis');
+      return;
+    }
+    
+    setSavingEntity(true);
+    try {
+      const response = await api.post('/social/entities', newEntity);
+      toast.success(`Entité "${response.data.name}" créée avec succès`);
+      setShowEntityModal(false);
+      setNewEntity({ name: '', color: '#6366f1', description: '' });
+      // Reload entities
+      await loadData();
+    } catch (error) {
+      console.error('Error creating entity:', error);
+      toast.error(error.response?.data?.detail || 'Erreur lors de la création');
+    } finally {
+      setSavingEntity(false);
+    }
+  };
+
+  const handleDeleteEntity = async (entityId) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette entité ?')) return;
+    
+    try {
+      await api.delete(`/social/entities/${entityId}`);
+      toast.success('Entité supprimée');
+      await loadData();
+      if (selectedEntity?.id === entityId) {
+        setSelectedEntity(null);
+      }
+    } catch (error) {
+      console.error('Error deleting entity:', error);
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  const handleLinkAccountToEntity = async (entityId, accountId) => {
+    try {
+      await api.post(`/social/entities/${entityId}/accounts/${accountId}`);
+      toast.success('Compte lié à l\'entité');
+      await loadData();
+    } catch (error) {
+      console.error('Error linking account:', error);
+      toast.error('Erreur lors de la liaison');
+    }
+  };
+
   // ==================== RENDER SECTIONS ====================
 
   const renderPublishing = () => (
