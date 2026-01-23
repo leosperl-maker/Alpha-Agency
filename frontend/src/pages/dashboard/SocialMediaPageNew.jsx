@@ -369,12 +369,21 @@ const SocialMediaPage = () => {
   // Handle OAuth callback on mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const metaCallback = urlParams.get('meta_callback');
     const code = urlParams.get('code');
     
-    if (metaCallback && code) {
+    // Handle Meta callback
+    if (urlParams.get('meta_callback') && code) {
       handleMetaCallback(code);
-      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Handle LinkedIn callback
+    else if (urlParams.get('linkedin_callback') && code) {
+      handleLinkedInCallback(code);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // Handle TikTok callback
+    else if (urlParams.get('tiktok_callback') && code) {
+      handleTikTokCallback(code);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
@@ -397,6 +406,42 @@ const SocialMediaPage = () => {
     } catch (error) {
       console.error("Meta callback error:", error);
       toast.error(error.response?.data?.detail || "Erreur lors de la connexion Meta");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLinkedInCallback = async (code) => {
+    setLoading(true);
+    try {
+      const redirectUri = `${window.location.origin}/admin/social-media?linkedin_callback=true`;
+      const response = await api.post('/linkedin/exchange-token', { code, redirect_uri: redirectUri });
+      
+      if (response.data.success) {
+        toast.success(response.data.message || 'Compte LinkedIn connecté !');
+        await loadData();
+      }
+    } catch (error) {
+      console.error("LinkedIn callback error:", error);
+      toast.error(error.response?.data?.detail || "Erreur lors de la connexion LinkedIn");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTikTokCallback = async (code) => {
+    setLoading(true);
+    try {
+      const redirectUri = `${window.location.origin}/admin/social-media?tiktok_callback=true`;
+      const response = await api.post('/tiktok/exchange-token', { code, redirect_uri: redirectUri });
+      
+      if (response.data.success) {
+        toast.success(response.data.message || 'Compte TikTok connecté !');
+        await loadData();
+      }
+    } catch (error) {
+      console.error("TikTok callback error:", error);
+      toast.error(error.response?.data?.detail || "Erreur lors de la connexion TikTok");
     } finally {
       setLoading(false);
     }
