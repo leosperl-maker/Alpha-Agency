@@ -871,16 +871,20 @@ async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
     workspace_id = get_workspace_id(current_user)
     user_id = get_user_id(current_user)
     
-    # Get Meta account from old system
-    meta_account = await db.social_accounts_legacy.find_one({
-        "user_id": user_id,
-        "platform": "meta",
-        "is_active": True
-    }) or await db.social_accounts.find_one({
+    # Get Meta account from the meta.py system (uses user_id and platform="meta")
+    meta_account = await db.social_accounts.find_one({
         "user_id": user_id,
         "platform": "meta",
         "is_active": True
     })
+    
+    if not meta_account:
+        # Also try with current_user["user_id"] directly
+        meta_account = await db.social_accounts.find_one({
+            "user_id": current_user.get("user_id"),
+            "platform": "meta",
+            "is_active": True
+        })
     
     if not meta_account:
         raise HTTPException(status_code=404, detail="No Meta account connected. Please connect via Facebook first.")
@@ -940,6 +944,7 @@ async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
             
             await db.social_accounts.insert_one(new_account)
             new_account.pop("access_token_encrypted", None)
+            new_account.pop("_id", None)
             synced_accounts.append({**new_account, "created": True})
             
             # Also create Instagram account if available
@@ -966,6 +971,7 @@ async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
                 }
                 await db.social_accounts.insert_one(ig_account)
                 ig_account.pop("access_token_encrypted", None)
+                ig_account.pop("_id", None)
                 synced_accounts.append({**ig_account, "created": True})
     
     return {
