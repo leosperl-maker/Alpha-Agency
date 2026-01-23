@@ -776,8 +776,8 @@ const SocialMediaPage = () => {
 
   const renderPublishing = () => (
     <div className="space-y-4">
-      {/* Sub-navigation */}
-      <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1">
+      {/* Sub-navigation - Scrollable on mobile */}
+      <div className="flex items-center gap-1 sm:gap-2 bg-white/5 rounded-lg p-1 overflow-x-auto scrollbar-hide">
         {[
           { id: 'calendar', label: 'Calendrier', icon: CalendarDays },
           { id: 'queue', label: 'File d\'attente', icon: LayoutList },
@@ -789,10 +789,10 @@ const SocialMediaPage = () => {
             variant={activeSubSection === item.id ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveSubSection(item.id)}
-            className={activeSubSection === item.id ? 'bg-indigo-600' : 'text-white/60'}
+            className={`whitespace-nowrap flex-shrink-0 ${activeSubSection === item.id ? 'bg-indigo-600' : 'text-white/60'}`}
           >
-            <item.icon className="w-4 h-4 mr-1" />
-            {item.label}
+            <item.icon className="w-4 h-4 sm:mr-1" />
+            <span className="hidden sm:inline">{item.label}</span>
           </Button>
         ))}
       </div>
