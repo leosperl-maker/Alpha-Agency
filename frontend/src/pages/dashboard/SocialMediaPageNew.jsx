@@ -1466,32 +1466,34 @@ const SocialMediaPage = () => {
   );
 
   const renderAccounts = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Entities Management */}
       <Card className="bg-white/5 border-white/10">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-6">
           <div>
-            <CardTitle className="text-white text-lg">Entités</CardTitle>
-            <CardDescription className="text-white/50">
+            <CardTitle className="text-white text-base sm:text-lg">Entités</CardTitle>
+            <CardDescription className="text-white/50 text-xs sm:text-sm">
               Gérez vos marques et clients
             </CardDescription>
           </div>
           <Button 
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto"
+            size="sm"
             onClick={() => setShowEntityModal(true)}
           >
             <Plus className="w-4 h-4 mr-1" />
             Nouvelle entité
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6 pt-0">
           {entities.length === 0 ? (
-            <div className="text-center py-8 text-white/40">
-              <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>Aucune entité créée</p>
-              <p className="text-sm mt-1">Créez des entités pour organiser vos comptes par marque/client</p>
+            <div className="text-center py-6 sm:py-8 text-white/40">
+              <Building2 className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 opacity-50" />
+              <p className="text-sm sm:text-base">Aucune entité créée</p>
+              <p className="text-xs sm:text-sm mt-1">Créez des entités pour organiser vos comptes</p>
               <Button 
-                className="mt-4 bg-indigo-600"
+                className="mt-3 sm:mt-4 bg-indigo-600"
+                size="sm"
                 onClick={() => setShowEntityModal(true)}
               >
                 <Plus className="w-4 h-4 mr-1" />
@@ -1499,32 +1501,32 @@ const SocialMediaPage = () => {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {entities.map(entity => (
                 <div 
                   key={entity.id}
-                  className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors group"
+                  className="p-3 sm:p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors group"
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between mb-2 sm:mb-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
                       <div 
-                        className="w-10 h-10 rounded-lg flex items-center justify-center"
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center"
                         style={{ backgroundColor: entity.color + '30' }}
                       >
-                        <Building2 className="w-5 h-5" style={{ color: entity.color }} />
+                        <Building2 className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: entity.color }} />
                       </div>
                       <div>
-                        <h4 className="text-white font-medium">{entity.name}</h4>
-                        <p className="text-white/50 text-xs">{entity.account_count} comptes liés</p>
+                        <h4 className="text-white font-medium text-sm sm:text-base">{entity.name}</h4>
+                        <p className="text-white/50 text-[10px] sm:text-xs">{entity.account_count} comptes</p>
                       </div>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                      className="sm:opacity-0 sm:group-hover:opacity-100 text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7 w-7 sm:h-8 sm:w-8"
                       onClick={() => handleDeleteEntity(entity.id)}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Button>
                   </div>
                   
@@ -1533,7 +1535,7 @@ const SocialMediaPage = () => {
                       .filter(a => a.entity_ids?.includes(entity.id))
                       .slice(0, 5)
                       .map(acc => (
-                        <PlatformIcon key={acc.id} platform={acc.platform} className="w-4 h-4" />
+                        <PlatformIcon key={acc.id} platform={acc.platform} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       ))
                     }
                   </div>
@@ -1546,18 +1548,18 @@ const SocialMediaPage = () => {
       
       {/* Connected Accounts */}
       <Card className="bg-white/5 border-white/10">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-6">
           <div>
-            <CardTitle className="text-white text-lg">Comptes connectés</CardTitle>
-            <CardDescription className="text-white/50">
+            <CardTitle className="text-white text-base sm:text-lg">Comptes connectés</CardTitle>
+            <CardDescription className="text-white/50 text-xs sm:text-sm">
               {accounts.length} compte{accounts.length > 1 ? 's' : ''} connecté{accounts.length > 1 ? 's' : ''}
             </CardDescription>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="bg-indigo-600">
+              <Button className="bg-indigo-600 w-full sm:w-auto" size="sm">
                 <Plus className="w-4 h-4 mr-1" />
-                Connecter un compte
+                Connecter
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-slate-900 border-white/10">
@@ -1577,7 +1579,7 @@ const SocialMediaPage = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6 pt-0">
           {accounts.length === 0 ? (
             <div className="text-center py-8 text-white/40">
               <Link2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
