@@ -211,29 +211,29 @@ const EntitySelector = ({ entities, selectedEntity, onSelect, accounts, selected
   };
   
   return (
-    <div className="flex items-center gap-3 bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-3">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-3">
       {/* Entity Dropdown */}
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button 
             variant="ghost" 
-            className="flex items-center gap-2 text-white hover:bg-white/10 h-auto py-2"
+            className="flex items-center gap-2 text-white hover:bg-white/10 h-auto py-2 w-full sm:w-auto justify-start"
           >
             {selectedEntity ? (
               <>
                 <div 
-                  className="w-3 h-3 rounded-full"
+                  className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: selectedEntity.color }}
                 />
-                <span className="font-medium">{selectedEntity.name}</span>
+                <span className="font-medium truncate">{selectedEntity.name}</span>
               </>
             ) : (
               <>
-                <Building2 className="w-4 h-4" />
-                <span>Sélectionner une entité</span>
+                <Building2 className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">Sélectionner une entité</span>
               </>
             )}
-            <ChevronDown className="w-4 h-4 text-white/50" />
+            <ChevronDown className="w-4 h-4 text-white/50 ml-auto sm:ml-0" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-64 p-2 bg-slate-900 border-white/10">
@@ -252,29 +252,30 @@ const EntitySelector = ({ entities, selectedEntity, onSelect, accounts, selected
                 }}
               >
                 <div 
-                  className="w-3 h-3 rounded-full"
+                  className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: entity.color }}
                 />
-                <span className="flex-1">{entity.name}</span>
-                <span className="text-xs text-white/40">{entity.account_count} comptes</span>
+                <span className="flex-1 truncate">{entity.name}</span>
+                <span className="text-xs text-white/40">{entity.account_count}</span>
               </button>
             ))}
           </div>
         </PopoverContent>
       </Popover>
       
-      <Separator orientation="vertical" className="h-8 bg-white/10" />
+      <Separator orientation="vertical" className="hidden sm:block h-8 bg-white/10" />
+      <Separator orientation="horizontal" className="sm:hidden bg-white/10" />
       
       {/* Accounts Multi-Select */}
       {selectedEntity && (
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1 flex-wrap">
             {entityAccounts.slice(0, 4).map(account => (
               <TooltipProvider key={account.id}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className={`relative p-0.5 rounded-full transition-all
+                      className={`relative p-0.5 rounded-full transition-all flex-shrink-0
                         ${selectedAccountIds.includes(account.id) 
                           ? 'ring-2 ring-indigo-500 ring-offset-2 ring-offset-slate-900' 
                           : 'opacity-50 hover:opacity-100'
@@ -315,12 +316,12 @@ const EntitySelector = ({ entities, selectedEntity, onSelect, accounts, selected
             variant="ghost"
             size="sm"
             onClick={toggleAll}
-            className="text-xs text-white/60 hover:text-white h-7"
+            className="text-xs text-white/60 hover:text-white h-7 hidden sm:inline-flex"
           >
-            {allSelected ? 'Désélectionner tout' : 'Tout sélectionner'}
+            {allSelected ? 'Désélectionner' : 'Tout'}
           </Button>
           
-          <Badge className="bg-indigo-500/20 text-indigo-400 border-none">
+          <Badge className="bg-indigo-500/20 text-indigo-400 border-none text-xs">
             {selectedAccountIds.length} actif{selectedAccountIds.length > 1 ? 's' : ''}
           </Badge>
         </div>
@@ -1587,12 +1588,12 @@ const SocialMediaPage = () => {
   }
 
   return (
-    <div className="space-y-4 p-4 md:p-6">
+    <div className="space-y-4 p-3 sm:p-4 md:p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Social Media</h1>
-          <p className="text-white/50 text-sm">
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Social Media</h1>
+          <p className="text-white/50 text-xs sm:text-sm">
             Gérez vos publications sur tous vos réseaux
           </p>
         </div>
@@ -1608,11 +1609,11 @@ const SocialMediaPage = () => {
         onAccountsChange={setSelectedAccountIds}
       />
       
-      {/* Main Navigation */}
-      <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1.5">
+      {/* Main Navigation - Mobile optimized */}
+      <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1 sm:p-1.5 overflow-x-auto scrollbar-hide">
         {[
           { id: 'publishing', label: 'Publishing', icon: Send },
-          { id: 'inbox', label: 'Inbox', icon: Inbox, badge: 0 },
+          { id: 'inbox', label: 'Inbox', icon: Inbox, badge: inboxStats?.unread || 0 },
           { id: 'reports', label: 'Reports', icon: BarChart3 },
           { id: 'accounts', label: 'Accounts', icon: Users },
         ].map(item => (
@@ -1620,12 +1621,12 @@ const SocialMediaPage = () => {
             key={item.id}
             variant={activeSection === item.id ? 'default' : 'ghost'}
             onClick={() => setActiveSection(item.id)}
-            className={`flex-1 ${activeSection === item.id ? 'bg-indigo-600' : 'text-white/60 hover:text-white'}`}
+            className={`flex-1 min-w-fit px-2 sm:px-4 ${activeSection === item.id ? 'bg-indigo-600' : 'text-white/60 hover:text-white'}`}
           >
-            <item.icon className="w-4 h-4 mr-2" />
-            {item.label}
+            <item.icon className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">{item.label}</span>
             {item.badge !== undefined && item.badge > 0 && (
-              <Badge className="ml-2 bg-red-500 text-white border-none text-xs">
+              <Badge className="ml-1 sm:ml-2 bg-red-500 text-white border-none text-xs min-w-[18px] h-[18px] flex items-center justify-center p-0">
                 {item.badge}
               </Badge>
             )}
