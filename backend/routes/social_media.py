@@ -628,6 +628,8 @@ async def create_post(data: SocialPostCreate, current_user: dict = Depends(get_c
     }
     
     await db.social_posts.insert_one(post)
+    # Remove _id from response
+    post.pop("_id", None)
     return post
 
 @router.put("/posts/{post_id}")
