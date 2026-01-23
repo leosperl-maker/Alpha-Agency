@@ -69,18 +69,26 @@ class TikTokVideoUpload(BaseModel):
 
 
 @router.get("/auth-url")
-async def get_tiktok_auth_url(current_user: dict = Depends(get_current_user)):
+async def get_tiktok_auth_url(
+    redirect_uri: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
     """Generate TikTok OAuth2 authorization URL"""
     if not TIKTOK_CLIENT_KEY:
         raise HTTPException(status_code=500, detail="TikTok Client Key not configured")
     
     state = str(uuid.uuid4())
     
+    # Use provided redirect_uri or default
+    if not redirect_uri:
+        redirect_uri = REDIRECT_URI
+    
     # Store state in database for verification
     await db.oauth_states.insert_one({
         "state": state,
         "platform": "tiktok",
         "user_id": current_user["user_id"],
+        "redirect_uri": redirect_uri,
         "created_at": datetime.now(timezone.utc).isoformat()
     })
     
@@ -91,7 +99,7 @@ async def get_tiktok_auth_url(current_user: dict = Depends(get_current_user)):
         f"?client_key={TIKTOK_CLIENT_KEY}"
         f"&response_type=code"
         f"&scope={scope}"
-        f"&redirect_uri={REDIRECT_URI}"
+        f"&redirect_uri={redirect_uri}"
         f"&state={state}"
     )
     
