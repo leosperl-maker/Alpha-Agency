@@ -9,11 +9,19 @@ import httpx
 import uuid
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import Optional, List
-from server import get_current_user, db
+from motor.motor_asyncio import AsyncIOMotorClient
+import jwt
 
 router = APIRouter(prefix="/tiktok", tags=["TikTok"])
+
+# Database connection
+MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+DB_NAME = os.environ.get("DB_NAME", "test_database")
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DB_NAME]
 
 # TikTok OAuth2 Configuration
 TIKTOK_CLIENT_KEY = os.environ.get("TIKTOK_CLIENT_KEY")
@@ -35,6 +43,17 @@ TIKTOK_SCOPES = [
     "video.upload",  # Requires app review
     "video.publish",  # Requires app review
 ]
+
+# Auth
+security = HTTPBearer()
+JWT_SECRET = os.environ.get('JWT_SECRET', 'alpha-agency-secret-key-2024')
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=["HS256"])
+        return payload
+    except:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 class TikTokTokenExchange(BaseModel):
