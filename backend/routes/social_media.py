@@ -28,7 +28,8 @@ def get_user_id(current_user: dict) -> str:
     return current_user.get("id", current_user.get("user_id", "unknown"))
 
 def get_workspace_id(current_user: dict) -> str:
-    return current_user.get("workspace_id", "default")
+    # Use workspace_id if available, otherwise fallback to user_id for single-tenant
+    return current_user.get("workspace_id", current_user.get("user_id", current_user.get("id", "default")))
 
 # ==================== ENCRYPTION ====================
 # Generate key: Fernet.generate_key()
