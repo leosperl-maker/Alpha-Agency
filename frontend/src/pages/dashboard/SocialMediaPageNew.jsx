@@ -361,6 +361,15 @@ const SocialMediaPage = () => {
   const [newEntity, setNewEntity] = useState({ name: '', color: '#6366f1', description: '' });
   const [savingEntity, setSavingEntity] = useState(false);
   
+  // Inbox state
+  const [inboxMessages, setInboxMessages] = useState([]);
+  const [inboxStats, setInboxStats] = useState({ unread: 0, total: 0 });
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [inboxFilter, setInboxFilter] = useState('all'); // all, unread, comments, dms
+  const [inboxLoading, setInboxLoading] = useState(false);
+  const [replyContent, setReplyContent] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+  
   // Stats
   const [stats, setStats] = useState(null);
 
