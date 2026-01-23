@@ -1094,9 +1094,6 @@ const SocialMediaPage = () => {
   };
 
   const renderInbox = () => {
-    // State for mobile detail panel
-    const [showMobileDetail, setShowMobileDetail] = useState(false);
-    
     const handleSelectMessage = (message) => {
       setSelectedMessage(message);
       if (message.status === 'unread') {
