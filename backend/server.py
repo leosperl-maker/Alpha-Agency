@@ -2674,7 +2674,6 @@ async def send_test_email(
     current_user: dict = Depends(get_current_user)
 ):
     """Send a test email to verify template configuration"""
-    import httpx
     
     brevo_api_key = os.environ.get('BREVO_API_KEY')
     sender_email = os.environ.get('BREVO_SENDER_EMAIL', COMPANY_INFO['email'])
