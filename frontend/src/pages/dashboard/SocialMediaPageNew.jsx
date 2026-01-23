@@ -956,43 +956,71 @@ const SocialMediaPage = () => {
               Gérez vos marques et clients
             </CardDescription>
           </div>
-          <Button className="bg-indigo-600">
+          <Button 
+            className="bg-indigo-600 hover:bg-indigo-700"
+            onClick={() => setShowEntityModal(true)}
+          >
             <Plus className="w-4 h-4 mr-1" />
             Nouvelle entité
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {entities.map(entity => (
-              <div 
-                key={entity.id}
-                className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
+          {entities.length === 0 ? (
+            <div className="text-center py-8 text-white/40">
+              <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>Aucune entité créée</p>
+              <p className="text-sm mt-1">Créez des entités pour organiser vos comptes par marque/client</p>
+              <Button 
+                className="mt-4 bg-indigo-600"
+                onClick={() => setShowEntityModal(true)}
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: entity.color + '30' }}
-                  >
-                    <Building2 className="w-5 h-5" style={{ color: entity.color }} />
+                <Plus className="w-4 h-4 mr-1" />
+                Créer ma première entité
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {entities.map(entity => (
+                <div 
+                  key={entity.id}
+                  className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors group"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-10 h-10 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: entity.color + '30' }}
+                      >
+                        <Building2 className="w-5 h-5" style={{ color: entity.color }} />
+                      </div>
+                      <div>
+                        <h4 className="text-white font-medium">{entity.name}</h4>
+                        <p className="text-white/50 text-xs">{entity.account_count} comptes liés</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                      onClick={() => handleDeleteEntity(entity.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <div>
-                    <h4 className="text-white font-medium">{entity.name}</h4>
-                    <p className="text-white/50 text-xs">{entity.account_count} comptes liés</p>
+                  
+                  <div className="flex items-center gap-1">
+                    {accounts
+                      .filter(a => a.entity_ids?.includes(entity.id))
+                      .slice(0, 5)
+                      .map(acc => (
+                        <PlatformIcon key={acc.id} platform={acc.platform} className="w-4 h-4" />
+                      ))
+                    }
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-1">
-                  {accounts
-                    .filter(a => a.entity_ids?.includes(entity.id))
-                    .slice(0, 5)
-                    .map(acc => (
-                      <PlatformIcon key={acc.id} platform={acc.platform} className="w-4 h-4" />
-                    ))
-                  }
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
       
