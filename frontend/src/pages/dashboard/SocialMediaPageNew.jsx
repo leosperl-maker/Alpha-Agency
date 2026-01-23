@@ -572,6 +572,19 @@ const SocialMediaPage = () => {
   };
 
   const handleLinkAccountToEntity = async (entityId, accountId) => {
+    if (entityId === 'none') {
+      // Unlink from all entities
+      try {
+        await api.delete(`/social/accounts/${accountId}/entities`);
+        toast.success('Compte dissocié de l\'entité');
+        await loadData();
+      } catch (error) {
+        console.error('Error unlinking account:', error);
+        toast.error('Erreur lors de la dissociation');
+      }
+      return;
+    }
+    
     try {
       await api.post(`/social/entities/${entityId}/accounts/${accountId}`);
       toast.success('Compte lié à l\'entité');
@@ -579,6 +592,19 @@ const SocialMediaPage = () => {
     } catch (error) {
       console.error('Error linking account:', error);
       toast.error('Erreur lors de la liaison');
+    }
+  };
+
+  const handleDisconnectAccount = async (accountId) => {
+    if (!confirm('Êtes-vous sûr de vouloir déconnecter ce compte ?')) return;
+    
+    try {
+      await api.delete(`/social/accounts/${accountId}`);
+      toast.success('Compte déconnecté');
+      await loadData();
+    } catch (error) {
+      console.error('Error disconnecting account:', error);
+      toast.error('Erreur lors de la déconnexion');
     }
   };
 
