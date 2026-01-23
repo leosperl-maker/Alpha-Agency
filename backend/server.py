@@ -6063,10 +6063,14 @@ class InstagramPublishPost(BaseModel):
 @api_router.get("/meta/auth-url", response_model=dict)
 async def get_meta_auth_url(current_user: dict = Depends(get_current_user)):
     """Get Meta OAuth authorization URL"""
-    if not META_APP_ID:
+    # Force reload from env to ensure latest value
+    meta_app_id = os.environ.get('META_APP_ID', '')
+    
+    if not meta_app_id:
         raise HTTPException(status_code=503, detail="Meta App ID non configuré")
     
-    redirect_uri = f"{FRONTEND_URL}/admin/social-media?meta_callback=true"
+    frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+    redirect_uri = f"{frontend_url}/admin/social-media?meta_callback=true"
     scope = "pages_manage_posts,pages_read_engagement,pages_show_list,instagram_basic,instagram_content_publish,business_management"
     state = str(uuid.uuid4())
     
@@ -6079,7 +6083,7 @@ async def get_meta_auth_url(current_user: dict = Depends(get_current_user)):
     })
     
     auth_url = f"https://www.facebook.com/{META_API_VERSION}/dialog/oauth?" \
-               f"client_id={META_APP_ID}&" \
+               f"client_id={meta_app_id}&" \
                f"redirect_uri={redirect_uri}&" \
                f"scope={scope}&" \
                f"state={state}&" \
