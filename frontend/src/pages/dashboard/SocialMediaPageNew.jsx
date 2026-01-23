@@ -588,7 +588,8 @@ const SocialMediaPage = () => {
         api.get('/social/inbox/stats')
       ]);
       
-      setInboxMessages(messagesRes.data.messages || []);
+      // The endpoint returns an array directly
+      setInboxMessages(Array.isArray(messagesRes.data) ? messagesRes.data : messagesRes.data.messages || []);
       setInboxStats(statsRes.data || { unread: 0, total: 0 });
     } catch (error) {
       console.error('Error loading inbox:', error);
