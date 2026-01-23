@@ -461,6 +461,16 @@ async def delete_social_account(account_id: str, current_user: dict = Depends(ge
     
     return {"message": "Account disconnected"}
 
+@router.delete("/accounts/{account_id}/entities")
+async def unlink_account_from_all_entities(account_id: str, current_user: dict = Depends(get_current_user)):
+    """Unlink a social account from all entities"""
+    result = await db.entity_social_accounts.delete_many({"social_account_id": account_id})
+    
+    return {
+        "message": f"Account unlinked from {result.deleted_count} entities",
+        "unlinked_count": result.deleted_count
+    }
+
 # ==================== ENTITY-ACCOUNT LINKS ====================
 
 @router.post("/entities/{entity_id}/accounts/{account_id}")
