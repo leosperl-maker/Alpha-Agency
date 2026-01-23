@@ -23,6 +23,13 @@ from .database import db, get_current_user
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/social", tags=["Social Media"])
 
+# Helper to get user_id from current_user dict
+def get_user_id(current_user: dict) -> str:
+    return current_user.get("id", current_user.get("user_id", "unknown"))
+
+def get_workspace_id(current_user: dict) -> str:
+    return current_user.get("workspace_id", "default")
+
 # ==================== ENCRYPTION ====================
 # Generate key: Fernet.generate_key()
 ENCRYPTION_KEY = os.environ.get('SOCIAL_ENCRYPTION_KEY', Fernet.generate_key())
