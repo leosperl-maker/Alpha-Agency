@@ -95,6 +95,12 @@ app = FastAPI(title="Alpha Agency API")
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer(auto_error=False)
 
+# Health check endpoint for Kubernetes
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Kubernetes liveness/readiness probes"""
+    return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat()}
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
