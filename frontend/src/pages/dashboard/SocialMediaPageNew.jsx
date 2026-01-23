@@ -670,7 +670,8 @@ const SocialMediaPage = () => {
 
   const handleConnectMeta = async () => {
     try {
-      const response = await api.get('/meta/auth-url');
+      const redirectUri = `${window.location.origin}/admin/social-media?meta_callback=true`;
+      const response = await api.get('/meta/auth-url', { params: { redirect_uri: redirectUri } });
       window.location.href = response.data.auth_url;
     } catch (error) {
       console.error('Error getting auth URL:', error);
