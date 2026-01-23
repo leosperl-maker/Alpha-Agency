@@ -4822,10 +4822,19 @@ async def get_scheduled_posts(
 @api_router.post("/social/posts", response_model=dict)
 async def create_scheduled_post(post: ScheduledPost, current_user: dict = Depends(get_current_user)):
     """Create a new scheduled post"""
+    # Determine status based on whether it's a draft or has a schedule
+    if post.is_draft or post.status == "draft":
+        final_status = "draft"
+    elif post.scheduled_at:
+        final_status = "scheduled"
+    else:
+        final_status = "draft"  # Default to draft if no schedule
+    
     post_dict = {
         "id": str(uuid.uuid4()),
         "user_id": current_user["user_id"],
-        **post.dict(),
+        **post.model_dump(),
+        "status": final_status,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
         "published_at": None,
