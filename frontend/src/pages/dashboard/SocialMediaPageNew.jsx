@@ -1772,7 +1772,7 @@ const SocialMediaPage = () => {
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label className="text-white/80">Nom de l'entité *</Label>
+              <Label className="text-white/80">Nom de l&apos;entité *</Label>
               <Input
                 placeholder="Ex: Mon Client, Ma Marque..."
                 value={newEntity.name}
@@ -1856,7 +1856,7 @@ const SocialMediaPage = () => {
               ) : (
                 <>
                   <Plus className="w-4 h-4 mr-1" />
-                  Créer l'entité
+                  Créer l&apos;entité
                 </>
               )}
             </Button>
