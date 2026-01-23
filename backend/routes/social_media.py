@@ -862,6 +862,7 @@ async def get_stats_per_entity(
 async def seed_initial_entities(current_user: dict = Depends(get_current_user)):
     """Seed initial entities - run once"""
     workspace_id = current_user.get("workspace_id", "default")
+    user_id = current_user.get("id", current_user.get("user_id", "unknown"))
     
     # Check if entities already exist
     existing = await db.social_entities.count_documents({"workspace_id": workspace_id})
@@ -885,7 +886,7 @@ async def seed_initial_entities(current_user: dict = Depends(get_current_user)):
             "description": entity_data["description"],
             "logo_url": None,
             "created_at": datetime.now(timezone.utc).isoformat(),
-            "created_by": current_user["user_id"]
+            "created_by": user_id
         }
         await db.social_entities.insert_one(entity)
         created.append(entity)
