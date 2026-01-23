@@ -1212,6 +1212,110 @@ const SocialMediaPage = () => {
           loadCalendarPosts();
         }}
       />
+      
+      {/* Entity Creation Modal */}
+      <Dialog open={showEntityModal} onOpenChange={setShowEntityModal}>
+        <DialogContent className="bg-slate-900 border-white/10 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Nouvelle Entité</DialogTitle>
+            <DialogDescription className="text-white/60">
+              Créez une entité pour regrouper vos comptes par marque ou client
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label className="text-white/80">Nom de l'entité *</Label>
+              <Input
+                placeholder="Ex: Mon Client, Ma Marque..."
+                value={newEntity.name}
+                onChange={(e) => setNewEntity({...newEntity, name: e.target.value})}
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-white/80">Couleur</Label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={newEntity.color}
+                  onChange={(e) => setNewEntity({...newEntity, color: e.target.value})}
+                  className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0"
+                />
+                <div className="flex gap-2">
+                  {['#6366f1', '#8B5CF6', '#EC4899', '#10B981', '#F59E0B', '#EF4444'].map(color => (
+                    <button
+                      key={color}
+                      className={`w-6 h-6 rounded-full transition-transform ${newEntity.color === color ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900 scale-110' : 'hover:scale-110'}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setNewEntity({...newEntity, color})}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-white/80">Description (optionnel)</Label>
+              <Textarea
+                placeholder="Une brève description..."
+                value={newEntity.description}
+                onChange={(e) => setNewEntity({...newEntity, description: e.target.value})}
+                className="bg-white/5 border-white/10 text-white resize-none"
+                rows={2}
+              />
+            </div>
+            
+            {/* Preview */}
+            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+              <p className="text-xs text-white/50 mb-2">Aperçu</p>
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-10 h-10 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: newEntity.color + '30' }}
+                >
+                  <Building2 className="w-5 h-5" style={{ color: newEntity.color }} />
+                </div>
+                <div>
+                  <h4 className="text-white font-medium">{newEntity.name || 'Nom de l\'entité'}</h4>
+                  <p className="text-white/50 text-xs">0 comptes liés</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setShowEntityModal(false);
+                setNewEntity({ name: '', color: '#6366f1', description: '' });
+              }}
+              className="text-white/60 hover:text-white"
+            >
+              Annuler
+            </Button>
+            <Button
+              onClick={handleCreateEntity}
+              disabled={!newEntity.name.trim() || savingEntity}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              {savingEntity ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Création...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-1" />
+                  Créer l'entité
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
