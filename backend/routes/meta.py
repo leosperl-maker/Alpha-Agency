@@ -48,7 +48,7 @@ async def get_meta_auth_url(current_user: dict = Depends(get_current_user)):
     if not META_APP_ID:
         raise HTTPException(status_code=503, detail="Meta App ID non configuré")
     
-    redirect_uri = f"{FRONTEND_URL}/admin/social?meta_callback=true"
+    redirect_uri = f"{FRONTEND_URL}/admin/social-media?meta_callback=true"
     scope = "pages_manage_posts,pages_read_engagement,pages_show_list,instagram_basic,instagram_content_publish,business_management"
     state = str(uuid.uuid4())
     
