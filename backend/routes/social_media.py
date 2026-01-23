@@ -222,16 +222,16 @@ class EntityAccountLink(BaseModel):
 
 class SocialPostCreate(BaseModel):
     entity_id: str
-    account_ids: List[str] = []  # Multi-account support
+    account_ids: List[str] = []
     post_type: PostType = PostType.FEED
     content: str = ""
     media_urls: List[str] = []
-    link_url: Optional[str] = Field(default=None)
+    link_url: str | None = None
     hashtags: List[str] = []
-    location: Optional[str] = Field(default=None)
-    scheduled_at: Optional[str] = Field(default=None)  # ISO format
+    location: str | None = None
+    scheduled_at: str | None = None
     is_draft: bool = False
-    platform_variations: Dict[str, Any] = {}  # Per-platform customizations
+    platform_variations: Dict[str, Any] = {}
 
 class SocialPostUpdate(BaseModel):
     content: Optional[str] = None
