@@ -578,6 +578,26 @@ const SocialMediaPage = () => {
     }
   };
 
+  const handleConnectLinkedIn = async () => {
+    try {
+      const response = await api.get('/linkedin/auth-url');
+      window.location.href = response.data.auth_url;
+    } catch (error) {
+      console.error('Error getting LinkedIn auth URL:', error);
+      toast.error('Erreur lors de la connexion LinkedIn');
+    }
+  };
+
+  const handleConnectTikTok = async () => {
+    try {
+      const response = await api.get('/tiktok/auth-url');
+      window.location.href = response.data.auth_url;
+    } catch (error) {
+      console.error('Error getting TikTok auth URL:', error);
+      toast.error('Erreur lors de la connexion TikTok');
+    }
+  };
+
   const handleCreateEntity = async () => {
     if (!newEntity.name.trim()) {
       toast.error('Le nom de l\'entité est requis');
