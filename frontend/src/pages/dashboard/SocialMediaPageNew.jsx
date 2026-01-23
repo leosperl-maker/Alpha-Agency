@@ -942,37 +942,6 @@ const SocialMediaPage = () => {
       </div>
     );
   };
-                  ${isToday ? 'bg-indigo-500 text-white rounded-full w-6 h-6 flex items-center justify-center' : ''}`}>
-                  {day.date.getDate()}
-                </div>
-                
-                <div className="space-y-0.5 mt-1">
-                  {dayPosts.slice(0, 3).map(post => (
-                    <div 
-                      key={post.id}
-                      className="text-xs px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 truncate"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingPost(post);
-                        setShowComposer(true);
-                      }}
-                    >
-                      {post.content?.substring(0, 20)}...
-                    </div>
-                  ))}
-                  {dayPosts.length > 3 && (
-                    <div className="text-xs text-white/40 px-1">
-                      +{dayPosts.length - 3} autres
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
 
   const renderQueue = (status) => {
     const filteredPosts = posts.filter(p => p.status === status);
