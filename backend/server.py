@@ -4725,10 +4725,12 @@ class ScheduledPost(BaseModel):
     post_type: str = "text"  # text, image, carousel, reel, story
     platforms: List[str] = []  # ['facebook', 'instagram']
     account_ids: List[str] = []
-    scheduled_at: str  # ISO datetime
+    scheduled_at: Optional[str] = None  # ISO datetime - optional for drafts
     hashtags: Optional[List[str]] = []
     link_url: Optional[str] = None
     status: str = "scheduled"  # scheduled, published, failed, draft
+    entity_id: Optional[str] = None  # For new social media system
+    is_draft: bool = False
 
 class ScheduledPostUpdate(BaseModel):
     content: Optional[str] = None
