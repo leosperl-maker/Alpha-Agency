@@ -648,7 +648,8 @@ async def create_post(data: SocialPostCreate, current_user: dict = Depends(get_c
     elif data.scheduled_at:
         status = PostStatus.SCHEDULED
     else:
-        status = PostStatus.DRAFT  # Must schedule or publish explicitly
+        # Immediate publish - set to PUBLISHING and it will be picked up by the worker
+        status = PostStatus.PUBLISHING
     
     post = {
         "id": post_id,
