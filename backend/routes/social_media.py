@@ -340,7 +340,17 @@ async def get_social_accounts(
     current_user: dict = Depends(get_current_user)
 ):
     """Get all connected social accounts"""
-    query = {"workspace_id": get_workspace_id(current_user)}
+    workspace_id = get_workspace_id(current_user)
+    user_id = get_user_id(current_user)
+    
+    # Query by workspace_id OR user_id for compatibility
+    query = {
+        "$or": [
+            {"workspace_id": workspace_id},
+            {"user_id": user_id},
+            {"user_id": current_user.get("user_id")}
+        ]
+    }
     
     if platform:
         query["platform"] = platform
