@@ -30,12 +30,24 @@ export const TikTokSandboxBadge = ({ className = "" }) => (
 
 // ==================== SANDBOX INFO BANNER ====================
 
-export const TikTokSandboxBanner = () => (
+export const TikTokSandboxBanner = ({ onToggle, enabled = true }) => (
   <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-xl p-4 mb-4">
     <div className="flex items-start gap-3">
       <Info className="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0" />
-      <div>
-        <h4 className="text-cyan-400 font-medium mb-1">TikTok Sandbox Demonstration</h4>
+      <div className="flex-1">
+        <div className="flex items-center justify-between mb-1">
+          <h4 className="text-cyan-400 font-medium">TikTok Sandbox Demonstration</h4>
+          {onToggle && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onToggle}
+              className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 hover:text-white"
+            >
+              Quitter le mode démo
+            </Button>
+          )}
+        </div>
         <p className="text-white/60 text-sm">
           This is a sandbox demonstration of the TikTok integration for app review purposes.
           All API calls are simulated. No real data is sent to TikTok in sandbox mode.
