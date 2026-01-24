@@ -6333,11 +6333,17 @@ async def exchange_meta_token(data: MetaTokenExchange, current_user: dict = Depe
             meta_account = {
                 "id": str(uuid.uuid4()),
                 "user_id": current_user["user_id"],
+                "workspace_id": current_user.get("workspace_id", current_user["user_id"]),
                 "platform": "meta",
+                "account_type": "user",
                 "meta_user_id": me_data.get("id"),
+                "external_id": me_data.get("id"),
                 "account_name": me_data.get("name", "Meta Account"),
+                "display_name": me_data.get("name", "Meta Account"),
+                "username": me_data.get("email", "").split("@")[0] if me_data.get("email") else me_data.get("id"),
                 "access_token": access_token,
                 "token_expires_at": (datetime.now(timezone.utc) + timedelta(seconds=expires_in)).isoformat(),
+                "status": "active",
                 "is_active": True,
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "updated_at": datetime.now(timezone.utc).isoformat()
