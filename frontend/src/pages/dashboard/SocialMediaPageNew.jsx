@@ -993,10 +993,18 @@ const SocialMediaPage = () => {
                 className={`min-h-[60px] sm:min-h-[100px] p-0.5 sm:p-1 border-b border-r border-white/5 
                   ${day.isCurrentMonth ? '' : 'bg-white/[0.02]'}
                   ${isToday ? 'bg-indigo-500/10' : ''}
-                  hover:bg-white/5 transition-colors cursor-pointer`}
+                  hover:bg-white/10 transition-colors cursor-pointer`}
                 onClick={() => {
-                  setEditingPost(null);
-                  setShowComposer(true);
+                  if (dayPosts.length > 0) {
+                    // Show posts for this day
+                    setSelectedDayPosts(dayPosts);
+                    setSelectedDayDate(day.date);
+                    setShowDayPostsModal(true);
+                  } else {
+                    // Open composer for new post
+                    setEditingPost(null);
+                    setShowComposer(true);
+                  }
                 }}
               >
                 <div className={`text-[10px] sm:text-xs p-0.5 sm:p-1 ${day.isCurrentMonth ? 'text-white/80' : 'text-white/30'}
