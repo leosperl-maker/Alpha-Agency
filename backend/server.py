@@ -5140,56 +5140,55 @@ async def sync_meta_comments(account: dict, user_id: str) -> int:
         return 0
     
     async with httpx.AsyncClient() as client:
+        try:
+            # Get recent posts with comments
+            response = await client.get(
+                f"https://graph.facebook.com/v20.0/{page_id}/feed",
+                params={
+                    "fields": "id,message,created_time,comments.limit(25){id,from,message,created_time}",
+                    "limit": 5,
+                    "access_token": page_token
+                },
+                timeout=30.0
+            )
             
-            try:
-                # Get recent posts with comments
-                response = await client.get(
-                    f"https://graph.facebook.com/v20.0/{page_id}/feed",
-                    params={
-                        "fields": "id,message,created_time,comments.limit(25){id,from,message,created_time}",
-                        "limit": 5,
-                        "access_token": page_token
-                    },
-                    timeout=30.0
-                )
+            if response.status_code == 200:
+                data = response.json()
                 
-                if response.status_code == 200:
-                    data = response.json()
+                for post in data.get("data", []):
+                    post_id = post.get("id")
+                    post_content = (post.get("message") or "")[:100]
                     
-                    for post in data.get("data", []):
-                        post_id = post.get("id")
-                        post_content = (post.get("message") or "")[:100]
+                    for comment in post.get("comments", {}).get("data", []):
+                        comment_id = comment.get("id")
                         
-                        for comment in post.get("comments", {}).get("data", []):
-                            comment_id = comment.get("id")
+                        # Check if exists
+                        existing = await db.social_messages.find_one({"external_id": comment_id})
+                        if not existing:
+                            sender = comment.get("from", {})
                             
-                            # Check if exists
-                            existing = await db.social_messages.find_one({"external_id": comment_id})
-                            if not existing:
-                                sender = comment.get("from", {})
-                                
-                                msg = {
-                                    "id": str(uuid.uuid4()),
-                                    "user_id": user_id,
-                                    "external_id": comment_id,
-                                    "platform": "facebook",
-                                    "account_id": account.get("id"),
-                                    "account_name": page_name,
-                                    "sender_id": sender.get("id", "unknown"),
-                                    "sender_name": sender.get("name", "Unknown"),
-                                    "message_type": "comment",
-                                    "content": comment.get("message", ""),
-                                    "post_id": post_id,
-                                    "post_content": post_content,
-                                    "status": "unread",
-                                    "priority": "normal",
-                                    "created_at": comment.get("created_time", datetime.now(timezone.utc).isoformat()),
-                                    "updated_at": datetime.now(timezone.utc).isoformat()
-                                }
-                                await db.social_messages.insert_one(msg)
-                                new_count += 1
-            except Exception as e:
-                logging.error(f"Error syncing page {page_id}: {e}")
+                            msg = {
+                                "id": str(uuid.uuid4()),
+                                "user_id": user_id,
+                                "external_id": comment_id,
+                                "platform": "facebook",
+                                "account_id": account.get("id"),
+                                "account_name": page_name,
+                                "sender_id": sender.get("id", "unknown"),
+                                "sender_name": sender.get("name", "Unknown"),
+                                "message_type": "comment",
+                                "content": comment.get("message", ""),
+                                "post_id": post_id,
+                                "post_content": post_content,
+                                "status": "unread",
+                                "priority": "normal",
+                                "created_at": comment.get("created_time", datetime.now(timezone.utc).isoformat()),
+                                "updated_at": datetime.now(timezone.utc).isoformat()
+                            }
+                            await db.social_messages.insert_one(msg)
+                            new_count += 1
+        except Exception as e:
+            logging.error(f"Error syncing page {page_id}: {e}")
     
     return new_count
 
