@@ -1608,6 +1608,7 @@ const SocialMediaPage = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          </div>
         </CardHeader>
         <CardContent className="p-3 sm:p-6 pt-0">
           {accounts.length === 0 ? (
