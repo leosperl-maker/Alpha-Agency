@@ -381,6 +381,13 @@ const SocialMediaPage = () => {
   const [sendingReply, setSendingReply] = useState(false);
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   
+  // TikTok Sandbox state
+  const [tiktokSandboxMode, setTiktokSandboxMode] = useState(false);
+  const [showTikTokSandboxAuth, setShowTikTokSandboxAuth] = useState(false);
+  const [showTikTokApiLogs, setShowTikTokApiLogs] = useState(false);
+  const [showTikTokComposer, setShowTikTokComposer] = useState(false);
+  const [tiktokPosts, setTiktokPosts] = useState([]);
+  
   // Stats
   const [stats, setStats] = useState(null);
 
