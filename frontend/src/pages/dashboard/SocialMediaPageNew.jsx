@@ -1180,16 +1180,35 @@ const SocialMediaPage = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-slate-900 border-white/10">
-                    <DropdownMenuItem className="text-white/80">
+                    <DropdownMenuItem 
+                      className="text-white/80 cursor-pointer"
+                      onClick={() => {
+                        setEditingPost(post);
+                        setShowComposer(true);
+                      }}
+                    >
                       <Edit className="w-4 h-4 mr-2" />
                       Modifier
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-white/80">
+                    <DropdownMenuItem className="text-white/80 cursor-pointer">
                       <Copy className="w-4 h-4 mr-2" />
                       Dupliquer
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-white/10" />
-                    <DropdownMenuItem className="text-red-400">
+                    <DropdownMenuItem 
+                      className="text-red-400 cursor-pointer"
+                      onClick={async () => {
+                        if (window.confirm('Supprimer ce post ?')) {
+                          try {
+                            await api.delete(`/social/posts/${post.id}`);
+                            toast.success('Post supprimé');
+                            loadPosts();
+                          } catch (error) {
+                            toast.error('Erreur lors de la suppression');
+                          }
+                        }
+                      }}
+                    >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Supprimer
                     </DropdownMenuItem>
