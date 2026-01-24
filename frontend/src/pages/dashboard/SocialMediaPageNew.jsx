@@ -1859,6 +1859,9 @@ const SocialMediaPage = () => {
         ))}
       </div>
       
+      {/* TikTok Sandbox Banner */}
+      {tiktokSandboxMode && <TikTokSandboxBanner />}
+      
       {/* Content */}
       <div className="mt-4">
         {activeSection === 'publishing' && renderPublishing()}
