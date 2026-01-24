@@ -56,11 +56,19 @@ class PublicationWorker:
         """Find and publish posts that are due"""
         now = datetime.now(timezone.utc)
         
-        # Find posts that should be published
-        # scheduled_at <= now AND status == 'scheduled'
+        # Find posts that should be published:
+        # 1. scheduled posts that are due (scheduled_at <= now AND status == 'scheduled')
+        # 2. immediate publish posts (status == 'publishing')
         cursor = db.scheduled_posts.find({
-            "status": "scheduled",
-            "scheduled_at": {"$lte": now.isoformat()}
+            "$or": [
+                {
+                    "status": "scheduled",
+                    "scheduled_at": {"$lte": now.isoformat()}
+                },
+                {
+                    "status": "publishing"
+                }
+            ]
         })
         
         posts = await cursor.to_list(length=50)
