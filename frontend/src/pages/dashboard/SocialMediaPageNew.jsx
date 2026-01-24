@@ -381,6 +381,11 @@ const SocialMediaPage = () => {
   const [sendingReply, setSendingReply] = useState(false);
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   
+  // Day posts modal state
+  const [selectedDayPosts, setSelectedDayPosts] = useState([]);
+  const [selectedDayDate, setSelectedDayDate] = useState(null);
+  const [showDayPostsModal, setShowDayPostsModal] = useState(false);
+  
   // TikTok Sandbox state
   const [tiktokSandboxMode, setTiktokSandboxMode] = useState(false);
   const [showTikTokSandboxAuth, setShowTikTokSandboxAuth] = useState(false);
