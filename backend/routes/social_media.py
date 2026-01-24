@@ -342,13 +342,18 @@ async def get_social_accounts(
     """Get all connected social accounts"""
     workspace_id = get_workspace_id(current_user)
     user_id = get_user_id(current_user)
+    current_user_id = current_user.get("user_id", "")
     
-    # Query by workspace_id OR user_id for compatibility
+    # Query by workspace_id OR user_id OR created_by for compatibility
     query = {
         "$or": [
             {"workspace_id": workspace_id},
+            {"workspace_id": current_user_id},
+            {"workspace_id": "default"},  # Legacy accounts
             {"user_id": user_id},
-            {"user_id": current_user.get("user_id")}
+            {"user_id": current_user_id},
+            {"created_by": user_id},
+            {"created_by": current_user_id}
         ]
     }
     
