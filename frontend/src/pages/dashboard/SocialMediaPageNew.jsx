@@ -7,7 +7,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Calendar, Send, MessageSquare, Settings, Plus, Clock, CheckCircle,
   AlertCircle, Facebook, Instagram, Linkedin, Image, Video, FileText,
-  ChevronLeft, ChevronRight, MoreVertical, Trash2, Edit, Eye, Filter,
+  ChevronLeft, ChevronRight, MoreVertical, Trash2, Edit, Edit3, Eye, Filter,
   Inbox, Archive, Star, Reply, Loader2, RefreshCw, List, Grid,
   Upload, ChevronDown, CalendarDays, LayoutList, Monitor, Smartphone,
   Heart, MessageCircle, Share2, BarChart3, Users, Building2, Link2,
