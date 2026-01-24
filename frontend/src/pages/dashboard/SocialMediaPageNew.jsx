@@ -383,20 +383,72 @@ const SocialMediaPage = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     
-    // Handle Meta callback
-    if (urlParams.get('meta_callback') && code) {
-      handleMetaCallback(code);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-    // Handle LinkedIn callback
-    else if (urlParams.get('linkedin_callback') && code) {
-      handleLinkedInCallback(code);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-    // Handle TikTok callback
-    else if (urlParams.get('tiktok_callback') && code) {
-      handleTikTokCallback(code);
-      window.history.replaceState({}, document.title, window.location.pathname);
+    const processCallback = async () => {
+      // Handle Meta callback
+      if (urlParams.get('meta_callback') && code) {
+        setLoading(true);
+        try {
+          const redirectUri = `${window.location.origin}/admin/social-media?meta_callback=true`;
+          const response = await api.post('/meta/exchange-token', { code, redirect_uri: redirectUri });
+          
+          if (response.data.success) {
+            toast.success(response.data.message || 'Compte Meta connecté avec succès !');
+            // Fetch pages and sync
+            try {
+              await api.get('/meta/pages');
+              await api.post('/social/sync-meta-accounts');
+            } catch (e) {
+              console.log('Sync will happen on next load');
+            }
+          }
+        } catch (error) {
+          console.error("Meta callback error:", error);
+          toast.error(error.response?.data?.detail || "Erreur lors de la connexion Meta");
+        } finally {
+          setLoading(false);
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      // Handle LinkedIn callback
+      else if (urlParams.get('linkedin_callback') && code) {
+        setLoading(true);
+        try {
+          const redirectUri = `${window.location.origin}/admin/social-media?linkedin_callback=true`;
+          const response = await api.post('/linkedin/exchange-token', { code, redirect_uri: redirectUri });
+          
+          if (response.data.success) {
+            toast.success(response.data.message || 'Compte LinkedIn connecté !');
+          }
+        } catch (error) {
+          console.error("LinkedIn callback error:", error);
+          toast.error(error.response?.data?.detail || "Erreur lors de la connexion LinkedIn");
+        } finally {
+          setLoading(false);
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      // Handle TikTok callback
+      else if (urlParams.get('tiktok_callback') && code) {
+        setLoading(true);
+        try {
+          const redirectUri = `${window.location.origin}/admin/social-media?tiktok_callback=true`;
+          const response = await api.post('/tiktok/exchange-token', { code, redirect_uri: redirectUri });
+          
+          if (response.data.success) {
+            toast.success(response.data.message || 'Compte TikTok connecté !');
+          }
+        } catch (error) {
+          console.error("TikTok callback error:", error);
+          toast.error(error.response?.data?.detail || "Erreur lors de la connexion TikTok");
+        } finally {
+          setLoading(false);
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    };
+    
+    if (code) {
+      processCallback();
     }
   }, []);
   
