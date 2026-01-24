@@ -1973,6 +1973,20 @@ const SocialMediaPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* TikTok Sandbox Authorization Modal */}
+      {showTikTokSandboxAuth && (
+        <TikTokSandboxAuth 
+          onAuthorize={handleTikTokSandboxAuthorize}
+          onCancel={() => setShowTikTokSandboxAuth(false)}
+        />
+      )}
+      
+      {/* TikTok API Logs Panel */}
+      <TikTokApiLogs 
+        show={showTikTokApiLogs}
+        onClose={() => setShowTikTokApiLogs(false)}
+      />
     </div>
   );
 };
