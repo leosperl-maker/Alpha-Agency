@@ -5125,14 +5125,21 @@ async def sync_meta_comments(account: dict, user_id: str) -> int:
     """Sync comments from Facebook/Instagram pages"""
     
     access_token = account.get("access_token")
-    pages = account.get("pages", [])
     new_count = 0
     
+    # The account IS the page now (new architecture: each page is a separate account)
+    # Check if this is a Facebook page account
+    if account.get("account_type") not in ["page", "facebook_page"]:
+        return 0
+    
+    page_id = account.get("external_id")
+    page_token = access_token
+    page_name = account.get("display_name", "Page")
+    
+    if not page_id or not page_token:
+        return 0
+    
     async with httpx.AsyncClient() as client:
-        for page in pages:
-            page_id = page.get("page_id")
-            page_token = page.get("access_token", access_token)
-            page_name = page.get("page_name", "Page")
             
             try:
                 # Get recent posts with comments
