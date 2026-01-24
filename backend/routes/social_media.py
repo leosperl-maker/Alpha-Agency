@@ -1015,6 +1015,53 @@ async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
         "accounts": synced_accounts
     }
 
+@router.post("/fix-accounts-ownership")
+async def fix_accounts_ownership(current_user: dict = Depends(get_current_user)):
+    """Fix accounts that were created without proper user_id/workspace_id"""
+    workspace_id = get_workspace_id(current_user)
+    user_id = get_user_id(current_user)
+    current_user_id = current_user.get("user_id", "")
+    
+    # Find accounts that belong to this user but might have wrong workspace_id
+    # Match by created_by or existing user_id
+    accounts_to_fix = await db.social_accounts.find({
+        "$or": [
+            {"created_by": user_id},
+            {"created_by": current_user_id},
+            {"user_id": user_id},
+            {"user_id": current_user_id},
+            {"workspace_id": "default"}  # Legacy accounts
+        ]
+    }).to_list(1000)
+    
+    fixed_count = 0
+    for acc in accounts_to_fix:
+        update_needed = False
+        update_data = {}
+        
+        # Add user_id if missing
+        if not acc.get("user_id"):
+            update_data["user_id"] = current_user_id
+            update_needed = True
+        
+        # Fix workspace_id if it's "default"
+        if acc.get("workspace_id") == "default" or not acc.get("workspace_id"):
+            update_data["workspace_id"] = workspace_id
+            update_needed = True
+        
+        if update_needed:
+            await db.social_accounts.update_one(
+                {"_id": acc["_id"]},
+                {"$set": update_data}
+            )
+            fixed_count += 1
+    
+    return {
+        "message": f"Fixed {fixed_count} accounts",
+        "fixed": fixed_count,
+        "total_found": len(accounts_to_fix)
+    }
+
 # ==================== SEED INITIAL ENTITIES ====================
 
 @router.post("/seed-entities")
