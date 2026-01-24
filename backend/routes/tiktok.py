@@ -107,13 +107,64 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 # ==================== SANDBOX STATUS ====================
 
+async def is_sandbox_enabled(user_id: str) -> bool:
+    """Check if sandbox mode is enabled for user (env var OR user preference)"""
+    # First check environment variable
+    if TIKTOK_SANDBOX:
+        return True
+    # Then check user preference
+    user_pref = await db.user_preferences.find_one({"user_id": user_id, "key": "tiktok_sandbox"})
+    return user_pref.get("value", False) if user_pref else False
+
 @router.get("/sandbox-status")
-async def get_sandbox_status():
+async def get_sandbox_status(current_user: dict = Depends(get_current_user)):
     """Get TikTok sandbox mode status"""
+    user_sandbox = await is_sandbox_enabled(current_user["user_id"])
+    
     return {
-        "sandbox_mode": TIKTOK_SANDBOX,
-        "message": "TikTok Sandbox Mode is ACTIVE - All API calls are simulated" if TIKTOK_SANDBOX else "TikTok Production Mode",
-        "info": "This mode allows recording a demo video for TikTok app review without real API calls." if TIKTOK_SANDBOX else None
+        "sandbox_mode": user_sandbox,
+        "env_sandbox": TIKTOK_SANDBOX,
+        "user_sandbox": not TIKTOK_SANDBOX and user_sandbox,
+        "message": "TikTok Sandbox Mode is ACTIVE - All API calls are simulated" if user_sandbox else "TikTok Production Mode",
+        "info": "This mode allows recording a demo video for TikTok app review without real API calls." if user_sandbox else None,
+        "can_toggle": True  # User can toggle sandbox mode
+    }
+
+@router.post("/sandbox-toggle")
+async def toggle_sandbox_mode(current_user: dict = Depends(get_current_user)):
+    """Toggle TikTok sandbox mode for user"""
+    user_id = current_user["user_id"]
+    
+    # Get current preference
+    user_pref = await db.user_preferences.find_one({"user_id": user_id, "key": "tiktok_sandbox"})
+    
+    if user_pref:
+        new_value = not user_pref.get("value", False)
+        await db.user_preferences.update_one(
+            {"user_id": user_id, "key": "tiktok_sandbox"},
+            {"$set": {"value": new_value, "updated_at": datetime.now(timezone.utc).isoformat()}}
+        )
+    else:
+        new_value = True
+        await db.user_preferences.insert_one({
+            "user_id": user_id,
+            "key": "tiktok_sandbox",
+            "value": new_value,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        })
+    
+    # Clear sandbox data when disabling
+    if not new_value:
+        # Optionally delete sandbox accounts
+        await db.social_accounts.delete_many({"user_id": user_id, "is_sandbox": True})
+        await db.tiktok_posts.delete_many({"user_id": user_id, "is_sandbox": True})
+    
+    log_sandbox_api("POST", "/tiktok/sandbox-toggle", 200, f"Sandbox mode {'enabled' if new_value else 'disabled'}")
+    
+    return {
+        "sandbox_mode": new_value,
+        "message": f"TikTok Sandbox Mode {'activé' if new_value else 'désactivé'}"
     }
 
 @router.get("/api-logs")
