@@ -193,8 +193,8 @@ class PublicationWorker:
         media_urls: list
     ) -> dict:
         """Publish to Facebook page"""
-        # In new architecture, each account is a page with its own token
-        access_token = account.get("access_token")
+        # Get decrypted access token
+        access_token = get_account_access_token(account)
         page_id = account.get("external_id")
         
         if not access_token:
