@@ -508,24 +508,38 @@ async def link_account_to_entity(
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
     
-    # Check if link already exists
+    # Update account with entity_id
+    current_entity_ids = account.get("entity_ids", [])
+    if entity_id not in current_entity_ids:
+        current_entity_ids.append(entity_id)
+    
+    await db.social_accounts.update_one(
+        {"id": account_id},
+        {"$set": {"entity_ids": current_entity_ids, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Also create link in junction table for reference
     existing = await db.entity_social_accounts.find_one({
         "entity_id": entity_id,
         "social_account_id": account_id
     })
     
-    if existing:
-        return {"message": "Link already exists"}
+    if not existing:
+        await db.entity_social_accounts.insert_one({
+            "id": str(uuid.uuid4()),
+            "entity_id": entity_id,
+            "social_account_id": account_id,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
     
-    # Create link
-    await db.entity_social_accounts.insert_one({
-        "id": str(uuid.uuid4()),
-        "entity_id": entity_id,
-        "social_account_id": account_id,
-        "created_at": datetime.now(timezone.utc).isoformat()
-    })
+    # Update entity account count
+    count = await db.social_accounts.count_documents({"entity_ids": entity_id})
+    await db.social_entities.update_one(
+        {"id": entity_id},
+        {"$set": {"account_count": count}}
+    )
     
-    return {"message": "Account linked to entity"}
+    return {"message": "Account linked to entity", "entity_id": entity_id, "account_id": account_id}
 
 @router.delete("/entities/{entity_id}/accounts/{account_id}")
 async def unlink_account_from_entity(
