@@ -968,29 +968,30 @@ async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
     synced_accounts = []
     
     for page in pages:
-        # Check if this page is already in the new system
+        # Check if this page is already in the system (flexible query)
         existing = await db.social_accounts.find_one({
             "platform": "facebook",
-            "external_id": page["page_id"],
-            "workspace_id": workspace_id
+            "external_id": page["page_id"]
         })
         
         if existing:
             # Update existing
             await db.social_accounts.update_one(
-                {"id": existing["id"]},
+                {"_id": existing["_id"]},
                 {"$set": {
                     "display_name": page["page_name"],
                     "profile_picture_url": page.get("picture_url"),
                     "status": "active",
+                    "user_id": user_id,
+                    "workspace_id": workspace_id,
                     "updated_at": datetime.now(timezone.utc).isoformat()
                 }}
             )
-            synced_accounts.append({**existing, "updated": True})
+            synced_accounts.append({"id": existing.get("id"), "platform": "facebook", "name": page["page_name"], "updated": True})
         else:
             # Create new social account for this page
             account_id = str(uuid.uuid4())
-            access_token = page.get("access_token", meta_account.get("access_token", ""))
+            page_access_token = page.get("access_token", meta_account.get("access_token", ""))
             
             new_account = {
                 "id": account_id,
@@ -1002,7 +1003,7 @@ async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
                 "display_name": page["page_name"],
                 "username": page.get("page_name", "").lower().replace(" ", ""),
                 "profile_picture_url": page.get("picture_url"),
-                "access_token_encrypted": encrypt_token(access_token) if access_token else None,
+                "access_token_encrypted": encrypt_token(page_access_token) if page_access_token else None,
                 "token_expires_at": meta_account.get("token_expires_at"),
                 "metadata": {
                     "category": page.get("category"),
@@ -1016,8 +1017,7 @@ async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
             }
             
             await db.social_accounts.insert_one(new_account)
-            new_account.pop("access_token_encrypted", None)
-            new_account.pop("_id", None)
+            synced_accounts.append({"id": account_id, "platform": "facebook", "name": page["page_name"], "created": True})
             synced_accounts.append({**new_account, "created": True})
             
             # Also create Instagram account if available
