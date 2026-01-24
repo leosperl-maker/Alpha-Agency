@@ -315,11 +315,16 @@ class PublicationWorker:
         media_urls: list
     ) -> dict:
         """Publish to LinkedIn"""
-        access_token = account.get("access_token")
+        access_token = get_account_access_token(account)
         linkedin_id = account.get("external_id")
         
         if not access_token:
             return {"error": "No LinkedIn access token"}
+        
+        if not linkedin_id:
+            return {"error": "No LinkedIn user ID"}
+        
+        logger.info(f"Publishing to LinkedIn user {linkedin_id}")
         
         post_payload = {
             "author": f"urn:li:person:{linkedin_id}",
@@ -337,25 +342,31 @@ class PublicationWorker:
             }
         }
         
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "https://api.linkedin.com/v2/ugcPosts",
-                json=post_payload,
-                headers={
-                    "Authorization": f"Bearer {access_token}",
-                    "Content-Type": "application/json",
-                    "X-Restli-Protocol-Version": "2.0.0"
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            try:
+                response = await client.post(
+                    "https://api.linkedin.com/v2/ugcPosts",
+                    json=post_payload,
+                    headers={
+                        "Authorization": f"Bearer {access_token}",
+                        "Content-Type": "application/json",
+                        "X-Restli-Protocol-Version": "2.0.0"
+                    }
+                )
+                
+                if response.status_code not in [200, 201]:
+                    error_text = response.text
+                    logger.error(f"LinkedIn API error: {error_text}")
+                    return {"error": f"LinkedIn API error: {error_text[:200]}"}
+                
+                result = response.json()
+                return {
+                    "id": result.get("id"),
+                    "url": "https://linkedin.com"
                 }
-            )
-            
-            if response.status_code not in [200, 201]:
-                return {"error": f"LinkedIn API error: {response.text}"}
-            
-            result = response.json()
-            return {
-                "id": result.get("id"),
-                "url": "https://linkedin.com"
-            }
+            except Exception as e:
+                logger.error(f"LinkedIn publish error: {e}")
+                return {"error": str(e)}
     
     async def publish_to_tiktok(
         self, 
