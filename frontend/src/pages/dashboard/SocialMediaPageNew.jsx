@@ -54,6 +54,7 @@ const PLATFORMS = {
   instagram: { name: 'Instagram', icon: Instagram, color: '#E4405F', bgColor: 'bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737]' },
   linkedin: { name: 'LinkedIn', icon: Linkedin, color: '#0A66C2', bgColor: 'bg-[#0A66C2]' },
   tiktok: { name: 'TikTok', icon: Play, color: '#000000', bgColor: 'bg-black' },
+  meta: { name: 'Meta', icon: Facebook, color: '#1877F2', bgColor: 'bg-[#1877F2]' },
 };
 
 const POST_STATUSES = {
