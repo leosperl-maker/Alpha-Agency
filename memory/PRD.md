@@ -186,6 +186,38 @@ POST   /api/editorial/ai/improve-caption
 4. ~~**Workers Backend**~~ ✅ DONE - Publication programmée automatique
 5. ~~**LinkedIn Integration**~~ ✅ DONE - OAuth et publication
 6. ~~**TikTok Integration**~~ ✅ DONE - OAuth connecté (publication nécessite review TikTok)
+7. **TikTok Sandbox Mode** ✅ NEW 2026-01-24 - Mode démo pour vidéo de review TikTok
+
+#### TikTok Sandbox Mode ✅ COMPLETE 2026-01-24
+
+Implémentation complète d'un mode sandbox pour enregistrer une vidéo de démonstration pour la review TikTok.
+
+**Fonctionnalités:**
+- Variable d'environnement `TIKTOK_SANDBOX=true` pour activer
+- Page d'autorisation OAuth simulée dans le frontend
+- Création de compte TikTok sandbox avec métadonnées simulées
+- Création de posts sandbox avec simulation de statut (scheduled → publishing → published)
+- Panneau "API Logs" affichant tous les appels API simulés
+- Bannière "TikTok Sandbox Mode" visible dans l'interface
+- Badge "Sandbox" sur les comptes et posts TikTok sandbox
+- Tous les logs API enregistrés pour la démo vidéo
+
+**Fichiers:**
+- `/app/backend/routes/tiktok.py` - Logique sandbox complète (sandbox-authorize, publish, api-logs)
+- `/app/frontend/src/components/TikTokSandbox.jsx` - Composants UI sandbox
+- `/app/frontend/src/pages/dashboard/SocialMediaPageNew.jsx` - Intégration sandbox UI
+
+**Endpoints TikTok Sandbox:**
+```
+GET    /api/tiktok/sandbox-status
+GET    /api/tiktok/api-logs
+DELETE /api/tiktok/api-logs
+POST   /api/tiktok/sandbox-authorize
+POST   /api/tiktok/publish
+POST   /api/tiktok/simulate-scheduled-publish/{post_id}
+GET    /api/tiktok/accounts
+GET    /api/tiktok/posts
+```
 
 #### API Routes - Social Media
 ```
