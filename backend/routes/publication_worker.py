@@ -227,49 +227,60 @@ class PublicationWorker:
         if not media_urls:
             return {"error": "Instagram requires media for publishing"}
         
-        # Find Instagram account linked to Facebook page
-        pages = account.get("pages", [])
-        ig_page = next((p for p in pages if p.get("has_instagram")), None)
+        # In new architecture, Instagram accounts are stored separately
+        # with account_type = "instagram_business"
+        ig_id = account.get("external_id")
+        access_token = account.get("access_token")
         
-        if not ig_page:
-            return {"error": "No Instagram account linked"}
+        if not ig_id:
+            return {"error": "No Instagram account ID found"}
         
-        ig_id = ig_page.get("instagram_id")
-        access_token = ig_page.get("access_token") or account.get("access_token")
+        if not access_token:
+            return {"error": "No access token for Instagram"}
         
-        async with httpx.AsyncClient() as client:
-            # Step 1: Create media container
-            container_response = await client.post(
-                f"https://graph.facebook.com/v20.0/{ig_id}/media",
-                params={
-                    "image_url": media_urls[0],
-                    "caption": content,
-                    "access_token": access_token
+        logger.info(f"Publishing to Instagram account {ig_id}")
+        
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            try:
+                # Step 1: Create media container
+                container_response = await client.post(
+                    f"https://graph.facebook.com/v20.0/{ig_id}/media",
+                    params={
+                        "image_url": media_urls[0],
+                        "caption": content,
+                        "access_token": access_token
+                    }
+                )
+                
+                if container_response.status_code != 200:
+                    error_data = container_response.json()
+                    error_msg = error_data.get("error", {}).get("message", container_response.text)
+                    return {"error": f"Container creation failed: {error_msg}"}
+                
+                container_id = container_response.json().get("id")
+                
+                # Step 2: Publish the container
+                publish_response = await client.post(
+                    f"https://graph.facebook.com/v20.0/{ig_id}/media_publish",
+                    params={
+                        "creation_id": container_id,
+                        "access_token": access_token
+                    }
+                )
+                
+                if publish_response.status_code != 200:
+                    error_data = publish_response.json()
+                    error_msg = error_data.get("error", {}).get("message", publish_response.text)
+                    return {"error": f"Publishing failed: {error_msg}"}
+                
+                result = publish_response.json()
+                return {
+                    "id": result.get("id"),
+                    "url": f"https://instagram.com"
                 }
-            )
-            
-            if container_response.status_code != 200:
-                return {"error": f"Container creation failed: {container_response.text}"}
-            
-            container_id = container_response.json().get("id")
-            
-            # Step 2: Publish the container
-            publish_response = await client.post(
-                f"https://graph.facebook.com/v20.0/{ig_id}/media_publish",
-                params={
-                    "creation_id": container_id,
-                    "access_token": access_token
-                }
-            )
-            
-            if publish_response.status_code != 200:
-                return {"error": f"Publishing failed: {publish_response.text}"}
-            
-            result = publish_response.json()
-            return {
-                "id": result.get("id"),
-                "url": f"https://instagram.com"
-            }
+            except Exception as e:
+                logger.error(f"Instagram publish error: {e}")
+                return {"error": str(e)}
     
     async def publish_to_linkedin(
         self, 
