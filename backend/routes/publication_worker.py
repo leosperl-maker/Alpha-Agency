@@ -87,10 +87,15 @@ class PublicationWorker:
         content = post.get("content", "")
         media_urls = post.get("media_urls", [])
         
-        logger.info(f"Publishing post {post_id} to {platforms}")
+        logger.info(f"Publishing post {post_id} to accounts: {account_ids}")
         
         results = []
         errors = []
+        
+        # Check if any accounts are selected
+        if not account_ids:
+            errors.append("Aucun compte sélectionné pour la publication")
+            logger.warning(f"Post {post_id} has no accounts selected")
         
         # Get accounts
         for account_id in account_ids:
