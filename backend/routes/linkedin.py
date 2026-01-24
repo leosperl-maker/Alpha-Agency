@@ -12,6 +12,8 @@ from pydantic import BaseModel
 from typing import Optional, List
 from motor.motor_asyncio import AsyncIOMotorClient
 
+import urllib.parse
+
 router = APIRouter(prefix="/linkedin", tags=["LinkedIn"])
 
 # Database connection
