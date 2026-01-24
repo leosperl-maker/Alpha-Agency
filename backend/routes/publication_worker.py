@@ -10,6 +10,7 @@ import logging
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 from motor.motor_asyncio import AsyncIOMotorClient
+from cryptography.fernet import Fernet
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -25,6 +26,26 @@ db = client[DB_NAME]
 # Meta API configuration
 META_APP_ID = os.environ.get("META_APP_ID")
 META_APP_SECRET = os.environ.get("META_APP_SECRET")
+
+# Token encryption
+ENCRYPTION_KEY = os.environ.get("ENCRYPTION_KEY", Fernet.generate_key().decode())
+fernet = Fernet(ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY)
+
+def decrypt_token(encrypted: str) -> str:
+    """Decrypt an encrypted token"""
+    try:
+        return fernet.decrypt(encrypted.encode()).decode()
+    except Exception as e:
+        logger.error(f"Failed to decrypt token: {e}")
+        return ""
+
+def get_account_access_token(account: dict) -> str:
+    """Get the decrypted access token from an account"""
+    # First try encrypted token
+    if account.get("access_token_encrypted"):
+        return decrypt_token(account["access_token_encrypted"])
+    # Fallback to plain token (for backward compatibility)
+    return account.get("access_token", "")
 
 
 class PublicationWorker:
