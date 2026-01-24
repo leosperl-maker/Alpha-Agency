@@ -191,7 +191,9 @@ async def get_tiktok_auth_url(
 ):
     """Generate TikTok OAuth2 authorization URL"""
     
-    if TIKTOK_SANDBOX:
+    sandbox_enabled = await is_sandbox_enabled(current_user["user_id"])
+    
+    if sandbox_enabled:
         # In sandbox mode, redirect to our sandbox auth page
         log_sandbox_api("GET", "/tiktok/auth-url", 200, "Sandbox OAuth URL generated")
         
