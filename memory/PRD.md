@@ -307,16 +307,19 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 2. **Impossible de sauvegarder/programmer/publier** - Erreur lors de la sauvegarde
 3. **Sync DMs/Commentaires crash** - Erreur lors de la synchronisation
 4. **LinkedIn OAuth** - Non fonctionnel sur production (redirect_uri mismatch probable)
-5. **Bouton "Publier maintenant" inactif** - CORRIGÉ: condition `disabled` incorrecte dans SocialComposer.jsx
+5. **Bouton "Publier maintenant" inactif** - ✅ CORRIGÉ: condition `disabled` incorrecte dans SocialComposer.jsx
 
-### Corrections apportées (environnement développement):
-- ✅ Fix condition bouton "Publier maintenant" dans SocialComposer.jsx
-- ✅ TikTok Sandbox mode complet pour vidéo de review
+### Corrections apportées cette session:
+- ✅ **TikTok Sandbox Mode complet** pour vidéo de review
+- ✅ **Fix bouton "Publier maintenant"** dans SocialComposer.jsx (disabled condition)
+- ✅ **Fix publication immédiate** - statut `publishing` au lieu de `draft` (server.py ligne 4836)
+- ✅ **Fix sync_meta_comments** - adapté à la nouvelle architecture (pages = comptes séparés)
 
 ### À vérifier sur production après déploiement:
 - Meta pages/Instagram accounts display
 - Entity linking fonctionnel
 - LinkedIn OAuth callback
+- Dashboard loading issues (peut nécessiter investigation logs production)
 
 ## Files Modified 2026-01-23
 - `/app/backend/server.py` - ScheduledPost model, inbox sync, mark-all-read
