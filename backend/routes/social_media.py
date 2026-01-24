@@ -903,30 +903,67 @@ async def get_stats_per_entity(
 @router.post("/sync-meta-accounts")
 async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
     """Sync Meta (Facebook/Instagram) pages to social accounts system"""
+    import httpx
+    
     workspace_id = get_workspace_id(current_user)
-    user_id = get_user_id(current_user)
+    user_id = current_user.get("user_id", get_user_id(current_user))
     
-    # Get Meta account from the meta.py system (uses user_id and platform="meta")
+    # Get Meta account - try multiple queries for compatibility
     meta_account = await db.social_accounts.find_one({
-        "user_id": user_id,
         "platform": "meta",
-        "is_active": True
+        "is_active": True,
+        "$or": [
+            {"user_id": user_id},
+            {"user_id": current_user.get("user_id")},
+            {"workspace_id": workspace_id},
+            {"workspace_id": "default"}
+        ]
     })
-    
-    if not meta_account:
-        # Also try with current_user["user_id"] directly
-        meta_account = await db.social_accounts.find_one({
-            "user_id": current_user.get("user_id"),
-            "platform": "meta",
-            "is_active": True
-        })
     
     if not meta_account:
         raise HTTPException(status_code=404, detail="No Meta account connected. Please connect via Facebook first.")
     
+    # Fetch pages directly from Meta API if not cached
     pages = meta_account.get("pages", [])
+    access_token = meta_account.get("access_token")
+    
+    if not pages and access_token:
+        # Fetch pages from Meta Graph API
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(
+                    f"https://graph.facebook.com/v19.0/me/accounts",
+                    params={
+                        "fields": "id,name,category,access_token,picture,instagram_business_account",
+                        "access_token": access_token
+                    }
+                )
+                
+                if response.status_code == 200:
+                    pages_data = response.json().get("data", [])
+                    pages = []
+                    for page in pages_data:
+                        page_obj = {
+                            "page_id": page["id"],
+                            "page_name": page["name"],
+                            "category": page.get("category", ""),
+                            "access_token": page.get("access_token"),
+                            "picture_url": page.get("picture", {}).get("data", {}).get("url"),
+                            "has_instagram": page.get("instagram_business_account") is not None,
+                            "instagram_id": page.get("instagram_business_account", {}).get("id") if page.get("instagram_business_account") else None
+                        }
+                        pages.append(page_obj)
+                    
+                    # Store pages in meta account
+                    await db.social_accounts.update_one(
+                        {"_id": meta_account["_id"]},
+                        {"$set": {"pages": pages, "updated_at": datetime.now(timezone.utc).isoformat()}}
+                    )
+        except Exception as e:
+            logger.error(f"Error fetching Meta pages: {e}")
+    
     if not pages:
-        return {"message": "No pages found. Please refresh your Meta pages.", "synced": 0}
+        return {"message": "No pages found. Please check your Meta permissions.", "synced": 0}
     
     synced_accounts = []
     
