@@ -1055,15 +1055,22 @@ const SocialMediaPage = () => {
     );
   };
 
-  const renderQueue = (status) => {
-    const filteredPosts = posts.filter(p => p.status === status);
+  const renderQueue = (statuses) => {
+    // Accept single status or array of statuses
+    const statusArray = Array.isArray(statuses) ? statuses : [statuses];
+    const filteredPosts = posts.filter(p => statusArray.includes(p.status));
+    
+    // Determine label for empty state
+    const emptyLabel = statusArray.includes('draft') ? 'en brouillon' : 
+                       statusArray.includes('scheduled') ? 'en attente' : 
+                       'publié';
     
     return (
       <div className="space-y-3">
         {filteredPosts.length === 0 ? (
           <div className="text-center py-8 sm:py-12 text-white/40">
             <FileText className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 opacity-50" />
-            <p className="text-sm sm:text-base">Aucun post {status === 'draft' ? 'en brouillon' : status === 'scheduled' ? 'programmé' : 'publié'}</p>
+            <p className="text-sm sm:text-base">Aucun post {emptyLabel}</p>
             <Button 
               onClick={() => setShowComposer(true)}
               className="mt-4 bg-indigo-600"
@@ -1105,6 +1112,12 @@ const SocialMediaPage = () => {
                     })}
                   </div>
                   <p className="text-white text-xs line-clamp-2">{post.content}</p>
+                  {post.error_message && (
+                    <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      {post.error_message}
+                    </p>
+                  )}
                 </div>
               </div>
               
@@ -1121,6 +1134,16 @@ const SocialMediaPage = () => {
                 </div>
                 
                 <p className="text-white text-sm line-clamp-2 mb-2">{post.content}</p>
+                
+                {/* Error message if any */}
+                {post.error_message && (
+                  <div className="bg-red-500/10 border border-red-500/30 rounded px-2 py-1 mb-2">
+                    <p className="text-red-400 text-xs flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      {post.error_message}
+                    </p>
+                  </div>
+                )}
                 
                 <div className="flex items-center gap-4 text-xs text-white/50">
                   {post.scheduled_at && (
