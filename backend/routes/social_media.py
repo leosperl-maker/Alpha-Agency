@@ -981,6 +981,7 @@ async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
                 ig_account_id = str(uuid.uuid4())
                 ig_account = {
                     "id": ig_account_id,
+                    "user_id": user_id,
                     "workspace_id": workspace_id,
                     "platform": "instagram",
                     "account_type": "business",
