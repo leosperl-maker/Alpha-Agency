@@ -100,13 +100,15 @@ async def get_linkedin_auth_url(
         "created_at": datetime.now(timezone.utc).isoformat()
     })
     
+    # Properly encode redirect_uri and scope for URL
+    encoded_redirect = urllib.parse.quote(redirect_uri, safe='')
     scope = "%20".join(LINKEDIN_SCOPES)
     
     auth_url = (
         f"{LINKEDIN_AUTH_URL}"
         f"?response_type=code"
         f"&client_id={LINKEDIN_CLIENT_ID}"
-        f"&redirect_uri={redirect_uri}"
+        f"&redirect_uri={encoded_redirect}"
         f"&scope={scope}"
         f"&state={state}"
     )
