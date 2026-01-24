@@ -769,6 +769,19 @@ const SocialMediaPage = () => {
     await loadData();
   };
   
+  const handleToggleTikTokSandbox = async () => {
+    try {
+      const response = await api.post('/tiktok/sandbox-toggle');
+      setTiktokSandboxMode(response.data.sandbox_mode);
+      toast.success(response.data.message);
+      // Reload data to refresh accounts
+      await loadData();
+    } catch (error) {
+      console.error('Error toggling sandbox:', error);
+      toast.error('Erreur lors du changement de mode');
+    }
+  };
+  
   const handleTriggerTikTokPublish = async (postId) => {
     try {
       const response = await api.post(`/tiktok/simulate-scheduled-publish/${postId}`);
