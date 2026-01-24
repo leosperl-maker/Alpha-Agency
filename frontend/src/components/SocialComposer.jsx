@@ -646,7 +646,14 @@ const SocialComposer = ({
         toast.success('Post mis à jour');
       } else {
         await api.post('/social/posts', postData);
-        toast.success(asDraft ? 'Brouillon enregistré' : 'Post programmé');
+        // Message approprié selon le type de publication
+        if (asDraft) {
+          toast.success('Brouillon enregistré');
+        } else if (scheduledDate && scheduledTime) {
+          toast.success('Post programmé');
+        } else {
+          toast.success('Publication en cours...');
+        }
       }
 
       onSuccess?.();
