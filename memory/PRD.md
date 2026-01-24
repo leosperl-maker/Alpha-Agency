@@ -293,6 +293,31 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 - **TikTok API:** OAuth ✅ (Client Key: awz0lr5px7ek23jj) - Publication nécessite review
 - **Cryptography:** Chiffrement tokens ✅
 
+## Files Modified 2026-01-24
+- `/app/backend/routes/tiktok.py` - Réécriture complète pour sandbox mode
+- `/app/backend/.env` - TIKTOK_SANDBOX=true ajouté
+- `/app/frontend/src/components/TikTokSandbox.jsx` - NEW: Composants UI sandbox (Auth, ApiLogs, Banner, PostComposer, PostsList)
+- `/app/frontend/src/components/SocialComposer.jsx` - Fix bouton "Publier maintenant" disabled condition
+- `/app/frontend/src/pages/dashboard/SocialMediaPageNew.jsx` - Intégration TikTok Sandbox (handleConnectTikTok, sandbox auth modal, api logs panel, banner)
+
+## Bugs Identifiés 2026-01-24 (Production alphagency.fr)
+
+### Problèmes signalés par l'utilisateur:
+1. **Dashboard crashé** - Erreurs de chargement intermittentes sur production
+2. **Impossible de sauvegarder/programmer/publier** - Erreur lors de la sauvegarde
+3. **Sync DMs/Commentaires crash** - Erreur lors de la synchronisation
+4. **LinkedIn OAuth** - Non fonctionnel sur production (redirect_uri mismatch probable)
+5. **Bouton "Publier maintenant" inactif** - CORRIGÉ: condition `disabled` incorrecte dans SocialComposer.jsx
+
+### Corrections apportées (environnement développement):
+- ✅ Fix condition bouton "Publier maintenant" dans SocialComposer.jsx
+- ✅ TikTok Sandbox mode complet pour vidéo de review
+
+### À vérifier sur production après déploiement:
+- Meta pages/Instagram accounts display
+- Entity linking fonctionnel
+- LinkedIn OAuth callback
+
 ## Files Modified 2026-01-23
 - `/app/backend/server.py` - ScheduledPost model, inbox sync, mark-all-read
 - `/app/backend/routes/social_media.py` - Module complet entités/comptes/posts
