@@ -266,6 +266,14 @@ POST   /api/tiktok/exchange-token
 GET    /api/tiktok/profile
 POST   /api/tiktok/refresh-token
 DELETE /api/tiktok/disconnect
+GET    /api/tiktok/sandbox-status     # NEW: Sandbox mode
+GET    /api/tiktok/api-logs           # NEW: Sandbox logs
+DELETE /api/tiktok/api-logs           # NEW: Clear logs
+POST   /api/tiktok/sandbox-authorize  # NEW: Sandbox auth
+POST   /api/tiktok/publish            # NEW: Publish/schedule
+POST   /api/tiktok/simulate-scheduled-publish/{post_id}  # NEW: Trigger scheduled
+GET    /api/tiktok/accounts           # NEW: List TikTok accounts
+GET    /api/tiktok/posts              # NEW: List TikTok posts
 ```
 
 ## Tests Effectués ✅
