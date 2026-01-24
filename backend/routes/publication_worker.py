@@ -167,47 +167,45 @@ class PublicationWorker:
     async def publish_to_facebook(
         self, 
         account: dict, 
-        page_id: str,
+        account_id: str,
         content: str, 
         media_urls: list
     ) -> dict:
         """Publish to Facebook page"""
-        # Find the page token
-        pages = account.get("pages", [])
-        page = next((p for p in pages if p.get("page_id") == page_id), None)
-        
-        if not page:
-            # Maybe the account itself is a page
-            access_token = account.get("access_token")
-            page_id = account.get("external_id") or page_id
-        else:
-            access_token = page.get("access_token")
+        # In new architecture, each account is a page with its own token
+        access_token = account.get("access_token")
+        page_id = account.get("external_id")
         
         if not access_token:
             return {"error": "No access token for page"}
         
-        async with httpx.AsyncClient() as client:
-            if media_urls:
-                # Post with media
-                # First upload photo
-                photo_url = media_urls[0]
-                response = await client.post(
-                    f"https://graph.facebook.com/v20.0/{page_id}/photos",
-                    params={
-                        "url": photo_url,
-                        "message": content,
-                        "access_token": access_token
-                    }
-                )
-            else:
-                # Text only post
-                response = await client.post(
-                    f"https://graph.facebook.com/v20.0/{page_id}/feed",
-                    params={
-                        "message": content,
-                        "access_token": access_token
-                    }
-                )
+        if not page_id:
+            return {"error": "No page ID found"}
+        
+        logger.info(f"Publishing to Facebook page {page_id}")
+        
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            try:
+                if media_urls:
+                    # Post with media
+                    photo_url = media_urls[0]
+                    response = await client.post(
+                        f"https://graph.facebook.com/v20.0/{page_id}/photos",
+                        params={
+                            "url": photo_url,
+                            "message": content,
+                            "access_token": access_token
+                        }
+                    )
+                else:
+                    # Text only post
+                    response = await client.post(
+                        f"https://graph.facebook.com/v20.0/{page_id}/feed",
+                        params={
+                            "message": content,
+                            "access_token": access_token
+                        }
+                    )
             
             if response.status_code != 200:
                 error_data = response.json()
