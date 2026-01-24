@@ -950,6 +950,7 @@ async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
             
             new_account = {
                 "id": account_id,
+                "user_id": user_id,
                 "workspace_id": workspace_id,
                 "platform": "facebook",
                 "account_type": "page",
