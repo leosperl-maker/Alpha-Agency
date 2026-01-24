@@ -1681,10 +1681,22 @@ const SocialMediaPage = () => {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleConnectTikTok} className="text-white/80 cursor-pointer">
                 <Play className="w-4 h-4 mr-2" />
-                TikTok
+                TikTok {tiktokSandboxMode && <Badge className="ml-2 bg-cyan-500/20 text-cyan-400 text-[10px] border-none">Sandbox</Badge>}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          {/* TikTok API Logs button - only visible in sandbox mode */}
+          {tiktokSandboxMode && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+              onClick={() => setShowTikTokApiLogs(true)}
+            >
+              <AlertTriangle className="w-4 h-4 mr-1" />
+              API Logs
+            </Button>
+          )}
           </div>
         </CardHeader>
         <CardContent className="p-3 sm:p-6 pt-0">
