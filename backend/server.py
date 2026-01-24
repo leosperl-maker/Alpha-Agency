@@ -5246,37 +5246,73 @@ async def sync_meta_comments(account: dict, user_id: str) -> int:
 # Calendar View Data
 @api_router.get("/social/calendar", response_model=dict)
 async def get_social_calendar(
-    month: int,
-    year: int,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
+    month: Optional[int] = None,
+    year: Optional[int] = None,
+    entity_id: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    account_ids: Optional[str] = None
 ):
-    """Get calendar view data for scheduled posts"""
-    # Calculate date range for the month
-    start_date = f"{year}-{month:02d}-01T00:00:00"
-    if month == 12:
-        end_date = f"{year + 1}-01-01T00:00:00"
-    else:
-        end_date = f"{year}-{month + 1:02d}-01T00:00:00"
+    """Get calendar view data for posts"""
+    user_id = current_user["user_id"]
     
+    # Build query
+    query = {"user_id": user_id}
+    
+    # Filter by entity if provided
+    if entity_id:
+        query["entity_id"] = entity_id
+    
+    # Filter by accounts if provided
+    if account_ids:
+        account_list = account_ids.split(',')
+        query["account_ids"] = {"$in": account_list}
+    
+    # Calculate date range
+    if start_date and end_date:
+        # Use provided dates
+        start_dt = f"{start_date}T00:00:00"
+        end_dt = f"{end_date}T23:59:59"
+    elif month and year:
+        # Use month/year format
+        start_dt = f"{year}-{month:02d}-01T00:00:00"
+        if month == 12:
+            end_dt = f"{year + 1}-01-01T00:00:00"
+        else:
+            end_dt = f"{year}-{month + 1:02d}-01T00:00:00"
+    else:
+        # Default to current month
+        from datetime import date
+        today = date.today()
+        start_dt = f"{today.year}-{today.month:02d}-01T00:00:00"
+        if today.month == 12:
+            end_dt = f"{today.year + 1}-01-01T00:00:00"
+        else:
+            end_dt = f"{today.year}-{today.month + 1:02d}-01T00:00:00"
+    
+    # Query posts - include both scheduled_at and created_at for immediate posts
     posts = await db.scheduled_posts.find({
-        "user_id": current_user["user_id"],
-        "scheduled_at": {"$gte": start_date, "$lt": end_date}
+        **query,
+        "$or": [
+            {"scheduled_at": {"$gte": start_dt, "$lt": end_dt}},
+            {"scheduled_at": None, "created_at": {"$gte": start_dt, "$lt": end_dt}}
+        ]
     }, {"_id": 0}).to_list(500)
     
     # Group by date
     calendar_data = {}
     for post in posts:
-        date_key = post["scheduled_at"][:10]  # YYYY-MM-DD
-        if date_key not in calendar_data:
-            calendar_data[date_key] = []
-        calendar_data[date_key].append(post)
+        # Use scheduled_at if available, otherwise use created_at
+        date_field = post.get("scheduled_at") or post.get("created_at")
+        if date_field:
+            date_key = date_field[:10]  # YYYY-MM-DD
+            if date_key not in calendar_data:
+                calendar_data[date_key] = []
+            calendar_data[date_key].append(post)
     
-    return {
-        "month": month,
-        "year": year,
-        "posts_by_date": calendar_data,
-        "total_posts": len(posts)
-    }
+    # Return in format expected by frontend
+    return calendar_data
 
 # Social Stats
 @api_router.get("/social/stats", response_model=dict)
