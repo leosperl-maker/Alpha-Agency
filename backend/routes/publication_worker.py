@@ -256,7 +256,7 @@ class PublicationWorker:
         # In new architecture, Instagram accounts are stored separately
         # with account_type = "instagram_business"
         ig_id = account.get("external_id")
-        access_token = account.get("access_token")
+        access_token = get_account_access_token(account)
         
         if not ig_id:
             return {"error": "No Instagram account ID found"}
