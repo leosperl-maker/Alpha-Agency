@@ -1561,13 +1561,37 @@ const SocialMediaPage = () => {
               {accounts.length} compte{accounts.length > 1 ? 's' : ''} connecté{accounts.length > 1 ? 's' : ''}
             </CardDescription>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="bg-indigo-600 w-full sm:w-auto" size="sm">
-                <Plus className="w-4 h-4 mr-1" />
-                Connecter
-              </Button>
-            </DropdownMenuTrigger>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/20 text-white/70 hover:text-white hover:bg-white/10 flex-1 sm:flex-none"
+              onClick={async () => {
+                try {
+                  setLoading(true);
+                  toast.info('Synchronisation en cours...');
+                  await api.post('/social/fix-accounts-ownership');
+                  const res = await api.post('/social/sync-meta-accounts');
+                  await loadData();
+                  toast.success(`${res.data.synced || 0} compte(s) synchronisé(s)`);
+                } catch (error) {
+                  console.error('Sync error:', error);
+                  toast.error(error.response?.data?.detail || 'Erreur de synchronisation');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              <RefreshCw className="w-4 h-4 mr-1" />
+              Sync Meta
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="bg-indigo-600 flex-1 sm:flex-none" size="sm">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Connecter
+                </Button>
+              </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-slate-900 border-white/10">
               <DropdownMenuLabel className="text-white/50">Plateformes</DropdownMenuLabel>
               <DropdownMenuItem onClick={handleConnectMeta} className="text-white/80 cursor-pointer">
