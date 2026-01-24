@@ -206,16 +206,21 @@ class PublicationWorker:
                             "access_token": access_token
                         }
                     )
-            
-            if response.status_code != 200:
-                error_data = response.json()
-                return {"error": error_data.get("error", {}).get("message", response.text)}
-            
-            result = response.json()
-            return {
-                "id": result.get("id") or result.get("post_id"),
-                "url": f"https://facebook.com/{result.get('id', '')}"
-            }
+                
+                if response.status_code != 200:
+                    error_data = response.json()
+                    error_msg = error_data.get("error", {}).get("message", response.text)
+                    logger.error(f"Facebook API error: {error_msg}")
+                    return {"error": error_msg}
+                
+                result = response.json()
+                return {
+                    "id": result.get("id") or result.get("post_id"),
+                    "url": f"https://facebook.com/{result.get('id', '')}"
+                }
+            except Exception as e:
+                logger.error(f"Facebook publish error: {e}")
+                return {"error": str(e)}
     
     async def publish_to_instagram(
         self, 
