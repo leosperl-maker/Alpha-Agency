@@ -1873,7 +1873,7 @@ const SocialMediaPage = () => {
       </div>
       
       {/* TikTok Sandbox Banner */}
-      {tiktokSandboxMode && <TikTokSandboxBanner />}
+      {tiktokSandboxMode && <TikTokSandboxBanner onToggle={handleToggleTikTokSandbox} />}
       
       {/* Content */}
       <div className="mt-4">
