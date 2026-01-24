@@ -432,3 +432,63 @@ async def get_publication_queue():
         "recent": recent,
         "current_time": now.isoformat()
     }
+
+
+@worker_router.get("/errors")
+async def get_publication_errors():
+    """Get posts with publication errors"""
+    
+    # Posts with errors
+    cursor = db.scheduled_posts.find(
+        {"$or": [
+            {"status": "failed"},
+            {"status": "partial"},
+            {"error_message": {"$ne": None}}
+        ]},
+        {"_id": 0}
+    ).sort("updated_at", -1).limit(50)
+    
+    error_posts = await cursor.to_list(length=50)
+    
+    return {
+        "error_posts": error_posts,
+        "total": len(error_posts)
+    }
+
+
+@worker_router.post("/retry/{post_id}")
+async def retry_publication(post_id: str):
+    """Retry publishing a failed post"""
+    
+    post = await db.scheduled_posts.find_one({"id": post_id}, {"_id": 0})
+    if not post:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    if post.get("status") not in ["failed", "partial", "publishing"]:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="Post is not in a retryable state")
+    
+    # Reset status and retry
+    await db.scheduled_posts.update_one(
+        {"id": post_id},
+        {"$set": {
+            "status": "publishing",
+            "error_message": None,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Publish immediately
+    worker = PublicationWorker()
+    updated_post = await db.scheduled_posts.find_one({"id": post_id}, {"_id": 0})
+    await worker.publish_post(updated_post)
+    
+    # Get updated status
+    final_post = await db.scheduled_posts.find_one({"id": post_id}, {"_id": 0})
+    
+    return {
+        "message": "Retry completed",
+        "post": final_post
+    }
+
