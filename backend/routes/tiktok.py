@@ -34,14 +34,14 @@ TIKTOK_AUTH_URL = "https://www.tiktok.com/v2/auth/authorize/"
 TIKTOK_TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/"
 TIKTOK_USERINFO_URL = "https://open.tiktokapis.com/v2/user/info/"
 
-# Required scopes
+# Required scopes - Start with basic scopes that don't require app review
 TIKTOK_SCOPES = [
     "user.info.basic",
     "user.info.profile",
-    "user.info.stats",
-    "video.list",
-    "video.upload",  # Requires app review
-    "video.publish",  # Requires app review
+    # "user.info.stats",  # May require review
+    # "video.list",       # May require review
+    # "video.upload",     # Requires app review
+    # "video.publish",    # Requires app review
 ]
 
 # Auth
