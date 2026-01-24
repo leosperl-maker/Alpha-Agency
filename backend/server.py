@@ -5107,8 +5107,8 @@ async def sync_inbox_messages(current_user: dict = Depends(get_current_user)):
     for account in accounts:
         platform = account.get("platform")
         try:
-            if platform in ["meta", "facebook"]:
-                # Sync Facebook comments
+            if platform in ["meta", "facebook", "instagram"]:
+                # Sync Facebook/Instagram comments
                 new_count = await sync_meta_comments(account, user_id)
                 sync_results[platform] = new_count
                 total_new += new_count
