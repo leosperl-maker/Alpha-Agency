@@ -1018,10 +1018,29 @@ async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
             
             await db.social_accounts.insert_one(new_account)
             synced_accounts.append({"id": account_id, "platform": "facebook", "name": page["page_name"], "created": True})
-            synced_accounts.append({**new_account, "created": True})
+        
+        # Also create/update Instagram account if available
+        if page.get("has_instagram") and page.get("instagram_id"):
+            existing_ig = await db.social_accounts.find_one({
+                "platform": "instagram",
+                "external_id": page["instagram_id"]
+            })
             
-            # Also create Instagram account if available
-            if page.get("has_instagram") and page.get("instagram_id"):
+            if existing_ig:
+                # Update existing Instagram account
+                await db.social_accounts.update_one(
+                    {"_id": existing_ig["_id"]},
+                    {"$set": {
+                        "display_name": f"{page['page_name']} (Instagram)",
+                        "profile_picture_url": page.get("picture_url"),
+                        "status": "active",
+                        "user_id": user_id,
+                        "workspace_id": workspace_id,
+                        "updated_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                synced_accounts.append({"id": existing_ig.get("id"), "platform": "instagram", "name": f"{page['page_name']} (Instagram)", "updated": True})
+            else:
                 ig_account_id = str(uuid.uuid4())
                 ig_account = {
                     "id": ig_account_id,
@@ -1033,7 +1052,7 @@ async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
                     "display_name": f"{page['page_name']} (Instagram)",
                     "username": page.get("page_name", "").lower().replace(" ", ""),
                     "profile_picture_url": page.get("picture_url"),
-                    "access_token_encrypted": encrypt_token(access_token) if access_token else None,
+                    "access_token_encrypted": encrypt_token(page_access_token) if page_access_token else None,
                     "token_expires_at": meta_account.get("token_expires_at"),
                     "metadata": {
                         "linked_facebook_page_id": page["page_id"],
@@ -1044,9 +1063,7 @@ async def sync_meta_accounts(current_user: dict = Depends(get_current_user)):
                     "created_by": user_id
                 }
                 await db.social_accounts.insert_one(ig_account)
-                ig_account.pop("access_token_encrypted", None)
-                ig_account.pop("_id", None)
-                synced_accounts.append({**ig_account, "created": True})
+                synced_accounts.append({"id": ig_account_id, "platform": "instagram", "name": f"{page['page_name']} (Instagram)", "created": True})
     
     return {
         "message": f"Synced {len(synced_accounts)} accounts from Meta",
