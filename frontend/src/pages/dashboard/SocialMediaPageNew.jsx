@@ -395,10 +395,13 @@ const SocialMediaPage = () => {
             toast.success(response.data.message || 'Compte Meta connecté avec succès !');
             // Fetch pages and sync
             try {
-              await api.get('/meta/pages');
-              await api.post('/social/sync-meta-accounts');
+              const pagesRes = await api.get('/meta/pages');
+              toast.info(`${pagesRes.data?.length || 0} pages Facebook trouvées`);
+              const syncRes = await api.post('/social/sync-meta-accounts');
+              toast.success(`${syncRes.data?.synced || 0} compte(s) synchronisé(s)`);
             } catch (e) {
-              console.log('Sync will happen on next load');
+              console.log('Sync error:', e);
+              toast.error('Erreur lors de la synchronisation des pages');
             }
           }
         } catch (error) {
@@ -406,6 +409,8 @@ const SocialMediaPage = () => {
           toast.error(error.response?.data?.detail || "Erreur lors de la connexion Meta");
         } finally {
           setLoading(false);
+          // Reload data to show new accounts
+          loadData();
         }
         window.history.replaceState({}, document.title, window.location.pathname);
       }
