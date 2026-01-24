@@ -204,6 +204,7 @@ async def exchange_linkedin_token(
             account_data.update({
                 "id": account_id,
                 "user_id": current_user["user_id"],
+                "workspace_id": current_user.get("workspace_id", current_user["user_id"]),
                 "created_at": datetime.now(timezone.utc).isoformat()
             })
             await db.social_accounts.insert_one(account_data)
