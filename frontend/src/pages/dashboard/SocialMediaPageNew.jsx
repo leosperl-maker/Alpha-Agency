@@ -541,11 +541,29 @@ const SocialMediaPage = () => {
       } catch (e) {
         // Meta not connected, that's fine
       }
+      
+      // Check TikTok sandbox mode
+      try {
+        const tiktokStatusRes = await api.get('/tiktok/sandbox-status');
+        setTiktokSandboxMode(tiktokStatusRes.data.sandbox_mode);
+      } catch (e) {
+        // TikTok status check failed, that's fine
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Erreur lors du chargement');
     }
     setLoading(false);
+  }, []);
+
+  // Load TikTok posts
+  const loadTikTokPosts = useCallback(async () => {
+    try {
+      const response = await api.get('/tiktok/posts');
+      setTiktokPosts(response.data?.posts || []);
+    } catch (error) {
+      console.error('Error loading TikTok posts:', error);
+    }
   }, []);
 
   const loadPosts = useCallback(async () => {
