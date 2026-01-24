@@ -494,6 +494,13 @@ const SocialMediaPage = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
+      // First, fix any accounts with ownership issues (silently)
+      try {
+        await api.post('/social/fix-accounts-ownership');
+      } catch (e) {
+        // Ignore errors
+      }
+      
       const [entitiesRes, accountsRes, statsRes] = await Promise.all([
         api.get('/social/entities'),
         api.get('/social/accounts'),
