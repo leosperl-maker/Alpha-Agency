@@ -4834,7 +4834,8 @@ async def create_scheduled_post(post: ScheduledPost, current_user: dict = Depend
     elif post.scheduled_at:
         final_status = "scheduled"
     else:
-        final_status = "draft"  # Default to draft if no schedule
+        # Publication immédiate - mettre en "publishing" pour que le worker le publie
+        final_status = "publishing"
     
     post_dict = {
         "id": str(uuid.uuid4()),
