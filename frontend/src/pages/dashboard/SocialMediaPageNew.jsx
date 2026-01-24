@@ -1698,8 +1698,8 @@ const SocialMediaPage = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          {/* TikTok API Logs button - only visible in sandbox mode */}
-          {tiktokSandboxMode && (
+          {/* TikTok Sandbox controls */}
+          {tiktokSandboxMode ? (
             <Button
               variant="outline"
               size="sm"
@@ -1708,6 +1708,16 @@ const SocialMediaPage = () => {
             >
               <AlertTriangle className="w-4 h-4 mr-1" />
               API Logs
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+              onClick={handleToggleTikTokSandbox}
+            >
+              <Play className="w-4 h-4 mr-1" />
+              Mode démo TikTok
             </Button>
           )}
           </div>
