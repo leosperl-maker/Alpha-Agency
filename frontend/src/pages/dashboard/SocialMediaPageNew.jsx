@@ -737,12 +737,49 @@ const SocialMediaPage = () => {
 
   const handleConnectTikTok = async () => {
     try {
+      // Check if TikTok sandbox mode is active
+      if (tiktokSandboxMode) {
+        // Show sandbox authorization page instead of redirecting to TikTok
+        setShowTikTokSandboxAuth(true);
+        return;
+      }
+      
+      // Real TikTok OAuth flow
       const redirectUri = `${window.location.origin}/admin/social-media?tiktok_callback=true`;
       const response = await api.get('/tiktok/auth-url', { params: { redirect_uri: redirectUri } });
+      
+      // In sandbox mode, the backend will return a sandbox URL
+      if (response.data.is_sandbox) {
+        setShowTikTokSandboxAuth(true);
+        return;
+      }
+      
       window.location.href = response.data.auth_url;
     } catch (error) {
       console.error('Error getting TikTok auth URL:', error);
       toast.error('Erreur lors de la connexion TikTok');
+    }
+  };
+  
+  const handleTikTokSandboxAuthorize = async (response) => {
+    // Sandbox authorization successful
+    setShowTikTokSandboxAuth(false);
+    toast.success('Compte TikTok (Sandbox) connecté avec succès !');
+    // Reload accounts to show the new sandbox account
+    await loadData();
+  };
+  
+  const handleTriggerTikTokPublish = async (postId) => {
+    try {
+      const response = await api.post(`/tiktok/simulate-scheduled-publish/${postId}`);
+      if (response.data.success) {
+        toast.success('Publication TikTok démarrée (Sandbox)');
+        // Reload TikTok posts to see the status change
+        await loadTikTokPosts();
+      }
+    } catch (error) {
+      console.error('Error triggering publish:', error);
+      toast.error('Erreur lors de la publication');
     }
   };
 

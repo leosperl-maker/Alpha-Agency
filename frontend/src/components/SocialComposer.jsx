@@ -706,7 +706,7 @@ const SocialComposer = ({
             </Button>
             <Button
               onClick={() => handleSave(false)}
-              disabled={saving || (!showScheduler && !scheduledDate)}
+              disabled={saving || (showScheduler && (!scheduledDate || !scheduledTime))}
               className="bg-indigo-600 hover:bg-indigo-700"
             >
               {saving ? (
