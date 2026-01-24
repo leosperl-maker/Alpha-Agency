@@ -904,14 +904,14 @@ const SocialMediaPage = () => {
       {/* Calendar View */}
       {activeSubSection === 'calendar' && renderCalendar()}
       
-      {/* Queue View */}
-      {activeSubSection === 'queue' && renderQueue('scheduled')}
+      {/* Queue View - scheduled and publishing */}
+      {activeSubSection === 'queue' && renderQueue(['scheduled', 'publishing'])}
       
       {/* Drafts View */}
-      {activeSubSection === 'drafts' && renderQueue('draft')}
+      {activeSubSection === 'drafts' && renderQueue(['draft'])}
       
-      {/* Published View */}
-      {activeSubSection === 'published' && renderQueue('published')}
+      {/* Published View - published and failed */}
+      {activeSubSection === 'published' && renderQueue(['published', 'failed', 'partial'])}
     </div>
   );
 
