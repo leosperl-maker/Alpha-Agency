@@ -474,9 +474,13 @@ const SocialMediaPage = () => {
   
   const syncMetaAccounts = async () => {
     try {
+      // First fix any accounts with ownership issues
+      await api.post('/social/fix-accounts-ownership');
+      
+      // Then sync meta accounts
       const response = await api.post('/social/sync-meta-accounts');
       if (response.data.synced > 0) {
-        toast.success(`${response.data.synced} compte(s) synchronisé(s)`);
+        toast.success(`${response.data.synced} compte(s) Meta synchronisé(s)`);
       }
       return response.data;
     } catch (error) {
