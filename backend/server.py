@@ -4799,12 +4799,14 @@ async def delete_social_account(account_id: str, current_user: dict = Depends(ge
     return {"message": "Compte supprimé"}
 
 # Scheduled Posts Management
-@api_router.get("/social/posts", response_model=List[dict])
+@api_router.get("/social/posts", response_model=dict)
 async def get_scheduled_posts(
     status: Optional[str] = None,
     platform: Optional[str] = None,
+    entity_id: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
+    limit: int = 100,
     current_user: dict = Depends(get_current_user)
 ):
     """Get scheduled posts with optional filters"""
@@ -4814,16 +4816,26 @@ async def get_scheduled_posts(
         query["status"] = status
     if platform:
         query["platforms"] = platform
+    if entity_id:
+        query["entity_id"] = entity_id
     if start_date:
-        query["scheduled_at"] = {"$gte": start_date}
+        query["$or"] = [
+            {"scheduled_at": {"$gte": start_date}},
+            {"created_at": {"$gte": start_date}}
+        ]
     if end_date:
-        if "scheduled_at" in query:
-            query["scheduled_at"]["$lte"] = end_date
+        if "$or" in query:
+            for cond in query["$or"]:
+                for key in cond:
+                    cond[key]["$lte"] = end_date
         else:
-            query["scheduled_at"] = {"$lte": end_date}
+            query["$or"] = [
+                {"scheduled_at": {"$lte": end_date}},
+                {"created_at": {"$lte": end_date}}
+            ]
     
-    posts = await db.scheduled_posts.find(query, {"_id": 0}).sort("scheduled_at", 1).to_list(1000)
-    return posts
+    posts = await db.scheduled_posts.find(query, {"_id": 0}).sort("created_at", -1).to_list(limit)
+    return {"posts": posts, "total": len(posts)}
 
 @api_router.post("/social/posts", response_model=dict)
 async def create_scheduled_post(
