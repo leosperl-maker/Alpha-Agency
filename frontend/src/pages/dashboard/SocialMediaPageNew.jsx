@@ -452,65 +452,6 @@ const SocialMediaPage = () => {
     }
   }, []);
   
-  const handleMetaCallback = async (code) => {
-    setLoading(true);
-    try {
-      const redirectUri = `${window.location.origin}/admin/social-media?meta_callback=true`;
-      const response = await api.post('/meta/exchange-token', { code, redirect_uri: redirectUri });
-      
-      if (response.data.success) {
-        toast.success(response.data.message || 'Compte Meta connecté avec succès !');
-        // Fetch pages after successful connection
-        await fetchMetaPages();
-        // Sync Meta accounts to new social system
-        await syncMetaAccounts();
-        // Reload all data
-        await loadData();
-      }
-    } catch (error) {
-      console.error("Meta callback error:", error);
-      toast.error(error.response?.data?.detail || "Erreur lors de la connexion Meta");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLinkedInCallback = async (code) => {
-    setLoading(true);
-    try {
-      const redirectUri = `${window.location.origin}/admin/social-media?linkedin_callback=true`;
-      const response = await api.post('/linkedin/exchange-token', { code, redirect_uri: redirectUri });
-      
-      if (response.data.success) {
-        toast.success(response.data.message || 'Compte LinkedIn connecté !');
-        await loadData();
-      }
-    } catch (error) {
-      console.error("LinkedIn callback error:", error);
-      toast.error(error.response?.data?.detail || "Erreur lors de la connexion LinkedIn");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleTikTokCallback = async (code) => {
-    setLoading(true);
-    try {
-      const redirectUri = `${window.location.origin}/admin/social-media?tiktok_callback=true`;
-      const response = await api.post('/tiktok/exchange-token', { code, redirect_uri: redirectUri });
-      
-      if (response.data.success) {
-        toast.success(response.data.message || 'Compte TikTok connecté !');
-        await loadData();
-      }
-    } catch (error) {
-      console.error("TikTok callback error:", error);
-      toast.error(error.response?.data?.detail || "Erreur lors de la connexion TikTok");
-    } finally {
-      setLoading(false);
-    }
-  };
-  
   const fetchMetaPages = async () => {
     try {
       const response = await api.get('/meta/pages');
