@@ -4826,15 +4826,21 @@ async def get_scheduled_posts(
     return posts
 
 @api_router.post("/social/posts", response_model=dict)
-async def create_scheduled_post(post: ScheduledPost, current_user: dict = Depends(get_current_user)):
+async def create_scheduled_post(
+    post: ScheduledPost, 
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
     """Create a new scheduled post"""
+    from routes.publication_worker import PublicationWorker
+    
     # Determine status based on whether it's a draft or has a schedule
     if post.is_draft or post.status == "draft":
         final_status = "draft"
     elif post.scheduled_at:
         final_status = "scheduled"
     else:
-        # Publication immédiate - mettre en "publishing" pour que le worker le publie
+        # Publication immédiate - mettre en "publishing" et publier directement
         final_status = "publishing"
     
     post_dict = {
@@ -4848,6 +4854,18 @@ async def create_scheduled_post(post: ScheduledPost, current_user: dict = Depend
         "error_message": None
     }
     await db.scheduled_posts.insert_one(post_dict)
+    
+    # Si publication immédiate, lancer la publication en arrière-plan
+    if final_status == "publishing":
+        async def publish_immediately():
+            worker = PublicationWorker()
+            # Récupérer le post depuis la DB (avec _id exclu)
+            post_to_publish = await db.scheduled_posts.find_one({"id": post_dict["id"]}, {"_id": 0})
+            if post_to_publish:
+                await worker.publish_post(post_to_publish)
+        
+        background_tasks.add_task(publish_immediately)
+    
     return {k: v for k, v in post_dict.items() if k != "_id"}
 
 @api_router.get("/social/posts/{post_id}", response_model=dict)
