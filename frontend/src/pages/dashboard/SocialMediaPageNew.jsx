@@ -46,6 +46,14 @@ import {
 import { toast } from 'sonner';
 import api from '../../lib/api';
 import SocialComposer from '../../components/SocialComposer';
+import { 
+  TikTokSandboxBadge, 
+  TikTokSandboxBanner, 
+  TikTokSandboxAuth, 
+  TikTokApiLogs,
+  TikTokPostComposer,
+  TikTokPostsList
+} from '../../components/TikTokSandbox';
 
 // ==================== CONSTANTS ====================
 
