@@ -1049,7 +1049,7 @@ def generate_invoice_pdf(invoice: dict, contact: dict) -> BytesIO:
 
 # ==================== AUTH ROUTES ====================
 
-# Création du super admin initial ou réinitialisation du mot de passe
+# Création du super admin initial (seulement s'il n'existe pas)
 async def create_initial_super_admin():
     admin_email = "admin@alphagency.fr"
     default_password = "superpassword"
@@ -1058,13 +1058,8 @@ async def create_initial_super_admin():
     existing_admin = await db.users.find_one({"email": admin_email})
     
     if existing_admin:
-        # Réinitialiser le mot de passe de l'admin existant
-        new_hash = hash_password(default_password)
-        await db.users.update_one(
-            {"email": admin_email},
-            {"$set": {"password": new_hash}}
-        )
-        logger.info(f"Mot de passe admin réinitialisé: {admin_email} / {default_password}")
+        # L'admin existe déjà, ne pas toucher au mot de passe
+        logger.info(f"Super admin existant: {admin_email}")
     else:
         # Créer le super admin s'il n'existe pas
         user_id = str(uuid.uuid4())
