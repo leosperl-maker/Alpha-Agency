@@ -429,6 +429,7 @@ const SocialMediaPage = () => {
           toast.error(error.response?.data?.detail || "Erreur lors de la connexion LinkedIn");
         } finally {
           setLoading(false);
+          loadData();
         }
         window.history.replaceState({}, document.title, window.location.pathname);
       }
@@ -447,6 +448,7 @@ const SocialMediaPage = () => {
           toast.error(error.response?.data?.detail || "Erreur lors de la connexion TikTok");
         } finally {
           setLoading(false);
+          loadData();
         }
         window.history.replaceState({}, document.title, window.location.pathname);
       }
