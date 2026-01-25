@@ -250,20 +250,55 @@ class PublicationWorker:
         content: str, 
         media_urls: list
     ) -> dict:
-        """Publish to Instagram (requires media)"""
+        """Publish to Instagram (requires media) using Page Access Token"""
         if not media_urls:
             return {"error": "Instagram requires media for publishing"}
         
-        # In new architecture, Instagram accounts are stored separately
-        # with account_type = "instagram_business"
+        # Instagram Business Account ID
         ig_id = account.get("external_id")
-        access_token = get_account_access_token(account)
+        user_id = account.get("user_id")
         
         if not ig_id:
             return {"error": "No Instagram account ID found"}
         
+        # Get Page Access Token - Instagram uses the linked Facebook Page's token
+        access_token = None
+        
+        if user_id:
+            # First try to find via linked_facebook_page_id
+            linked_page_id = account.get("linked_facebook_page_id") or account.get("meta_page_id")
+            
+            if linked_page_id:
+                meta_page = await db.meta_pages.find_one({
+                    "page_id": linked_page_id,
+                    "user_id": user_id,
+                    "is_active": True
+                })
+                
+                if meta_page:
+                    encrypted_token = meta_page.get("page_access_token_encrypted")
+                    if encrypted_token:
+                        access_token = decrypt_token(encrypted_token)
+            
+            # Also try finding page by instagram_business_id
+            if not access_token:
+                meta_page = await db.meta_pages.find_one({
+                    "instagram_business_id": ig_id,
+                    "user_id": user_id,
+                    "is_active": True
+                })
+                
+                if meta_page:
+                    encrypted_token = meta_page.get("page_access_token_encrypted")
+                    if encrypted_token:
+                        access_token = decrypt_token(encrypted_token)
+        
+        # Fallback to account's access token
         if not access_token:
-            return {"error": "No access token for Instagram"}
+            access_token = get_account_access_token(account)
+        
+        if not access_token:
+            return {"error": "No access token for Instagram. Please reconnect your Facebook account."}
         
         logger.info(f"Publishing to Instagram account {ig_id}")
         
@@ -286,7 +321,11 @@ class PublicationWorker:
                 
                 container_id = container_response.json().get("id")
                 
-                # Step 2: Publish the container
+                # Step 2: Wait for media processing
+                import asyncio
+                await asyncio.sleep(3)
+                
+                # Step 3: Publish the container
                 publish_response = await client.post(
                     f"https://graph.facebook.com/v20.0/{ig_id}/media_publish",
                     params={
