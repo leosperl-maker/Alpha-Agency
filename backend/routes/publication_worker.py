@@ -342,7 +342,7 @@ class PublicationWorker:
                 result = publish_response.json()
                 return {
                     "id": result.get("id"),
-                    "url": f"https://instagram.com"
+                    "url": "https://instagram.com"
                 }
             except Exception as e:
                 logger.error(f"Instagram publish error: {e}")

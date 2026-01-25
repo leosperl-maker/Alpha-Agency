@@ -784,7 +784,7 @@ async def publish_to_instagram(
                 "platform": "instagram",
                 "post_id": media_id,
                 "platform_post_id": media_id,
-                "url": f"https://instagram.com"
+                "url": "https://instagram.com"
             }
             
         except httpx.RequestError as e:
