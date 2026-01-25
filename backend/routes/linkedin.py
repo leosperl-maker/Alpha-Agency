@@ -38,13 +38,17 @@ LINKEDIN_TOKEN_URL = "https://www.linkedin.com/oauth/v2/accessToken"
 LINKEDIN_USERINFO_URL = "https://api.linkedin.com/v2/userinfo"
 LINKEDIN_ME_URL = "https://api.linkedin.com/v2/me"
 
-# Required scopes for posting
+# Required scopes for LinkedIn
+# Note: w_member_social requires approval from LinkedIn
+# For now, use only basic scopes that are always available
 LINKEDIN_SCOPES = [
     "openid",
     "profile", 
-    "email",
-    "w_member_social",  # Post on behalf of user
+    "email"
 ]
+
+# Additional scope for posting (requires LinkedIn approval)
+LINKEDIN_POST_SCOPE = "w_member_social"
 
 
 class LinkedInTokenExchange(BaseModel):
