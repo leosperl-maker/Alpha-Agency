@@ -183,6 +183,15 @@ async def exchange_linkedin_token(
         expires_at = datetime.now(timezone.utc).timestamp() + expires_in
         expires_at_iso = datetime.fromtimestamp(expires_at, tz=timezone.utc).isoformat()
         
+        # Encrypt the access token for secure storage
+        from cryptography.fernet import Fernet
+        SOCIAL_ENCRYPTION_KEY = os.environ.get('SOCIAL_ENCRYPTION_KEY')
+        if SOCIAL_ENCRYPTION_KEY:
+            fernet = Fernet(SOCIAL_ENCRYPTION_KEY.encode() if isinstance(SOCIAL_ENCRYPTION_KEY, str) else SOCIAL_ENCRYPTION_KEY)
+            encrypted_token = fernet.encrypt(access_token.encode()).decode()
+        else:
+            encrypted_token = access_token  # Fallback if no key (not recommended)
+        
         # Store or update LinkedIn account
         existing_account = await db.social_accounts.find_one({
             "user_id": current_user["user_id"],
@@ -196,7 +205,7 @@ async def exchange_linkedin_token(
             "display_name": name,
             "username": email or linkedin_id,
             "profile_picture_url": picture,
-            "access_token": access_token,
+            "access_token_encrypted": encrypted_token,
             "token_expires_at": expires_at_iso,
             "status": "active",
             "is_active": True,
