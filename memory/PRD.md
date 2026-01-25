@@ -319,6 +319,7 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 - iteration_33.json: 22/22 tests backend calendrier éditorial
 - iteration_34.json: 15/15 tests nouvelles fonctionnalités (stats, PDF, email, timezone)
 - iteration_35.json: 20/20 tests backend Social Media module
+- iteration_36.json: 29/29 tests Meta integration refactoring ✅ NEW 2026-01-25
 
 ## 3rd Party Integrations
 - **Cloudinary:** Upload médias ✅
@@ -327,10 +328,16 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 - **GPT-5.2:** IA rédactionnelle ✅
 - **ReportLab:** Export PDF ✅
 - **@dnd-kit:** Drag & drop ✅
-- **Meta API:** OAuth Facebook/Instagram ✅ (App ID: 859300267084667)
-- **LinkedIn API:** OAuth ✅ (Client ID: 78o6g7zdfql0bg)
-- **TikTok API:** OAuth ✅ (Client Key: awz0lr5px7ek23jj) - Publication nécessite review
+- **Meta API:** OAuth Facebook/Instagram ✅ REFACTORÉ 2026-01-25 (App ID: 859300267084667) - Utilise Page Access Tokens
+- **LinkedIn API:** OAuth ✅ (Client ID: 78o6g7zdfql0bg) - ⚠️ Publication bloquée par LinkedIn (scope non approuvé)
+- **TikTok API:** OAuth ✅ (Client Key: awz0lr5px7ek23jj) - Mode Sandbox pour démo review
 - **Cryptography:** Chiffrement tokens ✅
+
+## Files Modified 2026-01-25 (Meta Refactoring)
+- `/app/backend/routes/meta.py` - RÉÉCRITURE COMPLÈTE: Page Access Tokens, inbox sync, webhooks
+- `/app/backend/routes/publication_worker.py` - Updated pour utiliser meta_pages collection
+- `/app/backend/server.py` - SUPPRESSION des anciens endpoints Meta (lignes 6316-6736)
+- `/app/backend/routes/meta_integration.py` - SUPPRIMÉ (code intégré dans meta.py)
 
 ## Files Modified 2026-01-24
 - `/app/backend/routes/tiktok.py` - Réécriture complète pour sandbox mode
