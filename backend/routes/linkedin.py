@@ -91,6 +91,10 @@ async def get_linkedin_auth_url(
     if not redirect_uri:
         redirect_uri = REDIRECT_URI
     
+    # Log the redirect_uri for debugging
+    import logging
+    logging.info(f"LinkedIn auth URL requested with redirect_uri: {redirect_uri}")
+    
     # Store state in database for verification
     await db.oauth_states.insert_one({
         "state": state,
@@ -113,7 +117,9 @@ async def get_linkedin_auth_url(
         f"&state={state}"
     )
     
-    return {"auth_url": auth_url}
+    logging.info(f"Generated LinkedIn auth URL: {auth_url[:100]}...")
+    
+    return {"auth_url": auth_url, "redirect_uri_used": redirect_uri}
 
 
 @router.post("/exchange-token")
