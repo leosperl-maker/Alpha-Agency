@@ -2043,9 +2043,55 @@ const SocialMediaPage = () => {
                 </div>
               ))}
             </div>
+            </>
           )}
         </CardContent>
       </Card>
+      
+      {/* Bulk Add to Entity Modal */}
+      <Dialog open={showBulkEntityModal} onOpenChange={setShowBulkEntityModal}>
+        <DialogContent className="bg-slate-900 border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white">Ajouter à une entité</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-white/60 text-sm">
+              Ajouter {selectedAccounts.length} compte(s) à :
+            </p>
+            <Select value={bulkEntityId} onValueChange={setBulkEntityId}>
+              <SelectTrigger className="w-full bg-white/5 border-white/10 text-white">
+                <SelectValue placeholder="Sélectionner une entité..." />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-900 border-white/10">
+                {entities.map(entity => (
+                  <SelectItem key={entity.id} value={entity.id}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entity.color }} />
+                      <span>{entity.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowBulkEntityModal(false)}
+              className="text-white/60 border-white/20"
+            >
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleBulkAddToEntity}
+              className="bg-indigo-600 hover:bg-indigo-700"
+              disabled={!bulkEntityId}
+            >
+              Ajouter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 
