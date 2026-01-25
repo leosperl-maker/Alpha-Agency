@@ -27,43 +27,8 @@ db = client[DB_NAME]
 META_APP_ID = os.environ.get("META_APP_ID")
 META_APP_SECRET = os.environ.get("META_APP_SECRET")
 
-# Token encryption - use SAME key as social_media.py
-SOCIAL_ENCRYPTION_KEY = os.environ.get('SOCIAL_ENCRYPTION_KEY')
-if not SOCIAL_ENCRYPTION_KEY:
-    # Generate a fixed key for development - in production this should be set in .env
-    SOCIAL_ENCRYPTION_KEY = "dGVzdC1rZXktZm9yLWRldmVsb3BtZW50LW9ubHk="
-    logger.warning("SOCIAL_ENCRYPTION_KEY not set, using default key (NOT SECURE FOR PRODUCTION)")
-
-# Ensure proper encoding
-if isinstance(SOCIAL_ENCRYPTION_KEY, str):
-    try:
-        fernet = Fernet(SOCIAL_ENCRYPTION_KEY.encode())
-    except Exception:
-        # If the key is not valid base64, generate one
-        fernet = Fernet(Fernet.generate_key())
-else:
-    fernet = Fernet(SOCIAL_ENCRYPTION_KEY)
-
-def decrypt_token(encrypted: str) -> str:
-    """Decrypt an encrypted token"""
-    if not encrypted:
-        return ""
-    try:
-        return fernet.decrypt(encrypted.encode()).decode()
-    except Exception as e:
-        logger.error(f"Failed to decrypt token: {e}")
-        return ""
-
-def get_account_access_token(account: dict) -> str:
-    """Get the decrypted access token from an account"""
-    # First try encrypted token
-    encrypted_token = account.get("access_token_encrypted")
-    if encrypted_token:
-        decrypted = decrypt_token(encrypted_token)
-        if decrypted:
-            return decrypted
-    # Fallback to plain token (for backward compatibility)
-    return account.get("access_token", "")
+# Import shared encryption module
+from routes.token_encryption import decrypt_token, get_account_access_token
 
 
 class PublicationWorker:
