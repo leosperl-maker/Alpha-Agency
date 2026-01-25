@@ -1896,14 +1896,72 @@ const SocialMediaPage = () => {
               <p className="text-xs sm:text-sm mt-1">Connectez vos réseaux sociaux pour commencer</p>
             </div>
           ) : (
-            <div className="space-y-2 sm:space-y-3">
+            <>
+              {/* Bulk actions bar */}
+              <div className="flex items-center justify-between mb-4 p-3 bg-white/5 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <input 
+                    type="checkbox"
+                    checked={selectedAccounts.length === accounts.length && accounts.length > 0}
+                    onChange={selectAllAccounts}
+                    className="w-4 h-4 rounded border-white/30 bg-white/10"
+                  />
+                  <span className="text-white/60 text-sm">
+                    {selectedAccounts.length > 0 
+                      ? `${selectedAccounts.length} sélectionné(s)` 
+                      : 'Tout sélectionner'}
+                  </span>
+                </div>
+                
+                {selectedAccounts.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCheckTokens}
+                      className="text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      Vérifier tokens
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowBulkEntityModal(true)}
+                      className="text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/10"
+                    >
+                      <Building2 className="w-4 h-4 mr-1" />
+                      Ajouter à entité
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleBulkDisconnect}
+                      className="text-red-400 border-red-500/30 hover:bg-red-500/10"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Déconnecter
+                    </Button>
+                  </div>
+                )}
+              </div>
+              
+              <div className="space-y-2 sm:space-y-3">
               {accounts.map(account => (
                 <div 
                   key={account.id}
-                  className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border border-white/10 bg-white/5"
+                  className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border ${selectedAccounts.includes(account.id) ? 'border-indigo-500/50 bg-indigo-500/10' : 'border-white/10 bg-white/5'}`}
                 >
+                  {/* Checkbox */}
+                  <input 
+                    type="checkbox"
+                    checked={selectedAccounts.includes(account.id)}
+                    onChange={() => toggleAccountSelection(account.id)}
+                    className="w-4 h-4 rounded border-white/30 bg-white/10 flex-shrink-0"
+                  />
+                  
                   {/* Avatar et info */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="relative flex-shrink-0">
                       {account.profile_picture_url ? (
                         <img 
