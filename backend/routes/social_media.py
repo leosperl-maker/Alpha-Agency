@@ -34,17 +34,33 @@ def get_workspace_id(current_user: dict) -> str:
     return current_user.get("workspace_id", user_id)
 
 # ==================== ENCRYPTION ====================
-# Generate key: Fernet.generate_key()
-ENCRYPTION_KEY = os.environ.get('SOCIAL_ENCRYPTION_KEY', Fernet.generate_key())
-if isinstance(ENCRYPTION_KEY, str):
-    ENCRYPTION_KEY = ENCRYPTION_KEY.encode()
+# Token encryption key - must be consistent across restarts
+ENCRYPTION_KEY = os.environ.get('SOCIAL_ENCRYPTION_KEY')
+if not ENCRYPTION_KEY:
+    # CRITICAL: In production, SOCIAL_ENCRYPTION_KEY must be set in .env
+    # If not set, generate a key but log a warning
+    import logging
+    logging.warning("SOCIAL_ENCRYPTION_KEY not set! Generating random key - tokens will be lost on restart!")
+    ENCRYPTION_KEY = Fernet.generate_key()
+else:
+    if isinstance(ENCRYPTION_KEY, str):
+        ENCRYPTION_KEY = ENCRYPTION_KEY.encode()
+
 fernet = Fernet(ENCRYPTION_KEY)
 
 def encrypt_token(token: str) -> str:
+    if not token:
+        return ""
     return fernet.encrypt(token.encode()).decode()
 
 def decrypt_token(encrypted: str) -> str:
-    return fernet.decrypt(encrypted.encode()).decode()
+    if not encrypted:
+        return ""
+    try:
+        return fernet.decrypt(encrypted.encode()).decode()
+    except Exception as e:
+        logging.error(f"Failed to decrypt token: {e}")
+        return ""
 
 # ==================== ENUMS ====================
 
