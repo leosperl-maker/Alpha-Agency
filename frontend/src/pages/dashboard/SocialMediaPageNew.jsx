@@ -386,6 +386,11 @@ const SocialMediaPage = () => {
   const [selectedDayDate, setSelectedDayDate] = useState(null);
   const [showDayPostsModal, setShowDayPostsModal] = useState(false);
   
+  // Account selection state (for bulk operations)
+  const [selectedAccounts, setSelectedAccounts] = useState([]);
+  const [showBulkEntityModal, setShowBulkEntityModal] = useState(false);
+  const [bulkEntityId, setBulkEntityId] = useState('');
+  
   // TikTok Sandbox state
   const [tiktokSandboxMode, setTiktokSandboxMode] = useState(false);
   const [showTikTokSandboxAuth, setShowTikTokSandboxAuth] = useState(false);
@@ -395,6 +400,93 @@ const SocialMediaPage = () => {
   
   // Stats
   const [stats, setStats] = useState(null);
+
+  // ==================== BULK OPERATIONS ====================
+  
+  const toggleAccountSelection = (accountId) => {
+    setSelectedAccounts(prev => 
+      prev.includes(accountId) 
+        ? prev.filter(id => id !== accountId)
+        : [...prev, accountId]
+    );
+  };
+  
+  const selectAllAccounts = () => {
+    if (selectedAccounts.length === accounts.length) {
+      setSelectedAccounts([]);
+    } else {
+      setSelectedAccounts(accounts.map(a => a.id));
+    }
+  };
+  
+  const handleBulkAddToEntity = async () => {
+    if (!bulkEntityId || selectedAccounts.length === 0) return;
+    
+    try {
+      setLoading(true);
+      for (const accountId of selectedAccounts) {
+        await api.post(`/social/entities/${bulkEntityId}/accounts/${accountId}`);
+      }
+      toast.success(`${selectedAccounts.length} compte(s) ajouté(s) à l'entité`);
+      setSelectedAccounts([]);
+      setShowBulkEntityModal(false);
+      setBulkEntityId('');
+      await loadData();
+    } catch (error) {
+      toast.error('Erreur lors de l\'ajout');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleBulkDisconnect = async () => {
+    if (selectedAccounts.length === 0) return;
+    
+    if (!window.confirm(`Déconnecter ${selectedAccounts.length} compte(s) ?`)) return;
+    
+    try {
+      setLoading(true);
+      for (const accountId of selectedAccounts) {
+        await api.delete(`/social/accounts/${accountId}`);
+      }
+      toast.success(`${selectedAccounts.length} compte(s) déconnecté(s)`);
+      setSelectedAccounts([]);
+      await loadData();
+    } catch (error) {
+      toast.error('Erreur lors de la déconnexion');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleCheckTokens = async () => {
+    if (selectedAccounts.length === 0) {
+      toast.error('Sélectionnez au moins un compte');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const results = [];
+      for (const accountId of selectedAccounts) {
+        const res = await api.get(`/social/accounts/${accountId}/check-token`);
+        results.push(res.data);
+      }
+      
+      const valid = results.filter(r => r.token_valid).length;
+      const invalid = results.filter(r => !r.token_valid).length;
+      
+      if (invalid > 0) {
+        toast.error(`${invalid} compte(s) avec token invalide - reconnectez-les`);
+      } else {
+        toast.success(`${valid} compte(s) avec token valide`);
+      }
+    } catch (error) {
+      toast.error('Erreur lors de la vérification');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ==================== META OAUTH HANDLING ====================
   
