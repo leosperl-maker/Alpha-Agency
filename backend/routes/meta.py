@@ -535,7 +535,7 @@ async def get_meta_pages(current_user: dict = Depends(get_current_user)):
                         token_status = "expired"
                     elif exp_dt < datetime.now(timezone.utc) + timedelta(days=7):
                         token_status = "expiring_soon"
-                except:
+                except Exception:
                     pass
             
             result.append({

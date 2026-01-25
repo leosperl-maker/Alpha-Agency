@@ -85,7 +85,6 @@ class PublicationWorker:
     async def publish_post(self, post: dict):
         """Publish a single post to all selected platforms"""
         post_id = post.get("id")
-        platforms = post.get("platforms", [])
         account_ids = post.get("account_ids", [])
         content = post.get("content", "")
         media_urls = post.get("media_urls", [])
