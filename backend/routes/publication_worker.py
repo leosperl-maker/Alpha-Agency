@@ -174,16 +174,35 @@ class PublicationWorker:
         content: str, 
         media_urls: list
     ) -> dict:
-        """Publish to Facebook page"""
-        # Get decrypted access token
-        access_token = get_account_access_token(account)
-        page_id = account.get("external_id")
-        
-        if not access_token:
-            return {"error": "No access token for page"}
+        """Publish to Facebook page using Page Access Token"""
+        # Get page_id - can be external_id or the account_id itself
+        page_id = account.get("external_id") or account.get("meta_page_id") or account_id
+        user_id = account.get("user_id")
         
         if not page_id:
             return {"error": "No page ID found"}
+        
+        # Try to get Page Access Token from the new meta_pages collection first
+        access_token = None
+        
+        if user_id:
+            meta_page = await db.meta_pages.find_one({
+                "page_id": page_id,
+                "user_id": user_id,
+                "is_active": True
+            })
+            
+            if meta_page:
+                encrypted_token = meta_page.get("page_access_token_encrypted")
+                if encrypted_token:
+                    access_token = decrypt_token(encrypted_token)
+        
+        # Fallback to account's access token
+        if not access_token:
+            access_token = get_account_access_token(account)
+        
+        if not access_token:
+            return {"error": "No access token for page. Please reconnect your Facebook account."}
         
         logger.info(f"Publishing to Facebook page {page_id}")
         
