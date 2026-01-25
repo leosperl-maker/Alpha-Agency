@@ -10,7 +10,6 @@ import logging
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 from motor.motor_asyncio import AsyncIOMotorClient
-from cryptography.fernet import Fernet
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
