@@ -219,6 +219,45 @@ GET    /api/tiktok/accounts
 GET    /api/tiktok/posts
 ```
 
+#### Meta Integration Refactoring ✅ COMPLETE 2026-01-25
+
+**CRITIQUE: Correction de l'architecture des tokens Meta**
+
+**Problème Résolu:**
+- L'ancienne implémentation utilisait les **User Access Tokens** pour publier, ce qui causait des erreurs "Invalid OAuth access token" car les User Tokens ne peuvent pas publier sur les Pages
+- Maintenant utilise correctement les **Page Access Tokens** obtenus via `/me/accounts`
+
+**Changements Clés:**
+1. **Nouvelle collection `meta_pages`** - Stocke les Page Access Tokens encryptés pour chaque Page Facebook
+2. **Tokens séparés pour chaque Page** - Chaque Page a son propre token, jamais de User Token partagé
+3. **Instagram utilise le Page Token** - Instagram Business utilise le token de la Page Facebook liée
+4. **Scopes OAuth complets** - Ajout des scopes inbox: `pages_messaging`, `instagram_manage_comments`, `instagram_manage_messages`
+5. **Suppression des anciens endpoints** - Les routes `/api/meta/*` dans `server.py` ont été supprimées
+6. **Nouveau module** - Tout est géré par `/app/backend/routes/meta.py`
+
+**Fichiers Modifiés:**
+- `/app/backend/routes/meta.py` - Module complet refactoré avec Page Tokens
+- `/app/backend/routes/publication_worker.py` - Utilise maintenant `meta_pages` collection
+- `/app/backend/server.py` - Anciens endpoints Meta supprimés
+
+**Endpoints Meta Refactorés:**
+```
+GET    /api/meta/auth-url              # URL OAuth avec scopes complets
+POST   /api/meta/exchange-token        # Échange code → Page Access Tokens
+GET    /api/meta/pages                 # Liste des pages avec statut token
+GET    /api/meta/status                # Statut de connexion détaillé
+POST   /api/meta/publish/facebook      # Publication avec Page Token
+POST   /api/meta/publish/instagram     # Publication avec Page Token
+POST   /api/meta/inbox/sync            # Sync messages et commentaires
+GET    /api/meta/inbox                 # Récupérer inbox
+DELETE /api/meta/disconnect            # Déconnexion complète
+GET    /api/meta/webhooks              # Vérification webhook Meta
+POST   /api/meta/webhooks              # Réception événements webhook
+```
+
+**⚠️ ACTION REQUISE UTILISATEUR:**
+Après déploiement, l'utilisateur DOIT reconnecter tous ses comptes Meta via OAuth pour générer les nouveaux Page Access Tokens.
+
 #### API Routes - Social Media
 ```
 GET    /api/social/entities
