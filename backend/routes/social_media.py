@@ -423,6 +423,44 @@ async def get_social_account(account_id: str, current_user: dict = Depends(get_c
     
     return account
 
+@router.get("/accounts/{account_id}/check-token")
+async def check_account_token(account_id: str, current_user: dict = Depends(get_current_user)):
+    """Check if account token is valid and can be decrypted"""
+    account = await db.social_accounts.find_one({"id": account_id})
+    
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+    
+    result = {
+        "account_id": account_id,
+        "platform": account.get("platform"),
+        "display_name": account.get("display_name"),
+        "has_encrypted_token": bool(account.get("access_token_encrypted")),
+        "has_plain_token": bool(account.get("access_token")),
+        "token_valid": False,
+        "error": None
+    }
+    
+    # Try to decrypt the token
+    encrypted_token = account.get("access_token_encrypted")
+    if encrypted_token:
+        try:
+            decrypted = decrypt_token(encrypted_token)
+            result["token_valid"] = bool(decrypted and len(decrypted) > 10)
+            if not result["token_valid"]:
+                result["error"] = "Token decryption returned empty or short value"
+        except Exception as e:
+            result["error"] = f"Token decryption failed: {str(e)}"
+    else:
+        # Check plain token
+        plain_token = account.get("access_token")
+        if plain_token:
+            result["token_valid"] = bool(len(plain_token) > 10)
+        else:
+            result["error"] = "No token found"
+    
+    return result
+
 @router.post("/accounts")
 async def create_social_account(
     data: SocialAccountCreate, 
