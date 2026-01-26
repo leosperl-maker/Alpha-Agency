@@ -61,6 +61,23 @@ class PaymentCreate(BaseModel):
     notes: Optional[str] = None
 
 
+# ==================== DEPOSIT/BALANCE INVOICE MODELS ====================
+
+class DepositInvoiceCreate(BaseModel):
+    """Model for creating a deposit (acompte) invoice"""
+    deposit_type: str = "percent"  # "percent" or "amount"
+    deposit_value: float  # Percentage (30, 50, etc.) or fixed amount
+    label: Optional[str] = None  # Custom label, auto-generated if not provided
+    contract_date: Optional[str] = None  # Date du contrat signé
+    due_date: Optional[str] = None
+
+class BalanceInvoiceCreate(BaseModel):
+    """Model for creating a balance (solde) invoice"""
+    label: Optional[str] = None  # Custom label
+    due_date: Optional[str] = None
+    force_without_deposits: bool = False  # Allow creating balance without deposits
+
+
 # ==================== HELPERS ====================
 
 async def get_next_invoice_number(doc_type: str = "facture"):
