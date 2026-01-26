@@ -1409,3 +1409,351 @@ Cordialement,
     )
     
     return {"message": f"Email envoyé à {request.recipient_email} (copie envoyée à {copy_email})", "status": "sent"}
+
+
+# ==================== DEPOSIT & BALANCE INVOICE ROUTES ====================
+
+@router.post("/{invoice_id}/create-deposit", response_model=dict)
+async def create_deposit_invoice(
+    invoice_id: str, 
+    deposit: DepositInvoiceCreate, 
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Create a deposit (acompte) invoice linked to a parent invoice.
+    Can create multiple deposit invoices for one parent.
+    """
+    # Get parent invoice
+    parent = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
+    if not parent:
+        raise HTTPException(status_code=404, detail="Facture principale non trouvée")
+    
+    if parent.get("document_type") != "facture":
+        raise HTTPException(status_code=400, detail="Les acomptes ne peuvent être créés que sur des factures")
+    
+    if parent.get("invoice_type") in ["deposit", "balance"]:
+        raise HTTPException(status_code=400, detail="Impossible de créer un acompte sur une facture d'acompte ou de solde")
+    
+    parent_total = parent.get("total", 0)
+    parent_number = parent.get("invoice_number")
+    
+    # Get existing deposits to check total percentage
+    existing_summary = await get_deposit_summary(invoice_id)
+    existing_deposits_amount = existing_summary.get("total_deposits_amount", 0)
+    
+    # Calculate deposit amount
+    if deposit.deposit_type == "percent":
+        deposit_percent = deposit.deposit_value
+        deposit_amount = round(parent_total * (deposit_percent / 100), 2)
+    else:
+        deposit_amount = deposit.deposit_value
+        deposit_percent = round((deposit_amount / parent_total) * 100, 2) if parent_total > 0 else 0
+    
+    # Validate total deposits don't exceed parent total
+    if existing_deposits_amount + deposit_amount > parent_total:
+        remaining_available = parent_total - existing_deposits_amount
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Le total des acomptes ne peut pas dépasser le montant de la facture. Montant disponible: {remaining_available:.2f}€"
+        )
+    
+    # Generate deposit invoice number
+    deposit_number = await get_next_invoice_number("facture", "deposit", parent_number)
+    deposit_id = str(uuid.uuid4())
+    
+    # Generate default label if not provided
+    contract_date = deposit.contract_date or datetime.now(timezone.utc).strftime("%d/%m/%Y")
+    default_label = f"Acompte {deposit_percent:.0f}% sur prestation – Contrat signé le {contract_date} – Réf facture {parent_number}"
+    label = deposit.label or default_label
+    
+    # Calculate TVA proportionally
+    subtotal_ht = round(deposit_amount / 1.085, 2)  # Remove TVA (8.5%)
+    tva = round(deposit_amount - subtotal_ht, 2)
+    
+    deposit_doc = {
+        "id": deposit_id,
+        "invoice_number": deposit_number,
+        "quote_id": parent.get("quote_id"),
+        "contact_id": parent.get("contact_id"),
+        "document_type": "facture",
+        "invoice_type": "deposit",
+        "parent_invoice_id": invoice_id,
+        "parent_invoice_number": parent_number,
+        "items": [{
+            "title": "Acompte",
+            "description": label,
+            "quantity": 1,
+            "unit_price": subtotal_ht,
+            "discount": 0,
+            "discountType": "%"
+        }],
+        "subtotal": subtotal_ht,
+        "tva": tva,
+        "total": deposit_amount,
+        "total_paid": 0,
+        "remaining": deposit_amount,
+        "globalDiscount": 0,
+        "globalDiscountType": "%",
+        "status": "brouillon",
+        "due_date": deposit.due_date or (datetime.now(timezone.utc) + timedelta(days=15)).strftime("%Y-%m-%d"),
+        "payment_terms": "15",
+        "notes": f"Acompte sur facture {parent_number}",
+        "conditions": parent.get("conditions"),
+        "bank_details": parent.get("bank_details"),
+        "deposit_percent": deposit_percent,
+        "deposit_amount": deposit_amount,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.invoices.insert_one(deposit_doc)
+    
+    logger.info(f"Created deposit invoice {deposit_number} for parent {parent_number}")
+    
+    return {
+        "id": deposit_id,
+        "invoice_number": deposit_number,
+        "deposit_percent": deposit_percent,
+        "deposit_amount": deposit_amount,
+        "message": f"Facture d'acompte {deposit_number} créée ({deposit_percent:.0f}% = {deposit_amount:.2f}€)"
+    }
+
+
+@router.post("/{invoice_id}/create-balance", response_model=dict)
+async def create_balance_invoice(
+    invoice_id: str, 
+    balance: BalanceInvoiceCreate, 
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Create a balance (solde) invoice linked to a parent invoice.
+    Only one balance invoice per parent is allowed.
+    """
+    # Get parent invoice
+    parent = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
+    if not parent:
+        raise HTTPException(status_code=404, detail="Facture principale non trouvée")
+    
+    if parent.get("document_type") != "facture":
+        raise HTTPException(status_code=400, detail="Les soldes ne peuvent être créés que sur des factures")
+    
+    if parent.get("invoice_type") in ["deposit", "balance"]:
+        raise HTTPException(status_code=400, detail="Impossible de créer un solde sur une facture d'acompte ou de solde")
+    
+    # Get existing deposits and check for existing balance
+    existing_summary = await get_deposit_summary(invoice_id)
+    
+    if existing_summary.get("has_balance"):
+        raise HTTPException(status_code=400, detail="Une facture de solde existe déjà pour cette facture")
+    
+    deposits_count = existing_summary.get("deposits_count", 0)
+    total_deposits_paid = existing_summary.get("total_deposits_paid", 0)
+    
+    if deposits_count == 0 and not balance.force_without_deposits:
+        raise HTTPException(
+            status_code=400, 
+            detail="Aucun acompte trouvé. Cochez 'Créer sans acompte' pour forcer la création."
+        )
+    
+    parent_total = parent.get("total", 0)
+    parent_number = parent.get("invoice_number")
+    
+    # Calculate balance amount (Total - deposits paid)
+    balance_amount = round(parent_total - total_deposits_paid, 2)
+    
+    if balance_amount <= 0:
+        raise HTTPException(status_code=400, detail="Le solde est déjà réglé (acomptes >= total)")
+    
+    # Generate balance invoice number
+    balance_number = await get_next_invoice_number("facture", "balance", parent_number)
+    balance_id = str(uuid.uuid4())
+    
+    # Generate default label if not provided
+    default_label = f"Solde sur prestation – Réf facture {parent_number}"
+    label = balance.label or default_label
+    
+    # Calculate TVA proportionally
+    subtotal_ht = round(balance_amount / 1.085, 2)
+    tva = round(balance_amount - subtotal_ht, 2)
+    
+    # Build items: original items minus deposits
+    balance_items = []
+    
+    # Add original items description
+    original_items_text = ", ".join([item.get("title", item.get("description", ""))[:50] for item in parent.get("items", [])])
+    balance_items.append({
+        "title": "Solde de facture",
+        "description": f"{label}\n\nPrestations: {original_items_text}",
+        "quantity": 1,
+        "unit_price": parent.get("subtotal", subtotal_ht),  # Original subtotal
+        "discount": 0,
+        "discountType": "%"
+    })
+    
+    # Add line showing deposits already paid
+    if total_deposits_paid > 0:
+        deposits = existing_summary.get("deposits", [])
+        deposits_detail = []
+        for dep in deposits:
+            if dep.get("total_paid", 0) > 0:
+                deposits_detail.append(f"{dep.get('invoice_number')}: {dep.get('total_paid', 0):.2f}€")
+        
+        balance_items.append({
+            "title": "Acompte(s) déjà versé(s)",
+            "description": " | ".join(deposits_detail) if deposits_detail else "Acomptes réglés",
+            "quantity": 1,
+            "unit_price": -round(total_deposits_paid / 1.085, 2),  # Negative to subtract (HT)
+            "discount": 0,
+            "discountType": "%"
+        })
+    
+    # Recalculate totals with the balance items
+    subtotal_balance = sum(item.get("unit_price", 0) * item.get("quantity", 1) for item in balance_items)
+    tva_balance = round(subtotal_balance * 0.085, 2)
+    total_balance = round(subtotal_balance + tva_balance, 2)
+    
+    balance_doc = {
+        "id": balance_id,
+        "invoice_number": balance_number,
+        "quote_id": parent.get("quote_id"),
+        "contact_id": parent.get("contact_id"),
+        "document_type": "facture",
+        "invoice_type": "balance",
+        "parent_invoice_id": invoice_id,
+        "parent_invoice_number": parent_number,
+        "items": balance_items,
+        "subtotal": subtotal_balance,
+        "tva": tva_balance,
+        "total": total_balance,
+        "total_paid": 0,
+        "remaining": total_balance,
+        "globalDiscount": 0,
+        "globalDiscountType": "%",
+        "status": "brouillon",
+        "due_date": balance.due_date or (datetime.now(timezone.utc) + timedelta(days=30)).strftime("%Y-%m-%d"),
+        "payment_terms": "30",
+        "notes": f"Solde de la facture {parent_number}",
+        "conditions": parent.get("conditions"),
+        "bank_details": parent.get("bank_details"),
+        "deposit_percent": None,
+        "deposit_amount": None,
+        "total_deposits_paid": total_deposits_paid,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.invoices.insert_one(balance_doc)
+    
+    logger.info(f"Created balance invoice {balance_number} for parent {parent_number}")
+    
+    return {
+        "id": balance_id,
+        "invoice_number": balance_number,
+        "balance_amount": total_balance,
+        "deposits_paid": total_deposits_paid,
+        "message": f"Facture de solde {balance_number} créée ({total_balance:.2f}€ après {total_deposits_paid:.2f}€ d'acomptes)"
+    }
+
+
+@router.get("/{invoice_id}/related", response_model=dict)
+async def get_related_invoices(invoice_id: str, current_user: dict = Depends(get_current_user)):
+    """
+    Get all related invoices (deposits and balance) for a parent invoice.
+    Also works on deposit/balance to get parent and siblings.
+    """
+    invoice = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+    
+    invoice_type = invoice.get("invoice_type", "standard")
+    
+    if invoice_type in ["deposit", "balance"]:
+        # This is a child invoice, get the parent
+        parent_id = invoice.get("parent_invoice_id")
+        if parent_id:
+            return await get_related_invoices(parent_id, current_user)
+        return {
+            "parent": None,
+            "deposits": [],
+            "balance": None,
+            "summary": {"total_deposits_paid": 0, "balance_paid": 0, "total_paid": 0}
+        }
+    
+    # This is a parent invoice
+    summary = await get_deposit_summary(invoice_id)
+    
+    return {
+        "parent": {
+            "id": invoice.get("id"),
+            "invoice_number": invoice.get("invoice_number"),
+            "total": invoice.get("total"),
+            "status": invoice.get("status")
+        },
+        "deposits": summary.get("deposits", []),
+        "balance": summary.get("balance_invoice"),
+        "summary": {
+            "deposits_count": summary.get("deposits_count", 0),
+            "total_deposits_amount": summary.get("total_deposits_amount", 0),
+            "total_deposits_paid": summary.get("total_deposits_paid", 0),
+            "balance_amount": summary.get("balance_amount", 0),
+            "balance_paid": summary.get("balance_paid", 0),
+            "total_paid": summary.get("total_paid", 0),
+            "remaining": invoice.get("total", 0) - summary.get("total_paid", 0)
+        }
+    }
+
+
+@router.put("/{invoice_id}/sync-parent-totals", response_model=dict)
+async def sync_parent_invoice_totals(invoice_id: str, current_user: dict = Depends(get_current_user)):
+    """
+    Sync parent invoice totals based on paid deposits and balance.
+    Called after payment on a deposit/balance invoice.
+    """
+    invoice = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+    
+    # Determine parent ID
+    parent_id = invoice_id
+    if invoice.get("invoice_type") in ["deposit", "balance"]:
+        parent_id = invoice.get("parent_invoice_id")
+        if not parent_id:
+            return {"message": "No parent invoice to sync"}
+    
+    # Get parent
+    parent = await db.invoices.find_one({"id": parent_id}, {"_id": 0})
+    if not parent:
+        return {"message": "Parent invoice not found"}
+    
+    # Calculate totals from deposits and balance
+    summary = await get_deposit_summary(parent_id)
+    total_paid = summary.get("total_paid", 0)
+    parent_total = parent.get("total", 0)
+    remaining = max(0, parent_total - total_paid)
+    
+    # Determine status
+    new_status = parent.get("status", "brouillon")
+    if total_paid >= parent_total:
+        new_status = "soldée"
+    elif total_paid > 0:
+        new_status = "partiellement_payée"
+    
+    # Update parent
+    await db.invoices.update_one(
+        {"id": parent_id},
+        {"$set": {
+            "total_paid": total_paid,
+            "remaining": remaining,
+            "status": new_status,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    logger.info(f"Synced parent invoice {parent_id}: total_paid={total_paid}, status={new_status}")
+    
+    return {
+        "parent_id": parent_id,
+        "total_paid": total_paid,
+        "remaining": remaining,
+        "status": new_status,
+        "message": f"Facture principale mise à jour: {total_paid:.2f}€ payés, {remaining:.2f}€ restants"
+    }
+
