@@ -80,18 +80,72 @@ class BalanceInvoiceCreate(BaseModel):
 
 # ==================== HELPERS ====================
 
-async def get_next_invoice_number(doc_type: str = "facture"):
-    """Generate next invoice/quote number"""
-    prefix = "DEV" if doc_type == "devis" else "FAC"
-    counter_name = f"{prefix.lower()}_number"
+async def get_next_invoice_number(doc_type: str = "facture", invoice_type: str = "standard", parent_number: str = None):
+    """
+    Generate next invoice/quote number
+    - Standard: FAC-2026-0001
+    - Deposit (acompte): FAC-2026-0001-A1, FAC-2026-0001-A2, etc.
+    - Balance (solde): FAC-2026-0001-S
+    """
+    if invoice_type == "deposit" and parent_number:
+        # Count existing deposits for this parent
+        deposit_count = await db.invoices.count_documents({
+            "parent_invoice_number": parent_number,
+            "invoice_type": "deposit"
+        })
+        return f"{parent_number}-A{deposit_count + 1}"
     
-    counter = await db.counters.find_one_and_update(
-        {"name": counter_name},
-        {"$inc": {"value": 1}},
-        upsert=True,
-        return_document=True
-    )
-    return f"{prefix}-{datetime.now().year}-{str(counter['value']).zfill(4)}"
+    elif invoice_type == "balance" and parent_number:
+        return f"{parent_number}-S"
+    
+    else:
+        # Standard invoice/quote numbering
+        prefix = "DEV" if doc_type == "devis" else "FAC"
+        counter_name = f"{prefix.lower()}_number"
+        
+        counter = await db.counters.find_one_and_update(
+            {"name": counter_name},
+            {"$inc": {"value": 1}},
+            upsert=True,
+            return_document=True
+        )
+        return f"{prefix}-{datetime.now().year}-{str(counter['value']).zfill(4)}"
+
+
+async def get_deposit_summary(parent_invoice_id: str) -> dict:
+    """
+    Get summary of all deposits and balance for a parent invoice.
+    Returns total deposited, paid amount, and remaining.
+    """
+    # Get all deposit invoices
+    deposits = await db.invoices.find({
+        "parent_invoice_id": parent_invoice_id,
+        "invoice_type": "deposit"
+    }, {"_id": 0}).to_list(100)
+    
+    # Get balance invoice if exists
+    balance = await db.invoices.find_one({
+        "parent_invoice_id": parent_invoice_id,
+        "invoice_type": "balance"
+    }, {"_id": 0})
+    
+    # Calculate totals
+    total_deposits_amount = sum(d.get("total", 0) for d in deposits)
+    total_deposits_paid = sum(d.get("total_paid", 0) for d in deposits)
+    balance_amount = balance.get("total", 0) if balance else 0
+    balance_paid = balance.get("total_paid", 0) if balance else 0
+    
+    return {
+        "deposits": deposits,
+        "deposits_count": len(deposits),
+        "total_deposits_amount": total_deposits_amount,
+        "total_deposits_paid": total_deposits_paid,
+        "balance_invoice": balance,
+        "balance_amount": balance_amount,
+        "balance_paid": balance_paid,
+        "total_paid": total_deposits_paid + balance_paid,
+        "has_balance": balance is not None
+    }
 
 
 def calculate_invoice_totals(items: list, global_discount: float = 0, global_discount_type: str = "%"):
