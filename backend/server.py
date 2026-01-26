@@ -2855,6 +2855,79 @@ async def delete_email_logo(current_user: dict = Depends(get_current_user)):
     return {"success": True, "message": "Logo supprimé, logo par défaut restauré"}
 
 
+# ==================== SOCIAL MEDIA UPLOAD ====================
+
+@api_router.post("/social/upload-media", response_model=dict)
+async def upload_social_media(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Upload media (image/video) for social media posts.
+    Returns a public Cloudinary URL that can be used by Facebook/Instagram APIs.
+    """
+    import cloudinary
+    import cloudinary.uploader
+    import uuid
+    
+    # Validate file type
+    content_type = file.content_type or ""
+    is_image = content_type.startswith('image/')
+    is_video = content_type.startswith('video/')
+    
+    if not is_image and not is_video:
+        raise HTTPException(status_code=400, detail="Le fichier doit être une image ou une vidéo")
+    
+    # Read file contents
+    contents = await file.read()
+    
+    # Check file size (max 50MB for videos, 10MB for images)
+    max_size = 50 * 1024 * 1024 if is_video else 10 * 1024 * 1024
+    if len(contents) > max_size:
+        max_mb = max_size // (1024 * 1024)
+        raise HTTPException(status_code=400, detail=f"Le fichier ne doit pas dépasser {max_mb}MB")
+    
+    # Configure Cloudinary
+    cloudinary.config(
+        cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+        api_key=os.environ.get('CLOUDINARY_API_KEY'),
+        api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+    )
+    
+    try:
+        # Generate unique ID for this media
+        media_id = str(uuid.uuid4())[:8]
+        user_id = current_user.get('user_id', 'unknown')[:8]
+        
+        # Upload to Cloudinary
+        result = cloudinary.uploader.upload(
+            contents,
+            folder="social_media_posts",
+            public_id=f"social_{user_id}_{media_id}",
+            resource_type="video" if is_video else "image",
+            overwrite=True
+        )
+        
+        secure_url = result.get('secure_url')
+        
+        logger.info(f"Media uploaded to Cloudinary: {secure_url}")
+        
+        return {
+            "success": True,
+            "url": secure_url,
+            "type": "video" if is_video else "image",
+            "public_id": result.get('public_id'),
+            "format": result.get('format'),
+            "width": result.get('width'),
+            "height": result.get('height'),
+            "bytes": result.get('bytes'),
+            "message": "Média uploadé avec succès"
+        }
+    except Exception as e:
+        logger.error(f"Cloudinary upload error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erreur d'upload: {str(e)}")
+
+
 # ==================== API KEYS MANAGEMENT ====================
 
 @api_router.get("/settings/api-keys", response_model=dict)
