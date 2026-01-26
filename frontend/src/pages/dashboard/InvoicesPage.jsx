@@ -1392,6 +1392,7 @@ const InvoicesPage = () => {
                             {isDevis ? 'DEVIS' : 'FACTURE'}
                           </span>
                           <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
+                          {getInvoiceTypeBadge(invoice)}
                         </div>
                       </td>
                       <td className="px-4 py-4">
