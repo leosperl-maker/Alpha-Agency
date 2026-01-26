@@ -1962,16 +1962,74 @@ const InvoicesPage = () => {
                 </div>
               </div>
               
-              {/* Conditions Section */}
+              {/* Conditions Section - 4 types différents */}
               <div className="space-y-4">
-                <h3 className="text-white font-semibold">Conditions de règlement</h3>
-                <Textarea
-                  value={invoiceSettings?.default_conditions || formData.conditions || ""}
-                  onChange={(e) => setInvoiceSettings({...invoiceSettings, default_conditions: e.target.value})}
-                  placeholder="• Ce devis est valable 30 jours...
-• Paiement par virement bancaire..."
-                  className="bg-white/5 border-white/10 text-white min-h-[120px] text-sm"
-                />
+                <h3 className="text-white font-semibold flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-indigo-400" />
+                  Conditions de règlement par type de document
+                </h3>
+                
+                {/* Devis */}
+                <div className="bg-white/5 rounded-lg p-4 space-y-2">
+                  <Label className="text-blue-400 font-medium flex items-center gap-2">
+                    <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                    Devis
+                  </Label>
+                  <Textarea
+                    value={invoiceSettings?.conditions_devis || invoiceSettings?.default_conditions || ""}
+                    onChange={(e) => setInvoiceSettings({...invoiceSettings, conditions_devis: e.target.value})}
+                    placeholder="• Ce devis est valable 30 jours...
+• Un acompte de 50% est exigé..."
+                    className="bg-white/5 border-white/10 text-white min-h-[100px] text-sm"
+                  />
+                </div>
+                
+                {/* Facture standard */}
+                <div className="bg-white/5 rounded-lg p-4 space-y-2">
+                  <Label className="text-emerald-400 font-medium flex items-center gap-2">
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>
+                    Facture standard
+                  </Label>
+                  <Textarea
+                    value={invoiceSettings?.conditions_facture || invoiceSettings?.default_conditions || ""}
+                    onChange={(e) => setInvoiceSettings({...invoiceSettings, conditions_facture: e.target.value})}
+                    placeholder="• Paiement par virement bancaire...
+• Le règlement doit intervenir sous 30 jours..."
+                    className="bg-white/5 border-white/10 text-white min-h-[100px] text-sm"
+                  />
+                </div>
+                
+                {/* Facture d'acompte */}
+                <div className="bg-white/5 rounded-lg p-4 space-y-2">
+                  <Label className="text-blue-300 font-medium flex items-center gap-2">
+                    <span className="w-2 h-2 bg-blue-300 rounded-full"></span>
+                    Facture d&apos;acompte
+                  </Label>
+                  <Textarea
+                    value={invoiceSettings?.conditions_acompte || ""}
+                    onChange={(e) => setInvoiceSettings({...invoiceSettings, conditions_acompte: e.target.value})}
+                    placeholder="• Cette facture correspond à un acompte...
+• Paiement exigible à réception..."
+                    className="bg-white/5 border-white/10 text-white min-h-[100px] text-sm"
+                  />
+                  <p className="text-xs text-white/40">Ne jamais mentionner &quot;un acompte est exigé&quot; ici car cette facture EST l&apos;acompte.</p>
+                </div>
+                
+                {/* Facture de solde */}
+                <div className="bg-white/5 rounded-lg p-4 space-y-2">
+                  <Label className="text-purple-400 font-medium flex items-center gap-2">
+                    <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
+                    Facture de solde
+                  </Label>
+                  <Textarea
+                    value={invoiceSettings?.conditions_solde || ""}
+                    onChange={(e) => setInvoiceSettings({...invoiceSettings, conditions_solde: e.target.value})}
+                    placeholder="• Cette facture correspond au solde...
+• Paiement exigible à réception..."
+                    className="bg-white/5 border-white/10 text-white min-h-[100px] text-sm"
+                  />
+                  <p className="text-xs text-white/40">Le récapitulatif des acomptes versés sera ajouté automatiquement.</p>
+                </div>
               </div>
               
               {/* Bank Details Section */}
