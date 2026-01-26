@@ -19,10 +19,47 @@ Application CRM complète pour agence de communication en Guadeloupe (Alpha Agen
 - Kanban des opportunités
 - Colonnes personnalisables
 
-### 4. Facturation ✅
+### 4. Facturation ✅ UPDATED 2026-01-26
 - Devis et factures PDF
 - Paiements partiels (Acompte/Solde)
 - CA Encaissé calculé sur total_paid
+
+#### 4.1 Factures d'Acompte et de Solde ✅ NEW 2026-01-26
+
+**Gestion complète des acomptes et soldes pour contrats long terme**
+
+1. **Factures d'Acompte**
+   - Création depuis une facture principale via menu d'actions
+   - Choix par pourcentage (30%, 40%, 50%, 70%) ou montant libre
+   - Numérotation automatique: `FAC-2026-0001-A1`, `FAC-2026-0001-A2`, etc.
+   - Plusieurs acomptes possibles par facture (N acomptes)
+   - Libellé personnalisable avec défaut auto-généré
+   - Validation: total acomptes ne peut pas dépasser 100%
+
+2. **Factures de Solde**
+   - Création après acompte(s) payé(s)
+   - Numérotation automatique: `FAC-2026-0001-S`
+   - Calcul automatique: Total - Σ(acomptes payés)
+   - Une seule facture de solde par facture principale
+   - Option "Créer sans acompte" si nécessaire
+
+3. **Synchronisation Automatique**
+   - Paiement sur acompte → mise à jour automatique de la facture parente
+   - Statuts: `brouillon` → `partiellement_payée` → `soldée`
+   - Traçabilité complète: liste des acomptes et solde dans vue détaillée
+
+4. **PDF Professionnel**
+   - En-tête clair: "FACTURE D'ACOMPTE" ou "FACTURE DE SOLDE"
+   - Référence à la facture principale
+   - Récapitulatif des acomptes versés sur la facture de solde
+
+**Endpoints API:**
+```
+POST   /api/invoices/{id}/create-deposit    # Créer acompte
+POST   /api/invoices/{id}/create-balance    # Créer solde
+GET    /api/invoices/{id}/related           # Voir factures liées
+PUT    /api/invoices/{id}/sync-parent-totals # Sync manuelle
+```
 
 ### 5. Module "Things" ✅
 - Liste de tâches journalière
