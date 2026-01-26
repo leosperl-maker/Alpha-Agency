@@ -176,17 +176,18 @@ async def get_meta_auth_url(
     if not redirect_uri:
         redirect_uri = f"{FRONTEND_URL}/admin/social-media?meta_callback=true"
     
-    # Comprehensive scopes for publishing AND inbox
+    # Scopes for publishing - messaging scopes require App Review approval
+    # Basic scopes that work without special approval:
     scopes = [
         "pages_show_list",
         "pages_read_engagement",
         "pages_manage_posts",
         "pages_manage_metadata",
-        "pages_messaging",
+        # "pages_messaging",  # Requires App Review - uncomment after approval
         "instagram_basic",
         "instagram_content_publish",
         "instagram_manage_comments",
-        "instagram_manage_messages",
+        # "instagram_manage_messages",  # Requires App Review - uncomment after approval
         "business_management"
     ]
     
