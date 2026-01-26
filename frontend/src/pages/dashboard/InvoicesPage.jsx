@@ -1461,6 +1461,30 @@ const InvoicesPage = () => {
                                   <ArrowRightLeft className="w-4 h-4 mr-2" /> Convertir en facture
                               </DropdownMenuItem>
                               )}
+                              {/* Deposit & Balance options - only for factures, not deposit/balance themselves */}
+                              {invoice.document_type === 'facture' && (!invoice.invoice_type || invoice.invoice_type === 'standard') && (
+                                <>
+                                  <DropdownMenuSeparator className="bg-white/10" />
+                                  <DropdownMenuItem onClick={() => openDepositDialog(invoice)} className="text-blue-400">
+                                    <PiggyBank className="w-4 h-4 mr-2" /> Créer facture d'acompte
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => openBalanceDialog(invoice)} className="text-purple-400">
+                                    <Banknote className="w-4 h-4 mr-2" /> Créer facture de solde
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => openRelatedDialog(invoice)} className="text-white/70">
+                                    <FileText className="w-4 h-4 mr-2" /> Voir factures liées
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              {/* Show parent link for deposit/balance invoices */}
+                              {(invoice.invoice_type === 'deposit' || invoice.invoice_type === 'balance') && invoice.parent_invoice_number && (
+                                <DropdownMenuItem onClick={() => {
+                                  const parent = invoices.find(i => i.invoice_number === invoice.parent_invoice_number);
+                                  if (parent) openRelatedDialog(parent);
+                                }} className="text-white/70">
+                                  <FileText className="w-4 h-4 mr-2" /> Voir facture principale ({invoice.parent_invoice_number})
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuSeparator className="bg-white/10" />
                               <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-green-400">
                                 <CreditCard className="w-4 h-4 mr-2" /> Enregistrer paiement
