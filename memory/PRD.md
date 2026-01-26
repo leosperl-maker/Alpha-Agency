@@ -372,7 +372,14 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 - iteration_33.json: 22/22 tests backend calendrier éditorial
 - iteration_34.json: 15/15 tests nouvelles fonctionnalités (stats, PDF, email, timezone)
 - iteration_35.json: 20/20 tests backend Social Media module
-- iteration_36.json: 29/29 tests Meta integration refactoring ✅ NEW 2026-01-25
+- iteration_36.json: 29/29 tests Meta integration refactoring ✅ 2026-01-25
+- iteration_37.json: 20/20 tests factures acompte/solde ✅ 2026-01-26
+- iteration_38.json: 17/17 tests conditions de règlement différenciées ✅ 2026-01-26
+- iteration_39.json: 9/9 tests upload média Cloudinary ✅ 2026-01-26
+
+## Bug Fixes 2026-01-26
+- **Fix Cloudinary Upload:** Les images pour les posts sociaux étaient stockées en tant que blob:// URLs locales au lieu d'être uploadées vers Cloudinary. Cela causait des erreurs Facebook/Instagram car les URLs n'étaient pas accessibles. Nouveau endpoint POST /api/social/upload-media créé.
+- **Fix Meta Scopes:** Retrait des scopes `pages_messaging` et `instagram_manage_messages` qui nécessitent une App Review de Meta.
 
 ## 3rd Party Integrations
 - **Cloudinary:** Upload médias ✅
