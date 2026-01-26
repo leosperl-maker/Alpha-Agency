@@ -1,0 +1,81 @@
+{
+  "summary": "Backend testing completed for POST /api/social/upload-media endpoint. All 9 tests PASSED (100%). The endpoint correctly uploads images/videos to Cloudinary and returns valid https://res.cloudinary.com/... URLs instead of blob:// URLs. This fixes the Facebook/Instagram API errors.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_social_media_upload.py",
+    "/app/test_reports/pytest/pytest_social_media_upload.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_social_media_upload.py"
+  ],
+  "success_rate": {
+    "backend": "100% (9/9 tests passed)",
+    "frontend": "Not tested (backend only requested)"
+  },
+  "test_credentials": {
+    "email": "admin@alphagency.fr",
+    "password": "superpassword"
+  },
+  "seed_data_creation": "Test images uploaded to Cloudinary during tests",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "The /api/social/upload-media endpoint is fully functional. It uploads media to Cloudinary and returns public URLs. The frontend SocialComposer.jsx has been updated to call this endpoint instead of using URL.createObjectURL() which created unusable blob:// URLs.",
+  "verified_features": {
+    "POST /api/social/upload-media": {
+      "status": "PASS",
+      "tests": [
+        "Image upload returns Cloudinary URL (https://res.cloudinary.com/dd9izwkgo/...)",
+        "JPEG image upload works",
+        "Rejects invalid file types (text, PDF)",
+        "Rejects oversized images (>10MB)",
+        "Requires authentication (401 without token)",
+        "Response contains metadata (format, width, height, bytes)",
+        "Returned URL is publicly accessible",
+        "URL format is correct Cloudinary pattern"
+      ]
+    },
+    "File Type Validation": {
+      "status": "PASS",
+      "details": "Only image/* and video/* content types accepted"
+    },
+    "File Size Validation": {
+      "status": "PASS",
+      "details": "10MB limit for images, 50MB limit for videos"
+    },
+    "Cloudinary Integration": {
+      "status": "PASS",
+      "details": "Files uploaded to 'social_media_posts' folder with unique public_id"
+    }
+  },
+  "manual_verification": {
+    "curl_test": {
+      "command": "curl -X POST /api/social/upload-media -F 'file=@test.png'",
+      "response": {
+        "success": true,
+        "url": "https://res.cloudinary.com/dd9izwkgo/image/upload/v.../social_media_posts/social_xxx.png",
+        "type": "image",
+        "format": "png"
+      }
+    },
+    "url_accessibility": {
+      "status": "VERIFIED",
+      "details": "Cloudinary URL returns HTTP 200 with correct content-type"
+    }
+  },
+  "bug_fix_verification": {
+    "original_issue": "Images were stored as blob:// URLs which caused Facebook '(#100) url should represent a valid URL' and Instagram 'Only photo or video can be accepted as media type' errors",
+    "fix_applied": "MediaUploader in SocialComposer.jsx now calls /api/social/upload-media which uploads to Cloudinary and returns public https:// URLs",
+    "verification": "Endpoint returns https://res.cloudinary.com/... URLs that are publicly accessible by Meta APIs"
+  },
+  "rca_of_the_issue": null
+}
