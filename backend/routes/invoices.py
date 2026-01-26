@@ -717,7 +717,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
             payment_content.append(Paragraph(f"<b>Reste à payer : {remaining:.2f} €</b>", payment_line_style))
         else:
             payment_content.append(Spacer(1, 0.2*cm))
-            payment_content.append(Paragraph(f"<font color='#22c55e'><b>✓ FACTURE SOLDÉE</b></font>", payment_total_style))
+            payment_content.append(Paragraph("<font color='#22c55e'><b>✓ FACTURE SOLDÉE</b></font>", payment_total_style))
         
         # Créer la table avec fond pastel
         payments_table = Table([[payment_content]], colWidths=[17*cm])
