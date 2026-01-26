@@ -338,7 +338,7 @@ class TestPDFConditionsSelection:
             "deposit_value": 30
         })
         assert deposit_response.status_code == 200
-        deposit_id = deposit_response.json()["deposit_id"]
+        deposit_id = deposit_response.json()["id"]
         
         # Verify the deposit invoice has correct type
         get_response = api_client.get(f"{BASE_URL}/api/invoices/{deposit_id}")
@@ -376,12 +376,12 @@ class TestPDFConditionsSelection:
             "deposit_value": 30
         })
         assert deposit_response.status_code == 200
-        deposit_id = deposit_response.json()["deposit_id"]
+        deposit_id = deposit_response.json()["id"]
         
         # Create a balance invoice
         balance_response = api_client.post(f"{BASE_URL}/api/invoices/{parent_id}/create-balance", json={})
         assert balance_response.status_code == 200
-        balance_id = balance_response.json()["balance_id"]
+        balance_id = balance_response.json()["id"]
         
         # Verify the balance invoice has correct type
         get_response = api_client.get(f"{BASE_URL}/api/invoices/{balance_id}")
