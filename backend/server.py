@@ -2570,12 +2570,40 @@ async def get_invoice_settings(current_user: dict = Depends(get_current_user)):
 • Paiement par virement bancaire ou carte bancaire.
 • Le règlement doit intervenir sous 30 jours après réception de la facture.
 • Tout retard de paiement entraînera des pénalités de retard.""",
+            "conditions_devis": """• Ce devis est valable 30 jours à compter de sa date d'émission.
+• Un acompte de 50% est exigé pour le lancement du projet.
+• Le solde sera payable à la livraison finale.
+• Paiement par virement bancaire ou carte bancaire.""",
+            "conditions_facture": """• Paiement par virement bancaire ou carte bancaire.
+• Le règlement doit intervenir sous 30 jours après réception de la facture.
+• Tout retard de paiement entraînera des pénalités de retard conformément à l'article L.441-10 du Code de commerce.""",
+            "conditions_acompte": """• Cette facture correspond à un acompte sur la facture principale.
+• Paiement exigible à réception.
+• Le solde sera facturé à la livraison finale.""",
+            "conditions_solde": """• Cette facture correspond au solde après déduction des acomptes versés.
+• Paiement exigible à réception.
+• Merci de votre confiance.""",
             "bank_details": "",
             "footer_text": "Merci de votre confiance - Alpha Agency",
             "signature_text": "Bon pour accord, le client :",
             "show_logo": True,
             "logo_position": "left"
         }
+    
+    # Ensure all conditions fields exist (migration for existing settings)
+    if "conditions_devis" not in settings:
+        settings["conditions_devis"] = settings.get("default_conditions", "")
+    if "conditions_facture" not in settings:
+        settings["conditions_facture"] = settings.get("default_conditions", "")
+    if "conditions_acompte" not in settings:
+        settings["conditions_acompte"] = """• Cette facture correspond à un acompte sur la facture principale.
+• Paiement exigible à réception.
+• Le solde sera facturé à la livraison finale."""
+    if "conditions_solde" not in settings:
+        settings["conditions_solde"] = """• Cette facture correspond au solde après déduction des acomptes versés.
+• Paiement exigible à réception.
+• Merci de votre confiance."""
+    
     return settings
 
 @api_router.put("/settings/invoice", response_model=dict)
