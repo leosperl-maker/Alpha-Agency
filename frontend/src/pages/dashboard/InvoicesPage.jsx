@@ -137,6 +137,27 @@ const InvoicesPage = () => {
   const [globalDiscount, setGlobalDiscount] = useState({ type: "percent", value: 0 }); // type: "percent" or "fixed"
   const [invoiceSettings, setInvoiceSettings] = useState(null);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  
+  // Deposit and Balance invoice states
+  const [depositDialogOpen, setDepositDialogOpen] = useState(false);
+  const [balanceDialogOpen, setBalanceDialogOpen] = useState(false);
+  const [relatedDialogOpen, setRelatedDialogOpen] = useState(false);
+  const [selectedParentInvoice, setSelectedParentInvoice] = useState(null);
+  const [relatedInvoices, setRelatedInvoices] = useState(null);
+  const [depositForm, setDepositForm] = useState({
+    deposit_type: "percent",
+    deposit_value: 30,
+    label: "",
+    contract_date: new Date().toLocaleDateString('fr-FR'),
+    due_date: ""
+  });
+  const [balanceForm, setBalanceForm] = useState({
+    label: "",
+    due_date: "",
+    force_without_deposits: false
+  });
+  const [savingDeposit, setSavingDeposit] = useState(false);
+  
   const [formData, setFormData] = useState({
     contact_id: "",
     due_date: "",
