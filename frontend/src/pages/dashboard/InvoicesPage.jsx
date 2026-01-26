@@ -1467,7 +1467,7 @@ const InvoicesPage = () => {
                                 <>
                                   <DropdownMenuSeparator className="bg-white/10" />
                                   <DropdownMenuItem onClick={() => openDepositDialog(invoice)} className="text-blue-400">
-                                    <PiggyBank className="w-4 h-4 mr-2" /> Créer facture d'acompte
+                                    <PiggyBank className="w-4 h-4 mr-2" /> Créer facture d&apos;acompte
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => openBalanceDialog(invoice)} className="text-purple-400">
                                     <Banknote className="w-4 h-4 mr-2" /> Créer facture de solde
@@ -2824,7 +2824,7 @@ BANQUE : ..."
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
               <PiggyBank className="w-5 h-5 text-blue-400" />
-              Créer une facture d'acompte
+              Créer une facture d&apos;acompte
             </DialogTitle>
           </DialogHeader>
           
@@ -2916,7 +2916,7 @@ BANQUE : ..."
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white">Date d'échéance (optionnel)</Label>
+              <Label className="text-white">Date d&apos;échéance (optionnel)</Label>
               <Input
                 type="date"
                 value={depositForm.due_date}
@@ -2972,7 +2972,7 @@ BANQUE : ..."
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white">Date d'échéance (optionnel)</Label>
+              <Label className="text-white">Date d&apos;échéance (optionnel)</Label>
               <Input
                 type="date"
                 value={balanceForm.due_date}
@@ -3106,8 +3106,8 @@ BANQUE : ..."
               {(!relatedInvoices.deposits || relatedInvoices.deposits.length === 0) && !relatedInvoices.balance && (
                 <div className="text-center py-8 text-white/40">
                   <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>Aucune facture d'acompte ou de solde créée</p>
-                  <p className="text-sm mt-2">Utilisez le menu d'actions pour créer des factures liées</p>
+                  <p>Aucune facture d&apos;acompte ou de solde créée</p>
+                  <p className="text-sm mt-2">Utilisez le menu d&apos;actions pour créer des factures liées</p>
                 </div>
               )}
             </div>
