@@ -2817,6 +2817,309 @@ BANQUE : ..."
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Deposit Invoice Dialog */}
+      <Dialog open={depositDialogOpen} onOpenChange={setDepositDialogOpen}>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <PiggyBank className="w-5 h-5 text-blue-400" />
+              Créer une facture d'acompte
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedParentInvoice && (
+            <div className="bg-white/5 rounded-lg p-3 mb-4">
+              <p className="text-sm text-white/60">Facture principale</p>
+              <p className="font-mono font-bold text-white">{selectedParentInvoice.invoice_number}</p>
+              <p className="text-lg font-bold text-white">{formatCurrency(selectedParentInvoice.total)}</p>
+            </div>
+          )}
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-white">Type de calcul</Label>
+              <Select
+                value={depositForm.deposit_type}
+                onValueChange={(value) => setDepositForm({...depositForm, deposit_type: value})}
+              >
+                <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[#1a1a2e] border-white/10">
+                  <SelectItem value="percent" className="text-white">Pourcentage (%)</SelectItem>
+                  <SelectItem value="amount" className="text-white">Montant fixe (€)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-white">
+                {depositForm.deposit_type === 'percent' ? 'Pourcentage' : 'Montant'}
+              </Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min="0"
+                  max={depositForm.deposit_type === 'percent' ? 100 : selectedParentInvoice?.total}
+                  step={depositForm.deposit_type === 'percent' ? 5 : 0.01}
+                  value={depositForm.deposit_value}
+                  onChange={(e) => setDepositForm({...depositForm, deposit_value: parseFloat(e.target.value) || 0})}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+                <span className="text-white/60">{depositForm.deposit_type === 'percent' ? '%' : '€'}</span>
+              </div>
+              {depositForm.deposit_type === 'percent' && selectedParentInvoice && (
+                <p className="text-sm text-white/60">
+                  = {formatCurrency((selectedParentInvoice.total * depositForm.deposit_value / 100))}
+                </p>
+              )}
+            </div>
+            
+            {/* Quick percentage buttons */}
+            {depositForm.deposit_type === 'percent' && (
+              <div className="flex gap-2 flex-wrap">
+                {[30, 40, 50, 70].map((pct) => (
+                  <Button
+                    key={pct}
+                    type="button"
+                    variant={depositForm.deposit_value === pct ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setDepositForm({...depositForm, deposit_value: pct})}
+                    className={depositForm.deposit_value === pct ? "bg-blue-600" : "border-white/20 text-white hover:bg-white/10"}
+                  >
+                    {pct}%
+                  </Button>
+                ))}
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label className="text-white">Date du contrat (optionnel)</Label>
+              <Input
+                type="text"
+                placeholder="Ex: 15/01/2026"
+                value={depositForm.contract_date}
+                onChange={(e) => setDepositForm({...depositForm, contract_date: e.target.value})}
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-white">Libellé personnalisé (optionnel)</Label>
+              <Textarea
+                placeholder="Laissez vide pour utiliser le libellé par défaut"
+                value={depositForm.label}
+                onChange={(e) => setDepositForm({...depositForm, label: e.target.value})}
+                className="bg-white/5 border-white/10 text-white min-h-[80px]"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-white">Date d'échéance (optionnel)</Label>
+              <Input
+                type="date"
+                value={depositForm.due_date}
+                onChange={(e) => setDepositForm({...depositForm, due_date: e.target.value})}
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter className="gap-2 mt-4">
+            <Button variant="outline" onClick={() => setDepositDialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+              Annuler
+            </Button>
+            <Button onClick={handleCreateDeposit} disabled={savingDeposit} className="bg-blue-600 hover:bg-blue-700">
+              {savingDeposit ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PiggyBank className="w-4 h-4 mr-2" />}
+              Créer l'acompte
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Balance Invoice Dialog */}
+      <Dialog open={balanceDialogOpen} onOpenChange={setBalanceDialogOpen}>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Banknote className="w-5 h-5 text-purple-400" />
+              Créer une facture de solde
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedParentInvoice && (
+            <div className="bg-white/5 rounded-lg p-3 mb-4">
+              <p className="text-sm text-white/60">Facture principale</p>
+              <p className="font-mono font-bold text-white">{selectedParentInvoice.invoice_number}</p>
+              <p className="text-lg font-bold text-white">{formatCurrency(selectedParentInvoice.total)}</p>
+              <div className="mt-2 pt-2 border-t border-white/10">
+                <p className="text-sm text-white/60">Déjà payé: <span className="text-green-400">{formatCurrency(selectedParentInvoice.total_paid || 0)}</span></p>
+                <p className="text-sm text-white/60">Reste à facturer: <span className="text-orange-400">{formatCurrency((selectedParentInvoice.total || 0) - (selectedParentInvoice.total_paid || 0))}</span></p>
+              </div>
+            </div>
+          )}
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-white">Libellé personnalisé (optionnel)</Label>
+              <Textarea
+                placeholder="Laissez vide pour utiliser le libellé par défaut"
+                value={balanceForm.label}
+                onChange={(e) => setBalanceForm({...balanceForm, label: e.target.value})}
+                className="bg-white/5 border-white/10 text-white min-h-[80px]"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-white">Date d'échéance (optionnel)</Label>
+              <Input
+                type="date"
+                value={balanceForm.due_date}
+                onChange={(e) => setBalanceForm({...balanceForm, due_date: e.target.value})}
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="force_without_deposits"
+                checked={balanceForm.force_without_deposits}
+                onChange={(e) => setBalanceForm({...balanceForm, force_without_deposits: e.target.checked})}
+                className="w-4 h-4 rounded border-white/20 bg-white/5"
+              />
+              <Label htmlFor="force_without_deposits" className="text-white/60 text-sm cursor-pointer">
+                Créer sans acompte préalable
+              </Label>
+            </div>
+          </div>
+          
+          <DialogFooter className="gap-2 mt-4">
+            <Button variant="outline" onClick={() => setBalanceDialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+              Annuler
+            </Button>
+            <Button onClick={handleCreateBalance} disabled={savingDeposit} className="bg-purple-600 hover:bg-purple-700">
+              {savingDeposit ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Banknote className="w-4 h-4 mr-2" />}
+              Créer le solde
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Related Invoices Dialog */}
+      <Dialog open={relatedDialogOpen} onOpenChange={setRelatedDialogOpen}>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <FileText className="w-5 h-5" />
+              Factures liées
+            </DialogTitle>
+          </DialogHeader>
+          
+          {relatedInvoices && (
+            <div className="space-y-4">
+              {/* Parent Invoice */}
+              <div className="bg-white/5 rounded-lg p-4">
+                <h3 className="text-sm font-bold text-white/60 mb-2">FACTURE PRINCIPALE</h3>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-mono font-bold text-white text-lg">{relatedInvoices.parent?.invoice_number}</p>
+                    <p className="text-white/60">{getContactName(selectedParentInvoice?.contact_id)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-mono font-bold text-white text-lg">{formatCurrency(relatedInvoices.parent?.total)}</p>
+                    <Badge className={`${relatedInvoices.parent?.status === 'soldée' ? 'bg-green-500/20 text-green-400' : relatedInvoices.parent?.status === 'partiellement_payée' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/10 text-white/60'}`}>
+                      {relatedInvoices.parent?.status}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Summary */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-blue-500/10 rounded-lg p-3 text-center">
+                  <p className="text-xs text-blue-400 mb-1">Acomptes ({relatedInvoices.summary?.deposits_count || 0})</p>
+                  <p className="font-mono font-bold text-white">{formatCurrency(relatedInvoices.summary?.total_deposits_paid || 0)}</p>
+                  <p className="text-xs text-white/40">payés sur {formatCurrency(relatedInvoices.summary?.total_deposits_amount || 0)}</p>
+                </div>
+                <div className="bg-purple-500/10 rounded-lg p-3 text-center">
+                  <p className="text-xs text-purple-400 mb-1">Solde</p>
+                  <p className="font-mono font-bold text-white">{formatCurrency(relatedInvoices.summary?.balance_paid || 0)}</p>
+                  <p className="text-xs text-white/40">payés sur {formatCurrency(relatedInvoices.summary?.balance_amount || 0)}</p>
+                </div>
+                <div className="bg-green-500/10 rounded-lg p-3 text-center">
+                  <p className="text-xs text-green-400 mb-1">Reste à payer</p>
+                  <p className="font-mono font-bold text-white">{formatCurrency(relatedInvoices.summary?.remaining || 0)}</p>
+                </div>
+              </div>
+              
+              {/* Deposits List */}
+              {relatedInvoices.deposits?.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold text-blue-400 mb-2 flex items-center gap-2">
+                    <PiggyBank className="w-4 h-4" />
+                    FACTURES D'ACOMPTE
+                  </h3>
+                  <div className="space-y-2">
+                    {relatedInvoices.deposits.map((deposit) => (
+                      <div key={deposit.id} className="bg-white/5 rounded-lg p-3 flex justify-between items-center">
+                        <div>
+                          <p className="font-mono font-medium text-white">{deposit.invoice_number}</p>
+                          <p className="text-xs text-white/60">{deposit.deposit_percent}% - {formatDate(deposit.created_at)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-mono font-bold text-white">{formatCurrency(deposit.total)}</p>
+                          <Badge className={`${deposit.status === 'payée' ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/60'}`}>
+                            {deposit.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Balance Invoice */}
+              {relatedInvoices.balance && (
+                <div>
+                  <h3 className="text-sm font-bold text-purple-400 mb-2 flex items-center gap-2">
+                    <Banknote className="w-4 h-4" />
+                    FACTURE DE SOLDE
+                  </h3>
+                  <div className="bg-white/5 rounded-lg p-3 flex justify-between items-center">
+                    <div>
+                      <p className="font-mono font-medium text-white">{relatedInvoices.balance.invoice_number}</p>
+                      <p className="text-xs text-white/60">{formatDate(relatedInvoices.balance.created_at)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-mono font-bold text-white">{formatCurrency(relatedInvoices.balance.total)}</p>
+                      <Badge className={`${relatedInvoices.balance.status === 'payée' ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/60'}`}>
+                        {relatedInvoices.balance.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* No deposits or balance yet */}
+              {(!relatedInvoices.deposits || relatedInvoices.deposits.length === 0) && !relatedInvoices.balance && (
+                <div className="text-center py-8 text-white/40">
+                  <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>Aucune facture d'acompte ou de solde créée</p>
+                  <p className="text-sm mt-2">Utilisez le menu d'actions pour créer des factures liées</p>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRelatedDialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
