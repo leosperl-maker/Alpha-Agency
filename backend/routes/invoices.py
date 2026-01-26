@@ -735,8 +735,27 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     elements.append(Spacer(1, 0.1*cm))
     
     # ===== CONDITIONS DE RÈGLEMENT (rouge pastel, pas de bordure) =====
-    # TOUJOURS utiliser les conditions des settings de facturation
-    conditions_text = invoice_settings.get('default_conditions', '')
+    # Sélectionner les conditions selon le type de document
+    invoice_type = doc_data.get('invoice_type', 'standard')
+    
+    if doc_type == "devis":
+        conditions_text = invoice_settings.get('conditions_devis') or invoice_settings.get('default_conditions', '')
+    elif invoice_type == "deposit":
+        conditions_text = invoice_settings.get('conditions_acompte', '')
+        # Ajouter automatiquement la référence à la facture principale
+        parent_number = doc_data.get('parent_invoice_number')
+        if parent_number and conditions_text:
+            conditions_text = conditions_text.replace('[FAC-XXXX]', parent_number)
+    elif invoice_type == "balance":
+        conditions_text = invoice_settings.get('conditions_solde', '')
+        # Pour la facture de solde, ajouter le récapitulatif des acomptes
+        total_deposits_paid = doc_data.get('total_deposits_paid', 0)
+        if total_deposits_paid > 0:
+            conditions_text = f"• Acomptes déjà versés : {total_deposits_paid:.2f} €\n{conditions_text}"
+    else:
+        # Facture standard
+        conditions_text = invoice_settings.get('conditions_facture') or invoice_settings.get('default_conditions', '')
+    
     if conditions_text:
         conditions_content = []
         conditions_content.append(Paragraph("<b>Conditions de règlement :</b>", pastel_header_style))
