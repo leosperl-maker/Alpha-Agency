@@ -115,6 +115,7 @@ const PlatformIcon = ({ platform, className = "w-4 h-4", showBg = false }) => {
 const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleFileSelect = async (e) => {
     const files = Array.from(e.target.files);
@@ -126,18 +127,54 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
     }
 
     setUploading(true);
+    setUploadProgress(0);
     
-    // For now, create local URLs (in production, upload to Cloudinary)
-    const newMedias = files.map(file => ({
-      id: Math.random().toString(36).substr(2, 9),
-      url: URL.createObjectURL(file),
-      type: file.type.startsWith('video') ? 'video' : 'image',
-      name: file.name,
-      file: file
-    }));
+    const newMedias = [];
+    const totalFiles = files.length;
     
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      setUploadProgress(Math.round(((i) / totalFiles) * 100));
+      
+      try {
+        // Upload to Cloudinary via our API
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/social/upload-media`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Upload failed');
+        }
+        
+        const result = await response.json();
+        
+        newMedias.push({
+          id: Math.random().toString(36).substr(2, 9),
+          url: result.url,  // Cloudinary URL
+          type: result.type,
+          name: file.name,
+          cloudinary_public_id: result.public_id
+        });
+        
+      } catch (error) {
+        console.error('Upload error:', error);
+        toast.error(`Erreur upload ${file.name}: ${error.message}`);
+      }
+    }
+    
+    setUploadProgress(100);
     onChange([...medias, ...newMedias]);
     setUploading(false);
+    setUploadProgress(0);
     
     // Reset input
     if (fileInputRef.current) {
@@ -166,6 +203,22 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
         onChange={handleFileSelect}
         className="hidden"
       />
+      
+      {/* Upload Progress */}
+      {uploading && (
+        <div className="bg-white/5 rounded-lg p-3">
+          <div className="flex items-center gap-2 text-white/60 text-sm mb-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Upload en cours... {uploadProgress}%</span>
+          </div>
+          <div className="w-full bg-white/10 rounded-full h-2">
+            <div 
+              className="bg-indigo-500 h-2 rounded-full transition-all duration-300" 
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+        </div>
+      )}
       
       {/* Media Grid */}
       {medias.length > 0 && (
