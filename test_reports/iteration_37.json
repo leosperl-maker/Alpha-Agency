@@ -1,0 +1,86 @@
+{
+  "summary": "Complete testing of Deposit (Acompte) and Balance (Solde) Invoice functionality. All 20 backend tests PASSED (100%). Frontend UI fully functional with all required features working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_deposit_balance_invoices.py",
+    "/app/test_reports/pytest/pytest_deposit_balance.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_deposit_balance_invoices.py"
+  ],
+  "success_rate": {
+    "backend": "100% (20/20 tests passed)",
+    "frontend": "100% (all UI elements working)"
+  },
+  "test_credentials": {
+    "email": "admin@alphagency.fr",
+    "password": "superpassword"
+  },
+  "seed_data_creation": "Test invoices created and cleaned up automatically during tests",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Deposit/Balance invoice functionality is fully implemented and tested. Key test data: FAC-2026-0020 has 2 deposits (A1, A2) and 1 balance (S). A1 is paid, A2 and S are in brouillon status. Parent invoice status is 'partiellement_payée' with 224.59€ paid.",
+  "verified_features": {
+    "POST /api/invoices/{id}/create-deposit": {
+      "status": "PASS",
+      "tests": [
+        "Create deposit with percentage (30%, 40%, etc.)",
+        "Create deposit with fixed amount",
+        "Create multiple deposits for same parent",
+        "Validation: deposits cannot exceed 100% of parent total",
+        "Validation: cannot create deposit on devis",
+        "Validation: cannot create deposit on another deposit invoice",
+        "Numbering: FAC-YYYY-XXXX-A1, A2, etc."
+      ]
+    },
+    "POST /api/invoices/{id}/create-balance": {
+      "status": "PASS",
+      "tests": [
+        "Create balance invoice after deposits",
+        "Balance without deposits requires force flag",
+        "Only one balance per parent allowed",
+        "Numbering: FAC-YYYY-XXXX-S"
+      ]
+    },
+    "GET /api/invoices/{id}/related": {
+      "status": "PASS",
+      "tests": [
+        "Returns parent, deposits, and balance info",
+        "Works from child invoice (redirects to parent)",
+        "Summary includes total_deposits_paid, balance_paid, remaining"
+      ]
+    },
+    "Payment Synchronization": {
+      "status": "PASS",
+      "tests": [
+        "Payment on deposit syncs to parent invoice",
+        "Parent status updates to 'partiellement_payée' after partial payment"
+      ]
+    },
+    "Frontend UI": {
+      "status": "PASS",
+      "tests": [
+        "Dropdown menu shows 'Créer facture d'acompte' option",
+        "Dropdown menu shows 'Créer facture de solde' option",
+        "Dropdown menu shows 'Voir factures liées' option",
+        "Deposit modal: percentage/amount toggle, quick buttons (30%, 40%, 50%, 70%)",
+        "Deposit modal: real-time calculation display",
+        "Balance modal: shows remaining amount, force checkbox",
+        "Related invoices dialog: shows parent, deposits, balance with summary",
+        "Invoice list: 'Acompte' badge (blue) visible",
+        "Invoice list: 'Solde' badge (green) visible"
+      ]
+    }
+  },
+  "rca_of_the_issue": null
+}
