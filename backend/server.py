@@ -2539,7 +2539,12 @@ class InvoiceSettingsUpdate(BaseModel):
     company_vat: Optional[str] = None
     default_payment_terms: Optional[str] = "30"
     default_tva_rate: Optional[str] = "8.5"
-    default_conditions: Optional[str] = None
+    # Conditions différenciées par type de document
+    default_conditions: Optional[str] = None  # Legacy - fallback
+    conditions_devis: Optional[str] = None  # Pour les devis
+    conditions_facture: Optional[str] = None  # Pour les factures standard
+    conditions_acompte: Optional[str] = None  # Pour les factures d'acompte
+    conditions_solde: Optional[str] = None  # Pour les factures de solde
     bank_details: Optional[str] = None
     footer_text: Optional[str] = None
     signature_text: Optional[str] = None
