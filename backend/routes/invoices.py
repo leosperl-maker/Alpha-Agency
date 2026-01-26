@@ -825,7 +825,7 @@ async def create_invoice(invoice: InvoiceCreate, current_user: dict = Depends(ge
     doc_type = invoice.document_type or "facture"
     logger.info(f"Creating document with type: {doc_type}")
     logger.info(f"Creating document with type: {doc_type}, raw value: {invoice.document_type}")
-    invoice_number = await get_next_invoice_number(doc_type)
+    invoice_number = await get_next_invoice_number(doc_type, "standard", None)
     
     items_list = [item.model_dump() for item in invoice.items]
     subtotal, tva, total = calculate_invoice_totals(
@@ -840,10 +840,15 @@ async def create_invoice(invoice: InvoiceCreate, current_user: dict = Depends(ge
         "quote_id": invoice.quote_id,
         "contact_id": invoice.contact_id,
         "document_type": doc_type,
+        "invoice_type": "standard",  # standard | deposit | balance
+        "parent_invoice_id": None,  # For deposit/balance invoices
+        "parent_invoice_number": None,
         "items": items_list,
         "subtotal": subtotal,
         "tva": tva,
         "total": total,
+        "total_paid": 0,
+        "remaining": total,
         "globalDiscount": invoice.globalDiscount or 0,
         "globalDiscountType": invoice.globalDiscountType or "%",
         "status": "brouillon",
@@ -852,6 +857,8 @@ async def create_invoice(invoice: InvoiceCreate, current_user: dict = Depends(ge
         "notes": invoice.notes,
         "conditions": invoice.conditions,
         "bank_details": invoice.bank_details,
+        "deposit_percent": None,  # For deposit invoices
+        "deposit_amount": None,   # For deposit invoices
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.invoices.insert_one(invoice_doc)
