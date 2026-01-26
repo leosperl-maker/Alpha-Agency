@@ -346,6 +346,102 @@ const InvoicesPage = () => {
     }
   };
 
+  // ==================== DEPOSIT & BALANCE FUNCTIONS ====================
+
+  const openDepositDialog = (invoice) => {
+    setSelectedParentInvoice(invoice);
+    setDepositForm({
+      deposit_type: "percent",
+      deposit_value: 30,
+      label: "",
+      contract_date: new Date().toLocaleDateString('fr-FR'),
+      due_date: ""
+    });
+    setDepositDialogOpen(true);
+  };
+
+  const openBalanceDialog = (invoice) => {
+    setSelectedParentInvoice(invoice);
+    setBalanceForm({
+      label: "",
+      due_date: "",
+      force_without_deposits: false
+    });
+    setBalanceDialogOpen(true);
+  };
+
+  const openRelatedDialog = async (invoice) => {
+    setSelectedParentInvoice(invoice);
+    try {
+      const response = await api.get(`/invoices/${invoice.id}/related`);
+      setRelatedInvoices(response.data);
+      setRelatedDialogOpen(true);
+    } catch (error) {
+      toast.error("Erreur lors du chargement des factures liées");
+    }
+  };
+
+  const handleCreateDeposit = async () => {
+    if (!selectedParentInvoice) return;
+    
+    if (!depositForm.deposit_value || depositForm.deposit_value <= 0) {
+      toast.error("Veuillez saisir un montant ou pourcentage valide");
+      return;
+    }
+    
+    setSavingDeposit(true);
+    try {
+      const response = await api.post(`/invoices/${selectedParentInvoice.id}/create-deposit`, {
+        deposit_type: depositForm.deposit_type,
+        deposit_value: parseFloat(depositForm.deposit_value),
+        label: depositForm.label || null,
+        contract_date: depositForm.contract_date || null,
+        due_date: depositForm.due_date || null
+      });
+      
+      toast.success(response.data.message);
+      setDepositDialogOpen(false);
+      setSelectedParentInvoice(null);
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Erreur lors de la création de l'acompte");
+    } finally {
+      setSavingDeposit(false);
+    }
+  };
+
+  const handleCreateBalance = async () => {
+    if (!selectedParentInvoice) return;
+    
+    setSavingDeposit(true);
+    try {
+      const response = await api.post(`/invoices/${selectedParentInvoice.id}/create-balance`, {
+        label: balanceForm.label || null,
+        due_date: balanceForm.due_date || null,
+        force_without_deposits: balanceForm.force_without_deposits
+      });
+      
+      toast.success(response.data.message);
+      setBalanceDialogOpen(false);
+      setSelectedParentInvoice(null);
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Erreur lors de la création de la facture de solde");
+    } finally {
+      setSavingDeposit(false);
+    }
+  };
+
+  const getInvoiceTypeBadge = (invoice) => {
+    const type = invoice.invoice_type || 'standard';
+    if (type === 'deposit') {
+      return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Acompte</Badge>;
+    } else if (type === 'balance') {
+      return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Solde</Badge>;
+    }
+    return null;
+  };
+
   const addServiceToInvoice = (service) => {
     setItems([...items, {
       title: service.title,
