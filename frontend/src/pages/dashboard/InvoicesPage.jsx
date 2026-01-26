@@ -2167,13 +2167,21 @@ BANQUE : ..."
                   </div>
                 </div>
                 
-                {/* Conditions */}
-                {invoiceSettings?.default_conditions && (
-                  <div className="text-[8px] text-gray-600 mb-3 p-2 bg-gray-50 rounded">
-                    <p className="font-bold mb-1">Conditions de {documentType === 'devis' ? 'règlement' : 'paiement'}:</p>
-                    <p className="whitespace-pre-wrap">{invoiceSettings.default_conditions}</p>
-                  </div>
-                )}
+                {/* Conditions - sélection selon le type de document */}
+                {(() => {
+                  let conditionsText = '';
+                  if (documentType === 'devis') {
+                    conditionsText = invoiceSettings?.conditions_devis || invoiceSettings?.default_conditions || '';
+                  } else {
+                    conditionsText = invoiceSettings?.conditions_facture || invoiceSettings?.default_conditions || '';
+                  }
+                  return conditionsText && (
+                    <div className="text-[8px] text-gray-600 mb-3 p-2 bg-gray-50 rounded">
+                      <p className="font-bold mb-1">Conditions de {documentType === 'devis' ? 'règlement' : 'paiement'}:</p>
+                      <p className="whitespace-pre-wrap">{conditionsText}</p>
+                    </div>
+                  );
+                })()}
                 
                 {/* Bank Details */}
                 {invoiceSettings?.bank_details && (
