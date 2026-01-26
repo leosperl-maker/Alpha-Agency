@@ -276,8 +276,18 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     except:
         doc_date_formatted = doc_date
     
-    # Doc title and type
-    doc_type_title = "DEVIS" if doc_type == "devis" else "FACTURE"
+    # Doc title and type - Handle deposit/balance invoices
+    invoice_type = doc_data.get('invoice_type', 'standard')
+    parent_invoice_number = doc_data.get('parent_invoice_number')
+    
+    if doc_type == "devis":
+        doc_type_title = "DEVIS"
+    elif invoice_type == "deposit":
+        doc_type_title = "FACTURE D'ACOMPTE"
+    elif invoice_type == "balance":
+        doc_type_title = "FACTURE DE SOLDE"
+    else:
+        doc_type_title = "FACTURE"
     
     # Format validity/due date
     valid_until = doc_data.get('valid_until', '')
