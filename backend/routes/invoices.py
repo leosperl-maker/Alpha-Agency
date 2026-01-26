@@ -1180,19 +1180,63 @@ async def add_payment(invoice_id: str, payment: PaymentCreate, current_user: dic
         }}
     )
     
+    # If this is a deposit or balance invoice, sync parent totals
+    invoice_type = invoice.get("invoice_type", "standard")
+    parent_sync_result = None
+    if invoice_type in ["deposit", "balance"]:
+        parent_id = invoice.get("parent_invoice_id")
+        if parent_id:
+            # Get parent and recalculate totals
+            parent = await db.invoices.find_one({"id": parent_id}, {"_id": 0})
+            if parent:
+                summary = await get_deposit_summary(parent_id)
+                parent_total_paid = summary.get("total_paid", 0)
+                parent_total = parent.get("total", 0)
+                parent_remaining = max(0, parent_total - parent_total_paid)
+                
+                # Determine parent status
+                parent_status = parent.get("status", "brouillon")
+                if parent_total_paid >= parent_total:
+                    parent_status = "soldée"
+                elif parent_total_paid > 0:
+                    parent_status = "partiellement_payée"
+                
+                await db.invoices.update_one(
+                    {"id": parent_id},
+                    {"$set": {
+                        "total_paid": parent_total_paid,
+                        "remaining": parent_remaining,
+                        "status": parent_status,
+                        "updated_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                parent_sync_result = {
+                    "parent_id": parent_id,
+                    "parent_total_paid": parent_total_paid,
+                    "parent_remaining": parent_remaining,
+                    "parent_status": parent_status
+                }
+                logger.info(f"Auto-synced parent {parent_id}: paid={parent_total_paid}, status={parent_status}")
+    
     # Déterminer le message selon le type de paiement
     if payment.payment_type == "acompte" and payment.acompte_percent:
         message = f"Acompte de {payment.amount:.2f}€ ({payment.acompte_percent}%) enregistré"
     else:
         message = f"Paiement de {payment.amount:.2f}€ enregistré"
     
-    return {
+    result = {
         "payment_id": payment_id,
         "total_paid": total_paid,
         "remaining": remaining,
         "status": new_status,
         "message": message
     }
+    
+    if parent_sync_result:
+        result["parent_sync"] = parent_sync_result
+    
+    return result
 
 
 @router.get("/{invoice_id}/payments", response_model=List[dict])
