@@ -61,6 +61,22 @@ GET    /api/invoices/{id}/related           # Voir factures liées
 PUT    /api/invoices/{id}/sync-parent-totals # Sync manuelle
 ```
 
+#### 4.2 Conditions de Règlement Différenciées ✅ NEW 2026-01-26
+
+**Problème résolu:** Un seul champ de conditions utilisé pour tous les types de documents créait des incohérences juridiques (ex: "Un acompte de 50% est exigé" sur une facture d'acompte).
+
+**Solution:** 4 champs distincts dans les paramètres de facturation:
+- `conditions_devis` : Pour les devis
+- `conditions_facture` : Pour les factures standard
+- `conditions_acompte` : Pour les factures d'acompte
+- `conditions_solde` : Pour les factures de solde
+
+**Comportement:**
+- Chaque type de document utilise automatiquement ses conditions spécifiques
+- Migration automatique des anciens paramètres
+- Personnalisation possible par document
+- Templates par défaut appropriés pour chaque type
+
 ### 5. Module "Things" ✅
 - Liste de tâches journalière
 - Report automatique des tâches non terminées
