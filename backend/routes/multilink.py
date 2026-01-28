@@ -23,16 +23,22 @@ router = APIRouter()
 class LinkCreate(BaseModel):
     label: str
     url: str
+    description: Optional[str] = None  # Short description under label
+    thumbnail: Optional[str] = None  # Image thumbnail
     icon: Optional[str] = None  # Icon name or URL
     icon_type: Optional[str] = "lucide"  # lucide, social, custom
+    link_type: Optional[str] = "link"  # link, social, header, divider
     is_active: bool = True
     order: Optional[int] = 0
 
 class LinkUpdate(BaseModel):
     label: Optional[str] = None
     url: Optional[str] = None
+    description: Optional[str] = None
+    thumbnail: Optional[str] = None
     icon: Optional[str] = None
     icon_type: Optional[str] = None
+    link_type: Optional[str] = None
     is_active: Optional[bool] = None
     order: Optional[int] = None
 
