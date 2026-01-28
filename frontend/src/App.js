@@ -45,9 +45,11 @@ import MindMapPage from "./pages/dashboard/MindMapPage";
 import TransfersPage from "./pages/dashboard/TransfersPage";
 import AgendaPage from "./pages/dashboard/AgendaPage";
 import EditorialCalendarPage from "./pages/dashboard/EditorialCalendarPage";
+import MultilinkPage from "./pages/dashboard/MultilinkPage";
 
 // Public pages
 import TransferDownloadPage from "./pages/TransferDownloadPage";
+import LinkBioPage from "./pages/public/LinkBioPage";
 
 // Layout
 import MainLayout from "./components/MainLayout";
