@@ -4,7 +4,7 @@ import {
   Instagram, Facebook, Twitter, Youtube, Linkedin, 
   MessageCircle, Send, Mail, Globe, ShoppingBag, Calendar,
   Phone, MapPin, Link, Download, Play, Music, Mic, BookOpen,
-  ExternalLink, Loader2
+  ExternalLink, Loader2, ChevronRight
 } from 'lucide-react';
 
 // Icon mapping
@@ -28,6 +28,21 @@ const ICON_MAP = {
   music: Music,
   podcast: Mic,
   blog: BookOpen
+};
+
+// Social icon colors
+const SOCIAL_COLORS = {
+  instagram: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+  facebook: '#1877F2',
+  twitter: '#000000',
+  youtube: '#FF0000',
+  linkedin: '#0A66C2',
+  whatsapp: '#25D366',
+  telegram: '#0088cc',
+  tiktok: '#000000',
+  snapchat: '#FFFC00',
+  email: '#EA4335',
+  website: '#6366f1'
 };
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -76,33 +91,53 @@ const LinkBioPage = () => {
     window.open(link.url, '_blank', 'noopener,noreferrer');
   };
 
-  const getIcon = (iconName, iconType) => {
-    if (!iconName) return Link;
-    
-    if (iconType === 'social' || iconType === 'lucide') {
-      const Icon = ICON_MAP[iconName.toLowerCase()];
-      return Icon || Link;
+  const handleSocialClick = async (social) => {
+    // Record click if it has an id
+    if (social.id) {
+      try {
+        await fetch(`${API_URL}/api/multilink/public/${slug}/click/${social.id}`, {
+          method: 'POST'
+        });
+      } catch (err) {
+        // Silent fail
+      }
     }
     
-    return Link;
+    window.open(social.url, '_blank', 'noopener,noreferrer');
+  };
+
+  const getIcon = (iconName) => {
+    if (!iconName) return Link;
+    const Icon = ICON_MAP[iconName.toLowerCase()];
+    return Icon || Link;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 animate-spin text-white/50 mx-auto" />
+          <p className="text-white/40 mt-3 text-sm">Chargement...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
         <div className="text-center p-8">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">404</h1>
-          <p className="text-gray-600">{error}</p>
-          <a href="https://alphagency.fr" className="mt-4 inline-block text-indigo-600 hover:underline">
+          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Link className="w-10 h-10 text-white/30" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-2">404</h1>
+          <p className="text-white/60 mb-6">{error}</p>
+          <a 
+            href="https://alphagency.fr" 
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full text-white text-sm font-medium transition-all"
+          >
             Retour à l&apos;accueil
+            <ChevronRight className="w-4 h-4" />
           </a>
         </div>
       </div>
@@ -110,96 +145,227 @@ const LinkBioPage = () => {
   }
 
   const colors = page.theme_colors || {};
-  const isGradient = colors.background?.includes('gradient');
-
-  // Dynamic styles based on theme
-  const containerStyle = {
-    background: colors.background || '#ffffff',
-    minHeight: '100vh'
+  const design = page.design_settings || {};
+  const socialLinks = page.social_links || [];
+  const contentLinks = (page.links || []).filter(l => l.link_type !== 'social');
+  
+  // Determine background style
+  const getBackgroundStyle = () => {
+    if (design.background_type === 'gradient' && design.gradient) {
+      return { background: design.gradient };
+    }
+    if (design.background_type === 'image' && design.background_image) {
+      return { 
+        backgroundImage: `url(${design.background_image})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      };
+    }
+    return { background: colors.background || '#0f0f1a' };
   };
 
-  const textStyle = {
-    color: colors.text || '#1a1a1a'
-  };
-
-  const buttonStyle = {
-    backgroundColor: colors.button_bg || '#f3f4f6',
-    color: colors.button_text || '#1a1a1a',
-    transition: 'all 0.2s ease'
-  };
-
-  const buttonHoverStyle = {
-    backgroundColor: colors.button_hover || '#e5e7eb'
+  // Button styles based on design settings
+  const getButtonStyle = () => {
+    const buttonStyle = design.button_style || 'rounded';
+    const baseClasses = 'w-full p-4 flex items-center gap-4 transition-all duration-300 group';
+    
+    switch (buttonStyle) {
+      case 'pill':
+        return `${baseClasses} rounded-full`;
+      case 'square':
+        return `${baseClasses} rounded-none`;
+      case 'soft':
+        return `${baseClasses} rounded-2xl`;
+      case 'outline':
+        return `${baseClasses} rounded-xl border-2`;
+      default:
+        return `${baseClasses} rounded-xl`;
+    }
   };
 
   return (
-    <div style={containerStyle} className="px-4 py-8 md:py-12">
-      <div className="max-w-md mx-auto">
+    <div 
+      className="min-h-screen py-8 px-4"
+      style={getBackgroundStyle()}
+    >
+      {/* Background overlay for images */}
+      {design.background_type === 'image' && (
+        <div className="fixed inset-0 bg-black/50 -z-10" />
+      )}
+      
+      <div className="max-w-lg mx-auto relative z-10">
         {/* Profile Section */}
         <div className="text-center mb-8">
+          {/* Profile Image */}
           {page.profile_image && (
-            <img
-              src={page.profile_image}
-              alt={page.title}
-              className="w-24 h-24 md:w-28 md:h-28 rounded-full mx-auto mb-4 object-cover border-4 shadow-lg"
-              style={{ borderColor: colors.accent || '#6366f1' }}
-            />
+            <div className="relative inline-block mb-4">
+              <img
+                src={page.profile_image}
+                alt={page.title}
+                className="w-28 h-28 rounded-full object-cover border-4 shadow-2xl"
+                style={{ 
+                  borderColor: colors.accent || '#6366f1',
+                  boxShadow: `0 0 40px ${colors.accent || '#6366f1'}40`
+                }}
+              />
+              {/* Verified badge */}
+              {page.verified && (
+                <div 
+                  className="absolute bottom-1 right-1 w-7 h-7 rounded-full flex items-center justify-center"
+                  style={{ background: colors.accent || '#6366f1' }}
+                >
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
+            </div>
           )}
           
+          {/* Title */}
           <h1 
-            className="text-xl md:text-2xl font-bold mb-2"
-            style={textStyle}
+            className="text-2xl font-bold mb-2"
+            style={{ color: colors.text || '#ffffff' }}
           >
             {page.title}
           </h1>
           
+          {/* Bio */}
           {page.bio && (
             <p 
-              className="text-sm md:text-base opacity-80 max-w-sm mx-auto"
-              style={textStyle}
+              className="text-base opacity-80 max-w-md mx-auto leading-relaxed"
+              style={{ color: colors.text || '#ffffff' }}
             >
               {page.bio}
             </p>
           )}
         </div>
 
-        {/* Links */}
+        {/* Social Icons Row */}
+        {socialLinks.length > 0 && (
+          <div className="flex justify-center gap-3 mb-8 flex-wrap">
+            {socialLinks.filter(s => s.is_active).map((social, index) => {
+              const IconComponent = getIcon(social.icon);
+              const bgColor = SOCIAL_COLORS[social.icon] || colors.accent || '#6366f1';
+              
+              return (
+                <button
+                  key={social.id || index}
+                  onClick={() => handleSocialClick(social)}
+                  className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                  style={{ 
+                    background: bgColor,
+                    boxShadow: `0 4px 15px ${typeof bgColor === 'string' && !bgColor.includes('gradient') ? bgColor + '40' : 'rgba(0,0,0,0.3)'}`
+                  }}
+                  title={social.label}
+                >
+                  <IconComponent className="w-5 h-5 text-white" />
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Featured Image/Banner */}
+        {page.banner_image && (
+          <div className="mb-6 rounded-2xl overflow-hidden shadow-2xl">
+            <img 
+              src={page.banner_image} 
+              alt="Banner" 
+              className="w-full h-auto"
+            />
+          </div>
+        )}
+
+        {/* Content Links */}
         <div className="space-y-3">
-          {page.links?.map((link) => {
-            const IconComponent = getIcon(link.icon, link.icon_type);
+          {contentLinks.filter(link => link.is_active).map((link) => {
+            const IconComponent = getIcon(link.icon);
+            const buttonStyle = design.button_style || 'rounded';
+            const isOutline = buttonStyle === 'outline';
             
             return (
               <button
                 key={link.id}
                 onClick={() => handleLinkClick(link)}
-                className="w-full p-4 rounded-xl flex items-center justify-between group shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
-                style={buttonStyle}
+                className={getButtonStyle()}
+                style={{
+                  backgroundColor: isOutline ? 'transparent' : (colors.button_bg || 'rgba(255,255,255,0.1)'),
+                  borderColor: isOutline ? (colors.button_bg || 'rgba(255,255,255,0.3)') : 'transparent',
+                  color: colors.button_text || '#ffffff'
+                }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = buttonHoverStyle.backgroundColor;
+                  if (!isOutline) {
+                    e.currentTarget.style.backgroundColor = colors.button_hover || 'rgba(255,255,255,0.2)';
+                  }
+                  e.currentTarget.style.transform = 'scale(1.02)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = buttonStyle.backgroundColor;
+                  if (!isOutline) {
+                    e.currentTarget.style.backgroundColor = colors.button_bg || 'rgba(255,255,255,0.1)';
+                  }
+                  e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
-                <div className="flex items-center gap-3">
-                  <IconComponent className="w-5 h-5" style={{ color: colors.accent || '#6366f1' }} />
-                  <span className="font-medium text-left">{link.label}</span>
+                {/* Link thumbnail/icon */}
+                {link.thumbnail ? (
+                  <img 
+                    src={link.thumbnail} 
+                    alt="" 
+                    className="w-12 h-12 rounded-lg object-cover"
+                  />
+                ) : (
+                  <div 
+                    className="w-12 h-12 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: colors.accent + '20' || 'rgba(99,102,241,0.2)' }}
+                  >
+                    <IconComponent className="w-5 h-5" style={{ color: colors.accent || '#6366f1' }} />
+                  </div>
+                )}
+                
+                {/* Link content */}
+                <div className="flex-1 text-left">
+                  <p className="font-semibold">{link.label}</p>
+                  {link.description && (
+                    <p className="text-sm opacity-60 truncate">{link.description}</p>
+                  )}
                 </div>
-                <ExternalLink className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+                
+                {/* Arrow */}
+                <ExternalLink className="w-4 h-4 opacity-40 group-hover:opacity-100 transition-opacity" />
               </button>
             );
           })}
         </div>
 
+        {/* Empty state */}
+        {contentLinks.filter(l => l.is_active).length === 0 && socialLinks.filter(s => s.is_active).length === 0 && (
+          <div className="text-center py-12">
+            <div 
+              className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+            >
+              <Link className="w-8 h-8" style={{ color: colors.text || '#ffffff', opacity: 0.5 }} />
+            </div>
+            <p style={{ color: colors.text || '#ffffff', opacity: 0.6 }}>
+              Aucun lien disponible
+            </p>
+          </div>
+        )}
+
         {/* Footer */}
         <div className="mt-12 text-center">
           <a 
             href="https://alphagency.fr"
-            className="inline-flex items-center gap-2 text-xs opacity-50 hover:opacity-80 transition-opacity"
-            style={textStyle}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs transition-all hover:opacity-100"
+            style={{ 
+              color: colors.text || '#ffffff',
+              opacity: 0.4,
+              backgroundColor: 'rgba(255,255,255,0.05)'
+            }}
           >
-            <span>Propulsé par</span>
-            <span className="font-semibold">Alpha Agency</span>
+            <span>Créé avec</span>
+            <span className="font-bold">Alpha Agency</span>
           </a>
         </div>
       </div>
