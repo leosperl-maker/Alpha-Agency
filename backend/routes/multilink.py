@@ -41,9 +41,14 @@ class PageCreate(BaseModel):
     title: str
     bio: Optional[str] = None
     profile_image: Optional[str] = None
-    theme: Optional[str] = "minimal"  # minimal, dark, gradient, colorful, custom
+    banner_image: Optional[str] = None  # Featured image
+    theme: Optional[str] = "dark"  # minimal, dark, gradient, ocean, sunset, nature, custom
     custom_colors: Optional[dict] = None  # {background, text, button_bg, button_text, accent}
+    design_settings: Optional[dict] = None  # {button_style, background_type, gradient, background_image}
+    seo_settings: Optional[dict] = None  # {title, description, keywords, og_image, indexable}
+    social_links: Optional[List[dict]] = None  # [{platform, url, is_active}]
     custom_font: Optional[str] = None
+    verified: bool = False
     is_active: bool = True
 
 class PageUpdate(BaseModel):
@@ -51,9 +56,14 @@ class PageUpdate(BaseModel):
     title: Optional[str] = None
     bio: Optional[str] = None
     profile_image: Optional[str] = None
+    banner_image: Optional[str] = None
     theme: Optional[str] = None
     custom_colors: Optional[dict] = None
+    design_settings: Optional[dict] = None
+    seo_settings: Optional[dict] = None
+    social_links: Optional[List[dict]] = None
     custom_font: Optional[str] = None
+    verified: Optional[bool] = None
     is_active: Optional[bool] = None
 
 class LinksReorder(BaseModel):
