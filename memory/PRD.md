@@ -376,6 +376,25 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 - iteration_37.json: 20/20 tests factures acompte/solde ✅ 2026-01-26
 - iteration_38.json: 17/17 tests conditions de règlement différenciées ✅ 2026-01-26
 - iteration_39.json: 9/9 tests upload média Cloudinary ✅ 2026-01-26
+- iteration_40.json: 21/21 tests module Multilink ✅ 2026-01-28
+
+## Modules Ajoutés 2026-01-28
+### Module Multilink (type Linktree) ✅
+- **Objectif:** Créer des pages de liens accessibles publiquement sur `/lien-bio/{slug}`
+- **Collections MongoDB:** multilink_pages, multilink_links, multilink_stats, multilink_views
+- **Endpoints Admin:**
+  - CRUD pages: GET/POST/PUT/DELETE `/api/multilink/pages`
+  - CRUD liens: GET/POST/PUT/DELETE `/api/multilink/pages/{id}/links`
+  - Réordonnement: PUT `/api/multilink/pages/{id}/links/reorder`
+  - Stats: GET `/api/multilink/pages/{id}/stats`
+- **Endpoints Public (sans auth):**
+  - GET `/api/multilink/public/{slug}` - Affichage page + enregistrement vue
+  - POST `/api/multilink/public/{slug}/click/{link_id}` - Enregistrement clic
+- **Frontend Admin:** `/admin/multilink` - Liste, création, édition, drag&drop, stats
+- **Frontend Public:** `/lien-bio/{slug}` - Template mobile-first responsive
+- **Thèmes:** minimal, dark, gradient, ocean, sunset, nature, custom
+- **Icônes:** 20+ icônes (réseaux sociaux + génériques)
+- **Stats:** Vues/clics par jour, CTR, graphiques temporels
 
 ## Bug Fixes 2026-01-26
 - **Fix Cloudinary Upload:** Les images pour les posts sociaux étaient stockées en tant que blob:// URLs locales au lieu d'être uploadées vers Cloudinary. Cela causait des erreurs Facebook/Instagram car les URLs n'étaient pas accessibles. Nouveau endpoint POST /api/social/upload-media créé.
