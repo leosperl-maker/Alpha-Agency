@@ -117,7 +117,11 @@ function App() {
             <Route path="transfer" element={<TransfersPage />} />
             <Route path="agenda" element={<AgendaPage />} />
             <Route path="editorial" element={<EditorialCalendarPage />} />
+            <Route path="multilink" element={<MultilinkPage />} />
           </Route>
+          
+          {/* Public Multilink Pages */}
+          <Route path="/lien-bio/:slug" element={<LinkBioPage />} />
           
           {/* Public transfer download page */}
           <Route path="/transfer/:transferId" element={<TransferDownloadPage />} />
