@@ -438,6 +438,7 @@ const MultilinkPage = () => {
             pages.map(page => (
               <div
                 key={page.id}
+                data-testid={`page-card-${page.slug}`}
                 onClick={() => fetchPageDetails(page)}
                 className={`p-4 rounded-xl cursor-pointer transition-all ${
                   selectedPage?.id === page.id 
