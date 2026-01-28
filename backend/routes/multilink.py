@@ -286,9 +286,26 @@ async def create_page(page: PageCreate, current_user: dict = Depends(get_current
     page_id = str(uuid.uuid4())
     
     # Get theme colors
-    theme_colors = THEME_PRESETS.get(page.theme, THEME_PRESETS["minimal"])
+    theme_colors = THEME_PRESETS.get(page.theme, THEME_PRESETS["dark"])
     if page.theme == "custom" and page.custom_colors:
         theme_colors = {**theme_colors, **page.custom_colors}
+    
+    # Default design settings
+    design_settings = page.design_settings or {
+        "button_style": "rounded",  # rounded, pill, square, soft, outline
+        "background_type": "solid",  # solid, gradient, image
+        "gradient": None,
+        "background_image": None
+    }
+    
+    # Default SEO settings
+    seo_settings = page.seo_settings or {
+        "title": page.title,
+        "description": page.bio or "",
+        "keywords": "",
+        "og_image": page.profile_image,
+        "indexable": True
+    }
     
     page_doc = {
         "id": page_id,
@@ -297,10 +314,15 @@ async def create_page(page: PageCreate, current_user: dict = Depends(get_current
         "title": page.title,
         "bio": page.bio,
         "profile_image": page.profile_image,
+        "banner_image": page.banner_image,
         "theme": page.theme,
         "theme_colors": theme_colors,
         "custom_colors": page.custom_colors,
+        "design_settings": design_settings,
+        "seo_settings": seo_settings,
+        "social_links": page.social_links or [],
         "custom_font": page.custom_font,
+        "verified": page.verified,
         "is_active": page.is_active,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat()
