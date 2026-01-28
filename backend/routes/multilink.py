@@ -420,6 +420,28 @@ async def create_link(page_id: str, link: LinkCreate, current_user: dict = Depen
     return {"id": link_id, "message": "Lien ajouté"}
 
 
+# IMPORTANT: Reorder route must be defined BEFORE routes with {link_id} parameter
+# to avoid FastAPI matching "reorder" as a link_id
+@router.put("/pages/{page_id}/links/reorder", response_model=dict)
+async def reorder_links(page_id: str, data: LinksReorder, current_user: dict = Depends(get_current_user)):
+    """Reorder links"""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    # Verify page ownership
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    # Update order for each link
+    for index, link_id in enumerate(data.link_ids):
+        await db.multilink_links.update_one(
+            {"id": link_id, "page_id": page_id},
+            {"$set": {"order": index}}
+        )
+    
+    return {"message": "Ordre mis à jour"}
+
+
 @router.put("/pages/{page_id}/links/{link_id}", response_model=dict)
 async def update_link(page_id: str, link_id: str, link: LinkUpdate, current_user: dict = Depends(get_current_user)):
     """Update a link"""
@@ -464,26 +486,6 @@ async def delete_link(page_id: str, link_id: str, current_user: dict = Depends(g
     await db.multilink_stats.delete_many({"link_id": link_id})
     
     return {"message": "Lien supprimé"}
-
-
-@router.put("/pages/{page_id}/links/reorder", response_model=dict)
-async def reorder_links(page_id: str, data: LinksReorder, current_user: dict = Depends(get_current_user)):
-    """Reorder links"""
-    user_id = current_user.get("user_id") or current_user.get("id")
-    
-    # Verify page ownership
-    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
-    if not page:
-        raise HTTPException(status_code=404, detail="Page non trouvée")
-    
-    # Update order for each link
-    for index, link_id in enumerate(data.link_ids):
-        await db.multilink_links.update_one(
-            {"id": link_id, "page_id": page_id},
-            {"$set": {"order": index}}
-        )
-    
-    return {"message": "Ordre mis à jour"}
 
 
 # ==================== ADMIN ROUTES - STATS ====================
