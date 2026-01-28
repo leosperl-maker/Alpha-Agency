@@ -375,39 +375,51 @@ class TestMultilinkLinks(TestMultilinkAuth):
         deleted_link = next((l for l in links if l["id"] == link_id), None)
         assert deleted_link is None
     
-    def test_reorder_links(self, auth_headers, test_page):
+    def test_reorder_links(self, auth_headers):
         """PUT /api/multilink/pages/{id}/links/reorder - reorders links"""
-        page_id = test_page["id"]
-        
-        # Create multiple links
-        link_ids = []
-        for i in range(3):
-            response = requests.post(f"{BASE_URL}/api/multilink/pages/{page_id}/links", headers=auth_headers, json={
-                "label": f"TEST_Reorder Link {i}",
-                "url": f"https://reorder{i}.com",
-                "icon": "link"
-            })
-            assert response.status_code == 200
-            link_ids.append(response.json()["id"])
-        
-        # Reverse the order
-        reversed_ids = list(reversed(link_ids))
-        reorder_response = requests.put(f"{BASE_URL}/api/multilink/pages/{page_id}/links/reorder", headers=auth_headers, json={
-            "link_ids": reversed_ids
+        # Create a dedicated page for this test
+        unique_slug = f"test-reorder-{uuid.uuid4().hex[:8]}"
+        create_response = requests.post(f"{BASE_URL}/api/multilink/pages", headers=auth_headers, json={
+            "slug": unique_slug,
+            "title": "TEST_Reorder Page",
+            "theme": "minimal"
         })
-        assert reorder_response.status_code == 200
+        assert create_response.status_code == 200
+        page_id = create_response.json()["id"]
         
-        # Verify new order
-        page_response = requests.get(f"{BASE_URL}/api/multilink/pages/{page_id}", headers=auth_headers)
-        links = page_response.json().get("links", [])
-        
-        # Filter to only our test links
-        test_links = [l for l in links if l["id"] in link_ids]
-        test_links_sorted = sorted(test_links, key=lambda x: x["order"])
-        
-        # Verify order matches reversed_ids
-        for i, link in enumerate(test_links_sorted):
-            assert link["id"] == reversed_ids[i], f"Order mismatch at position {i}"
+        try:
+            # Create multiple links
+            link_ids = []
+            for i in range(3):
+                response = requests.post(f"{BASE_URL}/api/multilink/pages/{page_id}/links", headers=auth_headers, json={
+                    "label": f"TEST_Reorder Link {i}",
+                    "url": f"https://reorder{i}.com",
+                    "icon": "link"
+                })
+                assert response.status_code == 200, f"Failed to create link {i}: {response.text}"
+                link_ids.append(response.json()["id"])
+            
+            # Reverse the order
+            reversed_ids = list(reversed(link_ids))
+            reorder_response = requests.put(f"{BASE_URL}/api/multilink/pages/{page_id}/links/reorder", headers=auth_headers, json={
+                "link_ids": reversed_ids
+            })
+            assert reorder_response.status_code == 200, f"Reorder failed: {reorder_response.text}"
+            
+            # Verify new order
+            page_response = requests.get(f"{BASE_URL}/api/multilink/pages/{page_id}", headers=auth_headers)
+            links = page_response.json().get("links", [])
+            
+            # Filter to only our test links
+            test_links = [l for l in links if l["id"] in link_ids]
+            test_links_sorted = sorted(test_links, key=lambda x: x["order"])
+            
+            # Verify order matches reversed_ids
+            for i, link in enumerate(test_links_sorted):
+                assert link["id"] == reversed_ids[i], f"Order mismatch at position {i}"
+        finally:
+            # Cleanup
+            requests.delete(f"{BASE_URL}/api/multilink/pages/{page_id}", headers=auth_headers)
 
 
 class TestMultilinkStats(TestMultilinkAuth):
