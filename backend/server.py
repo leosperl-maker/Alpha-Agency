@@ -6489,6 +6489,10 @@ from routes.inbox import _sync_meta_inbox, _sync_linkedin_inbox, _sync_tiktok_in
 from routes.publication_worker import worker_router
 app.include_router(worker_router, prefix="/api", tags=["publication-worker"])
 
+# Multilink (Bio Link Pages)
+from routes.multilink import router as multilink_router
+app.include_router(multilink_router, prefix="/api/multilink", tags=["multilink"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
