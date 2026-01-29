@@ -381,11 +381,14 @@ async def update_page(page_id: str, page: PageUpdate, current_user: dict = Depen
         if slug_exists:
             raise HTTPException(status_code=400, detail=f"Le slug '{update_data['slug']}' est déjà utilisé")
     
-    # Update theme colors if theme changed
-    if "theme" in update_data:
-        theme_colors = THEME_PRESETS.get(update_data["theme"], THEME_PRESETS["minimal"])
-        if update_data["theme"] == "custom" and update_data.get("custom_colors"):
-            theme_colors = {**theme_colors, **update_data["custom_colors"]}
+    # Update theme colors if theme changed or if custom_colors changed for custom theme
+    current_theme = update_data.get("theme", existing.get("theme"))
+    if "theme" in update_data or ("custom_colors" in update_data and current_theme == "custom"):
+        theme_colors = THEME_PRESETS.get(current_theme, THEME_PRESETS["minimal"]).copy()
+        # For custom theme, merge custom_colors
+        if current_theme == "custom":
+            custom_colors = update_data.get("custom_colors") or existing.get("custom_colors") or {}
+            theme_colors = {**theme_colors, **custom_colors}
         update_data["theme_colors"] = theme_colors
     
     update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
