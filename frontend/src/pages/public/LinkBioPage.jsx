@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { 
   Instagram, Facebook, Twitter, Youtube, Linkedin, 
   MessageCircle, Send, Mail, Globe, ShoppingBag, Calendar,
