@@ -380,7 +380,7 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 - iteration_41.json: 30/30 tests (21 multilink + 9 upload) + SocialComposer responsive ✅ 2026-01-29
 
 ## Modules Ajoutés 2026-01-28
-### Module Multilink (type Linktree) ✅
+### Module Multilink (type Linktree/Zaap.bio) ✅ ENHANCED 2026-01-29
 - **Objectif:** Créer des pages de liens accessibles publiquement sur `/lien-bio/{slug}`
 - **Collections MongoDB:** multilink_pages, multilink_links, multilink_stats, multilink_views
 - **Endpoints Admin:**
@@ -388,14 +388,23 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
   - CRUD liens: GET/POST/PUT/DELETE `/api/multilink/pages/{id}/links`
   - Réordonnement: PUT `/api/multilink/pages/{id}/links/reorder`
   - Stats: GET `/api/multilink/pages/{id}/stats`
+  - Upload image: POST `/api/multilink/upload-image`
 - **Endpoints Public (sans auth):**
   - GET `/api/multilink/public/{slug}` - Affichage page + enregistrement vue
   - POST `/api/multilink/public/{slug}/click/{link_id}` - Enregistrement clic
-- **Frontend Admin:** `/admin/multilink` - Liste, création, édition, drag&drop, stats
-- **Frontend Public:** `/lien-bio/{slug}` - Template mobile-first responsive
-- **Thèmes:** minimal, dark, gradient, ocean, sunset, nature, custom
+- **Frontend Admin:** `/admin/multilink` - Éditeur avec onglets (Contenu, Design, Profil, Réseaux, SEO)
+- **Frontend Public:** `/lien-bio/{slug}` - Template moderne mobile-first avec icônes sociaux
+- **Thèmes:** minimal, dark, gradient, ocean, sunset, nature, custom (couleurs personnalisées)
+- **Design Settings:** button_style (rounded, pill, square, soft, outline), background_type
+- **SEO Settings:** title, description, og_image, indexable
+- **Social Links:** Icônes sociaux en header (Instagram, Facebook, Twitter, etc.)
 - **Icônes:** 20+ icônes (réseaux sociaux + génériques)
 - **Stats:** Vues/clics par jour, CTR, graphiques temporels
+
+## Bug Fixes 2026-01-29
+- **Fix SocialComposer Mobile Responsive:** Le composeur de posts sociaux n'était pas utilisable sur mobile (3 panneaux côte à côte). Ajout de tabs mobiles (Comptes/Contenu) et masquage du panneau preview sur mobile (trop petit pour être utile).
+- **Fix Upload Image "Body is disturbed or locked":** L'erreur se produisait car le body de la requête fetch était lu deux fois (une fois pour vérifier response.ok, une fois pour parser JSON). Corrigé en lisant JSON une seule fois.
+- **Fix Multilink theme_colors update:** Quand le thème était "custom" et les custom_colors modifiées, theme_colors n'était pas mis à jour. Corrigé pour merger les custom_colors dans theme_colors automatiquement.
 
 ## Bug Fixes 2026-01-26
 - **Fix Cloudinary Upload:** Les images pour les posts sociaux étaient stockées en tant que blob:// URLs locales au lieu d'être uploadées vers Cloudinary. Cela causait des erreurs Facebook/Instagram car les URLs n'étaient pas accessibles. Nouveau endpoint POST /api/social/upload-media créé.
