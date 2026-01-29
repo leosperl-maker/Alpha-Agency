@@ -379,6 +379,7 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 - iteration_40.json: 21/21 tests module Multilink ✅ 2026-01-28
 - iteration_41.json: 30/30 tests (21 multilink + 9 upload) + SocialComposer responsive ✅ 2026-01-29
 - iteration_42.json: 18/18 tests sections + thumbnails + carousel rendering ✅ 2026-01-29
+- iteration_43.json: 100% tests (upload token fix + card display + block categories) ✅ 2026-01-29
 
 ## Modules Ajoutés 2026-01-28
 ### Module Multilink (type Linktree/Zaap.bio) ✅ ENHANCED 2026-01-29
