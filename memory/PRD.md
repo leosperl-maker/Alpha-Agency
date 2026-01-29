@@ -416,6 +416,14 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 - **Fix Multilink theme_colors update:** Quand le thème était "custom" et les custom_colors modifiées, theme_colors n'était pas mis à jour. Corrigé pour merger automatiquement.
 - **Fix SocialComposer PWA Safe Area:** Bouton de fermeture caché par barre de statut en mode PWA. Ajout de `env(safe-area-inset-top)` + bouton X explicite sur mobile.
 - **Fix Multilink Link Creation:** Les champs description, thumbnail et link_type n'étaient pas sauvegardés lors de la création de liens.
+- **🔴 Fix Upload Image 401 Unauthorized:** Le code utilisait `localStorage.getItem('token')` au lieu de `localStorage.getItem('alpha_token')`. Corrigé dans SocialComposer.jsx et EditorialCalendarPage.jsx.
+- **Fix Card Thumbnail Crop:** Les images sur les cartes étaient coupées (aspect-video avec object-cover). Changé en object-contain pour afficher l'image entière.
+
+## Enhancements 2026-01-29 (Style Zaap.bio)
+- **Icônes réseaux sociaux SVG modernes:** Instagram, Facebook, Twitter/X, YouTube, LinkedIn, WhatsApp, TikTok
+- **Catégories de blocs:** Interface admin avec sections "Basiques" et "Contenu" comme zaap.bio
+- **Dimensions recommandées:** Indications claires pour les images (1200×630px pour cartes, 400×500px pour carousel)
+- **Nouveaux types de blocs:** link, link_image, button, folder/carousel, text, image_block, video, header, divider
 
 ## Bug Fixes 2026-01-26
 - **Fix Cloudinary Upload:** Les images pour les posts sociaux étaient stockées en tant que blob:// URLs locales au lieu d'être uploadées vers Cloudinary. Cela causait des erreurs Facebook/Instagram car les URLs n'étaient pas accessibles. Nouveau endpoint POST /api/social/upload-media créé.
