@@ -1329,15 +1329,26 @@ const MultilinkPage = () => {
 
       {/* Social Dialog */}
       <Dialog open={socialDialogOpen} onOpenChange={setSocialDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-md">
-          <DialogHeader>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-md max-h-[90vh] overflow-y-auto [&>button]:hidden">
+          <div 
+            className="flex items-center justify-between mb-4"
+            style={{ paddingTop: 'max(0px, env(safe-area-inset-top, 0px))' }}
+          >
             <DialogTitle className="flex items-center gap-2 text-white">
               <Share2 className="w-5 h-5 text-indigo-400" />
               {editingSocial ? 'Modifier' : 'Ajouter un réseau social'}
             </DialogTitle>
-          </DialogHeader>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSocialDialogOpen(false)}
+              className="text-white/60 hover:text-white hover:bg-white/10 h-8 w-8"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
 
-          <div className="space-y-4 mt-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-white">Réseau social</Label>
               <div className="grid grid-cols-5 gap-2">
