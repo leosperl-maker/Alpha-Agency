@@ -150,12 +150,11 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
           body: formData
         });
         
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.detail || 'Upload failed');
-        }
-        
         const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.detail || 'Upload failed');
+        }
         
         newMedias.push({
           id: Math.random().toString(36).substr(2, 9),
