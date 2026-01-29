@@ -1177,6 +1177,25 @@ async def record_click(slug: str, link_id: str, request: Request):
     return {"message": "Click recorded", "url": link.get("url")}
 
 
+@router.post("/public/{slug}/block-click/{block_id}", response_model=dict)
+async def record_block_click(slug: str, block_id: str, request: Request):
+    """Record a block click (no auth required)"""
+    page = await db.multilink_pages.find_one({"slug": slug, "is_active": True})
+    
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    block = await db.multilink_blocks.find_one({"id": block_id, "page_id": page["id"]})
+    
+    if not block:
+        raise HTTPException(status_code=404, detail="Bloc non trouvé")
+    
+    # Record click
+    await record_link_click(page["id"], None, request, block_id=block_id)
+    
+    return {"message": "Click recorded", "url": block.get("url")}
+
+
 # ==================== UTILITY ROUTES ====================
 
 @router.get("/themes", response_model=dict)
