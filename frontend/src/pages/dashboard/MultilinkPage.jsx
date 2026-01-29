@@ -7,8 +7,11 @@ import {
   Phone, MapPin, Link, Download, Play, Music, Mic, BookOpen,
   ChevronDown, Palette, TrendingUp, Search, Layout, Type,
   Share2, Verified, ImagePlus, LayoutGrid, FileText, Minus, Heading,
-  Video, Sparkles, Zap
+  Video, Sparkles, Zap, Bold, Italic, Underline, List, ListOrdered,
+  AlignLeft, AlignCenter, AlignRight, Smile, Undo, Redo
 } from 'lucide-react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
