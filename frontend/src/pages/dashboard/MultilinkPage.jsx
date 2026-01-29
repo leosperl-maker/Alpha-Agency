@@ -533,6 +533,102 @@ const MultilinkPage = () => {
     }
   };
 
+  // ================== SECTIONS MANAGEMENT ==================
+  
+  const openSectionDialog = (section = null) => {
+    if (section) {
+      setEditingSection(section);
+      setSectionForm({
+        section_type: section.section_type || 'carousel',
+        title: section.title || '',
+        content: section.content || '',
+        items: section.items || [],
+        images: section.images || [],
+        settings: section.settings || {},
+        is_active: section.is_active !== false
+      });
+    } else {
+      setEditingSection(null);
+      setSectionForm({
+        section_type: 'carousel',
+        title: '',
+        content: '',
+        items: [],
+        images: [],
+        settings: {},
+        is_active: true
+      });
+    }
+    setSectionDialogOpen(true);
+  };
+
+  const saveSection = async () => {
+    if (sectionForm.section_type === 'text' && !sectionForm.content.trim()) {
+      toast.error('Le contenu est requis pour une section texte');
+      return;
+    }
+    
+    setSaving(true);
+    try {
+      if (editingSection) {
+        await api.put(`/multilink/pages/${selectedPage.id}/sections/${editingSection.id}`, sectionForm);
+        toast.success('Section mise à jour');
+      } else {
+        await api.post(`/multilink/pages/${selectedPage.id}/sections`, sectionForm);
+        toast.success('Section ajoutée');
+      }
+      setSectionDialogOpen(false);
+      fetchPageDetails(selectedPage);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteSection = async (section) => {
+    if (!window.confirm('Supprimer cette section ?')) return;
+    
+    try {
+      await api.delete(`/multilink/pages/${selectedPage.id}/sections/${section.id}`);
+      toast.success('Section supprimée');
+      fetchPageDetails(selectedPage);
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  const toggleSection = async (section) => {
+    try {
+      await api.put(`/multilink/pages/${selectedPage.id}/sections/${section.id}`, { is_active: !section.is_active });
+      fetchPageDetails(selectedPage);
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  const addCarouselItem = () => {
+    setSectionForm({
+      ...sectionForm,
+      items: [...sectionForm.items, { image: '', title: '', subtitle: '', url: '' }]
+    });
+  };
+
+  const updateCarouselItem = (index, field, value) => {
+    const newItems = [...sectionForm.items];
+    newItems[index] = { ...newItems[index], [field]: value };
+    setSectionForm({ ...sectionForm, items: newItems });
+  };
+
+  const removeCarouselItem = (index) => {
+    setSectionForm({
+      ...sectionForm,
+      items: sectionForm.items.filter((_, i) => i !== index)
+    });
+  };
+
+  // ================== END SECTIONS MANAGEMENT ==================
+
   const openSocialDialog = (social = null) => {
     if (social) {
       setEditingSocial(social);
