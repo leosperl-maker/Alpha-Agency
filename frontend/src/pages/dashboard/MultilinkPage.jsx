@@ -24,13 +24,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Switch } from "../../components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 
-// Section types for zaap.bio style
+// Block types for zaap.bio style - organized by category
+const BLOCK_CATEGORIES = {
+  basics: [
+    { id: 'link', name: 'Lien simple', icon: Link, description: 'Un lien vers n\'importe quelle URL' },
+    { id: 'link_image', name: 'Lien + Image', icon: Image, description: 'Lien avec une image en bannière' },
+    { id: 'button', name: 'Bouton', icon: ExternalLink, description: 'Bouton d\'action mis en avant' },
+    { id: 'folder', name: 'Dossier/Carousel', icon: LayoutGrid, description: 'Groupe de liens en slider' },
+    { id: 'text', name: 'Bloc de texte', icon: FileText, description: 'Texte libre pour informations' },
+  ],
+  content: [
+    { id: 'image_block', name: 'Image', icon: Image, description: 'Afficher une ou plusieurs images' },
+    { id: 'video', name: 'Vidéo YouTube', icon: Play, description: 'Intégrer une vidéo YouTube' },
+    { id: 'header', name: 'Titre/En-tête', icon: Heading, description: 'Séparer les sections avec un titre' },
+    { id: 'divider', name: 'Séparateur', icon: Minus, description: 'Ligne de séparation visuelle' },
+  ],
+  social: [
+    { id: 'instagram_embed', name: 'Post Instagram', icon: Instagram, description: 'Intégrer un post Instagram' },
+    { id: 'tiktok_embed', name: 'Vidéo TikTok', icon: Music, description: 'Intégrer une vidéo TikTok' },
+  ]
+};
+
+// Flat list for backward compatibility
 const SECTION_TYPES = [
-  { id: 'carousel', name: 'Carousel', icon: LayoutGrid, description: 'Cartes en slider horizontal' },
-  { id: 'text', name: 'Texte', icon: FileText, description: 'Bloc de texte' },
-  { id: 'image', name: 'Images', icon: Image, description: 'Galerie d\'images' },
-  { id: 'divider', name: 'Séparateur', icon: Minus, description: 'Ligne de séparation' },
-  { id: 'header', name: 'Titre', icon: Heading, description: 'Grand titre' },
+  ...BLOCK_CATEGORIES.basics,
+  ...BLOCK_CATEGORIES.content,
+  ...BLOCK_CATEGORIES.social,
 ];
 
 const ICON_OPTIONS = [
