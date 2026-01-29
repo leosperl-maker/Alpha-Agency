@@ -2870,28 +2870,41 @@ async def upload_social_media(
     import cloudinary.uploader
     import uuid
     
+    # Check Cloudinary credentials are configured
+    cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME')
+    api_key = os.environ.get('CLOUDINARY_API_KEY')
+    api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+    
+    if not all([cloud_name, api_key, api_secret]):
+        logger.error(f"Cloudinary not configured. cloud_name={bool(cloud_name)}, api_key={bool(api_key)}, api_secret={bool(api_secret)}")
+        raise HTTPException(status_code=500, detail="Configuration Cloudinary manquante. Contactez l'administrateur.")
+    
     # Validate file type
     content_type = file.content_type or ""
     is_image = content_type.startswith('image/')
     is_video = content_type.startswith('video/')
+    
+    logger.info(f"Upload request: filename={file.filename}, content_type={content_type}, size_hint={file.size}")
     
     if not is_image and not is_video:
         raise HTTPException(status_code=400, detail="Le fichier doit être une image ou une vidéo")
     
     # Read file contents
     contents = await file.read()
+    file_size = len(contents)
+    logger.info(f"File read: {file_size} bytes")
     
     # Check file size (max 50MB for videos, 10MB for images)
     max_size = 50 * 1024 * 1024 if is_video else 10 * 1024 * 1024
-    if len(contents) > max_size:
+    if file_size > max_size:
         max_mb = max_size // (1024 * 1024)
         raise HTTPException(status_code=400, detail=f"Le fichier ne doit pas dépasser {max_mb}MB")
     
     # Configure Cloudinary
     cloudinary.config(
-        cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-        api_key=os.environ.get('CLOUDINARY_API_KEY'),
-        api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+        cloud_name=cloud_name,
+        api_key=api_key,
+        api_secret=api_secret
     )
     
     try:
