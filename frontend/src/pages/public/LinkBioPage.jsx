@@ -607,18 +607,35 @@ const LinkBioPage = () => {
                 }
               }
               
-              // Text block
+              // Text block - NOW WITH HTML RENDERING
               if (block.block_type === 'text' && block.content) {
                 return (
                   <div 
                     key={block.id}
                     className={`p-4 ${roundedClass}`}
                     style={{ 
-                      backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
+                      backgroundColor: colors.card_bg || colors.button_bg || 'rgba(255,255,255,0.1)',
                       color: colors.button_text || '#ffffff'
                     }}
                   >
-                    <p className="whitespace-pre-wrap">{block.content}</p>
+                    {/* Render HTML content from WYSIWYG editor */}
+                    <div 
+                      className="prose prose-invert prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: block.content }}
+                      style={{ color: colors.button_text || '#ffffff' }}
+                    />
+                    <style>{`
+                      .prose p { margin: 0.5em 0; color: inherit; }
+                      .prose h1, .prose h2, .prose h3 { color: inherit; font-weight: 700; margin: 0.5em 0; }
+                      .prose h1 { font-size: 1.5em; }
+                      .prose h2 { font-size: 1.25em; }
+                      .prose h3 { font-size: 1.1em; }
+                      .prose ul, .prose ol { padding-left: 1.5em; margin: 0.5em 0; }
+                      .prose li { margin: 0.25em 0; }
+                      .prose a { color: ${colors.accent || '#6366f1'}; text-decoration: underline; }
+                      .prose strong { font-weight: 700; }
+                      .prose em { font-style: italic; }
+                    `}</style>
                   </div>
                 );
               }
