@@ -641,7 +641,7 @@ const EditorialCalendarPage = () => {
   const handleExportPDF = async (calendarId) => {
     try {
       const url = `${api.defaults.baseURL}/editorial/calendars/${calendarId}/export/pdf`;
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('alpha_token');
       
       const response = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` }
