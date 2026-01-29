@@ -378,22 +378,30 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 - iteration_39.json: 9/9 tests upload média Cloudinary ✅ 2026-01-26
 - iteration_40.json: 21/21 tests module Multilink ✅ 2026-01-28
 - iteration_41.json: 30/30 tests (21 multilink + 9 upload) + SocialComposer responsive ✅ 2026-01-29
+- iteration_42.json: 18/18 tests sections + thumbnails + carousel rendering ✅ 2026-01-29
 
 ## Modules Ajoutés 2026-01-28
 ### Module Multilink (type Linktree/Zaap.bio) ✅ ENHANCED 2026-01-29
 - **Objectif:** Créer des pages de liens accessibles publiquement sur `/lien-bio/{slug}`
-- **Collections MongoDB:** multilink_pages, multilink_links, multilink_stats, multilink_views
+- **Collections MongoDB:** multilink_pages, multilink_links, multilink_sections, multilink_stats, multilink_views
 - **Endpoints Admin:**
   - CRUD pages: GET/POST/PUT/DELETE `/api/multilink/pages`
   - CRUD liens: GET/POST/PUT/DELETE `/api/multilink/pages/{id}/links`
+  - **CRUD sections: GET/POST/PUT/DELETE `/api/multilink/pages/{id}/sections`** ← NOUVEAU
   - Réordonnement: PUT `/api/multilink/pages/{id}/links/reorder`
+  - **Réordonnement sections: PUT `/api/multilink/pages/{id}/sections/reorder`** ← NOUVEAU
   - Stats: GET `/api/multilink/pages/{id}/stats`
   - Upload image: POST `/api/multilink/upload-image`
 - **Endpoints Public (sans auth):**
-  - GET `/api/multilink/public/{slug}` - Affichage page + enregistrement vue
+  - GET `/api/multilink/public/{slug}` - Affichage page + sections + enregistrement vue
   - POST `/api/multilink/public/{slug}/click/{link_id}` - Enregistrement clic
 - **Frontend Admin:** `/admin/multilink` - Éditeur avec onglets (Contenu, Design, Profil, Réseaux, SEO)
+  - **Gestion des sections: Carousel, Texte, Images, Séparateur, Titre** ← NOUVEAU
+  - **Liens avec thumbnails (cartes avec images)** ← NOUVEAU
 - **Frontend Public:** `/lien-bio/{slug}` - Template moderne mobile-first avec icônes sociaux
+  - **Carousel horizontal (swipe/scroll)** ← NOUVEAU
+  - **Cartes avec images arrondies (rounded-2xl)** ← NOUVEAU
+- **Section Types:** carousel (items avec image/titre/url), text, image, divider, header
 - **Thèmes:** minimal, dark, gradient, ocean, sunset, nature, custom (couleurs personnalisées)
 - **Design Settings:** button_style (rounded, pill, square, soft, outline), background_type
 - **SEO Settings:** title, description, og_image, indexable
@@ -403,8 +411,10 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 
 ## Bug Fixes 2026-01-29
 - **Fix SocialComposer Mobile Responsive:** Le composeur de posts sociaux n'était pas utilisable sur mobile (3 panneaux côte à côte). Ajout de tabs mobiles (Comptes/Contenu) et masquage du panneau preview sur mobile (trop petit pour être utile).
-- **Fix Upload Image "Body is disturbed or locked":** L'erreur se produisait car le body de la requête fetch était lu deux fois (une fois pour vérifier response.ok, une fois pour parser JSON). Corrigé en lisant JSON une seule fois.
-- **Fix Multilink theme_colors update:** Quand le thème était "custom" et les custom_colors modifiées, theme_colors n'était pas mis à jour. Corrigé pour merger les custom_colors dans theme_colors automatiquement.
+- **Fix Upload Image "Body is disturbed or locked":** L'erreur se produisait car le body de la requête fetch était lu deux fois. Corrigé avec AbortController + timeout 60s + lecture body via text().
+- **Fix Multilink theme_colors update:** Quand le thème était "custom" et les custom_colors modifiées, theme_colors n'était pas mis à jour. Corrigé pour merger automatiquement.
+- **Fix SocialComposer PWA Safe Area:** Bouton de fermeture caché par barre de statut en mode PWA. Ajout de `env(safe-area-inset-top)` + bouton X explicite sur mobile.
+- **Fix Multilink Link Creation:** Les champs description, thumbnail et link_type n'étaient pas sauvegardés lors de la création de liens.
 
 ## Bug Fixes 2026-01-26
 - **Fix Cloudinary Upload:** Les images pour les posts sociaux étaient stockées en tant que blob:// URLs locales au lieu d'être uploadées vers Cloudinary. Cela causait des erreurs Facebook/Instagram car les URLs n'étaient pas accessibles. Nouveau endpoint POST /api/social/upload-media créé.
