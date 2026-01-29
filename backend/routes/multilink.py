@@ -624,6 +624,212 @@ async def delete_link(page_id: str, link_id: str, current_user: dict = Depends(g
     return {"message": "Lien supprimé"}
 
 
+# ==================== ADMIN ROUTES - UNIFIED BLOCKS ====================
+# This is the NEW unified system where links and sections are all "blocks"
+
+@router.get("/pages/{page_id}/blocks", response_model=list)
+async def get_blocks(page_id: str, current_user: dict = Depends(get_current_user)):
+    """Get all blocks for a page (unified links + sections)"""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    blocks = await db.multilink_blocks.find(
+        {"page_id": page_id},
+        {"_id": 0}
+    ).sort("order", 1).to_list(200)
+    
+    return blocks
+
+
+@router.post("/pages/{page_id}/blocks", response_model=dict)
+async def create_block(page_id: str, block: BlockCreate, current_user: dict = Depends(get_current_user)):
+    """Create a new block"""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    # Get max order
+    max_order_doc = await db.multilink_blocks.find_one(
+        {"page_id": page_id},
+        sort=[("order", -1)]
+    )
+    max_order = max_order_doc.get("order", 0) if max_order_doc else 0
+    
+    block_id = str(uuid.uuid4())
+    
+    # Default settings based on block type
+    default_settings = {
+        "link": {"rounded": "md"},
+        "link_image": {"aspect_ratio": "auto", "rounded": "lg"},
+        "button": {"rounded": "full", "style": "primary"},
+        "carousel": {"autoplay": False, "show_arrows": True},
+        "text": {"align": "left", "size": "base"},
+        "image": {"aspect_ratio": "auto", "rounded": "lg", "columns": 1},
+        "video": {"aspect_ratio": "16:9", "rounded": "lg", "autoplay": False},
+        "youtube": {"aspect_ratio": "16:9", "rounded": "lg"},
+        "header": {"size": "lg", "align": "center"},
+        "divider": {"style": "line", "spacing": "md"}
+    }
+    
+    block_doc = {
+        "id": block_id,
+        "page_id": page_id,
+        "block_type": block.block_type,
+        "label": block.label,
+        "url": block.url,
+        "description": block.description,
+        "thumbnail": block.thumbnail,
+        "icon": block.icon,
+        "content": block.content,
+        "items": block.items or [],
+        "media_url": block.media_url,
+        "media_type": block.media_type,
+        "youtube_url": block.youtube_url,
+        "settings": block.settings or default_settings.get(block.block_type, {}),
+        "is_active": block.is_active,
+        "order": block.order if block.order else max_order + 1,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.multilink_blocks.insert_one(block_doc)
+    
+    return {"id": block_id, "message": "Bloc ajouté"}
+
+
+@router.put("/pages/{page_id}/blocks/reorder", response_model=dict)
+async def reorder_blocks(page_id: str, data: BlocksReorder, current_user: dict = Depends(get_current_user)):
+    """Reorder blocks"""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    for index, block_id in enumerate(data.block_ids):
+        await db.multilink_blocks.update_one(
+            {"id": block_id, "page_id": page_id},
+            {"$set": {"order": index}}
+        )
+    
+    return {"message": "Ordre mis à jour"}
+
+
+@router.put("/pages/{page_id}/blocks/{block_id}", response_model=dict)
+async def update_block(page_id: str, block_id: str, block: BlockUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a block"""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    existing = await db.multilink_blocks.find_one({"id": block_id, "page_id": page_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Bloc non trouvé")
+    
+    update_data = block.model_dump(exclude_unset=True)
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.multilink_blocks.update_one(
+        {"id": block_id},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Bloc mis à jour"}
+
+
+@router.delete("/pages/{page_id}/blocks/{block_id}", response_model=dict)
+async def delete_block(page_id: str, block_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a block"""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    result = await db.multilink_blocks.delete_one({"id": block_id, "page_id": page_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Bloc non trouvé")
+    
+    return {"message": "Bloc supprimé"}
+
+
+# ==================== MEDIA UPLOAD FOR BLOCKS ====================
+
+@router.post("/upload-media", response_model=dict)
+async def upload_block_media(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload image or video for Multilink blocks via Cloudinary"""
+    import cloudinary
+    import cloudinary.uploader
+    import io
+    
+    # Check Cloudinary credentials
+    cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME')
+    api_key = os.environ.get('CLOUDINARY_API_KEY')
+    api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+    
+    if not all([cloud_name, api_key, api_secret]):
+        raise HTTPException(status_code=500, detail="Cloudinary non configuré")
+    
+    cloudinary.config(
+        cloud_name=cloud_name,
+        api_key=api_key,
+        api_secret=api_secret
+    )
+    
+    # Validate file type
+    content_type = file.content_type or ""
+    is_image = content_type.startswith('image/')
+    is_video = content_type.startswith('video/')
+    
+    if not is_image and not is_video:
+        raise HTTPException(status_code=400, detail="Format non supporté. Images et vidéos uniquement.")
+    
+    # Read file
+    contents = await file.read()
+    file_size = len(contents)
+    
+    # Size limits
+    max_size = 100 * 1024 * 1024 if is_video else 10 * 1024 * 1024
+    if file_size > max_size:
+        raise HTTPException(status_code=400, detail=f"Fichier trop volumineux (max {max_size // (1024*1024)}MB)")
+    
+    try:
+        # Upload to Cloudinary
+        unique_id = str(uuid.uuid4())[:8]
+        result = cloudinary.uploader.upload(
+            io.BytesIO(contents),
+            folder="multilink_blocks",
+            public_id=f"block_{unique_id}_{file.filename.split('.')[0]}",
+            resource_type="video" if is_video else "image",
+            overwrite=True
+        )
+        
+        return {
+            "success": True,
+            "url": result.get('secure_url'),
+            "public_id": result.get('public_id'),
+            "media_type": "video" if is_video else "image",
+            "width": result.get('width'),
+            "height": result.get('height'),
+            "format": result.get('format'),
+            "duration": result.get('duration') if is_video else None
+        }
+        
+    except Exception as e:
+        logger.error(f"Cloudinary upload error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur upload: {str(e)}")
+
+
 # ==================== ADMIN ROUTES - SECTIONS ====================
 
 @router.get("/pages/{page_id}/sections", response_model=list)
