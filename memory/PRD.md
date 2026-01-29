@@ -425,6 +425,30 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 - **Dimensions recommandées:** Indications claires pour les images (1200×630px pour cartes, 400×500px pour carousel)
 - **Nouveaux types de blocs:** link, link_image, button, folder/carousel, text, image_block, video, header, divider
 
+## 🆕 REFONTE MAJEURE Multilink - Système Blocs Unifiés (2026-01-29)
+**Architecture style zaap.bio - tous les éléments sont des "blocs"**
+
+### Backend (multilink.py)
+- **Nouveau modèle `Block`** : Unifie liens et sections en un seul type
+- **Nouveaux endpoints:**
+  - GET/POST `/api/multilink/pages/{id}/blocks` - CRUD blocs
+  - PUT `/api/multilink/pages/{id}/blocks/reorder` - Réordonner
+  - POST `/api/multilink/upload-media` - Upload Cloudinary pour blocs
+- **Collection MongoDB:** `multilink_blocks`
+- **Types de blocs:** link, link_image, button, carousel, text, image, video, youtube, header, divider
+- **Settings par bloc:** aspect_ratio (1:1, 4:5, 16:9, 9:16), rounded (none, sm, md, lg, full)
+
+### Frontend Admin (MultilinkPage.jsx)
+- **Interface unifiée:** Un seul onglet "Blocs" avec drag & drop
+- **Dialog bloc complet:** Sélection type, upload média, settings format/arrondis
+- **Upload Cloudinary intégré:** Pour images et vidéos
+- **Prévisualisation miniature:** Affichage thumbnail dans la liste
+
+### Frontend Public (LinkBioPage.jsx)  
+- **Rendu unifié des blocs:** Link, Link+Image, Image, Video, YouTube, Text, Carousel, Header, Divider
+- **Settings appliqués:** Aspect ratio et bords arrondis selon configuration
+- **Backward compatibility:** Support des anciens liens et sections
+
 ## Bug Fixes 2026-01-26
 - **Fix Cloudinary Upload:** Les images pour les posts sociaux étaient stockées en tant que blob:// URLs locales au lieu d'être uploadées vers Cloudinary. Cela causait des erreurs Facebook/Instagram car les URLs n'étaient pas accessibles. Nouveau endpoint POST /api/social/upload-media créé.
 - **Fix Meta Scopes:** Retrait des scopes `pages_messaging` et `instagram_manage_messages` qui nécessitent une App Review de Meta.
