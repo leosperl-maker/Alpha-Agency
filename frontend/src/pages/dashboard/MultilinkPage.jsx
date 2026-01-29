@@ -269,6 +269,31 @@ const MultilinkPage = () => {
     is_active: true
   });
   
+  // ============ NEW UNIFIED BLOCKS SYSTEM ============
+  const [pageBlocks, setPageBlocks] = useState([]);
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [editingBlock, setEditingBlock] = useState(null);
+  const [blockForm, setBlockForm] = useState({
+    block_type: 'link',
+    label: '',
+    url: '',
+    description: '',
+    thumbnail: '',
+    icon: 'link',
+    content: '',
+    items: [],
+    media_url: '',
+    media_type: '',
+    youtube_url: '',
+    settings: {
+      aspect_ratio: 'auto',
+      rounded: 'lg'
+    },
+    is_active: true
+  });
+  const [uploadingBlockMedia, setUploadingBlockMedia] = useState(false);
+  // ============ END BLOCKS SYSTEM ============
+  
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [copied, setCopied] = useState(false);
