@@ -141,7 +141,10 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
         const formData = new FormData();
         formData.append('file', file);
         
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('alpha_token');
+        if (!token) {
+          throw new Error('Non connecté. Veuillez vous reconnecter.');
+        }
         
         // Use AbortController for timeout
         const controller = new AbortController();
