@@ -450,6 +450,9 @@ async def delete_page(page_id: str, current_user: dict = Depends(get_current_use
     # Delete all links
     await db.multilink_links.delete_many({"page_id": page_id})
     
+    # Delete all sections
+    await db.multilink_sections.delete_many({"page_id": page_id})
+    
     # Delete stats
     await db.multilink_stats.delete_many({"page_id": page_id})
     await db.multilink_views.delete_many({"page_id": page_id})
