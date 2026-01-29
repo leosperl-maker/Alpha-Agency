@@ -2857,6 +2857,21 @@ async def delete_email_logo(current_user: dict = Depends(get_current_user)):
 
 # ==================== SOCIAL MEDIA UPLOAD ====================
 
+@api_router.get("/social/upload-test", response_model=dict)
+async def test_upload_config(current_user: dict = Depends(get_current_user)):
+    """Test endpoint to verify Cloudinary configuration"""
+    cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME')
+    api_key = os.environ.get('CLOUDINARY_API_KEY')
+    api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+    
+    return {
+        "cloudinary_configured": all([cloud_name, api_key, api_secret]),
+        "cloud_name": cloud_name[:4] + "..." if cloud_name else None,
+        "api_key_set": bool(api_key),
+        "api_secret_set": bool(api_secret),
+        "message": "Configuration Cloudinary OK" if all([cloud_name, api_key, api_secret]) else "Cloudinary non configuré"
+    }
+
 @api_router.post("/social/upload-media", response_model=dict)
 async def upload_social_media(
     file: UploadFile = File(...),
