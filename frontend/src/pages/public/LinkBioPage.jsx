@@ -279,6 +279,17 @@ const LinkBioPage = () => {
     window.open(link.url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleBlockClick = async (block) => {
+    // Record block click for analytics
+    try {
+      await fetch(`${API_URL}/api/multilink/public/${slug}/block-click/${block.id}`, {
+        method: 'POST'
+      });
+    } catch (err) {
+      // Silent fail - don't block user interaction
+    }
+  };
+
   const handleSocialClick = async (social) => {
     // Record click if it has an id
     if (social.id) {
