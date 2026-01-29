@@ -1248,23 +1248,6 @@ const MultilinkPage = () => {
                     </DndContext>
                   )}
                 </TabsContent>
-                                checked={section.is_active}
-                                onCheckedChange={() => toggleSection(section)}
-                                className="data-[state=checked]:bg-green-500"
-                              />
-                              <Button variant="ghost" size="sm" onClick={() => openSectionDialog(section)} className="text-white/60 hover:text-white">
-                                <Edit2 className="w-4 h-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm" onClick={() => deleteSection(section)} className="text-red-400 hover:text-red-300">
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
 
                 {/* DESIGN TAB */}
                 <TabsContent value="design" className="p-4 space-y-6">
