@@ -740,9 +740,6 @@ const SocialComposer = ({
   const characterCount = content.length;
   const isOverLimit = characterCount > characterLimit;
 
-  // Mobile tab state for responsive layout
-  const [mobileTab, setMobileTab] = useState('content');
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl w-full h-[100dvh] md:h-[90vh] bg-slate-900 border-white/10 p-0 gap-0 overflow-hidden">
