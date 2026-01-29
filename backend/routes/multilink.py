@@ -792,6 +792,14 @@ async def get_public_page(slug: str, request: Request):
     
     page["links"] = links
     
+    # Get active sections
+    sections = await db.multilink_sections.find(
+        {"page_id": page["id"], "is_active": True},
+        {"_id": 0, "page_id": 0}
+    ).sort("order", 1).to_list(100)
+    
+    page["sections"] = sections
+    
     # Record view (async, don't wait)
     try:
         await record_page_view(page["id"], request)
