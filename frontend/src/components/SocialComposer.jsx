@@ -589,6 +589,7 @@ const SocialComposer = ({
   const [activePreviewPlatform, setActivePreviewPlatform] = useState('instagram');
   const [saving, setSaving] = useState(false);
   const [showScheduler, setShowScheduler] = useState(false);
+  const [mobileTab, setMobileTab] = useState('content');  // For mobile responsive layout
   
   // Derived state
   const entityAccounts = selectedEntity 
