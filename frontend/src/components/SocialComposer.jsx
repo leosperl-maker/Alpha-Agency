@@ -142,18 +142,42 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
         formData.append('file', file);
         
         const token = localStorage.getItem('token');
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/social/upload-media`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          body: formData
-        });
         
-        const result = await response.json();
+        // Use AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+        
+        let response;
+        try {
+          response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/social/upload-media`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData,
+            signal: controller.signal
+          });
+        } catch (fetchError) {
+          clearTimeout(timeoutId);
+          if (fetchError.name === 'AbortError') {
+            throw new Error('Timeout - fichier trop volumineux ou connexion lente');
+          }
+          throw new Error('Erreur réseau - vérifiez votre connexion');
+        }
+        
+        clearTimeout(timeoutId);
+        
+        // Parse response - handle network errors gracefully
+        let result;
+        try {
+          const text = await response.text();
+          result = text ? JSON.parse(text) : {};
+        } catch (parseError) {
+          throw new Error('Réponse serveur invalide');
+        }
         
         if (!response.ok) {
-          throw new Error(result.detail || 'Upload failed');
+          throw new Error(result.detail || `Erreur serveur (${response.status})`);
         }
         
         newMedias.push({
