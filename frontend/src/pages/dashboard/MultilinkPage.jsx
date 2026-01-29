@@ -2042,16 +2042,27 @@ const MultilinkPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* UNIFIED BLOCK DIALOG - Zaap.bio style */}
+      {/* UNIFIED BLOCK DIALOG - Zaap.bio style avec WYSIWYG */}
       <Dialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-lg max-h-[90vh] overflow-y-auto [&>button]:hidden">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
           <div 
             className="flex items-center justify-between mb-4"
             style={{ paddingTop: 'max(0px, env(safe-area-inset-top, 0px))' }}
           >
             <DialogTitle className="flex items-center gap-2 text-white">
-              <Sparkles className="w-5 h-5 text-purple-400" />
-              {editingBlock ? 'Modifier le bloc' : 'Ajouter un bloc'}
+              {blockForm.block_type === 'link_image' && <><Image className="w-5 h-5 text-indigo-400" /> Edit Link &amp; Image</>}
+              {blockForm.block_type === 'link' && <><Link className="w-5 h-5 text-indigo-400" /> Edit Link</>}
+              {blockForm.block_type === 'text' && <><Type className="w-5 h-5 text-indigo-400" /> Update Text Block</>}
+              {blockForm.block_type === 'button' && <><ExternalLink className="w-5 h-5 text-indigo-400" /> Edit Button</>}
+              {blockForm.block_type === 'image' && <><Image className="w-5 h-5 text-pink-400" /> Image Block</>}
+              {blockForm.block_type === 'video' && <><Video className="w-5 h-5 text-red-400" /> Video Block</>}
+              {blockForm.block_type === 'youtube' && <><Youtube className="w-5 h-5 text-red-400" /> YouTube Embed</>}
+              {blockForm.block_type === 'carousel' && <><LayoutGrid className="w-5 h-5 text-purple-400" /> Carousel</>}
+              {blockForm.block_type === 'header' && <><Heading className="w-5 h-5 text-blue-400" /> Header</>}
+              {blockForm.block_type === 'divider' && <><Minus className="w-5 h-5 text-gray-400" /> Divider</>}
+              {!editingBlock && !['link_image','link','text','button','image','video','youtube','carousel','header','divider'].includes(blockForm.block_type) && <>
+                <Sparkles className="w-5 h-5 text-purple-400" /> Ajouter un bloc
+              </>}
             </DialogTitle>
             <Button
               variant="ghost"
@@ -2064,95 +2075,264 @@ const MultilinkPage = () => {
           </div>
 
           <div className="space-y-4">
-            {/* Block Type Selection */}
-            <div className="space-y-3">
-              <Label className="text-white">Type de bloc</Label>
-              
-              {/* Links */}
-              <div>
-                <p className="text-white/50 text-xs uppercase tracking-wider mb-2">Liens</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: 'link', name: 'Lien simple', icon: Link, color: 'indigo' },
-                    { id: 'link_image', name: 'Lien + Image', icon: Image, color: 'indigo' },
-                    { id: 'button', name: 'Bouton', icon: ExternalLink, color: 'indigo' },
-                  ].map(type => (
-                    <button
-                      key={type.id}
-                      onClick={() => setBlockForm({ ...blockForm, block_type: type.id })}
-                      className={`p-2.5 rounded-xl border transition-all text-left flex items-center gap-2 ${
-                        blockForm.block_type === type.id 
-                          ? 'border-indigo-500 bg-indigo-500/20' 
-                          : 'border-white/10 hover:border-white/30'
-                      }`}
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
-                        <type.icon className="w-4 h-4 text-indigo-400" />
-                      </div>
-                      <span className="text-white text-sm">{type.name}</span>
-                    </button>
-                  ))}
+            {/* Block Type Selection - Only show when adding new */}
+            {!editingBlock && (
+              <div className="space-y-3">
+                <Label className="text-white">Type de bloc</Label>
+                
+                {/* Links */}
+                <div>
+                  <p className="text-white/50 text-xs uppercase tracking-wider mb-2">Liens</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'link', name: 'Lien simple', icon: Link },
+                      { id: 'link_image', name: 'Lien + Image', icon: Image },
+                      { id: 'button', name: 'Bouton', icon: ExternalLink },
+                    ].map(type => (
+                      <button
+                        key={type.id}
+                        onClick={() => setBlockForm({ ...blockForm, block_type: type.id })}
+                        className={`p-2.5 rounded-xl border transition-all text-left flex items-center gap-2 ${
+                          blockForm.block_type === type.id 
+                            ? 'border-indigo-500 bg-indigo-500/20' 
+                            : 'border-white/10 hover:border-white/30'
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+                          <type.icon className="w-4 h-4 text-indigo-400" />
+                        </div>
+                        <span className="text-white text-sm">{type.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Media */}
+                <div>
+                  <p className="text-white/50 text-xs uppercase tracking-wider mb-2">Médias</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { id: 'image', name: 'Image', icon: Image, bgColor: 'bg-pink-500/20', color: 'text-pink-400' },
+                      { id: 'video', name: 'Vidéo', icon: Video, bgColor: 'bg-red-500/20', color: 'text-red-400' },
+                      { id: 'youtube', name: 'YouTube', icon: Youtube, bgColor: 'bg-red-500/20', color: 'text-red-400' },
+                      { id: 'carousel', name: 'Carousel', icon: LayoutGrid, bgColor: 'bg-purple-500/20', color: 'text-purple-400' },
+                    ].map(type => (
+                      <button
+                        key={type.id}
+                        onClick={() => setBlockForm({ ...blockForm, block_type: type.id })}
+                        className={`p-2.5 rounded-xl border transition-all flex flex-col items-center gap-1.5 ${
+                          blockForm.block_type === type.id 
+                            ? 'border-purple-500 bg-purple-500/20' 
+                            : 'border-white/10 hover:border-white/30'
+                        }`}
+                      >
+                        <div className={`w-10 h-10 rounded-lg ${type.bgColor} flex items-center justify-center`}>
+                          <type.icon className={`w-5 h-5 ${type.color}`} />
+                        </div>
+                        <span className="text-white text-xs">{type.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div>
+                  <p className="text-white/50 text-xs uppercase tracking-wider mb-2">Contenu</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'text', name: 'Texte', icon: FileText, bgColor: 'bg-green-500/20', color: 'text-green-400' },
+                      { id: 'header', name: 'Titre', icon: Heading, bgColor: 'bg-blue-500/20', color: 'text-blue-400' },
+                      { id: 'divider', name: 'Séparateur', icon: Minus, bgColor: 'bg-gray-500/20', color: 'text-gray-400' },
+                    ].map(type => (
+                      <button
+                        key={type.id}
+                        onClick={() => setBlockForm({ ...blockForm, block_type: type.id })}
+                        className={`p-2.5 rounded-xl border transition-all text-left flex items-center gap-2 ${
+                          blockForm.block_type === type.id 
+                            ? 'border-green-500 bg-green-500/20' 
+                            : 'border-white/10 hover:border-white/30'
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-lg ${type.bgColor} flex items-center justify-center flex-shrink-0`}>
+                          <type.icon className={`w-4 h-4 ${type.color}`} />
+                        </div>
+                        <span className="text-white text-sm">{type.name}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
+            )}
 
-              {/* Media */}
-              <div>
-                <p className="text-white/50 text-xs uppercase tracking-wider mb-2">Médias</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: 'image', name: 'Image', icon: Image, color: 'pink' },
-                    { id: 'video', name: 'Vidéo', icon: Video, color: 'red' },
-                    { id: 'youtube', name: 'YouTube', icon: Youtube, color: 'red' },
-                    { id: 'carousel', name: 'Carousel', icon: LayoutGrid, color: 'purple' },
-                  ].map(type => (
-                    <button
-                      key={type.id}
-                      onClick={() => setBlockForm({ ...blockForm, block_type: type.id })}
-                      className={`p-2.5 rounded-xl border transition-all text-left flex items-center gap-2 ${
-                        blockForm.block_type === type.id 
-                          ? `border-${type.color}-500 bg-${type.color}-500/20` 
-                          : 'border-white/10 hover:border-white/30'
-                      }`}
+            {/* ============ LINK + IMAGE FORM (zaap.bio style) ============ */}
+            {blockForm.block_type === 'link_image' && (
+              <div className="space-y-4">
+                <p className="text-white/60 text-sm">Edit the details for this link.</p>
+                
+                {/* Heading (Label) */}
+                <div className="space-y-2">
+                  <Label className="text-white">Heading *</Label>
+                  <Input
+                    value={blockForm.label}
+                    onChange={(e) => setBlockForm({ ...blockForm, label: e.target.value })}
+                    placeholder="Site Web"
+                    className="bg-white/5 border-white/10 text-white"
+                  />
+                </div>
+
+                {/* Description */}
+                <div className="space-y-2">
+                  <Label className="text-white">Description</Label>
+                  <Textarea
+                    value={blockForm.description}
+                    onChange={(e) => setBlockForm({ ...blockForm, description: e.target.value })}
+                    placeholder="Démarquez-vous avec Alpha Agency, votre agence de marketing digital..."
+                    className="bg-white/5 border-white/10 text-white min-h-[80px]"
+                  />
+                </div>
+
+                {/* Link URL */}
+                <div className="space-y-2">
+                  <Label className="text-white">Link URL *</Label>
+                  <Input
+                    value={blockForm.url}
+                    onChange={(e) => setBlockForm({ ...blockForm, url: e.target.value })}
+                    placeholder="https://alphagency.fr/"
+                    className="bg-white/5 border-white/10 text-white"
+                  />
+                </div>
+
+                {/* Open link in */}
+                <div className="space-y-2">
+                  <Label className="text-white">Open link in:</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant={blockForm.settings?.open_in !== 'new_tab' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setBlockForm({ ...blockForm, settings: { ...blockForm.settings, open_in: 'same_tab' } })}
+                      className={blockForm.settings?.open_in !== 'new_tab' ? 'bg-indigo-600' : 'border-white/20 text-white/70'}
                     >
-                      <div className={`w-8 h-8 rounded-lg bg-${type.color}-500/20 flex items-center justify-center flex-shrink-0`}>
-                        <type.icon className={`w-4 h-4 text-${type.color}-400`} />
+                      Same Tab
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={blockForm.settings?.open_in === 'new_tab' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setBlockForm({ ...blockForm, settings: { ...blockForm.settings, open_in: 'new_tab' } })}
+                      className={blockForm.settings?.open_in === 'new_tab' ? 'bg-indigo-600' : 'border-white/20 text-white/70'}
+                    >
+                      New Tab
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Button Text */}
+                <div className="space-y-2">
+                  <Label className="text-white">Button Text *</Label>
+                  <Input
+                    value={blockForm.settings?.button_text || 'En Savoir +'}
+                    onChange={(e) => setBlockForm({ ...blockForm, settings: { ...blockForm.settings, button_text: e.target.value } })}
+                    placeholder="En Savoir +"
+                    className="bg-white/5 border-white/10 text-white"
+                  />
+                </div>
+
+                {/* Image Upload */}
+                <div className="space-y-2">
+                  <Label className="text-white">Image</Label>
+                  <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                    {/* Tabs: Upload Image / Image URL / Auto */}
+                    <div className="flex gap-2 mb-4">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={blockForm.settings?.image_source !== 'url' ? 'default' : 'outline'}
+                        onClick={() => setBlockForm({ ...blockForm, settings: { ...blockForm.settings, image_source: 'upload' } })}
+                        className={blockForm.settings?.image_source !== 'url' ? 'bg-indigo-600' : 'border-white/20 text-white/70'}
+                      >
+                        Upload Image
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={blockForm.settings?.image_source === 'url' ? 'default' : 'outline'}
+                        onClick={() => setBlockForm({ ...blockForm, settings: { ...blockForm.settings, image_source: 'url' } })}
+                        className={blockForm.settings?.image_source === 'url' ? 'bg-indigo-600' : 'border-white/20 text-white/70'}
+                      >
+                        Image URL
+                      </Button>
+                    </div>
+
+                    {blockForm.thumbnail ? (
+                      <div className="relative">
+                        <img src={blockForm.thumbnail} alt="" className="w-full h-48 rounded-xl object-contain bg-black/20" />
+                        <button
+                          onClick={() => setBlockForm({ ...blockForm, thumbnail: '' })}
+                          className="absolute top-2 right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                        <p className="text-center text-white/50 text-xs mt-2">Or Select From Library</p>
                       </div>
-                      <span className="text-white text-sm">{type.name}</span>
-                    </button>
-                  ))}
+                    ) : (
+                      <>
+                        {blockForm.settings?.image_source === 'url' ? (
+                          <Input
+                            value={blockForm.thumbnail || ''}
+                            onChange={(e) => setBlockForm({ ...blockForm, thumbnail: e.target.value })}
+                            placeholder="https://example.com/image.jpg"
+                            className="bg-white/5 border-white/10 text-white"
+                          />
+                        ) : (
+                          <label className="cursor-pointer block">
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                setUploadingBlockMedia(true);
+                                try {
+                                  const formData = new FormData();
+                                  formData.append('file', file);
+                                  const response = await api.post('/multilink/upload-media', formData, {
+                                    headers: { 'Content-Type': 'multipart/form-data' }
+                                  });
+                                  setBlockForm(prev => ({ ...prev, thumbnail: response.data.url }));
+                                  toast.success('Image uploadée');
+                                } catch (error) {
+                                  toast.error('Erreur upload');
+                                } finally {
+                                  setUploadingBlockMedia(false);
+                                }
+                              }} 
+                              className="hidden" 
+                            />
+                            <div className="flex flex-col items-center py-8 border-2 border-dashed border-white/20 rounded-xl hover:border-indigo-500/50 transition-colors">
+                              {uploadingBlockMedia ? (
+                                <Loader2 className="w-12 h-12 text-indigo-400 animate-spin" />
+                              ) : (
+                                <>
+                                  <div className="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-3">
+                                    <ImagePlus className="w-8 h-8 text-indigo-400" />
+                                  </div>
+                                  <p className="text-white font-medium">Click to upload</p>
+                                  <p className="text-white/50 text-xs mt-1">Or Select From Library</p>
+                                </>
+                              )}
+                            </div>
+                          </label>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
+            )}
 
-              {/* Content */}
-              <div>
-                <p className="text-white/50 text-xs uppercase tracking-wider mb-2">Contenu</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: 'text', name: 'Texte', icon: FileText, color: 'green' },
-                    { id: 'header', name: 'Titre', icon: Heading, color: 'blue' },
-                    { id: 'divider', name: 'Séparateur', icon: Minus, color: 'gray' },
-                  ].map(type => (
-                    <button
-                      key={type.id}
-                      onClick={() => setBlockForm({ ...blockForm, block_type: type.id })}
-                      className={`p-2.5 rounded-xl border transition-all text-left flex items-center gap-2 ${
-                        blockForm.block_type === type.id 
-                          ? 'border-green-500 bg-green-500/20' 
-                          : 'border-white/10 hover:border-white/30'
-                      }`}
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                        <type.icon className="w-4 h-4 text-green-400" />
-                      </div>
-                      <span className="text-white text-sm">{type.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Link fields */}
-            {['link', 'link_image', 'button'].includes(blockForm.block_type) && (
+            {/* ============ SIMPLE LINK FORM ============ */}
+            {blockForm.block_type === 'link' && (
               <>
                 <div className="space-y-2">
                   <Label className="text-white">Label *</Label>
@@ -2172,49 +2352,168 @@ const MultilinkPage = () => {
                     className="bg-white/5 border-white/10 text-white"
                   />
                 </div>
-                {blockForm.block_type === 'link_image' && (
-                  <div className="space-y-2">
-                    <Label className="text-white">Image de couverture</Label>
-                    <p className="text-white/40 text-xs">📐 Format recommandé : 1200×630px</p>
-                    <div className="flex items-center gap-4">
-                      {blockForm.thumbnail ? (
-                        <div className="relative">
-                          <img src={blockForm.thumbnail} alt="" className="w-24 h-16 rounded-lg object-cover" />
-                          <button
-                            onClick={() => setBlockForm({ ...blockForm, thumbnail: '' })}
-                            className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center"
-                          >
-                            <X className="w-3 h-3 text-white" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="w-24 h-16 rounded-lg bg-white/5 border border-dashed border-white/20 flex items-center justify-center">
-                          <Image className="w-6 h-6 text-white/30" />
-                        </div>
-                      )}
-                      <label className="cursor-pointer">
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleBlockMediaUpload(file).then(() => {
-                              setBlockForm(prev => ({ ...prev, thumbnail: prev.media_url }));
-                            });
-                          }} 
-                          className="hidden" 
-                        />
-                        <div className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white text-sm">
-                          {uploadingBlockMedia ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Uploader'}
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <Label className="text-white">Description (optionnel)</Label>
+                  <Input
+                    value={blockForm.description}
+                    onChange={(e) => setBlockForm({ ...blockForm, description: e.target.value })}
+                    placeholder="Courte description..."
+                    className="bg-white/5 border-white/10 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-white">Icône</Label>
+                  <Select value={blockForm.icon || 'link'} onValueChange={(value) => setBlockForm({ ...blockForm, icon: value })}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a1a2e] border-white/10 max-h-60">
+                      {ICON_OPTIONS.map(option => {
+                        const Icon = option.icon;
+                        return (
+                          <SelectItem key={option.value} value={option.value} className="text-white">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: option.color }}>
+                                <Icon className="w-3 h-3 text-white" />
+                              </div>
+                              <span>{option.label}</span>
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
               </>
             )}
 
-            {/* Image/Video upload */}
+            {/* ============ BUTTON FORM ============ */}
+            {blockForm.block_type === 'button' && (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-white">Texte du bouton *</Label>
+                  <Input
+                    value={blockForm.label}
+                    onChange={(e) => setBlockForm({ ...blockForm, label: e.target.value })}
+                    placeholder="Découvrir"
+                    className="bg-white/5 border-white/10 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-white">URL *</Label>
+                  <Input
+                    value={blockForm.url}
+                    onChange={(e) => setBlockForm({ ...blockForm, url: e.target.value })}
+                    placeholder="https://..."
+                    className="bg-white/5 border-white/10 text-white"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* ============ TEXT BLOCK WITH WYSIWYG ============ */}
+            {blockForm.block_type === 'text' && (
+              <div className="space-y-2">
+                <p className="text-white/60 text-sm mb-4">Share text, notes, or information on your page.</p>
+                <div className="quill-dark-theme">
+                  <ReactQuill
+                    theme="snow"
+                    value={blockForm.content || ''}
+                    onChange={(value) => setBlockForm({ ...blockForm, content: value })}
+                    placeholder="Nous sommes convaincus que la clé du succès réside dans une collaboration étroite avec nos clients..."
+                    modules={{
+                      toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        [{ 'size': ['small', false, 'large', 'huge'] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'align': [] }],
+                        ['link'],
+                        ['clean']
+                      ],
+                    }}
+                    formats={[
+                      'header', 'size',
+                      'bold', 'italic', 'underline', 'strike',
+                      'color', 'background',
+                      'list', 'bullet',
+                      'align',
+                      'link'
+                    ]}
+                    style={{ minHeight: '200px' }}
+                  />
+                </div>
+                <style>{`
+                  .quill-dark-theme .ql-toolbar {
+                    background: rgba(255,255,255,0.05);
+                    border-color: rgba(255,255,255,0.1);
+                    border-radius: 8px 8px 0 0;
+                  }
+                  .quill-dark-theme .ql-container {
+                    background: rgba(255,255,255,0.05);
+                    border-color: rgba(255,255,255,0.1);
+                    border-radius: 0 0 8px 8px;
+                    min-height: 150px;
+                    color: white;
+                  }
+                  .quill-dark-theme .ql-editor {
+                    min-height: 150px;
+                    color: white;
+                  }
+                  .quill-dark-theme .ql-editor.ql-blank::before {
+                    color: rgba(255,255,255,0.4);
+                    font-style: normal;
+                  }
+                  .quill-dark-theme .ql-stroke {
+                    stroke: rgba(255,255,255,0.7);
+                  }
+                  .quill-dark-theme .ql-fill {
+                    fill: rgba(255,255,255,0.7);
+                  }
+                  .quill-dark-theme .ql-picker-label {
+                    color: rgba(255,255,255,0.7);
+                  }
+                  .quill-dark-theme .ql-picker-options {
+                    background: #1a1a2e;
+                    border-color: rgba(255,255,255,0.1);
+                  }
+                  .quill-dark-theme .ql-picker-item {
+                    color: white;
+                  }
+                  .quill-dark-theme .ql-picker-item:hover {
+                    color: #6366f1;
+                  }
+                  .quill-dark-theme button:hover .ql-stroke {
+                    stroke: #6366f1;
+                  }
+                  .quill-dark-theme button:hover .ql-fill {
+                    fill: #6366f1;
+                  }
+                  .quill-dark-theme button.ql-active .ql-stroke {
+                    stroke: #6366f1;
+                  }
+                  .quill-dark-theme button.ql-active .ql-fill {
+                    fill: #6366f1;
+                  }
+                `}</style>
+              </div>
+            )}
+
+            {/* ============ HEADER BLOCK ============ */}
+            {blockForm.block_type === 'header' && (
+              <div className="space-y-2">
+                <Label className="text-white">Titre *</Label>
+                <Input
+                  value={blockForm.content}
+                  onChange={(e) => setBlockForm({ ...blockForm, content: e.target.value })}
+                  placeholder="Votre titre..."
+                  className="bg-white/5 border-white/10 text-white text-xl font-bold"
+                />
+              </div>
+            )}
+
+            {/* ============ IMAGE/VIDEO UPLOAD ============ */}
             {['image', 'video'].includes(blockForm.block_type) && (
               <div className="space-y-2">
                 <Label className="text-white">
@@ -2226,35 +2525,39 @@ const MultilinkPage = () => {
                 <div className="flex flex-col items-center gap-3 p-4 bg-white/5 rounded-xl border border-dashed border-white/20">
                   {blockForm.media_url ? (
                     <div className="relative w-full">
-                      {blockForm.media_type === 'image' ? (
-                        <img src={blockForm.media_url} alt="" className="w-full h-40 rounded-lg object-contain bg-black/20" />
+                      {blockForm.media_type === 'image' || blockForm.block_type === 'image' ? (
+                        <img src={blockForm.media_url} alt="" className="w-full h-48 rounded-lg object-contain bg-black/20" />
                       ) : (
-                        <video src={blockForm.media_url} className="w-full h-40 rounded-lg object-contain bg-black/20" controls />
+                        <video src={blockForm.media_url} className="w-full h-48 rounded-lg object-contain bg-black/20" controls />
                       )}
                       <button
                         onClick={() => setBlockForm({ ...blockForm, media_url: '', media_type: '' })}
-                        className="absolute top-2 right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
+                        className="absolute top-2 right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center"
                       >
-                        <X className="w-3 h-3 text-white" />
+                        <X className="w-4 h-4 text-white" />
                       </button>
                     </div>
                   ) : (
-                    <>
-                      <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center">
-                        {blockForm.block_type === 'image' ? <Image className="w-8 h-8 text-white/40" /> : <Video className="w-8 h-8 text-white/40" />}
+                    <label className="cursor-pointer w-full">
+                      <input 
+                        type="file" 
+                        accept={blockForm.block_type === 'image' ? 'image/*' : 'video/*'}
+                        onChange={(e) => handleBlockMediaUpload(e.target.files?.[0])} 
+                        className="hidden" 
+                      />
+                      <div className="flex flex-col items-center py-8 border-2 border-dashed border-white/20 rounded-xl hover:border-indigo-500/50 transition-colors">
+                        {uploadingBlockMedia ? (
+                          <Loader2 className="w-12 h-12 text-indigo-400 animate-spin" />
+                        ) : (
+                          <>
+                            <div className="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-3">
+                              {blockForm.block_type === 'image' ? <Image className="w-8 h-8 text-indigo-400" /> : <Video className="w-8 h-8 text-indigo-400" />}
+                            </div>
+                            <p className="text-white font-medium">Cliquer pour uploader</p>
+                          </>
+                        )}
                       </div>
-                      <label className="cursor-pointer">
-                        <input 
-                          type="file" 
-                          accept={blockForm.block_type === 'image' ? 'image/*' : 'video/*'}
-                          onChange={(e) => handleBlockMediaUpload(e.target.files?.[0])} 
-                          className="hidden" 
-                        />
-                        <div className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-lg text-white text-sm">
-                          {uploadingBlockMedia ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Choisir un fichier'}
-                        </div>
-                      </label>
-                    </>
+                    </label>
                   )}
                 </div>
                 
@@ -2300,7 +2603,7 @@ const MultilinkPage = () => {
               </div>
             )}
 
-            {/* YouTube URL */}
+            {/* ============ YOUTUBE URL ============ */}
             {blockForm.block_type === 'youtube' && (
               <div className="space-y-2">
                 <Label className="text-white">URL YouTube *</Label>
@@ -2314,20 +2617,7 @@ const MultilinkPage = () => {
               </div>
             )}
 
-            {/* Text/Header content */}
-            {['text', 'header'].includes(blockForm.block_type) && (
-              <div className="space-y-2">
-                <Label className="text-white">Contenu *</Label>
-                <Textarea
-                  value={blockForm.content}
-                  onChange={(e) => setBlockForm({ ...blockForm, content: e.target.value })}
-                  placeholder={blockForm.block_type === 'header' ? 'Votre titre...' : 'Votre texte...'}
-                  className="bg-white/5 border-white/10 text-white min-h-[100px]"
-                />
-              </div>
-            )}
-
-            {/* Carousel items */}
+            {/* ============ CAROUSEL ITEMS ============ */}
             {blockForm.block_type === 'carousel' && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -2377,24 +2667,26 @@ const MultilinkPage = () => {
               </div>
             )}
 
-            {/* Active toggle */}
-            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-              <span className="text-white">Bloc actif</span>
-              <Switch
-                checked={blockForm.is_active}
-                onCheckedChange={(checked) => setBlockForm({ ...blockForm, is_active: checked })}
-                className="data-[state=checked]:bg-green-500"
-              />
-            </div>
+            {/* Active toggle - Always show */}
+            {blockForm.block_type !== 'divider' && (
+              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <span className="text-white">Bloc actif</span>
+                <Switch
+                  checked={blockForm.is_active}
+                  onCheckedChange={(checked) => setBlockForm({ ...blockForm, is_active: checked })}
+                  className="data-[state=checked]:bg-green-500"
+                />
+              </div>
+            )}
           </div>
 
-          <DialogFooter className="mt-4">
+          <DialogFooter className="mt-4 flex gap-2">
             <Button variant="outline" onClick={() => setBlockDialogOpen(false)} className="border-white/10 text-white">
-              Annuler
+              Cancel
             </Button>
-            <Button onClick={saveBlock} disabled={saving} className="bg-gradient-to-r from-purple-600 to-indigo-600">
+            <Button onClick={saveBlock} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              {editingBlock ? 'Mettre à jour' : 'Ajouter'}
+              {editingBlock ? 'Apply Changes' : 'Ajouter'}
             </Button>
           </DialogFooter>
         </DialogContent>
