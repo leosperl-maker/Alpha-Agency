@@ -169,15 +169,28 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
         
         // Parse response - handle network errors gracefully
         let result;
+        const responseText = await response.text();
+        
+        console.log('Upload response status:', response.status);
+        console.log('Upload response headers:', Object.fromEntries(response.headers.entries()));
+        console.log('Upload response body (first 500 chars):', responseText?.substring(0, 500));
+        
+        // Check for empty response
+        if (!responseText || responseText.trim() === '') {
+          throw new Error(`Le serveur n'a pas répondu (status: ${response.status}). Vérifiez votre connexion.`);
+        }
+        
+        // Try to parse JSON
         try {
-          const text = await response.text();
-          console.log('Upload response status:', response.status);
-          console.log('Upload response text:', text?.substring(0, 200));
-          result = text ? JSON.parse(text) : {};
+          result = JSON.parse(responseText);
         } catch (parseError) {
-          console.error('Parse error:', parseError);
-          console.error('Response status was:', response.status);
-          throw new Error(`Réponse serveur invalide (status: ${response.status})`);
+          console.error('JSON parse error:', parseError);
+          console.error('Response was:', responseText?.substring(0, 200));
+          // Check if it's an HTML error page
+          if (responseText.includes('<html') || responseText.includes('<!DOCTYPE')) {
+            throw new Error('Erreur serveur (page HTML reçue). Rechargez la page et réessayez.');
+          }
+          throw new Error(`Réponse serveur invalide (status: ${response.status}). Réessayez.`);
         }
         
         if (!response.ok) {
