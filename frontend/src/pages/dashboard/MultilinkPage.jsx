@@ -1176,15 +1176,81 @@ const MultilinkPage = () => {
 
       {/* Link Dialog */}
       <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-md">
-          <DialogHeader>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-md max-h-[90vh] overflow-y-auto [&>button]:hidden">
+          <div 
+            className="flex items-center justify-between mb-4"
+            style={{ paddingTop: 'max(0px, env(safe-area-inset-top, 0px))' }}
+          >
             <DialogTitle className="flex items-center gap-2 text-white">
               <Link className="w-5 h-5 text-indigo-400" />
               {editingLink ? 'Modifier le lien' : 'Ajouter un lien'}
             </DialogTitle>
-          </DialogHeader>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setLinkDialogOpen(false)}
+              className="text-white/60 hover:text-white hover:bg-white/10 h-8 w-8"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
 
-          <div className="space-y-4 mt-4">
+          <div className="space-y-4">
+            {/* Thumbnail Upload */}
+            <div className="space-y-2">
+              <Label className="text-white">Image de la carte (optionnel)</Label>
+              <div className="flex items-center gap-4">
+                {linkForm.thumbnail ? (
+                  <div className="relative">
+                    <img 
+                      src={linkForm.thumbnail} 
+                      alt="" 
+                      className="w-24 h-24 rounded-xl object-cover border border-white/10"
+                    />
+                    <button
+                      onClick={() => setLinkForm({ ...linkForm, thumbnail: '' })}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 rounded-xl bg-white/5 border-2 border-dashed border-white/20 flex items-center justify-center">
+                    <Image className="w-8 h-8 text-white/30" />
+                  </div>
+                )}
+                <label className="cursor-pointer flex-1">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setUploadingImage(true);
+                      try {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        const response = await api.post('/multilink/upload-image', formData, {
+                          headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+                        setLinkForm({ ...linkForm, thumbnail: response.data.url });
+                        toast.success('Image uploadée');
+                      } catch (error) {
+                        toast.error('Erreur upload');
+                      } finally {
+                        setUploadingImage(false);
+                      }
+                    }} 
+                    className="hidden" 
+                  />
+                  <div className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white text-sm transition-colors text-center">
+                    {uploadingImage ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Choisir une image'}
+                  </div>
+                </label>
+              </div>
+              <p className="text-white/40 text-xs">L'image apparaîtra sur la carte du lien comme sur zaap.bio</p>
+            </div>
+
             <div className="space-y-2">
               <Label className="text-white">Label *</Label>
               <Input
