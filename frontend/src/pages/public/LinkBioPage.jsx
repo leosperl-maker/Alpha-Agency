@@ -376,13 +376,124 @@ const LinkBioPage = () => {
           </div>
         )}
 
-        {/* Content Links */}
+        {/* Sections - Carousel, Text, Image, etc. */}
+        {page.sections && page.sections.length > 0 && (
+          <div className="space-y-6 mb-6">
+            {page.sections.filter(s => s.is_active).map((section) => (
+              <div key={section.id}>
+                {/* Section title */}
+                {section.title && (
+                  <h3 
+                    className="font-semibold mb-3 text-lg"
+                    style={{ color: colors.text || '#ffffff' }}
+                  >
+                    {section.title}
+                  </h3>
+                )}
+                
+                {/* Carousel section */}
+                {section.section_type === 'carousel' && (
+                  <CarouselSection 
+                    items={section.items} 
+                    colors={colors}
+                    onItemClick={handleLinkClick}
+                  />
+                )}
+                
+                {/* Text section */}
+                {section.section_type === 'text' && section.content && (
+                  <div 
+                    className="p-4 rounded-2xl"
+                    style={{ 
+                      backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
+                      color: colors.button_text || '#ffffff'
+                    }}
+                  >
+                    <p className="whitespace-pre-wrap">{section.content}</p>
+                  </div>
+                )}
+                
+                {/* Image section */}
+                {section.section_type === 'image' && section.images && section.images.length > 0 && (
+                  <div className={`grid gap-2 ${
+                    section.images.length === 1 ? 'grid-cols-1' : 
+                    section.images.length === 2 ? 'grid-cols-2' :
+                    'grid-cols-2 md:grid-cols-3'
+                  }`}>
+                    {section.images.map((img, idx) => (
+                      <div key={idx} className="aspect-square rounded-2xl overflow-hidden">
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Divider section */}
+                {section.section_type === 'divider' && (
+                  <hr 
+                    className="border-0 h-px my-4"
+                    style={{ backgroundColor: (colors.text || '#ffffff') + '20' }}
+                  />
+                )}
+                
+                {/* Header section */}
+                {section.section_type === 'header' && (
+                  <h2 
+                    className="text-xl font-bold text-center"
+                    style={{ color: colors.text || '#ffffff' }}
+                  >
+                    {section.content}
+                  </h2>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Content Links - Cards with rounded thumbnails */}
         <div className="space-y-3">
           {contentLinks.filter(link => link.is_active).map((link) => {
             const IconComponent = getIcon(link.icon);
             const buttonStyle = design.button_style || 'rounded';
             const isOutline = buttonStyle === 'outline';
+            const hasThumbnail = !!link.thumbnail;
             
+            // Card style for links with thumbnails
+            if (hasThumbnail) {
+              return (
+                <button
+                  key={link.id}
+                  onClick={() => handleLinkClick(link)}
+                  className="w-full rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg text-left"
+                  style={{
+                    backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
+                  }}
+                >
+                  <div className="aspect-video relative">
+                    <img 
+                      src={link.thumbnail} 
+                      alt="" 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <p 
+                        className="font-semibold text-white text-lg"
+                      >
+                        {link.label}
+                      </p>
+                      {link.description && (
+                        <p className="text-white/80 text-sm mt-1 line-clamp-2">
+                          {link.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            }
+            
+            // Standard button style for links without thumbnails
             return (
               <button
                 key={link.id}
@@ -406,24 +517,16 @@ const LinkBioPage = () => {
                   e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
-                {/* Link thumbnail/icon */}
-                {link.thumbnail ? (
-                  <img 
-                    src={link.thumbnail} 
-                    alt="" 
-                    className="w-12 h-12 rounded-lg object-cover"
-                  />
-                ) : (
-                  <div 
-                    className="w-12 h-12 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: (colors.accent || '#6366f1') + '20' }}
-                  >
-                    <IconComponent className="w-5 h-5" style={{ color: colors.accent || '#6366f1' }} />
-                  </div>
-                )}
+                {/* Link icon */}
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: (colors.accent || '#6366f1') + '20' }}
+                >
+                  <IconComponent className="w-5 h-5" style={{ color: colors.accent || '#6366f1' }} />
+                </div>
                 
                 {/* Link content */}
-                <div className="flex-1 text-left">
+                <div className="flex-1 text-left min-w-0">
                   <p className="font-semibold">{link.label}</p>
                   {link.description && (
                     <p className="text-sm opacity-60 truncate">{link.description}</p>
