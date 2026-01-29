@@ -1,6 +1,7 @@
 """
-Multilink Module - Linktree-style link pages
+Multilink Module - Linktree/Zaap.bio style link pages
 Allows creating and managing bio link pages accessible at /lien-bio/{slug}
+Unified BLOCKS system - links, images, videos, text are all blocks
 """
 
 import os
@@ -18,16 +19,70 @@ logger = logging.getLogger("multilink")
 router = APIRouter()
 
 
-# ==================== MODELS ====================
+# ==================== UNIFIED BLOCK MODEL ====================
 
+class BlockCreate(BaseModel):
+    """Unified block model - replaces separate links and sections"""
+    block_type: str  # link, link_image, button, carousel, text, image, video, youtube, header, divider
+    
+    # For link blocks
+    label: Optional[str] = None
+    url: Optional[str] = None
+    description: Optional[str] = None
+    thumbnail: Optional[str] = None  # Image for link_image type
+    icon: Optional[str] = None
+    
+    # For text/header blocks
+    content: Optional[str] = None
+    
+    # For carousel blocks
+    items: Optional[List[dict]] = None  # [{image, title, subtitle, url}]
+    
+    # For image/video blocks
+    media_url: Optional[str] = None  # Cloudinary URL
+    media_type: Optional[str] = None  # image or video
+    
+    # For youtube blocks
+    youtube_url: Optional[str] = None
+    
+    # Display settings
+    settings: Optional[dict] = None  # {aspect_ratio, rounded, columns, etc.}
+    # aspect_ratio: "1:1", "4:5", "16:9", "9:16"
+    # rounded: true/false or "none", "sm", "md", "lg", "full"
+    # columns: 1, 2, 3 for image galleries
+    
+    is_active: bool = True
+    order: Optional[int] = 0
+
+class BlockUpdate(BaseModel):
+    block_type: Optional[str] = None
+    label: Optional[str] = None
+    url: Optional[str] = None
+    description: Optional[str] = None
+    thumbnail: Optional[str] = None
+    icon: Optional[str] = None
+    content: Optional[str] = None
+    items: Optional[List[dict]] = None
+    media_url: Optional[str] = None
+    media_type: Optional[str] = None
+    youtube_url: Optional[str] = None
+    settings: Optional[dict] = None
+    is_active: Optional[bool] = None
+    order: Optional[int] = None
+
+class BlocksReorder(BaseModel):
+    block_ids: List[str]
+
+
+# Legacy models for backward compatibility
 class LinkCreate(BaseModel):
     label: str
     url: str
-    description: Optional[str] = None  # Short description under label
-    thumbnail: Optional[str] = None  # Image thumbnail
-    icon: Optional[str] = None  # Icon name or URL
-    icon_type: Optional[str] = "lucide"  # lucide, social, custom
-    link_type: Optional[str] = "link"  # link, social, header, divider
+    description: Optional[str] = None
+    thumbnail: Optional[str] = None
+    icon: Optional[str] = None
+    icon_type: Optional[str] = "lucide"
+    link_type: Optional[str] = "link"
     is_active: bool = True
     order: Optional[int] = 0
 
