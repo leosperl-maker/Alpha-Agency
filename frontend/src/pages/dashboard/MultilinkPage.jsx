@@ -1585,6 +1585,167 @@ const MultilinkPage = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Section Dialog */}
+      <Dialog open={sectionDialogOpen} onOpenChange={setSectionDialogOpen}>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-lg max-h-[90vh] overflow-y-auto [&>button]:hidden">
+          <div 
+            className="flex items-center justify-between mb-4"
+            style={{ paddingTop: 'max(0px, env(safe-area-inset-top, 0px))' }}
+          >
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <LayoutGrid className="w-5 h-5 text-purple-400" />
+              {editingSection ? 'Modifier la section' : 'Ajouter une section'}
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSectionDialogOpen(false)}
+              className="text-white/60 hover:text-white hover:bg-white/10 h-8 w-8"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+
+          <div className="space-y-4">
+            {/* Section Type Selection */}
+            <div className="space-y-2">
+              <Label className="text-white">Type de section</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {SECTION_TYPES.map(type => {
+                  const Icon = type.icon;
+                  return (
+                    <button
+                      key={type.id}
+                      onClick={() => setSectionForm({ ...sectionForm, section_type: type.id })}
+                      className={`p-3 rounded-xl border-2 transition-all text-center ${
+                        sectionForm.section_type === type.id 
+                          ? 'border-purple-500 bg-purple-500/20' 
+                          : 'border-white/10 hover:border-white/30'
+                      }`}
+                    >
+                      <Icon className="w-6 h-6 mx-auto mb-1 text-purple-400" />
+                      <p className="text-white text-xs">{type.name}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Section Title */}
+            <div className="space-y-2">
+              <Label className="text-white">Titre (optionnel)</Label>
+              <Input
+                value={sectionForm.title}
+                onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })}
+                placeholder="Titre de la section"
+                className="bg-white/5 border-white/10 text-white"
+              />
+            </div>
+
+            {/* Content for Text/Header sections */}
+            {(sectionForm.section_type === 'text' || sectionForm.section_type === 'header') && (
+              <div className="space-y-2">
+                <Label className="text-white">Contenu *</Label>
+                <Textarea
+                  value={sectionForm.content}
+                  onChange={(e) => setSectionForm({ ...sectionForm, content: e.target.value })}
+                  placeholder="Votre texte ici..."
+                  className="bg-white/5 border-white/10 text-white min-h-[100px]"
+                />
+              </div>
+            )}
+
+            {/* Carousel Items */}
+            {sectionForm.section_type === 'carousel' && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-white">Éléments du carousel</Label>
+                  <Button size="sm" onClick={addCarouselItem} className="bg-purple-600 hover:bg-purple-700">
+                    <Plus className="w-4 h-4 mr-1" /> Ajouter
+                  </Button>
+                </div>
+                
+                {sectionForm.items.length === 0 ? (
+                  <div className="text-center py-6 text-white/40 bg-white/5 rounded-xl">
+                    <p className="text-sm">Aucun élément</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-60 overflow-y-auto">
+                    {sectionForm.items.map((item, index) => (
+                      <div key={index} className="p-3 bg-white/5 rounded-xl border border-white/10 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-white/60 text-xs">Élément {index + 1}</span>
+                          <Button size="sm" variant="ghost" onClick={() => removeCarouselItem(index)} className="text-red-400 hover:text-red-300 h-6 w-6 p-0">
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <Input
+                          value={item.image}
+                          onChange={(e) => updateCarouselItem(index, 'image', e.target.value)}
+                          placeholder="URL de l'image"
+                          className="bg-white/5 border-white/10 text-white text-sm"
+                        />
+                        <Input
+                          value={item.title}
+                          onChange={(e) => updateCarouselItem(index, 'title', e.target.value)}
+                          placeholder="Titre"
+                          className="bg-white/5 border-white/10 text-white text-sm"
+                        />
+                        <Input
+                          value={item.subtitle}
+                          onChange={(e) => updateCarouselItem(index, 'subtitle', e.target.value)}
+                          placeholder="Sous-titre (optionnel)"
+                          className="bg-white/5 border-white/10 text-white text-sm"
+                        />
+                        <Input
+                          value={item.url}
+                          onChange={(e) => updateCarouselItem(index, 'url', e.target.value)}
+                          placeholder="URL au clic (optionnel)"
+                          className="bg-white/5 border-white/10 text-white text-sm"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Image URLs for Image section */}
+            {sectionForm.section_type === 'image' && (
+              <div className="space-y-2">
+                <Label className="text-white">URLs des images (une par ligne)</Label>
+                <Textarea
+                  value={sectionForm.images.join('\n')}
+                  onChange={(e) => setSectionForm({ ...sectionForm, images: e.target.value.split('\n').filter(url => url.trim()) })}
+                  placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+                  className="bg-white/5 border-white/10 text-white min-h-[100px]"
+                />
+              </div>
+            )}
+
+            {/* Active toggle */}
+            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+              <span className="text-white">Section active</span>
+              <Switch
+                checked={sectionForm.is_active}
+                onCheckedChange={(checked) => setSectionForm({ ...sectionForm, is_active: checked })}
+                className="data-[state=checked]:bg-green-500"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setSectionDialogOpen(false)} className="border-white/10 text-white">
+              Annuler
+            </Button>
+            <Button onClick={saveSection} disabled={saving} className="bg-purple-600 hover:bg-purple-700">
+              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {editingSection ? 'Mettre à jour' : 'Ajouter'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Stats Dialog */}
       <Dialog open={statsDialogOpen} onOpenChange={setStatsDialogOpen}>
         <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
