@@ -742,9 +742,22 @@ const SocialComposer = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl w-full h-[100dvh] md:h-[90vh] bg-slate-900 border-white/10 p-0 gap-0 overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-3 md:px-6 py-3 md:py-4 border-b border-white/10">
+      <DialogContent className="max-w-6xl w-full h-[100dvh] md:h-[90vh] bg-slate-900 border-white/10 p-0 gap-0 overflow-hidden [&>button]:hidden">
+        {/* Header with safe area support for PWA mode */}
+        <div 
+          className="flex items-center justify-between px-3 md:px-6 py-3 md:py-4 border-b border-white/10 bg-slate-900"
+          style={{ paddingTop: 'max(12px, env(safe-area-inset-top, 12px))' }}
+        >
+          {/* Close button - Explicit for mobile PWA */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onOpenChange(false)}
+            className="md:hidden text-white/60 hover:text-white hover:bg-white/10 h-8 w-8 mr-2 flex-shrink-0"
+          >
+            <X className="w-5 h-5" />
+          </Button>
+          
           <div className="min-w-0 flex-1">
             <DialogTitle className="text-white text-base md:text-lg truncate">
               {editingPost ? 'Modifier le post' : 'Créer un nouveau post'}
