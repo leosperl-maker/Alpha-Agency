@@ -976,7 +976,7 @@ async def get_page_stats(
     days: int = 30,
     current_user: dict = Depends(get_current_user)
 ):
-    """Get detailed stats for a page"""
+    """Get detailed stats for a page including block-level analytics"""
     user_id = current_user.get("user_id") or current_user.get("id")
     
     # Verify page ownership
@@ -996,7 +996,7 @@ async def get_page_stats(
     ]
     views_by_day = await db.multilink_stats.aggregate(views_pipeline).to_list(100)
     
-    # Get daily clicks (all links)
+    # Get daily clicks (all links/blocks)
     clicks_pipeline = [
         {"$match": {"page_id": page_id, "type": "click", "date": {"$gte": start_str}}},
         {"$group": {"_id": "$date", "count": {"$sum": "$count"}}},
@@ -1004,16 +1004,32 @@ async def get_page_stats(
     ]
     clicks_by_day = await db.multilink_stats.aggregate(clicks_pipeline).to_list(100)
     
-    # Get clicks per link
+    # Get clicks per link (legacy)
     link_clicks_pipeline = [
-        {"$match": {"page_id": page_id, "type": "click"}},
+        {"$match": {"page_id": page_id, "type": "click", "link_id": {"$exists": True}}},
         {"$group": {"_id": "$link_id", "total": {"$sum": "$count"}}}
     ]
     link_clicks = await db.multilink_stats.aggregate(link_clicks_pipeline).to_list(100)
     
+    # Get clicks per block (new unified system)
+    block_clicks_pipeline = [
+        {"$match": {"page_id": page_id, "type": "click", "block_id": {"$exists": True}}},
+        {"$group": {"_id": "$block_id", "total": {"$sum": "$count"}}}
+    ]
+    block_clicks = await db.multilink_stats.aggregate(block_clicks_pipeline).to_list(100)
+    
     # Map link clicks to link labels
     links = await db.multilink_links.find({"page_id": page_id}, {"_id": 0}).to_list(100)
     link_map = {link["id"]: link["label"] for link in links}
+    
+    # Map block clicks to block labels
+    blocks = await db.multilink_blocks.find({"page_id": page_id}, {"_id": 0}).to_list(200)
+    block_map = {block["id"]: {
+        "label": block.get("label") or block.get("content", "")[:50] or f"Block ({block.get('block_type', 'unknown')})",
+        "type": block.get("block_type", "unknown"),
+        "thumbnail": block.get("thumbnail") or block.get("media_url"),
+        "url": block.get("url")
+    } for block in blocks}
     
     link_stats = []
     for lc in link_clicks:
@@ -1024,8 +1040,22 @@ async def get_page_stats(
             "clicks": lc["total"]
         })
     
+    block_stats = []
+    for bc in block_clicks:
+        block_id = bc["_id"]
+        block_info = block_map.get(block_id, {"label": "Bloc supprimé", "type": "unknown"})
+        block_stats.append({
+            "block_id": block_id,
+            "label": block_info["label"],
+            "type": block_info["type"],
+            "thumbnail": block_info.get("thumbnail"),
+            "url": block_info.get("url"),
+            "clicks": bc["total"]
+        })
+    
     # Sort by clicks descending
     link_stats.sort(key=lambda x: x["clicks"], reverse=True)
+    block_stats.sort(key=lambda x: x["clicks"], reverse=True)
     
     # Total stats
     total_views = sum(v.get("count", 0) for v in views_by_day)
@@ -1034,15 +1064,44 @@ async def get_page_stats(
     # CTR
     ctr = round((total_clicks / total_views * 100), 2) if total_views > 0 else 0
     
+    # Previous period comparison
+    prev_start = start_date - timedelta(days=days)
+    prev_end = start_date
+    prev_start_str = prev_start.strftime("%Y-%m-%d")
+    prev_end_str = prev_end.strftime("%Y-%m-%d")
+    
+    prev_views_pipeline = [
+        {"$match": {"page_id": page_id, "type": "view", "date": {"$gte": prev_start_str, "$lt": prev_end_str}}},
+        {"$group": {"_id": None, "total": {"$sum": "$count"}}}
+    ]
+    prev_views_result = await db.multilink_stats.aggregate(prev_views_pipeline).to_list(1)
+    prev_total_views = prev_views_result[0]["total"] if prev_views_result else 0
+    
+    prev_clicks_pipeline = [
+        {"$match": {"page_id": page_id, "type": "click", "date": {"$gte": prev_start_str, "$lt": prev_end_str}}},
+        {"$group": {"_id": None, "total": {"$sum": "$count"}}}
+    ]
+    prev_clicks_result = await db.multilink_stats.aggregate(prev_clicks_pipeline).to_list(1)
+    prev_total_clicks = prev_clicks_result[0]["total"] if prev_clicks_result else 0
+    
+    # Calculate growth
+    views_growth = round(((total_views - prev_total_views) / prev_total_views * 100), 1) if prev_total_views > 0 else 0
+    clicks_growth = round(((total_clicks - prev_total_clicks) / prev_total_clicks * 100), 1) if prev_total_clicks > 0 else 0
+    
     return {
         "page_id": page_id,
         "period_days": days,
         "total_views": total_views,
         "total_clicks": total_clicks,
         "ctr": ctr,
+        "views_growth": views_growth,
+        "clicks_growth": clicks_growth,
+        "prev_total_views": prev_total_views,
+        "prev_total_clicks": prev_total_clicks,
         "views_by_day": [{"date": v["date"], "count": v["count"]} for v in views_by_day],
         "clicks_by_day": [{"date": c["_id"], "count": c["count"]} for c in clicks_by_day],
-        "link_stats": link_stats
+        "link_stats": link_stats,
+        "block_stats": block_stats
     }
 
 
