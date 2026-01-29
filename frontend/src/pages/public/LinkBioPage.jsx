@@ -567,36 +567,43 @@ const LinkBioPage = () => {
             const isOutline = buttonStyle === 'outline';
             const hasThumbnail = !!link.thumbnail;
             
-            // Card style for links with thumbnails
+            // Card style for links with thumbnails - zaap.bio style
             if (hasThumbnail) {
               return (
                 <button
                   key={link.id}
                   onClick={() => handleLinkClick(link)}
-                  className="w-full rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg text-left"
+                  className="w-full rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl text-left group"
                   style={{
                     backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                   }}
                 >
-                  <div className="aspect-video relative">
+                  {/* Image container - adapts to image aspect ratio */}
+                  <div className="relative">
                     <img 
                       src={link.thumbnail} 
                       alt="" 
-                      className="w-full h-full object-cover"
+                      className="w-full h-auto object-contain rounded-t-2xl"
+                      style={{ maxHeight: '300px' }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                  </div>
+                  {/* Text content below image */}
+                  <div className="p-4">
+                    <p 
+                      className="font-semibold text-base"
+                      style={{ color: colors.button_text || '#ffffff' }}
+                    >
+                      {link.label}
+                    </p>
+                    {link.description && (
                       <p 
-                        className="font-semibold text-white text-lg"
+                        className="text-sm mt-1 opacity-70 line-clamp-2"
+                        style={{ color: colors.button_text || '#ffffff' }}
                       >
-                        {link.label}
+                        {link.description}
                       </p>
-                      {link.description && (
-                        <p className="text-white/80 text-sm mt-1 line-clamp-2">
-                          {link.description}
-                        </p>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </button>
               );
