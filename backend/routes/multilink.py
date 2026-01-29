@@ -1059,7 +1059,15 @@ async def get_public_page(slug: str, request: Request):
     if not page:
         raise HTTPException(status_code=404, detail="Page non trouvée")
     
-    # Get active links
+    # Get active blocks (new unified system)
+    blocks = await db.multilink_blocks.find(
+        {"page_id": page["id"], "is_active": True},
+        {"_id": 0, "page_id": 0}
+    ).sort("order", 1).to_list(200)
+    
+    page["blocks"] = blocks
+    
+    # Legacy: Get active links (backward compatibility)
     links = await db.multilink_links.find(
         {"page_id": page["id"], "is_active": True},
         {"_id": 0, "page_id": 0}
@@ -1067,7 +1075,7 @@ async def get_public_page(slug: str, request: Request):
     
     page["links"] = links
     
-    # Get active sections
+    # Legacy: Get active sections (backward compatibility)
     sections = await db.multilink_sections.find(
         {"page_id": page["id"], "is_active": True},
         {"_id": 0, "page_id": 0}
