@@ -6,7 +6,7 @@ import {
   MessageCircle, Send, Mail, Globe, ShoppingBag, Calendar,
   Phone, MapPin, Link, Download, Play, Music, Mic, BookOpen,
   ChevronDown, Palette, TrendingUp, Search, Layout, Type,
-  Share2, Verified, ImagePlus
+  Share2, Verified, ImagePlus, LayoutGrid, FileText, Minus, Heading
 } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -23,6 +23,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Switch } from "../../components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+
+// Section types for zaap.bio style
+const SECTION_TYPES = [
+  { id: 'carousel', name: 'Carousel', icon: LayoutGrid, description: 'Cartes en slider horizontal' },
+  { id: 'text', name: 'Texte', icon: FileText, description: 'Bloc de texte' },
+  { id: 'image', name: 'Images', icon: Image, description: 'Galerie d\'images' },
+  { id: 'divider', name: 'Séparateur', icon: Minus, description: 'Ligne de séparation' },
+  { id: 'header', name: 'Titre', icon: Heading, description: 'Grand titre' },
+];
 
 const ICON_OPTIONS = [
   { value: 'instagram', label: 'Instagram', icon: Instagram, color: '#E4405F' },
