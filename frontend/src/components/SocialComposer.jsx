@@ -928,10 +928,10 @@ const SocialComposer = ({
             </div>
           </div>
           
-          {/* Center Panel - Content Editor */}
-          <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Center Panel - Content Editor - Hidden on mobile unless tab selected */}
+          <div className={`${mobileTab === 'content' ? 'flex' : 'hidden'} md:flex flex-1 flex-col overflow-hidden`}>
             <ScrollArea className="flex-1">
-              <div className="p-6 space-y-6">
+              <div className="p-4 md:p-6 space-y-4 md:space-y-6">
                 {/* Content */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
