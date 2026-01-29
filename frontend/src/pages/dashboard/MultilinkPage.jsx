@@ -675,6 +675,175 @@ const MultilinkPage = () => {
 
   // ================== END SECTIONS MANAGEMENT ==================
 
+  // ================== UNIFIED BLOCKS MANAGEMENT ==================
+  
+  const openBlockDialog = (block = null) => {
+    if (block) {
+      setEditingBlock(block);
+      setBlockForm({
+        block_type: block.block_type || 'link',
+        label: block.label || '',
+        url: block.url || '',
+        description: block.description || '',
+        thumbnail: block.thumbnail || '',
+        icon: block.icon || 'link',
+        content: block.content || '',
+        items: block.items || [],
+        media_url: block.media_url || '',
+        media_type: block.media_type || '',
+        youtube_url: block.youtube_url || '',
+        settings: block.settings || { aspect_ratio: 'auto', rounded: 'lg' },
+        is_active: block.is_active !== false
+      });
+    } else {
+      setEditingBlock(null);
+      setBlockForm({
+        block_type: 'link',
+        label: '',
+        url: '',
+        description: '',
+        thumbnail: '',
+        icon: 'link',
+        content: '',
+        items: [],
+        media_url: '',
+        media_type: '',
+        youtube_url: '',
+        settings: { aspect_ratio: 'auto', rounded: 'lg' },
+        is_active: true
+      });
+    }
+    setBlockDialogOpen(true);
+  };
+
+  const saveBlock = async () => {
+    // Validation based on block type
+    if (['link', 'link_image', 'button'].includes(blockForm.block_type)) {
+      if (!blockForm.label.trim() || !blockForm.url.trim()) {
+        toast.error('Le label et l\'URL sont requis');
+        return;
+      }
+    }
+    if (blockForm.block_type === 'text' && !blockForm.content.trim()) {
+      toast.error('Le contenu est requis');
+      return;
+    }
+    if (blockForm.block_type === 'youtube' && !blockForm.youtube_url.trim()) {
+      toast.error('L\'URL YouTube est requise');
+      return;
+    }
+    if (['image', 'video'].includes(blockForm.block_type) && !blockForm.media_url) {
+      toast.error('Veuillez uploader un média');
+      return;
+    }
+    
+    setSaving(true);
+    try {
+      if (editingBlock) {
+        await api.put(`/multilink/pages/${selectedPage.id}/blocks/${editingBlock.id}`, blockForm);
+        toast.success('Bloc mis à jour');
+      } else {
+        await api.post(`/multilink/pages/${selectedPage.id}/blocks`, blockForm);
+        toast.success('Bloc ajouté');
+      }
+      setBlockDialogOpen(false);
+      fetchPageDetails(selectedPage);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteBlock = async (block) => {
+    if (!window.confirm('Supprimer ce bloc ?')) return;
+    
+    try {
+      await api.delete(`/multilink/pages/${selectedPage.id}/blocks/${block.id}`);
+      toast.success('Bloc supprimé');
+      fetchPageDetails(selectedPage);
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  const toggleBlock = async (block) => {
+    try {
+      await api.put(`/multilink/pages/${selectedPage.id}/blocks/${block.id}`, { is_active: !block.is_active });
+      fetchPageDetails(selectedPage);
+    } catch (error) {
+      toast.error('Erreur');
+    }
+  };
+
+  const handleBlockMediaUpload = async (file) => {
+    if (!file) return;
+    
+    setUploadingBlockMedia(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await api.post('/multilink/upload-media', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      setBlockForm({
+        ...blockForm,
+        media_url: response.data.url,
+        media_type: response.data.media_type
+      });
+      toast.success('Média uploadé');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur upload');
+    } finally {
+      setUploadingBlockMedia(false);
+    }
+  };
+
+  const handleBlockDragEnd = async (event) => {
+    const { active, over } = event;
+    
+    if (active.id !== over.id) {
+      const oldIndex = pageBlocks.findIndex(b => b.id === active.id);
+      const newIndex = pageBlocks.findIndex(b => b.id === over.id);
+      
+      const newBlocks = arrayMove(pageBlocks, oldIndex, newIndex);
+      setPageBlocks(newBlocks);
+      
+      try {
+        await api.put(`/multilink/pages/${selectedPage.id}/blocks/reorder`, {
+          block_ids: newBlocks.map(b => b.id)
+        });
+      } catch (error) {
+        toast.error('Erreur de réorganisation');
+        fetchPageDetails(selectedPage);
+      }
+    }
+  };
+
+  const addBlockCarouselItem = () => {
+    setBlockForm({
+      ...blockForm,
+      items: [...blockForm.items, { image: '', title: '', subtitle: '', url: '' }]
+    });
+  };
+
+  const updateBlockCarouselItem = (index, field, value) => {
+    const newItems = [...blockForm.items];
+    newItems[index] = { ...newItems[index], [field]: value };
+    setBlockForm({ ...blockForm, items: newItems });
+  };
+
+  const removeBlockCarouselItem = (index) => {
+    setBlockForm({
+      ...blockForm,
+      items: blockForm.items.filter((_, i) => i !== index)
+    });
+  };
+
+  // ================== END BLOCKS MANAGEMENT ==================
+
   const openSocialDialog = (social = null) => {
     if (social) {
       setEditingSocial(social);
