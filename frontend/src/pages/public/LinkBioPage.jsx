@@ -485,83 +485,214 @@ const LinkBioPage = () => {
           </div>
         )}
 
-        {/* Sections - Carousel, Text, Image, etc. */}
-        {page.sections && page.sections.length > 0 && (
-          <div className="space-y-6 mb-6">
-            {page.sections.filter(s => s.is_active).map((section) => (
-              <div key={section.id}>
-                {/* Section title */}
-                {section.title && (
-                  <h3 
-                    className="font-semibold mb-3 text-lg"
-                    style={{ color: colors.text || '#ffffff' }}
+        {/* UNIFIED BLOCKS RENDERING - Primary system */}
+        {page.blocks && page.blocks.length > 0 && (
+          <div className="space-y-4">
+            {page.blocks.filter(block => block.is_active).map((block) => {
+              const roundedClass = {
+                'none': 'rounded-none',
+                'sm': 'rounded-lg',
+                'md': 'rounded-xl',
+                'lg': 'rounded-2xl',
+                'full': 'rounded-full'
+              }[block.settings?.rounded || 'lg'] || 'rounded-2xl';
+              
+              const aspectClass = {
+                '1:1': 'aspect-square',
+                '4:5': 'aspect-[4/5]',
+                '16:9': 'aspect-video',
+                '9:16': 'aspect-[9/16]'
+              }[block.settings?.aspect_ratio] || '';
+              
+              // Link blocks
+              if (['link', 'button'].includes(block.block_type)) {
+                const IconComponent = getIcon(block.icon);
+                return (
+                  <button
+                    key={block.id}
+                    onClick={() => handleLinkClick(block)}
+                    className={`w-full ${roundedClass} p-4 flex items-center gap-4 transition-all duration-300 hover:scale-[1.02]`}
+                    style={{
+                      backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
+                      color: colors.button_text || '#ffffff'
+                    }}
                   >
-                    {section.title}
-                  </h3>
-                )}
-                
-                {/* Carousel section */}
-                {section.section_type === 'carousel' && (
-                  <CarouselSection 
-                    items={section.items} 
-                    colors={colors}
-                    onItemClick={handleLinkClick}
-                  />
-                )}
-                
-                {/* Text section */}
-                {section.section_type === 'text' && section.content && (
+                    <div 
+                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: (colors.accent || '#6366f1') + '20' }}
+                    >
+                      <IconComponent className="w-5 h-5" style={{ color: colors.accent || '#6366f1' }} />
+                    </div>
+                    <div className="flex-1 text-left min-w-0">
+                      <p className="font-semibold">{block.label}</p>
+                      {block.description && <p className="text-sm opacity-60 truncate">{block.description}</p>}
+                    </div>
+                  </button>
+                );
+              }
+              
+              // Link with image
+              if (block.block_type === 'link_image') {
+                return (
+                  <button
+                    key={block.id}
+                    onClick={() => handleLinkClick(block)}
+                    className={`w-full ${roundedClass} overflow-hidden transition-all duration-300 hover:scale-[1.02] text-left`}
+                    style={{
+                      backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    {block.thumbnail && (
+                      <img 
+                        src={block.thumbnail} 
+                        alt="" 
+                        className={`w-full h-auto object-contain ${roundedClass.replace('rounded', 'rounded-t')}`}
+                        style={{ maxHeight: '300px' }}
+                      />
+                    )}
+                    <div className="p-4">
+                      <p className="font-semibold" style={{ color: colors.button_text || '#ffffff' }}>{block.label}</p>
+                      {block.description && (
+                        <p className="text-sm mt-1 opacity-70" style={{ color: colors.button_text || '#ffffff' }}>{block.description}</p>
+                      )}
+                    </div>
+                  </button>
+                );
+              }
+              
+              // Image block
+              if (block.block_type === 'image' && block.media_url) {
+                return (
+                  <div key={block.id} className={`${roundedClass} overflow-hidden`}>
+                    <img 
+                      src={block.media_url} 
+                      alt="" 
+                      className={`w-full ${aspectClass || 'h-auto'} object-cover`}
+                    />
+                  </div>
+                );
+              }
+              
+              // Video block
+              if (block.block_type === 'video' && block.media_url) {
+                return (
+                  <div key={block.id} className={`${roundedClass} overflow-hidden`}>
+                    <video 
+                      src={block.media_url} 
+                      className={`w-full ${aspectClass || 'h-auto'}`}
+                      controls
+                      playsInline
+                    />
+                  </div>
+                );
+              }
+              
+              // YouTube block
+              if (block.block_type === 'youtube' && block.youtube_url) {
+                // Extract video ID
+                const videoId = block.youtube_url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s]+)/)?.[1];
+                if (videoId) {
+                  return (
+                    <div key={block.id} className={`${roundedClass} overflow-hidden aspect-video`}>
+                      <iframe
+                        src={`https://www.youtube.com/embed/${videoId}`}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title="YouTube video"
+                      />
+                    </div>
+                  );
+                }
+              }
+              
+              // Text block
+              if (block.block_type === 'text' && block.content) {
+                return (
                   <div 
-                    className="p-4 rounded-2xl"
+                    key={block.id}
+                    className={`p-4 ${roundedClass}`}
                     style={{ 
                       backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
                       color: colors.button_text || '#ffffff'
                     }}
                   >
-                    <p className="whitespace-pre-wrap">{section.content}</p>
+                    <p className="whitespace-pre-wrap">{block.content}</p>
                   </div>
-                )}
-                
-                {/* Image section */}
-                {section.section_type === 'image' && section.images && section.images.length > 0 && (
-                  <div className={`grid gap-2 ${
-                    section.images.length === 1 ? 'grid-cols-1' : 
-                    section.images.length === 2 ? 'grid-cols-2' :
-                    'grid-cols-2 md:grid-cols-3'
-                  }`}>
-                    {section.images.map((img, idx) => (
-                      <div key={idx} className="aspect-square rounded-2xl overflow-hidden">
-                        <img src={img} alt="" className="w-full h-full object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Divider section */}
-                {section.section_type === 'divider' && (
+                );
+              }
+              
+              // Header block
+              if (block.block_type === 'header' && block.content) {
+                return (
+                  <h2 
+                    key={block.id}
+                    className="text-xl font-bold text-center py-2"
+                    style={{ color: colors.text || '#ffffff' }}
+                  >
+                    {block.content}
+                  </h2>
+                );
+              }
+              
+              // Divider block
+              if (block.block_type === 'divider') {
+                return (
                   <hr 
+                    key={block.id}
                     className="border-0 h-px my-4"
                     style={{ backgroundColor: (colors.text || '#ffffff') + '20' }}
                   />
-                )}
-                
-                {/* Header section */}
-                {section.section_type === 'header' && (
-                  <h2 
-                    className="text-xl font-bold text-center"
-                    style={{ color: colors.text || '#ffffff' }}
-                  >
-                    {section.content}
-                  </h2>
-                )}
-              </div>
-            ))}
+                );
+              }
+              
+              // Carousel block
+              if (block.block_type === 'carousel' && block.items?.length > 0) {
+                return (
+                  <div key={block.id}>
+                    <CarouselSection 
+                      items={block.items} 
+                      colors={colors}
+                      onItemClick={handleLinkClick}
+                    />
+                  </div>
+                );
+              }
+              
+              return null;
+            })}
           </div>
         )}
 
-        {/* Content Links - Cards with rounded thumbnails */}
-        <div className="space-y-3">
-          {contentLinks.filter(link => link.is_active).map((link) => {
+        {/* LEGACY: Content Links - only show if no unified blocks */}
+        {(!page.blocks || page.blocks.length === 0) && (
+          <div className="space-y-3">
+            {/* Legacy sections */}
+            {page.sections && page.sections.length > 0 && (
+              <div className="space-y-6 mb-6">
+                {page.sections.filter(s => s.is_active).map((section) => (
+                  <div key={section.id}>
+                    {section.title && (
+                      <h3 className="font-semibold mb-3 text-lg" style={{ color: colors.text || '#ffffff' }}>
+                        {section.title}
+                      </h3>
+                    )}
+                    {section.section_type === 'carousel' && (
+                      <CarouselSection items={section.items} colors={colors} onItemClick={handleLinkClick} />
+                    )}
+                    {section.section_type === 'text' && section.content && (
+                      <div className="p-4 rounded-2xl" style={{ backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)', color: colors.button_text || '#ffffff' }}>
+                        <p className="whitespace-pre-wrap">{section.content}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Legacy links */}
+            {contentLinks.filter(link => link.is_active).map((link) => {
             const IconComponent = getIcon(link.icon);
             const buttonStyle = design.button_style || 'rounded';
             const isOutline = buttonStyle === 'outline';
