@@ -574,7 +574,7 @@ const LinkBioPage = () => {
                       )}
                       <button
                         onClick={() => {
-                          handleLinkClick(block);
+                          handleBlockClick(block);
                           if (openInNewTab) {
                             window.open(block.url, '_blank', 'noopener,noreferrer');
                           } else {
