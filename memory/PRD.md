@@ -377,6 +377,7 @@ GET    /api/tiktok/posts              # NEW: List TikTok posts
 - iteration_38.json: 17/17 tests conditions de règlement différenciées ✅ 2026-01-26
 - iteration_39.json: 9/9 tests upload média Cloudinary ✅ 2026-01-26
 - iteration_40.json: 21/21 tests module Multilink ✅ 2026-01-28
+- iteration_41.json: 30/30 tests (21 multilink + 9 upload) + SocialComposer responsive ✅ 2026-01-29
 
 ## Modules Ajoutés 2026-01-28
 ### Module Multilink (type Linktree) ✅
