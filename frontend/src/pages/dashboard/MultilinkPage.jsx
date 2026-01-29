@@ -1410,16 +1410,27 @@ const MultilinkPage = () => {
 
       {/* Stats Dialog */}
       <Dialog open={statsDialogOpen} onOpenChange={setStatsDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
+          <div 
+            className="flex items-center justify-between mb-4"
+            style={{ paddingTop: 'max(0px, env(safe-area-inset-top, 0px))' }}
+          >
             <DialogTitle className="flex items-center gap-2 text-white">
               <BarChart3 className="w-5 h-5 text-indigo-400" />
               Statistiques - {selectedPage?.title}
             </DialogTitle>
-          </DialogHeader>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setStatsDialogOpen(false)}
+              className="text-white/60 hover:text-white hover:bg-white/10 h-8 w-8"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
 
           {pageStats && (
-            <div className="space-y-6 mt-4">
+            <div className="space-y-6">
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-blue-500/10 rounded-xl p-4 text-center">
                   <Eye className="w-6 h-6 text-blue-400 mx-auto mb-2" />
