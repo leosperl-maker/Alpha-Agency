@@ -2786,16 +2786,16 @@ const MultilinkPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Stats Dialog */}
+      {/* Stats Dialog - Enhanced Analytics */}
       <Dialog open={statsDialogOpen} onOpenChange={setStatsDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-3xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
           <div 
             className="flex items-center justify-between mb-4"
             style={{ paddingTop: 'max(0px, env(safe-area-inset-top, 0px))' }}
           >
             <DialogTitle className="flex items-center gap-2 text-white">
               <BarChart3 className="w-5 h-5 text-indigo-400" />
-              Statistiques - {selectedPage?.title}
+              Analytics - {selectedPage?.title}
             </DialogTitle>
             <Button
               variant="ghost"
@@ -2809,30 +2809,121 @@ const MultilinkPage = () => {
 
           {pageStats && (
             <div className="space-y-6">
+              {/* Period Info */}
+              <div className="flex items-center justify-between text-white/50 text-sm">
+                <span>Période : {pageStats.period_days} derniers jours</span>
+                <span className="text-white/30">Comparé aux {pageStats.period_days} jours précédents</span>
+              </div>
+
+              {/* KPIs with Growth */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-blue-500/10 rounded-xl p-4 text-center">
-                  <Eye className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">{pageStats.total_views}</p>
-                  <p className="text-white/60 text-sm">Vues</p>
+                <div className="bg-blue-500/10 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <Eye className="w-6 h-6 text-blue-400" />
+                    {pageStats.views_growth !== 0 && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${pageStats.views_growth > 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                        {pageStats.views_growth > 0 ? '+' : ''}{pageStats.views_growth}%
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-2xl font-bold text-white">{pageStats.total_views.toLocaleString()}</p>
+                  <p className="text-white/60 text-sm">Vues totales</p>
+                  {pageStats.prev_total_views > 0 && (
+                    <p className="text-white/30 text-xs mt-1">vs {pageStats.prev_total_views.toLocaleString()} précédemment</p>
+                  )}
                 </div>
-                <div className="bg-green-500/10 rounded-xl p-4 text-center">
-                  <TrendingUp className="w-6 h-6 text-green-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">{pageStats.total_clicks}</p>
-                  <p className="text-white/60 text-sm">Clics</p>
+                <div className="bg-green-500/10 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <TrendingUp className="w-6 h-6 text-green-400" />
+                    {pageStats.clicks_growth !== 0 && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${pageStats.clicks_growth > 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                        {pageStats.clicks_growth > 0 ? '+' : ''}{pageStats.clicks_growth}%
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-2xl font-bold text-white">{pageStats.total_clicks.toLocaleString()}</p>
+                  <p className="text-white/60 text-sm">Clics totaux</p>
+                  {pageStats.prev_total_clicks > 0 && (
+                    <p className="text-white/30 text-xs mt-1">vs {pageStats.prev_total_clicks.toLocaleString()} précédemment</p>
+                  )}
                 </div>
-                <div className="bg-purple-500/10 rounded-xl p-4 text-center">
-                  <BarChart3 className="w-6 h-6 text-purple-400 mx-auto mb-2" />
+                <div className="bg-purple-500/10 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <BarChart3 className="w-6 h-6 text-purple-400" />
+                  </div>
                   <p className="text-2xl font-bold text-white">{pageStats.ctr}%</p>
-                  <p className="text-white/60 text-sm">CTR</p>
+                  <p className="text-white/60 text-sm">Taux de conversion</p>
+                  <p className="text-white/30 text-xs mt-1">Clics / Vues</p>
                 </div>
               </div>
 
+              {/* Mini Chart - Views by Day */}
+              {pageStats.views_by_day?.length > 0 && (
+                <div className="bg-white/5 rounded-xl p-4">
+                  <h3 className="text-white font-medium mb-3 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-indigo-400" />
+                    Vues par jour
+                  </h3>
+                  <div className="flex items-end gap-1 h-24">
+                    {pageStats.views_by_day.slice(-14).map((day, i) => {
+                      const max = Math.max(...pageStats.views_by_day.map(d => d.count));
+                      const height = max > 0 ? (day.count / max) * 100 : 0;
+                      return (
+                        <div 
+                          key={i} 
+                          className="flex-1 bg-indigo-500/50 rounded-t hover:bg-indigo-500 transition-colors group relative"
+                          style={{ height: `${Math.max(height, 2)}%` }}
+                          title={`${day.date}: ${day.count} vues`}
+                        >
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-10">
+                            {day.count}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex justify-between mt-2 text-white/30 text-xs">
+                    <span>{pageStats.views_by_day[0]?.date?.slice(5)}</span>
+                    <span>{pageStats.views_by_day[pageStats.views_by_day.length - 1]?.date?.slice(5)}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Block Stats - NEW */}
+              {pageStats.block_stats?.length > 0 && (
+                <div>
+                  <h3 className="text-white font-medium mb-3 flex items-center gap-2">
+                    <LayoutGrid className="w-4 h-4 text-purple-400" />
+                    Performance des blocs
+                  </h3>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {pageStats.block_stats.map((block, index) => (
+                      <div key={index} className="flex items-center gap-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
+                        <span className="text-white/40 text-sm w-6">{index + 1}.</span>
+                        {block.thumbnail && (
+                          <img src={block.thumbnail} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white truncate">{block.label}</p>
+                          <p className="text-white/40 text-xs">{block.type}</p>
+                        </div>
+                        <Badge className="bg-purple-500/20 text-purple-400">{block.clicks} clics</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Link Stats - Legacy */}
               {pageStats.link_stats?.length > 0 && (
                 <div>
-                  <h3 className="text-white font-medium mb-3">Performance des liens</h3>
-                  <div className="space-y-2">
+                  <h3 className="text-white font-medium mb-3 flex items-center gap-2">
+                    <Link className="w-4 h-4 text-indigo-400" />
+                    Performance des liens (legacy)
+                  </h3>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
                     {pageStats.link_stats.map((link, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
+                      <div key={index} className="flex items-center gap-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
                         <span className="text-white/40 text-sm w-6">{index + 1}.</span>
                         <span className="flex-1 text-white truncate">{link.label}</span>
                         <Badge className="bg-indigo-500/20 text-indigo-400">{link.clicks} clics</Badge>
@@ -2841,10 +2932,19 @@ const MultilinkPage = () => {
                   </div>
                 </div>
               )}
+
+              {/* No data message */}
+              {(!pageStats.block_stats?.length && !pageStats.link_stats?.length && pageStats.total_views === 0) && (
+                <div className="text-center py-8 bg-white/5 rounded-xl">
+                  <BarChart3 className="w-12 h-12 text-white/20 mx-auto mb-3" />
+                  <p className="text-white/60">Aucune donnée pour cette période</p>
+                  <p className="text-white/40 text-sm mt-1">Partagez votre page pour commencer à collecter des statistiques</p>
+                </div>
+              )}
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setStatsDialogOpen(false)} className="border-white/10 text-white">
               Fermer
             </Button>
