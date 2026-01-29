@@ -279,6 +279,7 @@ const MultilinkPage = () => {
       const response = await api.get(`/multilink/pages/${page.id}`);
       setSelectedPage(response.data);
       setPageLinks(response.data.links || []);
+      setPageSections(response.data.sections || []);
       // Also update pageForm for editing
       setPageForm({
         ...pageForm,
