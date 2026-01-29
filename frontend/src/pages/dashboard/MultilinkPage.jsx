@@ -1660,7 +1660,10 @@ const MultilinkPage = () => {
             {sectionForm.section_type === 'carousel' && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label className="text-white">Éléments du carousel</Label>
+                  <div>
+                    <Label className="text-white">Éléments du carousel</Label>
+                    <p className="text-white/40 text-xs mt-0.5">📐 Images: 400×500px (ratio 4:5)</p>
+                  </div>
                   <Button size="sm" onClick={addCarouselItem} className="bg-purple-600 hover:bg-purple-700">
                     <Plus className="w-4 h-4 mr-1" /> Ajouter
                   </Button>
@@ -1669,6 +1672,7 @@ const MultilinkPage = () => {
                 {sectionForm.items.length === 0 ? (
                   <div className="text-center py-6 text-white/40 bg-white/5 rounded-xl">
                     <p className="text-sm">Aucun élément</p>
+                    <p className="text-xs mt-1">Ajoutez des cartes comme sur zaap.bio</p>
                   </div>
                 ) : (
                   <div className="space-y-3 max-h-60 overflow-y-auto">
@@ -1683,7 +1687,7 @@ const MultilinkPage = () => {
                         <Input
                           value={item.image}
                           onChange={(e) => updateCarouselItem(index, 'image', e.target.value)}
-                          placeholder="URL de l'image"
+                          placeholder="URL de l'image (400×500px recommandé)"
                           className="bg-white/5 border-white/10 text-white text-sm"
                         />
                         <Input
@@ -1715,6 +1719,7 @@ const MultilinkPage = () => {
             {sectionForm.section_type === 'image' && (
               <div className="space-y-2">
                 <Label className="text-white">URLs des images (une par ligne)</Label>
+                <p className="text-white/40 text-xs">📐 Format carré recommandé: 600×600px</p>
                 <Textarea
                   value={sectionForm.images.join('\n')}
                   onChange={(e) => setSectionForm({ ...sectionForm, images: e.target.value.split('\n').filter(url => url.trim()) })}
