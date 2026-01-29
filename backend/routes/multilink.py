@@ -423,7 +423,7 @@ async def create_page(page: PageCreate, current_user: dict = Depends(get_current
 
 @router.get("/pages/{page_id}", response_model=dict)
 async def get_page(page_id: str, current_user: dict = Depends(get_current_user)):
-    """Get a single multilink page with its links"""
+    """Get a single multilink page with its blocks (unified system)"""
     user_id = current_user.get("user_id") or current_user.get("id")
     
     page = await db.multilink_pages.find_one(
@@ -434,7 +434,15 @@ async def get_page(page_id: str, current_user: dict = Depends(get_current_user))
     if not page:
         raise HTTPException(status_code=404, detail="Page non trouvée")
     
-    # Get links
+    # Get unified blocks (new system)
+    blocks = await db.multilink_blocks.find(
+        {"page_id": page_id},
+        {"_id": 0}
+    ).sort("order", 1).to_list(200)
+    
+    page["blocks"] = blocks
+    
+    # Legacy: Get links (for backward compatibility)
     links = await db.multilink_links.find(
         {"page_id": page_id},
         {"_id": 0}
@@ -442,7 +450,7 @@ async def get_page(page_id: str, current_user: dict = Depends(get_current_user))
     
     page["links"] = links
     
-    # Get sections
+    # Legacy: Get sections (for backward compatibility)
     sections = await db.multilink_sections.find(
         {"page_id": page_id},
         {"_id": 0}
