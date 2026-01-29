@@ -6,7 +6,8 @@ import {
   MessageCircle, Send, Mail, Globe, ShoppingBag, Calendar,
   Phone, MapPin, Link, Download, Play, Music, Mic, BookOpen,
   ChevronDown, Palette, TrendingUp, Search, Layout, Type,
-  Share2, Verified, ImagePlus, LayoutGrid, FileText, Minus, Heading
+  Share2, Verified, ImagePlus, LayoutGrid, FileText, Minus, Heading,
+  Video, Sparkles, Zap
 } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
