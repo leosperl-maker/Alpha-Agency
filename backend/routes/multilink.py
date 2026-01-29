@@ -486,8 +486,11 @@ async def create_link(page_id: str, link: LinkCreate, current_user: dict = Depen
         "page_id": page_id,
         "label": link.label,
         "url": link.url,
+        "description": link.description,
+        "thumbnail": link.thumbnail,
         "icon": link.icon,
         "icon_type": link.icon_type,
+        "link_type": link.link_type,
         "is_active": link.is_active,
         "order": link.order if link.order else max_order + 1,
         "created_at": datetime.now(timezone.utc).isoformat()
