@@ -1252,11 +1252,11 @@ const MultilinkPage = () => {
                   )}
                 </TabsContent>
 
-                {/* DESIGN TAB */}
+                {/* DESIGN TAB - Complete Color Customization like zaap.bio */}
                 <TabsContent value="design" className="p-4 space-y-6">
                   {/* Theme Selection */}
                   <div>
-                    <Label className="text-white mb-3 block">Thème</Label>
+                    <Label className="text-white mb-3 block">Thème de base</Label>
                     <div className="grid grid-cols-4 gap-3">
                       {THEME_PRESETS.map(theme => (
                         <button
@@ -1302,49 +1302,212 @@ const MultilinkPage = () => {
                     </div>
                   </div>
 
-                  {/* Custom Colors (only for custom theme) */}
-                  {pageForm.theme === 'custom' && (
-                    <div className="bg-white/5 rounded-xl p-4 space-y-4">
-                      <h4 className="text-white font-medium flex items-center gap-2">
-                        <Palette className="w-4 h-4" /> Couleurs personnalisées
-                      </h4>
-                      <div className="grid grid-cols-3 gap-4">
-                        {[
-                          { key: 'background', label: 'Fond' },
-                          { key: 'text', label: 'Texte' },
-                          { key: 'button_bg', label: 'Bouton' },
-                          { key: 'button_text', label: 'Texte bouton' },
-                          { key: 'accent', label: 'Accent' },
-                        ].map(color => (
-                          <div key={color.key}>
-                            <Label className="text-white/60 text-xs">{color.label}</Label>
-                            <div className="flex items-center gap-2 mt-1">
-                              <input
-                                type="color"
-                                value={pageForm.custom_colors?.[color.key] || '#ffffff'}
-                                onChange={(e) => setPageForm({
-                                  ...pageForm,
-                                  custom_colors: { ...pageForm.custom_colors, [color.key]: e.target.value }
-                                })}
-                                className="w-10 h-10 rounded cursor-pointer border-0"
-                              />
-                              <Input
-                                value={pageForm.custom_colors?.[color.key] || ''}
-                                onChange={(e) => setPageForm({
-                                  ...pageForm,
-                                  custom_colors: { ...pageForm.custom_colors, [color.key]: e.target.value }
-                                })}
-                                className="bg-white/5 border-white/10 text-white text-xs h-10 flex-1"
-                              />
-                            </div>
-                          </div>
-                        ))}
+                  {/* Full Color Customization Section - zaap.bio style */}
+                  <div className="bg-white/5 rounded-xl p-4 space-y-4 border border-white/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Palette className="w-5 h-5 text-indigo-400" />
+                      <h4 className="text-white font-medium">Personnalisation des couleurs</h4>
+                    </div>
+                    <p className="text-white/50 text-xs mb-4">Personnalisez chaque élément de votre page</p>
+                    
+                    {/* Background Color */}
+                    <div className="space-y-2">
+                      <Label className="text-white/70 text-sm">Fond de page (Background)</Label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={pageForm.custom_colors?.background || '#0f0f1a'}
+                          onChange={(e) => setPageForm({
+                            ...pageForm,
+                            theme: 'custom',
+                            custom_colors: { ...pageForm.custom_colors, background: e.target.value }
+                          })}
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-white/20"
+                        />
+                        <Input
+                          value={pageForm.custom_colors?.background || '#0f0f1a'}
+                          onChange={(e) => setPageForm({
+                            ...pageForm,
+                            theme: 'custom',
+                            custom_colors: { ...pageForm.custom_colors, background: e.target.value }
+                          })}
+                          className="bg-white/5 border-white/10 text-white flex-1"
+                          placeholder="#0f0f1a"
+                        />
                       </div>
                     </div>
-                  )}
+
+                    {/* Card Background Color */}
+                    <div className="space-y-2">
+                      <Label className="text-white/70 text-sm">Fond des cartes</Label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={pageForm.custom_colors?.card_bg || pageForm.custom_colors?.button_bg?.replace('rgba(255,255,255,0.1)', '#2a2a3e') || '#2a2a3e'}
+                          onChange={(e) => setPageForm({
+                            ...pageForm,
+                            theme: 'custom',
+                            custom_colors: { ...pageForm.custom_colors, card_bg: e.target.value, button_bg: e.target.value }
+                          })}
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-white/20"
+                        />
+                        <Input
+                          value={pageForm.custom_colors?.card_bg || '#2a2a3e'}
+                          onChange={(e) => setPageForm({
+                            ...pageForm,
+                            theme: 'custom',
+                            custom_colors: { ...pageForm.custom_colors, card_bg: e.target.value, button_bg: e.target.value }
+                          })}
+                          className="bg-white/5 border-white/10 text-white flex-1"
+                          placeholder="#2a2a3e"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Text Color */}
+                    <div className="space-y-2">
+                      <Label className="text-white/70 text-sm">Couleur du texte</Label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={pageForm.custom_colors?.text || '#ffffff'}
+                          onChange={(e) => setPageForm({
+                            ...pageForm,
+                            theme: 'custom',
+                            custom_colors: { ...pageForm.custom_colors, text: e.target.value }
+                          })}
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-white/20"
+                        />
+                        <Input
+                          value={pageForm.custom_colors?.text || '#ffffff'}
+                          onChange={(e) => setPageForm({
+                            ...pageForm,
+                            theme: 'custom',
+                            custom_colors: { ...pageForm.custom_colors, text: e.target.value }
+                          })}
+                          className="bg-white/5 border-white/10 text-white flex-1"
+                          placeholder="#ffffff"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Button Background */}
+                    <div className="space-y-2">
+                      <Label className="text-white/70 text-sm">Couleur des boutons</Label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={pageForm.custom_colors?.button_bg?.startsWith('#') ? pageForm.custom_colors.button_bg : '#6366f1'}
+                          onChange={(e) => setPageForm({
+                            ...pageForm,
+                            theme: 'custom',
+                            custom_colors: { ...pageForm.custom_colors, button_bg: e.target.value }
+                          })}
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-white/20"
+                        />
+                        <Input
+                          value={pageForm.custom_colors?.button_bg || '#6366f1'}
+                          onChange={(e) => setPageForm({
+                            ...pageForm,
+                            theme: 'custom',
+                            custom_colors: { ...pageForm.custom_colors, button_bg: e.target.value }
+                          })}
+                          className="bg-white/5 border-white/10 text-white flex-1"
+                          placeholder="#6366f1"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Button Text Color */}
+                    <div className="space-y-2">
+                      <Label className="text-white/70 text-sm">Texte des boutons</Label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={pageForm.custom_colors?.button_text || '#ffffff'}
+                          onChange={(e) => setPageForm({
+                            ...pageForm,
+                            theme: 'custom',
+                            custom_colors: { ...pageForm.custom_colors, button_text: e.target.value }
+                          })}
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-white/20"
+                        />
+                        <Input
+                          value={pageForm.custom_colors?.button_text || '#ffffff'}
+                          onChange={(e) => setPageForm({
+                            ...pageForm,
+                            theme: 'custom',
+                            custom_colors: { ...pageForm.custom_colors, button_text: e.target.value }
+                          })}
+                          className="bg-white/5 border-white/10 text-white flex-1"
+                          placeholder="#ffffff"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Accent Color */}
+                    <div className="space-y-2">
+                      <Label className="text-white/70 text-sm">Couleur d'accent</Label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={pageForm.custom_colors?.accent || '#6366f1'}
+                          onChange={(e) => setPageForm({
+                            ...pageForm,
+                            theme: 'custom',
+                            custom_colors: { ...pageForm.custom_colors, accent: e.target.value }
+                          })}
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-white/20"
+                        />
+                        <Input
+                          value={pageForm.custom_colors?.accent || '#6366f1'}
+                          onChange={(e) => setPageForm({
+                            ...pageForm,
+                            theme: 'custom',
+                            custom_colors: { ...pageForm.custom_colors, accent: e.target.value }
+                          })}
+                          className="bg-white/5 border-white/10 text-white flex-1"
+                          placeholder="#6366f1"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Live Preview Mini */}
+                  <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <Label className="text-white/70 text-sm mb-3 block">Aperçu en direct</Label>
+                    <div 
+                      className="rounded-xl p-4 min-h-[150px]"
+                      style={{ background: pageForm.custom_colors?.background || '#0f0f1a' }}
+                    >
+                      <div className="text-center mb-3">
+                        <div 
+                          className="w-12 h-12 rounded-full mx-auto mb-2"
+                          style={{ background: pageForm.custom_colors?.accent || '#6366f1' }}
+                        />
+                        <p style={{ color: pageForm.custom_colors?.text || '#ffffff' }} className="font-bold">Titre</p>
+                      </div>
+                      <div 
+                        className="rounded-xl p-3 mb-2"
+                        style={{ background: pageForm.custom_colors?.card_bg || pageForm.custom_colors?.button_bg || 'rgba(255,255,255,0.1)' }}
+                      >
+                        <p style={{ color: pageForm.custom_colors?.button_text || '#ffffff' }} className="text-sm font-medium">Exemple de carte</p>
+                        <p style={{ color: pageForm.custom_colors?.button_text || '#ffffff', opacity: 0.7 }} className="text-xs">Description du lien</p>
+                      </div>
+                      <div 
+                        className="rounded-full py-2 px-4 text-center text-sm font-medium"
+                        style={{ 
+                          background: pageForm.custom_colors?.accent || '#6366f1',
+                          color: pageForm.custom_colors?.button_text || '#ffffff'
+                        }}
+                      >
+                        Bouton
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Save Button */}
-                  <Button onClick={savePageSettings} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
+                  <Button onClick={savePageSettings} disabled={saving} className="w-full bg-indigo-600 hover:bg-indigo-700">
                     {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                     Enregistrer le design
                   </Button>
