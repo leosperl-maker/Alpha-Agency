@@ -42,6 +42,29 @@ class LinkUpdate(BaseModel):
     is_active: Optional[bool] = None
     order: Optional[int] = None
 
+
+# Section models for zaap.bio style sections
+class SectionCreate(BaseModel):
+    section_type: str  # carousel, text, image, divider, header
+    title: Optional[str] = None
+    content: Optional[str] = None  # Text content for text sections
+    items: Optional[List[dict]] = None  # Items for carousel: [{image, title, subtitle, url}]
+    images: Optional[List[str]] = None  # Image URLs for image sections
+    settings: Optional[dict] = None  # {columns, gap, rounded, etc.}
+    is_active: bool = True
+    order: Optional[int] = 0
+
+class SectionUpdate(BaseModel):
+    section_type: Optional[str] = None
+    title: Optional[str] = None
+    content: Optional[str] = None
+    items: Optional[List[dict]] = None
+    images: Optional[List[str]] = None
+    settings: Optional[dict] = None
+    is_active: Optional[bool] = None
+    order: Optional[int] = None
+
+
 class PageCreate(BaseModel):
     slug: str
     title: str
@@ -74,6 +97,9 @@ class PageUpdate(BaseModel):
 
 class LinksReorder(BaseModel):
     link_ids: List[str]  # Ordered list of link IDs
+
+class SectionsReorder(BaseModel):
+    section_ids: List[str]  # Ordered list of section IDs
 
 
 # ==================== THEME PRESETS ====================
