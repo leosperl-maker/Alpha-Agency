@@ -1628,27 +1628,66 @@ const MultilinkPage = () => {
           </div>
 
           <div className="space-y-4">
-            {/* Section Type Selection */}
-            <div className="space-y-2">
-              <Label className="text-white">Type de section</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {SECTION_TYPES.map(type => {
-                  const Icon = type.icon;
-                  return (
-                    <button
-                      key={type.id}
-                      onClick={() => setSectionForm({ ...sectionForm, section_type: type.id })}
-                      className={`p-3 rounded-xl border-2 transition-all text-center ${
-                        sectionForm.section_type === type.id 
-                          ? 'border-purple-500 bg-purple-500/20' 
-                          : 'border-white/10 hover:border-white/30'
-                      }`}
-                    >
-                      <Icon className="w-6 h-6 mx-auto mb-1 text-purple-400" />
-                      <p className="text-white text-xs">{type.name}</p>
-                    </button>
-                  );
-                })}
+            {/* Block Type Selection - zaap.bio style with categories */}
+            <div className="space-y-3">
+              <Label className="text-white">Choisir un type de bloc</Label>
+              
+              {/* Category: Basics */}
+              <div>
+                <p className="text-white/50 text-xs uppercase tracking-wider mb-2">Basiques</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {BLOCK_CATEGORIES.basics.map(type => {
+                    const Icon = type.icon;
+                    return (
+                      <button
+                        key={type.id}
+                        onClick={() => setSectionForm({ ...sectionForm, section_type: type.id })}
+                        className={`p-3 rounded-xl border transition-all text-left flex items-start gap-3 ${
+                          sectionForm.section_type === type.id 
+                            ? 'border-purple-500 bg-purple-500/20' 
+                            : 'border-white/10 hover:border-white/30 hover:bg-white/5'
+                        }`}
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-5 h-5 text-purple-400" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-white text-sm font-medium">{type.name}</p>
+                          <p className="text-white/50 text-xs line-clamp-1">{type.description}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              
+              {/* Category: Content */}
+              <div>
+                <p className="text-white/50 text-xs uppercase tracking-wider mb-2">Contenu</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {BLOCK_CATEGORIES.content.map(type => {
+                    const Icon = type.icon;
+                    return (
+                      <button
+                        key={type.id}
+                        onClick={() => setSectionForm({ ...sectionForm, section_type: type.id })}
+                        className={`p-3 rounded-xl border transition-all text-left flex items-start gap-3 ${
+                          sectionForm.section_type === type.id 
+                            ? 'border-blue-500 bg-blue-500/20' 
+                            : 'border-white/10 hover:border-white/30 hover:bg-white/5'
+                        }`}
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-5 h-5 text-blue-400" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-white text-sm font-medium">{type.name}</p>
+                          <p className="text-white/50 text-xs line-clamp-1">{type.description}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -1676,8 +1715,8 @@ const MultilinkPage = () => {
               </div>
             )}
 
-            {/* Carousel Items */}
-            {sectionForm.section_type === 'carousel' && (
+            {/* Carousel/Folder Items */}
+            {(sectionForm.section_type === 'carousel' || sectionForm.section_type === 'folder') && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
