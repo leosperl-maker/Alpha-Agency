@@ -175,9 +175,14 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
         
         console.log('Upload response status:', response.status);
         
-        // Handle 401 - token expired
+        // Handle 401 - token expired - force re-login
         if (response.status === 401) {
-          throw new Error('Session expirée. Veuillez vous reconnecter.');
+          // Clear auth data and redirect to login
+          localStorage.removeItem('alpha_token');
+          localStorage.removeItem('alpha_user');
+          console.error('401 Unauthorized - clearing token and redirecting to login');
+          window.location.href = '/admin/login';
+          throw new Error('Session expirée. Redirection vers la page de connexion...');
         }
         
         // Check for empty response
