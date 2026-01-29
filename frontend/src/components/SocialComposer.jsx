@@ -739,49 +739,81 @@ const SocialComposer = ({
   const characterCount = content.length;
   const isOverLimit = characterCount > characterLimit;
 
+  // Mobile tab state for responsive layout
+  const [mobileTab, setMobileTab] = useState('content');
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl h-[90vh] bg-slate-900 border-white/10 p-0 gap-0">
+      <DialogContent className="max-w-6xl w-full h-[100dvh] md:h-[90vh] bg-slate-900 border-white/10 p-0 gap-0 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-          <div>
-            <DialogTitle className="text-white text-lg">
+        <div className="flex items-center justify-between px-3 md:px-6 py-3 md:py-4 border-b border-white/10">
+          <div className="min-w-0 flex-1">
+            <DialogTitle className="text-white text-base md:text-lg truncate">
               {editingPost ? 'Modifier le post' : 'Créer un nouveau post'}
             </DialogTitle>
-            <p className="text-white/50 text-sm mt-0.5">
+            <p className="text-white/50 text-xs md:text-sm mt-0.5">
               {selectedAccounts.length} compte{selectedAccounts.length > 1 ? 's' : ''} sélectionné{selectedAccounts.length > 1 ? 's' : ''}
             </p>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2 ml-2">
             <Button
               variant="outline"
               onClick={() => handleSave(true)}
               disabled={saving}
-              className="text-white border-white/20"
+              className="text-white border-white/20 px-2 md:px-4 text-xs md:text-sm"
+              size="sm"
             >
-              <Save className="w-4 h-4 mr-1" />
-              Brouillon
+              <Save className="w-4 h-4 md:mr-1" />
+              <span className="hidden md:inline">Brouillon</span>
             </Button>
             <Button
               onClick={() => handleSave(false)}
               disabled={saving || (showScheduler && (!scheduledDate || !scheduledTime))}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-indigo-600 hover:bg-indigo-700 px-2 md:px-4 text-xs md:text-sm"
+              size="sm"
             >
               {saving ? (
-                <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                <Loader2 className="w-4 h-4 md:mr-1 animate-spin" />
               ) : (
-                <Send className="w-4 h-4 mr-1" />
+                <Send className="w-4 h-4 md:mr-1" />
               )}
-              {showScheduler ? 'Programmer' : 'Publier maintenant'}
+              <span className="hidden md:inline">{showScheduler ? 'Programmer' : 'Publier maintenant'}</span>
+              <span className="md:hidden">{showScheduler ? 'Prog.' : 'Publier'}</span>
             </Button>
           </div>
         </div>
+
+        {/* Mobile Tab Navigation - Only visible on small screens */}
+        <div className="md:hidden border-b border-white/10 bg-slate-950/50">
+          <div className="flex">
+            <button
+              onClick={() => setMobileTab('accounts')}
+              className={`flex-1 py-3 text-xs font-medium transition-colors ${
+                mobileTab === 'accounts' 
+                  ? 'text-indigo-400 border-b-2 border-indigo-500 bg-white/5' 
+                  : 'text-white/60'
+              }`}
+            >
+              Comptes
+            </button>
+            <button
+              onClick={() => setMobileTab('content')}
+              className={`flex-1 py-3 text-xs font-medium transition-colors ${
+                mobileTab === 'content' 
+                  ? 'text-indigo-400 border-b-2 border-indigo-500 bg-white/5' 
+                  : 'text-white/60'
+              }`}
+            >
+              Contenu
+            </button>
+          </div>
+        </div>
         
-        {/* Content */}
+        {/* Content - Responsive layout */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Left Panel - Account Selection */}
-          <div className="w-72 border-r border-white/10 flex flex-col">
+          {/* Left Panel - Account Selection - Hidden on mobile unless tab selected */}
+          <div className={`${mobileTab === 'accounts' ? 'flex' : 'hidden'} md:flex w-full md:w-72 border-r border-white/10 flex-col`}>
             <div className="p-4 border-b border-white/10">
               <Label className="text-white/70 text-xs uppercase tracking-wide">Entité</Label>
               <Select 
