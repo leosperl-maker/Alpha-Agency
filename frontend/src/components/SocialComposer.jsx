@@ -171,14 +171,20 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
         let result;
         try {
           const text = await response.text();
+          console.log('Upload response status:', response.status);
+          console.log('Upload response text:', text?.substring(0, 200));
           result = text ? JSON.parse(text) : {};
         } catch (parseError) {
-          throw new Error('Réponse serveur invalide');
+          console.error('Parse error:', parseError);
+          console.error('Response status was:', response.status);
+          throw new Error(`Réponse serveur invalide (status: ${response.status})`);
         }
         
         if (!response.ok) {
           throw new Error(result.detail || `Erreur serveur (${response.status})`);
         }
+        
+        console.log('Upload success:', result.url);
         
         newMedias.push({
           id: Math.random().toString(36).substr(2, 9),
