@@ -235,6 +235,20 @@ const MultilinkPage = () => {
     is_active: true
   });
   
+  // Section Form
+  const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
+  const [editingSection, setEditingSection] = useState(null);
+  const [pageSections, setPageSections] = useState([]);
+  const [sectionForm, setSectionForm] = useState({
+    section_type: 'carousel',
+    title: '',
+    content: '',
+    items: [],
+    images: [],
+    settings: {},
+    is_active: true
+  });
+  
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [copied, setCopied] = useState(false);
