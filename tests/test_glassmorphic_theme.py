@@ -11,7 +11,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://meta-oauth-upgrade.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://multilink-hub.preview.emergentagent.com')
 
 class TestAuth:
     """Authentication tests"""

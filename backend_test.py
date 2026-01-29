@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import Dict, Any
 
 class AlphaAgencyAPITester:
-    def __init__(self, base_url="https://meta-oauth-upgrade.preview.emergentagent.com"):
+    def __init__(self, base_url="https://multilink-hub.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.tests_run = 0
