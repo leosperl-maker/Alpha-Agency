@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { 
   Instagram, Facebook, Twitter, Youtube, Linkedin, 
   MessageCircle, Send, Mail, Globe, ShoppingBag, Calendar,
   Phone, MapPin, Link, Download, Play, Music, Mic, BookOpen,
-  ExternalLink, Loader2, ChevronRight
+  ExternalLink, Loader2, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 // Icon mapping
@@ -46,6 +46,105 @@ const SOCIAL_COLORS = {
 };
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+// Carousel Component for sections
+const CarouselSection = ({ items, colors, onItemClick }) => {
+  const scrollRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = 280;
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+      setTimeout(checkScroll, 300);
+    }
+  };
+
+  if (!items || items.length === 0) return null;
+
+  return (
+    <div className="relative">
+      {/* Scroll buttons */}
+      {canScrollLeft && (
+        <button
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+      )}
+      {canScrollRight && (
+        <button
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      )}
+      
+      {/* Carousel container */}
+      <div 
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        onScroll={checkScroll}
+      >
+        {items.map((item, index) => (
+          <button
+            key={index}
+            onClick={() => item.url && onItemClick({ url: item.url, id: item.id })}
+            className="flex-shrink-0 w-64 snap-start group"
+          >
+            <div 
+              className="rounded-2xl overflow-hidden transition-transform group-hover:scale-[1.02]"
+              style={{ 
+                backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
+              }}
+            >
+              {item.image && (
+                <div className="aspect-video">
+                  <img 
+                    src={item.image} 
+                    alt={item.title || ''} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <div className="p-4">
+                <h3 
+                  className="font-semibold text-left line-clamp-1"
+                  style={{ color: colors.button_text || '#ffffff' }}
+                >
+                  {item.title}
+                </h3>
+                {item.subtitle && (
+                  <p 
+                    className="text-sm text-left mt-1 line-clamp-2 opacity-70"
+                    style={{ color: colors.button_text || '#ffffff' }}
+                  >
+                    {item.subtitle}
+                  </p>
+                )}
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const LinkBioPage = () => {
   const { slug } = useParams();
