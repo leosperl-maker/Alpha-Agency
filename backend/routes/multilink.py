@@ -387,6 +387,14 @@ async def get_page(page_id: str, current_user: dict = Depends(get_current_user))
     
     page["links"] = links
     
+    # Get sections
+    sections = await db.multilink_sections.find(
+        {"page_id": page_id},
+        {"_id": 0}
+    ).sort("order", 1).to_list(100)
+    
+    page["sections"] = sections
+    
     return page
 
 
