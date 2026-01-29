@@ -531,15 +531,16 @@ const LinkBioPage = () => {
                 );
               }
               
-              // Link with image
+              // Link with image - zaap.bio style card with button
               if (block.block_type === 'link_image') {
+                const openInNewTab = block.settings?.open_in === 'new_tab';
+                const buttonText = block.settings?.button_text || 'En Savoir +';
                 return (
-                  <button
+                  <div
                     key={block.id}
-                    onClick={() => handleLinkClick(block)}
-                    className={`w-full ${roundedClass} overflow-hidden transition-all duration-300 hover:scale-[1.02] text-left`}
+                    className={`w-full ${roundedClass} overflow-hidden transition-all duration-300 hover:scale-[1.02]`}
                     style={{
-                      backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
+                      backgroundColor: colors.card_bg || colors.button_bg || 'rgba(255,255,255,0.1)',
                       boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                     }}
                   >
@@ -547,17 +548,34 @@ const LinkBioPage = () => {
                       <img 
                         src={block.thumbnail} 
                         alt="" 
-                        className={`w-full h-auto object-contain ${roundedClass.replace('rounded', 'rounded-t')}`}
+                        className={`w-full h-auto object-contain`}
                         style={{ maxHeight: '300px' }}
                       />
                     )}
                     <div className="p-4">
-                      <p className="font-semibold" style={{ color: colors.button_text || '#ffffff' }}>{block.label}</p>
+                      <p className="font-bold text-lg" style={{ color: colors.button_text || '#ffffff' }}>{block.label}</p>
                       {block.description && (
-                        <p className="text-sm mt-1 opacity-70" style={{ color: colors.button_text || '#ffffff' }}>{block.description}</p>
+                        <p className="text-sm mt-2 opacity-80 leading-relaxed" style={{ color: colors.button_text || '#ffffff' }}>{block.description}</p>
                       )}
+                      <button
+                        onClick={() => {
+                          handleLinkClick(block);
+                          if (openInNewTab) {
+                            window.open(block.url, '_blank', 'noopener,noreferrer');
+                          } else {
+                            window.location.href = block.url;
+                          }
+                        }}
+                        className="mt-4 px-6 py-2.5 rounded-full font-medium text-sm transition-all hover:opacity-90"
+                        style={{ 
+                          backgroundColor: colors.accent || '#6366f1',
+                          color: '#ffffff'
+                        }}
+                      >
+                        {buttonText}
+                      </button>
                     </div>
-                  </button>
+                  </div>
                 );
               }
               
