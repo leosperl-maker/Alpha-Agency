@@ -126,12 +126,12 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
   if (!items || items.length === 0) return null;
 
   return (
-    <div className="relative">
-      {/* Scroll buttons */}
+    <div className="relative -mx-4">
+      {/* Scroll buttons - desktop only */}
       {canScrollLeft && (
         <button
           onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+          className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/60 backdrop-blur-md items-center justify-center text-white hover:bg-black/80 transition-all shadow-lg"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -139,58 +139,94 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+          className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/60 backdrop-blur-md items-center justify-center text-white hover:bg-black/80 transition-all shadow-lg"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
       )}
       
-      {/* Carousel container */}
+      {/* Carousel container - Zaap.bio style cards */}
       <div 
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 snap-x snap-mandatory"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         onScroll={checkScroll}
       >
         {items.map((item, index) => (
           <button
             key={index}
             onClick={() => item.url && onItemClick({ url: item.url, id: item.id })}
-            className="flex-shrink-0 w-64 snap-start group"
+            className="flex-shrink-0 snap-start group focus:outline-none"
+            style={{ width: '160px' }}
           >
+            {/* Card - Zaap.bio exact style with rounded corners and shadow */}
             <div 
-              className="rounded-2xl overflow-hidden transition-transform group-hover:scale-[1.02]"
+              className="rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-[1.03] group-hover:shadow-xl group-active:scale-[0.98]"
               style={{ 
                 backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
               }}
             >
+              {/* Image - 4:5 aspect ratio like zaap.bio */}
               {item.image && (
-                <div className="aspect-video">
+                <div className="aspect-[4/5] relative">
                   <img 
                     src={item.image} 
                     alt={item.title || ''} 
                     className="w-full h-full object-cover"
                   />
+                  {/* Gradient overlay for text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  
+                  {/* Text overlay at bottom - zaap.bio style */}
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <h3 className="font-bold text-white text-sm leading-tight line-clamp-2 drop-shadow-lg">
+                      {item.title}
+                    </h3>
+                    {item.subtitle && (
+                      <p className="text-white/80 text-xs mt-1 line-clamp-1">
+                        {item.subtitle}
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
-              <div className="p-4">
-                <h3 
-                  className="font-semibold text-left line-clamp-1"
-                  style={{ color: colors.button_text || '#ffffff' }}
-                >
-                  {item.title}
-                </h3>
-                {item.subtitle && (
-                  <p 
-                    className="text-sm text-left mt-1 line-clamp-2 opacity-70"
+              
+              {/* Text only card (no image) */}
+              {!item.image && (
+                <div className="aspect-[4/5] flex flex-col justify-center p-4">
+                  <h3 
+                    className="font-bold text-center line-clamp-3"
                     style={{ color: colors.button_text || '#ffffff' }}
                   >
-                    {item.subtitle}
-                  </p>
-                )}
-              </div>
+                    {item.title}
+                  </h3>
+                  {item.subtitle && (
+                    <p 
+                      className="text-sm text-center mt-2 opacity-70 line-clamp-2"
+                      style={{ color: colors.button_text || '#ffffff' }}
+                    >
+                      {item.subtitle}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </button>
+        ))}
+      </div>
+      
+      {/* Scroll indicator dots - mobile only */}
+      <div className="flex justify-center gap-1.5 mt-3 md:hidden">
+        {items.map((_, index) => (
+          <div 
+            key={index}
+            className="w-1.5 h-1.5 rounded-full transition-all"
+            style={{ 
+              backgroundColor: colors.text || '#ffffff',
+              opacity: 0.3
+            }}
+          />
         ))}
       </div>
     </div>
