@@ -330,7 +330,9 @@ const LinkBioPage = () => {
     );
   }
 
-  const colors = page.theme_colors || {};
+  const colors = page.custom_colors && Object.keys(page.custom_colors).length > 0 
+    ? { ...page.theme_colors, ...page.custom_colors } 
+    : (page.theme_colors || {});
   const design = page.design_settings || {};
   const socialLinks = page.social_links || [];
   const contentLinks = (page.links || []).filter(l => l.link_type !== 'social');
