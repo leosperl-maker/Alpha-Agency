@@ -1123,81 +1123,131 @@ const MultilinkPage = () => {
                   </TabsTrigger>
                 </TabsList>
 
-                {/* CONTENT TAB */}
-                <TabsContent value="content" className="p-4 space-y-6">
-                  {/* Links Section */}
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-white font-medium">Liens ({pageLinks.length})</h3>
-                      <Button onClick={() => openLinkDialog()} size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-                        <Plus className="w-4 h-4 mr-1" /> Ajouter un lien
-                      </Button>
-                    </div>
-
-                    {pageLinks.length === 0 ? (
-                      <div className="text-center py-8 text-white/40 bg-white/5 rounded-xl">
-                        <Link className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">Aucun lien</p>
-                      </div>
-                    ) : (
-                      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                        <SortableContext items={pageLinks.map(l => l.id)} strategy={verticalListSortingStrategy}>
-                          <div className="space-y-2">
-                            {pageLinks.map(link => (
-                              <SortableLinkItem
-                                key={link.id}
-                                link={link}
-                                onEdit={openLinkDialog}
-                                onDelete={deleteLink}
-                                onToggle={toggleLink}
-                              />
-                            ))}
-                          </div>
-                        </SortableContext>
-                      </DndContext>
-                    )}
+                {/* CONTENT TAB - UNIFIED BLOCKS like Zaap.bio */}
+                <TabsContent value="content" className="p-4 space-y-4">
+                  {/* Add Block Button */}
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-white font-medium flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-yellow-400" />
+                      Blocs ({pageBlocks.length})
+                    </h3>
+                    <Button onClick={() => openBlockDialog()} size="sm" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700">
+                      <Plus className="w-4 h-4 mr-1" /> Ajouter un bloc
+                    </Button>
                   </div>
 
-                  {/* Sections (Carousel, Text, Images) */}
-                  <div className="border-t border-white/10 pt-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-white font-medium">Sections ({pageSections.length})</h3>
-                      <Button onClick={() => openSectionDialog()} size="sm" className="bg-purple-600 hover:bg-purple-700">
-                        <Plus className="w-4 h-4 mr-1" /> Ajouter une section
+                  {/* Blocks List - Unified drag & drop */}
+                  {pageBlocks.length === 0 ? (
+                    <div className="text-center py-12 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-dashed border-white/20">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center">
+                        <Sparkles className="w-8 h-8 text-purple-400" />
+                      </div>
+                      <h4 className="text-white font-medium mb-2">Créez votre page</h4>
+                      <p className="text-white/50 text-sm mb-4 max-w-xs mx-auto">
+                        Ajoutez des liens, images, vidéos, textes et plus encore
+                      </p>
+                      <Button onClick={() => openBlockDialog()} className="bg-gradient-to-r from-purple-600 to-indigo-600">
+                        <Plus className="w-4 h-4 mr-2" /> Ajouter un bloc
                       </Button>
                     </div>
-
-                    {pageSections.length === 0 ? (
-                      <div className="text-center py-8 text-white/40 bg-white/5 rounded-xl">
-                        <LayoutGrid className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">Aucune section</p>
-                        <p className="text-xs mt-1">Ajoutez des carousels, textes ou images</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {pageSections.map(section => {
-                          const SectionIcon = SECTION_TYPES.find(t => t.id === section.section_type)?.icon || LayoutGrid;
-                          return (
-                            <div 
-                              key={section.id}
-                              className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10"
-                            >
-                              <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                                <SectionIcon className="w-5 h-5 text-purple-400" />
+                  ) : (
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleBlockDragEnd}>
+                      <SortableContext items={pageBlocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
+                        <div className="space-y-2">
+                          {pageBlocks.map(block => {
+                            const blockTypeInfo = SECTION_TYPES.find(t => t.id === block.block_type) || { icon: Link, name: 'Bloc' };
+                            const BlockIcon = blockTypeInfo.icon;
+                            
+                            return (
+                              <div 
+                                key={block.id}
+                                className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                                  block.is_active 
+                                    ? 'bg-white/5 border-white/10 hover:border-white/20' 
+                                    : 'bg-white/[0.02] border-white/5 opacity-50'
+                                }`}
+                              >
+                                <div className="cursor-grab text-white/30 hover:text-white/60">
+                                  <GripVertical className="w-5 h-5" />
+                                </div>
+                                
+                                {/* Thumbnail preview for media blocks */}
+                                {(block.thumbnail || block.media_url) ? (
+                                  <img 
+                                    src={block.thumbnail || block.media_url} 
+                                    alt="" 
+                                    className="w-12 h-12 rounded-lg object-cover"
+                                  />
+                                ) : (
+                                  <div 
+                                    className="w-12 h-12 rounded-lg flex items-center justify-center"
+                                    style={{ 
+                                      backgroundColor: block.block_type.includes('link') ? 'rgba(99,102,241,0.2)' :
+                                        block.block_type === 'text' ? 'rgba(34,197,94,0.2)' :
+                                        block.block_type === 'image' ? 'rgba(236,72,153,0.2)' :
+                                        block.block_type === 'video' ? 'rgba(239,68,68,0.2)' :
+                                        block.block_type === 'youtube' ? 'rgba(239,68,68,0.2)' :
+                                        block.block_type === 'carousel' ? 'rgba(168,85,247,0.2)' :
+                                        'rgba(255,255,255,0.1)'
+                                    }}
+                                  >
+                                    <BlockIcon className="w-5 h-5" style={{
+                                      color: block.block_type.includes('link') ? '#6366f1' :
+                                        block.block_type === 'text' ? '#22c55e' :
+                                        block.block_type === 'image' ? '#ec4899' :
+                                        block.block_type === 'video' || block.block_type === 'youtube' ? '#ef4444' :
+                                        block.block_type === 'carousel' ? '#a855f7' :
+                                        '#ffffff'
+                                    }} />
+                                  </div>
+                                )}
+                                
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white font-medium truncate">
+                                    {block.label || block.content?.substring(0, 40) || blockTypeInfo.name}
+                                  </p>
+                                  <p className="text-white/40 text-xs truncate">
+                                    {block.block_type === 'link' && block.url}
+                                    {block.block_type === 'link_image' && block.url}
+                                    {block.block_type === 'text' && 'Bloc de texte'}
+                                    {block.block_type === 'image' && 'Image'}
+                                    {block.block_type === 'video' && 'Vidéo'}
+                                    {block.block_type === 'youtube' && block.youtube_url}
+                                    {block.block_type === 'carousel' && `${block.items?.length || 0} éléments`}
+                                    {block.block_type === 'header' && 'Titre'}
+                                    {block.block_type === 'divider' && 'Séparateur'}
+                                  </p>
+                                </div>
+                                
+                                <Switch
+                                  checked={block.is_active}
+                                  onCheckedChange={() => toggleBlock(block)}
+                                  className="data-[state=checked]:bg-green-500"
+                                />
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => openBlockDialog(block)} 
+                                  className="text-white/60 hover:text-white hover:bg-white/10"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => deleteBlock(block)} 
+                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-white font-medium truncate">
-                                  {section.title || SECTION_TYPES.find(t => t.id === section.section_type)?.name || 'Section'}
-                                </p>
-                                <p className="text-white/40 text-xs">
-                                  {section.section_type === 'carousel' && `${section.items?.length || 0} éléments`}
-                                  {section.section_type === 'text' && 'Bloc de texte'}
-                                  {section.section_type === 'image' && `${section.images?.length || 0} images`}
-                                  {section.section_type === 'divider' && 'Séparateur'}
-                                  {section.section_type === 'header' && 'Titre'}
-                                </p>
-                              </div>
-                              <Switch
+                            );
+                          })}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  )}
+                </TabsContent>
                                 checked={section.is_active}
                                 onCheckedChange={() => toggleSection(section)}
                                 className="data-[state=checked]:bg-green-500"
