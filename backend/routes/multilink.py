@@ -297,16 +297,23 @@ async def record_page_view(page_id: str, request: Request):
     })
 
 
-async def record_link_click(page_id: str, link_id: str, request: Request):
-    """Record a link click"""
+async def record_link_click(page_id: str, link_id: str, request: Request, block_id: str = None):
+    """Record a link or block click"""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    
+    # Build the query for the stats record
+    query = {"page_id": page_id, "date": today, "type": "click"}
+    if block_id:
+        query["block_id"] = block_id
+    else:
+        query["link_id"] = link_id
     
     # Update daily stats
     await db.multilink_stats.update_one(
-        {"page_id": page_id, "link_id": link_id, "date": today, "type": "click"},
+        query,
         {
             "$inc": {"count": 1},
-            "$setOnInsert": {"page_id": page_id, "link_id": link_id, "date": today, "type": "click"}
+            "$setOnInsert": query
         },
         upsert=True
     )
