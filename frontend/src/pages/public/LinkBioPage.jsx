@@ -317,7 +317,7 @@ const LinkBioPage = () => {
                 ) : (
                   <div 
                     className="w-12 h-12 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: colors.accent + '20' || 'rgba(99,102,241,0.2)' }}
+                    style={{ backgroundColor: (colors.accent || '#6366f1') + '20' }}
                   >
                     <IconComponent className="w-5 h-5" style={{ color: colors.accent || '#6366f1' }} />
                   </div>
