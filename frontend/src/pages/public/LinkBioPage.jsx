@@ -629,7 +629,7 @@ const LinkBioPage = () => {
                 }
               }
               
-              // Text block - NOW WITH HTML RENDERING
+              // Text block - NOW WITH MARKDOWN RENDERING
               if (block.block_type === 'text' && block.content) {
                 return (
                   <div 
@@ -640,12 +640,15 @@ const LinkBioPage = () => {
                       color: colors.button_text || '#ffffff'
                     }}
                   >
-                    {/* Render HTML content from WYSIWYG editor */}
+                    {/* Render Markdown content */}
                     <div 
                       className="prose prose-invert prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{ __html: block.content }}
                       style={{ color: colors.button_text || '#ffffff' }}
-                    />
+                    >
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {block.content}
+                      </ReactMarkdown>
+                    </div>
                     <style>{`
                       .prose p { margin: 0.5em 0; color: inherit; }
                       .prose h1, .prose h2, .prose h3 { color: inherit; font-weight: 700; margin: 0.5em 0; }
