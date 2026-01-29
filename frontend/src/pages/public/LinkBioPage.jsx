@@ -785,10 +785,11 @@ const LinkBioPage = () => {
               </button>
             );
           })}
-        </div>
+          </div>
+        )}
 
         {/* Empty state */}
-        {contentLinks.filter(l => l.is_active).length === 0 && socialLinks.filter(s => s.is_active).length === 0 && (
+        {(!page.blocks || page.blocks.length === 0) && contentLinks.filter(l => l.is_active).length === 0 && socialLinks.filter(s => s.is_active).length === 0 && (
           <div className="text-center py-12">
             <div 
               className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
