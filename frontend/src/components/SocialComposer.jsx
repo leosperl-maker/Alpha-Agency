@@ -1069,8 +1069,8 @@ const SocialComposer = ({
             </ScrollArea>
           </div>
           
-          {/* Right Panel - Previews */}
-          <div className="w-96 border-l border-white/10 flex flex-col bg-slate-950/50">
+          {/* Right Panel - Previews - HIDDEN ON MOBILE */}
+          <div className="hidden lg:flex w-96 border-l border-white/10 flex-col bg-slate-950/50">
             <div className="p-4 border-b border-white/10">
               <Label className="text-white/70 text-xs uppercase tracking-wide mb-2 block">Prévisualisation</Label>
               <div className="flex gap-1">
