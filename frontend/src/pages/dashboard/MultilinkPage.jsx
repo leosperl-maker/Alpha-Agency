@@ -2575,90 +2575,22 @@ const MultilinkPage = () => {
 
             {/* ============ TEXT BLOCK WITH WYSIWYG ============ */}
             {blockForm.block_type === 'text' && (
-              <div className="space-y-2">
+              <div className="space-y-2" data-color-mode="dark">
                 <p className="text-white/60 text-sm mb-4">Share text, notes, or information on your page.</p>
-                <div className="quill-dark-theme">
-                  <ReactQuill
-                    theme="snow"
-                    value={blockForm.content || ''}
-                    onChange={(value) => setBlockForm({ ...blockForm, content: value })}
-                    placeholder="Nous sommes convaincus que la clé du succès réside dans une collaboration étroite avec nos clients..."
-                    modules={{
-                      toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        [{ 'size': ['small', false, 'large', 'huge'] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'align': [] }],
-                        ['link'],
-                        ['clean']
-                      ],
-                    }}
-                    formats={[
-                      'header', 'size',
-                      'bold', 'italic', 'underline', 'strike',
-                      'color', 'background',
-                      'list', 'bullet',
-                      'align',
-                      'link'
-                    ]}
-                    style={{ minHeight: '200px' }}
-                  />
-                </div>
-                <style>{`
-                  .quill-dark-theme .ql-toolbar {
-                    background: rgba(255,255,255,0.05);
-                    border-color: rgba(255,255,255,0.1);
-                    border-radius: 8px 8px 0 0;
-                  }
-                  .quill-dark-theme .ql-container {
-                    background: rgba(255,255,255,0.05);
-                    border-color: rgba(255,255,255,0.1);
-                    border-radius: 0 0 8px 8px;
-                    min-height: 150px;
-                    color: white;
-                  }
-                  .quill-dark-theme .ql-editor {
-                    min-height: 150px;
-                    color: white;
-                  }
-                  .quill-dark-theme .ql-editor.ql-blank::before {
-                    color: rgba(255,255,255,0.4);
-                    font-style: normal;
-                  }
-                  .quill-dark-theme .ql-stroke {
-                    stroke: rgba(255,255,255,0.7);
-                  }
-                  .quill-dark-theme .ql-fill {
-                    fill: rgba(255,255,255,0.7);
-                  }
-                  .quill-dark-theme .ql-picker-label {
-                    color: rgba(255,255,255,0.7);
-                  }
-                  .quill-dark-theme .ql-picker-options {
-                    background: #1a1a2e;
-                    border-color: rgba(255,255,255,0.1);
-                  }
-                  .quill-dark-theme .ql-picker-item {
-                    color: white;
-                  }
-                  .quill-dark-theme .ql-picker-item:hover {
-                    color: #6366f1;
-                  }
-                  .quill-dark-theme button:hover .ql-stroke {
-                    stroke: #6366f1;
-                  }
-                  .quill-dark-theme button:hover .ql-fill {
-                    fill: #6366f1;
-                  }
-                  .quill-dark-theme button.ql-active .ql-stroke {
-                    stroke: #6366f1;
-                  }
-                  .quill-dark-theme button.ql-active .ql-fill {
-                    fill: #6366f1;
-                  }
-                `}</style>
+                <MDEditor
+                  value={blockForm.content || ''}
+                  onChange={(value) => setBlockForm({ ...blockForm, content: value || '' })}
+                  preview="edit"
+                  height={250}
+                  textareaProps={{
+                    placeholder: "Nous sommes convaincus que la clé du succès réside dans une collaboration étroite avec nos clients...",
+                  }}
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    borderRadius: '8px',
+                  }}
+                />
+                <p className="text-white/40 text-xs mt-2">Utilisez Markdown pour le formatage: **gras**, *italique*, # titre, - liste</p>
               </div>
             )}
 
