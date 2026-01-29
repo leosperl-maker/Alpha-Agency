@@ -1376,6 +1376,7 @@ const MultilinkPage = () => {
             {/* Thumbnail Upload */}
             <div className="space-y-2">
               <Label className="text-white">Image de la carte (optionnel)</Label>
+              <p className="text-white/40 text-xs mb-2">📐 Format recommandé : 1200×630px (ratio 1.91:1)</p>
               <div className="flex items-center gap-4">
                 {linkForm.thumbnail ? (
                   <div className="relative">
