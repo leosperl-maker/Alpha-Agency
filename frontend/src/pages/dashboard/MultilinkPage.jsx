@@ -325,6 +325,7 @@ const MultilinkPage = () => {
       setSelectedPage(response.data);
       setPageLinks(response.data.links || []);
       setPageSections(response.data.sections || []);
+      setPageBlocks(response.data.blocks || []); // NEW: Unified blocks
       // Also update pageForm for editing
       setPageForm({
         ...pageForm,
