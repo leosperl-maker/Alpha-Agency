@@ -391,25 +391,47 @@ const LinkBioPage = () => {
           )}
         </div>
 
-        {/* Social Icons Row */}
+        {/* Social Icons Row - Modern SVG icons like zaap.bio */}
         {socialLinks.length > 0 && (
           <div className="flex justify-center gap-3 mb-8 flex-wrap">
             {socialLinks.filter(s => s.is_active).map((social, index) => {
-              const IconComponent = getIcon(social.icon);
               const bgColor = SOCIAL_COLORS[social.icon] || colors.accent || '#6366f1';
+              
+              // Get modern icon component
+              const getModernIcon = (iconName) => {
+                const icons = {
+                  instagram: ModernInstagramIcon,
+                  facebook: ModernFacebookIcon,
+                  twitter: ModernTwitterIcon,
+                  youtube: ModernYouTubeIcon,
+                  linkedin: ModernLinkedInIcon,
+                  whatsapp: ModernWhatsAppIcon,
+                  tiktok: ModernTikTokIcon,
+                };
+                return icons[iconName];
+              };
+              
+              const ModernIcon = getModernIcon(social.icon);
+              const FallbackIcon = getIcon(social.icon);
               
               return (
                 <button
                   key={social.id || index}
                   onClick={() => handleSocialClick(social)}
-                  className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                  className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg p-2.5"
                   style={{ 
                     background: bgColor,
                     boxShadow: `0 4px 15px ${typeof bgColor === 'string' && !bgColor.includes('gradient') ? bgColor + '40' : 'rgba(0,0,0,0.3)'}`
                   }}
                   title={social.label}
                 >
-                  <IconComponent className="w-5 h-5 text-white" />
+                  {ModernIcon ? (
+                    <div className="w-full h-full text-white">
+                      <ModernIcon />
+                    </div>
+                  ) : (
+                    <FallbackIcon className="w-5 h-5 text-white" />
+                  )}
                 </button>
               );
             })}
