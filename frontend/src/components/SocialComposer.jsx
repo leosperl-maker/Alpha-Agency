@@ -168,12 +168,14 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
         clearTimeout(timeoutId);
         
         // Parse response - handle network errors gracefully
-        let result;
         const responseText = await response.text();
         
         console.log('Upload response status:', response.status);
-        console.log('Upload response headers:', Object.fromEntries(response.headers.entries()));
-        console.log('Upload response body (first 500 chars):', responseText?.substring(0, 500));
+        
+        // Handle 401 - token expired
+        if (response.status === 401) {
+          throw new Error('Session expirée. Veuillez vous reconnecter.');
+        }
         
         // Check for empty response
         if (!responseText || responseText.trim() === '') {
@@ -181,14 +183,14 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
         }
         
         // Try to parse JSON
+        let result;
         try {
           result = JSON.parse(responseText);
         } catch (parseError) {
           console.error('JSON parse error:', parseError);
-          console.error('Response was:', responseText?.substring(0, 200));
           // Check if it's an HTML error page
           if (responseText.includes('<html') || responseText.includes('<!DOCTYPE')) {
-            throw new Error('Erreur serveur (page HTML reçue). Rechargez la page et réessayez.');
+            throw new Error('Erreur serveur. Rechargez la page et réessayez.');
           }
           throw new Error(`Réponse serveur invalide (status: ${response.status}). Réessayez.`);
         }
