@@ -10,8 +10,7 @@ import {
   Video, Sparkles, Zap, Bold, Italic, Underline, List, ListOrdered,
   AlignLeft, AlignCenter, AlignRight, Smile, Undo, Redo
 } from 'lucide-react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import MDEditor from '@uiw/react-md-editor';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
