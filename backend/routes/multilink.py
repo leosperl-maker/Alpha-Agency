@@ -555,6 +555,136 @@ async def delete_link(page_id: str, link_id: str, current_user: dict = Depends(g
     return {"message": "Lien supprimé"}
 
 
+# ==================== ADMIN ROUTES - SECTIONS ====================
+
+@router.get("/pages/{page_id}/sections", response_model=list)
+async def get_sections(page_id: str, current_user: dict = Depends(get_current_user)):
+    """Get all sections for a page"""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    # Verify page ownership
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    sections = await db.multilink_sections.find(
+        {"page_id": page_id},
+        {"_id": 0}
+    ).sort("order", 1).to_list(100)
+    
+    return sections
+
+
+@router.post("/pages/{page_id}/sections", response_model=dict)
+async def create_section(page_id: str, section: SectionCreate, current_user: dict = Depends(get_current_user)):
+    """Add a section to a page"""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    # Verify page ownership
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    # Get max order
+    max_order_doc = await db.multilink_sections.find_one(
+        {"page_id": page_id},
+        sort=[("order", -1)]
+    )
+    max_order = max_order_doc.get("order", 0) if max_order_doc else 0
+    
+    section_id = str(uuid.uuid4())
+    
+    # Default settings based on section type
+    default_settings = {
+        "carousel": {"autoplay": False, "show_arrows": True, "card_style": "rounded"},
+        "text": {"align": "left", "size": "base"},
+        "image": {"columns": 2, "gap": 2, "rounded": True},
+        "divider": {"style": "line", "spacing": "md"},
+        "header": {"size": "lg", "align": "center"}
+    }
+    
+    section_doc = {
+        "id": section_id,
+        "page_id": page_id,
+        "section_type": section.section_type,
+        "title": section.title,
+        "content": section.content,
+        "items": section.items or [],
+        "images": section.images or [],
+        "settings": section.settings or default_settings.get(section.section_type, {}),
+        "is_active": section.is_active,
+        "order": section.order if section.order else max_order + 1,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.multilink_sections.insert_one(section_doc)
+    
+    return {"id": section_id, "message": "Section ajoutée"}
+
+
+@router.put("/pages/{page_id}/sections/reorder", response_model=dict)
+async def reorder_sections(page_id: str, data: SectionsReorder, current_user: dict = Depends(get_current_user)):
+    """Reorder sections"""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    # Verify page ownership
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    # Update order for each section
+    for index, section_id in enumerate(data.section_ids):
+        await db.multilink_sections.update_one(
+            {"id": section_id, "page_id": page_id},
+            {"$set": {"order": index}}
+        )
+    
+    return {"message": "Ordre des sections mis à jour"}
+
+
+@router.put("/pages/{page_id}/sections/{section_id}", response_model=dict)
+async def update_section(page_id: str, section_id: str, section: SectionUpdate, current_user: dict = Depends(get_current_user)):
+    """Update a section"""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    # Verify page ownership
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    existing = await db.multilink_sections.find_one({"id": section_id, "page_id": page_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Section non trouvée")
+    
+    update_data = section.model_dump(exclude_unset=True)
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.multilink_sections.update_one(
+        {"id": section_id},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Section mise à jour"}
+
+
+@router.delete("/pages/{page_id}/sections/{section_id}", response_model=dict)
+async def delete_section(page_id: str, section_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a section"""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    # Verify page ownership
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    result = await db.multilink_sections.delete_one({"id": section_id, "page_id": page_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Section non trouvée")
+    
+    return {"message": "Section supprimée"}
+
+
 # ==================== ADMIN ROUTES - STATS ====================
 
 @router.get("/pages/{page_id}/stats", response_model=dict)
