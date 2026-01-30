@@ -891,7 +891,8 @@ const MultilinkPage = () => {
         icon: social.icon || 'instagram',
         url: social.url || '',
         label: social.label || '',
-        is_active: social.is_active !== false
+        is_active: social.is_active !== false,
+        custom_icon: social.custom_icon || ''
       });
     } else {
       setEditingSocial(null);
@@ -899,7 +900,8 @@ const MultilinkPage = () => {
         icon: 'instagram',
         url: '',
         label: '',
-        is_active: true
+        is_active: true,
+        custom_icon: ''
       });
     }
     setSocialDialogOpen(true);
@@ -921,7 +923,8 @@ const MultilinkPage = () => {
       ...socialForm, 
       url, 
       id: editingSocial?.id || `social_${Date.now()}`,
-      label: socialForm.label || ICON_OPTIONS.find(i => i.value === socialForm.icon)?.label || socialForm.icon
+      label: socialForm.label || ICON_OPTIONS.find(i => i.value === socialForm.icon)?.label || socialForm.icon,
+      custom_icon: socialForm.custom_icon || ''
     };
     
     if (editingSocial) {
