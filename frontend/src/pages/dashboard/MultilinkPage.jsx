@@ -1513,6 +1513,30 @@ const MultilinkPage = () => {
                     </div>
                   </div>
 
+                  {/* Display Options */}
+                  <div className="bg-white/5 rounded-xl p-4 space-y-4 border border-white/10">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Settings className="w-5 h-5 text-indigo-400" />
+                      <h4 className="text-white font-medium">Options d'affichage</h4>
+                    </div>
+                    
+                    {/* Show/Hide Title */}
+                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                      <div>
+                        <p className="text-white text-sm">Afficher le titre</p>
+                        <p className="text-white/40 text-xs">Le titre apparaît sur la page publique</p>
+                      </div>
+                      <Switch
+                        checked={pageForm.design_settings?.show_title !== false}
+                        onCheckedChange={(checked) => setPageForm({
+                          ...pageForm,
+                          design_settings: { ...pageForm.design_settings, show_title: checked }
+                        })}
+                        className="data-[state=checked]:bg-green-500"
+                      />
+                    </div>
+                  </div>
+
                   {/* Live Preview Mini */}
                   <div className="bg-white/5 rounded-xl p-4 border border-white/10">
                     <Label className="text-white/70 text-sm mb-3 block">Aperçu en direct</Label>
