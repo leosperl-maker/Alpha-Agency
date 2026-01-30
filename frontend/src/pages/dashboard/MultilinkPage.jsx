@@ -2748,49 +2748,174 @@ const MultilinkPage = () => {
               </div>
             )}
 
-            {/* ============ CAROUSEL ITEMS ============ */}
+            {/* ============ CAROUSEL ITEMS - Enhanced with 3 types ============ */}
             {blockForm.block_type === 'carousel' && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-white">Éléments du carousel</Label>
-                  <Button size="sm" onClick={addBlockCarouselItem} className="bg-purple-600 hover:bg-purple-700 h-8">
-                    <Plus className="w-4 h-4 mr-1" /> Ajouter
-                  </Button>
+              <div className="space-y-4">
+                {/* Add Element Buttons */}
+                <div>
+                  <Label className="text-white mb-3 block">Ajouter un élément</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => addBlockCarouselItem('image')}
+                      className="p-3 rounded-xl border border-white/10 hover:border-pink-500/50 hover:bg-pink-500/10 transition-all flex flex-col items-center gap-2"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center">
+                        <Image className="w-5 h-5 text-pink-400" />
+                      </div>
+                      <span className="text-white text-xs">Image</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => addBlockCarouselItem('video')}
+                      className="p-3 rounded-xl border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 transition-all flex flex-col items-center gap-2"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
+                        <Video className="w-5 h-5 text-red-400" />
+                      </div>
+                      <span className="text-white text-xs">Vidéo</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => addBlockCarouselItem('link_image')}
+                      className="p-3 rounded-xl border border-white/10 hover:border-indigo-500/50 hover:bg-indigo-500/10 transition-all flex flex-col items-center gap-2"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+                        <Link className="w-5 h-5 text-indigo-400" />
+                      </div>
+                      <span className="text-white text-xs">Image + Lien</span>
+                    </button>
+                  </div>
                 </div>
-                <p className="text-white/40 text-xs">📐 Images: 400×500px (format 4:5)</p>
                 
+                {/* Elements List */}
                 {blockForm.items.length === 0 ? (
-                  <div className="text-center py-6 bg-white/5 rounded-xl text-white/40">
-                    <p className="text-sm">Aucun élément</p>
+                  <div className="text-center py-8 bg-white/5 rounded-xl text-white/40">
+                    <LayoutGrid className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Aucun élément dans le carrousel</p>
+                    <p className="text-xs mt-1">Cliquez sur un type ci-dessus pour ajouter</p>
                   </div>
                 ) : (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto">
                     {blockForm.items.map((item, index) => (
-                      <div key={index} className="p-2.5 bg-white/5 rounded-lg border border-white/10 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-white/60 text-xs">#{index + 1}</span>
-                          <Button size="sm" variant="ghost" onClick={() => removeBlockCarouselItem(index)} className="text-red-400 h-6 w-6 p-0">
-                            <X className="w-3 h-3" />
+                      <div key={index} className="p-4 bg-white/5 rounded-xl border border-white/10">
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-white/40 text-xs">#{index + 1}</span>
+                            <Badge className={
+                              item.type === 'video' ? 'bg-red-500/20 text-red-400' :
+                              item.type === 'link_image' ? 'bg-indigo-500/20 text-indigo-400' :
+                              'bg-pink-500/20 text-pink-400'
+                            }>
+                              {item.type === 'video' ? 'Vidéo' : item.type === 'link_image' ? 'Image + Lien' : 'Image'}
+                            </Badge>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => removeBlockCarouselItem(index)} 
+                            className="text-red-400 hover:text-red-300 h-7 w-7 p-0"
+                          >
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
-                        <Input
-                          value={item.image}
-                          onChange={(e) => updateBlockCarouselItem(index, 'image', e.target.value)}
-                          placeholder="URL image"
-                          className="bg-white/5 border-white/10 text-white text-xs h-8"
-                        />
-                        <Input
-                          value={item.title}
-                          onChange={(e) => updateBlockCarouselItem(index, 'title', e.target.value)}
-                          placeholder="Titre"
-                          className="bg-white/5 border-white/10 text-white text-xs h-8"
-                        />
-                        <Input
-                          value={item.url}
-                          onChange={(e) => updateBlockCarouselItem(index, 'url', e.target.value)}
-                          placeholder="URL (optionnel)"
-                          className="bg-white/5 border-white/10 text-white text-xs h-8"
-                        />
+
+                        {/* Media Upload */}
+                        <div className="mb-3">
+                          {item.media_url ? (
+                            <div className="relative">
+                              {item.media_type === 'video' || item.type === 'video' ? (
+                                <video 
+                                  src={item.media_url} 
+                                  className="w-full h-32 rounded-lg object-cover bg-black/20" 
+                                  controls 
+                                />
+                              ) : (
+                                <img 
+                                  src={item.media_url} 
+                                  alt="" 
+                                  className="w-full h-32 rounded-lg object-cover" 
+                                />
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => updateBlockCarouselItem(index, 'media_url', '')}
+                                className="absolute top-2 right-2 w-7 h-7 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600"
+                              >
+                                <X className="w-4 h-4 text-white" />
+                              </button>
+                            </div>
+                          ) : (
+                            <label className="cursor-pointer block">
+                              <input 
+                                type="file" 
+                                accept={item.type === 'video' ? 'video/*' : 'image/*'}
+                                onChange={(e) => uploadCarouselMedia(index, e.target.files?.[0])} 
+                                className="hidden" 
+                              />
+                              <div className="flex flex-col items-center py-6 border-2 border-dashed border-white/20 rounded-xl hover:border-indigo-500/50 transition-colors">
+                                {uploadingBlockMedia ? (
+                                  <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+                                ) : (
+                                  <>
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${
+                                      item.type === 'video' ? 'bg-red-500/20' : 'bg-pink-500/20'
+                                    }`}>
+                                      {item.type === 'video' ? (
+                                        <Video className="w-6 h-6 text-red-400" />
+                                      ) : (
+                                        <ImagePlus className="w-6 h-6 text-pink-400" />
+                                      )}
+                                    </div>
+                                    <p className="text-white text-sm">Cliquer pour uploader</p>
+                                    <p className="text-white/40 text-xs mt-1">
+                                      {item.type === 'video' ? 'MP4, MOV, WebM' : 'JPG, PNG, WebP'}
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+                            </label>
+                          )}
+                        </div>
+
+                        {/* Title (for all types) */}
+                        <div className="space-y-2 mb-2">
+                          <Input
+                            value={item.title || ''}
+                            onChange={(e) => updateBlockCarouselItem(index, 'title', e.target.value)}
+                            placeholder="Titre (optionnel)"
+                            className="bg-white/5 border-white/10 text-white text-sm h-9"
+                          />
+                        </div>
+
+                        {/* Link Image specific fields */}
+                        {item.type === 'link_image' && (
+                          <>
+                            <div className="space-y-2 mb-2">
+                              <Textarea
+                                value={item.description || ''}
+                                onChange={(e) => updateBlockCarouselItem(index, 'description', e.target.value)}
+                                placeholder="Description..."
+                                className="bg-white/5 border-white/10 text-white text-sm min-h-[60px]"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <Input
+                                value={item.url || ''}
+                                onChange={(e) => updateBlockCarouselItem(index, 'url', e.target.value)}
+                                placeholder="URL du lien *"
+                                className="bg-white/5 border-white/10 text-white text-sm h-9"
+                              />
+                              <Input
+                                value={item.button_text || 'En Savoir +'}
+                                onChange={(e) => updateBlockCarouselItem(index, 'button_text', e.target.value)}
+                                placeholder="Texte du bouton"
+                                className="bg-white/5 border-white/10 text-white text-sm h-9"
+                              />
+                            </div>
+                          </>
+                        )}
                       </div>
                     ))}
                   </div>
