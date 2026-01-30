@@ -2074,6 +2074,172 @@ const MultilinkPage = () => {
                     </div>
                   </div>
                 </TabsContent>
+
+                {/* ANALYTICS TAB */}
+                <TabsContent value="analytics" className="p-4 space-y-6">
+                  {/* Quick Stats Cards */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl p-4 border border-indigo-500/20">
+                      <div className="flex items-center gap-2 text-indigo-400 mb-2">
+                        <Eye className="w-4 h-4" />
+                        <span className="text-xs font-medium">Vues totales</span>
+                      </div>
+                      <p className="text-2xl font-bold text-white">{pageStats?.total_views || selectedPage?.total_views || 0}</p>
+                      {pageStats?.views_growth !== undefined && (
+                        <p className={`text-xs mt-1 ${pageStats.views_growth >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {pageStats.views_growth >= 0 ? '+' : ''}{pageStats.views_growth}% vs période précédente
+                        </p>
+                      )}
+                    </div>
+                    <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-4 border border-green-500/20">
+                      <div className="flex items-center gap-2 text-green-400 mb-2">
+                        <MousePointerClick className="w-4 h-4" />
+                        <span className="text-xs font-medium">Clics totaux</span>
+                      </div>
+                      <p className="text-2xl font-bold text-white">{pageStats?.total_clicks || selectedPage?.total_clicks || 0}</p>
+                      {pageStats?.clicks_growth !== undefined && (
+                        <p className={`text-xs mt-1 ${pageStats.clicks_growth >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {pageStats.clicks_growth >= 0 ? '+' : ''}{pageStats.clicks_growth}% vs période précédente
+                        </p>
+                      )}
+                    </div>
+                    <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-xl p-4 border border-amber-500/20">
+                      <div className="flex items-center gap-2 text-amber-400 mb-2">
+                        <TrendingUp className="w-4 h-4" />
+                        <span className="text-xs font-medium">Taux de clic</span>
+                      </div>
+                      <p className="text-2xl font-bold text-white">{pageStats?.ctr || 0}%</p>
+                      <p className="text-xs text-white/40 mt-1">CTR moyen</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-xl p-4 border border-pink-500/20">
+                      <div className="flex items-center gap-2 text-pink-400 mb-2">
+                        <Zap className="w-4 h-4" />
+                        <span className="text-xs font-medium">Blocs actifs</span>
+                      </div>
+                      <p className="text-2xl font-bold text-white">{pageBlocks.filter(b => b.is_active).length}</p>
+                      <p className="text-xs text-white/40 mt-1">sur {pageBlocks.length} total</p>
+                    </div>
+                  </div>
+
+                  {/* Load full stats button */}
+                  {!pageStats && (
+                    <Button 
+                      onClick={() => fetchPageStats(selectedPage)}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Charger les analytics détaillés
+                    </Button>
+                  )}
+
+                  {/* Detailed Block Stats */}
+                  {pageStats?.block_stats && pageStats.block_stats.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-white font-medium flex items-center gap-2">
+                        <MousePointerClick className="w-4 h-4 text-green-400" />
+                        Clics par bloc
+                      </h4>
+                      <div className="space-y-2">
+                        {pageStats.block_stats.map((stat, index) => (
+                          <div 
+                            key={stat.block_id || index}
+                            className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10"
+                          >
+                            {stat.thumbnail ? (
+                              <img src={stat.thumbnail} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                                <Link className="w-5 h-5 text-white/40" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white font-medium truncate">{stat.label}</p>
+                              <p className="text-white/40 text-xs truncate">
+                                {stat.type} {stat.url && `• ${stat.url}`}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-white font-bold">{stat.clicks}</p>
+                              <p className="text-white/40 text-xs">clics</p>
+                            </div>
+                            {/* Progress bar */}
+                            <div className="w-20 h-2 bg-white/10 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
+                                style={{ 
+                                  width: `${Math.min(100, (stat.clicks / Math.max(...pageStats.block_stats.map(s => s.clicks))) * 100)}%` 
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Legacy Link Stats */}
+                  {pageStats?.link_stats && pageStats.link_stats.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-white font-medium flex items-center gap-2">
+                        <Link className="w-4 h-4 text-indigo-400" />
+                        Clics par lien (legacy)
+                      </h4>
+                      <div className="space-y-2">
+                        {pageStats.link_stats.map((stat, index) => (
+                          <div 
+                            key={stat.link_id || index}
+                            className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10"
+                          >
+                            <span className="text-white truncate">{stat.label}</span>
+                            <Badge className="bg-indigo-500/20 text-indigo-400">{stat.clicks} clics</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Views by day chart placeholder */}
+                  {pageStats?.views_by_day && pageStats.views_by_day.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-white font-medium flex items-center gap-2">
+                        <Eye className="w-4 h-4 text-indigo-400" />
+                        Vues par jour (30 derniers jours)
+                      </h4>
+                      <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                        <div className="flex items-end gap-1 h-32">
+                          {pageStats.views_by_day.slice(-30).map((day, index) => {
+                            const maxViews = Math.max(...pageStats.views_by_day.map(d => d.count));
+                            const height = maxViews > 0 ? (day.count / maxViews) * 100 : 0;
+                            return (
+                              <div 
+                                key={day.date || index}
+                                className="flex-1 bg-gradient-to-t from-indigo-500 to-purple-500 rounded-t-sm hover:from-indigo-400 hover:to-purple-400 transition-all cursor-pointer group relative"
+                                style={{ height: `${Math.max(4, height)}%` }}
+                                title={`${day.date}: ${day.count} vues`}
+                              >
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black/80 rounded text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                  {day.date}: {day.count} vues
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="flex justify-between mt-2 text-xs text-white/40">
+                          <span>{pageStats.views_by_day[0]?.date}</span>
+                          <span>{pageStats.views_by_day[pageStats.views_by_day.length - 1]?.date}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Empty state */}
+                  {!pageStats && (
+                    <div className="text-center py-8 text-white/40">
+                      <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                      <p>Cliquez sur le bouton ci-dessus pour charger les analytics</p>
+                    </div>
+                  )}
+                </TabsContent>
               </Tabs>
             </div>
           ) : (
