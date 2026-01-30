@@ -8,7 +8,8 @@ import {
   ChevronDown, Palette, TrendingUp, Search, Layout, Type,
   Share2, Verified, ImagePlus, LayoutGrid, FileText, Minus, Heading,
   Video, Sparkles, Zap, Bold, Italic, Underline, List, ListOrdered,
-  AlignLeft, AlignCenter, AlignRight, Smile, Undo, Redo
+  AlignLeft, AlignCenter, AlignRight, Smile, Undo, Redo,
+  Globe2, CheckCircle2, AlertCircle, RefreshCw
 } from 'lucide-react';
 import MDEditor from '@uiw/react-md-editor';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
