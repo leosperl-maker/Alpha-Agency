@@ -824,10 +824,19 @@ const MultilinkPage = () => {
     }
   };
 
-  const addBlockCarouselItem = () => {
+  const addBlockCarouselItem = (itemType = 'image') => {
+    const newItem = {
+      type: itemType, // 'image', 'video', 'link_image'
+      media_url: '',
+      media_type: itemType === 'video' ? 'video' : 'image',
+      title: '',
+      description: '',
+      url: '',
+      button_text: 'En Savoir +'
+    };
     setBlockForm({
       ...blockForm,
-      items: [...blockForm.items, { image: '', title: '', subtitle: '', url: '' }]
+      items: [...blockForm.items, newItem]
     });
   };
 
@@ -842,6 +851,34 @@ const MultilinkPage = () => {
       ...blockForm,
       items: blockForm.items.filter((_, i) => i !== index)
     });
+  };
+
+  const uploadCarouselMedia = async (index, file) => {
+    if (!file) return;
+    
+    const isVideo = file.type.startsWith('video/');
+    setUploadingBlockMedia(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await api.post('/multilink/upload-media', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      const newItems = [...blockForm.items];
+      newItems[index] = { 
+        ...newItems[index], 
+        media_url: response.data.url,
+        media_type: isVideo ? 'video' : 'image'
+      };
+      setBlockForm({ ...blockForm, items: newItems });
+      toast.success(isVideo ? 'Vidéo uploadée' : 'Image uploadée');
+    } catch (error) {
+      toast.error('Erreur upload');
+    } finally {
+      setUploadingBlockMedia(false);
+    }
   };
 
   // ================== END BLOCKS MANAGEMENT ==================
