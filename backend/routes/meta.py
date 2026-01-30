@@ -1088,3 +1088,231 @@ async def process_facebook_comment(
     
     await db.meta_inbox.insert_one(inbox_doc)
     logger.info(f"Stored Facebook comment {comment_id} from webhook")
+
+
+# ==================== META SANDBOX MODE ====================
+"""
+MODE SANDBOX META - Documentation
+
+Ce mode permet de tester les fonctionnalités de messagerie et commentaires
+Facebook/Instagram sans toucher aux données réelles des utilisateurs.
+
+ENDPOINTS IMPACTÉS:
+- GET /meta/inbox -> Retourne des messages de test
+- POST /meta/inbox/{id}/reply -> Simule l'envoi (ne fait rien en réalité)
+- GET /meta/comments -> Retourne des commentaires de test
+
+COMPTES TEST UTILISÉS:
+- Page Facebook Test: "Alpha Agency Demo" (ID: demo_page_123)
+- Compte Instagram Test: @alphagency_demo (ID: demo_ig_123)
+
+SCÉNARIOS DE TEST:
+1. Message DM Instagram - Client intéressé par un produit
+2. Message Messenger - Demande de devis
+3. Commentaire Facebook - Question sur un post
+4. Commentaire Instagram - Feedback positif
+
+POUR AJOUTER UN SCÉNARIO:
+Modifier la constante SANDBOX_META_DATA ci-dessous et ajouter vos messages/commentaires.
+"""
+
+# Données de test pour le mode sandbox Meta
+SANDBOX_META_CONVERSATIONS = [
+    {
+        "id": "sandbox_conv_1",
+        "external_id": "sandbox_dm_ig_001",
+        "platform": "instagram",
+        "message_type": "dm",
+        "page_id": "demo_page_123",
+        "page_name": "Alpha Agency Demo",
+        "sender_id": "user_marie_001",
+        "sender_name": "Marie Dupont",
+        "sender_profile_pic": "https://ui-avatars.com/api/?name=Marie+Dupont&background=E4405F&color=fff",
+        "content": "Bonjour ! Je suis intéressée par vos services de marketing digital. Pouvez-vous me donner plus d'informations sur vos tarifs ?",
+        "timestamp": (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat(),
+        "status": "unread",
+        "is_sandbox": True
+    },
+    {
+        "id": "sandbox_conv_2",
+        "external_id": "sandbox_dm_fb_001",
+        "platform": "facebook",
+        "message_type": "dm",
+        "page_id": "demo_page_123",
+        "page_name": "Alpha Agency Demo",
+        "sender_id": "user_thomas_001",
+        "sender_name": "Thomas Martin",
+        "sender_profile_pic": "https://ui-avatars.com/api/?name=Thomas+Martin&background=1877F2&color=fff",
+        "content": "Salut ! J'aimerais obtenir un devis pour la gestion de mes réseaux sociaux. Mon entreprise est dans le secteur de la restauration.",
+        "timestamp": (datetime.now(timezone.utc) - timedelta(hours=5)).isoformat(),
+        "status": "unread",
+        "is_sandbox": True
+    },
+    {
+        "id": "sandbox_conv_3",
+        "external_id": "sandbox_comment_fb_001",
+        "platform": "facebook",
+        "message_type": "comment",
+        "page_id": "demo_page_123",
+        "page_name": "Alpha Agency Demo",
+        "post_id": "demo_post_001",
+        "sender_id": "user_julie_001",
+        "sender_name": "Julie Bernard",
+        "sender_profile_pic": "https://ui-avatars.com/api/?name=Julie+Bernard&background=1877F2&color=fff",
+        "content": "Super article ! J'ai une question : est-ce que vous proposez aussi des formations en marketing digital ?",
+        "timestamp": (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat(),
+        "status": "unread",
+        "is_sandbox": True
+    },
+    {
+        "id": "sandbox_conv_4",
+        "external_id": "sandbox_comment_ig_001",
+        "platform": "instagram",
+        "message_type": "comment",
+        "page_id": "demo_page_123",
+        "page_name": "Alpha Agency Demo",
+        "post_id": "demo_post_002",
+        "sender_id": "user_alex_001",
+        "sender_name": "Alexandre Petit",
+        "sender_profile_pic": "https://ui-avatars.com/api/?name=Alexandre+Petit&background=E4405F&color=fff",
+        "content": "🔥 Excellent travail ! Vos designs sont vraiment incroyables. Bravo à toute l'équipe !",
+        "timestamp": (datetime.now(timezone.utc) - timedelta(minutes=30)).isoformat(),
+        "status": "read",
+        "is_sandbox": True
+    },
+    {
+        "id": "sandbox_conv_5",
+        "external_id": "sandbox_dm_ig_002",
+        "platform": "instagram",
+        "message_type": "dm",
+        "page_id": "demo_page_123",
+        "page_name": "Alpha Agency Demo",
+        "sender_id": "user_sophie_001",
+        "sender_name": "Sophie Leroy",
+        "sender_profile_pic": "https://ui-avatars.com/api/?name=Sophie+Leroy&background=C13584&color=fff",
+        "content": "Bonjour ! J'ai vu votre portfolio et je suis impressionnée. Je cherche une agence pour gérer ma marque de cosmétiques bio. Disponibles pour un appel cette semaine ?",
+        "timestamp": (datetime.now(timezone.utc) - timedelta(days=1)).isoformat(),
+        "status": "unread",
+        "is_sandbox": True
+    }
+]
+
+# Variable globale pour le mode sandbox (par utilisateur en production, ici simplifié)
+META_SANDBOX_USERS = set()
+
+@router.get("/sandbox-status", response_model=dict)
+async def get_meta_sandbox_status(current_user: dict = Depends(get_current_user)):
+    """
+    Vérifie si le mode sandbox Meta est activé pour l'utilisateur.
+    """
+    user_id = get_user_id(current_user)
+    is_sandbox = user_id in META_SANDBOX_USERS
+    
+    # Also check database for persistence
+    user_settings = await db.user_settings.find_one({"user_id": user_id})
+    if user_settings:
+        is_sandbox = user_settings.get("meta_sandbox_mode", False)
+    
+    return {
+        "sandbox_mode": is_sandbox,
+        "message": "Mode sandbox Meta " + ("activé" if is_sandbox else "désactivé")
+    }
+
+@router.post("/sandbox-toggle", response_model=dict)
+async def toggle_meta_sandbox(current_user: dict = Depends(get_current_user)):
+    """
+    Active ou désactive le mode sandbox Meta pour l'utilisateur.
+    
+    Quand activé:
+    - Les endpoints inbox retournent des données de test
+    - Les réponses aux messages sont simulées (non envoyées)
+    - Aucune donnée réelle n'est touchée
+    """
+    user_id = get_user_id(current_user)
+    
+    # Toggle in database for persistence
+    user_settings = await db.user_settings.find_one({"user_id": user_id})
+    current_status = False
+    
+    if user_settings:
+        current_status = user_settings.get("meta_sandbox_mode", False)
+    
+    new_status = not current_status
+    
+    await db.user_settings.update_one(
+        {"user_id": user_id},
+        {"$set": {"meta_sandbox_mode": new_status}},
+        upsert=True
+    )
+    
+    # Update in-memory set
+    if new_status:
+        META_SANDBOX_USERS.add(user_id)
+    else:
+        META_SANDBOX_USERS.discard(user_id)
+    
+    logger.info(f"Meta sandbox mode {'enabled' if new_status else 'disabled'} for user {user_id}")
+    
+    return {
+        "sandbox_mode": new_status,
+        "message": "Mode sandbox Meta " + ("activé" if new_status else "désactivé")
+    }
+
+@router.get("/sandbox-inbox", response_model=dict)
+async def get_sandbox_inbox(current_user: dict = Depends(get_current_user)):
+    """
+    Retourne les conversations sandbox Meta (messages DM + commentaires).
+    Utilisé quand le mode sandbox est activé.
+    """
+    # Return sandbox test data
+    return {
+        "conversations": SANDBOX_META_CONVERSATIONS,
+        "total": len(SANDBOX_META_CONVERSATIONS),
+        "unread": sum(1 for c in SANDBOX_META_CONVERSATIONS if c.get("status") == "unread"),
+        "is_sandbox": True
+    }
+
+@router.post("/sandbox-reply/{conversation_id}", response_model=dict)
+async def send_sandbox_reply(
+    conversation_id: str,
+    reply: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Simule l'envoi d'une réponse en mode sandbox.
+    Ne fait rien de réel - juste pour tester l'interface.
+    """
+    user_id = get_user_id(current_user)
+    message = reply.get("message", "")
+    
+    logger.info(f"[SANDBOX] User {user_id} sent reply to {conversation_id}: {message[:50]}...")
+    
+    # Find the conversation in sandbox data
+    conversation = next((c for c in SANDBOX_META_CONVERSATIONS if c["id"] == conversation_id), None)
+    
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation sandbox non trouvée")
+    
+    # Simulate response
+    return {
+        "success": True,
+        "message": "Réponse simulée envoyée (mode sandbox)",
+        "conversation_id": conversation_id,
+        "reply_content": message,
+        "is_sandbox": True
+    }
+
+async def is_meta_sandbox_enabled(user_id: str) -> bool:
+    """
+    Vérifie si le mode sandbox Meta est activé pour un utilisateur.
+    """
+    if user_id in META_SANDBOX_USERS:
+        return True
+    
+    user_settings = await db.user_settings.find_one({"user_id": user_id})
+    if user_settings and user_settings.get("meta_sandbox_mode", False):
+        META_SANDBOX_USERS.add(user_id)
+        return True
+    
+    return False
+
