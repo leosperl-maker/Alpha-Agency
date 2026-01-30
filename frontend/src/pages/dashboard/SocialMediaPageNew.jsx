@@ -1891,8 +1891,76 @@ const SocialMediaPage = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          {/* TikTok Sandbox controls */}
-          {tiktokSandboxMode ? (
+          
+          {/* Sandbox Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className={`border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 ${(tiktokSandboxMode || metaSandboxMode) ? 'bg-cyan-500/10' : ''}`}
+              >
+                <AlertTriangle className="w-4 h-4 mr-1" />
+                Sandbox
+                {(tiktokSandboxMode || metaSandboxMode) && (
+                  <Badge className="ml-2 bg-cyan-500 text-white text-[10px] px-1">ON</Badge>
+                )}
+                <ChevronDown className="w-3 h-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-slate-900 border-white/10 min-w-[220px]">
+              <DropdownMenuLabel className="text-white/50 text-xs">Mode démonstration</DropdownMenuLabel>
+              
+              {/* TikTok Sandbox */}
+              <div className="px-2 py-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Play className="w-4 h-4" />
+                    <span className="text-white/80 text-sm">TikTok Sandbox</span>
+                  </div>
+                  <Switch
+                    checked={tiktokSandboxMode}
+                    onCheckedChange={handleToggleTikTokSandbox}
+                    className="data-[state=checked]:bg-cyan-500"
+                  />
+                </div>
+                <p className="text-white/40 text-xs mt-1 pl-6">Publication test TikTok</p>
+              </div>
+              
+              <DropdownMenuSeparator className="bg-white/10" />
+              
+              {/* Meta Sandbox */}
+              <div className="px-2 py-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Facebook className="w-4 h-4 text-[#1877F2]" />
+                    <span className="text-white/80 text-sm">Meta Sandbox</span>
+                  </div>
+                  <Switch
+                    checked={metaSandboxMode}
+                    onCheckedChange={handleToggleMetaSandbox}
+                    className="data-[state=checked]:bg-cyan-500"
+                  />
+                </div>
+                <p className="text-white/40 text-xs mt-1 pl-6">Messages & commentaires test</p>
+              </div>
+              
+              {(tiktokSandboxMode || metaSandboxMode) && (
+                <>
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  <div className="px-2 py-2 bg-cyan-500/10 rounded-b-md">
+                    <p className="text-cyan-400 text-xs flex items-center gap-1">
+                      <Info className="w-3 h-3" />
+                      Mode test actif - Données fictives
+                    </p>
+                  </div>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          {/* TikTok API Logs button - only when sandbox mode is on */}
+          {tiktokSandboxMode && (
             <Button
               variant="outline"
               size="sm"
@@ -1901,16 +1969,6 @@ const SocialMediaPage = () => {
             >
               <AlertTriangle className="w-4 h-4 mr-1" />
               API Logs
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-              onClick={handleToggleTikTokSandbox}
-            >
-              <Play className="w-4 h-4 mr-1" />
-              Mode démo TikTok
             </Button>
           )}
           </div>
