@@ -203,9 +203,11 @@ const MultilinkPage = () => {
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [socialDialogOpen, setSocialDialogOpen] = useState(false);
   const [statsDialogOpen, setStatsDialogOpen] = useState(false);
+  const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [editingPage, setEditingPage] = useState(null);
   const [editingLink, setEditingLink] = useState(null);
   const [editingSocial, setEditingSocial] = useState(null);
+  const qrRef = useRef(null);
   
   // Page Form
   const [pageForm, setPageForm] = useState({
