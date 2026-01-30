@@ -3631,6 +3631,75 @@ const MultilinkPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* QR Code Dialog */}
+      <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <QrCode className="w-5 h-5 text-indigo-400" />
+              QR Code - {selectedPage?.title}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {/* QR Code Preview */}
+            <div 
+              ref={qrRef}
+              className="bg-white rounded-2xl p-6 mx-auto w-fit"
+            >
+              <QRCodeSVG 
+                value={getPageUrl()}
+                size={200}
+                level="H"
+                includeMargin={false}
+                bgColor="#ffffff"
+                fgColor="#000000"
+              />
+            </div>
+
+            {/* URL Display */}
+            <div className="text-center">
+              <p className="text-white/60 text-sm mb-1">URL de la page</p>
+              <p className="text-white font-medium break-all text-sm bg-white/5 rounded-lg px-3 py-2">
+                {getPageUrl()}
+              </p>
+            </div>
+
+            {/* Download Buttons */}
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => downloadQrCode('png')}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                PNG (1024px)
+              </Button>
+              <Button 
+                onClick={() => downloadQrCode('svg')}
+                variant="outline"
+                className="flex-1 border-white/10 text-white hover:bg-white/5"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                SVG
+              </Button>
+            </div>
+
+            {/* Tips */}
+            <div className="bg-white/5 rounded-lg p-3">
+              <p className="text-white/40 text-xs">
+                <strong className="text-white/60">💡 Conseil:</strong> Le format PNG est idéal pour les impressions (cartes de visite, flyers). Le format SVG est vectoriel et peut être agrandi sans perte de qualité.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setQrDialogOpen(false)} className="border-white/10 text-white">
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
