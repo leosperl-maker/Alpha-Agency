@@ -35,11 +35,12 @@ const QuickActions = () => {
 
   const quickActions = [
     { id: "contact", icon: UserPlus, label: "Nouveau contact", color: "from-blue-500 to-cyan-500" },
-    { id: "invoice", icon: Receipt, label: "Nouvelle facture", color: "from-green-500 to-emerald-500" },
     { id: "task", icon: CheckSquare, label: "Nouvelle tâche", color: "from-amber-500 to-orange-500" },
+    { id: "invoice", icon: Receipt, label: "Nouvelle facture", color: "from-green-500 to-emerald-500" },
     { id: "opportunity", icon: Briefcase, label: "Nouvelle opportunité", color: "from-purple-500 to-pink-500" },
-    { id: "document", icon: FolderPlus, label: "Nouveau document", color: "from-indigo-500 to-violet-500", navigate: "/admin/documents" },
-    { id: "blog", icon: FileText, label: "Nouvel article", color: "from-rose-500 to-red-500", navigate: "/admin/blog" },
+    { id: "multilink", icon: Link2, label: "Multilink", color: "from-indigo-500 to-violet-500", navigate: "/admin/multilink" },
+    { id: "social", icon: Share2, label: "Publier", color: "from-pink-500 to-rose-500", navigate: "/admin/social-media" },
+    { id: "assistant", icon: Bot, label: "Assistant IA", color: "from-cyan-500 to-teal-500", navigate: "/admin/assistant" },
   ];
 
   const handleAction = (action) => {
