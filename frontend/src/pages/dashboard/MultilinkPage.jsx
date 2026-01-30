@@ -554,6 +554,62 @@ const MultilinkPage = () => {
 
   // ================== END CUSTOM DOMAIN MANAGEMENT ==================
 
+  // ================== QR CODE FUNCTIONS ==================
+  
+  const getPageUrl = () => {
+    if (selectedPage?.custom_domain) {
+      return `https://${selectedPage.custom_domain}`;
+    }
+    return `https://alphagency.fr/lien-bio/${selectedPage?.slug}`;
+  };
+
+  const downloadQrCode = (format = 'png') => {
+    const svg = qrRef.current?.querySelector('svg');
+    if (!svg) return;
+
+    if (format === 'svg') {
+      // Download as SVG
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = svgUrl;
+      downloadLink.download = `qr-${selectedPage?.slug || 'page'}.svg`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(svgUrl);
+    } else {
+      // Download as PNG
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const img = new window.Image();
+      
+      img.onload = () => {
+        canvas.width = 1024;
+        canvas.height = 1024;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, 1024, 1024);
+        
+        const pngUrl = canvas.toDataURL('image/png');
+        const downloadLink = document.createElement('a');
+        downloadLink.href = pngUrl;
+        downloadLink.download = `qr-${selectedPage?.slug || 'page'}.png`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      };
+      
+      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+    }
+    
+    toast.success(`QR Code téléchargé en ${format.toUpperCase()}`);
+  };
+
+  // ================== END QR CODE FUNCTIONS ==================
+
   const deletePage = async (page) => {
     if (!window.confirm(`Supprimer la page "${page.title}" ?`)) return;
     
