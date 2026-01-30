@@ -890,6 +890,22 @@ const SocialMediaPage = () => {
     }
   };
   
+  const handleToggleMetaSandbox = async () => {
+    try {
+      const response = await api.post('/meta/sandbox-toggle');
+      setMetaSandboxMode(response.data.sandbox_mode);
+      toast.success(response.data.message);
+      // Reload inbox data if sandbox mode changed
+      if (activeSection === 'inbox') {
+        await loadInbox();
+      }
+      await loadData();
+    } catch (error) {
+      console.error('Error toggling Meta sandbox:', error);
+      toast.error('Erreur lors du changement de mode');
+    }
+  };
+  
   const handleTriggerTikTokPublish = async (postId) => {
     try {
       const response = await api.post(`/tiktok/simulate-scheduled-publish/${postId}`);
