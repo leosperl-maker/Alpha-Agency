@@ -1,18 +1,23 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, Users, Kanban, FileText, Receipt, CreditCard, Settings,
   LogOut, Menu, X, Image, Inbox, FileCheck, CheckSquare, Wallet, Database,
   UserCog, Bot, Newspaper, Share2, Tag, Mail, ChevronLeft, Bell, Search,
   User, ChevronDown, AlertCircle, Clock, FileWarning, UserPlus, Sun, Moon,
-  ListTodo, GitBranch, Send, Calendar, CalendarDays, Link2
+  ListTodo, GitBranch, Send, Calendar, CalendarDays, Link2, Command, 
+  FileSearch, Contact, Briefcase, DollarSign
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import FloatingAIChat from "../../components/FloatingAIChat";
 import QuickActions from "../../components/QuickActions";
-import { tasksAPI, contactsAPI, invoicesAPI } from "../../lib/api";
+import { tasksAPI, contactsAPI, invoicesAPI, opportunitiesAPI } from "../../lib/api";
 import { useTheme } from "../../contexts/ThemeContext";
+import {
+  Dialog,
+  DialogContent,
+} from "../../components/ui/dialog";
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
