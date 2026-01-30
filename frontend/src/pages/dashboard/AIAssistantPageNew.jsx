@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { 
   Send, Loader2, Sparkles, User, Image as ImageIcon,
   Plus, Wand2, Camera, Download, Zap, CheckCircle2, AlertCircle,
-  X, ChevronDown, History, Trash2, RefreshCw
+  X, ChevronDown, History, Trash2, RefreshCw, Bot, Check
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { ScrollArea } from "../../components/ui/scroll-area";
@@ -12,6 +12,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../../components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog";
 import { toast } from "sonner";
 import { aiEnhancedAPI, aiAPI } from "../../lib/api";
 
