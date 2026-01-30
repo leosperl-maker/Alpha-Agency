@@ -634,9 +634,9 @@ const LinkBioPage = () => {
                       />
                     )}
                     <div className="p-4">
-                      <p className="font-bold text-lg" style={{ color: colors.button_text || '#ffffff' }}>{block.label}</p>
+                      <p className="font-bold text-lg" style={{ color: colors.text || '#ffffff' }}>{block.label}</p>
                       {block.description && (
-                        <p className="text-sm mt-2 opacity-80 leading-relaxed" style={{ color: colors.button_text || '#ffffff' }}>{block.description}</p>
+                        <p className="text-sm mt-2 opacity-80 leading-relaxed" style={{ color: colors.text || '#ffffff' }}>{block.description}</p>
                       )}
                       <button
                         onClick={() => {
@@ -650,7 +650,7 @@ const LinkBioPage = () => {
                         className="mt-4 px-6 py-2.5 rounded-full font-medium text-sm transition-all hover:opacity-90"
                         style={{ 
                           backgroundColor: colors.accent || '#6366f1',
-                          color: '#ffffff'
+                          color: colors.button_text || '#ffffff'
                         }}
                       >
                         {buttonText}
