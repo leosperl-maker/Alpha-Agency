@@ -293,6 +293,12 @@ const EditorialCalendarPage = () => {
   const [aiTopic, setAiTopic] = useState('');
   const [aiResult, setAiResult] = useState(null);
 
+  // AI Ideas Panel states
+  const [showIdeasPanel, setShowIdeasPanel] = useState(false);
+  const [ideasLoading, setIdeasLoading] = useState(false);
+  const [postIdeas, setPostIdeas] = useState([]);
+  const [ideasThemes, setIdeasThemes] = useState('');
+
   // Preview state
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewPost, setPreviewPost] = useState(null);
