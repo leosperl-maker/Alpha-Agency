@@ -6,6 +6,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 
 // Components
 import ScrollToTop from "./components/ScrollToTop";
+import CustomDomainHandler from "./components/CustomDomainHandler";
 
 // Pages vitrine
 import HomePage from "./pages/HomePage";
