@@ -630,6 +630,53 @@ const AIAssistantPageNew = () => {
           </div>
         </div>
       </div>
+
+      {/* Model Selection Dialog */}
+      <Dialog open={showModelDialog} onOpenChange={setShowModelDialog}>
+        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Bot className="w-5 h-5 text-indigo-400" />
+              Choisir un modèle IA
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-2 py-2">
+            {modelOptions.map(model => (
+              <button
+                key={model.value}
+                onClick={() => { setSelectedModel(model.value); setShowModelDialog(false); }}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                  selectedModel === model.value 
+                    ? 'bg-indigo-600/20 border-2 border-indigo-500/50' 
+                    : 'bg-white/5 border-2 border-transparent hover:bg-white/10 hover:border-white/10'
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl ${
+                  selectedModel === model.value ? 'bg-indigo-600/30' : 'bg-white/5'
+                }`}>
+                  {model.icon}
+                </div>
+                <div className="flex-1 text-left">
+                  <p className={`font-medium ${selectedModel === model.value ? 'text-indigo-400' : 'text-white'}`}>
+                    {model.label}
+                  </p>
+                  <p className="text-xs text-white/40">{model.description}</p>
+                </div>
+                {selectedModel === model.value && (
+                  <Check className="w-5 h-5 text-indigo-400" />
+                )}
+              </button>
+            ))}
+          </div>
+          
+          <div className="pt-2 border-t border-white/10">
+            <p className="text-xs text-white/40 text-center">
+              Sélectionnez le modèle adapté à votre besoin
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   );
 };
