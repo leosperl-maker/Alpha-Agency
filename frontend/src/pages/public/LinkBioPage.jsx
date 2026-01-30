@@ -116,7 +116,7 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
 
   const scroll = (direction) => {
     if (scrollRef.current) {
-      const scrollAmount = 280;
+      const scrollAmount = 300;
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -128,12 +128,12 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
   if (!items || items.length === 0) return null;
 
   return (
-    <div className="relative -mx-4">
+    <div className="relative">
       {/* Scroll buttons - desktop only */}
       {canScrollLeft && (
         <button
           onClick={() => scroll('left')}
-          className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/60 backdrop-blur-md items-center justify-center text-white hover:bg-black/80 transition-all shadow-lg"
+          className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/60 backdrop-blur-md items-center justify-center text-white hover:bg-black/80 transition-all shadow-lg"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -141,7 +141,7 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}
-          className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/60 backdrop-blur-md items-center justify-center text-white hover:bg-black/80 transition-all shadow-lg"
+          className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/60 backdrop-blur-md items-center justify-center text-white hover:bg-black/80 transition-all shadow-lg"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -150,7 +150,7 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
       {/* Carousel container */}
       <div 
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 snap-x snap-mandatory"
+        className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         onScroll={checkScroll}
       >
@@ -164,12 +164,12 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
             <div
               key={index}
               className="flex-shrink-0 snap-start group"
-              style={{ width: isLinkImage ? '220px' : '160px' }}
+              style={{ width: isLinkImage ? '260px' : '200px' }}
             >
               {/* Link Image Card - zaap.bio style with button */}
               {isLinkImage ? (
                 <div 
-                  className="rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-[1.02]"
+                  className="rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-[1.02] h-full"
                   style={{ 
                     backgroundColor: colors.card_bg || colors.button_bg || 'rgba(255,255,255,0.1)',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
@@ -179,27 +179,27 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
                     <img 
                       src={mediaUrl} 
                       alt={item.title || ''} 
-                      className="w-full h-32 object-cover"
+                      className="w-full h-40 object-cover"
                     />
                   )}
-                  <div className="p-3">
+                  <div className="p-4">
                     {item.title && (
-                      <h3 className="font-bold text-sm" style={{ color: colors.button_text || '#ffffff' }}>
+                      <h3 className="font-bold text-base" style={{ color: colors.text || '#ffffff' }}>
                         {item.title}
                       </h3>
                     )}
                     {item.description && (
-                      <p className="text-xs mt-1 opacity-70 line-clamp-2" style={{ color: colors.button_text || '#ffffff' }}>
+                      <p className="text-sm mt-1.5 opacity-70 line-clamp-2" style={{ color: colors.text || '#ffffff' }}>
                         {item.description}
                       </p>
                     )}
                     {item.url && (
                       <button
                         onClick={() => onItemClick({ url: item.url, id: item.id })}
-                        className="mt-3 w-full py-2 rounded-full text-xs font-medium transition-all hover:opacity-90"
+                        className="mt-3 w-full py-2.5 rounded-full text-sm font-medium transition-all hover:opacity-90"
                         style={{ 
                           backgroundColor: colors.accent || '#6366f1',
-                          color: '#ffffff'
+                          color: colors.button_text || '#ffffff'
                         }}
                       >
                         {item.button_text || 'En Savoir +'}
@@ -217,7 +217,7 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
                   <div 
                     className="rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-[1.03] group-active:scale-[0.98]"
                     style={{ 
-                      backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
+                      backgroundColor: colors.card_bg || colors.button_bg || 'rgba(255,255,255,0.1)',
                       boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
                     }}
                   >
@@ -245,8 +245,8 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
                             )}
                             {/* Text overlay */}
                             {item.title && (
-                              <div className="absolute bottom-0 left-0 right-0 p-3">
-                                <h3 className="font-bold text-white text-sm leading-tight line-clamp-2 drop-shadow-lg">
+                              <div className="absolute bottom-0 left-0 right-0 p-4">
+                                <h3 className="font-bold text-white text-base leading-tight line-clamp-2 drop-shadow-lg">
                                   {item.title}
                                 </h3>
                               </div>
@@ -261,7 +261,7 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
                       <div className="aspect-[4/5] flex flex-col justify-center p-4">
                         <h3 
                           className="font-bold text-center line-clamp-3"
-                          style={{ color: colors.button_text || '#ffffff' }}
+                          style={{ color: colors.text || '#ffffff' }}
                         >
                           {item.title}
                         </h3>
@@ -276,11 +276,11 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
       </div>
       
       {/* Scroll indicator dots - mobile only */}
-      <div className="flex justify-center gap-1.5 mt-3 md:hidden">
+      <div className="flex justify-center gap-1.5 mt-4 md:hidden">
         {items.map((_, index) => (
           <div 
             key={index}
-            className="w-1.5 h-1.5 rounded-full transition-all"
+            className="w-2 h-2 rounded-full transition-all"
             style={{ 
               backgroundColor: colors.text || '#ffffff',
               opacity: 0.3
