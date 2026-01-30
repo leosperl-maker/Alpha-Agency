@@ -129,7 +129,7 @@ function App() {
           <Route path="/transfer/:transferId" element={<TransferDownloadPage />} />
         </Routes>
           </CustomDomainHandler>
-      </BrowserRouter>
+        </BrowserRouter>
     </div>
     </ThemeProvider>
   );
