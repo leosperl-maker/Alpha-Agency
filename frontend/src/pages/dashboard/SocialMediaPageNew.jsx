@@ -2240,6 +2240,36 @@ const SocialMediaPage = () => {
       {/* TikTok Sandbox Banner */}
       {tiktokSandboxMode && <TikTokSandboxBanner onToggle={handleToggleTikTokSandbox} />}
       
+      {/* Meta Sandbox Banner */}
+      {metaSandboxMode && (
+        <div className="mb-4 p-4 bg-gradient-to-r from-[#1877F2]/20 to-[#E4405F]/20 border border-[#1877F2]/30 rounded-xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#1877F2]/20 flex items-center justify-center">
+                <Facebook className="w-5 h-5 text-[#1877F2]" />
+              </div>
+              <div>
+                <h3 className="text-white font-medium flex items-center gap-2">
+                  Mode Sandbox Meta Activé
+                  <Badge className="bg-[#1877F2]/20 text-[#1877F2] text-xs">DEMO</Badge>
+                </h3>
+                <p className="text-white/60 text-sm">
+                  Messages et commentaires Facebook/Instagram en mode test - Aucune donnée réelle
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleToggleMetaSandbox}
+              className="border-[#1877F2]/30 text-[#1877F2] hover:bg-[#1877F2]/10"
+            >
+              Désactiver
+            </Button>
+          </div>
+        </div>
+      )}
+      
       {/* Content */}
       <div className="mt-4">
         {activeSection === 'publishing' && renderPublishing()}
