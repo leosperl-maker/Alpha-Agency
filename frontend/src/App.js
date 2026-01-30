@@ -70,8 +70,9 @@ function App() {
           }}
         />
         <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
+          <CustomDomainHandler>
+            <ScrollToTop />
+            <Routes>
             {/* Site vitrine */}
             <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
