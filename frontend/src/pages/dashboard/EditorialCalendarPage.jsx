@@ -880,12 +880,20 @@ const EditorialCalendarPage = () => {
         
         <div className="flex items-center gap-2">
           <Button 
+            onClick={() => setShowIdeasPanel(true)}
+            variant="outline"
+            className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/10"
+          >
+            <Lightbulb className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Idées IA</span>
+          </Button>
+          <Button 
             onClick={() => { resetCalendarForm(); setShowCalendarModal(true); }}
             variant="outline"
             className="border-white/20 text-white hover:bg-white/10"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Nouveau calendrier
+            <span className="hidden sm:inline">Nouveau calendrier</span>
           </Button>
           <Button 
             onClick={() => openNewPost()}
