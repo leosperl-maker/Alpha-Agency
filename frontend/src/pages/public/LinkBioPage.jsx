@@ -714,13 +714,13 @@ const LinkBioPage = () => {
                     className={`p-4 ${roundedClass}`}
                     style={{ 
                       backgroundColor: colors.card_bg || colors.button_bg || 'rgba(255,255,255,0.1)',
-                      color: colors.button_text || '#ffffff'
+                      color: colors.text || '#ffffff'
                     }}
                   >
                     {/* Render Markdown content */}
                     <div 
                       className="prose prose-invert prose-sm max-w-none"
-                      style={{ color: colors.button_text || '#ffffff' }}
+                      style={{ color: colors.text || '#ffffff' }}
                     >
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {block.content}
