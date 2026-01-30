@@ -1854,6 +1854,152 @@ const MultilinkPage = () => {
                     {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                     Enregistrer le SEO
                   </Button>
+
+                  {/* CUSTOM DOMAIN SECTION */}
+                  <div className="border-t border-white/10 pt-6 mt-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Globe2 className="w-5 h-5 text-indigo-400" />
+                      <h3 className="text-white font-medium">Domaine personnalisé</h3>
+                    </div>
+                    
+                    <p className="text-white/50 text-sm mb-4">
+                      Associez un domaine personnalisé à cette page (ex: bio.votre-domaine.com)
+                    </p>
+
+                    {/* Current domain display */}
+                    {selectedPage?.custom_domain && (
+                      <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-xl">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-green-400" />
+                            <span className="text-green-400 text-sm font-medium">
+                              Domaine configuré: {selectedPage.custom_domain}
+                            </span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={removeCustomDomain}
+                            disabled={savingDomain}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7"
+                          >
+                            <Trash2 className="w-3 h-3 mr-1" />
+                            Supprimer
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Domain input */}
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <Input
+                          value={customDomainInput}
+                          onChange={(e) => setCustomDomainInput(e.target.value.toLowerCase().replace(/^https?:\/\//, ''))}
+                          placeholder="bio.votre-domaine.com"
+                          className="bg-white/5 border-white/10 text-white flex-1"
+                        />
+                        <Button 
+                          onClick={saveCustomDomain} 
+                          disabled={savingDomain || !customDomainInput.trim()}
+                          className="bg-indigo-600 hover:bg-indigo-700"
+                        >
+                          {savingDomain ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            'Configurer'
+                          )}
+                        </Button>
+                      </div>
+
+                      {/* Check DNS status button */}
+                      {selectedPage?.custom_domain && (
+                        <Button
+                          variant="outline"
+                          onClick={checkDomainStatus}
+                          disabled={checkingDomain}
+                          className="w-full border-white/10 text-white hover:bg-white/5"
+                        >
+                          {checkingDomain ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                          )}
+                          Vérifier la configuration DNS
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Domain status display */}
+                    {domainStatus && (
+                      <div className={`mt-4 p-4 rounded-xl border ${
+                        domainStatus.dns_configured 
+                          ? 'bg-green-500/10 border-green-500/20' 
+                          : 'bg-yellow-500/10 border-yellow-500/20'
+                      }`}>
+                        <div className="flex items-start gap-3">
+                          {domainStatus.dns_configured ? (
+                            <CheckCircle2 className="w-5 h-5 text-green-400 mt-0.5" />
+                          ) : (
+                            <AlertCircle className="w-5 h-5 text-yellow-400 mt-0.5" />
+                          )}
+                          <div className="flex-1">
+                            <p className={`font-medium ${
+                              domainStatus.dns_configured ? 'text-green-400' : 'text-yellow-400'
+                            }`}>
+                              {domainStatus.dns_configured ? 'DNS configuré correctement' : 'Configuration DNS requise'}
+                            </p>
+                            <p className="text-white/60 text-sm mt-1">
+                              {domainStatus.dns_message || 'Suivez les instructions ci-dessous pour configurer votre domaine.'}
+                            </p>
+                            
+                            {/* DNS Instructions */}
+                            {domainStatus.instructions && !domainStatus.dns_configured && (
+                              <div className="mt-3 p-3 bg-black/20 rounded-lg">
+                                <p className="text-white/80 text-sm font-medium mb-2">Instructions de configuration:</p>
+                                <ol className="text-white/60 text-sm space-y-2">
+                                  <li>1. Accédez à votre panneau de gestion DNS</li>
+                                  <li>2. Ajoutez un enregistrement <strong className="text-white">CNAME</strong></li>
+                                  <li className="pl-4">
+                                    <span className="text-indigo-400">Nom/Host:</span> {customDomainInput.split('.')[0] || 'bio'}
+                                  </li>
+                                  <li className="pl-4">
+                                    <span className="text-indigo-400">Valeur/Target:</span> 
+                                    <code className="ml-1 bg-white/10 px-2 py-0.5 rounded text-xs">
+                                      {domainStatus.instructions?.dns_record?.split('→')[2]?.trim() || 'blockify-bio.preview.emergentagent.com'}
+                                    </code>
+                                  </li>
+                                  <li>3. Attendez la propagation DNS (quelques minutes à 24h)</li>
+                                  <li>4. Cliquez sur "Vérifier la configuration DNS" ci-dessus</li>
+                                </ol>
+                              </div>
+                            )}
+
+                            {/* Success URL */}
+                            {domainStatus.dns_configured && domainStatus.url && (
+                              <a 
+                                href={domainStatus.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 mt-2 text-green-400 hover:text-green-300 text-sm"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                Ouvrir {domainStatus.url}
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Help text */}
+                    <div className="mt-4 p-3 bg-white/5 rounded-lg">
+                      <p className="text-white/40 text-xs">
+                        <strong className="text-white/60">💡 Conseil:</strong> Pour utiliser un sous-domaine comme <code className="bg-white/10 px-1 rounded">bio.votre-site.com</code>, 
+                        créez un enregistrement CNAME pointant vers notre serveur. La propagation DNS peut prendre jusqu'à 24 heures.
+                      </p>
+                    </div>
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>
