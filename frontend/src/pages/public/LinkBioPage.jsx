@@ -585,8 +585,29 @@ const LinkBioPage = () => {
                 '9:16': 'aspect-[9/16]'
               }[block.settings?.aspect_ratio] || '';
               
-              // Link blocks
-              if (['link', 'button'].includes(block.block_type)) {
+              // Button block - centered, accent color, auto-width
+              if (block.block_type === 'button') {
+                return (
+                  <div key={block.id} className="flex justify-center">
+                    <button
+                      onClick={() => {
+                        handleBlockClick(block);
+                        window.open(block.url, '_blank', 'noopener,noreferrer');
+                      }}
+                      className={`px-8 py-3 ${roundedClass} font-medium text-base transition-all duration-300 hover:scale-[1.05] hover:opacity-90`}
+                      style={{
+                        backgroundColor: colors.accent || '#6366f1',
+                        color: colors.button_text || '#ffffff'
+                      }}
+                    >
+                      {block.label}
+                    </button>
+                  </div>
+                );
+              }
+              
+              // Link blocks (simple links with icon)
+              if (block.block_type === 'link') {
                 const IconComponent = getIcon(block.icon);
                 return (
                   <button
@@ -595,7 +616,7 @@ const LinkBioPage = () => {
                     className={`w-full ${roundedClass} p-4 flex items-center gap-4 transition-all duration-300 hover:scale-[1.02]`}
                     style={{
                       backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
-                      color: colors.button_text || '#ffffff'
+                      color: colors.text || '#ffffff'
                     }}
                   >
                     <div 
