@@ -478,6 +478,79 @@ const MultilinkPage = () => {
     }
   };
 
+  // ================== CUSTOM DOMAIN MANAGEMENT ==================
+  
+  const saveCustomDomain = async () => {
+    if (!selectedPage) return;
+    
+    setSavingDomain(true);
+    try {
+      const response = await api.post(`/multilink/pages/${selectedPage.id}/custom-domain`, {
+        domain: customDomainInput.trim() || null
+      });
+      
+      toast.success(response.data.message);
+      
+      // Show DNS instructions if domain was set
+      if (customDomainInput.trim() && response.data.instructions) {
+        setDomainStatus({
+          configured: true,
+          dns_configured: false,
+          instructions: response.data.instructions,
+          custom_domain: response.data.custom_domain
+        });
+      } else {
+        setDomainStatus(null);
+      }
+      
+      fetchPageDetails(selectedPage);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la configuration du domaine');
+    } finally {
+      setSavingDomain(false);
+    }
+  };
+
+  const checkDomainStatus = async () => {
+    if (!selectedPage) return;
+    
+    setCheckingDomain(true);
+    try {
+      const response = await api.get(`/multilink/pages/${selectedPage.id}/domain-status`);
+      setDomainStatus(response.data);
+      
+      if (response.data.dns_configured) {
+        toast.success('DNS correctement configuré !');
+      } else if (response.data.configured) {
+        toast.warning('DNS non résolu - Vérifiez votre configuration CNAME');
+      }
+    } catch (error) {
+      toast.error('Erreur lors de la vérification');
+    } finally {
+      setCheckingDomain(false);
+    }
+  };
+
+  const removeCustomDomain = async () => {
+    if (!selectedPage) return;
+    if (!window.confirm('Supprimer le domaine personnalisé ?')) return;
+    
+    setSavingDomain(true);
+    try {
+      await api.post(`/multilink/pages/${selectedPage.id}/custom-domain`, { domain: null });
+      toast.success('Domaine personnalisé supprimé');
+      setCustomDomainInput('');
+      setDomainStatus(null);
+      fetchPageDetails(selectedPage);
+    } catch (error) {
+      toast.error('Erreur');
+    } finally {
+      setSavingDomain(false);
+    }
+  };
+
+  // ================== END CUSTOM DOMAIN MANAGEMENT ==================
+
   const deletePage = async (page) => {
     if (!window.confirm(`Supprimer la page "${page.title}" ?`)) return;
     
