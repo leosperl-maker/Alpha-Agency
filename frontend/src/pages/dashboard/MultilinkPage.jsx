@@ -1264,6 +1264,15 @@ const MultilinkPage = () => {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={() => setQrDialogOpen(true)}
+                    className="text-white/60 hover:text-white hover:bg-white/10"
+                    title="QR Code"
+                  >
+                    <QrCode className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => fetchPageStats(selectedPage)}
                     className="text-white/60 hover:text-white hover:bg-white/10"
                   >
@@ -1306,6 +1315,9 @@ const MultilinkPage = () => {
                     </TabsTrigger>
                     <TabsTrigger value="seo" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-white whitespace-nowrap">
                       <Search className="w-4 h-4 mr-2" /> SEO
+                    </TabsTrigger>
+                    <TabsTrigger value="analytics" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-white whitespace-nowrap">
+                      <BarChart3 className="w-4 h-4 mr-2" /> Analytics
                     </TabsTrigger>
                   </TabsList>
                 </div>
