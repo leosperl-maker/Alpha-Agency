@@ -128,6 +128,7 @@ function App() {
           {/* Public transfer download page */}
           <Route path="/transfer/:transferId" element={<TransferDownloadPage />} />
         </Routes>
+          </CustomDomainHandler>
       </BrowserRouter>
     </div>
     </ThemeProvider>
