@@ -184,6 +184,175 @@ const DashboardLayout = () => {
     }
   };
 
+  // ================== COMMAND PALETTE (⌘K) ==================
+  
+  // All searchable items
+  const allNavigationItems = [
+    { id: 'nav-dashboard', type: 'Navigation', title: "Vue d'ensemble", icon: LayoutDashboard, action: () => navigate('/admin'), keywords: 'dashboard accueil home' },
+    { id: 'nav-contacts', type: 'Navigation', title: "Contacts", icon: Users, action: () => navigate('/admin/contacts'), keywords: 'clients prospects' },
+    { id: 'nav-pipeline', type: 'Navigation', title: "Pipeline", icon: Kanban, action: () => navigate('/admin/pipeline'), keywords: 'ventes deals opportunités' },
+    { id: 'nav-tasks', type: 'Navigation', title: "Tâches", icon: CheckSquare, action: () => navigate('/admin/taches'), keywords: 'todo list' },
+    { id: 'nav-agenda', type: 'Navigation', title: "Agenda / RDV", icon: Calendar, action: () => navigate('/admin/agenda'), keywords: 'calendrier rendez-vous' },
+    { id: 'nav-editorial', type: 'Navigation', title: "Calendrier Éditorial", icon: CalendarDays, action: () => navigate('/admin/editorial'), keywords: 'posts publications' },
+    { id: 'nav-multilink', type: 'Navigation', title: "Multilink", icon: Link2, action: () => navigate('/admin/multilink'), keywords: 'bio links page' },
+    { id: 'nav-invoices', type: 'Navigation', title: "Facturation", icon: Receipt, action: () => navigate('/admin/facturation'), keywords: 'factures devis' },
+    { id: 'nav-budget', type: 'Navigation', title: "Budget", icon: Wallet, action: () => navigate('/admin/budget'), keywords: 'finances argent' },
+    { id: 'nav-social', type: 'Navigation', title: "Social Media", icon: Share2, action: () => navigate('/admin/social-media'), keywords: 'réseaux sociaux instagram facebook' },
+    { id: 'nav-assistant', type: 'Navigation', title: "Assistant IA", icon: Bot, action: () => navigate('/admin/assistant'), keywords: 'ai chat gpt' },
+    { id: 'nav-settings', type: 'Navigation', title: "Paramètres", icon: Settings, action: () => navigate('/admin/parametres'), keywords: 'config configuration' },
+  ];
+
+  const quickActionItems = [
+    { id: 'action-contact', type: 'Action rapide', title: "Créer un contact", icon: UserPlus, action: () => { setCommandPaletteOpen(false); /* trigger quick action */ }, keywords: 'nouveau client' },
+    { id: 'action-task', type: 'Action rapide', title: "Créer une tâche", icon: CheckSquare, action: () => { setCommandPaletteOpen(false); }, keywords: 'nouvelle todo' },
+    { id: 'action-invoice', type: 'Action rapide', title: "Créer une facture", icon: Receipt, action: () => { setCommandPaletteOpen(false); navigate('/admin/facturation'); }, keywords: 'nouvelle facture devis' },
+    { id: 'action-opportunity', type: 'Action rapide', title: "Créer une opportunité", icon: Briefcase, action: () => { setCommandPaletteOpen(false); navigate('/admin/pipeline'); }, keywords: 'nouveau deal' },
+  ];
+
+  // Global search function
+  const performGlobalSearch = useCallback(async (query) => {
+    if (!query.trim()) {
+      setCommandResults([...allNavigationItems.slice(0, 5), ...quickActionItems]);
+      return;
+    }
+
+    setIsSearching(true);
+    const lowerQuery = query.toLowerCase();
+    
+    // Filter navigation items
+    const navResults = allNavigationItems.filter(item => 
+      item.title.toLowerCase().includes(lowerQuery) || 
+      item.keywords.toLowerCase().includes(lowerQuery)
+    );
+
+    // Filter quick actions
+    const actionResults = quickActionItems.filter(item =>
+      item.title.toLowerCase().includes(lowerQuery) ||
+      item.keywords.toLowerCase().includes(lowerQuery)
+    );
+
+    // Search in database
+    let dbResults = [];
+    try {
+      const [contactsRes, tasksRes, invoicesRes, opportunitiesRes] = await Promise.all([
+        contactsAPI.getAll({ search: query }).catch(() => ({ data: [] })),
+        tasksAPI.getAll({ search: query }).catch(() => ({ data: [] })),
+        invoicesAPI.getAll({ search: query }).catch(() => ({ data: [] })),
+        opportunitiesAPI.getAll({ search: query }).catch(() => ({ data: [] }))
+      ]);
+
+      (contactsRes.data || []).slice(0, 3).forEach(c => {
+        dbResults.push({
+          id: `contact-${c.id}`,
+          type: 'Contact',
+          title: `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.email,
+          subtitle: c.company || c.email,
+          icon: Contact,
+          action: () => { setCommandPaletteOpen(false); navigate('/admin/contacts'); }
+        });
+      });
+
+      (tasksRes.data || []).slice(0, 3).forEach(t => {
+        dbResults.push({
+          id: `task-${t.id}`,
+          type: 'Tâche',
+          title: t.title,
+          subtitle: t.status === 'todo' ? 'À faire' : t.status === 'in_progress' ? 'En cours' : 'Terminée',
+          icon: CheckSquare,
+          action: () => { setCommandPaletteOpen(false); navigate('/admin/taches'); }
+        });
+      });
+
+      (invoicesRes.data || []).slice(0, 2).forEach(i => {
+        dbResults.push({
+          id: `invoice-${i.id}`,
+          type: 'Facture',
+          title: i.number || `Facture ${i.client_name}`,
+          subtitle: `${i.total?.toFixed(2) || 0}€`,
+          icon: Receipt,
+          action: () => { setCommandPaletteOpen(false); navigate('/admin/facturation'); }
+        });
+      });
+
+      (opportunitiesRes.data || []).slice(0, 2).forEach(o => {
+        dbResults.push({
+          id: `opportunity-${o.id}`,
+          type: 'Opportunité',
+          title: o.name,
+          subtitle: `${o.amount?.toFixed(0) || 0}€`,
+          icon: Briefcase,
+          action: () => { setCommandPaletteOpen(false); navigate('/admin/pipeline'); }
+        });
+      });
+    } catch (error) {
+      console.error("Search error:", error);
+    }
+
+    setCommandResults([...navResults, ...actionResults, ...dbResults]);
+    setSelectedCommandIndex(0);
+    setIsSearching(false);
+  }, [navigate]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // ⌘K or Ctrl+K - Open command palette
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(prev => !prev);
+        setCommandQuery("");
+        performGlobalSearch("");
+      }
+      
+      // Escape - Close palette
+      if (e.key === 'Escape' && commandPaletteOpen) {
+        setCommandPaletteOpen(false);
+      }
+
+      // Navigate results with arrow keys
+      if (commandPaletteOpen) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setSelectedCommandIndex(prev => 
+            prev < commandResults.length - 1 ? prev + 1 : 0
+          );
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setSelectedCommandIndex(prev => 
+            prev > 0 ? prev - 1 : commandResults.length - 1
+          );
+        }
+        if (e.key === 'Enter' && commandResults[selectedCommandIndex]) {
+          e.preventDefault();
+          commandResults[selectedCommandIndex].action();
+          setCommandPaletteOpen(false);
+        }
+      }
+
+      // Quick shortcuts (when palette closed)
+      if (!commandPaletteOpen && !e.target.closest('input, textarea')) {
+        // G then D - Go to Dashboard
+        // G then C - Go to Contacts
+        // G then T - Go to Tasks
+        // G then P - Go to Pipeline
+        // G then A - Go to Assistant
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [commandPaletteOpen, commandResults, selectedCommandIndex, performGlobalSearch]);
+
+  // Focus input when palette opens
+  useEffect(() => {
+    if (commandPaletteOpen) {
+      setTimeout(() => commandInputRef.current?.focus(), 100);
+    }
+  }, [commandPaletteOpen]);
+
+  // ================== END COMMAND PALETTE ==================
+
   const handleLogout = () => {
     localStorage.removeItem("alpha_token");
     localStorage.removeItem("alpha_user");
