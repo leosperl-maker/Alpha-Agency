@@ -1393,7 +1393,7 @@ async def set_custom_domain(
             "custom_domain": domain,
             "instructions": {
                 "step1": f"Ajoutez un enregistrement DNS CNAME:",
-                "dns_record": f"{domain} → CNAME → blockify-bio.preview.emergentagent.com",
+                "dns_record": f"{domain} → CNAME → alphagency.fr",
                 "step2": "Attendez la propagation DNS (quelques minutes à 24h)",
                 "step3": f"Testez en accédant à https://{domain}"
             }

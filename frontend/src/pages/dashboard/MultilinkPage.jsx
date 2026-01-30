@@ -1966,7 +1966,7 @@ const MultilinkPage = () => {
                                   <li className="pl-4">
                                     <span className="text-indigo-400">Valeur/Target:</span> 
                                     <code className="ml-1 bg-white/10 px-2 py-0.5 rounded text-xs">
-                                      {domainStatus.instructions?.dns_record?.split('→')[2]?.trim() || 'blockify-bio.preview.emergentagent.com'}
+                                      {domainStatus.instructions?.dns_record?.split('→')[2]?.trim() || 'alphagency.fr'}
                                     </code>
                                   </li>
                                   <li>3. Attendez la propagation DNS (quelques minutes à 24h)</li>
