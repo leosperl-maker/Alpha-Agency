@@ -569,6 +569,44 @@ const EditorialCalendarPage = () => {
     }
   };
 
+  // Generate AI Post Ideas
+  const generatePostIdeas = async () => {
+    setIdeasLoading(true);
+    try {
+      const calendar = calendars.find(c => c.id === selectedCalendarId);
+      const response = await api.post('/editorial/ai/generate-ideas', {
+        calendar_id: selectedCalendarId !== 'all' ? selectedCalendarId : null,
+        niche: calendar?.niche || 'agence',
+        count: 5,
+        themes: ideasThemes ? ideasThemes.split(',').map(t => t.trim()) : []
+      });
+
+      if (response.data.success) {
+        setPostIdeas(response.data.ideas || []);
+        toast.success(`${response.data.ideas?.length || 0} idées générées !`);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la génération');
+    }
+    setIdeasLoading(false);
+  };
+
+  // Use an idea to create a post
+  const useIdea = (idea) => {
+    setPostForm({
+      ...postForm,
+      title: idea.title || '',
+      caption: idea.caption || '',
+      format_type: idea.format || 'post',
+      networks: idea.networks || [],
+      content_pillar: idea.pillar || '',
+      cta: idea.hook || ''
+    });
+    setShowIdeasPanel(false);
+    setShowPostModal(true);
+    toast.success('Idée appliquée au formulaire');
+  };
+
   // Form helpers
   const resetCalendarForm = () => {
     setCalendarForm({ 
