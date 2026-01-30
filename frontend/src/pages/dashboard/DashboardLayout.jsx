@@ -561,42 +561,25 @@ const DashboardLayout = () => {
 
           {/* Right: Search + Actions */}
           <div className="flex items-center gap-3">
-            {/* Search - Desktop */}
-            <div ref={searchRef} className="hidden md:block relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-              <Input 
-                placeholder="Rechercher..." 
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                onFocus={() => setSearchOpen(true)}
-                className="w-64 pl-10 bg-white/5 border-white/10 text-white placeholder-white/40 focus:border-indigo-500/50 rounded-xl"
-              />
-              
-              {/* Search Results Dropdown */}
-              {searchOpen && searchResults.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-xl z-50">
-                  {searchResults.map((result) => (
-                    <button
-                      key={result.id}
-                      onClick={() => {
-                        navigate(result.link);
-                        setSearchOpen(false);
-                        setSearchQuery("");
-                        setSearchResults([]);
-                      }}
-                      className="w-full flex items-center gap-3 p-3 hover:bg-white/10 transition-colors text-left"
-                    >
-                      <result.icon className="w-4 h-4 text-indigo-400" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-medium truncate">{result.title}</p>
-                        <p className="text-white/50 text-xs truncate">{result.subtitle}</p>
-                      </div>
-                      <span className="text-white/30 text-xs">{result.type}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Search - Opens Command Palette */}
+            <button 
+              onClick={() => { setCommandPaletteOpen(true); setCommandQuery(""); performGlobalSearch(""); }}
+              className="hidden sm:flex items-center gap-2 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white/60 hover:bg-white/10 hover:border-white/20 transition-all w-48 lg:w-64"
+            >
+              <Search className="w-4 h-4" />
+              <span className="text-sm flex-1 text-left">Rechercher...</span>
+              <kbd className="hidden lg:flex items-center gap-0.5 px-1.5 py-0.5 bg-white/5 rounded text-[10px]">
+                <Command className="w-3 h-3" />K
+              </kbd>
+            </button>
+            
+            {/* Mobile Search Button */}
+            <button 
+              onClick={() => { setCommandPaletteOpen(true); setCommandQuery(""); performGlobalSearch(""); }}
+              className="sm:hidden p-2 rounded-xl hover:bg-white/10 text-white/60"
+            >
+              <Search className="w-5 h-5" />
+            </button>
 
             {/* Notifications */}
             <div ref={notifRef} className="relative">
