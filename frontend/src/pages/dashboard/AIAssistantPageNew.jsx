@@ -59,7 +59,7 @@ const AIAssistantPageNew = () => {
   const [mode, setMode] = useState("chat"); // chat or generate
   const [actionsEnabled, setActionsEnabled] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
-  const [showModelMenu, setShowModelMenu] = useState(false);
+  const [showModelDialog, setShowModelDialog] = useState(false);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const inputRef = useRef(null);
