@@ -900,9 +900,32 @@ async def get_meta_inbox(
     limit: int = 50,
     current_user: dict = Depends(get_current_user)
 ):
-    """Get inbox messages/comments"""
+    """
+    Get inbox messages/comments.
+    Si le mode sandbox est activé, retourne les données de test.
+    """
     user_id = get_user_id(current_user)
     
+    # Check if sandbox mode is enabled
+    if await is_meta_sandbox_enabled(user_id):
+        # Return sandbox test data
+        sandbox_messages = SANDBOX_META_CONVERSATIONS.copy()
+        
+        # Apply filters to sandbox data
+        if platform:
+            sandbox_messages = [m for m in sandbox_messages if m.get("platform") == platform]
+        if message_type:
+            sandbox_messages = [m for m in sandbox_messages if m.get("message_type") == message_type]
+        if status:
+            sandbox_messages = [m for m in sandbox_messages if m.get("status") == status]
+        
+        return {
+            "messages": sandbox_messages[:limit],
+            "total": len(sandbox_messages),
+            "is_sandbox": True
+        }
+    
+    # Normal operation - fetch from database
     query = {"user_id": user_id}
     if platform:
         query["platform"] = platform
@@ -915,7 +938,8 @@ async def get_meta_inbox(
     
     return {
         "messages": messages,
-        "total": len(messages)
+        "total": len(messages),
+        "is_sandbox": False
     }
 
 
