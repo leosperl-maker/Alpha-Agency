@@ -706,18 +706,18 @@ const LinkBioPage = () => {
                 }
               }
               
-              // Text block - NOW WITH MARKDOWN RENDERING
+              // Text block - NOW WITH MARKDOWN RENDERING - CENTERED
               if (block.block_type === 'text' && block.content) {
                 return (
                   <div 
                     key={block.id}
-                    className={`p-4 ${roundedClass}`}
+                    className={`p-4 ${roundedClass} text-center`}
                     style={{ 
                       backgroundColor: colors.card_bg || colors.button_bg || 'rgba(255,255,255,0.1)',
                       color: colors.text || '#ffffff'
                     }}
                   >
-                    {/* Render Markdown content */}
+                    {/* Render Markdown content - centered */}
                     <div 
                       className="prose prose-invert prose-sm max-w-none"
                       style={{ color: colors.text || '#ffffff' }}
@@ -727,12 +727,12 @@ const LinkBioPage = () => {
                       </ReactMarkdown>
                     </div>
                     <style>{`
-                      .prose p { margin: 0.5em 0; color: inherit; }
-                      .prose h1, .prose h2, .prose h3 { color: inherit; font-weight: 700; margin: 0.5em 0; }
+                      .prose p { margin: 0.5em 0; color: inherit; text-align: center; }
+                      .prose h1, .prose h2, .prose h3 { color: inherit; font-weight: 700; margin: 0.5em 0; text-align: center; }
                       .prose h1 { font-size: 1.5em; }
                       .prose h2 { font-size: 1.25em; }
                       .prose h3 { font-size: 1.1em; }
-                      .prose ul, .prose ol { padding-left: 1.5em; margin: 0.5em 0; }
+                      .prose ul, .prose ol { padding-left: 1.5em; margin: 0.5em 0; text-align: left; }
                       .prose li { margin: 0.25em 0; }
                       .prose a { color: ${colors.accent || '#6366f1'}; text-decoration: underline; }
                       .prose strong { font-weight: 700; }
