@@ -336,6 +336,9 @@ const MultilinkPage = () => {
       setPageLinks(response.data.links || []);
       setPageSections(response.data.sections || []);
       setPageBlocks(response.data.blocks || []); // NEW: Unified blocks
+      // Initialize custom domain input
+      setCustomDomainInput(response.data.custom_domain || '');
+      setDomainStatus(null);
       // Also update pageForm for editing
       setPageForm({
         ...pageForm,
