@@ -292,16 +292,26 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
   );
 };
 
-const LinkBioPage = () => {
+const LinkBioPage = ({ customDomain }) => {
   const { slug } = useParams();
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pageSlug, setPageSlug] = useState(slug);
 
   useEffect(() => {
     const fetchPage = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/multilink/public/${slug}`);
+        let response;
+        
+        // Si on a un domaine personnalisé, utiliser l'API domaine
+        if (customDomain) {
+          response = await fetch(`${API_URL}/api/multilink/domain/${customDomain}`);
+        } else {
+          // Sinon, utiliser l'API slug standard
+          response = await fetch(`${API_URL}/api/multilink/public/${slug}`);
+        }
+        
         if (!response.ok) {
           if (response.status === 404) {
             setError('Page non trouvée');
@@ -312,6 +322,8 @@ const LinkBioPage = () => {
         }
         const data = await response.json();
         setPage(data);
+        // Stocker le slug pour les clics analytics
+        setPageSlug(data.slug || slug);
       } catch (err) {
         setError('Erreur de connexion');
       } finally {
@@ -320,7 +332,7 @@ const LinkBioPage = () => {
     };
 
     fetchPage();
-  }, [slug]);
+  }, [slug, customDomain]);
 
   const handleLinkClick = async (link) => {
     // Record click
