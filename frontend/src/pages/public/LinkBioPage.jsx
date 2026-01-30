@@ -453,7 +453,7 @@ const LinkBioPage = () => {
       
       <div className="max-w-lg mx-auto relative z-10">
         {/* Profile Section */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-10">
           {/* Profile Image */}
           {page.profile_image && (
             <div className="relative inline-block mb-4">
@@ -480,13 +480,15 @@ const LinkBioPage = () => {
             </div>
           )}
           
-          {/* Title */}
-          <h1 
-            className="text-2xl font-bold mb-2"
-            style={{ color: colors.text || '#ffffff' }}
-          >
-            {page.title}
-          </h1>
+          {/* Title - Only show if show_title is enabled */}
+          {(page.design_settings?.show_title !== false) && page.title && (
+            <h1 
+              className="text-2xl font-bold mb-2"
+              style={{ color: colors.text || '#ffffff' }}
+            >
+              {page.title}
+            </h1>
+          )}
           
           {/* Bio */}
           {page.bio && (
