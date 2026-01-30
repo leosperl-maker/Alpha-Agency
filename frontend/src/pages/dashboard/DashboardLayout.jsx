@@ -39,6 +39,14 @@ const DashboardLayout = () => {
   const searchRef = useRef(null);
   const notifRef = useRef(null);
   const profileRef = useRef(null);
+  const commandInputRef = useRef(null);
+
+  // Command palette state
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [commandQuery, setCommandQuery] = useState("");
+  const [commandResults, setCommandResults] = useState([]);
+  const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("alpha_token");
