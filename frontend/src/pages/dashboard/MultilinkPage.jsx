@@ -2437,93 +2437,60 @@ const MultilinkPage = () => {
                   />
                 </div>
 
-                {/* Image Upload */}
+                {/* Image Upload - Only upload, no URL option */}
                 <div className="space-y-2">
                   <Label className="text-white">Image</Label>
                   <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                    {/* Tabs: Upload Image / Image URL / Auto */}
-                    <div className="flex gap-2 mb-4">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={blockForm.settings?.image_source !== 'url' ? 'default' : 'outline'}
-                        onClick={() => setBlockForm({ ...blockForm, settings: { ...blockForm.settings, image_source: 'upload' } })}
-                        className={blockForm.settings?.image_source !== 'url' ? 'bg-indigo-600' : 'border-white/20 text-white/70'}
-                      >
-                        Upload Image
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={blockForm.settings?.image_source === 'url' ? 'default' : 'outline'}
-                        onClick={() => setBlockForm({ ...blockForm, settings: { ...blockForm.settings, image_source: 'url' } })}
-                        className={blockForm.settings?.image_source === 'url' ? 'bg-indigo-600' : 'border-white/20 text-white/70'}
-                      >
-                        Image URL
-                      </Button>
-                    </div>
-
                     {blockForm.thumbnail ? (
                       <div className="relative">
                         <img src={blockForm.thumbnail} alt="" className="w-full h-48 rounded-xl object-contain bg-black/20" />
                         <button
+                          type="button"
                           onClick={() => setBlockForm({ ...blockForm, thumbnail: '' })}
                           className="absolute top-2 right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600"
                         >
                           <X className="w-4 h-4 text-white" />
                         </button>
-                        <p className="text-center text-white/50 text-xs mt-2">Or Select From Library</p>
                       </div>
                     ) : (
-                      <>
-                        {blockForm.settings?.image_source === 'url' ? (
-                          <Input
-                            value={blockForm.thumbnail || ''}
-                            onChange={(e) => setBlockForm({ ...blockForm, thumbnail: e.target.value })}
-                            placeholder="https://example.com/image.jpg"
-                            className="bg-white/5 border-white/10 text-white"
-                          />
-                        ) : (
-                          <label className="cursor-pointer block">
-                            <input 
-                              type="file" 
-                              accept="image/*" 
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                setUploadingBlockMedia(true);
-                                try {
-                                  const formData = new FormData();
-                                  formData.append('file', file);
-                                  const response = await api.post('/multilink/upload-media', formData, {
-                                    headers: { 'Content-Type': 'multipart/form-data' }
-                                  });
-                                  setBlockForm(prev => ({ ...prev, thumbnail: response.data.url }));
-                                  toast.success('Image uploadée');
-                                } catch (error) {
-                                  toast.error('Erreur upload');
-                                } finally {
-                                  setUploadingBlockMedia(false);
-                                }
-                              }} 
-                              className="hidden" 
-                            />
-                            <div className="flex flex-col items-center py-8 border-2 border-dashed border-white/20 rounded-xl hover:border-indigo-500/50 transition-colors">
-                              {uploadingBlockMedia ? (
-                                <Loader2 className="w-12 h-12 text-indigo-400 animate-spin" />
-                              ) : (
-                                <>
-                                  <div className="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-3">
-                                    <ImagePlus className="w-8 h-8 text-indigo-400" />
-                                  </div>
-                                  <p className="text-white font-medium">Click to upload</p>
-                                  <p className="text-white/50 text-xs mt-1">Or Select From Library</p>
-                                </>
-                              )}
-                            </div>
-                          </label>
-                        )}
-                      </>
+                      <label className="cursor-pointer block">
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setUploadingBlockMedia(true);
+                            try {
+                              const formData = new FormData();
+                              formData.append('file', file);
+                              const response = await api.post('/multilink/upload-media', formData, {
+                                headers: { 'Content-Type': 'multipart/form-data' }
+                              });
+                              setBlockForm(prev => ({ ...prev, thumbnail: response.data.url }));
+                              toast.success('Image uploadée');
+                            } catch (error) {
+                              toast.error('Erreur upload');
+                            } finally {
+                              setUploadingBlockMedia(false);
+                            }
+                          }} 
+                          className="hidden" 
+                        />
+                        <div className="flex flex-col items-center py-8 border-2 border-dashed border-white/20 rounded-xl hover:border-indigo-500/50 transition-colors">
+                          {uploadingBlockMedia ? (
+                            <Loader2 className="w-12 h-12 text-indigo-400 animate-spin" />
+                          ) : (
+                            <>
+                              <div className="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-3">
+                                <ImagePlus className="w-8 h-8 text-indigo-400" />
+                              </div>
+                              <p className="text-white font-medium">Cliquer pour uploader</p>
+                              <p className="text-white/50 text-xs mt-1">JPG, PNG, WebP (max 10MB)</p>
+                            </>
+                          )}
+                        </div>
+                      </label>
                     )}
                   </div>
                 </div>
