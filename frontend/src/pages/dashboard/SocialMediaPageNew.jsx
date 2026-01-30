@@ -398,6 +398,9 @@ const SocialMediaPage = () => {
   const [showTikTokComposer, setShowTikTokComposer] = useState(false);
   const [tiktokPosts, setTiktokPosts] = useState([]);
   
+  // Meta Sandbox state
+  const [metaSandboxMode, setMetaSandboxMode] = useState(false);
+  
   // Stats
   const [stats, setStats] = useState(null);
 
