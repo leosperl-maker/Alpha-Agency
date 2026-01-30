@@ -1,7 +1,7 @@
 # Alpha Agency CRM - Product Requirements Document
 
 ## Original Problem Statement
-Application CRM complète pour une agence de marketing digital incluant:
+Application CRM complète pour une agence de communication digitale incluant:
 - Gestion des contacts et opportunités
 - Facturation (devis, factures, abonnements)
 - Module Multilink (clone de zaap.bio)
@@ -27,55 +27,67 @@ Application CRM complète pour une agence de marketing digital incluant:
 - `divider` - Séparateur
 
 #### Personnalisation des Couleurs (Onglet Design)
-- Fond de page (background)
-- Fond des cartes (card_bg)
-- Couleur du texte
-- Couleur des boutons
-- Texte des boutons
-- Couleur d'accent
-- Aperçu en direct
-- Thèmes prédéfinis: Minimal, Dark, Gradient, Ocean, Sunset, Nature, Personnalisé
+- Fond de page, cartes, texte, boutons, accent
+- Thèmes prédéfinis + personnalisé
 - Option afficher/masquer le titre
 
-#### Analytics pour Multilink
-- Vues totales avec croissance vs période précédente
+#### QR Code (NEW)
+- Génération automatique de QR Code pour chaque page
+- Téléchargement en PNG (1024px) ou SVG vectoriel
+- URL basée sur le domaine personnalisé si configuré
+
+#### Analytics Multilink (Onglet dédié)
+- Vues totales avec croissance
 - Clics totaux avec croissance
 - Taux de conversion (CTR)
-- Graphique des vues par jour
-- Stats par bloc (clics par bloc)
-- Stats par lien (legacy)
+- Graphique des vues par jour (30 derniers jours)
+- Stats détaillées par bloc (clics par élément)
+- Barre de progression pour comparer les performances
 
-#### Domaines Personnalisés (NEW - 30/01/2026)
+#### Domaines Personnalisés
 - Configuration d'un domaine personnalisé par page (ex: bio.votre-domaine.com)
 - UI dans l'onglet SEO pour configurer le domaine
 - Vérification du statut DNS
 - Instructions détaillées pour la configuration CNAME
-- Endpoint `/api/multilink/domain/{domain}` pour accès par domaine
-- Un domaine ne peut être associé qu'à une seule page
 
 #### Mode Sandbox (Meta & TikTok)
 - Toggle entre mode production et sandbox
 - Données mock pour développement/test
-- Bannières d'indication du mode actif
 
-#### Page Publique
-- Rendu Markdown (react-markdown + remark-gfm)
-- Application des couleurs personnalisées
-- Enregistrement des clics par bloc pour analytics
+### 🆕 Améliorations UX (30 Janvier 2026)
+
+#### Barre de recherche globale (⌘K)
+- Command Palette accessible via ⌘K (Mac) ou Ctrl+K (Windows)
+- Recherche dans: Navigation, Actions rapides, Contacts, Tâches, Factures, Opportunités
+- Navigation au clavier (↑↓ + Entrée)
+- Regroupement par catégorie
+
+#### Sélecteur d'agent IA amélioré
+- Dialog modal au lieu de dropdown scroll
+- Interface claire avec icônes et descriptions
+- Fonctionne parfaitement sur mobile
+
+#### Actions rapides améliorées
+- Plus d'options: Contact, Tâche, Facture, Opportunité, Multilink, Publier, Assistant IA
+- Design amélioré avec labels de section
+
+#### Mobile: Onglets Multilink scrollables
+- Les onglets (Contenu, Design, Profil, Réseaux, SEO, Analytics) sont maintenant scrollables horizontalement sur mobile
 
 ### 🔄 Prochaines Priorités
 
-#### P0 - Story Editor + Scheduler (Clone Storrito)
+#### P0 - Social Media Manager
+- Suggestions IA de posts (calendrier éditorial)
+- Meilleur moment pour poster
+- Aperçu multi-plateforme
+- Suggestions de hashtags
+
+#### P1 - Story Editor + Scheduler (Clone Storrito)
 - Éditeur de Stories Instagram
 - Planification et publication automatique
-- Utilisation d'émulateurs Android côté serveur
 
-#### P1 - Dashboard Analytics Complet
-- Expansion des analytics Multilink
-- Statistiques globales multi-pages
-
-#### P2 - Amélioration Sandbox Meta
-- Inclure les commentaires en plus des messages
+#### P2 - Mode hors-ligne
+- Dashboard admin fonctionnel sans connexion (PWA + cache)
 
 ### 📋 Backlog
 
@@ -83,6 +95,8 @@ Application CRM complète pour une agence de marketing digital incluant:
 2. Amélioration MindMap (export PDF, raccourcis)
 3. Push Notifications
 4. Intégration Qonto (banking)
+5. Analytics & Reporting avancé
+6. Gestion client (portail, notes internes)
 
 ### 🐛 Bugs Connus
 
@@ -98,26 +112,34 @@ Application CRM complète pour une agence de marketing digital incluant:
 ## Architecture Technique
 
 ### Backend (FastAPI)
-- `/app/backend/routes/multilink.py` - API Multilink (blocs, pages, stats, domaines personnalisés)
-- `/app/backend/routes/meta.py` - API Meta (Facebook/Instagram) avec Sandbox
+- `/app/backend/routes/multilink.py` - API Multilink
+- `/app/backend/routes/meta.py` - API Meta avec Sandbox
 - `/app/backend/routes/social.py` - API Social Media Manager
 
 ### Frontend (React)
-- `/app/frontend/src/pages/dashboard/MultilinkPage.jsx` - Admin UI Multilink (avec domaines personnalisés)
-- `/app/frontend/src/pages/public/LinkBioPage.jsx` - Page publique
-- `/app/frontend/src/components/SocialComposer.jsx` - Composeur social
+- `/app/frontend/src/pages/dashboard/MultilinkPage.jsx` - Admin UI Multilink (QR Code, Analytics)
+- `/app/frontend/src/pages/dashboard/DashboardLayout.jsx` - Layout avec Command Palette (⌘K)
+- `/app/frontend/src/pages/dashboard/AIAssistantPageNew.jsx` - Assistant IA (sélecteur modal)
+- `/app/frontend/src/components/QuickActions.jsx` - Actions rapides améliorées
+- `/app/frontend/src/components/FloatingAIChat.jsx` - Chat IA flottant
 
 ### Base de données (MongoDB)
 - `multilink_pages` - Pages Multilink (avec `custom_domain`)
 - `multilink_blocks` - Blocs unifiés
 - `multilink_stats` - Statistiques (vues, clics)
-- `multilink_views` - Vues détaillées
 
 ## Credentials de Test
 - Email: `admin@alphagency.fr`
 - Password: `Test123!`
 
 ## URLs
-- Admin: `/multilink`
+- Admin: `/admin`
+- Multilink Admin: `/admin/multilink`
 - Page publique: `/lien-bio/{slug}`
 - Page par domaine: `https://{custom_domain}`
+
+## Raccourcis Clavier
+- `⌘K` / `Ctrl+K` - Ouvrir la recherche globale
+- `↑↓` - Naviguer dans les résultats
+- `Entrée` - Sélectionner
+- `Échap` - Fermer
