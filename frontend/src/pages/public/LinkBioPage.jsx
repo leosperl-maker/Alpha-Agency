@@ -337,7 +337,7 @@ const LinkBioPage = ({ customDomain }) => {
   const handleLinkClick = async (link) => {
     // Record click
     try {
-      await fetch(`${API_URL}/api/multilink/public/${slug}/click/${link.id}`, {
+      await fetch(`${API_URL}/api/multilink/public/${pageSlug}/click/${link.id}`, {
         method: 'POST'
       });
     } catch (err) {
@@ -351,7 +351,7 @@ const LinkBioPage = ({ customDomain }) => {
   const handleBlockClick = async (block) => {
     // Record block click for analytics
     try {
-      await fetch(`${API_URL}/api/multilink/public/${slug}/block-click/${block.id}`, {
+      await fetch(`${API_URL}/api/multilink/public/${pageSlug}/block-click/${block.id}`, {
         method: 'POST'
       });
     } catch (err) {
@@ -363,7 +363,7 @@ const LinkBioPage = ({ customDomain }) => {
     // Record click if it has an id
     if (social.id) {
       try {
-        await fetch(`${API_URL}/api/multilink/public/${slug}/click/${social.id}`, {
+        await fetch(`${API_URL}/api/multilink/public/${pageSlug}/click/${social.id}`, {
           method: 'POST'
         });
       } catch (err) {
