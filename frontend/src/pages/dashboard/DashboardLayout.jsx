@@ -738,6 +738,105 @@ const DashboardLayout = () => {
       
       {/* Quick Actions Button */}
       <QuickActions />
+
+      {/* Command Palette (⌘K) */}
+      <Dialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
+        <DialogContent className="bg-[#0a0a12]/95 backdrop-blur-2xl border-white/10 p-0 max-w-xl overflow-hidden shadow-2xl">
+          {/* Search Input */}
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
+            <Search className="w-5 h-5 text-white/40" />
+            <input
+              ref={commandInputRef}
+              value={commandQuery}
+              onChange={(e) => {
+                setCommandQuery(e.target.value);
+                performGlobalSearch(e.target.value);
+              }}
+              placeholder="Rechercher ou taper une commande..."
+              className="flex-1 bg-transparent text-white placeholder-white/40 outline-none text-base"
+              autoFocus
+            />
+            <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 bg-white/5 rounded text-white/30 text-xs">
+              <Command className="w-3 h-3" />K
+            </kbd>
+          </div>
+
+          {/* Results */}
+          <div className="max-h-[60vh] overflow-y-auto p-2">
+            {isSearching ? (
+              <div className="flex items-center justify-center py-8 text-white/40">
+                <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mr-2" />
+                Recherche...
+              </div>
+            ) : commandResults.length === 0 ? (
+              <div className="text-center py-8 text-white/40">
+                <FileSearch className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                <p>Aucun résultat pour "{commandQuery}"</p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {/* Group by type */}
+                {['Navigation', 'Action rapide', 'Contact', 'Tâche', 'Facture', 'Opportunité'].map(type => {
+                  const items = commandResults.filter(r => r.type === type);
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={type}>
+                      <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-white/30 font-medium">
+                        {type}
+                      </p>
+                      {items.map((result, idx) => {
+                        const globalIndex = commandResults.indexOf(result);
+                        const Icon = result.icon;
+                        return (
+                          <button
+                            key={result.id}
+                            onClick={() => {
+                              result.action();
+                              setCommandPaletteOpen(false);
+                            }}
+                            onMouseEnter={() => setSelectedCommandIndex(globalIndex)}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                              selectedCommandIndex === globalIndex 
+                                ? 'bg-indigo-600/20 text-white' 
+                                : 'text-white/70 hover:bg-white/5 hover:text-white'
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                              selectedCommandIndex === globalIndex ? 'bg-indigo-600/30' : 'bg-white/5'
+                            }`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1 text-left">
+                              <p className="text-sm font-medium">{result.title}</p>
+                              {result.subtitle && (
+                                <p className="text-xs text-white/40">{result.subtitle}</p>
+                              )}
+                            </div>
+                            {selectedCommandIndex === globalIndex && (
+                              <kbd className="px-2 py-0.5 bg-white/5 rounded text-white/30 text-xs">
+                                Entrée
+                              </kbd>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="px-4 py-2 border-t border-white/10 bg-white/[0.02] flex items-center justify-between text-xs text-white/30">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/5 rounded">↑↓</kbd> Naviguer</span>
+              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/5 rounded">Entrée</kbd> Sélectionner</span>
+              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/5 rounded">Échap</kbd> Fermer</span>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
