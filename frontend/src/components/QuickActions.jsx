@@ -246,18 +246,21 @@ const QuickActions = () => {
         {/* Actions Menu */}
         {isOpen && (
           <div className="absolute bottom-16 right-0 mb-2 animate-in slide-in-from-bottom-5 fade-in duration-200">
-            <div className="bg-black/80 backdrop-blur-2xl rounded-2xl border border-white/10 p-2 shadow-2xl min-w-[200px]">
+            <div className="bg-black/90 backdrop-blur-2xl rounded-2xl border border-white/10 p-2 shadow-2xl min-w-[220px]">
+              <p className="px-4 py-2 text-[10px] uppercase tracking-wider text-white/30 font-medium">
+                Actions rapides
+              </p>
               {quickActions.map((action, index) => {
                 const Icon = action.icon;
                 return (
                   <button
                     key={action.id}
                     onClick={() => handleAction(action)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all"
                     style={{ animationDelay: `${index * 50}ms` }}
                     data-testid={`quick-action-${action.id}`}
                   >
-                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center`}>
+                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center shadow-lg`}>
                       <Icon className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-sm font-medium">{action.label}</span>
