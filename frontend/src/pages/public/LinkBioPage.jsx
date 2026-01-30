@@ -100,7 +100,7 @@ const IMAGE_DIMENSIONS = {
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
-// Carousel Component for sections
+// Carousel Component - Enhanced with 3 types: image, video, link_image
 const CarouselSection = ({ items, colors, onItemClick }) => {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -147,75 +147,132 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
         </button>
       )}
       
-      {/* Carousel container - Zaap.bio style cards */}
+      {/* Carousel container */}
       <div 
         ref={scrollRef}
         className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 snap-x snap-mandatory"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         onScroll={checkScroll}
       >
-        {items.map((item, index) => (
-          <button
-            key={index}
-            onClick={() => item.url && onItemClick({ url: item.url, id: item.id })}
-            className="flex-shrink-0 snap-start group focus:outline-none"
-            style={{ width: '160px' }}
-          >
-            {/* Card - Zaap.bio exact style with rounded corners and shadow */}
-            <div 
-              className="rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-[1.03] group-hover:shadow-xl group-active:scale-[0.98]"
-              style={{ 
-                backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
-              }}
+        {items.map((item, index) => {
+          // Determine media source (new format or legacy)
+          const mediaUrl = item.media_url || item.image;
+          const isVideo = item.type === 'video' || item.media_type === 'video';
+          const isLinkImage = item.type === 'link_image';
+          
+          return (
+            <div
+              key={index}
+              className="flex-shrink-0 snap-start group"
+              style={{ width: isLinkImage ? '220px' : '160px' }}
             >
-              {/* Image - 4:5 aspect ratio like zaap.bio */}
-              {item.image && (
-                <div className="aspect-[4/5] relative">
-                  <img 
-                    src={item.image} 
-                    alt={item.title || ''} 
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Gradient overlay for text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  
-                  {/* Text overlay at bottom - zaap.bio style */}
-                  <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <h3 className="font-bold text-white text-sm leading-tight line-clamp-2 drop-shadow-lg">
-                      {item.title}
-                    </h3>
-                    {item.subtitle && (
-                      <p className="text-white/80 text-xs mt-1 line-clamp-1">
-                        {item.subtitle}
+              {/* Link Image Card - zaap.bio style with button */}
+              {isLinkImage ? (
+                <div 
+                  className="rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-[1.02]"
+                  style={{ 
+                    backgroundColor: colors.card_bg || colors.button_bg || 'rgba(255,255,255,0.1)',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+                  }}
+                >
+                  {mediaUrl && (
+                    <img 
+                      src={mediaUrl} 
+                      alt={item.title || ''} 
+                      className="w-full h-32 object-cover"
+                    />
+                  )}
+                  <div className="p-3">
+                    {item.title && (
+                      <h3 className="font-bold text-sm" style={{ color: colors.button_text || '#ffffff' }}>
+                        {item.title}
+                      </h3>
+                    )}
+                    {item.description && (
+                      <p className="text-xs mt-1 opacity-70 line-clamp-2" style={{ color: colors.button_text || '#ffffff' }}>
+                        {item.description}
                       </p>
+                    )}
+                    {item.url && (
+                      <button
+                        onClick={() => onItemClick({ url: item.url, id: item.id })}
+                        className="mt-3 w-full py-2 rounded-full text-xs font-medium transition-all hover:opacity-90"
+                        style={{ 
+                          backgroundColor: colors.accent || '#6366f1',
+                          color: '#ffffff'
+                        }}
+                      >
+                        {item.button_text || 'En Savoir +'}
+                      </button>
                     )}
                   </div>
                 </div>
-              )}
-              
-              {/* Text only card (no image) */}
-              {!item.image && (
-                <div className="aspect-[4/5] flex flex-col justify-center p-4">
-                  <h3 
-                    className="font-bold text-center line-clamp-3"
-                    style={{ color: colors.button_text || '#ffffff' }}
+              ) : (
+                /* Image or Video Card */
+                <button
+                  onClick={() => item.url && onItemClick({ url: item.url, id: item.id })}
+                  className="w-full focus:outline-none"
+                  disabled={!item.url}
+                >
+                  <div 
+                    className="rounded-2xl overflow-hidden transition-all duration-300 group-hover:scale-[1.03] group-active:scale-[0.98]"
+                    style={{ 
+                      backgroundColor: colors.button_bg || 'rgba(255,255,255,0.1)',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+                    }}
                   >
-                    {item.title}
-                  </h3>
-                  {item.subtitle && (
-                    <p 
-                      className="text-sm text-center mt-2 opacity-70 line-clamp-2"
-                      style={{ color: colors.button_text || '#ffffff' }}
-                    >
-                      {item.subtitle}
-                    </p>
-                  )}
-                </div>
+                    {/* Media - 4:5 aspect ratio */}
+                    {mediaUrl && (
+                      <div className="aspect-[4/5] relative">
+                        {isVideo ? (
+                          <video 
+                            src={mediaUrl} 
+                            className="w-full h-full object-cover"
+                            controls
+                            playsInline
+                            preload="metadata"
+                          />
+                        ) : (
+                          <>
+                            <img 
+                              src={mediaUrl} 
+                              alt={item.title || ''} 
+                              className="w-full h-full object-cover"
+                            />
+                            {/* Gradient overlay for text */}
+                            {item.title && (
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                            )}
+                            {/* Text overlay */}
+                            {item.title && (
+                              <div className="absolute bottom-0 left-0 right-0 p-3">
+                                <h3 className="font-bold text-white text-sm leading-tight line-clamp-2 drop-shadow-lg">
+                                  {item.title}
+                                </h3>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Text only card (no media) */}
+                    {!mediaUrl && (
+                      <div className="aspect-[4/5] flex flex-col justify-center p-4">
+                        <h3 
+                          className="font-bold text-center line-clamp-3"
+                          style={{ color: colors.button_text || '#ffffff' }}
+                        >
+                          {item.title}
+                        </h3>
+                      </div>
+                    )}
+                  </div>
+                </button>
               )}
             </div>
-          </button>
-        ))}
+          );
+        })}
       </div>
       
       {/* Scroll indicator dots - mobile only */}
