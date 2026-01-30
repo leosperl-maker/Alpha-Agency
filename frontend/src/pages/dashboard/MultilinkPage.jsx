@@ -1970,7 +1970,7 @@ const MultilinkPage = () => {
                                     </code>
                                   </li>
                                   <li>3. Attendez la propagation DNS (quelques minutes à 24h)</li>
-                                  <li>4. Cliquez sur "Vérifier la configuration DNS" ci-dessus</li>
+                                  <li>4. Cliquez sur &quot;Vérifier la configuration DNS&quot; ci-dessus</li>
                                 </ol>
                               </div>
                             )}
@@ -1996,7 +1996,7 @@ const MultilinkPage = () => {
                     <div className="mt-4 p-3 bg-white/5 rounded-lg">
                       <p className="text-white/40 text-xs">
                         <strong className="text-white/60">💡 Conseil:</strong> Pour utiliser un sous-domaine comme <code className="bg-white/10 px-1 rounded">bio.votre-site.com</code>, 
-                        créez un enregistrement CNAME pointant vers notre serveur. La propagation DNS peut prendre jusqu'à 24 heures.
+                        créez un enregistrement CNAME pointant vers notre serveur. La propagation DNS peut prendre jusqu&apos;à 24 heures.
                       </p>
                     </div>
                   </div>
