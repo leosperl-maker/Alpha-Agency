@@ -539,47 +539,22 @@ const AIAssistantPageNew = () => {
               {/* Bottom toolbar */}
               <div className="flex items-center justify-between px-2 py-1.5 border-t border-white/5 bg-white/[0.02]">
                 <div className="flex items-center gap-0.5">
-                  {/* Model selector */}
-                  <div className="relative">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={() => setShowModelMenu(!showModelMenu)}
-                          className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-colors"
-                        >
-                          <span>{currentModel.icon}</span>
-                          <span className="hidden sm:inline">{currentModel.label}</span>
-                          <ChevronDown className="w-3 h-3" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">
-                        <p>Changer de modèle IA</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    
-                    {showModelMenu && (
-                      <>
-                        <div className="fixed inset-0 z-40" onClick={() => setShowModelMenu(false)} />
-                        <div className="absolute bottom-full left-0 mb-2 w-48 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 transform -translate-y-1">
-                          {modelOptions.map(model => (
-                            <button
-                              key={model.value}
-                              onClick={() => { setSelectedModel(model.value); setShowModelMenu(false); }}
-                              className={`w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-white/10 transition-colors ${
-                                selectedModel === model.value ? 'bg-indigo-600/20 text-indigo-400' : 'text-white/80'
-                              }`}
-                            >
-                              <span className="text-base">{model.icon}</span>
-                              <div>
-                                <p className="text-sm">{model.label}</p>
-                                <p className="text-[10px] text-white/40">{model.description}</p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
+                  {/* Model selector - Opens Dialog on mobile, dropdown on desktop */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setShowModelDialog(true)}
+                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                      >
+                        <span>{currentModel.icon}</span>
+                        <span className="hidden sm:inline">{currentModel.label}</span>
+                        <ChevronDown className="w-3 h-3" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      <p>Changer de modèle IA</p>
+                    </TooltipContent>
+                  </Tooltip>
                   
                   {/* Image attach */}
                   <input
