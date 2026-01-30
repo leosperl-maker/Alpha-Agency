@@ -2015,6 +2015,59 @@ const MultilinkPage = () => {
               />
             </div>
 
+            {/* Custom Icon Image - especially useful for website */}
+            <div className="space-y-2">
+              <Label className="text-white">Icône personnalisée (optionnel)</Label>
+              <p className="text-white/40 text-xs">Remplace l'icône par défaut par votre propre image</p>
+              <div className="flex items-center gap-4">
+                {socialForm.custom_icon ? (
+                  <div className="relative">
+                    <img 
+                      src={socialForm.custom_icon} 
+                      alt="" 
+                      className="w-16 h-16 rounded-full object-cover border-2 border-white/20" 
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setSocialForm({ ...socialForm, custom_icon: '' })}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-white/10 border border-dashed border-white/20 flex items-center justify-center">
+                    <ImagePlus className="w-6 h-6 text-white/30" />
+                  </div>
+                )}
+                <label className="cursor-pointer">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        const response = await api.post('/multilink/upload-media', formData, {
+                          headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+                        setSocialForm(prev => ({ ...prev, custom_icon: response.data.url }));
+                        toast.success('Image uploadée');
+                      } catch (error) {
+                        toast.error('Erreur upload');
+                      }
+                    }} 
+                    className="hidden" 
+                  />
+                  <div className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white text-sm cursor-pointer">
+                    Uploader une image
+                  </div>
+                </label>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
               <span className="text-white">Actif</span>
               <Switch
