@@ -61,6 +61,7 @@ const ICON_OPTIONS = [
   { value: 'twitter', label: 'Twitter/X', icon: Twitter, color: '#000000' },
   { value: 'youtube', label: 'YouTube', icon: Youtube, color: '#FF0000' },
   { value: 'linkedin', label: 'LinkedIn', icon: Linkedin, color: '#0A66C2' },
+  { value: 'tiktok', label: 'TikTok', icon: Play, color: '#000000' },
   { value: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: '#25D366' },
   { value: 'telegram', label: 'Telegram', icon: Send, color: '#0088cc' },
   { value: 'email', label: 'Email', icon: Mail, color: '#EA4335' },
