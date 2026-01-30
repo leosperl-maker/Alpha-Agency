@@ -1549,14 +1549,16 @@ const MultilinkPage = () => {
                           className="w-12 h-12 rounded-full mx-auto mb-2"
                           style={{ background: pageForm.custom_colors?.accent || '#6366f1' }}
                         />
-                        <p style={{ color: pageForm.custom_colors?.text || '#ffffff' }} className="font-bold">Titre</p>
+                        {pageForm.design_settings?.show_title !== false && (
+                          <p style={{ color: pageForm.custom_colors?.text || '#ffffff' }} className="font-bold">Titre</p>
+                        )}
                       </div>
                       <div 
                         className="rounded-xl p-3 mb-2"
                         style={{ background: pageForm.custom_colors?.card_bg || pageForm.custom_colors?.button_bg || 'rgba(255,255,255,0.1)' }}
                       >
-                        <p style={{ color: pageForm.custom_colors?.button_text || '#ffffff' }} className="text-sm font-medium">Exemple de carte</p>
-                        <p style={{ color: pageForm.custom_colors?.button_text || '#ffffff', opacity: 0.7 }} className="text-xs">Description du lien</p>
+                        <p style={{ color: pageForm.custom_colors?.text || '#ffffff' }} className="text-sm font-medium">Exemple de carte</p>
+                        <p style={{ color: pageForm.custom_colors?.text || '#ffffff', opacity: 0.7 }} className="text-xs">Description du lien</p>
                       </div>
                       <div 
                         className="rounded-full py-2 px-4 text-center text-sm font-medium"
