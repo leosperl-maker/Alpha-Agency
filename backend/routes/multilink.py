@@ -1253,3 +1253,202 @@ async def upload_profile_image(
     except Exception as e:
         logger.error(f"Upload error: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur d'upload: {str(e)}")
+
+
+
+# ==================== CUSTOM DOMAIN ROUTES ====================
+"""
+DOMAINE PERSONNALISÉ - Documentation
+
+Cette fonctionnalité permet d'associer un domaine personnalisé à une page Multilink.
+
+EXEMPLE:
+- Au lieu de: alphagency.fr/lien-bio/antilla
+- Vous pouvez avoir: bio.antilla-martinique.com (sans slug)
+
+CONFIGURATION REQUISE CÔTÉ CLIENT:
+1. Ajouter un enregistrement DNS CNAME:
+   bio.antilla-martinique.com → CNAME → votre-domaine-emergent.com
+   
+2. Attendre la propagation DNS (quelques minutes à 24h)
+
+3. Configurer le domaine dans l'interface Multilink
+
+SÉCURITÉ:
+- Un domaine ne peut être associé qu'à UNE seule page
+- Le propriétaire doit prouver qu'il contrôle le domaine (via DNS)
+"""
+
+@router.get("/domain/{domain}", response_model=dict)
+async def get_page_by_domain(domain: str, request: Request):
+    """
+    Récupère une page Multilink par son domaine personnalisé.
+    Utilisé quand un utilisateur accède via bio.example.com
+    """
+    # Normalize domain (lowercase, no trailing slash)
+    domain = domain.lower().strip().rstrip('/')
+    
+    # Remove protocol if present
+    if domain.startswith('http://'):
+        domain = domain[7:]
+    elif domain.startswith('https://'):
+        domain = domain[8:]
+    
+    # Find page by custom domain
+    page = await db.multilink_pages.find_one({
+        "custom_domain": domain,
+        "is_active": True
+    })
+    
+    if not page:
+        raise HTTPException(status_code=404, detail="Aucune page associée à ce domaine")
+    
+    # Record view
+    await record_page_view(page["id"], request)
+    
+    # Get theme colors
+    theme_colors = THEME_PRESETS.get(page.get("theme", "dark"), THEME_PRESETS["dark"])
+    
+    # Get links, blocks, and social links
+    links = await db.multilink_links.find(
+        {"page_id": page["id"], "is_active": True},
+        {"_id": 0}
+    ).sort("order", 1).to_list(100)
+    
+    blocks = await db.multilink_blocks.find(
+        {"page_id": page["id"], "is_active": True},
+        {"_id": 0}
+    ).sort("order", 1).to_list(200)
+    
+    return {
+        "id": page["id"],
+        "slug": page["slug"],
+        "title": page.get("title", ""),
+        "bio": page.get("bio", ""),
+        "profile_image": page.get("profile_image"),
+        "banner_image": page.get("banner_image"),
+        "theme": page.get("theme", "dark"),
+        "theme_colors": theme_colors,
+        "custom_colors": page.get("custom_colors"),
+        "design_settings": page.get("design_settings"),
+        "seo_settings": page.get("seo_settings"),
+        "social_links": page.get("social_links", []),
+        "links": links,
+        "blocks": blocks,
+        "custom_domain": page.get("custom_domain"),
+        "verified": page.get("verified", False),
+        "custom_font": page.get("custom_font")
+    }
+
+
+@router.post("/pages/{page_id}/custom-domain", response_model=dict)
+async def set_custom_domain(
+    page_id: str,
+    domain_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Configure un domaine personnalisé pour une page.
+    
+    Body: {"domain": "bio.example.com"} ou {"domain": null} pour supprimer
+    """
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    # Verify ownership
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    domain = domain_data.get("domain")
+    
+    if domain:
+        # Normalize domain
+        domain = domain.lower().strip().rstrip('/')
+        if domain.startswith('http://'):
+            domain = domain[7:]
+        elif domain.startswith('https://'):
+            domain = domain[8:]
+        
+        # Check if domain is already used by another page
+        existing = await db.multilink_pages.find_one({
+            "custom_domain": domain,
+            "id": {"$ne": page_id}
+        })
+        
+        if existing:
+            raise HTTPException(
+                status_code=400, 
+                detail="Ce domaine est déjà utilisé par une autre page"
+            )
+        
+        # Update page with custom domain
+        await db.multilink_pages.update_one(
+            {"id": page_id},
+            {"$set": {"custom_domain": domain, "updated_at": datetime.now(timezone.utc)}}
+        )
+        
+        return {
+            "success": True,
+            "message": f"Domaine personnalisé configuré: {domain}",
+            "custom_domain": domain,
+            "instructions": {
+                "step1": f"Ajoutez un enregistrement DNS CNAME:",
+                "dns_record": f"{domain} → CNAME → blockify-bio.preview.emergentagent.com",
+                "step2": "Attendez la propagation DNS (quelques minutes à 24h)",
+                "step3": f"Testez en accédant à https://{domain}"
+            }
+        }
+    else:
+        # Remove custom domain
+        await db.multilink_pages.update_one(
+            {"id": page_id},
+            {"$unset": {"custom_domain": ""}, "$set": {"updated_at": datetime.now(timezone.utc)}}
+        )
+        
+        return {
+            "success": True,
+            "message": "Domaine personnalisé supprimé",
+            "custom_domain": None
+        }
+
+
+@router.get("/pages/{page_id}/domain-status", response_model=dict)
+async def check_domain_status(
+    page_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Vérifie si le domaine personnalisé est correctement configuré (DNS).
+    """
+    import socket
+    
+    user_id = current_user.get("user_id") or current_user.get("id")
+    
+    # Verify ownership
+    page = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page non trouvée")
+    
+    custom_domain = page.get("custom_domain")
+    if not custom_domain:
+        return {
+            "configured": False,
+            "message": "Aucun domaine personnalisé configuré"
+        }
+    
+    # Try to resolve the domain
+    try:
+        ip = socket.gethostbyname(custom_domain)
+        dns_configured = True
+        dns_message = f"DNS résolu vers {ip}"
+    except socket.gaierror:
+        dns_configured = False
+        dns_message = "DNS non résolu - Vérifiez votre configuration CNAME"
+    
+    return {
+        "configured": True,
+        "custom_domain": custom_domain,
+        "dns_configured": dns_configured,
+        "dns_message": dns_message,
+        "url": f"https://{custom_domain}" if dns_configured else None
+    }
