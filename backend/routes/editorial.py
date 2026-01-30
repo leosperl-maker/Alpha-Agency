@@ -1137,6 +1137,169 @@ Améliore cette légende en gardant le message principal mais en la rendant plus
         logger.error(f"AI improve caption error: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur IA: {str(e)}")
 
+
+class PostIdeasRequest(BaseModel):
+    calendar_id: Optional[str] = None
+    niche: Optional[str] = None
+    count: int = 5
+    themes: Optional[List[str]] = None
+
+
+@router.post("/ai/generate-ideas")
+async def generate_post_ideas(
+    request: PostIdeasRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Generate AI-powered post ideas based on niche, trends, and calendar context.
+    Returns ready-to-use post suggestions with titles, captions, and recommended times.
+    """
+    if not EMERGENT_LLM_KEY:
+        raise HTTPException(status_code=500, detail="Clé API LLM non configurée")
+    
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        import json
+        
+        # Get calendar context if provided
+        calendar_context = ""
+        niche_context = request.niche or "général"
+        
+        if request.calendar_id:
+            calendar = await db.editorial_calendars.find_one(
+                {"id": request.calendar_id, "user_id": current_user["user_id"]},
+                {"_id": 0}
+            )
+            if calendar:
+                niche_context = calendar.get("niche", niche_context)
+                calendar_context = f"Pour le calendrier: {calendar.get('title', 'Client')}"
+                
+                # Get recent posts to avoid repetition
+                recent_posts = await db.editorial_posts.find(
+                    {"calendar_id": request.calendar_id},
+                    {"_id": 0, "title": 1, "caption": 1}
+                ).sort("created_at", -1).limit(5).to_list(5)
+                
+                if recent_posts:
+                    recent_titles = [p.get("title", "") for p in recent_posts if p.get("title")]
+                    calendar_context += f"\nPosts récents (éviter la répétition): {', '.join(recent_titles[:3])}"
+        
+        # Niche descriptions
+        niche_descriptions = {
+            "restaurant": "restaurant, bar, gastronomie, food, cuisine",
+            "automobile": "concession auto, garage, véhicules, mobilité",
+            "retail": "commerce, boutique, vente au détail, shopping",
+            "immobilier": "agence immobilière, biens, locations, ventes",
+            "beaute": "salon de beauté, coiffure, esthétique, bien-être, spa",
+            "fitness": "salle de sport, coaching, nutrition, musculation",
+            "media": "médias, divertissement, événements, spectacles",
+            "tech": "technologie, startup, innovation, digital",
+            "mode": "mode, fashion, vêtements, accessoires, tendances",
+            "agence": "agence de communication, marketing, publicité, branding",
+            "general": "entreprise généraliste"
+        }
+        
+        niche_desc = niche_descriptions.get(niche_context, niche_context)
+        
+        # Get current month events/themes
+        now = datetime.now()
+        month_themes = {
+            1: "Nouvelle année, bonnes résolutions, soldes d'hiver",
+            2: "Saint-Valentin, Carnaval, fin des soldes",
+            3: "Printemps, Journée de la femme, renouveau",
+            4: "Pâques, giboulées, jardinage",
+            5: "Fête des mères, ponts de mai, préparation été",
+            6: "Fête des pères, début été, Fête de la musique",
+            7: "Vacances d'été, soldes d'été, 14 juillet",
+            8: "Rentrée approche, fin vacances, derniers jours d'été",
+            9: "Rentrée, reprise, nouveaux projets",
+            10: "Halloween, automne, changement d'heure",
+            11: "Black Friday, Beaujolais, préparation fêtes",
+            12: "Noël, fêtes de fin d'année, rétrospective"
+        }
+        
+        current_themes = month_themes.get(now.month, "tendances actuelles")
+        
+        # Add custom themes if provided
+        if request.themes:
+            current_themes += ", " + ", ".join(request.themes)
+        
+        system_message = """Tu es un expert en stratégie social media et content marketing.
+Tu génères des idées de posts créatives, engageantes et adaptées au secteur d'activité.
+
+Réponds UNIQUEMENT en JSON valide avec ce format exact:
+{
+    "ideas": [
+        {
+            "title": "Titre court et accrocheur",
+            "caption": "Légende complète avec émojis et hashtags",
+            "format": "post|carrousel|reel|story",
+            "networks": ["instagram", "facebook"],
+            "best_time": "Mardi 10h",
+            "pillar": "education|social_proof|offer|behind_scenes|entertainment|inspiration",
+            "hook": "Phrase d'accroche pour commencer"
+        }
+    ]
+}"""
+
+        user_prompt = f"""Génère {request.count} idées de posts social media pour:
+
+SECTEUR: {niche_desc}
+{calendar_context}
+
+CONTEXTE DU MOMENT: {current_themes}
+
+Critères:
+- Idées variées (pas que des promotions)
+- Mix de formats (posts, carrousels, reels, stories)
+- Contenu engageant et authentique
+- Adapté aux codes de chaque réseau
+- Hashtags pertinents inclus dans les légendes
+
+Génère {request.count} idées différentes et créatives."""
+
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"post-ideas-{uuid.uuid4()}",
+            system_message=system_message
+        ).with_model("openai", "gpt-5.2")
+        
+        user_message = UserMessage(text=user_prompt)
+        response = await chat.send_message(user_message)
+        
+        # Parse JSON response
+        response_text = response.strip()
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.startswith("```"):
+            response_text = response_text[3:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+        response_text = response_text.strip()
+        
+        try:
+            result = json.loads(response_text)
+            ideas = result.get("ideas", [])
+        except json.JSONDecodeError:
+            # Fallback
+            ideas = []
+            logger.warning(f"Failed to parse AI response: {response_text[:200]}")
+        
+        return {
+            "success": True,
+            "ideas": ideas,
+            "context": {
+                "niche": niche_context,
+                "month_themes": current_themes,
+                "count": len(ideas)
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"AI generate ideas error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur IA: {str(e)}")
+
+
 # ==================== CALENDAR VIEW HELPERS ====================
 
 @router.get("/calendar-view")
