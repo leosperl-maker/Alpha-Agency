@@ -1231,23 +1231,25 @@ const MultilinkPage = () => {
 
               {/* Tabs like Zaap */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="w-full bg-white/5 border-b border-white/10 rounded-none h-auto p-0">
-                  <TabsTrigger value="content" className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-white">
-                    <Layout className="w-4 h-4 mr-2" /> Contenu
-                  </TabsTrigger>
-                  <TabsTrigger value="design" className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-white">
-                    <Palette className="w-4 h-4 mr-2" /> Design
-                  </TabsTrigger>
-                  <TabsTrigger value="profile" className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-white">
-                    <Type className="w-4 h-4 mr-2" /> Profil
-                  </TabsTrigger>
-                  <TabsTrigger value="socials" className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-white">
-                    <Share2 className="w-4 h-4 mr-2" /> Réseaux
-                  </TabsTrigger>
-                  <TabsTrigger value="seo" className="flex-1 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-white">
-                    <Search className="w-4 h-4 mr-2" /> SEO
-                  </TabsTrigger>
-                </TabsList>
+                <div className="overflow-x-auto scrollbar-hide">
+                  <TabsList className="w-max min-w-full bg-white/5 border-b border-white/10 rounded-none h-auto p-0 flex">
+                    <TabsTrigger value="content" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-white whitespace-nowrap">
+                      <Layout className="w-4 h-4 mr-2" /> Contenu
+                    </TabsTrigger>
+                    <TabsTrigger value="design" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-white whitespace-nowrap">
+                      <Palette className="w-4 h-4 mr-2" /> Design
+                    </TabsTrigger>
+                    <TabsTrigger value="profile" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-white whitespace-nowrap">
+                      <Type className="w-4 h-4 mr-2" /> Profil
+                    </TabsTrigger>
+                    <TabsTrigger value="socials" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-white whitespace-nowrap">
+                      <Share2 className="w-4 h-4 mr-2" /> Réseaux
+                    </TabsTrigger>
+                    <TabsTrigger value="seo" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-white whitespace-nowrap">
+                      <Search className="w-4 h-4 mr-2" /> SEO
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
 
                 {/* CONTENT TAB - UNIFIED BLOCKS like Zaap.bio */}
                 <TabsContent value="content" className="p-4 space-y-4">
