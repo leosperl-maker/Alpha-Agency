@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Plus, Trash2, Edit2, Eye, ExternalLink, Link2, BarChart3,
   GripVertical, Copy, Check, Loader2, Image, Settings, X,
@@ -9,8 +9,9 @@ import {
   Share2, Verified, ImagePlus, LayoutGrid, FileText, Minus, Heading,
   Video, Sparkles, Zap, Bold, Italic, Underline, List, ListOrdered,
   AlignLeft, AlignCenter, AlignRight, Smile, Undo, Redo,
-  Globe2, CheckCircle2, AlertCircle, RefreshCw
+  Globe2, CheckCircle2, AlertCircle, RefreshCw, QrCode, MousePointerClick
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import MDEditor from '@uiw/react-md-editor';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
