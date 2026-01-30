@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Plus, X, UserPlus, Receipt, FileText, CheckSquare, 
-  FolderPlus, Calendar, Mail, Briefcase
+  FolderPlus, Calendar, Mail, Briefcase, Link2, Share2, Bot, Zap
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { 
