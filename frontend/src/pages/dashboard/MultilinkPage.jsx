@@ -1981,7 +1981,7 @@ const MultilinkPage = () => {
             <div className="space-y-2">
               <Label className="text-white">Réseau social</Label>
               <div className="grid grid-cols-5 gap-2">
-                {ICON_OPTIONS.filter(i => ['instagram', 'facebook', 'twitter', 'youtube', 'linkedin', 'whatsapp', 'telegram', 'email', 'website'].includes(i.value)).map(option => {
+                {ICON_OPTIONS.filter(i => ['instagram', 'facebook', 'twitter', 'youtube', 'linkedin', 'tiktok', 'whatsapp', 'telegram', 'email', 'website'].includes(i.value)).map(option => {
                   const Icon = option.icon;
                   return (
                     <button
