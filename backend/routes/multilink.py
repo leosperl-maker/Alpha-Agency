@@ -132,6 +132,7 @@ class PageCreate(BaseModel):
     seo_settings: Optional[dict] = None  # {title, description, keywords, og_image, indexable}
     social_links: Optional[List[dict]] = None  # [{platform, url, is_active}]
     custom_font: Optional[str] = None
+    custom_domain: Optional[str] = None  # Domaine personnalisé (ex: bio.antilla-martinique.com)
     verified: bool = False
     is_active: bool = True
 
@@ -147,6 +148,7 @@ class PageUpdate(BaseModel):
     seo_settings: Optional[dict] = None
     social_links: Optional[List[dict]] = None
     custom_font: Optional[str] = None
+    custom_domain: Optional[str] = None  # Domaine personnalisé
     verified: Optional[bool] = None
     is_active: Optional[bool] = None
 
