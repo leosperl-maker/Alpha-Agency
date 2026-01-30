@@ -649,6 +649,14 @@ const SocialMediaPage = () => {
       } catch (e) {
         // TikTok status check failed, that's fine
       }
+      
+      // Check Meta sandbox mode
+      try {
+        const metaStatusRes = await api.get('/meta/sandbox-status');
+        setMetaSandboxMode(metaStatusRes.data.sandbox_mode);
+      } catch (e) {
+        // Meta status check failed, that's fine
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Erreur lors du chargement');
