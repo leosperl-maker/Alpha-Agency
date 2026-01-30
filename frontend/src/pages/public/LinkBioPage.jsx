@@ -503,7 +503,7 @@ const LinkBioPage = () => {
 
         {/* Social Icons Row - Modern SVG icons like zaap.bio */}
         {socialLinks.length > 0 && (
-          <div className="flex justify-center gap-3 mb-8 flex-wrap">
+          <div className="flex justify-center gap-3 mb-10 flex-wrap">
             {socialLinks.filter(s => s.is_active).map((social, index) => {
               const bgColor = SOCIAL_COLORS[social.icon] || colors.accent || '#6366f1';
               
@@ -528,15 +528,22 @@ const LinkBioPage = () => {
                 <button
                   key={social.id || index}
                   onClick={() => handleSocialClick(social)}
-                  className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg p-2.5"
+                  className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg overflow-hidden"
                   style={{ 
-                    background: bgColor,
-                    boxShadow: `0 4px 15px ${typeof bgColor === 'string' && !bgColor.includes('gradient') ? bgColor + '40' : 'rgba(0,0,0,0.3)'}`
+                    background: social.custom_icon ? 'transparent' : bgColor,
+                    boxShadow: social.custom_icon ? 'none' : `0 4px 15px ${typeof bgColor === 'string' && !bgColor.includes('gradient') ? bgColor + '40' : 'rgba(0,0,0,0.3)'}`
                   }}
                   title={social.label}
                 >
-                  {ModernIcon ? (
-                    <div className="w-full h-full text-white">
+                  {/* Use custom icon if available */}
+                  {social.custom_icon ? (
+                    <img 
+                      src={social.custom_icon} 
+                      alt={social.label} 
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : ModernIcon ? (
+                    <div className="w-6 h-6 text-white">
                       <ModernIcon />
                     </div>
                   ) : (
