@@ -302,6 +302,12 @@ const MultilinkPage = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [copied, setCopied] = useState(false);
   
+  // Custom domain states
+  const [customDomainInput, setCustomDomainInput] = useState('');
+  const [domainStatus, setDomainStatus] = useState(null);
+  const [checkingDomain, setCheckingDomain] = useState(false);
+  const [savingDomain, setSavingDomain] = useState(false);
+  
   // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
