@@ -967,85 +967,94 @@ const EditorialCalendarPage = () => {
   }
 
   return (
-    <div className="space-y-6" data-testid="editorial-calendar-page">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="space-y-4 sm:space-y-6 pb-20" data-testid="editorial-calendar-page">
+      {/* Header - Mobile Optimized */}
+      <div className="flex flex-col gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Calendrier Éditorial</h1>
-          <p className="text-white/60">Planifiez vos contenus social media</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Calendrier Éditorial</h1>
+          <p className="text-white/60 text-sm">Planifiez vos contenus social media</p>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
           <Button 
             onClick={() => setShowIdeasPanel(true)}
             variant="outline"
-            className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/10"
+            size="sm"
+            className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/10 whitespace-nowrap flex-shrink-0"
           >
-            <Lightbulb className="w-4 h-4 mr-2" />
+            <Lightbulb className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Idées IA</span>
           </Button>
           <Button 
             onClick={() => { resetCalendarForm(); setShowCalendarModal(true); }}
             variant="outline"
-            className="border-white/20 text-white hover:bg-white/10"
+            size="sm"
+            className="border-white/20 text-white hover:bg-white/10 whitespace-nowrap flex-shrink-0"
           >
-            <Plus className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Nouveau calendrier</span>
+            <Plus className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Calendrier</span>
           </Button>
           <Button 
             onClick={() => openNewPost()}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white"
+            size="sm"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white whitespace-nowrap flex-shrink-0"
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Nouveau post
+            <Plus className="w-4 h-4 mr-1 sm:mr-2" />
+            <span className="sm:hidden">Post</span>
+            <span className="hidden sm:inline">Nouveau post</span>
           </Button>
         </div>
       </div>
 
-      {/* Filters & View Toggle */}
-      <div className="flex flex-col md:flex-row md:items-center gap-4 bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10">
-        {/* Calendar selector */}
-        <Select value={selectedCalendarId} onValueChange={setSelectedCalendarId}>
-          <SelectTrigger className="w-48 bg-white/5 border-white/10 text-white">
-            <SelectValue placeholder="Tous les calendriers" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les calendriers</SelectItem>
-            {calendars.map(cal => (
-              <SelectItem key={cal.id} value={cal.id}>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cal.color }} />
-                  {cal.title}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Filters & View Toggle - Mobile Optimized */}
+      <div className="flex flex-col gap-3 bg-white/5 backdrop-blur-xl rounded-xl p-3 sm:p-4 border border-white/10">
+        {/* First row: Calendar selector + Filters */}
+        <div className="flex flex-wrap gap-2">
+          {/* Calendar selector */}
+          <Select value={selectedCalendarId} onValueChange={setSelectedCalendarId}>
+            <SelectTrigger className="w-full sm:w-48 bg-white/5 border-white/10 text-white text-sm">
+              <SelectValue placeholder="Tous les calendriers" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les calendriers</SelectItem>
+              {calendars.map(cal => (
+                <SelectItem key={cal.id} value={cal.id}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cal.color }} />
+                    {cal.title}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        {/* Filters */}
-        <Select value={filters.network} onValueChange={(v) => setFilters(f => ({ ...f, network: v }))}>
-          <SelectTrigger className="w-40 bg-white/5 border-white/10 text-white">
-            <SelectValue placeholder="Réseau" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les réseaux</SelectItem>
-            {settings.networks?.map(n => (
-              <SelectItem key={n.id} value={n.id}>{n.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Second row: More filters - horizontal scroll on mobile */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+          {/* Filters */}
+          <Select value={filters.network} onValueChange={(v) => setFilters(f => ({ ...f, network: v }))}>
+            <SelectTrigger className="min-w-[120px] sm:w-40 bg-white/5 border-white/10 text-white text-sm flex-shrink-0">
+              <SelectValue placeholder="Réseau" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les réseaux</SelectItem>
+              {settings.networks?.map(n => (
+                <SelectItem key={n.id} value={n.id}>{n.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Select value={filters.status} onValueChange={(v) => setFilters(f => ({ ...f, status: v }))}>
-          <SelectTrigger className="w-40 bg-white/5 border-white/10 text-white">
-            <SelectValue placeholder="Statut" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les statuts</SelectItem>
-            {settings.statuses?.map(s => (
-              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <Select value={filters.status} onValueChange={(v) => setFilters(f => ({ ...f, status: v }))}>
+            <SelectTrigger className="min-w-[120px] sm:w-40 bg-white/5 border-white/10 text-white text-sm flex-shrink-0">
+              <SelectValue placeholder="Statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les statuts</SelectItem>
+              {settings.statuses?.map(s => (
+                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
         {/* Format filter */}
         <Select value={filters.format} onValueChange={(v) => setFilters(f => ({ ...f, format: v }))}>
