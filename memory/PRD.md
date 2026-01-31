@@ -82,10 +82,17 @@ A comprehensive CRM and social media management tool for Alpha Agency, featuring
 
 ## Changelog
 
-### 2026-01-31
+### 2026-01-31 (Session 2)
+- **MOBILE RESPONSIVE:** Optimisation complète des pages principales
+  - Dashboard: stats scrollables, KPIs 2 colonnes, graphiques adaptés
+  - Calendrier Éditorial: boutons compacts, filtres empilés, calendriers scrollables
+  - Multilink: header responsive, liste pages en scroll horizontal
+  - Social Media: padding et navigation optimisés
 - **BUG FIX (P0):** Fixed critical "black screen" bug on admin dashboard
   - Cause: TDZ error - `lastKeyPressed` used before declaration in `DashboardLayout.jsx`
-  - Solution: Moved useState declarations before useEffect that uses them
+- **BUG FIX (P1):** TikTok Sandbox banner no longer appears automatically
+  - Banner only shows when user explicitly activates demo mode
+  - "Quitter le mode démo" button now properly disables sandbox
 
 ### Previous Session (Completed)
 - Custom domain support for Multilink pages
