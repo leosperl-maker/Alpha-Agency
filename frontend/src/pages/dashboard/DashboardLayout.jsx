@@ -18,11 +18,13 @@ import {
   Dialog,
   DialogContent,
 } from "../../components/ui/dialog";
+import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const { isOnline, wasOffline } = useOnlineStatus();
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
