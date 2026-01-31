@@ -1164,72 +1164,74 @@ const MultilinkPage = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6 pb-20">
+      {/* Header - Mobile Optimized */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-            <Link2 className="w-7 h-7 text-indigo-400" />
+          <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
+            <Link2 className="w-5 h-5 sm:w-7 sm:h-7 text-indigo-400" />
             Multilink
           </h1>
-          <p className="text-white/60 mt-1">Créez des pages de liens professionnelles</p>
+          <p className="text-white/60 text-sm sm:text-base mt-0.5 sm:mt-1">Créez des pages de liens professionnelles</p>
         </div>
-        <Button onClick={() => openPageDialog()} className="bg-indigo-600 hover:bg-indigo-700">
+        <Button onClick={() => openPageDialog()} className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" /> Nouvelle page
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Pages List */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+        {/* Pages List - Horizontal scroll on mobile */}
         <div className="lg:col-span-3 space-y-3">
-          <h2 className="text-white/60 text-sm font-medium uppercase tracking-wider">Mes pages</h2>
+          <h2 className="text-white/60 text-xs sm:text-sm font-medium uppercase tracking-wider">Mes pages</h2>
           
           {pages.length === 0 ? (
-            <div className="bg-white/5 rounded-xl p-8 text-center border border-white/10">
-              <Link2 className="w-12 h-12 text-white/20 mx-auto mb-3" />
-              <p className="text-white/60">Aucune page créée</p>
-              <Button onClick={() => openPageDialog()} className="mt-4 bg-indigo-600 hover:bg-indigo-700">
+            <div className="bg-white/5 rounded-xl p-6 sm:p-8 text-center border border-white/10">
+              <Link2 className="w-10 h-10 sm:w-12 sm:h-12 text-white/20 mx-auto mb-3" />
+              <p className="text-white/60 text-sm sm:text-base">Aucune page créée</p>
+              <Button onClick={() => openPageDialog()} className="mt-4 bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" /> Créer ma première page
               </Button>
             </div>
           ) : (
-            pages.map(page => (
-              <div
-                key={page.id}
-                onClick={() => fetchPageDetails(page)}
-                className={`p-4 rounded-xl cursor-pointer transition-all ${
-                  selectedPage?.id === page.id 
-                    ? 'bg-indigo-600/20 border-2 border-indigo-500' 
-                    : 'bg-white/5 border border-white/10 hover:bg-white/10'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  {page.profile_image ? (
-                    <img src={page.profile_image} alt="" className="w-10 h-10 rounded-full object-cover" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                      <Link2 className="w-5 h-5 text-indigo-400" />
+            <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 -mx-4 px-4 lg:mx-0 lg:px-0 scrollbar-hide">
+              {pages.map(page => (
+                <div
+                  key={page.id}
+                  onClick={() => fetchPageDetails(page)}
+                  className={`p-3 sm:p-4 rounded-xl cursor-pointer transition-all min-w-[200px] lg:min-w-0 flex-shrink-0 lg:flex-shrink ${
+                    selectedPage?.id === page.id 
+                      ? 'bg-indigo-600/20 border-2 border-indigo-500' 
+                      : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {page.profile_image ? (
+                      <img src={page.profile_image} alt="" className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                        <Link2 className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-medium truncate flex items-center gap-1 text-sm sm:text-base">
+                        {page.title}
+                        {page.verified && <Verified className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />}
+                      </p>
+                      <p className="text-white/40 text-[10px] sm:text-xs">/{page.slug}</p>
                     </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium truncate flex items-center gap-1">
-                      {page.title}
-                      {page.verified && <Verified className="w-4 h-4 text-blue-400" />}
-                    </p>
-                    <p className="text-white/40 text-xs">/{page.slug}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 sm:gap-4 mt-2 sm:mt-3 text-[10px] sm:text-xs text-white/40">
+                    <span className="flex items-center gap-1">
+                      <Eye className="w-3 h-3" /> {page.total_views}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" /> {page.total_clicks}
+                    </span>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-4 mt-3 text-xs text-white/40">
-                  <span className="flex items-center gap-1">
-                    <Eye className="w-3 h-3" /> {page.total_views}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3" /> {page.total_clicks}
-                  </span>
-                </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
 
