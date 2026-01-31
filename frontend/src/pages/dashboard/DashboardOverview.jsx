@@ -233,12 +233,23 @@ const DashboardOverview = () => {
     { name: "Payées", value: stats?.invoices?.paid || 0, color: "#10B981" }
   ];
 
+  // Quick actions
+  const quickActions = [
+    { icon: Users, label: 'Contact', color: 'from-blue-500 to-cyan-500', action: () => navigate('/admin/contacts') },
+    { icon: CheckSquare, label: 'Tâche', color: 'from-amber-500 to-orange-500', action: () => navigate('/admin/taches') },
+    { icon: Receipt, label: 'Facture', color: 'from-green-500 to-emerald-500', action: () => navigate('/admin/facturation') },
+    { icon: Share2, label: 'Publier', color: 'from-pink-500 to-rose-500', action: () => navigate('/admin/editorial') },
+    { icon: Link2, label: 'Multilink', color: 'from-indigo-500 to-violet-500', action: () => navigate('/admin/multilink') },
+    { icon: Bot, label: 'Assistant', color: 'from-cyan-500 to-teal-500', action: () => navigate('/admin/assistant') },
+  ];
+
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="h-20 bg-white/5 animate-pulse rounded-2xl" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 bg-white/5 animate-pulse rounded-2xl border border-white/10" />
+            <div key={i} className="h-28 bg-white/5 animate-pulse rounded-2xl border border-white/10" />
           ))}
         </div>
       </div>
@@ -246,11 +257,71 @@ const DashboardOverview = () => {
   }
 
   return (
-    <div data-testid="dashboard-overview" className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="mb-2">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white">Vue d'ensemble</h1>
-        <p className="text-white/50 text-sm sm:text-base">Bienvenue sur votre dashboard Alpha Agency</p>
+    <div data-testid="dashboard-overview" className="space-y-6">
+      {/* Welcome Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20 border border-white/10 p-6"
+      >
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+              {greeting} 👋
+            </h1>
+            <p className="text-white/60 mt-1">
+              {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={() => navigate('/admin/assistant')}
+              className="bg-white/10 hover:bg-white/20 text-white border-0"
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              Assistant IA
+            </Button>
+          </div>
+        </div>
+
+        {/* Quick Stats Strip */}
+        <div className="relative mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: 'Pipeline', value: formatCurrency(stats?.opportunities?.pipeline_value || 0), icon: Target, color: 'text-purple-400' },
+            { label: 'Facturé ce mois', value: formatCurrency(stats?.invoices?.total_invoiced || 0), icon: Euro, color: 'text-green-400' },
+            { label: 'Tâches en cours', value: taskStats?.in_progress || 0, icon: Clock, color: 'text-blue-400' },
+            { label: 'Contacts', value: stats?.contacts?.total || 0, icon: Users, color: 'text-pink-400' },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white/5 rounded-xl p-3 backdrop-blur-sm">
+              <div className="flex items-center gap-2 mb-1">
+                <stat.icon className={`w-4 h-4 ${stat.color}`} />
+                <span className="text-white/50 text-xs">{stat.label}</span>
+              </div>
+              <p className="text-white font-bold text-lg">{stat.value}</p>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Quick Actions */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <span className="text-white/40 text-sm whitespace-nowrap mr-2">Accès rapide:</span>
+        {quickActions.map((action, i) => (
+          <motion.button
+            key={i}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: i * 0.05 }}
+            onClick={action.action}
+            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all whitespace-nowrap group"
+          >
+            <div className={`w-6 h-6 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center`}>
+              <action.icon className="w-3 h-3 text-white" />
+            </div>
+            <span className="text-white/70 text-sm group-hover:text-white">{action.label}</span>
+          </motion.button>
+        ))}
       </div>
 
       {/* Main KPI Cards - Row 1 */}
