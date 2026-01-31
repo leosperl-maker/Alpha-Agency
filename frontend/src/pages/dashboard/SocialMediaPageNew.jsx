@@ -2299,7 +2299,7 @@ const SocialMediaPage = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleToggleMetaSandbox}
+              onClick={handleDisableMetaSandbox}
               className="border-[#1877F2]/30 text-[#1877F2] hover:bg-[#1877F2]/10"
             >
               Désactiver
