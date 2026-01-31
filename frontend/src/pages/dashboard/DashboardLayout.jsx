@@ -50,6 +50,10 @@ const DashboardLayout = () => {
   const [commandResults, setCommandResults] = useState([]);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
+  
+  // Keyboard shortcut state - MUST be declared before useEffect that uses them
+  const [lastKeyPressed, setLastKeyPressed] = useState(null);
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("alpha_token");
