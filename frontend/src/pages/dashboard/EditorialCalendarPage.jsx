@@ -1058,7 +1058,7 @@ const EditorialCalendarPage = () => {
 
         {/* Format filter */}
         <Select value={filters.format} onValueChange={(v) => setFilters(f => ({ ...f, format: v }))}>
-          <SelectTrigger className="w-40 bg-white/5 border-white/10 text-white">
+          <SelectTrigger className="min-w-[120px] sm:w-40 bg-white/5 border-white/10 text-white text-sm flex-shrink-0">
             <SelectValue placeholder="Format" />
           </SelectTrigger>
           <SelectContent>
@@ -1075,49 +1075,48 @@ const EditorialCalendarPage = () => {
             variant="ghost"
             size="sm"
             onClick={() => setFilters({ network: 'all', status: 'all', format: 'all' })}
-            className="text-white/60 hover:text-white"
+            className="text-white/60 hover:text-white flex-shrink-0"
             title="Réinitialiser les filtres"
           >
             <RotateCcw className="w-4 h-4" />
           </Button>
         )}
+        </div>
 
-        <div className="flex-1" />
-
-        {/* View toggle */}
-        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
+        {/* View toggle - third row on mobile */}
+        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1 w-full sm:w-auto">
           <Button
             size="sm"
             variant={viewMode === 'calendar' ? 'default' : 'ghost'}
             onClick={() => setViewMode('calendar')}
-            className={viewMode === 'calendar' ? 'bg-indigo-600' : 'text-white/60'}
+            className={`flex-1 sm:flex-initial ${viewMode === 'calendar' ? 'bg-indigo-600' : 'text-white/60'}`}
           >
-            <CalendarIcon className="w-4 h-4 mr-1" />
-            Calendrier
+            <CalendarIcon className="w-4 h-4 sm:mr-1" />
+            <span className="hidden sm:inline">Calendrier</span>
           </Button>
           <Button
             size="sm"
             variant={viewMode === 'trello' ? 'default' : 'ghost'}
             onClick={() => setViewMode('trello')}
-            className={viewMode === 'trello' ? 'bg-indigo-600' : 'text-white/60'}
+            className={`flex-1 sm:flex-initial ${viewMode === 'trello' ? 'bg-indigo-600' : 'text-white/60'}`}
           >
-            <Grid3X3 className="w-4 h-4 mr-1" />
-            Trello
+            <Grid3X3 className="w-4 h-4 sm:mr-1" />
+            <span className="hidden sm:inline">Trello</span>
           </Button>
         </div>
       </div>
 
-      {/* Calendars list (collapsible) */}
+      {/* Calendars list (collapsible) - horizontal scroll on mobile */}
       {calendars.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap scrollbar-hide">
           {calendars.map(cal => (
             <div 
               key={cal.id}
-              className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2 border border-white/10"
+              className="flex items-center gap-2 bg-white/5 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 border border-white/10 whitespace-nowrap flex-shrink-0"
             >
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cal.color }} />
-              <span className="text-white text-sm">{cal.title}</span>
-              <span className="text-white/40 text-xs">({cal.post_count} posts)</span>
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full" style={{ backgroundColor: cal.color }} />
+              <span className="text-white text-xs sm:text-sm">{cal.title}</span>
+              <span className="text-white/40 text-[10px] sm:text-xs">({cal.post_count})</span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-white/60 hover:text-white">
