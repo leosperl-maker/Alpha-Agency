@@ -1910,6 +1910,141 @@ const EditorialCalendarPage = () => {
         </DialogContent>
       </Dialog>
 
+      {/* AI Ideas Panel (Slide-over) */}
+      {showIdeasPanel && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={() => setShowIdeasPanel(false)}>
+          <div 
+            className="absolute inset-y-0 right-0 w-full max-w-md bg-gradient-to-b from-[#12121f] to-[#0a0a12] border-l border-white/10 flex flex-col shadow-2xl animate-in slide-in-from-right duration-300"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                  <Lightbulb className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold text-white">Idées de posts IA</h2>
+                  <p className="text-xs text-white/50">Générez des idées créatives</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowIdeasPanel(false)} 
+                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4 text-white/60" />
+              </button>
+            </div>
+
+            {/* Generator */}
+            <div className="p-4 border-b border-white/10 space-y-3">
+              <div className="space-y-2">
+                <Label className="text-white/70 text-xs">Thèmes spécifiques (optionnel)</Label>
+                <Input
+                  value={ideasThemes}
+                  onChange={(e) => setIdeasThemes(e.target.value)}
+                  placeholder="Ex: promo été, témoignage, astuce..."
+                  className="bg-white/5 border-white/10 text-white text-sm"
+                />
+              </div>
+              <Button
+                onClick={generatePostIdeas}
+                disabled={ideasLoading}
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500"
+              >
+                {ideasLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Génération en cours...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Générer 5 idées
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* Ideas List */}
+            <ScrollArea className="flex-1 p-4">
+              {postIdeas.length === 0 ? (
+                <div className="text-center py-12 text-white/40">
+                  <Lightbulb className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                  <p className="text-sm">Cliquez sur &quot;Générer&quot; pour obtenir des idées de posts créatives</p>
+                  <p className="text-xs mt-2 text-white/30">L&apos;IA tiendra compte de votre secteur d&apos;activité et des tendances actuelles</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {postIdeas.map((idea, idx) => (
+                    <div 
+                      key={idx}
+                      className="p-4 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group"
+                    >
+                      {/* Title & Format */}
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-white font-medium text-sm flex-1">{idea.title}</h3>
+                        <Badge variant="outline" className="ml-2 text-xs border-indigo-500/50 text-indigo-400">
+                          {idea.format}
+                        </Badge>
+                      </div>
+
+                      {/* Caption preview */}
+                      <p className="text-white/60 text-xs line-clamp-3 mb-3">
+                        {idea.caption?.substring(0, 150)}...
+                      </p>
+
+                      {/* Meta */}
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          {idea.networks?.map(n => (
+                            <span key={n} className="text-white/40">
+                              <NetworkIcon network={n} className="w-3 h-3" />
+                            </span>
+                          ))}
+                          {idea.best_time && (
+                            <span className="text-white/30 flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {idea.best_time}
+                            </span>
+                          )}
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => useIdea(idea)}
+                          className="h-7 text-xs bg-indigo-600 hover:bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Utiliser
+                        </Button>
+                      </div>
+
+                      {/* Hook */}
+                      {idea.hook && (
+                        <div className="mt-3 pt-3 border-t border-white/5">
+                          <p className="text-xs text-amber-400/80 italic">
+                            💡 {idea.hook}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+
+            {/* Footer */}
+            {postIdeas.length > 0 && (
+              <div className="p-3 border-t border-white/10 bg-white/[0.02]">
+                <p className="text-xs text-white/30 text-center">
+                  Cliquez sur une idée pour l&apos;utiliser comme base pour votre post
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <SocialPreviewModal 
         open={showPreviewModal} 
         onOpenChange={setShowPreviewModal} 
