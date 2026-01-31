@@ -38,7 +38,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
-import { dashboardAPI, tasksAPI, budgetAPI, socialAPI } from "../../lib/api";
+import { dashboardAPI, tasksAPI, budgetAPI } from "../../lib/api";
 import api from "../../lib/api";
 import { 
   LineChart, 
@@ -53,9 +53,7 @@ import {
   Cell,
   BarChart,
   Bar,
-  Legend,
-  AreaChart,
-  Area
+  Legend
 } from "recharts";
 
 const DashboardOverview = () => {
