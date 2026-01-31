@@ -6,7 +6,7 @@ import {
   UserCog, Bot, Newspaper, Share2, Tag, Mail, ChevronLeft, Bell, Search,
   User, ChevronDown, AlertCircle, Clock, FileWarning, UserPlus, Sun, Moon,
   ListTodo, GitBranch, Send, Calendar, CalendarDays, Link2, Command, 
-  FileSearch, Contact, Briefcase, DollarSign
+  FileSearch, Contact, Briefcase, DollarSign, Keyboard, HelpCircle
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
