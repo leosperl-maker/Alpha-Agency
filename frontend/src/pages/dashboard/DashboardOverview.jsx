@@ -254,67 +254,66 @@ const DashboardOverview = () => {
   }
 
   return (
-    <div data-testid="dashboard-overview" className="space-y-6">
-      {/* Welcome Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20 border border-white/10 p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div data-testid="dashboard-overview" className="space-y-4 sm:space-y-6 pb-20">
+      {/* Welcome Header - Mobile Optimized */}
+      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20 border border-white/10 p-4 sm:p-6">
+        <div className="flex flex-row items-center justify-between gap-2">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white flex items-center gap-2">
               {greeting} 👋
             </h1>
-            <p className="text-white/60 mt-1">
+            <p className="text-white/60 text-sm sm:text-base mt-0.5 sm:mt-1">
               {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              onClick={() => navigate('/admin/assistant')}
-              className="bg-white/10 hover:bg-white/20 text-white border-0"
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              Assistant IA
-            </Button>
-          </div>
+          <Button 
+            onClick={() => navigate('/admin/assistant')}
+            className="bg-white/10 hover:bg-white/20 text-white border-0 text-xs sm:text-sm px-2 sm:px-4"
+            size="sm"
+          >
+            <Sparkles className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Assistant IA</span>
+          </Button>
         </div>
 
-        {/* Quick Stats Strip */}
-        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {/* Quick Stats Strip - Horizontal scroll on mobile */}
+        <div className="mt-4 sm:mt-6 flex sm:grid sm:grid-cols-4 gap-2 sm:gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
           {[
             { label: 'Pipeline', value: formatCurrency(stats?.opportunities?.pipeline_value || 0), icon: Target, color: 'text-purple-400' },
-            { label: 'Facturé ce mois', value: formatCurrency(stats?.invoices?.total_invoiced || 0), icon: Euro, color: 'text-green-400' },
-            { label: 'Tâches en cours', value: taskStats?.in_progress || 0, icon: Clock, color: 'text-blue-400' },
+            { label: 'Facturé', value: formatCurrency(stats?.invoices?.total_invoiced || 0), icon: Euro, color: 'text-green-400' },
+            { label: 'Tâches', value: taskStats?.in_progress || 0, icon: Clock, color: 'text-blue-400' },
             { label: 'Contacts', value: stats?.contacts?.total || 0, icon: Users, color: 'text-pink-400' },
           ].map((stat, i) => (
-            <div key={i} className="bg-white/5 rounded-xl p-3 backdrop-blur-sm">
-              <div className="flex items-center gap-2 mb-1">
-                <stat.icon className={`w-4 h-4 ${stat.color}`} />
-                <span className="text-white/50 text-xs">{stat.label}</span>
+            <div key={i} className="bg-white/5 rounded-lg sm:rounded-xl p-2.5 sm:p-3 backdrop-blur-sm flex-shrink-0 min-w-[100px] sm:min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                <stat.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${stat.color}`} />
+                <span className="text-white/50 text-[10px] sm:text-xs">{stat.label}</span>
               </div>
-              <p className="text-white font-bold text-lg">{stat.value}</p>
+              <p className="text-white font-bold text-base sm:text-lg">{stat.value}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        <span className="text-white/40 text-sm whitespace-nowrap mr-2">Accès rapide:</span>
+      {/* Quick Actions - Mobile Optimized */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
+        <span className="text-white/40 text-xs sm:text-sm whitespace-nowrap mr-1 sm:mr-2 hidden sm:inline">Accès rapide:</span>
         {quickActions.map((action, i) => (
           <button
             key={i}
             onClick={action.action}
-            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all whitespace-nowrap group"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg sm:rounded-xl transition-all whitespace-nowrap group flex-shrink-0"
           >
-            <div className={`w-6 h-6 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center`}>
-              <action.icon className="w-3 h-3 text-white" />
+            <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center`}>
+              <action.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
             </div>
-            <span className="text-white/70 text-sm group-hover:text-white">{action.label}</span>
+            <span className="text-white/70 text-xs sm:text-sm group-hover:text-white">{action.label}</span>
           </button>
         ))}
       </div>
 
       {/* Main KPI Cards - Row 1 */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
         {mainKPIs.map((kpi, index) => (
           <div key={kpi.title}>
             <Link to={kpi.link}>
@@ -341,7 +340,7 @@ const DashboardOverview = () => {
       </div>
 
       {/* Secondary KPI Cards - Row 2 */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
         {secondaryKPIs.map((kpi, index) => (
           <div key={kpi.title}>
             <Link to={kpi.link}>
