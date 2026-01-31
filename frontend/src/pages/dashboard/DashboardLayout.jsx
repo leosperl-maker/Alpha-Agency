@@ -385,10 +385,6 @@ const DashboardLayout = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [commandPaletteOpen, commandResults, selectedCommandIndex, performGlobalSearch, lastKeyPressed, navigate]);
 
-  // State for keyboard shortcut sequences
-  const [lastKeyPressed, setLastKeyPressed] = useState(null);
-  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
-
   // Focus input when palette opens
   useEffect(() => {
     if (commandPaletteOpen) {
