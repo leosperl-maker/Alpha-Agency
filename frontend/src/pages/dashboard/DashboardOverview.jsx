@@ -624,6 +624,195 @@ const DashboardOverview = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Fifth Row - Upcoming Events, Scheduled Posts, Multilink Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Upcoming Events */}
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-white text-base flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-amber-400" />
+              Prochains RDV
+            </CardTitle>
+            <Link to="/admin/agenda" className="text-xs text-indigo-400 hover:text-indigo-300">
+              Voir tout →
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {upcomingEvents.length === 0 ? (
+              <div className="text-center py-6">
+                <Calendar className="w-8 h-8 text-white/20 mx-auto mb-2" />
+                <p className="text-white/40 text-sm">Aucun événement à venir</p>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate('/admin/agenda')}
+                  className="mt-2 text-indigo-400 hover:text-indigo-300"
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Ajouter un RDV
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {upcomingEvents.map((event, i) => (
+                  <div key={event.id || i} className="flex items-start gap-3 p-2 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                    <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex flex-col items-center justify-center text-amber-400">
+                      <span className="text-xs font-bold">{new Date(event.start_date || event.date).getDate()}</span>
+                      <span className="text-[10px] uppercase">{new Date(event.start_date || event.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium truncate">{event.title}</p>
+                      <p className="text-white/40 text-xs truncate">
+                        {event.start_time || '09:00'} {event.location && `• ${event.location}`}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Scheduled Posts */}
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-white text-base flex items-center gap-2">
+              <Share2 className="w-4 h-4 text-pink-400" />
+              Posts programmés
+            </CardTitle>
+            <Link to="/admin/editorial" className="text-xs text-indigo-400 hover:text-indigo-300">
+              Voir tout →
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {scheduledPosts.length === 0 ? (
+              <div className="text-center py-6">
+                <Share2 className="w-8 h-8 text-white/20 mx-auto mb-2" />
+                <p className="text-white/40 text-sm">Aucun post programmé</p>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate('/admin/editorial')}
+                  className="mt-2 text-indigo-400 hover:text-indigo-300"
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Programmer un post
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {scheduledPosts.map((post, i) => (
+                  <div key={post.id || i} className="flex items-start gap-3 p-2 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                    <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center">
+                      {post.networks?.includes('instagram') ? <Instagram className="w-4 h-4 text-pink-400" /> :
+                       post.networks?.includes('facebook') ? <Facebook className="w-4 h-4 text-blue-400" /> :
+                       post.networks?.includes('linkedin') ? <Linkedin className="w-4 h-4 text-blue-500" /> :
+                       <Share2 className="w-4 h-4 text-pink-400" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium truncate">{post.title || 'Post sans titre'}</p>
+                      <p className="text-white/40 text-xs">
+                        {post.scheduled_date && new Date(post.scheduled_date).toLocaleDateString('fr-FR')} {post.scheduled_time || ''}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Multilink Stats */}
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-white text-base flex items-center gap-2">
+              <Link2 className="w-4 h-4 text-indigo-400" />
+              Multilink
+            </CardTitle>
+            <Link to="/admin/multilink" className="text-xs text-indigo-400 hover:text-indigo-300">
+              Gérer →
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {!multilinkStats ? (
+              <div className="text-center py-6">
+                <Link2 className="w-8 h-8 text-white/20 mx-auto mb-2" />
+                <p className="text-white/40 text-sm">Aucune page créée</p>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate('/admin/multilink')}
+                  className="mt-2 text-indigo-400 hover:text-indigo-300"
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Créer une page
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-center p-3 bg-indigo-500/10 rounded-xl">
+                    <p className="text-2xl font-bold text-indigo-400">{multilinkStats.pages}</p>
+                    <p className="text-white/40 text-xs">Pages</p>
+                  </div>
+                  <div className="text-center p-3 bg-green-500/10 rounded-xl">
+                    <Eye className="w-4 h-4 text-green-400 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-green-400">{multilinkStats.views}</p>
+                    <p className="text-white/40 text-xs">Vues</p>
+                  </div>
+                  <div className="text-center p-3 bg-amber-500/10 rounded-xl">
+                    <MousePointerClick className="w-4 h-4 text-amber-400 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-amber-400">{multilinkStats.clicks}</p>
+                    <p className="text-white/40 text-xs">Clics</p>
+                  </div>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white/60 text-xs">Taux de clic</span>
+                    <span className="text-indigo-400 font-bold">
+                      {multilinkStats.views > 0 ? ((multilinkStats.clicks / multilinkStats.views) * 100).toFixed(1) : 0}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* AI Assistant Promo */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-600/20 via-indigo-600/20 to-purple-600/20 border border-white/10 p-6"
+      >
+        <div className="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-3xl" />
+        <div className="relative flex flex-col sm:flex-row items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+            <Sparkles className="w-7 h-7 text-white" />
+          </div>
+          <div className="flex-1 text-center sm:text-left">
+            <h3 className="text-white font-semibold text-lg">Assistant IA disponible</h3>
+            <p className="text-white/60 text-sm">Générez des idées de posts, hashtags optimisés et découvrez les meilleurs moments pour publier</p>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => navigate('/admin/editorial')}
+              variant="outline"
+              className="border-white/20 text-white hover:bg-white/10"
+            >
+              <Hash className="w-4 h-4 mr-2" />
+              Hashtags
+            </Button>
+            <Button 
+              onClick={() => navigate('/admin/assistant')}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500"
+            >
+              <Bot className="w-4 h-4 mr-2" />
+              Ouvrir
+            </Button>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 };
