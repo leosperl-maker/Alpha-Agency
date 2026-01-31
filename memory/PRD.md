@@ -10,136 +10,125 @@ Application CRM complète pour une agence de communication digitale incluant:
 - Calendrier et tâches
 - File Manager, Transferts, etc.
 
-## Current Focus: Module Multilink (Clone Zaap.bio)
+## 🆕 Dernières implémentations (30 Janvier 2026)
 
-### ✅ Implémenté (30 Janvier 2026)
+### 🤖 Suggestions IA de Posts
+- Bouton "Idées IA" dans le calendrier éditorial
+- Panneau latéral avec génération d'idées automatiques
+- Prise en compte du secteur d'activité (niche) du client
+- Thèmes saisonniers automatiques (vacances, événements, etc.)
+- Formats variés proposés (post, carrousel, reel, story)
+- Utilisation directe d'une idée pour créer un post
 
-#### Système de Blocs Unifié
-- `link` - Lien simple avec icône
-- `link_image` - Carte avec image, description et bouton "En Savoir +"
-- `button` - Bouton CTA
-- `text` - Bloc texte avec éditeur Markdown (@uiw/react-md-editor)
-- `header` - Titre/En-tête
-- `image` - Image avec aspect ratio configurable
-- `video` - Vidéo avec aspect ratio configurable
-- `youtube` - Embed YouTube
-- `carousel` - Carrousel d'images (upload direct image/vidéo/image+lien)
-- `divider` - Séparateur
+### ⌨️ Raccourcis Clavier Complets
+- `⌘K` / `Ctrl+K` - Recherche globale
+- `?` (Shift+?) - Afficher l'aide des raccourcis
+- Séquences G+lettre pour navigation rapide:
+  - G+D → Dashboard
+  - G+C → Contacts
+  - G+T → Tâches
+  - G+P → Pipeline
+  - G+F → Facturation
+  - G+S → Social Media
+  - G+E → Éditorial
+  - G+M → Multilink
+  - G+A → Assistant IA
+  - G+B → Budget
 
-#### Personnalisation des Couleurs (Onglet Design)
-- Fond de page, cartes, texte, boutons, accent
-- Thèmes prédéfinis + personnalisé
-- Option afficher/masquer le titre
+### 📴 Mode Hors-ligne (PWA)
+- Service Worker configuré pour le cache
+- Page offline dédiée
+- Cache des assets statiques
+- Cache des données API (contacts, tâches, calendriers)
+- Indicateur visuel de connexion (barre jaune hors-ligne, verte au retour)
+- Synchronisation automatique au retour en ligne
 
-#### QR Code (NEW)
-- Génération automatique de QR Code pour chaque page
-- Téléchargement en PNG (1024px) ou SVG vectoriel
-- URL basée sur le domaine personnalisé si configuré
+## Module Multilink (Clone Zaap.bio)
 
-#### Analytics Multilink (Onglet dédié)
-- Vues totales avec croissance
-- Clics totaux avec croissance
-- Taux de conversion (CTR)
-- Graphique des vues par jour (30 derniers jours)
-- Stats détaillées par bloc (clics par élément)
-- Barre de progression pour comparer les performances
+### ✅ Fonctionnalités Complètes
+- Système de blocs unifié (link, button, text, header, image, video, carousel, etc.)
+- Éditeur Markdown pour les blocs texte
+- Personnalisation complète des couleurs et styles
+- QR Code avec téléchargement PNG/SVG
+- Analytics détaillés (vues, clics, CTR, graphiques)
+- Domaines personnalisés (CNAME)
+- Mode Sandbox pour Meta et TikTok
+- Scroll horizontal des onglets sur mobile
 
-#### Domaines Personnalisés
-- Configuration d'un domaine personnalisé par page (ex: bio.votre-domaine.com)
-- UI dans l'onglet SEO pour configurer le domaine
-- Vérification du statut DNS
-- Instructions détaillées pour la configuration CNAME
+## Social Media Manager
 
-#### Mode Sandbox (Meta & TikTok)
-- Toggle entre mode production et sandbox
-- Données mock pour développement/test
+### ✅ Fonctionnalités Actuelles
+- Calendrier éditorial avec drag & drop
+- Assistant IA pour génération de contenu
+- Suggestions IA automatiques (NEW)
+- Publication multi-plateforme
+- Prévisualisation des posts
+- Gestion des médias
 
-### 🆕 Améliorations UX (30 Janvier 2026)
-
-#### Barre de recherche globale (⌘K)
-- Command Palette accessible via ⌘K (Mac) ou Ctrl+K (Windows)
-- Recherche dans: Navigation, Actions rapides, Contacts, Tâches, Factures, Opportunités
-- Navigation au clavier (↑↓ + Entrée)
-- Regroupement par catégorie
-
-#### Sélecteur d'agent IA amélioré
-- Dialog modal au lieu de dropdown scroll
-- Interface claire avec icônes et descriptions
-- Fonctionne parfaitement sur mobile
-
-#### Actions rapides améliorées
-- Plus d'options: Contact, Tâche, Facture, Opportunité, Multilink, Publier, Assistant IA
-- Design amélioré avec labels de section
-
-#### Mobile: Onglets Multilink scrollables
-- Les onglets (Contenu, Design, Profil, Réseaux, SEO, Analytics) sont maintenant scrollables horizontalement sur mobile
-
-### 🔄 Prochaines Priorités
-
-#### P0 - Social Media Manager
-- Suggestions IA de posts (calendrier éditorial)
-- Meilleur moment pour poster
-- Aperçu multi-plateforme
-- Suggestions de hashtags
-
-#### P1 - Story Editor + Scheduler (Clone Storrito)
-- Éditeur de Stories Instagram
-- Planification et publication automatique
-
-#### P2 - Mode hors-ligne
-- Dashboard admin fonctionnel sans connexion (PWA + cache)
-
-### 📋 Backlog
-
-1. Bulk Delete pour posts sociaux
-2. Amélioration MindMap (export PDF, raccourcis)
-3. Push Notifications
-4. Intégration Qonto (banking)
-5. Analytics & Reporting avancé
-6. Gestion client (portail, notes internes)
-
-### 🐛 Bugs Connus
-
-#### P1 - Comptes Meta Manquants
-- Certains comptes Facebook/Instagram ne s'affichent pas
-- À investiguer: scopes OAuth, pagination Graph API
-
-### ⛔ Bloqués (Externe)
-
-- **LinkedIn Posting** - En attente d'approbation w_member_social
-- **Meta Inbox (Production)** - En attente Meta App Review pour pages_messaging (Mode Sandbox disponible)
+### 🔄 En attente
+- Insights Meta (nécessite App Review)
+- Analyse des posts performants
 
 ## Architecture Technique
 
 ### Backend (FastAPI)
-- `/app/backend/routes/multilink.py` - API Multilink
-- `/app/backend/routes/meta.py` - API Meta avec Sandbox
-- `/app/backend/routes/social.py` - API Social Media Manager
+- `/api/editorial/ai/generate-ideas` - Génération d'idées IA (NEW)
+- `/api/editorial/ai/assist` - Assistant IA existant
+- `/api/multilink/*` - API Multilink complète
 
 ### Frontend (React)
-- `/app/frontend/src/pages/dashboard/MultilinkPage.jsx` - Admin UI Multilink (QR Code, Analytics)
-- `/app/frontend/src/pages/dashboard/DashboardLayout.jsx` - Layout avec Command Palette (⌘K)
-- `/app/frontend/src/pages/dashboard/AIAssistantPageNew.jsx` - Assistant IA (sélecteur modal)
-- `/app/frontend/src/components/QuickActions.jsx` - Actions rapides améliorées
-- `/app/frontend/src/components/FloatingAIChat.jsx` - Chat IA flottant
+- Service Worker pour PWA
+- Hook `useOnlineStatus` pour détection connexion
+- Command Palette (⌘K)
+- Panneau d'idées IA
 
-### Base de données (MongoDB)
-- `multilink_pages` - Pages Multilink (avec `custom_domain`)
-- `multilink_blocks` - Blocs unifiés
-- `multilink_stats` - Statistiques (vues, clics)
+### PWA Configuration
+- `/public/service-worker.js` - Cache et offline support
+- `/public/offline.html` - Page hors-ligne
+- `/public/manifest.json` - Manifest PWA
+
+## 🔄 Prochaines Priorités
+
+### P1 - Améliorations Social Media
+- Meilleur moment pour poster (basé sur les stats quand disponibles)
+- Aperçu multi-plateforme
+- Suggestions de hashtags avancées
+
+### P2 - Bug Comptes Meta Manquants
+- Investiguer scopes OAuth
+- Vérifier pagination Graph API
+
+## 📋 Backlog
+
+1. Story Editor (Storrito clone)
+2. Analytics & Reporting avancé
+3. Intégration Qonto
+4. Push Notifications
+5. Bulk Delete posts
+
+## ⛔ Bloqués (Externe)
+
+- **LinkedIn Posting** - En attente d'approbation w_member_social
+- **Meta Inbox (Production)** - En attente Meta App Review
+- **Meta Insights** - Nécessite permissions supplémentaires
 
 ## Credentials de Test
 - Email: `admin@alphagency.fr`
 - Password: `Test123!`
 
-## URLs
-- Admin: `/admin`
-- Multilink Admin: `/admin/multilink`
-- Page publique: `/lien-bio/{slug}`
-- Page par domaine: `https://{custom_domain}`
-
-## Raccourcis Clavier
-- `⌘K` / `Ctrl+K` - Ouvrir la recherche globale
-- `↑↓` - Naviguer dans les résultats
-- `Entrée` - Sélectionner
-- `Échap` - Fermer
+## Raccourcis Clavier (Résumé)
+| Raccourci | Action |
+|-----------|--------|
+| ⌘K / Ctrl+K | Recherche globale |
+| ? | Aide raccourcis |
+| G → D | Dashboard |
+| G → C | Contacts |
+| G → T | Tâches |
+| G → P | Pipeline |
+| G → F | Facturation |
+| G → S | Social Media |
+| G → E | Éditorial |
+| G → M | Multilink |
+| G → A | Assistant IA |
+| G → B | Budget |
+| Échap | Fermer modals |
