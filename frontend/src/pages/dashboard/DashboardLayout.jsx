@@ -751,6 +751,22 @@ const DashboardLayout = () => {
           </div>
         </header>
 
+        {/* Offline Indicator */}
+        {!isOnline && (
+          <div className="bg-amber-500/90 text-black px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium">
+            <WifiOff className="w-4 h-4" />
+            Mode hors ligne - Certaines fonctionnalités peuvent être limitées
+          </div>
+        )}
+        
+        {/* Back Online Indicator */}
+        {isOnline && wasOffline && (
+          <div className="bg-green-500/90 text-black px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium animate-in slide-in-from-top duration-300">
+            <Wifi className="w-4 h-4" />
+            Connexion rétablie
+          </div>
+        )}
+
         {/* Page Content */}
         <main className="flex-1 p-4 lg:p-6 relative z-10">
           <Outlet />
