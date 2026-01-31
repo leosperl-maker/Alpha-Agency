@@ -5,7 +5,7 @@ import {
   Copy, Archive, Clock, User, Link as LinkIcon, MessageSquare, Target,
   Sparkles, Upload, X, Check, GripVertical, Instagram, Facebook, Linkedin, Youtube,
   Wand2, Loader2, Lightbulb, Hash, MousePointerClick, Filter, RotateCcw,
-  Download, BarChart3, FileText
+  Download, BarChart3, FileText, Timer, TrendingUp, Zap
 } from 'lucide-react';
 import {
   DndContext,
