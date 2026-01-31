@@ -367,49 +367,49 @@ const DashboardOverview = () => {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Leads Trend Chart */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-white text-lg flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-indigo-400" />
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-xl sm:rounded-2xl">
+          <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
+            <CardTitle className="text-white text-base sm:text-lg flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
               Évolution des leads
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
+          <CardContent className="p-2 sm:p-6 pt-0 sm:pt-0">
+            <ResponsiveContainer width="100%" height={180}>
               <BarChart data={leadsTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" fontSize={12} />
-                <YAxis stroke="rgba(255,255,255,0.5)" fontSize={12} />
+                <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" fontSize={10} tickMargin={5} />
+                <YAxis stroke="rgba(255,255,255,0.5)" fontSize={10} width={30} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', color: 'white' }}
+                  contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: 'white', fontSize: '12px' }}
                   formatter={(value) => [value, 'Leads']}
                 />
-                <Bar dataKey="leads" fill="#6366f1" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="leads" fill="#6366f1" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Pipeline Distribution */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-white text-lg flex items-center gap-2">
-              <PieChartIcon className="w-5 h-5 text-purple-400" />
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-xl sm:rounded-2xl">
+          <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
+            <CardTitle className="text-white text-base sm:text-lg flex items-center gap-2">
+              <PieChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
               Répartition Pipeline
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-2 sm:p-6 pt-0 sm:pt-0">
             <div className="flex items-center">
-              <ResponsiveContainer width="60%" height={200}>
+              <ResponsiveContainer width="55%" height={160}>
                 <PieChart>
                   <Pie
                     data={pipelineData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
+                    innerRadius={35}
+                    outerRadius={60}
                     paddingAngle={3}
                     dataKey="value"
                   >
@@ -418,19 +418,19 @@ const DashboardOverview = () => {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', color: 'white' }}
+                    contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: 'white', fontSize: '12px' }}
                     formatter={(value, name) => [value, name]}
                   />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="w-[40%] space-y-2">
+              <div className="w-[45%] space-y-1.5 sm:space-y-2">
                 {pipelineData.map((item) => (
                   <div key={item.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="text-sm text-white/60">{item.name}</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span className="text-xs sm:text-sm text-white/60">{item.name}</span>
                     </div>
-                    <span className="font-bold text-white">{item.value}</span>
+                    <span className="font-bold text-white text-xs sm:text-sm">{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -440,12 +440,12 @@ const DashboardOverview = () => {
       </div>
 
       {/* Third Row - Invoice Status & Tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Invoice Status */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-white text-lg flex items-center gap-2">
-              <Receipt className="w-5 h-5 text-amber-400" />
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-xl sm:rounded-2xl">
+          <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
+            <CardTitle className="text-white text-base sm:text-lg flex items-center gap-2">
+              <Receipt className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
               Statut Factures
             </CardTitle>
           </CardHeader>
