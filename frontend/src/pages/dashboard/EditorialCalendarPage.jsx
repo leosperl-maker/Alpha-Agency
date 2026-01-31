@@ -298,6 +298,18 @@ const EditorialCalendarPage = () => {
   const [ideasLoading, setIdeasLoading] = useState(false);
   const [postIdeas, setPostIdeas] = useState([]);
   const [ideasThemes, setIdeasThemes] = useState('');
+  const [ideasTab, setIdeasTab] = useState('ideas'); // ideas, hashtags, timing
+
+  // Hashtag generator states
+  const [hashtagTopic, setHashtagTopic] = useState('');
+  const [hashtagNetwork, setHashtagNetwork] = useState('instagram');
+  const [hashtagsLoading, setHashtagsLoading] = useState(false);
+  const [hashtagResults, setHashtagResults] = useState(null);
+
+  // Best time states
+  const [bestTimeNetworks, setBestTimeNetworks] = useState(['instagram', 'facebook']);
+  const [bestTimeLoading, setBestTimeLoading] = useState(false);
+  const [bestTimeResults, setBestTimeResults] = useState(null);
 
   // Preview state
   const [showPreviewModal, setShowPreviewModal] = useState(false);
