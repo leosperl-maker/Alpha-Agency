@@ -59,13 +59,24 @@ import {
 } from "recharts";
 
 const DashboardOverview = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [taskStats, setTaskStats] = useState(null);
   const [budgetSummary, setBudgetSummary] = useState(null);
   const [recentTasks, setRecentTasks] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [scheduledPosts, setScheduledPosts] = useState([]);
+  const [multilinkStats, setMultilinkStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
+    // Set greeting based on time
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting('Bonjour');
+    else if (hour < 18) setGreeting('Bon après-midi');
+    else setGreeting('Bonsoir');
+
     const fetchAllData = async () => {
       try {
         const [statsRes, taskStatsRes, budgetRes, tasksRes] = await Promise.all([
@@ -78,6 +89,37 @@ const DashboardOverview = () => {
         setTaskStats(taskStatsRes.data);
         setBudgetSummary(budgetRes.data);
         setRecentTasks(tasksRes.data.slice(0, 5));
+
+        // Fetch upcoming events
+        try {
+          const eventsRes = await api.get('/agenda/events', { 
+            params: { start_date: new Date().toISOString().split('T')[0], limit: 3 }
+          });
+          setUpcomingEvents(eventsRes.data?.slice(0, 3) || []);
+        } catch (e) { console.log('No events API'); }
+
+        // Fetch scheduled posts
+        try {
+          const postsRes = await api.get('/editorial/posts', { 
+            params: { status: 'scheduled', limit: 3 }
+          });
+          setScheduledPosts(postsRes.data?.slice(0, 3) || []);
+        } catch (e) { console.log('No posts API'); }
+
+        // Fetch multilink stats
+        try {
+          const pagesRes = await api.get('/multilink/pages');
+          if (pagesRes.data?.length > 0) {
+            const totalViews = pagesRes.data.reduce((sum, p) => sum + (p.total_views || 0), 0);
+            const totalClicks = pagesRes.data.reduce((sum, p) => sum + (p.total_clicks || 0), 0);
+            setMultilinkStats({ 
+              pages: pagesRes.data.length, 
+              views: totalViews, 
+              clicks: totalClicks 
+            });
+          }
+        } catch (e) { console.log('No multilink API'); }
+
       } catch (error) {
         console.error("Error fetching stats:", error);
       } finally {
