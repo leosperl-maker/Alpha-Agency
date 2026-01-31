@@ -1300,6 +1300,266 @@ Génère {request.count} idées différentes et créatives."""
         raise HTTPException(status_code=500, detail=f"Erreur IA: {str(e)}")
 
 
+# ==================== BEST TIME TO POST ====================
+
+# Optimal posting times by network (based on industry research)
+OPTIMAL_TIMES = {
+    "instagram": {
+        "best_days": ["mardi", "mercredi", "jeudi"],
+        "best_hours": ["11:00", "13:00", "19:00"],
+        "avoid": ["dimanche matin", "lundi tôt"],
+        "peak_engagement": {
+            "weekday": {"start": 11, "end": 14},
+            "evening": {"start": 18, "end": 21}
+        }
+    },
+    "facebook": {
+        "best_days": ["mercredi", "jeudi", "vendredi"],
+        "best_hours": ["09:00", "13:00", "16:00"],
+        "avoid": ["samedi", "dimanche"],
+        "peak_engagement": {
+            "morning": {"start": 9, "end": 12},
+            "afternoon": {"start": 13, "end": 16}
+        }
+    },
+    "linkedin": {
+        "best_days": ["mardi", "mercredi", "jeudi"],
+        "best_hours": ["08:00", "10:00", "12:00"],
+        "avoid": ["weekend", "après 18h"],
+        "peak_engagement": {
+            "morning": {"start": 8, "end": 10},
+            "lunch": {"start": 12, "end": 13}
+        }
+    },
+    "twitter": {
+        "best_days": ["mercredi", "jeudi"],
+        "best_hours": ["09:00", "12:00", "17:00"],
+        "avoid": ["weekend après-midi"],
+        "peak_engagement": {
+            "morning": {"start": 9, "end": 11},
+            "evening": {"start": 17, "end": 19}
+        }
+    },
+    "tiktok": {
+        "best_days": ["mardi", "jeudi", "vendredi"],
+        "best_hours": ["19:00", "21:00", "22:00"],
+        "avoid": ["matin tôt", "après-midi semaine"],
+        "peak_engagement": {
+            "evening": {"start": 19, "end": 23}
+        }
+    },
+    "youtube": {
+        "best_days": ["jeudi", "vendredi", "samedi"],
+        "best_hours": ["12:00", "15:00", "21:00"],
+        "avoid": ["lundi", "mardi matin"],
+        "peak_engagement": {
+            "afternoon": {"start": 14, "end": 17},
+            "evening": {"start": 20, "end": 22}
+        }
+    }
+}
+
+# Niche-specific adjustments
+NICHE_TIME_ADJUSTMENTS = {
+    "restaurant": {
+        "instagram": {"best_hours": ["11:30", "18:30", "20:00"]},  # Before meals
+        "facebook": {"best_hours": ["11:00", "17:00"]}
+    },
+    "fitness": {
+        "instagram": {"best_hours": ["06:00", "12:00", "18:00"]},  # Workout times
+        "tiktok": {"best_hours": ["06:30", "18:00", "21:00"]}
+    },
+    "beaute": {
+        "instagram": {"best_hours": ["10:00", "14:00", "20:00"]},
+        "tiktok": {"best_hours": ["12:00", "19:00", "21:00"]}
+    },
+    "retail": {
+        "instagram": {"best_hours": ["12:00", "18:00", "21:00"]},
+        "facebook": {"best_hours": ["10:00", "13:00", "19:00"]}
+    },
+    "tech": {
+        "linkedin": {"best_hours": ["08:30", "12:00", "17:00"]},
+        "twitter": {"best_hours": ["09:00", "14:00", "17:00"]}
+    }
+}
+
+
+class BestTimeRequest(BaseModel):
+    networks: List[str]
+    niche: Optional[str] = "general"
+    date: Optional[str] = None  # YYYY-MM-DD
+
+
+@router.post("/ai/best-time")
+async def get_best_posting_time(
+    request: BestTimeRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get optimal posting times for specified networks and niche"""
+    results = {}
+    
+    for network in request.networks:
+        network_lower = network.lower()
+        if network_lower not in OPTIMAL_TIMES:
+            continue
+            
+        base_times = OPTIMAL_TIMES[network_lower].copy()
+        
+        # Apply niche adjustments if available
+        if request.niche and request.niche in NICHE_TIME_ADJUSTMENTS:
+            niche_adj = NICHE_TIME_ADJUSTMENTS[request.niche].get(network_lower, {})
+            base_times.update(niche_adj)
+        
+        # Get day of week if date provided
+        day_recommendation = None
+        if request.date:
+            try:
+                date_obj = datetime.strptime(request.date, "%Y-%m-%d")
+                day_names = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+                day_name = day_names[date_obj.weekday()]
+                
+                is_best_day = day_name in base_times.get("best_days", [])
+                day_recommendation = {
+                    "day": day_name,
+                    "is_optimal": is_best_day,
+                    "message": f"{'✅ Jour optimal' if is_best_day else '⚠️ Pas le meilleur jour'} pour {network}"
+                }
+            except ValueError:
+                pass
+        
+        results[network_lower] = {
+            "best_hours": base_times.get("best_hours", []),
+            "best_days": base_times.get("best_days", []),
+            "avoid": base_times.get("avoid", []),
+            "peak_engagement": base_times.get("peak_engagement", {}),
+            "day_recommendation": day_recommendation,
+            "tip": f"Pour {network}, publiez de préférence le {', '.join(base_times.get('best_days', [])[:2])} vers {base_times.get('best_hours', ['12:00'])[0]}"
+        }
+    
+    return {
+        "success": True,
+        "recommendations": results,
+        "niche": request.niche,
+        "general_tip": "Ces recommandations sont basées sur les études d'engagement. Ajustez selon les retours de votre audience."
+    }
+
+
+# ==================== HASHTAG SUGGESTIONS ====================
+
+class HashtagRequest(BaseModel):
+    topic: str
+    niche: Optional[str] = "general"
+    network: Optional[str] = "instagram"
+    count: int = 15
+    include_trending: bool = True
+
+
+@router.post("/ai/hashtags")
+async def generate_hashtags(
+    request: HashtagRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate AI-powered hashtag suggestions for a topic"""
+    if not EMERGENT_LLM_KEY:
+        raise HTTPException(status_code=500, detail="Clé API LLM non configurée")
+    
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        import json
+        
+        # Network-specific hashtag rules
+        network_rules = {
+            "instagram": "Maximum 30 hashtags, mix populaires et niche. Inclure des hashtags français et anglais si pertinent.",
+            "tiktok": "Maximum 5-7 hashtags courts et tendance. Privilégier les hashtags viraux.",
+            "linkedin": "Maximum 3-5 hashtags professionnels. Éviter les hashtags trop génériques.",
+            "twitter": "Maximum 2-3 hashtags pertinents. Court et percutant.",
+            "facebook": "Maximum 2-3 hashtags ou aucun. Les hashtags sont moins importants sur Facebook.",
+            "youtube": "Tags plutôt que hashtags. Mots-clés descriptifs pour le SEO."
+        }
+        
+        rules = network_rules.get(request.network.lower(), network_rules["instagram"])
+        
+        system_message = """Tu es un expert en stratégie de hashtags et SEO social media.
+Tu génères des hashtags pertinents, un mix de populaires et de niche, optimisés pour l'engagement.
+
+Réponds UNIQUEMENT en JSON valide avec ce format exact:
+{
+    "hashtags": {
+        "high_volume": ["#hashtag1", "#hashtag2"],
+        "medium_volume": ["#hashtag3", "#hashtag4"],
+        "niche": ["#hashtag5", "#hashtag6"],
+        "trending": ["#hashtag7"]
+    },
+    "recommended_set": ["#top1", "#top2", "#top3", "#top4", "#top5"],
+    "caption_placement": "Placer les hashtags dans le premier commentaire pour Instagram",
+    "tips": ["Conseil 1", "Conseil 2"]
+}"""
+
+        user_prompt = f"""Génère des hashtags pour:
+
+SUJET: {request.topic}
+SECTEUR: {request.niche}
+RÉSEAU: {request.network}
+NOMBRE DEMANDÉ: {request.count}
+
+RÈGLES POUR {request.network.upper()}:
+{rules}
+
+Critères:
+- Mix de hashtags populaires (large audience) et niche (engagement ciblé)
+- Hashtags en rapport direct avec le sujet
+- Inclure des hashtags en français et anglais si pertinent
+{"- Inclure 2-3 hashtags tendance actuels" if request.include_trending else ""}
+- Éviter les hashtags bannis ou spam
+
+Génère une liste optimisée de hashtags."""
+
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"hashtags-{uuid.uuid4()}",
+            system_message=system_message
+        ).with_model("openai", "gpt-5.2")
+        
+        user_message = UserMessage(text=user_prompt)
+        response = await chat.send_message(user_message)
+        
+        # Parse JSON response
+        response_text = response.strip()
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.startswith("```"):
+            response_text = response_text[3:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+        response_text = response_text.strip()
+        
+        try:
+            result = json.loads(response_text)
+        except json.JSONDecodeError:
+            # Fallback - try to extract hashtags from text
+            import re
+            hashtags = re.findall(r'#\w+', response_text)
+            result = {
+                "hashtags": {
+                    "recommended": hashtags[:request.count]
+                },
+                "recommended_set": hashtags[:5],
+                "tips": []
+            }
+        
+        return {
+            "success": True,
+            "topic": request.topic,
+            "network": request.network,
+            "niche": request.niche,
+            **result
+        }
+        
+    except Exception as e:
+        logger.error(f"AI hashtags error: {e}")
+        raise HTTPException(status_code=500, detail=f"Erreur IA: {str(e)}")
+
+
 # ==================== CALENDAR VIEW HELPERS ====================
 
 @router.get("/calendar-view")
