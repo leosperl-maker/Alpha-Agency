@@ -256,12 +256,8 @@ const DashboardOverview = () => {
   return (
     <div data-testid="dashboard-overview" className="space-y-6">
       {/* Welcome Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20 border border-white/10 p-6"
-      >
-        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20 border border-white/10 p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
               {greeting} 👋
@@ -282,7 +278,7 @@ const DashboardOverview = () => {
         </div>
 
         {/* Quick Stats Strip */}
-        <div className="relative mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: 'Pipeline', value: formatCurrency(stats?.opportunities?.pipeline_value || 0), icon: Target, color: 'text-purple-400' },
             { label: 'Facturé ce mois', value: formatCurrency(stats?.invoices?.total_invoiced || 0), icon: Euro, color: 'text-green-400' },
@@ -298,17 +294,14 @@ const DashboardOverview = () => {
             </div>
           ))}
         </div>
-      </motion.div>
+      </div>
 
       {/* Quick Actions */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
         <span className="text-white/40 text-sm whitespace-nowrap mr-2">Accès rapide:</span>
         {quickActions.map((action, i) => (
-          <motion.button
+          <button
             key={i}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.05 }}
             onClick={action.action}
             className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl transition-all whitespace-nowrap group"
           >
@@ -316,7 +309,7 @@ const DashboardOverview = () => {
               <action.icon className="w-3 h-3 text-white" />
             </div>
             <span className="text-white/70 text-sm group-hover:text-white">{action.label}</span>
-          </motion.button>
+          </button>
         ))}
       </div>
 
