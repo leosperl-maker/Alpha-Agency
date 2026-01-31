@@ -330,19 +330,57 @@ const DashboardLayout = () => {
         }
       }
 
-      // Quick shortcuts (when palette closed)
-      if (!commandPaletteOpen && !e.target.closest('input, textarea')) {
-        // G then D - Go to Dashboard
-        // G then C - Go to Contacts
-        // G then T - Go to Tasks
-        // G then P - Go to Pipeline
-        // G then A - Go to Assistant
+      // Quick shortcuts (when palette closed and not in input/textarea)
+      if (!commandPaletteOpen && !e.target.closest('input, textarea, [contenteditable="true"]')) {
+        // Single key shortcuts
+        if (e.key === '?' && e.shiftKey) {
+          e.preventDefault();
+          setShowShortcutsHelp(prev => !prev);
+        }
+        
+        // G + key sequences for navigation
+        if (lastKeyPressed === 'g') {
+          e.preventDefault();
+          const gShortcuts = {
+            'd': '/admin',           // Go Dashboard
+            'c': '/admin/contacts',  // Go Contacts
+            't': '/admin/taches',    // Go Tasks
+            'p': '/admin/pipeline',  // Go Pipeline
+            'a': '/admin/assistant', // Go Assistant
+            'f': '/admin/facturation', // Go Facturation
+            's': '/admin/social-media', // Go Social
+            'e': '/admin/editorial', // Go Editorial
+            'm': '/admin/multilink', // Go Multilink
+            'b': '/admin/budget',    // Go Budget
+          };
+          
+          if (gShortcuts[e.key.toLowerCase()]) {
+            navigate(gShortcuts[e.key.toLowerCase()]);
+            setLastKeyPressed(null);
+            return;
+          }
+        }
+        
+        // Store last key for sequences
+        if (e.key === 'g') {
+          setLastKeyPressed('g');
+          setTimeout(() => setLastKeyPressed(null), 1000); // Reset after 1s
+        }
+
+        // N for new (based on current page)
+        if (e.key === 'n' && !e.metaKey && !e.ctrlKey) {
+          // This will be handled by individual pages
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [commandPaletteOpen, commandResults, selectedCommandIndex, performGlobalSearch]);
+  }, [commandPaletteOpen, commandResults, selectedCommandIndex, performGlobalSearch, lastKeyPressed, navigate]);
+
+  // State for keyboard shortcut sequences
+  const [lastKeyPressed, setLastKeyPressed] = useState(null);
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
 
   // Focus input when palette opens
   useEffect(() => {
