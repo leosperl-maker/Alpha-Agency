@@ -891,6 +891,43 @@ const SocialMediaPage = () => {
     }
   };
   
+  // Explicitly disable TikTok sandbox mode (for "Quitter le mode démo" button)
+  const handleDisableTikTokSandbox = async () => {
+    try {
+      // First check current state and disable if enabled
+      const statusRes = await api.get('/tiktok/sandbox-status');
+      if (statusRes.data.sandbox_mode) {
+        await api.post('/tiktok/sandbox-toggle');
+      }
+      setTiktokSandboxMode(false);
+      toast.success('Mode démo TikTok désactivé');
+      await loadData();
+    } catch (error) {
+      console.error('Error disabling sandbox:', error);
+      // Even if API fails, hide the banner locally
+      setTiktokSandboxMode(false);
+    }
+  };
+  
+  // Explicitly disable Meta sandbox mode
+  const handleDisableMetaSandbox = async () => {
+    try {
+      const statusRes = await api.get('/meta/sandbox-status');
+      if (statusRes.data.sandbox_mode) {
+        await api.post('/meta/sandbox-toggle');
+      }
+      setMetaSandboxMode(false);
+      toast.success('Mode démo Meta désactivé');
+      if (activeSection === 'inbox') {
+        await loadInbox();
+      }
+      await loadData();
+    } catch (error) {
+      console.error('Error disabling Meta sandbox:', error);
+      setMetaSandboxMode(false);
+    }
+  };
+  
   const handleToggleMetaSandbox = async () => {
     try {
       const response = await api.post('/meta/sandbox-toggle');
