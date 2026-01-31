@@ -619,6 +619,91 @@ const EditorialCalendarPage = () => {
     toast.success('Idée appliquée au formulaire');
   };
 
+  // Generate hashtags
+  const generateHashtags = async () => {
+    if (!hashtagTopic.trim()) {
+      toast.error('Entrez un sujet pour générer des hashtags');
+      return;
+    }
+    
+    setHashtagsLoading(true);
+    try {
+      const calendar = calendars.find(c => c.id === selectedCalendarId);
+      const response = await api.post('/editorial/ai/hashtags', {
+        topic: hashtagTopic,
+        niche: calendar?.niche || 'general',
+        network: hashtagNetwork,
+        count: 15,
+        include_trending: true
+      });
+
+      if (response.data.success) {
+        setHashtagResults(response.data);
+        toast.success('Hashtags générés !');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la génération');
+    }
+    setHashtagsLoading(false);
+  };
+
+  // Copy hashtags to clipboard
+  const copyHashtags = (hashtags) => {
+    const text = hashtags.join(' ');
+    navigator.clipboard.writeText(text);
+    toast.success('Hashtags copiés !');
+  };
+
+  // Add hashtags to current post caption
+  const addHashtagsToCaption = (hashtags) => {
+    const hashtagText = hashtags.join(' ');
+    setPostForm(prev => ({
+      ...prev,
+      caption: prev.caption ? `${prev.caption}\n\n${hashtagText}` : hashtagText
+    }));
+    setShowIdeasPanel(false);
+    setShowPostModal(true);
+    toast.success('Hashtags ajoutés à la légende');
+  };
+
+  // Get best posting times
+  const getBestTimes = async () => {
+    if (bestTimeNetworks.length === 0) {
+      toast.error('Sélectionnez au moins un réseau');
+      return;
+    }
+    
+    setBestTimeLoading(true);
+    try {
+      const calendar = calendars.find(c => c.id === selectedCalendarId);
+      const response = await api.post('/editorial/ai/best-time', {
+        networks: bestTimeNetworks,
+        niche: calendar?.niche || 'general',
+        date: postForm.scheduled_date || null
+      });
+
+      if (response.data.success) {
+        setBestTimeResults(response.data.recommendations);
+        toast.success('Recommandations chargées');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur');
+    }
+    setBestTimeLoading(false);
+  };
+
+  // Apply best time to post form
+  const applyBestTime = (network, time) => {
+    const currentDate = postForm.scheduled_date || new Date().toISOString().split('T')[0];
+    setPostForm(prev => ({
+      ...prev,
+      scheduled_date: currentDate,
+      scheduled_time: time,
+      networks: prev.networks.includes(network) ? prev.networks : [...prev.networks, network]
+    }));
+    toast.success(`Heure ${time} appliquée`);
+  };
+
   // Form helpers
   const resetCalendarForm = () => {
     setCalendarForm({ 
