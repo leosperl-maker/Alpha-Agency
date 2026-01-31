@@ -758,12 +758,7 @@ const DashboardOverview = () => {
       </div>
 
       {/* AI Assistant Promo */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-600/20 via-indigo-600/20 to-purple-600/20 border border-white/10 p-6"
-      >
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-600/20 via-indigo-600/20 to-purple-600/20 border border-white/10 p-6">
         <div className="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-3xl" />
         <div className="relative flex flex-col sm:flex-row items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
@@ -791,7 +786,7 @@ const DashboardOverview = () => {
             </Button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
