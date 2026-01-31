@@ -2229,7 +2229,7 @@ const SocialMediaPage = () => {
   }
 
   return (
-    <div className="space-y-4 p-3 sm:p-4 md:p-6">
+    <div className="space-y-4 pb-20">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
