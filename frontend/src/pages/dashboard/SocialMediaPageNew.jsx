@@ -642,21 +642,22 @@ const SocialMediaPage = () => {
         // Meta not connected, that's fine
       }
       
-      // Check TikTok sandbox mode
-      try {
-        const tiktokStatusRes = await api.get('/tiktok/sandbox-status');
-        setTiktokSandboxMode(tiktokStatusRes.data.sandbox_mode);
-      } catch (e) {
-        // TikTok status check failed, that's fine
-      }
+      // Check TikTok sandbox mode - DON'T auto-load to avoid showing banner on page load
+      // The sandbox mode will only be activated when user explicitly clicks to start demo
+      // try {
+      //   const tiktokStatusRes = await api.get('/tiktok/sandbox-status');
+      //   setTiktokSandboxMode(tiktokStatusRes.data.sandbox_mode);
+      // } catch (e) {
+      //   // TikTok status check failed, that's fine
+      // }
       
-      // Check Meta sandbox mode
-      try {
-        const metaStatusRes = await api.get('/meta/sandbox-status');
-        setMetaSandboxMode(metaStatusRes.data.sandbox_mode);
-      } catch (e) {
-        // Meta status check failed, that's fine
-      }
+      // Check Meta sandbox mode - DON'T auto-load
+      // try {
+      //   const metaStatusRes = await api.get('/meta/sandbox-status');
+      //   setMetaSandboxMode(metaStatusRes.data.sandbox_mode);
+      // } catch (e) {
+      //   // Meta status check failed, that's fine
+      // }
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Erreur lors du chargement');
