@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
   Users, 
@@ -17,11 +17,29 @@ import {
   AlertCircle,
   Percent,
   BarChart3,
-  PieChartIcon
+  PieChartIcon,
+  Calendar,
+  Plus,
+  ArrowRight,
+  Sparkles,
+  Link2,
+  Share2,
+  Instagram,
+  Facebook,
+  Linkedin,
+  MessageSquare,
+  Eye,
+  MousePointerClick,
+  Zap,
+  Bot,
+  Hash,
+  Timer
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
-import { dashboardAPI, tasksAPI, budgetAPI } from "../../lib/api";
+import { Button } from "../../components/ui/button";
+import { dashboardAPI, tasksAPI, budgetAPI, socialAPI } from "../../lib/api";
+import api from "../../lib/api";
 import { 
   LineChart, 
   Line, 
@@ -35,7 +53,9 @@ import {
   Cell,
   BarChart,
   Bar,
-  Legend
+  Legend,
+  AreaChart,
+  Area
 } from "recharts";
 
 const DashboardOverview = () => {
