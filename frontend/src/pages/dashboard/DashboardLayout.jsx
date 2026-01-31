@@ -855,6 +855,86 @@ const DashboardLayout = () => {
               <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/5 rounded">Entrée</kbd> Sélectionner</span>
               <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/5 rounded">Échap</kbd> Fermer</span>
             </div>
+            <button 
+              onClick={() => { setCommandPaletteOpen(false); setShowShortcutsHelp(true); }}
+              className="flex items-center gap-1 hover:text-white transition-colors"
+            >
+              <Keyboard className="w-3 h-3" />
+              <span className="hidden sm:inline">Raccourcis</span>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Keyboard Shortcuts Help Dialog */}
+      <Dialog open={showShortcutsHelp} onOpenChange={setShowShortcutsHelp}>
+        <DialogContent className="bg-[#0a0a12]/95 backdrop-blur-2xl border-white/10 max-w-lg">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <Keyboard className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-white">Raccourcis clavier</h2>
+              <p className="text-xs text-white/50">Naviguez plus rapidement dans l&apos;application</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {/* Global shortcuts */}
+            <div>
+              <p className="text-xs uppercase tracking-wider text-white/30 mb-2">Global</p>
+              <div className="space-y-1.5">
+                {[
+                  { keys: ['⌘', 'K'], label: 'Recherche globale' },
+                  { keys: ['?'], label: 'Afficher cette aide' },
+                  { keys: ['Échap'], label: 'Fermer les modals' },
+                ].map((shortcut, i) => (
+                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/5">
+                    <span className="text-sm text-white/70">{shortcut.label}</span>
+                    <div className="flex items-center gap-1">
+                      {shortcut.keys.map((key, j) => (
+                        <kbd key={j} className="px-2 py-0.5 bg-white/10 rounded text-white/60 text-xs min-w-[24px] text-center">
+                          {key}
+                        </kbd>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Navigation shortcuts */}
+            <div>
+              <p className="text-xs uppercase tracking-wider text-white/30 mb-2">Navigation (G puis...)</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  { key: 'D', label: 'Dashboard' },
+                  { key: 'C', label: 'Contacts' },
+                  { key: 'T', label: 'Tâches' },
+                  { key: 'P', label: 'Pipeline' },
+                  { key: 'F', label: 'Facturation' },
+                  { key: 'S', label: 'Social Media' },
+                  { key: 'E', label: 'Éditorial' },
+                  { key: 'M', label: 'Multilink' },
+                  { key: 'A', label: 'Assistant IA' },
+                  { key: 'B', label: 'Budget' },
+                ].map((shortcut, i) => (
+                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/5">
+                    <span className="text-xs text-white/70">{shortcut.label}</span>
+                    <div className="flex items-center gap-1">
+                      <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-white/60 text-[10px]">G</kbd>
+                      <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-white/60 text-[10px]">{shortcut.key}</kbd>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-white/10 text-center">
+            <p className="text-xs text-white/30">
+              Les raccourcis fonctionnent quand vous n&apos;êtes pas dans un champ de texte
+            </p>
           </div>
         </DialogContent>
       </Dialog>
