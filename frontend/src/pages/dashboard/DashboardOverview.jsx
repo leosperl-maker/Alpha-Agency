@@ -316,12 +316,7 @@ const DashboardOverview = () => {
       {/* Main KPI Cards - Row 1 */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {mainKPIs.map((kpi, index) => (
-          <motion.div
-            key={kpi.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-          >
+          <div key={kpi.title}>
             <Link to={kpi.link}>
               <Card className="bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/20 shadow-lg hover:shadow-xl hover:shadow-indigo-500/10 transition-all cursor-pointer h-full rounded-2xl group">
                 <CardContent className="p-3 sm:p-5">
@@ -341,19 +336,14 @@ const DashboardOverview = () => {
                 </CardContent>
               </Card>
             </Link>
-          </motion.div>
+          </div>
         ))}
       </div>
 
       {/* Secondary KPI Cards - Row 2 */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {secondaryKPIs.map((kpi, index) => (
-          <motion.div
-            key={kpi.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 + index * 0.05 }}
-          >
+          <div key={kpi.title}>
             <Link to={kpi.link}>
               <Card className="bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/20 shadow-lg hover:shadow-xl transition-all cursor-pointer h-full rounded-2xl group">
                 <CardContent className="p-3 sm:p-5">
@@ -373,7 +363,7 @@ const DashboardOverview = () => {
                 </CardContent>
               </Card>
             </Link>
-          </motion.div>
+          </div>
         ))}
       </div>
 
