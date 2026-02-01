@@ -576,54 +576,6 @@ async def auto_publish_article(
     }
 
 
-@router.get("/api-info", response_model=dict)
-async def get_api_info():
-    """
-    📚 Documentation de l'API Blog pour l'automatisation
-    
-    Retourne les informations sur l'endpoint d'automatisation.
-    """
-    return {
-        "endpoint": "/api/blog/auto-publish",
-        "method": "POST",
-        "authentication": "Header X-API-Key",
-        "description": "Crée et publie automatiquement un article de blog",
-        "fields": {
-            "title": {"type": "string", "required": True, "description": "Titre de l'article"},
-            "slug": {"type": "string", "required": False, "description": "URL personnalisée (auto-générée si absent)"},
-            "excerpt": {"type": "string", "required": False, "description": "Résumé/extrait de l'article"},
-            "content": {"type": "string", "required": True, "description": "Contenu de l'article (Markdown, HTML ou texte)"},
-            "content_format": {"type": "string", "required": False, "default": "markdown", "options": ["markdown", "html", "text"]},
-            "featured_image_url": {"type": "string", "required": False, "description": "URL de l'image à la une"},
-            "tags": {"type": "array", "required": False, "description": "Liste des tags"},
-            "category": {"type": "string", "required": False, "description": "Catégorie de l'article"},
-            "status": {"type": "string", "required": False, "default": "published", "options": ["draft", "published", "scheduled"]},
-            "publish_at": {"type": "string", "required": False, "description": "Date de publication programmée (ISO 8601)"},
-            "seo_title": {"type": "string", "required": False, "description": "Titre SEO (utilise le titre si absent)"},
-            "seo_description": {"type": "string", "required": False, "description": "Description SEO (utilise l'extrait si absent)"},
-            "author_name": {"type": "string", "required": False, "default": "Alpha Agency"},
-            "source_ia": {"type": "object", "required": False, "description": "Payload source pour audit (modèle, prompt, etc.)"}
-        },
-        "example_request": {
-            "title": "Les tendances marketing digital 2024",
-            "excerpt": "Découvrez les principales tendances qui vont façonner le marketing digital cette année.",
-            "content": "## Introduction\n\nLe marketing digital évolue constamment...\n\n## 1. L'IA générative\n\nL'intelligence artificielle...",
-            "content_format": "markdown",
-            "featured_image_url": "https://example.com/image.jpg",
-            "tags": ["marketing", "digital", "tendances"],
-            "category": "Marketing",
-            "status": "published",
-            "seo_title": "Tendances Marketing Digital 2024 | Alpha Agency",
-            "seo_description": "Guide complet des tendances marketing digital 2024. IA, personnalisation, vidéo courte...",
-            "source_ia": {
-                "model": "claude-sonnet-4.5",
-                "image_model": "dall-e-3",
-                "generated_at": "2024-01-15T10:30:00Z"
-            }
-        }
-    }
-
-
 @router.post("/publish-scheduled", response_model=dict)
 async def publish_scheduled_articles(x_api_key: Optional[str] = Header(None)):
     """
