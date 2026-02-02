@@ -82,6 +82,8 @@ function App() {
             <Route path="/realisations/:slug" element={<PortfolioPageNew />} />
             <Route path="/actualites" element={<BlogPage />} />
             <Route path="/actualites/:slug" element={<BlogPostPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/mentions-legales" element={<LegalPage type="mentions" />} />
             <Route path="/confidentialite" element={<LegalPage type="privacy" />} />
