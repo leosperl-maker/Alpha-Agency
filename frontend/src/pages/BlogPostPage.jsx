@@ -460,12 +460,12 @@ const BlogPostPage = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nom <span className="text-red-500">*</span>
                   </label>
-                  <Input
+                  <input
                     type="text"
                     placeholder="Votre nom"
                     value={newComment.name}
                     onChange={(e) => setNewComment({ ...newComment, name: e.target.value })}
-                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-gray-500 focus:ring-gray-500"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400"
                     required
                   />
                 </div>
@@ -473,12 +473,12 @@ const BlogPostPage = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Email (optionnel)
                   </label>
-                  <Input
+                  <input
                     type="email"
                     placeholder="votre@email.com"
                     value={newComment.email}
                     onChange={(e) => setNewComment({ ...newComment, email: e.target.value })}
-                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-gray-500 focus:ring-gray-500"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400"
                   />
                 </div>
               </div>
@@ -486,19 +486,19 @@ const BlogPostPage = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Commentaire <span className="text-red-500">*</span>
                 </label>
-                <Textarea
+                <textarea
                   placeholder="Écrivez votre commentaire..."
                   value={newComment.content}
                   onChange={(e) => setNewComment({ ...newComment, content: e.target.value })}
                   rows={4}
-                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-gray-500 focus:ring-gray-500 resize-none"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400 resize-none"
                   required
                 />
               </div>
-              <Button 
+              <button 
                 type="submit" 
                 disabled={submittingComment}
-                className="bg-[#1A1A1A] hover:bg-[#333] text-white rounded-full px-6"
+                className="inline-flex items-center justify-center px-6 py-3 bg-[#1A1A1A] hover:bg-[#333] text-white font-medium rounded-full transition-colors disabled:opacity-50"
               >
                 {submittingComment ? (
                   <>Envoi en cours...</>
@@ -508,7 +508,7 @@ const BlogPostPage = () => {
                     Publier le commentaire
                   </>
                 )}
-              </Button>
+              </button>
             </form>
           </div>
 
