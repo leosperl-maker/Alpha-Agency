@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { 
   Plus, Search, Filter, MoreVertical, Edit, Trash2, Eye, 
   FileText, Calendar, Tag, Clock, CheckCircle, Archive,
-  X, Loader2, Sparkles, Save, ArrowLeft
+  X, Loader2, Sparkles, Save, ArrowLeft, MessageCircle, User
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
