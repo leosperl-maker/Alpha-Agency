@@ -261,11 +261,11 @@ const BlogPostPage = () => {
             className="mb-6"
           >
             <Link 
-              to="/blog"
-              className="inline-flex items-center gap-2 text-gray-500 hover:text-indigo-600 transition-colors text-sm font-medium"
+              to="/actualites"
+              className="inline-flex items-center gap-2 text-gray-500 hover:text-[#1A1A1A] transition-colors text-sm font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
-              Retour au blog
+              Retour aux articles
             </Link>
           </motion.div>
 
