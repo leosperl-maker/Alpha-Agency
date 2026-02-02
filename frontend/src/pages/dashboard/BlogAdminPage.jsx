@@ -129,6 +129,8 @@ const BlogAdminPage = () => {
       featured_image: "",
       status: "draft",
       tags: [],
+      category: "",
+      author_name: "Alpha Agency",
       meta_title: "",
       meta_description: "",
       slug: ""
@@ -146,11 +148,31 @@ const BlogAdminPage = () => {
       featured_image: post.featured_image || "",
       status: post.status || "draft",
       tags: post.tags || [],
-      meta_title: post.meta_title || "",
-      meta_description: post.meta_description || "",
+      category: post.category || "",
+      author_name: post.author_name || "Alpha Agency",
+      meta_title: post.meta_title || post.seo_title || "",
+      meta_description: post.meta_description || post.seo_description || "",
       slug: post.slug || ""
     });
     setIsEditing(true);
+  };
+  
+  // View comments for a post
+  const viewComments = (post) => {
+    setSelectedPostForComments(post);
+    // Load comments from localStorage (in production, this would be an API call)
+    const savedComments = localStorage.getItem(`blog-comments-${post.slug}`);
+    setSelectedPostComments(savedComments ? JSON.parse(savedComments) : []);
+    setShowCommentsModal(true);
+  };
+  
+  // Delete a comment
+  const deleteComment = (commentId) => {
+    if (!confirm("Supprimer ce commentaire ?")) return;
+    const updatedComments = selectedPostComments.filter(c => c.id !== commentId);
+    setSelectedPostComments(updatedComments);
+    localStorage.setItem(`blog-comments-${selectedPostForComments.slug}`, JSON.stringify(updatedComments));
+    toast.success("Commentaire supprimé");
   };
 
   // Save post
