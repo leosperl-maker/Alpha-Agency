@@ -623,6 +623,108 @@ const BlogAdminPage = () => {
           ))}
         </div>
       )}
+      
+      {/* Comments Modal */}
+      {showCommentsModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#1a1a2e] rounded-2xl border border-white/10 w-full max-w-2xl max-h-[80vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <div>
+                <h2 className="text-lg font-semibold text-white">Commentaires</h2>
+                <p className="text-white/60 text-sm truncate max-w-md">
+                  {selectedPostForComments?.title}
+                </p>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowCommentsModal(false)}
+                className="text-white/60 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="p-4 overflow-y-auto max-h-[60vh]">
+              {selectedPostComments.length === 0 ? (
+                <div className="text-center py-12">
+                  <MessageCircle className="w-12 h-12 mx-auto text-white/20 mb-3" />
+                  <p className="text-white/60">Aucun commentaire sur cet article</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {selectedPostComments.map(comment => (
+                    <div 
+                      key={comment.id} 
+                      className="bg-white/5 rounded-xl p-4 border border-white/10"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                            {comment.name?.charAt(0).toUpperCase() || "?"}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-white">{comment.name}</span>
+                              <span className="text-white/40 text-xs">
+                                {new Date(comment.created_at).toLocaleDateString('fr-FR', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                            {comment.email && (
+                              <p className="text-white/40 text-xs">{comment.email}</p>
+                            )}
+                            <p className="text-white/80 mt-2">{comment.content}</p>
+                            
+                            {/* Replies */}
+                            {comment.replies?.length > 0 && (
+                              <div className="mt-3 pl-4 border-l-2 border-white/10 space-y-2">
+                                {comment.replies.map(reply => (
+                                  <div key={reply.id} className="bg-white/5 rounded-lg p-3">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium text-white text-sm">{reply.name}</span>
+                                      <span className="text-white/40 text-xs">
+                                        {new Date(reply.created_at).toLocaleDateString('fr-FR')}
+                                      </span>
+                                    </div>
+                                    <p className="text-white/70 text-sm mt-1">{reply.content}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => deleteComment(comment.id)}
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-white/10 bg-black/20">
+              <p className="text-white/40 text-sm text-center">
+                {selectedPostComments.length} commentaire{selectedPostComments.length > 1 ? 's' : ''}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
