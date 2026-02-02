@@ -465,7 +465,8 @@ const BlogPostPage = () => {
                     placeholder="Votre nom"
                     value={newComment.name}
                     onChange={(e) => setNewComment({ ...newComment, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400"
+                    style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A' }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400"
                     required
                   />
                 </div>
@@ -478,7 +479,8 @@ const BlogPostPage = () => {
                     placeholder="votre@email.com"
                     value={newComment.email}
                     onChange={(e) => setNewComment({ ...newComment, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400"
+                    style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A' }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400"
                   />
                 </div>
               </div>
@@ -491,7 +493,8 @@ const BlogPostPage = () => {
                   value={newComment.content}
                   onChange={(e) => setNewComment({ ...newComment, content: e.target.value })}
                   rows={4}
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400 resize-none"
+                  style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A' }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400 resize-none"
                   required
                 />
               </div>
