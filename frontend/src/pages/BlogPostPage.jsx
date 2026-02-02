@@ -381,8 +381,8 @@ const BlogPostPage = () => {
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                <Share2 className="w-5 h-5 text-indigo-600" />
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                <Share2 className="w-5 h-5 text-gray-700" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">Partager cet article</h3>
@@ -422,7 +422,7 @@ const BlogPostPage = () => {
 
             {/* Instagram Note */}
             <p className="mt-4 text-xs text-gray-400 text-center">
-              💡 Pour Instagram, copiez le lien et partagez-le dans votre story ou bio
+              Pour Instagram, copiez le lien et partagez-le dans votre story ou bio
             </p>
           </div>
         </div>
