@@ -575,9 +575,16 @@ const BlogAdminPage = () => {
                             <Edit className="w-4 h-4 mr-2" />
                             Modifier
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-white">
+                          <DropdownMenuItem 
+                            onClick={() => window.open(`/actualites/${post.slug}`, '_blank')}
+                            className="text-white"
+                          >
                             <Eye className="w-4 h-4 mr-2" />
                             Aperçu
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => viewComments(post)} className="text-white">
+                            <MessageCircle className="w-4 h-4 mr-2" />
+                            Commentaires
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="bg-white/10" />
                           <DropdownMenuItem onClick={() => deletePost(post.id)} className="text-red-400">
