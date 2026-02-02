@@ -442,7 +442,7 @@ const BlogPostPage = () => {
           </div>
 
           {/* Comment Form */}
-          <div className="bg-[#F8F8F8] rounded-2xl p-6 mb-8 border border-gray-200">
+          <div className="bg-white rounded-2xl p-6 mb-8 border border-gray-200 shadow-sm">
             <h4 className="font-semibold text-gray-900 mb-4">
               {replyTo ? "Répondre au commentaire" : "Laisser un commentaire"}
             </h4>
