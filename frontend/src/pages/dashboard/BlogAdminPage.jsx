@@ -601,6 +601,10 @@ const BlogAdminPage = () => {
                         {post.status === "published" ? "Publié" : post.status === "draft" ? "Brouillon" : "Archivé"}
                       </Badge>
                       <span className="flex items-center gap-1">
+                        <User className="w-3 h-3" />
+                        {post.author_name || "Alpha Agency"}
+                      </span>
+                      <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {new Date(post.created_at).toLocaleDateString('fr-FR')}
                       </span>
