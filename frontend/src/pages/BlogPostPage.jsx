@@ -432,8 +432,8 @@ const BlogPostPage = () => {
       <section className="py-12 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-indigo-600" />
+            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+              <MessageCircle className="w-5 h-5 text-gray-700" />
             </div>
             <div>
               <h3 className="text-xl font-bold text-gray-900">Commentaires ({comments.length})</h3>
@@ -442,14 +442,14 @@ const BlogPostPage = () => {
           </div>
 
           {/* Comment Form */}
-          <div className="bg-gray-50 rounded-2xl p-6 mb-8">
+          <div className="bg-[#F8F8F8] rounded-2xl p-6 mb-8 border border-gray-200">
             <h4 className="font-semibold text-gray-900 mb-4">
               {replyTo ? "Répondre au commentaire" : "Laisser un commentaire"}
             </h4>
             {replyTo && (
               <button 
                 onClick={() => setReplyTo(null)}
-                className="text-sm text-indigo-600 hover:underline mb-4"
+                className="text-sm text-gray-600 hover:text-gray-900 hover:underline mb-4"
               >
                 ← Annuler la réponse
               </button>
@@ -465,7 +465,7 @@ const BlogPostPage = () => {
                     placeholder="Votre nom"
                     value={newComment.name}
                     onChange={(e) => setNewComment({ ...newComment, name: e.target.value })}
-                    className="bg-white border-gray-300 text-gray-900"
+                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-gray-500 focus:ring-gray-500"
                     required
                   />
                 </div>
@@ -478,7 +478,7 @@ const BlogPostPage = () => {
                     placeholder="votre@email.com"
                     value={newComment.email}
                     onChange={(e) => setNewComment({ ...newComment, email: e.target.value })}
-                    className="bg-white border-gray-300 text-gray-900"
+                    className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-gray-500 focus:ring-gray-500"
                   />
                 </div>
               </div>
@@ -491,14 +491,14 @@ const BlogPostPage = () => {
                   value={newComment.content}
                   onChange={(e) => setNewComment({ ...newComment, content: e.target.value })}
                   rows={4}
-                  className="bg-white border-gray-300 text-gray-900 resize-none"
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-gray-500 focus:ring-gray-500 resize-none"
                   required
                 />
               </div>
               <Button 
                 type="submit" 
                 disabled={submittingComment}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="bg-[#1A1A1A] hover:bg-[#333] text-white rounded-full px-6"
               >
                 {submittingComment ? (
                   <>Envoi en cours...</>
@@ -515,16 +515,16 @@ const BlogPostPage = () => {
           {/* Comments List */}
           <div className="space-y-6">
             {comments.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-2xl">
+              <div className="text-center py-12 bg-[#F8F8F8] rounded-2xl border border-gray-200">
                 <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">Aucun commentaire pour le moment.</p>
+                <p className="text-gray-600">Aucun commentaire pour le moment.</p>
                 <p className="text-sm text-gray-400 mt-1">Soyez le premier à commenter cet article !</p>
               </div>
             ) : (
               comments.map((comment) => (
                 <div key={comment.id} className="bg-white border border-gray-200 rounded-xl p-5">
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-semibold flex-shrink-0">
                       {comment.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1">
@@ -540,14 +540,14 @@ const BlogPostPage = () => {
                       <div className="flex items-center gap-4">
                         <button 
                           onClick={() => handleLikeComment(comment.id)}
-                          className="flex items-center gap-1 text-gray-500 hover:text-indigo-600 text-sm transition-colors"
+                          className="flex items-center gap-1 text-gray-500 hover:text-gray-900 text-sm transition-colors"
                         >
                           <ThumbsUp className="w-4 h-4" />
                           <span>{comment.likes || 0}</span>
                         </button>
                         <button 
                           onClick={() => setReplyTo(comment.id)}
-                          className="flex items-center gap-1 text-gray-500 hover:text-indigo-600 text-sm transition-colors"
+                          className="flex items-center gap-1 text-gray-500 hover:text-gray-900 text-sm transition-colors"
                         >
                           <MessageCircle className="w-4 h-4" />
                           Répondre
@@ -558,9 +558,9 @@ const BlogPostPage = () => {
                       {comment.replies && comment.replies.length > 0 && (
                         <div className="mt-4 pl-4 border-l-2 border-gray-200 space-y-4">
                           {comment.replies.map((reply) => (
-                            <div key={reply.id} className="bg-gray-50 rounded-lg p-4">
+                            <div key={reply.id} className="bg-[#F8F8F8] rounded-lg p-4">
                               <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center text-white text-sm font-semibold">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center text-white text-sm font-semibold">
                                   {reply.name.charAt(0).toUpperCase()}
                                 </div>
                                 <span className="font-semibold text-gray-900 text-sm">{reply.name}</span>
