@@ -582,14 +582,14 @@ const BlogPostPage = () => {
 
       {/* Related Posts */}
       {relatedPosts.length > 0 && (
-        <section className="py-12 bg-gray-50">
+        <section className="py-12 bg-[#F8F8F8]">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-8">Articles similaires</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {relatedPosts.map((relatedPost) => (
                 <Link 
                   key={relatedPost.id} 
-                  to={`/blog/${relatedPost.slug}`}
+                  to={`/actualites/${relatedPost.slug}`}
                   className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100"
                 >
                   {(relatedPost.featured_image || relatedPost.image_url) && (
@@ -602,11 +602,11 @@ const BlogPostPage = () => {
                     </div>
                   )}
                   <div className="p-4">
-                    <h4 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2 mb-2">
+                    <h4 className="font-semibold text-gray-900 group-hover:text-[#1A1A1A] transition-colors line-clamp-2 mb-2">
                       {relatedPost.title}
                     </h4>
                     <p className="text-sm text-gray-500 line-clamp-2">{relatedPost.excerpt}</p>
-                    <div className="flex items-center gap-2 mt-3 text-indigo-600 text-sm font-medium">
+                    <div className="flex items-center gap-2 mt-3 text-[#1A1A1A] text-sm font-medium">
                       Lire l'article
                       <ChevronRight className="w-4 h-4" />
                     </div>
@@ -619,16 +619,16 @@ const BlogPostPage = () => {
       )}
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-indigo-600 to-purple-600">
+      <section className="py-16 bg-[#1A1A1A]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
             Vous avez un projet ?
           </h3>
-          <p className="text-white/80 mb-8">
+          <p className="text-white/70 mb-8">
             Discutons ensemble de vos besoins et trouvons la meilleure solution pour votre entreprise.
           </p>
           <Link to="/contact">
-            <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100">
+            <Button size="lg" className="bg-white text-[#1A1A1A] hover:bg-gray-100 rounded-full px-8">
               Contactez-nous
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
