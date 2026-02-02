@@ -340,6 +340,28 @@ const BlogAdminPage = () => {
                     </SelectContent>
                   </Select>
                 </div>
+                
+                {/* Author */}
+                <div className="space-y-2">
+                  <Label>Auteur</Label>
+                  <Input
+                    value={formData.author_name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, author_name: e.target.value }))}
+                    placeholder="Nom de l'auteur"
+                    className="bg-white/5 border-white/10"
+                  />
+                </div>
+                
+                {/* Category */}
+                <div className="space-y-2">
+                  <Label>Catégorie</Label>
+                  <Input
+                    value={formData.category}
+                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                    placeholder="Ex: Marketing, Tech, Actualités..."
+                    className="bg-white/5 border-white/10"
+                  />
+                </div>
 
                 {/* Featured Image */}
                 <div className="space-y-2">
