@@ -43,12 +43,19 @@ const BlogAdminPage = () => {
     featured_image: "",
     status: "draft",
     tags: [],
+    category: "",
+    author_name: "Alpha Agency",
     meta_title: "",
     meta_description: "",
     slug: ""
   });
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  
+  // Comments management
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
+  const [selectedPostComments, setSelectedPostComments] = useState([]);
+  const [selectedPostForComments, setSelectedPostForComments] = useState(null);
 
   // Fetch posts
   const fetchPosts = useCallback(async () => {
