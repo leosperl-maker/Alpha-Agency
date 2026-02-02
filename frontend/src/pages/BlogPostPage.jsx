@@ -277,7 +277,7 @@ const BlogPostPage = () => {
             {/* Category & Tags */}
             <div className="flex flex-wrap items-center gap-2 mb-4">
               {post.category && (
-                <Badge className="bg-indigo-600 text-white hover:bg-indigo-700 text-xs">
+                <Badge className="bg-[#1A1A1A] text-white hover:bg-[#333] text-xs">
                   {post.category}
                 </Badge>
               )}
