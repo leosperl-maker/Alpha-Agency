@@ -310,8 +310,8 @@ const BlogPostPage = () => {
             {/* Meta info */}
             <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-gray-500 text-sm mb-8 pb-6 border-b border-gray-200">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                  <User className="w-5 h-5 text-indigo-600" />
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                  <User className="w-5 h-5 text-gray-600" />
                 </div>
                 <div>
                   <p className="font-medium text-gray-900">{post.author_name || "Alpha Agency"}</p>
