@@ -82,6 +82,15 @@ A comprehensive CRM and social media management tool for Alpha Agency, featuring
 
 ## Changelog
 
+### 2026-02-01
+- **NEW FEATURE:** API Blog Automatisée pour n8n
+  - Endpoint `POST /api/blog/auto-publish` avec authentification par clé API
+  - Conversion automatique Markdown/HTML → content blocks
+  - Support publication immédiate ou programmée (`publish_at`)
+  - Champ `source_ia` pour stocker le payload IA (audit/replay)
+  - Endpoint `POST /api/blog/publish-scheduled` pour CRON
+  - Documentation API sur `GET /api/blog/api-info`
+
 ### 2026-01-31 (Session 2)
 - **MOBILE RESPONSIVE:** Optimisation complète des pages principales
   - Dashboard: stats scrollables, KPIs 2 colonnes, graphiques adaptés
