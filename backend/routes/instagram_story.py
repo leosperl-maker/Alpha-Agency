@@ -83,7 +83,7 @@ class StoryDraft(BaseModel):
 
 # ==================== HELPER FUNCTIONS ====================
 
-async def get_instagram_account(account_id: str, user_id: str) -> Optional[Dict]:
+async def get_meta_instagram_account(account_id: str, user_id: str) -> Optional[Dict]:
     """Get Instagram account details from stored Meta pages"""
     page = await db.meta_pages.find_one({
         "user_id": user_id,
