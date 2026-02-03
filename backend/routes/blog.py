@@ -98,8 +98,9 @@ class AutoPublishArticle(BaseModel):
     slug: Optional[str] = None
     excerpt: Optional[str] = None
     featured_image_url: Optional[str] = None  # URL to download image from
-    content: str  # Can be HTML or Markdown - will be auto-converted
+    content: Optional[str] = None  # Can be HTML or Markdown - will be auto-converted (optional if content_blocks provided)
     content_format: Optional[str] = "markdown"  # 'markdown', 'html', 'text'
+    content_blocks: Optional[List[ContentBlock]] = None  # Direct content blocks with images support
     tags: Optional[List[str]] = []
     category: Optional[str] = None
     status: Optional[str] = "published"  # draft, published, scheduled
@@ -504,6 +505,10 @@ async def auto_publish_article(
     if x_api_key != BLOG_API_KEY:
         raise HTTPException(status_code=401, detail="Clé API invalide. Utilisez le header X-API-Key.")
     
+    # Validate that either content or content_blocks is provided
+    if not article.content and not article.content_blocks:
+        raise HTTPException(status_code=400, detail="Vous devez fournir soit 'content' soit 'content_blocks'.")
+    
     article_id = str(uuid.uuid4())
     slug = article.slug or generate_slug(article.title)
     
@@ -512,9 +517,12 @@ async def auto_publish_article(
     if existing:
         slug = f"{slug}-{article_id[:8]}"
     
-    # Convert content to blocks
+    # Convert content to blocks - prioritize content_blocks if provided
     content_blocks = []
-    if article.content:
+    if article.content_blocks:
+        # Use provided content_blocks directly (supports images inline)
+        content_blocks = [block.model_dump() if hasattr(block, 'model_dump') else block for block in article.content_blocks]
+    elif article.content:
         if article.content_format == "markdown":
             content_blocks = markdown_to_blocks(article.content)
         elif article.content_format == "html":
