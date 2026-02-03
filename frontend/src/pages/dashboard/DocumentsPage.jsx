@@ -5,7 +5,7 @@ import {
   Archive, Download, ChevronRight, ChevronDown, Search, Grid, List,
   FolderOpen, Plus, X, Pencil, Save, HardDrive, 
   Clock, CheckCircle2, Eye, Star, StarOff, Info, Settings,
-  Move, Copy, Share2, Link, LayoutGrid, SlidersHorizontal, Bot, Sparkles, Wand2
+  Move, Copy, Share2, Link, LayoutGrid, SlidersHorizontal, Bot, Sparkles, Wand2, Menu
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
