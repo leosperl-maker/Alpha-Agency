@@ -763,50 +763,128 @@ const BlogAdminPage = () => {
         </div>
       )}
       
-      {/* Comments Modal */}
+      {/* Comments Modal with Moderation */}
       {showCommentsModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#1a1a2e] rounded-2xl border border-white/10 w-full max-w-2xl max-h-[80vh] overflow-hidden">
+          <div className="bg-[#1a1a2e] rounded-2xl border border-white/10 w-full max-w-3xl max-h-[85vh] overflow-hidden">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <div>
-                <h2 className="text-lg font-semibold text-white">Commentaires</h2>
-                <p className="text-white/60 text-sm truncate max-w-md">
-                  {selectedPostForComments?.title}
-                </p>
+                <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5 text-indigo-400" />
+                  {selectedPostForComments ? "Commentaires de l'article" : "Modération des commentaires"}
+                </h2>
+                {selectedPostForComments && (
+                  <p className="text-white/60 text-sm truncate max-w-md mt-1">
+                    {selectedPostForComments.title}
+                  </p>
+                )}
               </div>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => setShowCommentsModal(false)}
+                onClick={() => {
+                  setShowCommentsModal(false);
+                  setSelectedPostForComments(null);
+                }}
                 className="text-white/60 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </Button>
             </div>
             
+            {/* Tabs for moderation view */}
+            {!selectedPostForComments && (
+              <div className="flex gap-2 p-4 border-b border-white/10 bg-black/20">
+                {[
+                  { key: "pending", label: "En attente", color: "amber" },
+                  { key: "approved", label: "Approuvés", color: "green" },
+                  { key: "rejected", label: "Rejetés", color: "red" },
+                  { key: "all", label: "Tous", color: "gray" }
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    onClick={() => {
+                      setCommentsTab(tab.key);
+                      fetchAllComments(tab.key === "all" ? null : tab.key);
+                    }}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      commentsTab === tab.key
+                        ? `bg-${tab.color}-500/20 text-${tab.color}-400 border border-${tab.color}-500/30`
+                        : "text-white/60 hover:text-white hover:bg-white/5"
+                    }`}
+                    style={commentsTab === tab.key ? {
+                      backgroundColor: tab.color === "amber" ? "rgba(245,158,11,0.2)" :
+                                       tab.color === "green" ? "rgba(34,197,94,0.2)" :
+                                       tab.color === "red" ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.1)",
+                      color: tab.color === "amber" ? "#fbbf24" :
+                             tab.color === "green" ? "#4ade80" :
+                             tab.color === "red" ? "#f87171" : "#9ca3af",
+                      borderColor: tab.color === "amber" ? "rgba(245,158,11,0.3)" :
+                                   tab.color === "green" ? "rgba(34,197,94,0.3)" :
+                                   tab.color === "red" ? "rgba(239,68,68,0.3)" : "rgba(255,255,255,0.2)"
+                    } : {}}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            
             {/* Modal Content */}
-            <div className="p-4 overflow-y-auto max-h-[60vh]">
-              {selectedPostComments.length === 0 ? (
+            <div className="p-4 overflow-y-auto max-h-[55vh]">
+              {loadingComments ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+                </div>
+              ) : (selectedPostForComments ? selectedPostComments : allComments).length === 0 ? (
                 <div className="text-center py-12">
                   <MessageCircle className="w-12 h-12 mx-auto text-white/20 mb-3" />
-                  <p className="text-white/60">Aucun commentaire sur cet article</p>
+                  <p className="text-white/60">
+                    {selectedPostForComments 
+                      ? "Aucun commentaire sur cet article"
+                      : `Aucun commentaire ${commentsTab === "pending" ? "en attente" : commentsTab === "approved" ? "approuvé" : commentsTab === "rejected" ? "rejeté" : ""}`
+                    }
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {selectedPostComments.map(comment => (
+                  {(selectedPostForComments ? selectedPostComments : allComments).map(comment => (
                     <div 
                       key={comment.id} 
-                      className="bg-white/5 rounded-xl p-4 border border-white/10"
+                      className={`bg-white/5 rounded-xl p-4 border ${
+                        comment.status === "pending" ? "border-amber-500/30" :
+                        comment.status === "approved" ? "border-green-500/30" :
+                        comment.status === "rejected" ? "border-red-500/30" : "border-white/10"
+                      }`}
                     >
+                      {/* Article info if in moderation view */}
+                      {!selectedPostForComments && comment.article_title && (
+                        <div className="mb-3 pb-3 border-b border-white/10">
+                          <p className="text-white/40 text-xs">Article :</p>
+                          <p className="text-white/80 text-sm font-medium">{comment.article_title}</p>
+                        </div>
+                      )}
+                      
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3">
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
-                            {comment.name?.charAt(0).toUpperCase() || "?"}
+                            {(comment.author || comment.name)?.charAt(0).toUpperCase() || "?"}
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-white">{comment.name}</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-medium text-white">{comment.author || comment.name}</span>
+                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                comment.status === "pending" ? "bg-amber-500/20 text-amber-400" :
+                                comment.status === "approved" ? "bg-green-500/20 text-green-400" :
+                                comment.status === "rejected" ? "bg-red-500/20 text-red-400" :
+                                comment.status === "spam" ? "bg-gray-500/20 text-gray-400" : ""
+                              }`}>
+                                {comment.status === "pending" ? "En attente" :
+                                 comment.status === "approved" ? "Approuvé" :
+                                 comment.status === "rejected" ? "Rejeté" :
+                                 comment.status === "spam" ? "Spam" : comment.status}
+                              </span>
                               <span className="text-white/40 text-xs">
                                 {new Date(comment.created_at).toLocaleDateString('fr-FR', {
                                   day: 'numeric',
@@ -821,30 +899,57 @@ const BlogAdminPage = () => {
                               <p className="text-white/40 text-xs">{comment.email}</p>
                             )}
                             <p className="text-white/80 mt-2">{comment.content}</p>
-                            
-                            {/* Replies */}
-                            {comment.replies?.length > 0 && (
-                              <div className="mt-3 pl-4 border-l-2 border-white/10 space-y-2">
-                                {comment.replies.map(reply => (
-                                  <div key={reply.id} className="bg-white/5 rounded-lg p-3">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-medium text-white text-sm">{reply.name}</span>
-                                      <span className="text-white/40 text-xs">
-                                        {new Date(reply.created_at).toLocaleDateString('fr-FR')}
-                                      </span>
-                                    </div>
-                                    <p className="text-white/70 text-sm mt-1">{reply.content}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         </div>
+                      </div>
+                      
+                      {/* Action buttons */}
+                      <div className="flex items-center gap-2 mt-4 pt-3 border-t border-white/10">
+                        {comment.status === "pending" && (
+                          <>
+                            <Button 
+                              size="sm"
+                              onClick={() => moderateComment(comment.id, "approved")}
+                              className="bg-green-600 hover:bg-green-500 text-white"
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Approuver
+                            </Button>
+                            <Button 
+                              size="sm"
+                              variant="outline"
+                              onClick={() => moderateComment(comment.id, "rejected")}
+                              className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Rejeter
+                            </Button>
+                            <Button 
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => moderateComment(comment.id, "spam")}
+                              className="text-white/50 hover:text-white/80"
+                            >
+                              Spam
+                            </Button>
+                          </>
+                        )}
+                        {comment.status !== "pending" && comment.status !== "approved" && (
+                          <Button 
+                            size="sm"
+                            variant="outline"
+                            onClick={() => moderateComment(comment.id, "approved")}
+                            className="border-green-500/50 text-green-400 hover:bg-green-500/10"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Approuver
+                          </Button>
+                        )}
                         <Button 
-                          variant="ghost" 
                           size="sm"
+                          variant="ghost"
                           onClick={() => deleteComment(comment.id)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 ml-auto"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -858,7 +963,7 @@ const BlogAdminPage = () => {
             {/* Modal Footer */}
             <div className="p-4 border-t border-white/10 bg-black/20">
               <p className="text-white/40 text-sm text-center">
-                {selectedPostComments.length} commentaire{selectedPostComments.length > 1 ? 's' : ''}
+                {(selectedPostForComments ? selectedPostComments : allComments).length} commentaire{(selectedPostForComments ? selectedPostComments : allComments).length > 1 ? 's' : ''}
               </p>
             </div>
           </div>
