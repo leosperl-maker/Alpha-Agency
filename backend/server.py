@@ -6592,6 +6592,10 @@ app.include_router(multilink_router, prefix="/api/multilink", tags=["multilink"]
 from routes.moltbot import router as moltbot_router
 app.include_router(moltbot_router, prefix="/api", tags=["moltbot"])
 
+# Business Search (SIRET/Kbis lookup)
+from routes.business_search import router as business_search_router
+app.include_router(business_search_router, prefix="/api", tags=["business-search"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
