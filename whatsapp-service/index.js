@@ -129,17 +129,79 @@ async function connectToWhatsApp() {
                 // Skip status updates
                 if (msg.key.remoteJid === 'status@broadcast') continue;
                 
-                // Get message text
-                const messageText = msg.message.conversation || 
-                    msg.message.extendedTextMessage?.text || 
-                    msg.message.imageMessage?.caption ||
-                    '';
-                
-                if (!messageText) continue;
+                // Skip outgoing messages (from us)
+                if (msg.key.fromMe) continue;
                 
                 const senderNumber = msg.key.remoteJid.replace('@s.whatsapp.net', '');
                 
-                logger.info(`Message from ${senderNumber}: ${messageText}`);
+                // Determine message type and content
+                let messageType = 'text';
+                let messageText = '';
+                let audioBuffer = null;
+                
+                // Check for audio/voice message
+                const audioMessage = msg.message.audioMessage;
+                if (audioMessage) {
+                    messageType = 'audio';
+                    logger.info(`Audio message from ${senderNumber}, duration: ${audioMessage.seconds}s`);
+                    
+                    // Download audio
+                    try {
+                        const { downloadMediaMessage } = require('@whiskeysockets/baileys');
+                        audioBuffer = await downloadMediaMessage(msg, 'buffer', {});
+                        logger.info(`Audio downloaded: ${audioBuffer.length} bytes`);
+                    } catch (dlErr) {
+                        logger.error('Error downloading audio:', dlErr);
+                    }
+                }
+                // Check for video message (might contain voice)
+                else if (msg.message.videoMessage) {
+                    messageType = 'video';
+                    messageText = msg.message.videoMessage.caption || '';
+                    logger.info(`Video message from ${senderNumber}`);
+                }
+                // Check for image message
+                else if (msg.message.imageMessage) {
+                    messageType = 'image';
+                    messageText = msg.message.imageMessage.caption || '';
+                    logger.info(`Image message from ${senderNumber}: ${messageText}`);
+                }
+                // Check for document
+                else if (msg.message.documentMessage) {
+                    messageType = 'document';
+                    messageText = msg.message.documentMessage.fileName || '';
+                    logger.info(`Document from ${senderNumber}: ${messageText}`);
+                }
+                // Standard text message
+                else {
+                    messageText = msg.message.conversation || 
+                        msg.message.extendedTextMessage?.text || 
+                        '';
+                    
+                    if (!messageText) continue;
+                    logger.info(`Text message from ${senderNumber}: ${messageText}`);
+                }
+                
+                // Build webhook payload
+                const webhookPayload = {
+                    phone_number: senderNumber,
+                    message: messageText,
+                    message_id: msg.key.id,
+                    timestamp: msg.messageTimestamp,
+                    message_type: messageType
+                };
+                
+                // If audio, save to temp file and get URL
+                if (audioBuffer) {
+                    try {
+                        const tempPath = `/tmp/wa_audio_${msg.key.id}.ogg`;
+                        require('fs').writeFileSync(tempPath, audioBuffer);
+                        webhookPayload.audio_path = tempPath;
+                        logger.info(`Audio saved to: ${tempPath}`);
+                    } catch (saveErr) {
+                        logger.error('Error saving audio:', saveErr);
+                    }
+                }
                 
                 // Send to backend webhook
                 try {
@@ -149,12 +211,7 @@ async function connectToWhatsApp() {
                             'Content-Type': 'application/json',
                             'X-MoltBot-Secret': MOLTBOT_SECRET
                         },
-                        body: JSON.stringify({
-                            phone_number: senderNumber,
-                            message: messageText,
-                            message_id: msg.key.id,
-                            timestamp: msg.messageTimestamp
-                        })
+                        body: JSON.stringify(webhookPayload)
                     });
                     
                     const data = await response.json();
