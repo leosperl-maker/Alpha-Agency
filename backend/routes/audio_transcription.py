@@ -358,7 +358,7 @@ Analyse maintenant:"""
             api_key=EMERGENT_LLM_KEY,
             session_id="voice-to-crm",
             system_message="Tu es un assistant CRM intelligent qui analyse les commandes vocales."
-        ).with_model("google", "gemini-2.0-flash")
+        )
         
         response = await chat.send_message(UserMessage(text=prompt))
         

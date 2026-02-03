@@ -223,7 +223,7 @@ Hashtags:"""
             api_key=EMERGENT_LLM_KEY,
             session_id=f"hashtag-{platform}",
             system_message="Tu es un expert en marketing digital et réseaux sociaux."
-        ).with_model("google", "gemini-2.0-flash")
+        )
         
         response = await chat.send_message(UserMessage(text=prompt))
         
@@ -344,7 +344,7 @@ Réponds en JSON:
             api_key=EMERGENT_LLM_KEY,
             session_id=f"optimize-{target_platform}",
             system_message="Tu es un expert en marketing digital et optimisation de contenu pour les réseaux sociaux."
-        ).with_model("google", "gemini-2.0-flash")
+        )
         
         response = await chat.send_message(UserMessage(text=prompt))
         
