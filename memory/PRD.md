@@ -1,7 +1,7 @@
 # Alpha Agency CRM & Social Media Management Tool
 
 ## Overview
-A comprehensive CRM and social media management tool for Alpha Agency, featuring client management, invoicing, task tracking, editorial calendar, and a Multilink module (zaap.bio clone).
+A comprehensive CRM and social media management tool for Alpha Agency, featuring client management, invoicing, task tracking, editorial calendar, Multilink module, and now **MoltBot** - an integrated AI assistant with full CRM access.
 
 ## Core Features
 
@@ -15,10 +15,7 @@ A comprehensive CRM and social media management tool for Alpha Agency, featuring
 ### 2. Social Media Management
 - Editorial calendar for content planning
 - Multi-platform publishing (Meta, LinkedIn, TikTok)
-- AI-powered features:
-  - Post ideas generation
-  - Hashtag suggestions
-  - Best time to post analysis
+- AI-powered features (post ideas, hashtags, best time)
 - Sandbox mode for Meta and TikTok testing
 
 ### 3. Multilink Module (zaap.bio clone)
@@ -32,29 +29,63 @@ A comprehensive CRM and social media management tool for Alpha Agency, featuring
 ### 4. Blog Module
 - Rich content editor with blocks
 - Auto-publish API for n8n/automation workflows
-- Content blocks with inline images support
-- SEO optimization (title, description)
+- **Content blocks with inline images support** (NEW)
+- SEO optimization
 - Scheduled publishing
 
-### 5. MoltBot Integration
-- Autonomous AI chatbot connected to Telegram/WhatsApp
-- CRM webhook integration for automatic contact/task creation
-- Dashboard page for configuration at `/admin/moltbot`
+### 5. MoltBot Integration (NEW - MAJOR FEATURE)
+**Full CRM AI Assistant replacing the previous Assistant IA**
 
-### 6. PWA / Offline Mode
+#### Core Capabilities:
+- Complete CRM read/write access via chat
+- Contact, Invoice, Quote, Task management
+- Appointment creation with Google Meet invitations
+- Document search and retrieval
+- Global search across all CRM data
+- Business intelligence (stats, briefings, recaps)
+
+#### Security Model:
+- **Admin Mode:** Full CRM access for whitelisted phone numbers
+- **Public Mode:** Limited FAQ access for website visitors
+
+#### Communication Channels:
+- Dashboard chat interface
+- WhatsApp bidirectional (planned)
+- Telegram (planned)
+- Website chat widget
+
+#### Daily Automations:
+- Morning briefing (tasks, RDV, alerts)
+- Evening recap (completed tasks, tomorrow preview)
+- Real-time alerts (new leads, payments, overdue)
+
+### 6. Website Chat Widget (NEW)
+- Public FAQ chatbot on the website
+- Keyword-based intelligent responses
+- Lead capture form
+- Quick questions suggestions
+- Seamless contact form integration
+
+### 7. PWA Widget for iPhone (NEW)
+- Mobile-optimized dashboard at `/widget`
+- Today's tasks with completion toggle
+- Quick stats (CA, leads)
+- Today's appointments
+- Alerts section
+- Add to Home Screen ready
+
+### 8. Business Search API (NEW)
+- SIRET/SIREN company lookup
+- French government API integration
+- Auto-fill client information
+
+### 9. PWA / Offline Mode
 - Service worker for offline caching
 - Online status indicator
-- Basic offline functionality
-- Safe area support for iOS notch/home indicator
-
-### 7. UI/UX Enhancements
-- Command palette (⌘K) for quick navigation
-- Keyboard shortcuts (G+D for Dashboard, etc.)
-- Mobile-responsive design
-- Dark theme
+- Safe area support for iOS notch
 
 ## Tech Stack
-- **Frontend:** React, Tailwind CSS, Shadcn/UI, Recharts
+- **Frontend:** React, Tailwind CSS, Shadcn/UI, Recharts, Framer Motion
 - **Backend:** FastAPI, Python
 - **Database:** MongoDB
 - **Integrations:** 
@@ -65,166 +96,196 @@ A comprehensive CRM and social media management tool for Alpha Agency, featuring
   - Cloudinary (Media)
   - Brevo (Email)
   - Google Calendar API
-  - MoltBot (Autonomous AI Agent)
+  - entreprise.data.gouv.fr (Business search)
 
 ## Architecture
 ```
 /app
 ├── backend/
 │   ├── routes/
-│   │   ├── blog.py           # Blog API with auto-publish + content_blocks
-│   │   ├── editorial.py      # AI-powered social features
-│   │   ├── multilink.py      # Multilink pages API
-│   │   ├── meta.py           # Meta (FB/IG) integration
+│   │   ├── moltbot.py         # NEW: Full MoltBot CRM API
+│   │   ├── business_search.py  # NEW: SIRET/Kbis lookup
+│   │   ├── blog.py            # Blog API with content_blocks
+│   │   ├── editorial.py       # AI-powered social features
+│   │   ├── multilink.py       # Multilink pages API
+│   │   ├── meta.py            # Meta (FB/IG) integration
 │   │   └── ...
-│   └── server.py             # Main API + MoltBot webhook
+│   └── server.py              # Main API + legacy moltbot webhook
 └── frontend/
     └── src/
         ├── components/
-        │   ├── CustomDomainHandler.jsx
-        │   ├── Navbar.jsx          # Phone button hidden on blog pages
-        │   └── ui/                 # Shadcn components
+        │   ├── ChatWidget.jsx      # NEW: Public FAQ chatbot
+        │   ├── Navbar.jsx          # Phone hidden on blog pages
+        │   └── MainLayout.jsx      # Includes ChatWidget
         ├── pages/
+        │   ├── WidgetPage.jsx      # NEW: PWA Widget for iPhone
         │   ├── dashboard/
+        │   │   ├── MoltBotPage.jsx     # NEW: Full MoltBot interface
         │   │   ├── DashboardLayout.jsx
-        │   │   ├── DashboardOverview.jsx
-        │   │   ├── EditorialCalendarPage.jsx
-        │   │   ├── MultilinkPage.jsx
-        │   │   └── MoltBotPage.jsx   # NEW: MoltBot configuration
+        │   │   └── ...
         │   └── public/
         │       └── LinkBioPage.jsx
-        └── hooks/
-            └── useOnlineStatus.js
+        └── index.css               # PWA safe-area CSS
 ```
 
 ## Changelog
 
-### 2026-02-03 (Current Session)
-- **API Blog Enhanced:** Support for `content_blocks` with inline images
-  - `content` is now optional (use either `content` or `content_blocks`)
-  - New structure supports: heading, text, image, quote blocks
-  - Each image block supports: url, caption, alignment, size
-  - Updated API documentation at `/api/blog/api-info`
-  
-- **UI Fix:** Phone button hidden on blog/actualités pages
-  - Sticky phone CTA no longer overlaps share buttons on article pages
-  - Condition added in `Navbar.jsx` for `/actualites/*` and `/blog/*` routes
-  
-- **MoltBot Integration:**
-  - New dashboard page at `/admin/moltbot`
-  - Webhook endpoint `POST /api/moltbot/webhook` for CRM sync
-  - Supports: contact_create, task_create, message events
-  - Documentation and setup guide included in the page
-  
-- **PWA/Mobile Enhancements:**
-  - Safe area CSS variables for iOS notch support
-  - PWA standalone mode detection
-  - Minimum 44px touch targets
-  - Prevent iOS zoom on input focus
-  - Responsive grid utilities (kpi-grid, grid-responsive)
+### 2026-02-03 (Current Session - MAJOR UPDATE)
 
-### 2026-02-01
-- **NEW FEATURE:** API Blog Automatisée pour n8n
-  - Endpoint `POST /api/blog/auto-publish` avec authentification par clé API
-  - Conversion automatique Markdown/HTML → content blocks
-  - Support publication immédiate ou programmée (`publish_at`)
-  - Champ `source_ia` pour stocker le payload IA (audit/replay)
-  - Endpoint `POST /api/blog/publish-scheduled` pour CRON
-  - Documentation API sur `GET /api/blog/api-info`
+#### MoltBot Complete Implementation
+- **Backend API (`/api/moltbot/`):**
+  - Full CRUD for contacts, tasks, invoices, appointments
+  - Global search across all CRM data
+  - Business stats (CA, leads, tasks)
+  - Daily briefing and evening recap endpoints
+  - Reminders system
+  - Security: Admin vs Public access levels
+  - Business search (SIRET/SIREN integration)
 
-### 2026-01-31 (Session 2)
-- **MOBILE RESPONSIVE:** Optimisation complète des pages principales
-  - Dashboard: stats scrollables, KPIs 2 colonnes, graphiques adaptés
-  - Calendrier Éditorial: boutons compacts, filtres empilés, calendriers scrollables
-  - Multilink: header responsive, liste pages en scroll horizontal
-  - Social Media: padding et navigation optimisés
-- **BUG FIX (P0):** Fixed critical "black screen" bug on admin dashboard
-  - Cause: TDZ error - `lastKeyPressed` used before declaration in `DashboardLayout.jsx`
-- **BUG FIX (P1):** TikTok Sandbox banner no longer appears automatically
-  - Banner only shows when user explicitly activates demo mode
-  - "Quitter le mode démo" button now properly disables sandbox
+- **Frontend MoltBot Page:**
+  - Chat interface with command processing
+  - Quick action buttons
+  - Stats sidebar
+  - Daily briefing banner
+  - WhatsApp integration section
+  - Settings panel
 
-### Previous Session (Completed)
-- Custom domain support for Multilink pages
-- QR code generation for Multilink
-- Mobile scroll fix for tabs
-- Command palette (⌘K) implementation
-- Keyboard shortcuts
-- PWA / Offline mode with service worker
-- AI-powered editorial features (post ideas, hashtags, best time)
-- Admin dashboard redesign
+- **Website Chat Widget:**
+  - Public FAQ chatbot
+  - Keyword-based responses
+  - Lead capture form
+  - Quick questions
+
+- **PWA Widget for iPhone:**
+  - `/widget` route
+  - Mobile-optimized design
+  - Task list with completion
+  - Stats and alerts
+
+#### Blog API Enhanced
+- `content_blocks` field for inline images
+- `content` now optional (use either)
+- Updated API documentation
+
+#### UI Fixes
+- Phone button hidden on `/actualites/*` and `/blog/*`
+- Fixed MoltBot page X import error
+
+#### PWA/Mobile Enhancements
+- Safe area CSS variables
+- PWA standalone mode support
+- Responsive grid utilities
+
+### Previous Sessions
+- Blog auto-publish API
+- Mobile responsive fixes
+- Critical dashboard bug fix (TDZ error)
+- Custom domain support (Cloudflare for SaaS solution)
 
 ## API Reference
+
+### MoltBot API (Admin)
+```
+GET  /api/moltbot/contacts?search=...
+GET  /api/moltbot/contacts/{id}
+POST /api/moltbot/contacts
+
+GET  /api/moltbot/tasks?status=todo
+POST /api/moltbot/tasks
+PUT  /api/moltbot/tasks/{id}/complete
+
+GET  /api/moltbot/invoices?type=devis
+POST /api/moltbot/invoices
+PUT  /api/moltbot/invoices/{id}/add-item
+
+GET  /api/moltbot/appointments?upcoming=true
+POST /api/moltbot/appointments
+
+GET  /api/moltbot/documents?search=...
+POST /api/moltbot/search
+
+GET  /api/moltbot/stats?period=month
+GET  /api/moltbot/briefing
+GET  /api/moltbot/recap
+
+GET  /api/moltbot/business-search?query=...
+
+Headers required:
+- X-MoltBot-Secret: moltbot-alpha-secret-2024
+  OR
+- X-MoltBot-Phone: [admin phone number]
+```
+
+### MoltBot API (Public)
+```
+GET  /api/moltbot/public/faq
+POST /api/moltbot/public/inquiry?name=...&email=...&message=...
+```
 
 ### Blog Auto-Publish API
 ```
 POST /api/blog/auto-publish
 Headers:
   X-API-Key: blog-alpha-auto-publish-2024-secure
-  Content-Type: application/json
-
-Body (with content):
-{
-  "title": "Article Title",
-  "content": "## Markdown content...",
-  "content_format": "markdown",
-  ...
-}
 
 Body (with content_blocks):
 {
-  "title": "Article with Images",
+  "title": "Article Title",
   "content_blocks": [
     {"type": "heading", "content": "Title", "level": 1},
     {"type": "text", "content": "Paragraph..."},
-    {"type": "image", "url": "https://...", "caption": "Caption", "alignment": "center", "size": "large"},
+    {"type": "image", "url": "...", "caption": "...", "alignment": "center"},
     ...
-  ],
-  ...
-}
-```
-
-### MoltBot Webhook
-```
-POST /api/moltbot/webhook
-Content-Type: application/json
-
-Body:
-{
-  "event_type": "contact_create" | "task_create" | "message",
-  "platform": "telegram" | "whatsapp",
-  "data": { ... }
+  ]
 }
 ```
 
 ## Pending Issues
 
 ### P1 - High Priority
-1. **Missing Meta Accounts** - Some Facebook/Instagram accounts not appearing in list
-2. **Comment Moderation** - Backend and UI for approving/deleting blog comments
+1. **Missing Meta Accounts** - Some FB/IG accounts not appearing
+2. **Comment Moderation** - Backend + UI for approving/deleting comments
+3. **WhatsApp Integration** - Connect MoltBot to actual WhatsApp
 
 ### P2 - Medium Priority
-1. **Multi-platform Post Preview** - Show how posts appear on different platforms
-2. **Detailed Multilink Analytics** - Click tracking by specific link
-3. **Slow Multilink Public Pages** - Optimize loading of `LinkBioPage.jsx`
+1. **Multi-platform Post Preview** - Show how posts appear on platforms
+2. **Detailed Multilink Analytics** - Click tracking by link
+3. **Gmail Integration** - Read emails via MoltBot
+4. **Google Drive Integration** - Document sync
 
 ## Future Roadmap
 
 ### Phase 1 (Next)
-- Story Editor + Scheduler (Storrito clone)
-- Full comment management in CRM
-- Enhanced analytics with PDF exports
+- WhatsApp Business API integration
+- Telegram bot connection
+- Comment management in CRM
+- Enhanced analytics
 
 ### Phase 2
-- Client management improvements (notes, contract alerts)
-- Advanced AI suggestions in editorial calendar
+- Story Editor + Scheduler (Storrito clone)
+- Voice-to-CRM (audio messages)
+- Gmail/Drive integration
+- Automated follow-ups
+
+### Phase 3
+- AI predictions (close probability)
+- Competitor monitoring
+- Multi-language support
+- Advanced reporting with PDF exports
 
 ## Test Credentials
 - **Email:** admin@alphagency.fr
 - **Password:** Test123!
 - **Blog API Key:** blog-alpha-auto-publish-2024-secure
+- **MoltBot Secret:** moltbot-alpha-secret-2024
 
 ## Known Limitations
 - **Mocked:** Meta Inbox, TikTok (Sandbox mode)
-- **Blocked:** LinkedIn posting (connection only)
-- **Custom Domain SSL:** Requires Cloudflare for SaaS setup by user
+- **Blocked:** LinkedIn posting, Instagram Stories API
+- **Custom Domain SSL:** Requires Cloudflare for SaaS setup
+- **Business Search:** French gov API may have rate limits
+
+## URLs
+- **Preview:** https://marketingcore.preview.emergentagent.com
+- **PWA Widget:** https://marketingcore.preview.emergentagent.com/widget
+- **MoltBot Admin:** https://marketingcore.preview.emergentagent.com/admin/moltbot
