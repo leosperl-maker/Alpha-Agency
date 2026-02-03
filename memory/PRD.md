@@ -16,6 +16,7 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 - FAQ automatique
 - Capture de leads
 - Design rouge/blanc/noir
+- **Téléphone contact : 0691 266 003**
 
 ### 3. WhatsApp Business Integration
 - Page de configuration : `/admin/whatsapp`
@@ -32,8 +33,17 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 ### 5. Gestion Commentaires Blog
 - Endpoints : pending, all, moderate, delete
 - Statuts : pending, approved, rejected, spam
+- **UI de modération complète dans BlogAdminPage.jsx**
+- Bandeau d'alerte pour commentaires en attente
+- Modal de modération avec onglets (En attente, Approuvés, Rejetés, Tous)
 
-### 6. API Blog avec content_blocks
+### 6. Business Search API (Recherche Entreprises)
+- API française de recherche d'entreprises
+- Source : recherche-entreprises.api.gouv.fr (fiable)
+- Recherche par nom, SIRET, SIREN
+- Retourne : nom, adresse, dirigeants, effectifs, CA
+
+### 7. API Blog avec content_blocks
 - Support images inline
 - Publication via n8n
 
@@ -114,20 +124,29 @@ DELETE /api/blog/comments/{id}
 
 ## Tâches Restantes
 
+### P0 (Terminé ce jour)
+- [x] Numéro téléphone Agent X corrigé → 0691 266 003
+- [x] UI modération commentaires dans BlogAdminPage
+- [x] Business Search API fonctionnelle
+
 ### P1 (Haute priorité)
-- [ ] UI modération commentaires dans BlogAdminPage
+- [ ] Interface "Fichiers/Dossiers" style Google Drive avec arborescence
+- [ ] MoltBot : Classification intelligente des documents (OCR + analyse)
+- [ ] Support vidéo/audio avec transcription (Whisper)
+- [ ] WhatsApp bidirectionnel complet (envoi/réception commandes)
 - [ ] Scheduler pour briefings automatiques (cron)
-- [ ] Tests complets WhatsApp
 
 ### P2 (Moyenne priorité)
 - [ ] Gmail integration via MoltBot
-- [ ] Google Drive sync
+- [ ] Google Drive sync avec tri automatique MoltBot
 - [ ] Story Editor via MoltBot (Instagram)
+- [ ] Accounts Meta manquants (pagination/scopes OAuth)
 
 ### Backlog
 - [ ] Multi-platform post preview
 - [ ] Voice-to-CRM
 - [ ] Advanced analytics PDF
+- [ ] Automatisations avancées (lead scoring, alertes churn)
 
 ## Credentials
 - Email: admin@alphagency.fr
