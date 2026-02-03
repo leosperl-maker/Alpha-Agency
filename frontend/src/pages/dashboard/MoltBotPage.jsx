@@ -5,7 +5,7 @@ import {
   Sparkles, MessageSquare, Bell, Clock, TrendingUp, Zap,
   ExternalLink, Copy, Check, Plus, ArrowRight, RefreshCw,
   Volume2, VolumeX, Paperclip, Download, Eye, Trash2,
-  ChevronDown, ChevronUp, AlertCircle, CheckCircle2, XCircle
+  ChevronDown, ChevronUp, AlertCircle, CheckCircle2, XCircle, X
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
