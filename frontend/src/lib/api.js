@@ -612,4 +612,22 @@ export const apiKeysAPI = {
   testKey: (service) => api.get(`/settings/api-keys/test/${service}`),
 };
 
+// Document AI (MoltBot Intelligence)
+export const documentAIAPI = {
+  getCategories: () => api.get('/document-ai/categories'),
+  getSuggestions: () => api.get('/document-ai/suggestions'),
+  analyzeDocument: (documentId) => api.post(`/document-ai/analyze/${documentId}`),
+  analyzeUpload: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/document-ai/analyze', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  batchAnalyze: (documentIds) => api.post('/document-ai/batch-analyze', { document_ids: documentIds }),
+  autoClassify: (documentId, applyChanges = false) => 
+    api.post(`/document-ai/auto-classify/${documentId}?apply_changes=${applyChanges}`),
+  applySuggestions: (documentIds) => api.post('/document-ai/apply-suggestions', documentIds),
+};
+
 export default api;
