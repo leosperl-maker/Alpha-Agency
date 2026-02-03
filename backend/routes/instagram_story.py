@@ -146,15 +146,18 @@ async def create_story_draft(
 @router.get("/drafts")
 async def list_story_drafts(
     status: Optional[str] = None,
+    account_id: Optional[str] = None,
     limit: int = 20,
     current_user: dict = Depends(get_current_user)
 ):
-    """List all story drafts for the user"""
+    """List all story drafts for the user, optionally filtered by account"""
     user_id = get_user_id(current_user)
     
     query = {"user_id": user_id}
     if status:
         query["status"] = status
+    if account_id:
+        query["account_id"] = account_id
     
     drafts = await db.instagram_story_drafts.find(
         query,
@@ -162,6 +165,53 @@ async def list_story_drafts(
     ).sort("created_at", -1).limit(limit).to_list(limit)
     
     return {"drafts": drafts, "count": len(drafts)}
+
+@router.get("/accounts/{account_id}/history")
+async def get_account_history(
+    account_id: str,
+    limit: int = 50,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get story history for a specific Instagram account"""
+    user_id = get_user_id(current_user)
+    
+    # Verify account belongs to user
+    account = await db.instagram_accounts.find_one({
+        "id": account_id,
+        "user_id": user_id
+    })
+    
+    if not account:
+        raise HTTPException(status_code=404, detail="Compte non trouvé")
+    
+    # Get all stories for this account
+    stories = await db.instagram_story_drafts.find(
+        {"user_id": user_id, "account_id": account_id},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # Count stats
+    total = len(stories)
+    published = len([s for s in stories if s.get("status") == "published"])
+    scheduled = len([s for s in stories if s.get("status") == "scheduled"])
+    drafts = len([s for s in stories if s.get("status") == "draft"])
+    failed = len([s for s in stories if s.get("status") == "failed"])
+    
+    return {
+        "account": {
+            "id": account_id,
+            "username": account.get("username"),
+            "login_success": account.get("login_success")
+        },
+        "stories": stories,
+        "stats": {
+            "total": total,
+            "published": published,
+            "scheduled": scheduled,
+            "drafts": drafts,
+            "failed": failed
+        }
+    }
 
 @router.get("/drafts/{draft_id}")
 async def get_story_draft(
