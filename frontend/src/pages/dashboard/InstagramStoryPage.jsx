@@ -196,7 +196,7 @@ const InstagramStoryPage = () => {
         }
       }
       
-      // Create draft
+      // Create draft with engagement stickers
       const draftData = {
         account_id: selectedAccount.id,
         media_url: mediaUrl,
@@ -205,6 +205,9 @@ const InstagramStoryPage = () => {
         poll: storyPoll.enabled ? {
           question: storyPoll.question,
           options: storyPoll.options.filter(o => o)
+        } : null,
+        question: storyQuestion.enabled ? {
+          question: storyQuestion.question
         } : null,
         schedule_time: scheduleEnabled && scheduleDate && scheduleTime 
           ? `${scheduleDate}T${scheduleTime}:00` 
