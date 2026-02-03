@@ -290,21 +290,38 @@ async def exchange_meta_token(data: MetaTokenExchange, current_user: dict = Depe
         
         # Step 4: Fetch all Pages WITH their Page Access Tokens
         # CRITICAL: Each page has its own access_token field!
+        # IMPORTANT: Handle pagination to get ALL pages
         logger.info("Fetching pages with Page Access Tokens...")
-        pages_response = await http_client.get(
-            f"https://graph.facebook.com/{META_API_VERSION}/me/accounts",
-            params={
-                "fields": "id,name,category,access_token,picture{url},instagram_business_account{id,username,profile_picture_url,followers_count}",
-                "access_token": user_access_token
-            }
-        )
         
-        if pages_response.status_code != 200:
-            error_data = pages_response.json()
-            logger.error(f"Failed to fetch pages: {error_data}")
-            raise HTTPException(status_code=400, detail="Impossible de récupérer vos Pages Facebook")
+        all_pages = []
+        next_url = f"https://graph.facebook.com/{META_API_VERSION}/me/accounts"
+        params = {
+            "fields": "id,name,category,access_token,picture{url},instagram_business_account{id,username,profile_picture_url,followers_count}",
+            "access_token": user_access_token,
+            "limit": 100  # Request more pages at once
+        }
         
-        pages_data = pages_response.json().get("data", [])
+        # Paginate through all pages
+        while next_url:
+            pages_response = await http_client.get(next_url, params=params if "?" not in next_url else None)
+            
+            if pages_response.status_code != 200:
+                error_data = pages_response.json()
+                logger.error(f"Failed to fetch pages: {error_data}")
+                break
+            
+            response_data = pages_response.json()
+            all_pages.extend(response_data.get("data", []))
+            
+            # Check for next page
+            paging = response_data.get("paging", {})
+            next_url = paging.get("next")
+            params = None  # URL already contains params
+            
+            logger.info(f"Fetched {len(all_pages)} pages so far...")
+        
+        pages_data = all_pages
+        logger.info(f"Total pages fetched: {len(pages_data)}")
         
         if not pages_data:
             logger.warning("No Facebook Pages found for this user")
