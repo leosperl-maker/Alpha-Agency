@@ -115,7 +115,7 @@ async def create_story_draft(
     user_id = get_user_id(current_user)
     
     # Verify Instagram account access
-    account = await get_instagram_account(request.instagram_account_id, user_id)
+    account = await get_meta_instagram_account(request.instagram_account_id, user_id)
     if not account:
         raise HTTPException(status_code=404, detail="Compte Instagram non trouvé")
     
