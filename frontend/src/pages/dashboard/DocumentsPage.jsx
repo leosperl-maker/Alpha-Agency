@@ -5,7 +5,7 @@ import {
   Archive, Download, ChevronRight, ChevronDown, Search, Grid, List,
   FolderOpen, Plus, X, Pencil, Save, HardDrive, 
   Clock, CheckCircle2, Eye, Star, StarOff, Info, Settings,
-  Move, Copy, Share2, Link, LayoutGrid, SlidersHorizontal
+  Move, Copy, Share2, Link, LayoutGrid, SlidersHorizontal, Bot, Sparkles, Wand2
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -19,7 +19,7 @@ import {
 import { ScrollArea } from "../../components/ui/scroll-area";
 import { Progress } from "../../components/ui/progress";
 import { toast } from "sonner";
-import { fileManagerAPI } from "../../lib/api";
+import { fileManagerAPI, documentAIAPI } from "../../lib/api";
 
 const DocumentsPage = () => {
   const [documents, setDocuments] = useState([]);
