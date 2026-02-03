@@ -96,6 +96,13 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 - **Nom changé**: "Alpha Agency" → "Agent X - Alpha Agency"
 - **Interface intuitive**: Clic sur photo/nom pour modifier
 
+#### ✅ Fix Comptes Meta manquants (Pagination)
+- **Problème**: L'API Facebook pagine les résultats mais le code ne gérait pas la pagination
+- **Solution**: Ajout de la boucle de pagination dans `/api/meta/exchange-token`
+- **Nouvel endpoint**: `/api/meta/resync-pages` pour resynchroniser tous les comptes depuis Meta
+- **UI**: Bouton "Resync depuis Meta" dans la page Social Media → Accounts
+- **Limite augmentée**: De 25 à 100 pages par requête + pagination automatique
+
 #### ✅ Tests passés: iteration_49
 - Backend: 20/20 tests (100%)
 - Frontend: 100% (UI vérifiée)
