@@ -51,6 +51,7 @@ import MoltBotPage from "./pages/dashboard/MoltBotPage";
 import InstagramStoryPage from "./pages/dashboard/InstagramStoryPage";
 import WhatsAppConfigPage from "./pages/dashboard/WhatsAppConfigPage";
 import NurturingPage from "./pages/dashboard/NurturingPage";
+import VoiceCRMPage from "./pages/dashboard/VoiceCRMPage";
 
 // Public pages
 import TransferDownloadPage from "./pages/TransferDownloadPage";
@@ -132,6 +133,7 @@ function App() {
             <Route path="whatsapp" element={<WhatsAppConfigPage />} />
             <Route path="instagram-stories" element={<InstagramStoryPage />} />
             <Route path="nurturing" element={<NurturingPage />} />
+            <Route path="voice-crm" element={<VoiceCRMPage />} />
           </Route>
           
           {/* PWA Widget Page for iPhone */}
