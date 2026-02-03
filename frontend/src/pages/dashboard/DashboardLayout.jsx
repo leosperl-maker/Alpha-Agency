@@ -424,6 +424,7 @@ const DashboardLayout = () => {
     { path: "/admin/actualites", icon: Newspaper, label: "Actualités" },
     { path: "/admin/blog", icon: FileText, label: "Blog" },
     { path: "/admin/social-media", icon: Share2, label: "Social Media" },
+    { path: "/admin/moltbot", icon: Bot, label: "MoltBot" },
     { path: "/admin/campagnes", icon: Mail, label: "Campagnes" },
   ];
 
