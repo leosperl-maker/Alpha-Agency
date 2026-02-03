@@ -237,7 +237,7 @@ const DashboardOverview = () => {
     { icon: Receipt, label: 'Facture', color: 'from-green-500 to-emerald-500', action: () => navigate('/admin/facturation') },
     { icon: Share2, label: 'Publier', color: 'from-pink-500 to-rose-500', action: () => navigate('/admin/editorial') },
     { icon: Link2, label: 'Multilink', color: 'from-indigo-500 to-violet-500', action: () => navigate('/admin/multilink') },
-    { icon: Bot, label: 'Assistant', color: 'from-cyan-500 to-teal-500', action: () => navigate('/admin/assistant') },
+    { icon: Bot, label: 'MoltBot', color: 'from-violet-500 to-purple-500', action: () => navigate('/admin/moltbot') },
   ];
 
   if (loading) {
