@@ -6608,8 +6608,18 @@ app.include_router(moltbot_docs_router, prefix="/api", tags=["moltbot-documents"
 from routes.audio_transcription import router as audio_router
 app.include_router(audio_router, prefix="/api", tags=["audio"])
 
+# MoltBot Scheduler for automated briefings
+from routes.scheduler import moltbot_scheduler
+
+@app.on_event("startup")
+async def start_moltbot_scheduler():
+    """Start MoltBot scheduler on app startup"""
+    moltbot_scheduler.set_database(db)
+    await moltbot_scheduler.start()
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
+    moltbot_scheduler.stop()
     client.close()
 
