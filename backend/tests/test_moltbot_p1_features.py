@@ -299,9 +299,13 @@ class TestMoltBotPageAPI:
     
     def test_moltbot_stats_endpoint(self, auth_headers):
         """Test MoltBot stats endpoint"""
+        headers = {
+            **auth_headers,
+            "X-MoltBot-Secret": "moltbot-alpha-secret-2024"
+        }
         response = requests.get(
             f"{BASE_URL}/api/moltbot/stats?period=month",
-            headers=auth_headers
+            headers=headers
         )
         assert response.status_code == 200
         data = response.json()
@@ -310,9 +314,13 @@ class TestMoltBotPageAPI:
     
     def test_moltbot_briefing_endpoint(self, auth_headers):
         """Test MoltBot briefing endpoint"""
+        headers = {
+            **auth_headers,
+            "X-MoltBot-Secret": "moltbot-alpha-secret-2024"
+        }
         response = requests.get(
             f"{BASE_URL}/api/moltbot/briefing",
-            headers=auth_headers
+            headers=headers
         )
         assert response.status_code == 200
         data = response.json()
