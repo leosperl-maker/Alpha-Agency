@@ -6620,6 +6620,10 @@ app.include_router(instagram_story_router, prefix="/api/instagram-story", tags=[
 from routes.moltbot_gmail import router as moltbot_gmail_router
 app.include_router(moltbot_gmail_router, prefix="/api/moltbot/gmail", tags=["moltbot-gmail"])
 
+# Lead Scoring & Analytics
+from routes.lead_scoring import router as lead_scoring_router
+app.include_router(lead_scoring_router, prefix="/api", tags=["analytics"])
+
 # MoltBot Scheduler for automated briefings
 from routes.scheduler import moltbot_scheduler
 
