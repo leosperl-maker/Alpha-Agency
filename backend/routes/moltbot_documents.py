@@ -55,12 +55,6 @@ async def get_current_user_for_docs(credentials: HTTPAuthorizationCredentials = 
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Token invalide")
 
-router = APIRouter(prefix="/moltbot/documents", tags=["MoltBot Document Intelligence"])
-logger = logging.getLogger(__name__)
-
-# API Key
-EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
-
 # Document categories for classification
 DOCUMENT_CATEGORIES = {
     "facture": "Factures",
