@@ -353,18 +353,39 @@ async def whatsapp_webhook(message: IncomingMessage):
     Processes messages from admin users for CRM control
     Supports text and audio messages
     """
-    logger.info(f"WhatsApp message from {message.phone_number}: type={message.message_type}, text={message.message[:50] if message.message else 'audio'}")
+    logger.info(f"WhatsApp message from {message.phone_number}: type={message.message_type}, text={message.message[:50] if message.message else 'audio/media'}")
     
     # Process text from message
     text_content = message.message
+    was_transcribed = False
     
     # If audio message, transcribe it first
-    if message.message_type == "audio" and message.audio_url:
+    if message.message_type == "audio":
         from routes.audio_transcription import transcribe_for_moltbot
-        logger.info(f"Transcribing audio from {message.audio_url}")
-        transcribed_text = await transcribe_for_moltbot(url=message.audio_url)
+        
+        transcribed_text = None
+        
+        # Try local file path first (from Node service)
+        if message.audio_path:
+            logger.info(f"Transcribing audio from local path: {message.audio_path}")
+            transcribed_text = await transcribe_for_moltbot(file_path=message.audio_path)
+            
+            # Clean up temp file after transcription
+            try:
+                import os
+                if os.path.exists(message.audio_path):
+                    os.unlink(message.audio_path)
+            except Exception as e:
+                logger.warning(f"Could not delete temp audio file: {e}")
+        
+        # Fall back to URL if available
+        elif message.audio_url:
+            logger.info(f"Transcribing audio from URL: {message.audio_url}")
+            transcribed_text = await transcribe_for_moltbot(url=message.audio_url)
+        
         if transcribed_text:
             text_content = transcribed_text
+            was_transcribed = True
             logger.info(f"Transcribed: {transcribed_text[:100]}")
         else:
             text_content = "[Audio non reconnu]"
@@ -379,7 +400,7 @@ async def whatsapp_webhook(message: IncomingMessage):
         "message_id": message.message_id,
         "timestamp": message.timestamp or datetime.now(timezone.utc).timestamp(),
         "audio_url": message.audio_url,
-        "transcribed": message.message_type == "audio",
+        "transcribed": was_transcribed,
         "created_at": datetime.now(timezone.utc).isoformat()
     })
     
@@ -387,7 +408,7 @@ async def whatsapp_webhook(message: IncomingMessage):
     if is_admin(message.phone_number):
         # Process command
         reply = await process_admin_command(message.phone_number, text_content)
-        return {"reply": reply, "is_admin": True, "transcribed": message.message_type == "audio"}
+        return {"reply": reply, "is_admin": True, "transcribed": was_transcribed}
     else:
         # Public response - limited
         return {
