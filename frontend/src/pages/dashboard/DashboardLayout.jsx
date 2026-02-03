@@ -7,7 +7,7 @@ import {
   User, ChevronDown, AlertCircle, Clock, FileWarning, UserPlus, Sun, Moon,
   ListTodo, GitBranch, Send, Calendar, CalendarDays, Link2, Command, 
   FileSearch, Contact, Briefcase, DollarSign, Keyboard, HelpCircle,
-  Wifi, WifiOff, Instagram, Zap
+  Wifi, WifiOff, Instagram, Zap, Mic
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -425,6 +425,7 @@ const DashboardLayout = () => {
     { path: "/admin/social-media", icon: Share2, label: "Social Media" },
     { path: "/admin/instagram-stories", icon: Instagram, label: "Stories" },
     { path: "/admin/nurturing", icon: Zap, label: "Nurturing" },
+    { path: "/admin/voice-crm", icon: Mic, label: "Voice CRM" },
     { path: "/admin/moltbot", icon: Bot, label: "MoltBot" },
     { path: "/admin/whatsapp", icon: Wifi, label: "WhatsApp" },
     { path: "/admin/campagnes", icon: Mail, label: "Campagnes" },
