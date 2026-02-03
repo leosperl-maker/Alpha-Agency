@@ -265,22 +265,89 @@ const WhatsAppConfigPage = () => {
               <Loader2 className="w-8 h-8 text-white/50 animate-spin" />
             </div>
           ) : status.connected ? (
-            <div className="text-center py-8">
-              <div className="w-20 h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center mb-4">
-                <CheckCircle2 className="w-10 h-10 text-green-400" />
+            <div className="text-center py-6">
+              {/* Profile Picture */}
+              <div className="relative w-24 h-24 mx-auto mb-4 group">
+                {profile.profile_picture ? (
+                  <img 
+                    src={profile.profile_picture} 
+                    alt="Profile" 
+                    className="w-24 h-24 rounded-full object-cover border-4 border-green-500/30"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-green-500/20 flex items-center justify-center border-4 border-green-500/30">
+                    <User className="w-10 h-10 text-green-400" />
+                  </div>
+                )}
+                
+                {/* Upload overlay */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingPicture}
+                  className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                >
+                  {uploadingPicture ? (
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  ) : (
+                    <Camera className="w-6 h-6 text-white" />
+                  )}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePictureUpload}
+                  className="hidden"
+                />
               </div>
-              <h3 className="text-white font-semibold text-lg mb-2">Connecté !</h3>
-              <p className="text-white/60 mb-1">
-                {status.name || "WhatsApp"}
-              </p>
+              
+              {/* Profile Name */}
+              {editingName ? (
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Input
+                    value={newProfileName}
+                    onChange={(e) => setNewProfileName(e.target.value)}
+                    placeholder="Nom du profil"
+                    className="w-48 bg-white/5 border-white/10 text-white text-center"
+                    onKeyDown={(e) => e.key === 'Enter' && updateProfileName()}
+                  />
+                  <Button size="sm" onClick={updateProfileName} className="bg-green-600 hover:bg-green-500">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setEditingName(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <h3 className="text-white font-semibold text-lg">
+                    {profile.name || status.name || "WhatsApp"}
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setNewProfileName(profile.name || status.name || "");
+                      setEditingName(true);
+                    }}
+                    className="text-white/40 hover:text-white/70 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+              
               <p className="text-white/40 text-sm">
                 {status.phone_number && `+${status.phone_number}`}
               </p>
+              
               <p className="text-white/30 text-xs mt-4">
                 Dernière connexion : {status.last_connected 
                   ? new Date(status.last_connected).toLocaleString('fr-FR')
                   : 'N/A'
                 }
+              </p>
+              
+              <p className="text-green-400/60 text-xs mt-2">
+                💡 Cliquez sur la photo ou le nom pour modifier
               </p>
             </div>
           ) : qrCode ? (
