@@ -936,7 +936,7 @@ const DashboardLayout = () => {
                   { key: 'S', label: 'Social Media' },
                   { key: 'E', label: 'Éditorial' },
                   { key: 'M', label: 'Multilink' },
-                  { key: 'A', label: 'Assistant IA' },
+                  { key: 'A', label: 'MoltBot' },
                   { key: 'B', label: 'Budget' },
                 ].map((shortcut, i) => (
                   <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/5">
