@@ -48,6 +48,7 @@ import AgendaPage from "./pages/dashboard/AgendaPage";
 import EditorialCalendarPage from "./pages/dashboard/EditorialCalendarPage";
 import MultilinkPage from "./pages/dashboard/MultilinkPage";
 import MoltBotPage from "./pages/dashboard/MoltBotPage";
+import WhatsAppConfigPage from "./pages/dashboard/WhatsAppConfigPage";
 
 // Public pages
 import TransferDownloadPage from "./pages/TransferDownloadPage";
