@@ -341,6 +341,76 @@ const WhatsAppConfigPage = () => {
         </div>
       </div>
 
+      {/* Test Briefings */}
+      {status.connected && (
+        <div className="glass-panel rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-yellow-400" />
+            Tester les briefings automatisés
+          </h2>
+          
+          <p className="text-white/60 text-sm mb-4">
+            Envoyez un briefing ou récap de test au numéro admin configuré.
+          </p>
+          
+          <div className="flex flex-wrap gap-3">
+            <Button 
+              onClick={async () => {
+                try {
+                  const res = await fetch(`${API}/api/whatsapp/test-briefing?briefing_type=morning`, {
+                    method: "POST",
+                    headers: { 
+                      "Content-Type": "application/json",
+                      "X-MoltBot-Secret": "moltbot-alpha-secret-2024"
+                    }
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    toast.success("Briefing matin envoyé !");
+                  } else {
+                    toast.error(data.error || "Erreur d'envoi");
+                  }
+                } catch (err) {
+                  toast.error("Erreur lors de l'envoi");
+                }
+              }}
+              variant="outline"
+              className="border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10"
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              Envoyer Briefing Matin
+            </Button>
+            
+            <Button 
+              onClick={async () => {
+                try {
+                  const res = await fetch(`${API}/api/whatsapp/test-briefing?briefing_type=evening`, {
+                    method: "POST",
+                    headers: { 
+                      "Content-Type": "application/json",
+                      "X-MoltBot-Secret": "moltbot-alpha-secret-2024"
+                    }
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    toast.success("Récap soir envoyé !");
+                  } else {
+                    toast.error(data.error || "Erreur d'envoi");
+                  }
+                } catch (err) {
+                  toast.error("Erreur lors de l'envoi");
+                }
+              }}
+              variant="outline"
+              className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              Envoyer Récap Soir
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Test Message */}
       {status.connected && (
         <div className="glass-panel rounded-xl p-6">
