@@ -6588,6 +6588,10 @@ app.include_router(worker_router, prefix="/api", tags=["publication-worker"])
 from routes.multilink import router as multilink_router
 app.include_router(multilink_router, prefix="/api/multilink", tags=["multilink"])
 
+# MoltBot Integration (Full CRM Access)
+from routes.moltbot import router as moltbot_router
+app.include_router(moltbot_router, prefix="/api", tags=["moltbot"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
