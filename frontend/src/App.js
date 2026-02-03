@@ -50,6 +50,7 @@ import MultilinkPage from "./pages/dashboard/MultilinkPage";
 import MoltBotPage from "./pages/dashboard/MoltBotPage";
 import InstagramStoryPage from "./pages/dashboard/InstagramStoryPage";
 import WhatsAppConfigPage from "./pages/dashboard/WhatsAppConfigPage";
+import NurturingPage from "./pages/dashboard/NurturingPage";
 
 // Public pages
 import TransferDownloadPage from "./pages/TransferDownloadPage";
