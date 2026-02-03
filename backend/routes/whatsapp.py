@@ -71,6 +71,7 @@ def is_admin(phone: str) -> bool:
 async def process_admin_command(phone: str, message: str) -> str:
     """Process commands from admin via WhatsApp"""
     msg = message.lower().strip()
+    original_msg = message.strip()
     
     try:
         # Stats commands
@@ -118,11 +119,22 @@ async def process_admin_command(phone: str, message: str) -> str:
             else:
                 return "Utilisez: 'Cherche contact: nom'"
 
-        # Devis
+        # Devis - Enhanced with PDF generation
         elif 'devis' in msg:
-            if 'crée' in msg:
-                return "Pour créer un devis: 'Crée devis 2000€ pour Client, description'"
+            if 'crée' in msg or 'créer' in msg or 'faire' in msg:
+                result = await create_quote_from_message(original_msg, phone)
+                return result
+            elif 'envoie' in msg or 'envoi' in msg:
+                result = await send_quote_pdf(original_msg, phone)
+                return result
             return await get_recent_quotes()
+
+        # Facture
+        elif 'facture' in msg:
+            if 'crée' in msg or 'créer' in msg:
+                result = await create_invoice_from_message(original_msg, phone)
+                return result
+            return await get_recent_invoices()
 
         # Help
         elif any(x in msg for x in ['aide', 'help', 'commande']):
@@ -133,7 +145,8 @@ async def process_admin_command(phone: str, message: str) -> str:
 🌙 Récap: "Récap", "Bilan"
 📋 Tâches: "Mes tâches", "Crée tâche: ..."
 👥 Contacts: "Cherche contact: nom"
-📄 Devis: "Mes devis", "Crée devis..."
+📄 Devis: "Crée devis 2000€ pour Client, description"
+📄 Facture: "Crée facture 500€ pour Client, service"
 
 Tapez une commande pour commencer !"""
 
@@ -144,7 +157,7 @@ Exemples rapides:
 • "CA du mois"
 • "Mes tâches"  
 • "Briefing"
-• "Crée tâche: appeler client" """
+• "Crée devis 1500€ pour Dupont, création site web" """
 
     except Exception as e:
         logger.error(f"Error processing command: {e}")
