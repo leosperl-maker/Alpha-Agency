@@ -6608,6 +6608,10 @@ app.include_router(moltbot_docs_router, prefix="/api", tags=["moltbot-documents"
 from routes.audio_transcription import router as audio_router
 app.include_router(audio_router, prefix="/api", tags=["audio"])
 
+# WhatsApp Business Cloud API (official Meta API)
+from routes.whatsapp_cloud import router as whatsapp_cloud_router
+app.include_router(whatsapp_cloud_router, prefix="/api/whatsapp-cloud", tags=["whatsapp-cloud"])
+
 # MoltBot Scheduler for automated briefings
 from routes.scheduler import moltbot_scheduler
 
