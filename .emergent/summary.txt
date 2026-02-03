@@ -1,167 +1,371 @@
 <analysis>**original_problem_statement:**
-The user's primary goal is to build a comprehensive CRM and social media management tool. The initial work focused on creating a Multilink module (a  clone), a Story Editor ( clone), custom domain support, and a sandbox mode for testing social integrations.
+The user's primary goal is the continued development and expansion of MoltBot, a sophisticated AI assistant integrated into their CRM. The project's scope has grown significantly to encompass full CRM control via WhatsApp, intelligent document management, automated client interactions, and social media management.
 
-In this session, the user requested a series of significant UI/UX enhancements, including:
-- Fixing a mobile scrolling bug.
-- Adding QR codes to Multilink pages.
-- Implementing a detailed analytics view.
-- Making the global search bar functional.
-- Adding keyboard shortcuts.
-- Improving the AI assistant agent selector.
-- Implementing an offline mode (PWA).
-- Adding advanced AI features to the social media calendar (post ideas, best time to post, hashtag suggestions).
-- A complete redesign of the main admin dashboard.
-
-Towards the end of the session, the user reported a critical bug: the admin dashboard displays a black screen after the redesign, and the public Multilink page is loading slowly.
+The user's most recent requests and feedback include:
+1.  **Fix WhatsApp Integration:** The QR code for linking WhatsApp was not appearing.
+2.  **Enhance WhatsApp Functionality:**
+    *   Allow the CRM admin to change MoltBot's WhatsApp profile name and picture from the UI.
+    *   Implement advanced commands via WhatsApp messages (e.g., crée devis pour client X should generate a PDF quote and send it back).
+    *   Provide options for using a dedicated WhatsApp number without a physical phone, leading to a request to integrate the official WhatsApp Business Cloud API.
+3.  **Fix Meta Integration:** A long-standing issue where not all connected Facebook Pages and Instagram accounts were being synchronized, likely due to a pagination problem.
+4.  **Implement Instagram Story Editor:**
+    *   The user wants MoltBot to be able to log in to Instagram using provided credentials and publish stories directly. This requires browser automation as it's not supported by the official API.
+    *   The feature must support multiple Instagram accounts.
+    *   It must support scheduling posts.
+    *   The UI must be a full-featured visual editor, similar to Storrito, with a phone mockup for live preview, drag-and-drop placement of engagement stickers (polls, questions, quizzes), and custom text styling.
 
 **User's preferred language**: Français
 
 **what currently exists?**
-- A full-stack application with a React frontend, FastAPI backend, and MongoDB database.
-- A Multilink module that clones , including a Markdown editor, design customization, analytics, and advanced block types.
-- A Sandbox Mode for Meta and TikTok to facilitate testing without using production data.
-- **Custom Domain Functionality**: The backend is ready, and the frontend has been updated with a UI for configuration () and a root-level handler () to detect and serve pages from a custom domain.
-- **QR Code Generation**: A feature to generate and download QR codes for each Multilink page has been added.
-- **Enhanced Social Media Tools**: The editorial calendar now includes an AI-powered panel for generating post ideas, suggesting hashtags, and finding the best time to post.
-- **PWA / Offline Mode**: The application is configured as a Progressive Web App with a service worker for basic offline caching and an online status indicator in the UI.
-- **Major UX/UI Overhauls**:
-    - A global command palette (invoked by  or clicking the search bar) for quick navigation.
-    - Keyboard shortcuts for navigating to key pages (e.g., G+D for Dashboard).
-    - An improved, mobile-friendly agent selector on the AI Assistant page.
-    - A completely redesigned Admin Dashboard () with quick access buttons and new statistical widgets.
+- A full-stack CRM with a FastAPI backend and React frontend.
+- **WhatsApp Integration (Baileys):** The non-official WhatsApp service is now running and connected. The UI at  correctly shows the Connected status. The initial QR code issue is resolved.
+- **WhatsApp P1 Features (Complete):** Automated morning/evening briefings can be configured and triggered for testing from the UI. The backend logic for audio transcription (Whisper) and receiving messages is in place.
+- **WhatsApp Profile Management (Complete):** The UI now allows the admin to change the WhatsApp Business profile name and upload a new profile picture.
+- **Advanced WhatsApp Commands (Backend Complete):** The  can now process commands like crée devis 1500€ pour Dupont, which successfully creates a quote in the CRM using existing PDF generation logic.
+- **Meta Account Sync (Fixed):** The issue of missing Meta (Facebook/Instagram) accounts has been resolved. The backend sync logic now handles API pagination, and a Sync Meta button has been added to the  page to allow the user to manually trigger a full resynchronization of all their pages.
+- **Instagram Story Editor (Scaffolding):**
+    - **Backend:** A robust backend using Playwright for browser automation is implemented. It supports multi-account credential management (encrypted storage) and has API endpoints to add, list, test, and delete accounts. The logic for scheduling and publishing stories is in place.
+    - **Frontend:** A new page exists at  with a complete UI for managing multiple Instagram accounts (add, list, test, delete) and a modal for creating/scheduling stories. This modal includes placeholders for media, text, and engagement stickers (Poll, Question).
+- **WhatsApp Business Cloud API (Scaffolding):** The backend includes a new router () and the frontend UI at  has a new section with input fields for the required API credentials.
 
 **Last working item**:
--   **Last item agent was working:** Debugging a critical bug reported by the user: the admin dashboard () shows a black screen, and the public Multilink pages are slow to load. The agent had just finished a major redesign of the  component.
--   **Status:** BLOCKED
--   **Agent Testing Done:** N (The agent's attempted fixes were unsuccessful).
--   **Which testing method agent to use?** **troubleshoot_agent**. The agent correctly identified the issue as critical and was about to escalate to the troubleshoot agent before the session ended. This should be the immediate next step.
--   **User Testing Done:** Y (User confirmed the bug persists with a bug emoji after the agent's fixes).
+- **Last item agent was working:** The agent was building the comprehensive Instagram Story editor. After creating a functional UI for account management and story creation, the user provided detailed feedback with screenshots, requesting a full-fledged visual editor with a live phone preview, drag-and-drop stickers, and text styling, similar to a professional tool like Storrito.
+- **Status:** NOT STARTED (The advanced visual editor part is a new request; the current UI is just a form).
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** screenshot tool
+- **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: (P0) CRITICAL - Admin Dashboard is a Black Screen & Public Pages are Slow.**
-    -   **Description:** After a major redesign of the admin dashboard, the page at  now renders as a black screen, making the application unusable. The user also reported that public Multilink pages are slow to load.
-    -   **Attempted fixes:**
-        1.  Corrected an API call to a non-existent  in .
-        2.  Removed all  () components from  to rule out animation-related rendering issues.
-    -   **Next debug checklist:**
-        1.  **Invoke the ** as planned to get a deeper analysis of the frontend runtime error.
-        2.  Inspect the browser's JavaScript console logs for runtime errors on the  page.
-        3.  Examine  again. The issue is likely a data-fetching or rendering error where a component is crashing the entire page (e.g., trying to access properties of  or  in the initial state).
-        4.  For the slow , investigate lazy-loading components or optimizing the large inline SVG icons. The API response time was confirmed to be fast.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a critical blocker. The user cannot access the main application dashboard.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Frontend.
+- **Issue 1: (P0) Playwright Browser Automation Failure**
+    - **Description:** The user reported an error when adding an Instagram account. The agent diagnosed this as a  caused by the Playwright library not finding its browser executable at the default path. The container environment uses a custom path ().
+    - **Attempted fixes:** The agent set the  environment variable and made the automation code more robust to handle Playwright's absence gracefully. However, the end-to-end flow of testing a login has not been re-validated since the fix.
+    - **Next debug checklist:**
+        1. Navigate to .
+        2. Click Ajouter un compte and add valid Instagram credentials.
+        3. Once the account appears in the list with Non testé status, click the Tester button next to it.
+        4. Check the browser console and backend logs (==> /var/log/supervisor/backend.err.log <==
+    raise exc
+  File "/root/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/root/.venv/lib/python3.11/site-packages/starlette/routing.py", line 756, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/root/.venv/lib/python3.11/site-packages/starlette/routing.py", line 776, in app
+    await route.handle(scope, receive, send)
+  File "/root/.venv/lib/python3.11/site-packages/starlette/routing.py", line 297, in handle
+    await self.app(scope, receive, send)
+  File "/root/.venv/lib/python3.11/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/root/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/root/.venv/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/root/.venv/lib/python3.11/site-packages/starlette/routing.py", line 72, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/root/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 278, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venv/lib/python3.11/site-packages/fastapi/routing.py", line 191, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/backend/routes/instagram_story.py", line 452, in add_instagram_account
+    result = await test_account_login(account_id, account.username, account.password)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/backend/routes/instagram_automation.py", line 295, in test_account_login
+    automation = await get_automation(account_id)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/backend/routes/instagram_automation.py", line 287, in get_automation
+    await _automation_instances[account_id].init_browser(account_id)
+  File "/app/backend/routes/instagram_automation.py", line 49, in init_browser
+    self.browser = await playwright.chromium.launch(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venv/lib/python3.11/site-packages/playwright/async_api/_generated.py", line 14547, in launch
+    await self._impl_obj.launch(
+  File "/root/.venv/lib/python3.11/site-packages/playwright/_impl/_browser_type.py", line 97, in launch
+    await self._channel.send(
+  File "/root/.venv/lib/python3.11/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venv/lib/python3.11/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: BrowserType.launch: Executable doesn't exist at /root/.cache/ms-playwright/chromium_headless_shell-1208/chrome-linux/headless_shell
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+WARNING:  WatchFiles detected changes in 'routes/instagram_automation.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-02-03 21:29:40,035 - routes.scheduler - INFO - MoltBot Scheduler stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [10522]
+2026-02-03 21:29:42,076 - token_encryption - INFO - Token encryption initialized successfully
+2026-02-03 21:29:43,681 - routes.appointments - INFO - Brevo API key loaded: xkeysib-978316d020f3...
+INFO:     Started server process [11048]
+INFO:     Waiting for application startup.
+2026-02-03 21:29:43,955 - server - INFO - Super admin existant: admin@alphagency.fr
+2026-02-03 21:29:43,957 - routes.scheduler - INFO - MoltBot Scheduler started
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'routes/instagram_story.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-02-03 21:30:02,596 - routes.scheduler - INFO - MoltBot Scheduler stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [11048]
+2026-02-03 21:30:04,485 - token_encryption - INFO - Token encryption initialized successfully
+2026-02-03 21:30:06,071 - routes.appointments - INFO - Brevo API key loaded: xkeysib-978316d020f3...
+INFO:     Started server process [11143]
+INFO:     Waiting for application startup.
+2026-02-03 21:30:06,323 - server - INFO - Super admin existant: admin@alphagency.fr
+2026-02-03 21:30:06,324 - routes.scheduler - INFO - MoltBot Scheduler started
+INFO:     Application startup complete.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-02-03 21:32:44,590 - routes.scheduler - INFO - MoltBot Scheduler stopped
+INFO:     Application shutdown complete.
+INFO:     Finished server process [11143]
+INFO:     Stopping reloader process [10520]
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [11484] using WatchFiles
+2026-02-03 21:32:46,525 - token_encryption - INFO - Token encryption initialized successfully
+2026-02-03 21:32:48,102 - routes.appointments - INFO - Brevo API key loaded: xkeysib-978316d020f3...
+INFO:     Started server process [11486]
+INFO:     Waiting for application startup.
+2026-02-03 21:32:48,354 - server - INFO - Super admin existant: admin@alphagency.fr
+2026-02-03 21:32:48,355 - routes.scheduler - INFO - MoltBot Scheduler started
+INFO:     Application startup complete.
+2026-02-03 21:35:26,740 - instagram_automation - INFO - Attempting Instagram login for alphagency.fr
+2026-02-03 21:35:32,155 - instagram_automation - INFO - Attempting Instagram login for alphagency.fr
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [46] using WatchFiles
 
--   **Issue 2: (P1) Missing Meta (Facebook/Instagram) Accounts.**
-    -   **Description:** Not all connected Facebook Pages and linked Instagram accounts appear in the account list.
-    -   **Next debug checklist:**
-        1.  Review the  endpoint in .
-        2.  Investigate the Graph API calls for correct pagination logic to ensure all results are being fetched.
-        3.  Verify the required OAuth scopes (, , ) are sufficient.
-    -   **Status:** NOT STARTED
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Backend.
+==> /var/log/supervisor/backend.out.log <==
+INFO:     10.64.130.143:51344 - "GET /api/dashboard/stats HTTP/1.1" 200 OK
+INFO:     10.64.131.7:50776 - "OPTIONS /api/invoices?status=pending,overdue HTTP/1.1" 200 OK
+INFO:     10.64.131.6:49030 - "GET /api/ai/status HTTP/1.1" 200 OK
+INFO:     10.64.131.7:39140 - "GET /api/budget/summary HTTP/1.1" 200 OK
+INFO:     10.64.130.143:51332 - "GET /api/tasks?status=todo,in_progress HTTP/1.1" 200 OK
+INFO:     10.64.131.9:48948 - "OPTIONS /api/invoices?status=pending,overdue HTTP/1.1" 200 OK
+INFO:     10.64.131.6:49032 - "OPTIONS /api/agenda/events?start_date=2026-02-03&limit=3 HTTP/1.1" 200 OK
+INFO:     10.64.131.7:50776 - "GET /api/agenda/events?start_date=2026-02-03&limit=3 HTTP/1.1" 404 Not Found
+INFO:     10.64.131.9:48952 - "GET /api/invoices?status=pending,overdue HTTP/1.1" 200 OK
+INFO:     10.64.131.8:59978 - "GET /api/dashboard/stats HTTP/1.1" 200 OK
+INFO:     10.64.131.8:59978 - "OPTIONS /api/contacts?type=lead HTTP/1.1" 200 OK
+INFO:     10.64.131.9:48948 - "GET /api/invoices?status=pending,overdue HTTP/1.1" 200 OK
+INFO:     10.64.131.8:59986 - "GET /api/agenda/events?start_date=2026-02-03&limit=3 HTTP/1.1" 404 Not Found
+INFO:     10.64.131.7:50776 - "OPTIONS /api/editorial/posts?status=scheduled&limit=3 HTTP/1.1" 200 OK
+INFO:     10.64.131.6:49030 - "OPTIONS /api/editorial/posts?status=scheduled&limit=3 HTTP/1.1" 200 OK
+INFO:     10.64.130.144:37350 - "GET /api/contacts?type=lead HTTP/1.1" 200 OK
+INFO:     10.64.131.9:48948 - "GET /api/editorial/posts?status=scheduled&limit=3 HTTP/1.1" 200 OK
+INFO:     10.64.131.8:59978 - "GET /api/contacts?type=lead HTTP/1.1" 200 OK
+INFO:     10.64.131.9:48948 - "GET /api/editorial/posts?status=scheduled&limit=3 HTTP/1.1" 200 OK
+INFO:     10.64.131.7:50776 - "OPTIONS /api/multilink/pages HTTP/1.1" 200 OK
+INFO:     10.64.131.10:59528 - "GET /api/multilink/pages HTTP/1.1" 200 OK
+INFO:     10.64.131.10:59528 - "GET /api/multilink/pages HTTP/1.1" 200 OK
+INFO:     10.64.131.10:59528 - "GET /api/instagram-story/accounts HTTP/1.1" 200 OK
+INFO:     10.64.131.10:34450 - "GET /api/instagram-story/drafts HTTP/1.1" 200 OK
+INFO:     10.64.131.202:39418 - "GET /api/instagram-story/drafts HTTP/1.1" 200 OK
+INFO:     10.64.131.202:39418 - "GET /api/instagram-story/accounts HTTP/1.1" 200 OK
+INFO:     10.64.131.202:39418 - "GET /api/ai/status HTTP/1.1" 200 OK
+INFO:     10.64.131.207:52710 - "GET /api/tasks?status=todo,in_progress HTTP/1.1" 200 OK
+INFO:     10.64.131.202:39418 - "GET /api/tasks?status=todo,in_progress HTTP/1.1" 200 OK
+INFO:     10.64.131.8:59978 - "GET /api/ai/status HTTP/1.1" 200 OK
+INFO:     10.64.131.10:34450 - "GET /api/invoices?status=pending,overdue HTTP/1.1" 200 OK
+INFO:     10.64.131.202:39418 - "GET /api/contacts?type=lead HTTP/1.1" 200 OK
+INFO:     10.64.131.207:52710 - "GET /api/invoices?status=pending,overdue HTTP/1.1" 200 OK
+INFO:     10.64.131.10:34450 - "GET /api/contacts?type=lead HTTP/1.1" 200 OK
+INFO:     10.64.134.75:52822 - "OPTIONS /api/instagram-story/accounts HTTP/1.1" 200 OK
+INFO:     10.64.134.75:52834 - "OPTIONS /api/instagram-story/drafts HTTP/1.1" 200 OK
+INFO:     10.64.134.88:35204 - "OPTIONS /api/instagram-story/accounts HTTP/1.1" 200 OK
+INFO:     10.64.134.110:54712 - "OPTIONS /api/instagram-story/drafts HTTP/1.1" 200 OK
+INFO:     10.64.134.88:35204 - "GET /api/instagram-story/accounts HTTP/1.1" 401 Unauthorized
+INFO:     10.64.134.75:52834 - "GET /api/instagram-story/drafts HTTP/1.1" 401 Unauthorized
+INFO:     10.64.131.202:54414 - "GET /api/ai/status HTTP/1.1" 401 Unauthorized
+INFO:     10.64.131.207:53900 - "GET /api/ai/status HTTP/1.1" 401 Unauthorized
+INFO:     10.64.135.215:43384 - "GET /api/instagram-story/drafts HTTP/1.1" 401 Unauthorized
+INFO:     10.64.131.9:59442 - "GET /api/instagram-story/accounts HTTP/1.1" 401 Unauthorized
+INFO:     10.64.131.207:53900 - "OPTIONS /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.6:45930 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.135.215:43384 - "OPTIONS /api/dashboard/stats HTTP/1.1" 200 OK
+INFO:     10.64.130.143:51368 - "OPTIONS /api/budget/summary HTTP/1.1" 200 OK
+INFO:     10.64.130.143:51354 - "OPTIONS /api/tasks/stats/summary HTTP/1.1" 200 OK
+INFO:     10.64.131.6:45930 - "OPTIONS /api/dashboard/stats HTTP/1.1" 200 OK
+INFO:     10.64.130.143:51376 - "OPTIONS /api/tasks?limit=5 HTTP/1.1" 200 OK
+INFO:     10.64.131.9:59442 - "OPTIONS /api/ai/status HTTP/1.1" 200 OK
+INFO:     10.64.130.143:51368 - "OPTIONS /api/tasks/stats/summary HTTP/1.1" 200 OK
+INFO:     10.64.131.8:38450 - "OPTIONS /api/tasks?limit=5 HTTP/1.1" 200 OK
+INFO:     10.64.131.7:44140 - "OPTIONS /api/budget/summary HTTP/1.1" 200 OK
+INFO:     10.64.131.7:44138 - "OPTIONS /api/ai/status HTTP/1.1" 200 OK
+INFO:     10.64.130.144:57314 - "OPTIONS /api/tasks?status=todo,in_progress HTTP/1.1" 200 OK
+INFO:     10.64.131.7:44138 - "GET /api/budget/summary HTTP/1.1" 200 OK
+INFO:     10.64.131.9:59442 - "GET /api/tasks?limit=5 HTTP/1.1" 200 OK
+INFO:     10.64.131.6:45930 - "GET /api/ai/status HTTP/1.1" 200 OK
+INFO:     10.64.131.7:44140 - "GET /api/tasks?status=todo,in_progress HTTP/1.1" 200 OK
+INFO:     10.64.130.144:57314 - "OPTIONS /api/tasks?status=todo,in_progress HTTP/1.1" 200 OK
+INFO:     10.64.131.8:38450 - "GET /api/tasks/stats/summary HTTP/1.1" 200 OK
+INFO:     10.64.131.9:59442 - "GET /api/tasks?limit=5 HTTP/1.1" 200 OK
+INFO:     10.64.131.8:38452 - "GET /api/dashboard/stats HTTP/1.1" 200 OK
+INFO:     10.64.131.10:40692 - "GET /api/dashboard/stats HTTP/1.1" 200 OK
+INFO:     10.64.131.202:54414 - "GET /api/budget/summary HTTP/1.1" 200 OK
+INFO:     10.64.131.10:40692 - "GET /api/ai/status HTTP/1.1" 200 OK
+INFO:     10.64.131.8:38450 - "OPTIONS /api/invoices?status=pending,overdue HTTP/1.1" 200 OK
+INFO:     10.64.131.207:53900 - "GET /api/tasks?status=todo,in_progress HTTP/1.1" 200 OK
+INFO:     10.64.130.144:57314 - "GET /api/tasks/stats/summary HTTP/1.1" 200 OK
+INFO:     10.64.131.9:59442 - "OPTIONS /api/agenda/events?start_date=2026-02-03&limit=3 HTTP/1.1" 200 OK
+INFO:     10.64.131.6:45930 - "GET /api/invoices?status=pending,overdue HTTP/1.1" 200 OK
+INFO:     10.64.131.202:54414 - "OPTIONS /api/agenda/events?start_date=2026-02-03&limit=3 HTTP/1.1" 200 OK
+INFO:     10.64.131.7:44140 - "GET /api/agenda/events?start_date=2026-02-03&limit=3 HTTP/1.1" 404 Not Found
+INFO:     10.64.131.10:40692 - "OPTIONS /api/contacts?type=lead HTTP/1.1" 200 OK
+INFO:     10.64.131.6:45930 - "GET /api/invoices?status=pending,overdue HTTP/1.1" 200 OK
+INFO:     10.64.131.7:44140 - "GET /api/agenda/events?start_date=2026-02-03&limit=3 HTTP/1.1" 404 Not Found
+INFO:     10.64.131.202:54414 - "OPTIONS /api/editorial/posts?status=scheduled&limit=3 HTTP/1.1" 200 OK
+INFO:     10.64.131.8:38450 - "GET /api/contacts?type=lead HTTP/1.1" 200 OK
+INFO:     10.64.135.215:43384 - "GET /api/editorial/posts?status=scheduled&limit=3 HTTP/1.1" 200 OK
+INFO:     10.64.130.144:57314 - "OPTIONS /api/multilink/pages HTTP/1.1" 200 OK
+INFO:     10.64.130.143:51354 - "GET /api/editorial/posts?status=scheduled&limit=3 HTTP/1.1" 200 OK
+INFO:     10.64.131.6:45930 - "GET /api/contacts?type=lead HTTP/1.1" 200 OK
+INFO:     10.64.130.144:57314 - "GET /api/multilink/pages HTTP/1.1" 200 OK
+INFO:     10.64.131.10:40692 - "GET /api/multilink/pages HTTP/1.1" 200 OK
+INFO:     10.64.131.6:45930 - "GET /api/instagram-story/drafts HTTP/1.1" 200 OK
+INFO:     10.64.131.207:53900 - "GET /api/instagram-story/accounts HTTP/1.1" 200 OK
+INFO:     10.64.131.9:59442 - "GET /api/instagram-story/accounts HTTP/1.1" 200 OK
+INFO:     10.64.135.215:43384 - "GET /api/instagram-story/drafts HTTP/1.1" 200 OK
+INFO:     10.64.131.207:53900 - "GET /api/ai/status HTTP/1.1" 200 OK
+INFO:     10.64.131.8:38450 - "GET /api/tasks?status=todo,in_progress HTTP/1.1" 200 OK
+INFO:     10.64.131.7:44140 - "GET /api/ai/status HTTP/1.1" 200 OK
+INFO:     10.64.135.215:43384 - "GET /api/tasks?status=todo,in_progress HTTP/1.1" 200 OK
+INFO:     10.64.135.215:43384 - "GET /api/invoices?status=pending,overdue HTTP/1.1" 200 OK
+INFO:     10.64.130.143:51354 - "GET /api/invoices?status=pending,overdue HTTP/1.1" 200 OK
+INFO:     10.64.131.9:59442 - "GET /api/contacts?type=lead HTTP/1.1" 200 OK
+INFO:     10.64.131.7:44140 - "GET /api/contacts?type=lead HTTP/1.1" 200 OK
+INFO:     10.64.131.10:55712 - "POST /api/instagram-story/accounts/58fc1950-3bf5-4cc8-84fd-ea99a2adc3b9/test HTTP/1.1" 200 OK
+INFO:     10.64.130.143:51392 - "POST /api/instagram-story/accounts/58fc1950-3bf5-4cc8-84fd-ea99a2adc3b9/test HTTP/1.1" 200 OK) to confirm the test login API call succeeds without a 500 error and that Playwright launches correctly.
+    - **Why fix this issue and what will be achieved with the fix?** This is a critical blocker for the entire Instagram Story publishing feature. Without a working browser automation setup, no stories can be posted.
+    - **Status:** IN PROGRESS
+    - **Is recurring issue?** N
+    - **Should Test frontend/backend/both after fix?** Backend.
+    - **Blocked on other issue:** None.
 
 **In progress Task List**:
--   None. All efforts must be focused on the P0 bug.
+- **Task 1: (P0) Build the Visual Instagram Story Editor**
+    - **Description:** Upgrade the existing story creation modal into a full-featured visual editor as requested by the user.
+    - **Where to resume:** Modify . This will likely require a new, complex component for the visual editor itself, potentially using a library like  for drag-and-drop functionality.
+    - **What will be achieved with this?** The user will have a what you see is what you get (WYSIWYG) editor to precisely design their Instagram stories, including placing stickers and styling text, before publishing or scheduling them via MoltBot.
+    - **Status:** IN PROGRESS
+    - **Should Test frontend/backend/both after fix?** Both.
+    - **Blocked on something:** Blocked on **Issue 1: Playwright Browser Automation Failure** for the final publishing step, but the UI can be built in parallel.
 
 **Upcoming and Future Tasks**
--   **Upcoming Tasks:**
-    -   **(P1) Social Media Manager - Multi-platform Preview:** Implement a UI to show how a post will appear on Instagram, Facebook, etc., before publishing.
-    -   **(P1) Detailed Multilink Analytics:** Expand the new Analytics tab to show exactly where users clicked on a Multilink page.
-    -   **(P2) Story Editor + Scheduler (Storrito clone):** A large, high-priority feature from the initial request, to be tackled after the current bug and smaller features are complete.
--   **Future Tasks:**
-    -   Full Analytics & Reporting dashboard with PDF exports.
-    -   Client management features (internal notes, contract renewal alerts).
-    -   Implement AI-driven post suggestions within the editorial calendar.
+- **Upcoming Tasks:**
+    - **(P1) Implement Gmail & Google Drive Integration:** The integration playbooks have been fetched. The implementation is pending the user providing the necessary Google Cloud Client ID and Secret.
+    - **(P1) Finalize WhatsApp Business Cloud API Integration:** The backend and frontend scaffolding is complete. The implementation is pending the user providing their WhatsApp Business Account ID, Phone Number ID, and a permanent access token.
+
+- **Future Tasks:**
+    - **(P2) Advanced WhatsApp Commands:** Extend the command processor to handle more complex requests (e.g., generating and sending PDF invoices).
+    - **(P2) Advanced Automations:** Implement lead scoring, nurturing sequences, churn alerts, and intelligent follow-ups.
+    - **(P2) Social Media Manager - Multi-platform Preview:** A UI to show how a single post will appear on different platforms (Facebook, Instagram, etc.).
+    - **(P2) Full Analytics Dashboard:** Detailed reporting with PDF exports.
 
 **Completed work in this session**
--   **Custom Domain Feature**: Finalized the implementation, allowing users to map their own domains to Multilink pages. This included frontend UI, backend logic, and a root-level request handler (). Provided detailed DNS instructions to the user.
--   **Mobile UI Scroll Fix**: Resolved an issue where tabs in the Multilink editor were not scrollable on mobile devices.
--   **QR Code for Multilink**: Added a feature to generate and download a QR code for each Multilink page.
--   **Global Command Palette & Shortcuts**: Implemented a  command menu for quick navigation and added sequential keyboard shortcuts (e.g., G then D for Dashboard).
--   **Offline Mode (PWA)**: Configured the application as a Progressive Web App with a service worker for offline caching and an online status indicator.
--   **AI-Powered Social Tools**: Implemented backend endpoints and a new UI panel in the editorial calendar for:
-    - AI Post Ideas
-    - Hashtag Suggestions
-    - Best Time to Post analysis
--   **Admin Dashboard Redesign**: Completely overhauled the  page with a new layout, quick access buttons, and new widgets for appointments, scheduled posts, and stats. (This led to the current critical bug).
+- **WhatsApp Integration Fixed & Enhanced:**
+    - Diagnosed and fixed the missing QR code by correctly starting the underlying Node.js service. (DONE)
+    - Implemented UI for changing the WhatsApp profile name and picture. (DONE)
+    - Implemented and tested automated morning/evening briefings. (DONE)
+    - Implemented advanced backend command processing for creating CRM objects (e.g., quotes) from a WhatsApp message. (DONE)
+- **Meta Integration Fixed:**
+    - Fixed the recurring issue of missing Facebook/Instagram accounts by implementing pagination in the backend sync logic. (DONE)
+    - Added a Sync Meta button to the UI for manual resynchronization. (DONE)
+- **Instagram Story Editor (V1):**
+    - Created a backend with Playwright for browser automation to post stories, a feature not available in the official API. (DONE)
+    - Implemented secure, multi-account credential management. (DONE)
+    - Built a complete frontend UI () to manage accounts and create/schedule stories. (DONE)
+    - Added a password visibility toggle in the Add Account modal for better UX. (DONE)
+- **WhatsApp Business Cloud API Scaffolding:**
+    - Created the backend router and added a configuration section to the frontend UI. (DONE)
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: Missing Meta (Facebook/Instagram) Accounts.**
-    -   **Debug checklist:** Review scopes and pagination in .
-    -   **Why to solve this issue and what will be achieved with this?** To allow the user to manage all their social properties from the app.
-    -   **Should Test frontend/backend/both after fix:** Backend.
-    -   **Is recurring issue?** N
+None. The critical recurring issue of missing Meta accounts was resolved in this session.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** Image Upload Failure.
--   **Recurrence count:** High.
--   **Status:** RESOLVED (No recurrence in this session).
+- **Issue recurrence in previous fork:** Missing Meta (Facebook/Instagram) Accounts.
+- **Recurrence count:** High (present in multiple previous forks).
+- **Status:** RESOLVED. The agent successfully identified the lack of pagination as the root cause and implemented a fix.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **PWA (Progressive Web App):** The app is now configured with a service worker () to cache assets and provide a basic offline experience.
--   **Custom Domain Handling:** A root-level React component () intercepts requests to check . If it's not the primary app domain, it fetches the corresponding Multilink page data via a dedicated API endpoint and renders it, enabling clean custom URLs for clients.
--   **Command Palette:** The  library was used to create a searchable command menu for fast navigation and actions, triggered by .
--   **Hotkeys:** The  library was implemented in the main layout for global keyboard shortcuts.
+-   **Hybrid Architecture:** Python (FastAPI) + Node.js (Express/Baileys).
+-   **AI Integration ():** Gemini for documents, Whisper for audio.
+-   **Browser Automation (Playwright):** Used to programmatically log in to Instagram and publish stories, bypassing official API limitations. This is a high-risk, high-reward feature.
+-   **API Pagination:** Correctly handling paginated responses from external APIs (like Facebook Graph API) is crucial for data completeness.
+-   **Dynamic Configuration:** Moving away from hardcoded environment variables () to dynamic configuration stored in the database (WhatsApp config page) for more flexibility.
 
 **key DB schema**
--   No new collections or significant schema changes were made in this session.
+-   **instagram_accounts:** 
+-   **instagram_story_drafts:** 
 
 **All files of reference**
--   **/app/frontend/src/pages/dashboard/DashboardOverview.jsx** (Source of the critical bug)
--   /app/frontend/src/pages/dashboard/DashboardLayout.jsx
--   /app/frontend/src/pages/dashboard/EditorialCalendarPage.jsx
--   /app/frontend/src/pages/public/LinkBioPage.jsx
--   /app/frontend/src/App.js
--   /app/frontend/src/components/CustomDomainHandler.jsx
--   /app/backend/routes/editorial.py
--   /app/backend/routes/meta.py
+-   **/app/frontend/src/pages/dashboard/InstagramStoryPage.jsx**: The new UI for the Instagram Story editor. This is where the visual editor needs to be built.
+-   **/app/backend/routes/instagram_story.py**: The backend logic for managing story accounts, drafts, and publishing.
+-   **/app/backend/routes/instagram_automation.py**: The core Playwright logic for browser automation. This is where the path issue needs to be confirmed as fixed.
+-   **/app/backend/routes/meta.py**: Contains the fix for the Meta account pagination issue.
+-   **/app/backend/routes/whatsapp.py**: Contains the enhanced logic for processing advanced commands like crée devis.
+-   **/app/frontend/src/pages/dashboard/WhatsAppConfigPage.jsx**: The UI for all WhatsApp settings, including Baileys status, profile management, and the new Business Cloud API config.
 
 **Critical Info for New Agent**
-1.  **URGENT: The admin dashboard is broken.** Your absolute first priority is to fix the black screen bug on the  page. The previous agent was about to use the ; you should start there.
-2.  **User's Language is French.** All communication MUST be in French.
-3.  The screenshot tool has been unreliable and often produces black images, especially with the app's dark theme. Do not rely on it as the sole method of verification for the frontend. Check browser console logs or use  on the HTML to confirm the app is rendering.
+1.  **Parlez Français:** You MUST communicate with the user in French.
+2.  **Fix Playwright First:** The immediate technical blocker is the Playwright path issue (Issue #1). The Instagram Story feature cannot be fully tested or completed until this is resolved.
+3.  **Build the Visual Story Editor:** The user's top priority is the visual Instagram Story editor. Don't just add more form fields; the goal is a drag-and-drop, WYSIWYG interface with a phone preview.
+4.  **Await User Credentials:** The Google and WhatsApp Business Cloud API integrations are blocked pending credentials from the user. Keep them in the upcoming tasks and proceed with other work. The user is aware and will provide them when ready.
+5.  **Acknowledge Automation Risks:** The Instagram Story publisher uses browser automation, which is against Instagram's Terms of Service. Continue to include warnings in the UI about the potential risks (e.g., temporary blocks or account bans).
 
 **documents and test reports created in this job**
--    (Updated with all new features)
+-   /app/test_reports/iteration_49.json
+-   /app/memory/PRD.md (Updated multiple times)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Asks to improve the admin dashboard.
-2.  **Agent:** Redesigns the admin dashboard with new stats and quick access buttons.
-3.  **User:** Reports the admin dashboard is now a black screen and the public page is slow.
-4.  **Agent:** Investigates, finds a bad API call (), removes it, and also removes  as a potential cause. Asks the user to re-test.
-5.  **User:** Responds with a bug emoji, confirming the fix did not work.
-6.  **Agent:** Acknowledges it's a critical bug and decides to use the .
-7.  **User:** (No response, waiting on agent)
+1.  **User:** Asks how to make MoltBot send messages to an admin and how to change the WhatsApp display name/photo. (DONE)
+2.  **User:** Reports a WhatsApp sync issue (En attente de ce message) and sees a strange US number, but gives the go-ahead to continue with the modifications. (INFO PROVIDED, MODS CONTINUED)
+3.  **User:** Agrees with the plan to integrate WhatsApp Business Cloud API, asks to start the Instagram Story Editor and advanced WhatsApp commands while they handle Google/Meta config. (IN PROGRESS)
+4.  **User:** Clarifies for the Story Editor, they want MoltBot to log in with credentials they provide and post automatically. (ACKNOWLEDGED)
+5.  **User:** Asks if stories can be scheduled and for multiple accounts. States they don't see the UI/tab for the Story Editor yet. (IN PROGRESS)
+6.  **User:** Uploads a screenshot showing a 500 error when trying to add an Instagram account. Notes that the password field should have a visibility toggle and asks if engagement stickers like polls can be added, as that's the main goal. (IN PROGRESS)
+7.  **User:** Uploads several screenshots showing examples of a rich story editor (like Storrito) and states they want a live preview, ability to position stickers, custom typography, etc. (PENDING - This is the current main task).
 
 **Project Health Check:**
--   **Broken:** Admin Dashboard (). The page is currently non-functional (black screen).
--   **Mocked:** Meta Inbox, TikTok.
--   **Blocked:** LinkedIn Posting, Meta Inbox (Production).
+-   **Broken:**
+    -   Instagram Story publishing is broken due to the Playwright path configuration issue, resulting in a 500 error when the backend tries to launch a browser instance.
+-   **Mocked:**
+    -   The Instagram Story editor UI is a basic form. It does not yet have the requested visual, drag-and-drop capabilities.
+-   **Blocked:**
+    -   Gmail & Google Drive Integration: Blocked on user providing Google Cloud credentials.
+    -   WhatsApp Business Cloud API Integration: Blocked on user providing Meta developer credentials.
 
 **3rd Party Integrations**
--   **Emergent LLM Key:** Used for AI features (Post Ideas, Hashtags, Best Time to Post) via  library.
--   **Meta (Facebook/Instagram):** Publishing, Account Sync. Inbox is in Sandbox mode.
--   **LinkedIn:** Connection only (Posting blocked).
--   **TikTok:** In Sandbox mode.
--   **Cloudinary:** Media uploads.
--   **Brevo (Sendinblue):** Functional.
--   **Google Calendar API:** Functional.
+-   **Meta (Facebook/Instagram):** Publishing, Account Sync. (Pagination issue fixed).
+-   **Baileys (Node.js):** For non-official WhatsApp integration. (Service is running and connected).
+-   **Gemini (via Emergent LLM Key):** Used for AI document classification.
+-   **OpenAI Whisper (via Emergent LLM Key):** Used for audio transcription.
+-   **Playwright:** **NEW**. For browser automation to publish Instagram Stories. (Configuration issue pending).
+-   **Google APIs (Gmail, Drive):** Planned; blocked on user credentials.
+-   **WhatsApp Business Cloud API:** Planned; blocked on user credentials.
 
 **Testing status**
--   **Testing agent used after significant changes:** NO
--   **Troubleshoot agent used after agent stuck in loop:** NO (but it was the planned next step).
+-   **Testing agent used after significant changes:** YES, successfully used for the P1 WhatsApp features.
+-   **Troubleshoot agent used after agent stuck in loop:** NO
 -   **Test files created:** None.
--   **Known regressions:** The entire Admin Dashboard is a regression from the previous state.
+-   **Known regressions:** None. The previous global responsive regression was confirmed fixed by the user.
 
 **Credentials to test flow:**
 -   **email:** 
 -   **password:** 
 
 **What agent forgot to execute**
--   The P1 issue Missing Meta Accounts from the initial handoff was not addressed. The agent implemented a large number of new user requests instead.</analysis>
+- The agent initially missed that the Playwright browser path would be different inside the container, leading to a runtime error. However, they correctly diagnosed and took steps to fix it. All explicit user requests were addressed or planned.</analysis>
