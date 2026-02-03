@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import {
   Instagram, Plus, Image, Video, Type, BarChart2, HelpCircle,
   Clock, Calendar, Send, Trash2, Eye, EyeOff, Settings, User, Lock,
-  CheckCircle2, XCircle, Loader2, RefreshCw, ChevronDown, MessageCircle
+  CheckCircle2, XCircle, Loader2, RefreshCw, ChevronDown, MessageCircle,
+  History, Filter, ArrowLeft
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { toast } from "sonner";
+import StoryEditor from "../../components/StoryEditor";
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
@@ -16,7 +18,10 @@ const InstagramStoryPage = () => {
   const [drafts, setDrafts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddAccount, setShowAddAccount] = useState(false);
-  const [showCreateStory, setShowCreateStory] = useState(false);
+  const [showVisualEditor, setShowVisualEditor] = useState(false);
+  const [viewMode, setViewMode] = useState("all"); // all, account
+  const [filterAccountId, setFilterAccountId] = useState(null);
+  const [testingAccount, setTestingAccount] = useState(null);
   
   // New account form
   const [newUsername, setNewUsername] = useState("");
@@ -24,18 +29,8 @@ const InstagramStoryPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [savingAccount, setSavingAccount] = useState(false);
   
-  // Story creation
-  const [storyMedia, setStoryMedia] = useState(null);
-  const [storyMediaPreview, setStoryMediaPreview] = useState(null);
-  const [storyText, setStoryText] = useState("");
-  const [storyPoll, setStoryPoll] = useState({ enabled: false, question: "", options: ["", ""] });
-  const [storyQuestion, setStoryQuestion] = useState({ enabled: false, question: "" });
-  const [scheduleEnabled, setScheduleEnabled] = useState(false);
-  const [scheduleDate, setScheduleDate] = useState("");
-  const [scheduleTime, setScheduleTime] = useState("");
+  // Publishing state
   const [publishing, setPublishing] = useState(false);
-  
-  const fileInputRef = useRef(null);
 
   useEffect(() => {
     loadAccounts();
@@ -71,7 +66,7 @@ const InstagramStoryPage = () => {
 
   const loadDrafts = async () => {
     try {
-      const res = await fetch(`${API}/api/instagram-story/drafts`, {
+      const res = await fetch(`${API}/api/instagram-story/drafts?limit=100`, {
         headers: getAuthHeaders()
       });
       if (res.ok) {
@@ -116,6 +111,7 @@ const InstagramStoryPage = () => {
   };
 
   const testAccountLogin = async (accountId) => {
+    setTestingAccount(accountId);
     try {
       const res = await fetch(`${API}/api/instagram-story/accounts/${accountId}/test`, {
         method: "POST",
@@ -125,64 +121,52 @@ const InstagramStoryPage = () => {
       const data = await res.json();
       
       if (data.success) {
-        toast.success("Connexion réussie !");
+        toast.success("Connexion Instagram réussie !");
         loadAccounts();
       } else {
         toast.error(data.error || "Échec de connexion");
       }
     } catch (error) {
-      toast.error("Erreur lors du test");
+      toast.error("Erreur lors du test de connexion");
+    } finally {
+      setTestingAccount(null);
     }
   };
 
   const deleteAccount = async (accountId) => {
-    if (!confirm("Supprimer ce compte Instagram ?")) return;
+    if (!confirm("Supprimer ce compte Instagram ? Les stories associées seront conservées.")) return;
     
     try {
-      await fetch(`${API}/api/instagram-story/accounts/${accountId}`, {
+      const res = await fetch(`${API}/api/instagram-story/accounts/${accountId}`, {
         method: "DELETE",
         headers: getAuthHeaders()
       });
-      toast.success("Compte supprimé");
-      loadAccounts();
+      
+      if (res.ok) {
+        toast.success("Compte supprimé");
+        loadAccounts();
+        if (selectedAccount?.id === accountId) {
+          setSelectedAccount(accounts.find(a => a.id !== accountId) || null);
+        }
+      }
     } catch (error) {
       toast.error("Erreur lors de la suppression");
     }
   };
 
-  const handleMediaSelect = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
-      toast.error("Format non supporté. Utilisez une image ou vidéo.");
-      return;
-    }
-    
-    setStoryMedia(file);
-    setStoryMediaPreview(URL.createObjectURL(file));
-  };
-
-  const createStory = async (publishNow = false) => {
+  const handleEditorSave = async (editorData) => {
     if (!selectedAccount) {
       toast.error("Sélectionnez un compte Instagram");
       return;
     }
-    
-    if (!storyMedia && !storyMediaPreview) {
-      toast.error("Ajoutez une image ou vidéo");
-      return;
-    }
-    
-    setPublishing(true);
-    
+
     try {
-      // First upload media if needed
-      let mediaUrl = storyMediaPreview;
+      // Upload media if needed
+      let mediaUrl = editorData.mediaPreview;
       
-      if (storyMedia) {
+      if (editorData.mediaFile) {
         const formData = new FormData();
-        formData.append("file", storyMedia);
+        formData.append("file", editorData.mediaFile);
         
         const uploadRes = await fetch(`${API}/api/upload`, {
           method: "POST",
@@ -195,62 +179,123 @@ const InstagramStoryPage = () => {
           mediaUrl = uploadData.url;
         }
       }
-      
-      // Create draft with engagement stickers
+
+      // Get poll/question data from stickers
+      const pollSticker = editorData.stickers.find(s => s.type === "poll");
+      const questionSticker = editorData.stickers.find(s => s.type === "question");
+      const textSticker = editorData.stickers.find(s => s.type === "text");
+
       const draftData = {
         account_id: selectedAccount.id,
         media_url: mediaUrl,
-        media_type: storyMedia?.type?.startsWith('video/') ? 'video' : 'image',
-        text_overlay: storyText || null,
-        poll: storyPoll.enabled ? {
-          question: storyPoll.question,
-          options: storyPoll.options.filter(o => o)
+        media_type: editorData.mediaFile?.type?.startsWith('video/') ? 'video' : 'image',
+        background_color: editorData.backgroundColor,
+        text_overlay: textSticker?.data?.text || null,
+        poll: pollSticker ? {
+          question: pollSticker.data.question,
+          options: pollSticker.data.options.filter(o => o)
         } : null,
-        question: storyQuestion.enabled ? {
-          question: storyQuestion.question
+        question: questionSticker ? {
+          question: questionSticker.data.question
         } : null,
-        schedule_time: scheduleEnabled && scheduleDate && scheduleTime 
-          ? `${scheduleDate}T${scheduleTime}:00` 
-          : null
       };
-      
+
       const res = await fetch(`${API}/api/instagram-story/drafts`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify(draftData)
       });
-      
+
       const data = await res.json();
-      
+
       if (data.success) {
-        if (publishNow && !scheduleEnabled) {
-          // Publish immediately
-          const pubRes = await fetch(`${API}/api/instagram-story/drafts/${data.draft_id}/publish`, {
-            method: "POST",
-            headers: getAuthHeaders()
-          });
-          
-          const pubData = await pubRes.json();
-          
-          if (pubData.success) {
-            toast.success("Story publiée avec succès !");
-          } else {
-            toast.error(pubData.error || "Erreur lors de la publication");
-          }
-        } else {
-          toast.success(scheduleEnabled ? "Story programmée !" : "Brouillon créé !");
-        }
-        
-        // Reset form
-        setStoryMedia(null);
-        setStoryMediaPreview(null);
-        setStoryText("");
-        setStoryPoll({ enabled: false, question: "", options: ["", ""] });
-        setScheduleEnabled(false);
-        setShowCreateStory(false);
+        toast.success("Brouillon créé !");
+        setShowVisualEditor(false);
         loadDrafts();
       } else {
-        toast.error(data.error || "Erreur lors de la création");
+        toast.error(data.error || "Erreur lors de la sauvegarde");
+      }
+    } catch (error) {
+      toast.error("Erreur de connexion");
+    }
+  };
+
+  const handleEditorPublish = async (editorData) => {
+    if (!selectedAccount) {
+      toast.error("Sélectionnez un compte Instagram");
+      return;
+    }
+
+    setPublishing(true);
+
+    try {
+      // Upload media if needed
+      let mediaUrl = editorData.mediaPreview;
+      
+      if (editorData.mediaFile) {
+        const formData = new FormData();
+        formData.append("file", editorData.mediaFile);
+        
+        const uploadRes = await fetch(`${API}/api/upload`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${localStorage.getItem("alpha_token")}` },
+          body: formData
+        });
+        
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          mediaUrl = uploadData.url;
+        }
+      }
+
+      // Get poll/question data from stickers
+      const pollSticker = editorData.stickers.find(s => s.type === "poll");
+      const questionSticker = editorData.stickers.find(s => s.type === "question");
+      const textSticker = editorData.stickers.find(s => s.type === "text");
+
+      const draftData = {
+        account_id: selectedAccount.id,
+        media_url: mediaUrl,
+        media_type: editorData.mediaFile?.type?.startsWith('video/') ? 'video' : 'image',
+        background_color: editorData.backgroundColor,
+        text_overlay: textSticker?.data?.text || null,
+        poll: pollSticker ? {
+          question: pollSticker.data.question,
+          options: pollSticker.data.options.filter(o => o)
+        } : null,
+        question: questionSticker ? {
+          question: questionSticker.data.question
+        } : null,
+      };
+
+      // Create draft first
+      const draftRes = await fetch(`${API}/api/instagram-story/drafts`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(draftData)
+      });
+
+      const draftResult = await draftRes.json();
+
+      if (!draftResult.success) {
+        toast.error(draftResult.error || "Erreur lors de la création");
+        return;
+      }
+
+      // Now publish
+      const pubRes = await fetch(`${API}/api/instagram-story/drafts/${draftResult.draft_id}/publish`, {
+        method: "POST",
+        headers: getAuthHeaders()
+      });
+
+      const pubData = await pubRes.json();
+
+      if (pubData.success) {
+        toast.success("Story publiée avec succès !");
+        setShowVisualEditor(false);
+        loadDrafts();
+      } else {
+        toast.error(pubData.error || "Erreur lors de la publication");
       }
     } catch (error) {
       toast.error("Erreur de connexion");
@@ -280,6 +325,8 @@ const InstagramStoryPage = () => {
   };
 
   const deleteDraft = async (draftId) => {
+    if (!confirm("Supprimer ce brouillon ?")) return;
+    
     try {
       await fetch(`${API}/api/instagram-story/drafts/${draftId}`, {
         method: "DELETE",
@@ -304,10 +351,63 @@ const InstagramStoryPage = () => {
     return <span className={`px-2 py-1 text-xs rounded-full ${badge.color} text-white`}>{badge.text}</span>;
   };
 
+  // Filter drafts by account
+  const filteredDrafts = filterAccountId 
+    ? drafts.filter(d => d.account_id === filterAccountId)
+    : drafts;
+
+  const pendingDrafts = filteredDrafts.filter(d => d.status !== 'published');
+  const publishedDrafts = filteredDrafts.filter(d => d.status === 'published');
+
+  // Group published stories by account
+  const storiesByAccount = accounts.map(acc => ({
+    account: acc,
+    stories: drafts.filter(d => d.account_id === acc.id)
+  }));
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
+      </div>
+    );
+  }
+
+  // Visual Editor View
+  if (showVisualEditor) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] p-4 md:p-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-6">
+            <Button
+              variant="ghost"
+              onClick={() => setShowVisualEditor(false)}
+              className="text-white/70 hover:text-white"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Retour
+            </Button>
+            <h1 className="text-xl font-bold text-white">Créer une Story</h1>
+          </div>
+
+          {/* Warning */}
+          <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 mb-6">
+            <p className="text-yellow-300 text-sm">
+              ⚠️ L'automatisation Instagram est contre les CGU. Risque de suspension de compte.
+            </p>
+          </div>
+
+          {/* Editor */}
+          <StoryEditor
+            accounts={accounts}
+            selectedAccountId={selectedAccount?.id}
+            onAccountChange={(id) => setSelectedAccount(accounts.find(a => a.id === id))}
+            onSave={handleEditorSave}
+            onPublish={handleEditorPublish}
+            isPublishing={publishing}
+          />
+        </div>
       </div>
     );
   }
@@ -331,14 +431,16 @@ const InstagramStoryPage = () => {
               onClick={() => setShowAddAccount(true)}
               variant="outline"
               className="border-pink-500/30 text-pink-400 hover:bg-pink-500/10"
+              data-testid="add-account-btn"
             >
               <Plus className="w-4 h-4 mr-2" />
               Ajouter un compte
             </Button>
             <Button 
-              onClick={() => setShowCreateStory(true)}
+              onClick={() => setShowVisualEditor(true)}
               className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
               disabled={accounts.length === 0}
+              data-testid="create-story-btn"
             >
               <Plus className="w-4 h-4 mr-2" />
               Créer une Story
@@ -355,7 +457,7 @@ const InstagramStoryPage = () => {
         </div>
 
         {/* Accounts Section */}
-        <div className="glass-panel rounded-xl p-6">
+        <div className="glass-panel rounded-xl p-6" data-testid="accounts-section">
           <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <User className="w-5 h-5 text-pink-400" />
             Comptes Instagram ({accounts.length})
@@ -375,91 +477,160 @@ const InstagramStoryPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {accounts.map((account) => (
-                <div 
-                  key={account.id}
-                  className={`p-4 rounded-lg border transition-all cursor-pointer ${
-                    selectedAccount?.id === account.id 
-                      ? 'bg-pink-500/20 border-pink-500' 
-                      : 'bg-white/5 border-white/10 hover:border-pink-500/50'
-                  }`}
-                  onClick={() => setSelectedAccount(account)}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center">
-                        <Instagram className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">@{account.username}</p>
-                        <p className="text-white/40 text-xs">
-                          {account.login_success ? "✅ Connecté" : "⚠️ Non testé"}
-                        </p>
+              {accounts.map((account) => {
+                const accountStories = drafts.filter(d => d.account_id === account.id);
+                const publishedCount = accountStories.filter(d => d.status === 'published').length;
+                const pendingCount = accountStories.filter(d => d.status !== 'published').length;
+                
+                return (
+                  <div 
+                    key={account.id}
+                    className={`p-4 rounded-lg border transition-all ${
+                      selectedAccount?.id === account.id 
+                        ? 'bg-pink-500/20 border-pink-500' 
+                        : 'bg-white/5 border-white/10 hover:border-pink-500/50'
+                    }`}
+                    data-testid={`account-card-${account.id}`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 via-purple-500 to-orange-500 flex items-center justify-center">
+                          <Instagram className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-white font-medium">@{account.username}</p>
+                          <p className="text-white/40 text-xs flex items-center gap-1">
+                            {account.login_success === true ? (
+                              <><CheckCircle2 className="w-3 h-3 text-green-400" /> Connecté</>
+                            ) : account.login_success === false ? (
+                              <><XCircle className="w-3 h-3 text-red-400" /> Échec connexion</>
+                            ) : (
+                              <><Clock className="w-3 h-3 text-yellow-400" /> Non testé</>
+                            )}
+                          </p>
+                        </div>
                       </div>
                     </div>
                     
-                    {selectedAccount?.id === account.id && (
-                      <CheckCircle2 className="w-5 h-5 text-pink-400" />
-                    )}
+                    {/* Account Stats */}
+                    <div className="flex gap-4 mb-3 text-xs">
+                      <div className="flex items-center gap-1 text-white/60">
+                        <CheckCircle2 className="w-3 h-3 text-green-400" />
+                        {publishedCount} publiées
+                      </div>
+                      <div className="flex items-center gap-1 text-white/60">
+                        <Clock className="w-3 h-3 text-blue-400" />
+                        {pendingCount} en attente
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="flex-1 text-xs"
+                        onClick={() => testAccountLogin(account.id)}
+                        disabled={testingAccount === account.id}
+                        data-testid={`test-account-${account.id}`}
+                      >
+                        {testingAccount === account.id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <><RefreshCw className="w-3 h-3 mr-1" /> Tester</>
+                        )}
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="text-xs"
+                        onClick={() => {
+                          setFilterAccountId(account.id);
+                          setViewMode("account");
+                        }}
+                        data-testid={`view-history-${account.id}`}
+                      >
+                        <History className="w-3 h-3 mr-1" />
+                        Historique
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="destructive"
+                        className="text-xs"
+                        onClick={() => deleteAccount(account.id)}
+                        data-testid={`delete-account-${account.id}`}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
-                  
-                  <div className="flex gap-2 mt-3">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="flex-1 text-xs"
-                      onClick={(e) => { e.stopPropagation(); testAccountLogin(account.id); }}
-                    >
-                      <RefreshCw className="w-3 h-3 mr-1" />
-                      Tester
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      className="text-xs"
-                      onClick={(e) => { e.stopPropagation(); deleteAccount(account.id); }}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
 
+        {/* Filter Bar (when viewing specific account) */}
+        {viewMode === "account" && filterAccountId && (
+          <div className="flex items-center gap-3 p-4 rounded-lg bg-pink-500/10 border border-pink-500/30">
+            <Filter className="w-5 h-5 text-pink-400" />
+            <span className="text-white">
+              Affichage des stories de <strong>@{accounts.find(a => a.id === filterAccountId)?.username}</strong>
+            </span>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => { setViewMode("all"); setFilterAccountId(null); }}
+              className="ml-auto text-white/70 hover:text-white"
+            >
+              Voir tous
+            </Button>
+          </div>
+        )}
+
         {/* Drafts & Scheduled Section */}
-        <div className="glass-panel rounded-xl p-6">
+        <div className="glass-panel rounded-xl p-6" data-testid="pending-section">
           <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <Clock className="w-5 h-5 text-blue-400" />
-            Stories en attente ({drafts.filter(d => d.status !== 'published').length})
+            Stories en attente ({pendingDrafts.length})
           </h2>
           
-          {drafts.length === 0 ? (
+          {pendingDrafts.length === 0 ? (
             <div className="text-center py-8">
               <Calendar className="w-12 h-12 text-white/20 mx-auto mb-3" />
               <p className="text-white/50">Aucune story en attente</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {drafts.filter(d => d.status !== 'published').map((draft) => (
-                <div key={draft.id} className="bg-white/5 rounded-lg overflow-hidden border border-white/10">
-                  {draft.media_url && (
-                    <div className="aspect-[9/16] max-h-48 bg-black/50 relative">
+              {pendingDrafts.map((draft) => (
+                <div key={draft.id} className="bg-white/5 rounded-lg overflow-hidden border border-white/10" data-testid={`draft-${draft.id}`}>
+                  <div className="aspect-[9/16] max-h-56 bg-black/50 relative">
+                    {draft.media_url ? (
                       <img 
                         src={draft.media_url} 
                         alt="Story preview"
                         className="w-full h-full object-cover"
                       />
-                      {draft.elements?.text_overlay && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <p className="text-white text-lg font-bold text-center px-4 drop-shadow-lg">
-                            {draft.elements.text_overlay}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    ) : (
+                      <div 
+                        className="w-full h-full flex items-center justify-center"
+                        style={{ backgroundColor: draft.background_color || "#000" }}
+                      >
+                        <Image className="w-8 h-8 text-white/30" />
+                      </div>
+                    )}
+                    {draft.elements?.text_overlay && (
+                      <div className="absolute inset-0 flex items-center justify-center p-4">
+                        <p className="text-white text-lg font-bold text-center drop-shadow-lg">
+                          {draft.elements.text_overlay}
+                        </p>
+                      </div>
+                    )}
+                    {draft.elements?.poll && (
+                      <div className="absolute bottom-3 left-3 right-3 bg-white/90 rounded-lg p-2">
+                        <p className="text-xs text-gray-800 font-medium truncate">{draft.elements.poll.question}</p>
+                      </div>
+                    )}
+                  </div>
                   
                   <div className="p-3">
                     <div className="flex items-center justify-between mb-2">
@@ -468,13 +639,20 @@ const InstagramStoryPage = () => {
                     </div>
                     
                     {draft.schedule_time && (
-                      <p className="text-white/50 text-xs mb-2">
-                        📅 {new Date(draft.schedule_time).toLocaleString('fr-FR')}
+                      <p className="text-white/50 text-xs mb-2 flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(draft.schedule_time).toLocaleString('fr-FR')}
+                      </p>
+                    )}
+                    
+                    {draft.error_message && (
+                      <p className="text-red-400 text-xs mb-2 truncate" title={draft.error_message}>
+                        ⚠️ {draft.error_message}
                       </p>
                     )}
                     
                     <div className="flex gap-2">
-                      {draft.status === 'draft' && (
+                      {(draft.status === 'draft' || draft.status === 'failed') && (
                         <Button 
                           size="sm" 
                           className="flex-1 bg-pink-600 hover:bg-pink-500 text-xs"
@@ -500,26 +678,48 @@ const InstagramStoryPage = () => {
           )}
         </div>
 
-        {/* Published Stories */}
-        {drafts.filter(d => d.status === 'published').length > 0 && (
-          <div className="glass-panel rounded-xl p-6">
+        {/* Published Stories Section */}
+        {publishedDrafts.length > 0 && (
+          <div className="glass-panel rounded-xl p-6" data-testid="published-section">
             <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-green-400" />
-              Stories publiées
+              Stories publiées ({publishedDrafts.length})
             </h2>
             
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {drafts.filter(d => d.status === 'published').slice(0, 12).map((draft) => (
-                <div key={draft.id} className="aspect-[9/16] rounded-lg overflow-hidden bg-white/5 relative">
-                  {draft.media_url && (
+              {publishedDrafts.slice(0, 18).map((draft) => (
+                <div 
+                  key={draft.id} 
+                  className="aspect-[9/16] rounded-lg overflow-hidden bg-white/5 relative group"
+                  data-testid={`published-${draft.id}`}
+                >
+                  {draft.media_url ? (
                     <img 
                       src={draft.media_url} 
                       alt="Story"
                       className="w-full h-full object-cover"
                     />
+                  ) : (
+                    <div 
+                      className="w-full h-full"
+                      style={{ backgroundColor: draft.background_color || "#000" }}
+                    />
                   )}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="text-xs"
+                      onClick={() => deleteDraft(draft.id)}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
                   <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
                     <p className="text-white text-xs truncate">@{draft.instagram_username}</p>
+                    <p className="text-white/60 text-[10px]">
+                      {new Date(draft.published_at).toLocaleDateString('fr-FR')}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -531,7 +731,7 @@ const InstagramStoryPage = () => {
       {/* Add Account Modal */}
       {showAddAccount && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1a1a2e] rounded-xl p-6 w-full max-w-md">
+          <div className="bg-[#1a1a2e] rounded-xl p-6 w-full max-w-md" data-testid="add-account-modal">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
               <Instagram className="w-6 h-6 text-pink-500" />
               Ajouter un compte Instagram
@@ -545,6 +745,7 @@ const InstagramStoryPage = () => {
                   value={newUsername}
                   onChange={(e) => setNewUsername(e.target.value)}
                   className="bg-white/5 border-white/10 text-white"
+                  data-testid="username-input"
                 />
               </div>
               
@@ -557,6 +758,7 @@ const InstagramStoryPage = () => {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="bg-white/5 border-white/10 text-white pr-10"
+                    data-testid="password-input"
                   />
                   <button
                     type="button"
@@ -587,6 +789,7 @@ const InstagramStoryPage = () => {
                   className="flex-1 bg-pink-600 hover:bg-pink-500"
                   onClick={addAccount}
                   disabled={savingAccount}
+                  data-testid="save-account-btn"
                 >
                   {savingAccount ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -595,233 +798,6 @@ const InstagramStoryPage = () => {
                   )}
                 </Button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Create Story Modal */}
-      {showCreateStory && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-[#1a1a2e] rounded-xl p-6 w-full max-w-2xl my-8">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Plus className="w-6 h-6 text-pink-500" />
-              Créer une Story
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Media Preview */}
-              <div>
-                <label className="text-white/70 text-sm block mb-2">Média</label>
-                <div 
-                  className="aspect-[9/16] rounded-lg bg-white/5 border-2 border-dashed border-white/20 flex items-center justify-center cursor-pointer hover:border-pink-500/50 transition-colors overflow-hidden"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {storyMediaPreview ? (
-                    <img 
-                      src={storyMediaPreview} 
-                      alt="Preview" 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-center">
-                      <Image className="w-12 h-12 text-white/30 mx-auto mb-2" />
-                      <p className="text-white/50 text-sm">Cliquez pour ajouter</p>
-                      <p className="text-white/30 text-xs">Image ou Vidéo</p>
-                    </div>
-                  )}
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*,video/*"
-                  onChange={handleMediaSelect}
-                  className="hidden"
-                />
-              </div>
-              
-              {/* Options */}
-              <div className="space-y-4">
-                {/* Account Selection */}
-                <div>
-                  <label className="text-white/70 text-sm block mb-1">Compte Instagram</label>
-                  <select
-                    value={selectedAccount?.id || ""}
-                    onChange={(e) => setSelectedAccount(accounts.find(a => a.id === e.target.value))}
-                    className="w-full p-2 rounded-lg bg-white/5 border border-white/10 text-white"
-                  >
-                    {accounts.map((acc) => (
-                      <option key={acc.id} value={acc.id}>@{acc.username}</option>
-                    ))}
-                  </select>
-                </div>
-                
-                {/* Text Overlay */}
-                <div>
-                  <label className="text-white/70 text-sm block mb-1">
-                    <Type className="w-4 h-4 inline mr-1" />
-                    Texte (optionnel)
-                  </label>
-                  <Input
-                    placeholder="Texte sur la story..."
-                    value={storyText}
-                    onChange={(e) => setStoryText(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white"
-                  />
-                </div>
-                
-                {/* Engagement Stickers Section */}
-                <div className="p-3 rounded-lg bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-500/20">
-                  <h4 className="text-pink-300 font-medium text-sm mb-3 flex items-center gap-2">
-                    ✨ Stickers d'engagement
-                  </h4>
-                  
-                  {/* Poll Sticker */}
-                  <div className="mb-3">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={storyPoll.enabled}
-                        onChange={(e) => setStoryPoll({ ...storyPoll, enabled: e.target.checked })}
-                        className="rounded accent-pink-500"
-                      />
-                      <span className="text-white text-sm flex items-center gap-1">
-                        <BarChart2 className="w-4 h-4 text-pink-400" />
-                        Sondage
-                      </span>
-                    </label>
-                    
-                    {storyPoll.enabled && (
-                      <div className="mt-2 space-y-2 p-3 rounded-lg bg-black/30">
-                        <Input
-                          placeholder="Posez votre question..."
-                          value={storyPoll.question}
-                          onChange={(e) => setStoryPoll({ ...storyPoll, question: e.target.value })}
-                          className="bg-white/5 border-white/10 text-white text-sm"
-                        />
-                        <div className="grid grid-cols-2 gap-2">
-                          <Input
-                            placeholder="Oui ✅"
-                            value={storyPoll.options[0]}
-                            onChange={(e) => setStoryPoll({ 
-                              ...storyPoll, 
-                              options: [e.target.value, storyPoll.options[1]] 
-                            })}
-                            className="bg-white/5 border-white/10 text-white text-sm"
-                          />
-                          <Input
-                            placeholder="Non ❌"
-                            value={storyPoll.options[1]}
-                            onChange={(e) => setStoryPoll({ 
-                              ...storyPoll, 
-                              options: [storyPoll.options[0], e.target.value] 
-                            })}
-                            className="bg-white/5 border-white/10 text-white text-sm"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Question Sticker */}
-                  <div>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={storyQuestion.enabled}
-                        onChange={(e) => setStoryQuestion({ ...storyQuestion, enabled: e.target.checked })}
-                        className="rounded accent-purple-500"
-                      />
-                      <span className="text-white text-sm flex items-center gap-1">
-                        <MessageCircle className="w-4 h-4 text-purple-400" />
-                        Question ouverte
-                      </span>
-                    </label>
-                    
-                    {storyQuestion.enabled && (
-                      <div className="mt-2 p-3 rounded-lg bg-black/30">
-                        <Input
-                          placeholder="Posez-moi une question..."
-                          value={storyQuestion.question}
-                          onChange={(e) => setStoryQuestion({ ...storyQuestion, question: e.target.value })}
-                          className="bg-white/5 border-white/10 text-white text-sm"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Schedule */}
-                <div>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={scheduleEnabled}
-                      onChange={(e) => setScheduleEnabled(e.target.checked)}
-                      className="rounded"
-                    />
-                    <span className="text-white/70 text-sm">
-                      <Calendar className="w-4 h-4 inline mr-1" />
-                      Programmer la publication
-                    </span>
-                  </label>
-                  
-                  {scheduleEnabled && (
-                    <div className="mt-2 grid grid-cols-2 gap-2">
-                      <Input
-                        type="date"
-                        value={scheduleDate}
-                        onChange={(e) => setScheduleDate(e.target.value)}
-                        className="bg-white/5 border-white/10 text-white text-sm"
-                      />
-                      <Input
-                        type="time"
-                        value={scheduleTime}
-                        onChange={(e) => setScheduleTime(e.target.value)}
-                        className="bg-white/5 border-white/10 text-white text-sm"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            {/* Actions */}
-            <div className="flex gap-3 mt-6">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setShowCreateStory(false)}
-              >
-                Annuler
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => createStory(false)}
-                disabled={publishing}
-              >
-                Sauvegarder brouillon
-              </Button>
-              <Button
-                className="flex-1 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
-                onClick={() => createStory(true)}
-                disabled={publishing}
-              >
-                {publishing ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : scheduleEnabled ? (
-                  <>
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Programmer
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4 mr-2" />
-                    Publier maintenant
-                  </>
-                )}
-              </Button>
             </div>
           </div>
         </div>
