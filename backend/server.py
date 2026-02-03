@@ -6596,6 +6596,10 @@ app.include_router(moltbot_router, prefix="/api", tags=["moltbot"])
 from routes.business_search import router as business_search_router
 app.include_router(business_search_router, prefix="/api", tags=["business-search"])
 
+# WhatsApp Integration
+from routes.whatsapp import router as whatsapp_router
+app.include_router(whatsapp_router, prefix="/api", tags=["whatsapp"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
