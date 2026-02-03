@@ -6612,6 +6612,10 @@ app.include_router(audio_router, prefix="/api", tags=["audio"])
 from routes.whatsapp_cloud import router as whatsapp_cloud_router
 app.include_router(whatsapp_cloud_router, prefix="/api/whatsapp-cloud", tags=["whatsapp-cloud"])
 
+# Instagram Story Editor
+from routes.instagram_story import router as instagram_story_router
+app.include_router(instagram_story_router, prefix="/api/instagram-story", tags=["instagram-story"])
+
 # MoltBot Scheduler for automated briefings
 from routes.scheduler import moltbot_scheduler
 
