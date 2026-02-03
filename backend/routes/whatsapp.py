@@ -636,7 +636,7 @@ async def whatsapp_webhook(message: IncomingMessage):
     })
     
     # Check if admin
-    if is_admin(message.phone_number):
+    if await is_admin(message.phone_number):
         # Process command
         reply = await process_admin_command(message.phone_number, text_content)
         return {"reply": reply, "is_admin": True, "transcribed": was_transcribed}
