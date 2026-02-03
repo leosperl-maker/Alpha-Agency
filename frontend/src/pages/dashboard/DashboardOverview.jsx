@@ -119,6 +119,19 @@ const DashboardOverview = () => {
           }
         } catch (e) { console.log('No multilink API'); }
 
+        // Fetch hot leads (Lead Scoring)
+        try {
+          const leadsRes = await api.get('/analytics/lead-scores', { params: { limit: 5 } });
+          const hot = (leadsRes.data?.leads || []).filter(l => l.score >= 60).slice(0, 5);
+          setHotLeads(hot);
+        } catch (e) { console.log('No lead scoring API'); }
+
+        // Fetch churn alerts
+        try {
+          const churnRes = await api.get('/analytics/churn-alerts', { params: { limit: 5 } });
+          setChurnAlerts((churnRes.data?.alerts || []).slice(0, 5));
+        } catch (e) { console.log('No churn alerts API'); }
+
       } catch (error) {
         console.error("Error fetching stats:", error);
       } finally {
