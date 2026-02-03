@@ -39,11 +39,12 @@ class WhatsAppConfig(BaseModel):
 
 class IncomingMessage(BaseModel):
     phone_number: str
-    message: str
+    message: str = ""
     message_id: Optional[str] = None
     timestamp: Optional[int] = None
-    message_type: str = "text"  # text, audio, image, video
+    message_type: str = "text"  # text, audio, image, video, document
     audio_url: Optional[str] = None
+    audio_path: Optional[str] = None  # Local path for downloaded audio
     media_url: Optional[str] = None
 
 class OutgoingMessage(BaseModel):
