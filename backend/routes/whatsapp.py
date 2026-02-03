@@ -491,9 +491,14 @@ async def send_quote_pdf(message: str, phone: str) -> str:
     """
     Send a quote/invoice PDF via WhatsApp.
     Format: "Envoie devis DEV-2024-001 à email@client.com" or just "Envoie devis DEV-2024-001"
+    Also supports: "Envoie facture FAC-2024-001"
     """
     import re
     from .invoices import generate_professional_pdf
+    import cloudinary
+    import cloudinary.uploader
+    import base64
+    import os
     
     try:
         # Extract document number
@@ -513,33 +518,86 @@ async def send_quote_pdf(message: str, phone: str) -> str:
         if doc.get("contact_id"):
             contact = await db.contacts.find_one({"id": doc["contact_id"]}) or {}
         
+        # Get invoice settings
+        settings = await db.settings.find_one({"key": "invoice_settings"})
+        invoice_settings = settings.get("value") if settings else {}
+        
         # Generate PDF
         doc_type = "devis" if doc["type"] == "devis" else "facture"
-        pdf_buffer = generate_professional_pdf(doc, contact, doc_type)
+        pdf_buffer = generate_professional_pdf(doc, contact, doc_type, invoice_settings)
         
-        # Save PDF temporarily
-        import os
-        pdf_path = f"/tmp/moltbot_{doc_number}.pdf"
-        with open(pdf_path, "wb") as f:
-            f.write(pdf_buffer.getvalue())
-        
-        # For now, we can't directly send PDF via WhatsApp Baileys without uploading to a URL
-        # We'll update the status and inform the user
-        await db.invoices.update_one(
-            {"number": doc_number},
-            {"$set": {"status": "sent", "sent_at": datetime.now(timezone.utc).isoformat()}}
+        # Upload to Cloudinary for WhatsApp sharing
+        cloudinary.config(
+            cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+            api_key=os.environ.get('CLOUDINARY_API_KEY'),
+            api_secret=os.environ.get('CLOUDINARY_API_SECRET')
         )
         
-        return f"""📄 *PDF Généré: {doc_number}*
+        pdf_bytes = pdf_buffer.getvalue()
+        pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+        data_uri = f"data:application/pdf;base64,{pdf_base64}"
+        
+        result = cloudinary.uploader.upload(
+            data_uri,
+            resource_type="raw",
+            public_id=f"moltbot/{doc_number}",
+            format="pdf"
+        )
+        
+        pdf_url = result.get('secure_url', '')
+        
+        # Update document status
+        await db.invoices.update_one(
+            {"number": doc_number},
+            {"$set": {
+                "status": "sent", 
+                "sent_at": datetime.now(timezone.utc).isoformat(),
+                "pdf_url": pdf_url
+            }}
+        )
+        
+        # Send PDF via WhatsApp
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                # Send document message via WhatsApp service
+                response = await client.post(
+                    f"{WHATSAPP_SERVICE_URL}/send-document",
+                    json={
+                        "phone_number": phone,
+                        "document_url": pdf_url,
+                        "filename": f"{doc_number}.pdf",
+                        "caption": f"📄 {doc_type.capitalize()} {doc_number} - {doc['client_name']} - {doc['total']:.2f}€ TTC"
+                    }
+                )
+                
+                if response.status_code == 200:
+                    logger.info(f"PDF sent via WhatsApp: {doc_number}")
+                else:
+                    logger.warning(f"WhatsApp document send failed: {response.text}")
+        except Exception as wa_err:
+            logger.warning(f"Could not send via WhatsApp service: {wa_err}")
+        
+        # Check for email sending
+        email_match = re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', message)
+        email_response = ""
+        
+        if email_match:
+            recipient_email = email_match.group(0)
+            # Send email with PDF
+            try:
+                from .invoices import send_invoice_email
+                await send_invoice_email(doc, contact, recipient_email, pdf_bytes, doc_type)
+                email_response = f"\n📧 Email envoyé à {recipient_email}"
+            except Exception as email_err:
+                email_response = f"\n⚠️ Email non envoyé: {str(email_err)}"
+        
+        return f"""✅ *{doc_type.capitalize()} {doc_number} envoyé !*
 
 👤 Client: {doc['client_name']}
-💰 Total: {doc['total']:.2f}€
-📁 Fichier: /tmp/moltbot_{doc_number}.pdf
+💰 Total: {doc['total']:.2f}€ TTC
+🔗 PDF: {pdf_url}{email_response}
 
-Le document est prêt ! Vous pouvez le télécharger depuis le CRM ou demander l'envoi par email.
-
-Pour envoyer par email (bientôt): 
-"Email devis {doc_number} à client@email.com" """
+Le document est en cours d'envoi sur cette conversation."""
         
     except Exception as e:
         logger.error(f"Error sending PDF: {e}")
