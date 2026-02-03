@@ -114,14 +114,20 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 #### ✅ Instagram Story Editor (Backend P2)
 - **Nouveau fichier**: `/app/backend/routes/instagram_story.py`
 - **Nouveau fichier**: `/app/backend/routes/instagram_automation.py` (Playwright)
-- **Endpoints**:
-  - `POST /api/instagram-story/credentials` - Sauvegarder identifiants Instagram
-  - `GET /api/instagram-story/credentials` - Vérifier si configuré
-  - `POST /api/instagram-story/test-login` - Tester la connexion
-  - `POST /api/instagram-story/drafts` - Créer brouillon de story
+- **Page Frontend**: `/app/frontend/src/pages/dashboard/InstagramStoryPage.jsx`
+- **Route**: `/admin/instagram-stories`
+- **Endpoints Multi-comptes**:
+  - `GET/POST /api/instagram-story/accounts` - Gérer les comptes Instagram
+  - `DELETE /api/instagram-story/accounts/{id}` - Supprimer un compte
+  - `POST /api/instagram-story/accounts/{id}/test` - Tester la connexion
+- **Endpoints Stories**:
+  - `POST /api/instagram-story/drafts` - Créer brouillon avec scheduling
   - `POST /api/instagram-story/drafts/{id}/publish` - **Publier via automation browser**
-- **Éléments supportés**: Poll, Question, Countdown, Mention, Link, Text
-- **Automatisation**: MoltBot se connecte avec vos identifiants et publie automatiquement
+- **Features**:
+  - ✅ Multi-comptes Instagram
+  - ✅ Programmation des Stories (schedule_time)
+  - ✅ Poll, Question, Countdown, Mention, Link, Text
+  - ✅ Interface UI complète avec modals
 - **WARNING**: Contre les CGU Instagram - risque de suspension
 
 #### ✅ UI WhatsApp Business Cloud
