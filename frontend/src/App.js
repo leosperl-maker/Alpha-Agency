@@ -52,6 +52,7 @@ import MoltBotPage from "./pages/dashboard/MoltBotPage";
 // Public pages
 import TransferDownloadPage from "./pages/TransferDownloadPage";
 import LinkBioPage from "./pages/public/LinkBioPage";
+import WidgetPage from "./pages/WidgetPage";
 
 // Layout
 import MainLayout from "./components/MainLayout";
