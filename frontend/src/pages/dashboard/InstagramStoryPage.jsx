@@ -547,13 +547,22 @@ const InstagramStoryPage = () => {
               
               <div>
                 <label className="text-white/70 text-sm block mb-1">Mot de passe</label>
-                <Input
-                  type="password"
-                  placeholder="••••••••"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white"
-                />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
               
               <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
@@ -567,7 +576,7 @@ const InstagramStoryPage = () => {
                 <Button
                   variant="outline"
                   className="flex-1"
-                  onClick={() => setShowAddAccount(false)}
+                  onClick={() => { setShowAddAccount(false); setShowPassword(false); }}
                 >
                   Annuler
                 </Button>
