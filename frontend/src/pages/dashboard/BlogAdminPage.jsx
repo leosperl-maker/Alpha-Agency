@@ -157,23 +157,130 @@ const BlogAdminPage = () => {
     setIsEditing(true);
   };
   
+  // Comments state
+  const [pendingCommentsCount, setPendingCommentsCount] = useState(0);
+  const [allComments, setAllComments] = useState([]);
+  const [commentsTab, setCommentsTab] = useState("pending");
+  const [loadingComments, setLoadingComments] = useState(false);
+  
+  // Fetch pending comments count
+  const fetchPendingCommentsCount = async () => {
+    try {
+      const token = localStorage.getItem("alpha_token");
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/blog/comments/pending`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPendingCommentsCount(data.count || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching pending comments:", error);
+    }
+  };
+  
+  // Fetch all comments for moderation panel
+  const fetchAllComments = async (status = null) => {
+    setLoadingComments(true);
+    try {
+      const token = localStorage.getItem("alpha_token");
+      const url = status 
+        ? `${process.env.REACT_APP_BACKEND_URL}/api/blog/comments/all?status=${status}`
+        : `${process.env.REACT_APP_BACKEND_URL}/api/blog/comments/all`;
+      const res = await fetch(url, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAllComments(data.comments || []);
+      }
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+  
   // View comments for a post
-  const viewComments = (post) => {
+  const viewComments = async (post) => {
     setSelectedPostForComments(post);
-    // Load comments from localStorage (in production, this would be an API call)
-    const savedComments = localStorage.getItem(`blog-comments-${post.slug}`);
-    setSelectedPostComments(savedComments ? JSON.parse(savedComments) : []);
+    setLoadingComments(true);
+    try {
+      const token = localStorage.getItem("alpha_token");
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/blog/comments/all`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Filter comments for this post
+        const postComments = data.comments?.filter(c => c.article_slug === post.slug) || [];
+        setSelectedPostComments(postComments);
+      }
+    } catch (error) {
+      toast.error("Erreur lors du chargement des commentaires");
+    } finally {
+      setLoadingComments(false);
+    }
     setShowCommentsModal(true);
   };
   
-  // Delete a comment
-  const deleteComment = (commentId) => {
-    if (!confirm("Supprimer ce commentaire ?")) return;
-    const updatedComments = selectedPostComments.filter(c => c.id !== commentId);
-    setSelectedPostComments(updatedComments);
-    localStorage.setItem(`blog-comments-${selectedPostForComments.slug}`, JSON.stringify(updatedComments));
-    toast.success("Commentaire supprimé");
+  // Moderate a comment
+  const moderateComment = async (commentId, status) => {
+    try {
+      const token = localStorage.getItem("alpha_token");
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/blog/comments/${commentId}/moderate`, {
+        method: "PUT",
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        const statusText = { approved: "approuvé", rejected: "rejeté", spam: "marqué spam" };
+        toast.success(`Commentaire ${statusText[status]}`);
+        // Refresh comments
+        if (selectedPostForComments) {
+          viewComments(selectedPostForComments);
+        } else {
+          fetchAllComments(commentsTab === "all" ? null : commentsTab);
+        }
+        fetchPendingCommentsCount();
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la modération");
+    }
   };
+  
+  // Delete a comment
+  const deleteComment = async (commentId) => {
+    if (!confirm("Supprimer définitivement ce commentaire ?")) return;
+    try {
+      const token = localStorage.getItem("alpha_token");
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/blog/comments/${commentId}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        toast.success("Commentaire supprimé");
+        // Refresh
+        if (selectedPostForComments) {
+          const updated = selectedPostComments.filter(c => c.id !== commentId);
+          setSelectedPostComments(updated);
+        } else {
+          fetchAllComments(commentsTab === "all" ? null : commentsTab);
+        }
+        fetchPendingCommentsCount();
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la suppression");
+    }
+  };
+  
+  // Load pending count on mount
+  useEffect(() => {
+    fetchPendingCommentsCount();
+  }, []);
 
   // Save post
   const savePost = async (newStatus = null) => {
