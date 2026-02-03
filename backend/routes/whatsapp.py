@@ -42,6 +42,9 @@ class IncomingMessage(BaseModel):
     message: str
     message_id: Optional[str] = None
     timestamp: Optional[int] = None
+    message_type: str = "text"  # text, audio, image, video
+    audio_url: Optional[str] = None
+    media_url: Optional[str] = None
 
 class OutgoingMessage(BaseModel):
     phone_number: str
