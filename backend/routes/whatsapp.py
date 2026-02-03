@@ -549,3 +549,60 @@ async def get_message_history(
     ).sort("created_at", -1).limit(limit).to_list(limit)
     
     return {"messages": messages, "count": len(messages)}
+
+
+@router.post("/test-briefing")
+async def test_send_briefing(
+    briefing_type: str = "morning",
+    phone_number: Optional[str] = None,
+    secret: str = Header(None, alias="X-MoltBot-Secret")
+):
+    """
+    Test endpoint to manually trigger a briefing or recap
+    briefing_type: 'morning' or 'evening'
+    """
+    if secret != MOLTBOT_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    # Get phone number from config if not provided
+    if not phone_number:
+        config = await db.settings.find_one({"key": "whatsapp_config"})
+        if config and config.get("value"):
+            phone_number = config["value"].get("admin_phone")
+    
+    if not phone_number:
+        raise HTTPException(status_code=400, detail="Aucun numéro admin configuré")
+    
+    # Generate message
+    if briefing_type == "morning":
+        message = await get_daily_briefing()
+    else:
+        message = await get_daily_recap()
+    
+    # Send via WhatsApp service
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                f"{WHATSAPP_SERVICE_URL}/send",
+                json={"phone_number": phone_number, "message": message}
+            )
+            
+            if response.status_code == 200:
+                # Log the test
+                await db.whatsapp_messages.insert_one({
+                    "phone_number": phone_number,
+                    "message": message,
+                    "direction": "outgoing",
+                    "message_type": f"test_{briefing_type}",
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                })
+                
+                return {
+                    "success": True, 
+                    "message": f"Briefing {briefing_type} envoyé à {phone_number}",
+                    "preview": message[:200] + "..."
+                }
+            else:
+                return {"success": False, "error": response.text}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
