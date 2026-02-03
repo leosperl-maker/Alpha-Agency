@@ -3,6 +3,8 @@
 ## Vue d'ensemble
 CRM complet avec assistant IA MoltBot, intégrations multiples, et analytics avancées.
 
+**Dernière mise à jour**: 3 Février 2026
+
 ## Fonctionnalités Implémentées
 
 ### 1. Gmail Integration ✅
@@ -10,11 +12,16 @@ CRM complet avec assistant IA MoltBot, intégrations multiples, et analytics ava
 - Nettoyage intelligent (Soft/Medium/Hard)
 - Désabonnement automatique newsletters
 - Liste blanche emails critiques
+- Interface frontend dans MoltBot
 - **Route**: `/api/moltbot/gmail/*`
+- **Frontend**: `/admin/moltbot` (section Gmail)
 
-### 2. Voice-to-CRM ✅
+### 2. Voice-to-CRM ✅ (NOUVEAU)
 - Transcription audio via Whisper
 - Création automatique via IA : contacts, tâches, notes, RDV, devis
+- **Interface dédiée**: `/admin/voice-crm`
+- Exemples de commandes vocales
+- Saisie manuelle possible
 - **Route**: `/api/audio/voice-to-crm`
 
 ### 3. Lead Scoring ✅
