@@ -32,7 +32,11 @@ import {
   Zap,
   Bot,
   Hash,
-  Timer
+  Timer,
+  Flame,
+  AlertTriangle,
+  UserCheck,
+  TrendingDown
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
