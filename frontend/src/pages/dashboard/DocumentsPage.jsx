@@ -444,21 +444,71 @@ const DocumentsPage = () => {
   return (
     <div 
       data-testid="documents-page" 
-      className="h-full flex"
+      className="h-full flex flex-col lg:flex-row overflow-hidden"
       onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
     >
-      {/* Sidebar - Google Drive style */}
-      <aside className={`${sidebarCollapsed ? "w-16" : "w-64"} flex-shrink-0 border-r border-white/10 flex flex-col transition-all duration-300`}>
-        {/* New button */}
-        <div className="p-4">
-          <Button
+      {/* Mobile Header */}
+      <div className="flex items-center justify-between p-3 border-b border-white/10 lg:hidden">
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setShowMobileSidebar(true)}
+            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+          >
+            <Menu className="w-5 h-5 text-white" />
+          </button>
+          <div className="flex items-center gap-2">
+            <HardDrive className="w-5 h-5 text-indigo-400" />
+            <span className="text-white font-semibold">Documents</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+            className="p-2 hover:bg-white/10 rounded-lg text-white/60"
+          >
+            {viewMode === "grid" ? <List className="w-4 h-4" /> : <Grid className="w-4 h-4" />}
+          </button>
+          <button
             onClick={() => setUploadModal(true)}
-            className={`${sidebarCollapsed ? "w-12 h-12 p-0" : "w-full"} bg-white hover:bg-gray-100 text-gray-800 shadow-lg rounded-2xl`}
+            className="p-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"
+          >
+            <Plus className="w-4 h-4 text-white" />
+          </button>
+        </div>
+      </div>
+
+      {/* Sidebar - Desktop always visible, Mobile as overlay */}
+      <aside className={`
+        ${showMobileSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        fixed lg:relative left-0 top-0 h-full
+        w-64 lg:w-56 xl:w-64
+        bg-[#0a0a12] lg:bg-transparent
+        border-r border-white/10
+        flex flex-col
+        transition-transform duration-300 ease-in-out
+        z-50 lg:z-auto
+      `}>
+        {/* Mobile close button */}
+        <div className="flex items-center justify-between p-3 border-b border-white/20 lg:hidden">
+          <span className="text-white font-semibold">Mon Drive</span>
+          <button 
+            onClick={() => setShowMobileSidebar(false)}
+            className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5 text-white" />
+          </button>
+        </div>
+
+        {/* New button */}
+        <div className="p-3">
+          <Button
+            onClick={() => { setUploadModal(true); setShowMobileSidebar(false); }}
+            className="w-full bg-white hover:bg-gray-100 text-gray-800 shadow-lg rounded-xl"
           >
             <Plus className="w-5 h-5" />
-            {!sidebarCollapsed && <span className="ml-2">Nouveau</span>}
+            <span className="ml-2">Nouveau</span>
           </Button>
         </div>
 
@@ -467,17 +517,17 @@ const DocumentsPage = () => {
           <div className="space-y-1">
             {/* Mon Drive */}
             <button
-              onClick={() => navigateToFolder(null, "Mon Drive")}
+              onClick={() => { navigateToFolder(null, "Mon Drive"); setShowMobileSidebar(false); }}
               className={`w-full flex items-center gap-3 py-2 px-3 rounded-xl transition-colors ${
                 currentFolder === null ? "bg-indigo-600/20 text-indigo-400" : "hover:bg-white/5 text-white/70"
               }`}
             >
               <HardDrive className="w-5 h-5" />
-              {!sidebarCollapsed && <span className="text-sm font-medium">Mon Drive</span>}
+              <span className="text-sm font-medium">Mon Drive</span>
             </button>
 
             {/* Folder tree */}
-            {!sidebarCollapsed && folderTree.length > 0 && (
+            {folderTree.length > 0 && (
               <div className="mt-2 space-y-0.5">
                 {renderSidebarTree(folderTree)}
               </div>
@@ -486,10 +536,10 @@ const DocumentsPage = () => {
         </ScrollArea>
 
         {/* Storage info */}
-        <div className={`p-4 border-t border-white/10 ${sidebarCollapsed ? "hidden" : ""}`}>
+        <div className="p-3 border-t border-white/10">
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-white/60">Espace utilisé</span>
+              <span className="text-white/60">Espace</span>
               <span className="text-white/80">{formatSize(storage.used)} / {STORAGE_QUOTA_GB} Go</span>
             </div>
             <Progress value={storage.percentage} className="h-1.5 bg-white/10" />
@@ -499,6 +549,14 @@ const DocumentsPage = () => {
           </div>
         </div>
       </aside>
+
+      {/* Mobile sidebar overlay */}
+      {showMobileSidebar && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setShowMobileSidebar(false)}
+        />
+      )}
 
       {/* Main content */}
       <main className="flex-1 flex flex-col overflow-hidden">
