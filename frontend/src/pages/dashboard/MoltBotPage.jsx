@@ -261,11 +261,29 @@ const MoltBotPage = () => {
 📋 "Mes tâches" / "Ajoute tâche: ..." / "Terminé: ..."
 📄 "Crée devis de X€ pour..." / "Liste devis"
 📅 "Mes RDV"
-🔍 "Recherche Dupont"`;
+🔍 "Recherche Dupont"
+
+💡 **Tu peux aussi me poser n'importe quelle question !**`;
       }
 
-      // Default
-      return "Je n'ai pas compris. Dites \"aide\" pour voir les commandes disponibles.";
+      // === AI FALLBACK - Pour toutes les autres questions ===
+      try {
+        const aiRes = await fetch(`${API}/api/moltbot/chat`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ message: text })
+        });
+        const aiData = await aiRes.json();
+        
+        if (aiData.success && aiData.response) {
+          return aiData.response;
+        }
+      } catch (aiError) {
+        console.error("AI Chat error:", aiError);
+      }
+
+      // Default if AI fails
+      return "Désolé, je n'ai pas pu traiter votre demande. Dites \"aide\" pour voir les commandes disponibles.";
 
     } catch (error) {
       console.error("Error:", error);
