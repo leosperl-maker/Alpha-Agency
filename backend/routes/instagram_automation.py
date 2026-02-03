@@ -19,6 +19,10 @@ import uuid
 import httpx
 from datetime import datetime, timezone
 from typing import Optional, Dict, List
+
+# Set Playwright browsers path BEFORE importing playwright
+os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH', '/pw-browsers')
+
 from playwright.async_api import async_playwright, Browser, Page, TimeoutError as PlaywrightTimeout
 
 from .database import db
