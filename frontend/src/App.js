@@ -47,6 +47,7 @@ import TransfersPage from "./pages/dashboard/TransfersPage";
 import AgendaPage from "./pages/dashboard/AgendaPage";
 import EditorialCalendarPage from "./pages/dashboard/EditorialCalendarPage";
 import MultilinkPage from "./pages/dashboard/MultilinkPage";
+import MoltBotPage from "./pages/dashboard/MoltBotPage";
 
 // Public pages
 import TransferDownloadPage from "./pages/TransferDownloadPage";
@@ -122,6 +123,7 @@ function App() {
             <Route path="agenda" element={<AgendaPage />} />
             <Route path="editorial" element={<EditorialCalendarPage />} />
             <Route path="multilink" element={<MultilinkPage />} />
+            <Route path="moltbot" element={<MoltBotPage />} />
           </Route>
           
           {/* Public Multilink Pages */}
