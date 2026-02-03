@@ -6604,6 +6604,10 @@ app.include_router(whatsapp_router, prefix="/api", tags=["whatsapp"])
 from routes.moltbot_documents import router as moltbot_docs_router
 app.include_router(moltbot_docs_router, prefix="/api", tags=["moltbot-documents"])
 
+# Audio Transcription (Whisper)
+from routes.audio_transcription import router as audio_router
+app.include_router(audio_router, prefix="/api", tags=["audio"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
