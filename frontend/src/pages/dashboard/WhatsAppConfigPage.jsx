@@ -654,9 +654,73 @@ const WhatsAppConfigPage = () => {
             <span className="text-white/70">"Récap"</span>
             <span className="text-white/70">"Crée tâche: ..."</span>
             <span className="text-white/70">"Cherche contact: ..."</span>
-            <span className="text-white/70">"Mes devis"</span>
+            <span className="text-white/70">"Crée devis 500€ pour X"</span>
             <span className="text-white/70">"Aide"</span>
           </div>
+        </div>
+      </div>
+
+      {/* WhatsApp Business Cloud API Section */}
+      <div className="glass-panel rounded-xl p-6">
+        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <Settings className="w-5 h-5 text-blue-400" />
+          WhatsApp Business Cloud API (Officiel)
+        </h2>
+        
+        <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 mb-4">
+          <p className="text-blue-300 text-sm mb-2">
+            <strong>Alternative officielle à Baileys</strong> - API Meta pour les entreprises
+          </p>
+          <ul className="text-white/60 text-xs space-y-1">
+            <li>✅ Pas de QR code à scanner</li>
+            <li>✅ Numéro dédié sans téléphone physique</li>
+            <li>✅ 1000 messages gratuits/mois</li>
+            <li>⚠️ Nécessite vérification business Meta</li>
+          </ul>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="text-white/70 text-sm block mb-1">Phone Number ID</label>
+            <Input
+              placeholder="123456789012345"
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
+          <div>
+            <label className="text-white/70 text-sm block mb-1">Business Account ID</label>
+            <Input
+              placeholder="987654321098765"
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
+          <div>
+            <label className="text-white/70 text-sm block mb-1">Access Token</label>
+            <Input
+              type="password"
+              placeholder="EAAxxxxxxx..."
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
+          
+          <Button 
+            className="w-full bg-blue-600 hover:bg-blue-500"
+            disabled
+          >
+            Configurer (Bientôt disponible)
+          </Button>
+          
+          <p className="text-white/40 text-xs text-center">
+            Obtenez vos credentials sur{" "}
+            <a 
+              href="https://developers.facebook.com/apps" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:underline"
+            >
+              Meta for Developers
+            </a>
+          </p>
         </div>
       </div>
     </div>
