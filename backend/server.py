@@ -6521,6 +6521,73 @@ app.include_router(worker_router, prefix="/api", tags=["publication-worker"])
 from routes.multilink import router as multilink_router
 app.include_router(multilink_router, prefix="/api/multilink", tags=["multilink"])
 
+# ==================== MOLTBOT WEBHOOK ====================
+
+class MoltBotWebhookPayload(BaseModel):
+    event_type: str  # 'message', 'contact_create', 'task_create', etc.
+    platform: Optional[str] = None  # 'telegram', 'whatsapp'
+    user_id: Optional[str] = None
+    data: Optional[Dict[str, Any]] = None
+
+@api_router.post("/moltbot/webhook")
+async def moltbot_webhook(payload: MoltBotWebhookPayload):
+    """
+    🤖 Webhook endpoint for MoltBot integration
+    
+    Receives events from MoltBot and processes them:
+    - contact_create: Creates a new contact in the CRM
+    - task_create: Creates a new task
+    - message: Logs incoming messages
+    """
+    logger.info(f"MoltBot webhook received: {payload.event_type}")
+    
+    try:
+        if payload.event_type == "contact_create" and payload.data:
+            # Create contact from MoltBot data
+            contact_data = {
+                "id": str(uuid.uuid4()),
+                "first_name": payload.data.get("first_name", ""),
+                "last_name": payload.data.get("last_name", ""),
+                "email": payload.data.get("email", ""),
+                "phone": payload.data.get("phone", ""),
+                "company": payload.data.get("company", ""),
+                "source": f"moltbot_{payload.platform or 'unknown'}",
+                "status": "lead",
+                "tags": ["moltbot"],
+                "note": payload.data.get("note", ""),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.contacts.insert_one(contact_data)
+            return {"success": True, "message": "Contact créé", "contact_id": contact_data["id"]}
+        
+        elif payload.event_type == "task_create" and payload.data:
+            # Create task from MoltBot data
+            task_data = {
+                "id": str(uuid.uuid4()),
+                "title": payload.data.get("title", "Tâche MoltBot"),
+                "description": payload.data.get("description", ""),
+                "status": "todo",
+                "priority": payload.data.get("priority", "medium"),
+                "source": "moltbot",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.tasks.insert_one(task_data)
+            return {"success": True, "message": "Tâche créée", "task_id": task_data["id"]}
+        
+        elif payload.event_type == "message":
+            # Log message (could be stored for analytics)
+            logger.info(f"MoltBot message from {payload.platform}: {payload.data}")
+            return {"success": True, "message": "Message reçu"}
+        
+        else:
+            return {"success": True, "message": f"Event {payload.event_type} reçu"}
+    
+    except Exception as e:
+        logger.error(f"MoltBot webhook error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
