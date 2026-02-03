@@ -130,8 +130,17 @@ GET/POST /api/whatsapp/config
 GET  /api/blog/articles/{slug}/comments
 POST /api/blog/articles/{slug}/comments
 GET  /api/blog/comments/pending
+GET  /api/blog/comments/all
 PUT  /api/blog/comments/{id}/moderate
 DELETE /api/blog/comments/{id}
+```
+
+### Business Search
+```
+GET  /api/business/search?query=nom_entreprise
+GET  /api/business/search/all?query=nom&limit=10
+GET  /api/business/siret/{siret}
+GET  /api/business/siren/{siren}
 ```
 
 ## Tâches Restantes
