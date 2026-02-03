@@ -33,7 +33,7 @@ const DocumentsPage = () => {
   const [stats, setStats] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [expandedFolders, setExpandedFolders] = useState(new Set());
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
   
