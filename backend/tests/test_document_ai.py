@@ -6,7 +6,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://moltbot-crm.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://smart-agent-54.preview.emergentagent.com')
 
 # Test credentials
 TEST_EMAIL = "admin@alphagency.fr"

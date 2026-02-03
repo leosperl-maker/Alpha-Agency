@@ -225,7 +225,7 @@ GET  /api/business/siren/{siren}
 - Blog API Key: blog-alpha-auto-publish-2024-secure
 
 ## URLs
-- Preview: https://moltbot-crm.preview.emergentagent.com
+- Preview: https://smart-agent-54.preview.emergentagent.com
 - Widget iPhone: /widget
 - MoltBot Admin: /admin/moltbot
 - WhatsApp Config: /admin/whatsapp
