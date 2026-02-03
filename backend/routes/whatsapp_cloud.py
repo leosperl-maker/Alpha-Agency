@@ -452,7 +452,7 @@ async def verify_webhook(request: Request):
             logger.info("Webhook verified successfully")
             return int(challenge)
         else:
-            logger.warning(f"Webhook verification failed: invalid token")
+            logger.warning("Webhook verification failed: invalid token")
             raise HTTPException(status_code=403, detail="Invalid verify token")
     
     raise HTTPException(status_code=400, detail="Invalid request")
@@ -467,7 +467,7 @@ async def receive_webhook(request: Request, background_tasks: BackgroundTasks):
     
     try:
         payload = await request.json()
-    except:
+    except Exception:
         return {"status": "ok"}
     
     # Get signature for validation
