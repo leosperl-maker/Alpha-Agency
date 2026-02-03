@@ -1,0 +1,358 @@
+"""
+Instagram Story Editor - Create and publish Instagram Stories
+
+IMPORTANT: This feature uses browser automation which is against Instagram's ToS.
+Use at your own risk. The official Instagram Graph API does not support Story posting.
+
+Features:
+- Create story with image/video
+- Add polls, questions, countdowns
+- Schedule story publication
+- Preview before posting
+"""
+
+import os
+import uuid
+import logging
+import httpx
+from datetime import datetime, timezone, timedelta
+from typing import Optional, List, Dict
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, BackgroundTasks
+from pydantic import BaseModel
+
+from .database import db, get_current_user, get_user_id
+
+logger = logging.getLogger("instagram_story")
+
+router = APIRouter()
+
+# ==================== MODELS ====================
+
+class StoryPoll(BaseModel):
+    question: str
+    options: List[str]  # Max 2 for polls
+
+class StoryQuestion(BaseModel):
+    question: str
+    
+class StoryCountdown(BaseModel):
+    title: str
+    end_time: str  # ISO format
+
+class StoryMention(BaseModel):
+    username: str
+    position: Dict[str, float] = {"x": 0.5, "y": 0.5}
+
+class StoryLink(BaseModel):
+    url: str
+    text: Optional[str] = "En savoir plus"
+
+class CreateStoryRequest(BaseModel):
+    """Request to create a story draft"""
+    instagram_account_id: str
+    media_url: Optional[str] = None  # Image or video URL
+    media_type: str = "image"  # image or video
+    background_color: Optional[str] = "#000000"
+    text_overlay: Optional[str] = None
+    text_position: Dict[str, float] = {"x": 0.5, "y": 0.5}
+    text_color: Optional[str] = "#FFFFFF"
+    poll: Optional[StoryPoll] = None
+    question: Optional[StoryQuestion] = None
+    countdown: Optional[StoryCountdown] = None
+    mentions: Optional[List[StoryMention]] = None
+    link: Optional[StoryLink] = None
+    schedule_time: Optional[str] = None  # ISO format, None = immediate
+
+class StoryDraft(BaseModel):
+    """A saved story draft"""
+    id: str
+    instagram_account_id: str
+    instagram_username: str
+    media_url: Optional[str]
+    media_type: str
+    elements: Dict  # All story elements (poll, question, etc.)
+    status: str  # draft, scheduled, published, failed
+    schedule_time: Optional[str]
+    created_at: str
+    published_at: Optional[str]
+    error_message: Optional[str]
+
+# ==================== HELPER FUNCTIONS ====================
+
+async def get_instagram_account(account_id: str, user_id: str) -> Optional[Dict]:
+    """Get Instagram account details from stored Meta pages"""
+    page = await db.meta_pages.find_one({
+        "user_id": user_id,
+        "instagram_business_id": account_id,
+        "is_active": True
+    })
+    return page
+
+async def upload_media_for_story(media_url: str, media_type: str) -> Optional[str]:
+    """
+    Upload media to a temporary storage for story creation.
+    Returns a URL that can be used for the story.
+    """
+    # For now, we assume the media_url is already accessible
+    # In production, you'd want to upload to your own CDN
+    return media_url
+
+# ==================== DRAFT MANAGEMENT ====================
+
+@router.post("/drafts")
+async def create_story_draft(
+    request: CreateStoryRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Create a story draft. This saves the story configuration
+    without publishing it yet.
+    """
+    user_id = get_user_id(current_user)
+    
+    # Verify Instagram account access
+    account = await get_instagram_account(request.instagram_account_id, user_id)
+    if not account:
+        raise HTTPException(status_code=404, detail="Compte Instagram non trouvé")
+    
+    # Create draft
+    draft_id = str(uuid.uuid4())
+    draft = {
+        "id": draft_id,
+        "user_id": user_id,
+        "instagram_account_id": request.instagram_account_id,
+        "instagram_username": account.get("instagram_username", ""),
+        "media_url": request.media_url,
+        "media_type": request.media_type,
+        "background_color": request.background_color,
+        "elements": {
+            "text_overlay": request.text_overlay,
+            "text_position": request.text_position,
+            "text_color": request.text_color,
+            "poll": request.poll.dict() if request.poll else None,
+            "question": request.question.dict() if request.question else None,
+            "countdown": request.countdown.dict() if request.countdown else None,
+            "mentions": [m.dict() for m in request.mentions] if request.mentions else [],
+            "link": request.link.dict() if request.link else None
+        },
+        "status": "scheduled" if request.schedule_time else "draft",
+        "schedule_time": request.schedule_time,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "published_at": None,
+        "error_message": None
+    }
+    
+    await db.instagram_story_drafts.insert_one(draft)
+    
+    logger.info(f"Story draft created: {draft_id} for @{account.get('instagram_username')}")
+    
+    return {
+        "success": True,
+        "draft_id": draft_id,
+        "status": draft["status"],
+        "message": "Brouillon de story créé" + (" et programmé" if request.schedule_time else "")
+    }
+
+@router.get("/drafts")
+async def list_story_drafts(
+    status: Optional[str] = None,
+    limit: int = 20,
+    current_user: dict = Depends(get_current_user)
+):
+    """List all story drafts for the user"""
+    user_id = get_user_id(current_user)
+    
+    query = {"user_id": user_id}
+    if status:
+        query["status"] = status
+    
+    drafts = await db.instagram_story_drafts.find(
+        query,
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    return {"drafts": drafts, "count": len(drafts)}
+
+@router.get("/drafts/{draft_id}")
+async def get_story_draft(
+    draft_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get a specific story draft"""
+    user_id = get_user_id(current_user)
+    
+    draft = await db.instagram_story_drafts.find_one(
+        {"id": draft_id, "user_id": user_id},
+        {"_id": 0}
+    )
+    
+    if not draft:
+        raise HTTPException(status_code=404, detail="Brouillon non trouvé")
+    
+    return draft
+
+@router.delete("/drafts/{draft_id}")
+async def delete_story_draft(
+    draft_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a story draft"""
+    user_id = get_user_id(current_user)
+    
+    result = await db.instagram_story_drafts.delete_one({
+        "id": draft_id,
+        "user_id": user_id,
+        "status": {"$in": ["draft", "scheduled", "failed"]}  # Can't delete published
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Brouillon non trouvé ou déjà publié")
+    
+    return {"success": True, "message": "Brouillon supprimé"}
+
+# ==================== PUBLISHING ====================
+
+@router.post("/drafts/{draft_id}/publish")
+async def publish_story(
+    draft_id: str,
+    background_tasks: BackgroundTasks,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Publish a story immediately.
+    
+    WARNING: This uses browser automation and is against Instagram's Terms of Service.
+    The official API does not support Story posting.
+    """
+    user_id = get_user_id(current_user)
+    
+    draft = await db.instagram_story_drafts.find_one({
+        "id": draft_id,
+        "user_id": user_id
+    })
+    
+    if not draft:
+        raise HTTPException(status_code=404, detail="Brouillon non trouvé")
+    
+    if draft["status"] == "published":
+        raise HTTPException(status_code=400, detail="Story déjà publiée")
+    
+    # Update status to publishing
+    await db.instagram_story_drafts.update_one(
+        {"id": draft_id},
+        {"$set": {"status": "publishing"}}
+    )
+    
+    # Note: Actual browser automation would go here
+    # This is a placeholder that marks it as needing manual action
+    # because automated posting is against Instagram ToS
+    
+    return {
+        "success": True,
+        "message": "Publication initiée",
+        "warning": "⚠️ L'API officielle Instagram ne supporte pas la publication de Stories. Cette fonctionnalité nécessite une action manuelle ou une automatisation browser (contre les CGU).",
+        "draft_id": draft_id,
+        "status": "requires_manual_action"
+    }
+
+# ==================== STORY ELEMENTS INFO ====================
+
+@router.get("/elements")
+async def get_available_elements():
+    """Get list of available story elements and their configurations"""
+    return {
+        "elements": [
+            {
+                "type": "poll",
+                "name": "Sondage",
+                "description": "Posez une question avec 2 options",
+                "config": {
+                    "question": "string (max 100 chars)",
+                    "options": ["Option A", "Option B"]
+                }
+            },
+            {
+                "type": "question",
+                "name": "Question",
+                "description": "Posez une question ouverte à votre audience",
+                "config": {
+                    "question": "string (max 100 chars)"
+                }
+            },
+            {
+                "type": "countdown",
+                "name": "Compte à rebours",
+                "description": "Ajoutez un compte à rebours vers un événement",
+                "config": {
+                    "title": "string",
+                    "end_time": "ISO date"
+                }
+            },
+            {
+                "type": "mention",
+                "name": "Mention",
+                "description": "Mentionnez un autre compte",
+                "config": {
+                    "username": "@username",
+                    "position": {"x": 0.5, "y": 0.5}
+                }
+            },
+            {
+                "type": "link",
+                "name": "Lien",
+                "description": "Ajoutez un lien swipe-up (nécessite 10k abonnés)",
+                "config": {
+                    "url": "https://...",
+                    "text": "En savoir plus"
+                }
+            },
+            {
+                "type": "text",
+                "name": "Texte",
+                "description": "Ajoutez du texte sur la story",
+                "config": {
+                    "text": "string",
+                    "position": {"x": 0.5, "y": 0.5},
+                    "color": "#FFFFFF",
+                    "font": "default"
+                }
+            }
+        ],
+        "limitations": {
+            "note": "L'API officielle Instagram Graph ne supporte PAS la publication de Stories.",
+            "alternatives": [
+                "Publication manuelle via l'app Instagram",
+                "Meta Business Suite (pour comptes business)",
+                "Automatisation browser (contre les CGU, risque de ban)"
+            ]
+        }
+    }
+
+# ==================== ANALYTICS ====================
+
+@router.get("/analytics")
+async def get_story_analytics(
+    days: int = 7,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get story analytics. 
+    Note: This requires Instagram Insights API access.
+    """
+    user_id = get_user_id(current_user)
+    
+    # Get published stories
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    
+    stories = await db.instagram_story_drafts.find({
+        "user_id": user_id,
+        "status": "published",
+        "published_at": {"$gte": since}
+    }, {"_id": 0}).to_list(100)
+    
+    return {
+        "period_days": days,
+        "total_stories": len(stories),
+        "stories": stories,
+        "note": "Pour les métriques détaillées (vues, réponses, swipe-ups), utilisez l'API Instagram Insights via le endpoint Meta."
+    }
