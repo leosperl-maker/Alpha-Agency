@@ -20,30 +20,43 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 
 ### 3. WhatsApp Business Integration
 - Page de configuration : `/admin/whatsapp`
-- Service Baileys Node.js pour connexion QR
-- Commandes via WhatsApp
-- Briefings automatiques
+- **Baileys (actuel)**: Service Node.js pour connexion QR - FONCTIONNEL
+- **Cloud API (nouveau)**: API officielle Meta - EN COURS DE CONFIG
+- Commandes WhatsApp avancées :
+  - "Crée devis 1500€ pour Client, description" → Génère un devis
+  - "Crée facture 500€ pour Client, service" → Génère une facture
+  - "Envoie devis DEV-2024-001" → Génère le PDF
+  - Stats, tâches, contacts, briefing, etc.
+- Briefings automatiques matin/soir
+- Modification nom/photo profil WhatsApp
 
-### 4. Widget PWA iPhone
+### 4. Instagram Story Editor (NOUVEAU - P2)
+- Backend : `/api/instagram-story/*`
+- Création de brouillons de Stories
+- Support sondages, questions, countdowns, mentions, liens
+- **Note**: L'API officielle Instagram ne supporte PAS la publication de Stories
+- Alternative : Meta Business Suite ou automation browser (risqué)
+
+### 5. Widget PWA iPhone
 - Page `/widget` optimisée mobile
 - Tâches du jour
 - Stats rapides
 - Add to Home Screen ready
 
-### 5. Gestion Commentaires Blog
+### 6. Gestion Commentaires Blog
 - Endpoints : pending, all, moderate, delete
 - Statuts : pending, approved, rejected, spam
 - **UI de modération complète dans BlogAdminPage.jsx**
 - Bandeau d'alerte pour commentaires en attente
 - Modal de modération avec onglets (En attente, Approuvés, Rejetés, Tous)
 
-### 6. Business Search API (Recherche Entreprises)
+### 7. Business Search API (Recherche Entreprises)
 - API française de recherche d'entreprises
 - Source : recherche-entreprises.api.gouv.fr (fiable)
 - Recherche par nom, SIRET, SIREN
 - Retourne : nom, adresse, dirigeants, effectifs, CA
 
-### 7. API Blog avec content_blocks
+### 8. API Blog avec content_blocks
 - Support images inline
 - Publication via n8n
 
