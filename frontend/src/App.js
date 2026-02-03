@@ -130,6 +130,7 @@ function App() {
             <Route path="moltbot" element={<MoltBotPage />} />
             <Route path="whatsapp" element={<WhatsAppConfigPage />} />
             <Route path="instagram-stories" element={<InstagramStoryPage />} />
+            <Route path="nurturing" element={<NurturingPage />} />
           </Route>
           
           {/* PWA Widget Page for iPhone */}
