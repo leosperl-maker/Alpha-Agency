@@ -550,6 +550,7 @@ const StoryEditor = ({
                 <button
                   key={opt.type}
                   onClick={() => addSticker(opt.type)}
+                  data-testid={`sticker-btn-${opt.type}`}
                   className={`p-4 rounded-xl bg-gradient-to-br ${opt.color} hover:opacity-90 transition-opacity flex flex-col items-center gap-2`}
                 >
                   <opt.icon className="w-6 h-6 text-white" />
