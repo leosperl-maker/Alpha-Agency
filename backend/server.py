@@ -6632,6 +6632,10 @@ app.include_router(analytics_reports_router, prefix="/api", tags=["reports"])
 from routes.social_preview import router as social_preview_router
 app.include_router(social_preview_router, prefix="/api", tags=["social"])
 
+# Email Nurturing Automation
+from routes.nurturing import router as nurturing_router
+app.include_router(nurturing_router, prefix="/api", tags=["nurturing"])
+
 # MoltBot Scheduler for automated briefings
 from routes.scheduler import moltbot_scheduler
 
