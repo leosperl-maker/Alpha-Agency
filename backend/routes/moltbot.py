@@ -1121,8 +1121,7 @@ Commandes CRM disponibles:
         
         # Call AI
         chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            model="gemini-2.0-flash"
+            api_key=EMERGENT_LLM_KEY
         )
         
         response = await chat.send_message(
