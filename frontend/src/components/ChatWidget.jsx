@@ -85,7 +85,7 @@ const ChatWidget = () => {
       } else if (userQuestion.includes("délai") || userQuestion.includes("temps") || userQuestion.includes("combien de temps")) {
         botResponse = "Un site vitrine est généralement livré en 7 jours ouvrés. Les projets plus complexes peuvent prendre 2 à 4 semaines. Souhaitez-vous qu'on en discute ?";
       } else if (userQuestion.includes("contact") || userQuestion.includes("appeler") || userQuestion.includes("téléphone") || userQuestion.includes("email")) {
-        botResponse = "Vous pouvez nous joindre au 0690 05 34 44 ou par email à contact@alphagency.fr. Préférez-vous qu'on vous rappelle ?";
+        botResponse = "Vous pouvez nous joindre au 0691 266 003 ou par email à contact@alphagency.fr. Préférez-vous qu'on vous rappelle ?";
         setTimeout(() => setShowContactForm(true), 500);
       } else if (userQuestion.includes("service") || userQuestion.includes("proposez") || userQuestion.includes("faites")) {
         botResponse = "Nous proposons :\n• Création de sites web (vitrine, e-commerce)\n• Community management\n• Photographie professionnelle\n• Publicité digitale (Google Ads, Meta Ads)\n\nQuel service vous intéresse ?";
