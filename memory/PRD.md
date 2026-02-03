@@ -78,7 +78,15 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 
 ## Changelog
 
-### 2026-02-03 (Session actuelle - Suite)
+### 2026-02-03 (Session actuelle - Suite 2)
+
+#### ✅ Interface Documents style Google Drive
+- Sidebar avec arborescence des dossiers
+- Indicateur de stockage (X Ko / 15 Go)
+- Panneau de détails (clic droit ou bouton info)
+- Vue grille et liste
+- Drag & drop pour upload
+- Recherche dans Drive
 
 #### ✅ Corrections P0 terminées
 1. **Numéro téléphone Agent X** → 0691 266 003 (était 0690 05 34 44)
@@ -86,9 +94,9 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 3. **Business Search API** → Réécrite pour utiliser recherche-entreprises.api.gouv.fr
 
 #### ✅ Tests passés (100%)
-- Backend: 9/9 tests passés
-- Frontend: Toutes fonctionnalités vérifiées
-- Rapport: /app/test_reports/iteration_45.json
+- Backend: 9/9 tests passés (iteration_45)
+- Frontend Documents: 100% (iteration_46)
+- Login flow: PASS
 
 ### 2026-02-03 (Session précédente)
 
@@ -149,9 +157,9 @@ GET  /api/business/siren/{siren}
 - [x] Numéro téléphone Agent X corrigé → 0691 266 003
 - [x] UI modération commentaires dans BlogAdminPage
 - [x] Business Search API fonctionnelle
+- [x] Interface Documents style Google Drive
 
 ### P1 (Haute priorité)
-- [ ] Interface "Fichiers/Dossiers" style Google Drive avec arborescence
 - [ ] MoltBot : Classification intelligente des documents (OCR + analyse)
 - [ ] Support vidéo/audio avec transcription (Whisper)
 - [ ] WhatsApp bidirectionnel complet (envoi/réception commandes)
