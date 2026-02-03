@@ -64,6 +64,8 @@ const DashboardOverview = () => {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [scheduledPosts, setScheduledPosts] = useState([]);
   const [multilinkStats, setMultilinkStats] = useState(null);
+  const [hotLeads, setHotLeads] = useState([]);
+  const [churnAlerts, setChurnAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState('');
 
