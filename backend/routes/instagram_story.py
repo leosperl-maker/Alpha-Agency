@@ -83,24 +83,6 @@ class StoryDraft(BaseModel):
 
 # ==================== HELPER FUNCTIONS ====================
 
-async def get_meta_instagram_account(account_id: str, user_id: str) -> Optional[Dict]:
-    """Get Instagram account details from stored Meta pages"""
-    page = await db.meta_pages.find_one({
-        "user_id": user_id,
-        "instagram_business_id": account_id,
-        "is_active": True
-    })
-    return page
-
-async def upload_media_for_story(media_url: str, media_type: str) -> Optional[str]:
-    """
-    Upload media to a temporary storage for story creation.
-    Returns a URL that can be used for the story.
-    """
-    # For now, we assume the media_url is already accessible
-    # In production, you'd want to upload to your own CDN
-    return media_url
-
 # ==================== DRAFT MANAGEMENT ====================
 
 @router.post("/drafts")
