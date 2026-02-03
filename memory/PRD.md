@@ -1,228 +1,206 @@
-# Alpha Agency CRM & Social Media Management Tool
+# Alpha Agency CRM - MoltBot
 
 ## Vue d'ensemble
-CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier éditorial, Multilink, et intégration IA complète via MoltBot.
+CRM complet avec assistant IA MoltBot, intégrations multiples (WhatsApp, Gmail, Instagram), et analytics avancées.
 
 ## Fonctionnalités Principales
 
 ### 1. MoltBot (Assistant IA Admin)
 - Chat interface dans `/admin/moltbot`
-- Commandes naturelles : "CA du mois", "Crée un devis..."
-- Briefing matin et récap soir automatiques
-- Accès complet au CRM
-
-### 2. Agent X (Chatbot Public)
-- Widget chat rouge sur le site public
-- FAQ automatique
-- Capture de leads
-- Design rouge/blanc/noir
-- **Téléphone contact : 0691 266 003**
-
-### 3. WhatsApp Business Integration
-- Page de configuration : `/admin/whatsapp`
-- **Baileys (actuel)**: Service Node.js pour connexion QR - FONCTIONNEL
-- **Cloud API (nouveau)**: API officielle Meta - EN COURS DE CONFIG
-- Commandes WhatsApp avancées :
-  - "Crée devis 1500€ pour Client, description" → Génère un devis
-  - "Crée facture 500€ pour Client, service" → Génère une facture
-  - "Envoie devis DEV-2024-001" → Génère le PDF
-  - Stats, tâches, contacts, briefing, etc.
+- Commandes naturelles pour gérer le CRM
 - Briefings automatiques matin/soir
-- Modification nom/photo profil WhatsApp
 
-### 4. Instagram Story Editor (NOUVEAU - COMPLET)
-- **Route**: `/admin/instagram-stories`
-- **Backend**: `/api/instagram-story/*`
-- **Features**:
-  - ✅ **Éditeur visuel WYSIWYG** avec aperçu téléphone en temps réel
-  - ✅ **Stickers d'engagement drag-and-drop**: Sondage, Question, Quiz, Mention, Lien, Texte
-  - ✅ **Stylisation du texte**: taille, police, couleur, gras, italique, ombre
-  - ✅ **Couleur de fond personnalisable**
-  - ✅ **Multi-comptes Instagram**
-  - ✅ **Historique par compte**
-  - ✅ **Suppression de comptes**
-  - ✅ **Programmation des Stories**
-  - ✅ **Test de connexion Instagram** (Playwright)
-- **WARNING**: L'automatisation est contre les CGU Instagram - risque de suspension
+### 2. Gmail Integration (NOUVEAU ✅)
+- OAuth 2.0 avec scope complet `https://mail.google.com/`
+- Nettoyage intelligent (mode Soft/Medium/Hard)
+- Désabonnement automatique des newsletters
+- Liste blanche pour emails critiques (banques, factures, clients)
+- Logs de toutes les actions pour audit/rollback
+- **Route**: `/api/moltbot/gmail/*`
 
-### 5. Widget PWA iPhone
-- Page `/widget` optimisée mobile
-- Tâches du jour
-- Stats rapides
-- Add to Home Screen ready
+### 3. Voice-to-CRM (NOUVEAU ✅)
+- Transcription audio via Whisper
+- Analyse IA pour créer automatiquement :
+  - Contacts
+  - Tâches
+  - Notes
+  - RDV
+  - Devis/Factures
+- **Route**: `/api/audio/voice-to-crm`
 
-### 6. Gestion Commentaires Blog
-- Endpoints : pending, all, moderate, delete
-- Statuts : pending, approved, rejected, spam
-- **UI de modération complète dans BlogAdminPage.jsx**
-- Bandeau d'alerte pour commentaires en attente
-- Modal de modération avec onglets (En attente, Approuvés, Rejetés, Tous)
+### 4. Lead Scoring (NOUVEAU ✅)
+- Score 0-100 basé sur :
+  - Profil complet (email, téléphone, entreprise, budget)
+  - Engagement (RDV, emails, clics)
+  - Activité (devis, factures)
+  - Timing (contact récent)
+- Grades A/B/C/D/F
+- Recommandations automatiques
+- **Route**: `/api/analytics/lead-scores`
 
-### 7. Business Search API (Recherche Entreprises)
-- API française de recherche d'entreprises
-- Source : recherche-entreprises.api.gouv.fr (fiable)
-- Recherche par nom, SIRET, SIREN
-- Retourne : nom, adresse, dirigeants, effectifs, CA
+### 5. Alertes Churn (NOUVEAU ✅)
+- Détection des clients à risque
+- Niveaux: critical, high, medium, low
+- Signaux d'alerte :
+  - Aucun contact depuis X jours
+  - Factures impayées
+  - Baisse des commandes
+  - RDV annulés
+- Actions recommandées
+- **Route**: `/api/analytics/churn-alerts`
 
-### 8. API Blog avec content_blocks
-- Support images inline
-- Publication via n8n
+### 6. Advanced Analytics PDF (NOUVEAU ✅)
+- Rapports PDF générés avec ReportLab
+- Périodes : semaine, mois, trimestre, année, custom
+- Sections : CA, devis, leads, clients, tâches
+- **Route**: `/api/reports/analytics-pdf`
+
+### 7. Multi-Platform Post Preview (NOUVEAU ✅)
+- Prévisualisation pour Facebook, Instagram, LinkedIn, Twitter, TikTok
+- Validation des limites de caractères
+- Suggestions de hashtags IA
+- Optimisation de contenu
+- **Route**: `/api/social/preview`
+
+### 8. WhatsApp Integration
+- **Baileys (Non-officiel)**: Connecté, QR code, commandes
+- **Cloud API (Officiel)**: Scaffolding prêt
+- Commandes avancées : "crée devis", "envoie facture"
+- Envoi de PDF via WhatsApp
+
+### 9. Instagram Story Editor
+- Éditeur visuel WYSIWYG avec aperçu téléphone
+- Stickers drag-and-drop : Sondage, Question, Quiz, Mention, Lien, Texte
+- Multi-comptes
+- Programmation
+
+### 10. Agent X (Chatbot Public)
+- Widget chat rouge sur le site public
+- FAQ automatique, capture de leads
 
 ## Architecture
 
 ```
 /app
 ├── backend/
-│   ├── routes/
-│   │   ├── moltbot.py         # API MoltBot complète
-│   │   ├── whatsapp.py        # API WhatsApp Baileys
-│   │   ├── whatsapp_cloud.py  # API WhatsApp Cloud (scaffolding)
-│   │   ├── instagram_story.py # API Stories (comptes, brouillons, publication)
-│   │   ├── instagram_automation.py # Playwright pour automation Instagram
-│   │   ├── business_search.py # Recherche SIRET
-│   │   ├── blog.py            # Blog + commentaires
-│   │   └── ...
-│   └── server.py
+│   └── routes/
+│       ├── moltbot_gmail.py       # Gmail integration
+│       ├── audio_transcription.py # Voice-to-CRM
+│       ├── lead_scoring.py        # Lead scores & churn
+│       ├── analytics_reports.py   # PDF reports
+│       ├── social_preview.py      # Multi-platform preview
+│       ├── instagram_story.py     # Story editor
+│       ├── whatsapp.py            # WhatsApp Baileys
+│       └── ...
 ├── frontend/
 │   └── src/
 │       ├── components/
-│       │   ├── ChatWidget.jsx     # Agent X (rouge)
-│       │   ├── StoryEditor.jsx    # Éditeur visuel de Stories
-│       │   └── ...
-│       ├── pages/
-│       │   ├── WidgetPage.jsx         # PWA iPhone
-│       │   └── dashboard/
-│       │       ├── MoltBotPage.jsx
-│       │       ├── WhatsAppConfigPage.jsx
-│       │       ├── InstagramStoryPage.jsx  # Page Stories complète
-│       │       └── ...
-│       └── ...
+│       │   ├── MoltBotGmailSection.jsx
+│       │   └── StoryEditor.jsx
+│       └── pages/
+│           └── dashboard/
+│               ├── MoltBotPage.jsx
+│               ├── InstagramStoryPage.jsx
+│               └── ...
 └── whatsapp-service/
-    ├── package.json
-    └── index.js               # Service Baileys
+    └── index.js
 ```
 
 ## Changelog
 
-### 2026-02-03 (Session actuelle - Suite 7)
+### 2026-02-03 (Session 8)
 
-#### ✅ Instagram Story Editor COMPLET
-- **Éditeur Visuel WYSIWYG** : Nouveau composant `StoryEditor.jsx`
-  - Aperçu téléphone iPhone avec Dynamic Island
-  - Zone de drop pour média (image/vidéo)
-  - 6 types de stickers avec drag-and-drop via @dnd-kit
-- **Stickers d'engagement**:
-  - Sondage (2 options, question personnalisable)
-  - Question ouverte
-  - Quiz (4 options, bonne réponse)
-  - Mention (@username)
-  - Lien (texte personnalisable)
-  - Texte (taille, police, couleur, ombre)
-- **Onglets de l'éditeur**:
-  - Stickers : grille des 6 types
-  - Texte : paramètres par défaut
-  - Fond : couleurs prédéfinies + custom
-- **Gestion Multi-comptes**:
-  - Liste des comptes avec stats (publiées/en attente)
-  - Bouton Historique par compte
-  - Suppression de comptes
-  - Test de connexion Instagram
+#### ✅ Gmail Integration
+- OAuth 2.0 complet avec scope `https://mail.google.com/`
+- Nettoyage intelligent (label + archive, jamais de suppression directe)
+- Désabonnement via List-Unsubscribe header
+- Liste blanche automatique (banques, admin, clients)
+- UI dans MoltBot page
 
-#### ✅ Fix Playwright (P0 Bloqueur)
-- **Problème**: Le navigateur Chromium n'était pas installé dans `/pw-browsers/`
-- **Solution**: Installation de Chromium via `python3 -m playwright install chromium`
-- **Résultat**: Le test de connexion Instagram retourne 200 (pas 500)
-- **Note**: Timeout normal avec identifiants invalides
+#### ✅ Voice-to-CRM
+- Transcription + analyse IA
+- Création automatique de contacts, tâches, notes, RDV, devis
 
-#### ✅ API Améliorée
-- Nouvel endpoint: `GET /api/instagram-story/accounts/{id}/history` - Historique par compte
-- Amélioration: `GET /api/instagram-story/drafts` - Filtre par account_id
+#### ✅ Lead Scoring & Churn Alerts
+- Algorithme de scoring multi-facteurs
+- Détection des clients à risque
+- Recommandations et actions
 
-#### ✅ Tests (iteration_50)
-- Backend: 23/23 tests passés (100%)
-- Frontend: 100% vérifié
-- Playwright: Fonctionnel (pas d'erreur 500)
+#### ✅ Advanced Analytics PDF
+- Génération PDF avec ReportLab
+- Rapports CA, leads, clients, tâches
+
+#### ✅ Multi-Platform Preview
+- Prévisualisation Facebook, Instagram, LinkedIn, Twitter
+- Validation des limites
+- Suggestions de hashtags IA
+
+#### ✅ Tests
+- Backend: 21/21 (100%)
+- Frontend: 100%
 
 ### Sessions précédentes
+- Instagram Story Editor WYSIWYG
+- Fix Playwright
+- Fix Meta pagination
+- WhatsApp profile management
+- Commandes WhatsApp avancées
 
-#### WhatsApp Business Cloud API (Backend)
-- Endpoints pour config, status, send/text, send/media, send/template, webhook
-- UI dans `/admin/whatsapp` avec champs credentials
+## APIs Nouvelles
 
-#### Commandes WhatsApp Avancées
-- "Crée devis 1500€ pour Client, description" → Crée un devis
-- "Crée facture 500€ pour Client, service" → Crée une facture
-
-#### Fix Comptes Meta manquants (Pagination)
-- Boucle de pagination pour récupérer tous les comptes
-- Bouton "Resync depuis Meta"
-
-## Routes API Instagram Stories
-
+### Gmail
 ```
-# Comptes
-GET  /api/instagram-story/accounts           # Liste des comptes
-POST /api/instagram-story/accounts           # Ajouter un compte
-GET  /api/instagram-story/accounts/{id}      # Détails d'un compte
-DELETE /api/instagram-story/accounts/{id}    # Supprimer un compte
-POST /api/instagram-story/accounts/{id}/test # Tester connexion (Playwright)
-GET  /api/instagram-story/accounts/{id}/history # Historique du compte
-
-# Brouillons/Stories
-GET  /api/instagram-story/drafts             # Liste des brouillons
-POST /api/instagram-story/drafts             # Créer un brouillon
-GET  /api/instagram-story/drafts/{id}        # Détails d'un brouillon
-DELETE /api/instagram-story/drafts/{id}      # Supprimer un brouillon
-POST /api/instagram-story/drafts/{id}/publish # Publier une story
-
-# Info
-GET  /api/instagram-story/elements           # Types de stickers disponibles
-GET  /api/instagram-story/analytics          # Statistiques
+GET  /api/moltbot/gmail/auth      # Initier OAuth
+GET  /api/moltbot/gmail/callback  # Callback OAuth
+GET  /api/moltbot/gmail/status    # Statut connexion
+GET  /api/moltbot/gmail/emails    # Lister emails
+POST /api/moltbot/gmail/clean     # Nettoyer inbox
+POST /api/moltbot/gmail/unsubscribe # Désabonner
+POST /api/moltbot/gmail/reply     # Envoyer email
+DELETE /api/moltbot/gmail/disconnect # Déconnecter
 ```
 
-## Tâches Restantes
+### Voice-to-CRM
+```
+POST /api/audio/voice-to-crm      # Transcrire et créer entrée CRM
+GET  /api/audio/voice-commands    # Historique commandes
+```
 
-### Terminées cette session
-- [x] Fix Playwright (erreur 500 → OK)
-- [x] Éditeur visuel WYSIWYG avec aperçu téléphone
-- [x] Stickers drag-and-drop (6 types)
-- [x] Stylisation du texte
-- [x] Historique par compte
-- [x] Suppression de comptes
+### Analytics
+```
+GET  /api/analytics/lead-scores   # Tous les scores
+GET  /api/analytics/lead-score/{id} # Score d'un contact
+GET  /api/analytics/churn-alerts  # Alertes churn
+GET  /api/analytics/dashboard     # Dashboard complet
+GET  /api/reports/analytics-pdf   # Télécharger PDF
+GET  /api/reports/analytics-json  # Données JSON
+```
 
-### P1 (En attente de credentials)
-- [ ] Gmail integration via MoltBot (bloqué sur Google credentials)
-- [ ] Google Drive sync avec tri automatique MoltBot (bloqué sur Google credentials)
-- [ ] WhatsApp Business Cloud API (bloqué sur Meta credentials)
+### Social Preview
+```
+POST /api/social/preview          # Prévisualiser multi-plateforme
+POST /api/social/suggest-hashtags # Suggestions hashtags
+GET  /api/social/platform-info    # Infos plateformes
+POST /api/social/optimize-content # Optimiser contenu
+```
 
-### Backlog
-- [ ] Multi-platform post preview
-- [ ] Voice-to-CRM
-- [ ] Advanced analytics PDF
-- [ ] Automatisations avancées (lead scoring, alertes churn)
-- [ ] Commandes WhatsApp avancées (factures PDF avec envoi)
+## Configuration Production
 
-## Credentials
+Pour déployer en production, ajouter dans `.env` :
+```
+GMAIL_CLIENT_ID=votre_client_id
+GMAIL_CLIENT_SECRET=votre_client_secret
+GMAIL_REDIRECT_URI=https://votre-domaine.fr/api/moltbot/gmail/callback
+```
+
+Et ajouter l'URI de redirection dans Google Cloud Console.
+
+## Credentials Test
 - Email: admin@alphagency.fr
 - Password: Test123!
-- MoltBot Secret: moltbot-alpha-secret-2024
-- Blog API Key: blog-alpha-auto-publish-2024-secure
 
 ## URLs
 - Preview: https://social-command-10.preview.emergentagent.com
-- Widget iPhone: /widget
-- MoltBot Admin: /admin/moltbot
-- WhatsApp Config: /admin/whatsapp
+- MoltBot: /admin/moltbot
 - Instagram Stories: /admin/instagram-stories
-
-## Notes Techniques
-
-### Playwright
-- Chemin browsers: `/pw-browsers/`
-- Variable d'environnement: `PLAYWRIGHT_BROWSERS_PATH=/pw-browsers`
-- Chromium installé via: `python3 -m playwright install chromium`
-
-### Instagram Automation
-- Contre les CGU Instagram (risque de suspension)
-- Utilisé pour poster des Stories (non supporté par l'API officielle)
-- Alternative recommandée: Meta Business Suite
+- WhatsApp: /admin/whatsapp
