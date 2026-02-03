@@ -78,6 +78,23 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 
 ## Changelog
 
+### 2026-02-03 (Session actuelle - Suite 5)
+
+#### ✅ WhatsApp P1 Features Finalisés et Testés
+- **QR Code issue résolu**: Service WhatsApp Node.js redémarré, session reconnectée automatiquement
+- **URL correcte**: `/admin/whatsapp` (pas `/admin/whatsapp-config`)
+- **Gestion messages audio améliorée**: 
+  - Service Node.js télécharge les fichiers audio
+  - Backend transcrit via fichier local (plus fiable que URL)
+  - Nettoyage automatique des fichiers temporaires
+- **Boutons de test briefings**: Interface UI pour tester manuellement l'envoi des briefings
+- **API test-briefing**: Nouvel endpoint `/api/whatsapp/test-briefing` pour déclencher manuellement
+
+#### ✅ Tests passés: iteration_49
+- Backend: 20/20 tests (100%)
+- Frontend: 100% (UI vérifiée)
+- Service WhatsApp: Connecté et fonctionnel
+
 ### 2026-02-03 (Session actuelle - Suite 2)
 
 ### 2026-02-03 (Session actuelle - Suite 4)
