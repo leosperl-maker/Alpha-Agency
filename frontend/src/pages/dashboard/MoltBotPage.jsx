@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { 
-  Bot, Send, Mic, MicOff, Loader2, Settings, Phone, Mail,
+  Bot, Send, Settings, Phone,
   FileText, Calendar, Users, DollarSign, CheckSquare, Search,
-  Sparkles, MessageSquare, Bell, Clock, TrendingUp, Zap,
-  ExternalLink, Copy, Check, Plus, ArrowRight, RefreshCw,
-  Volume2, VolumeX, Paperclip, Download, Eye, Trash2,
-  ChevronDown, ChevronUp, AlertCircle, CheckCircle2, XCircle, X
+  Sparkles, TrendingUp, Zap,
+  ExternalLink, X, ChevronDown, ChevronUp, Menu
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -17,11 +15,11 @@ const MoltBotPage = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [stats, setStats] = useState(null);
   const [briefing, setBriefing] = useState(null);
   const [showBriefing, setShowBriefing] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -30,11 +28,8 @@ const MoltBotPage = () => {
     adminPhone: "",
     morningBriefing: true,
     eveningRecap: true,
-    briefingTime: "08:00",
-    recapTime: "18:00",
     notifyNewLeads: true,
-    notifyPayments: true,
-    notifyOverdue: true
+    notifyPayments: true
   });
 
   useEffect(() => {
@@ -70,7 +65,7 @@ const MoltBotPage = () => {
       // Welcome message
       setMessages([{
         type: "bot",
-        text: "Bonjour ! 👋 Je suis MoltBot, votre assistant IA intégré au CRM. Je peux vous aider à :\n\n• Gérer vos contacts et clients\n• Créer des devis et factures\n• Planifier des RDV\n• Suivre vos tâches\n• Rechercher des informations\n\nQue puis-je faire pour vous ?",
+        text: "Bonjour ! 👋 Je suis MoltBot, votre assistant IA. Je peux gérer vos contacts, créer des devis, planifier des RDV et bien plus.\n\nTapez \"aide\" pour voir toutes les commandes.",
         time: new Date()
       }]);
     } catch (error) {
@@ -89,115 +84,97 @@ const MoltBotPage = () => {
 
     try {
       // === STATS & BRIEFING ===
-      if (lowerText.includes("ca") || lowerText.includes("chiffre") || lowerText.includes("revenue")) {
+      if (lowerText.includes("ca") || lowerText.includes("chiffre") || lowerText.includes("revenue") || lowerText.includes("stats")) {
         const res = await fetch(`${API}/api/moltbot/stats?period=month`, { headers });
         const data = await res.json();
-        return `📊 **Statistiques du mois**\n\n💰 CA: ${data.revenue?.current?.toLocaleString('fr-FR') || 0}€\n📝 Devis en attente: ${data.revenue?.pending_count || 0} (${data.revenue?.pending_quotes?.toLocaleString('fr-FR') || 0}€)\n👥 Nouveaux contacts: ${data.contacts?.new || 0}\n✅ Tâches terminées: ${data.tasks?.completed || 0}`;
+        return `📊 **Stats du mois**\n\n💰 CA: ${data.revenue?.current?.toLocaleString('fr-FR') || 0}€\n📝 Devis en attente: ${data.revenue?.pending_count || 0}\n👥 Nouveaux contacts: ${data.contacts?.new || 0}\n✅ Tâches terminées: ${data.tasks?.completed || 0}`;
       }
 
       if (lowerText.includes("briefing") || lowerText.includes("journée") || lowerText.includes("aujourd'hui")) {
         const res = await fetch(`${API}/api/moltbot/briefing`, { headers });
         const data = await res.json();
-        let response = `☀️ **${data.greeting}**\n\n`;
-        response += `📋 **Tâches:** ${data.tasks?.count || 0} à faire\n`;
-        response += `📅 **RDV:** ${data.appointments?.count || 0} prévus\n`;
-        if (data.alerts?.new_leads) response += `🆕 **Nouveaux leads:** ${data.alerts.new_leads}\n`;
-        if (data.alerts?.overdue_invoices?.length) response += `⚠️ **Factures en retard:** ${data.alerts.overdue_invoices.length}\n`;
-        response += `\n💰 **CA du mois:** ${data.stats?.ca_month?.toLocaleString('fr-FR') || 0}€`;
-        return response;
-      }
-
-      if (lowerText.includes("recap") || lowerText.includes("récap") || lowerText.includes("bilan")) {
-        const res = await fetch(`${API}/api/moltbot/recap`, { headers });
-        const data = await res.json();
-        let response = `🌙 **${data.summary}**\n\n`;
-        response += `✅ **Terminées:** ${data.completed?.count || 0} tâches\n`;
-        response += `⏳ **En attente:** ${data.remaining?.count || 0} tâches\n\n`;
-        if (data.tomorrow?.appointments?.length) {
-          response += `📅 **Demain:**\n`;
-          data.tomorrow.appointments.forEach(rdv => {
-            const time = new Date(rdv.start_time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-            response += `• ${time} - ${rdv.title}\n`;
-          });
+        let response = `☀️ **Briefing du jour**\n\n`;
+        response += `📋 ${data.tasks?.count || 0} tâches en cours\n`;
+        response += `📅 ${data.appointments?.count || 0} RDV aujourd'hui\n`;
+        response += `💰 CA du mois: ${data.stats?.ca_month?.toLocaleString('fr-FR') || 0}€\n`;
+        if (data.alerts?.length) {
+          response += `\n⚠️ Alertes: ${data.alerts.join(', ')}`;
         }
-        return response;
-      }
-
-      // === CONTACTS ===
-      if (lowerText.includes("cherche") && (lowerText.includes("contact") || lowerText.includes("client"))) {
-        const searchTerm = text.replace(/cherche|contact|client|le|la|les|un|une/gi, '').trim();
-        const res = await fetch(`${API}/api/moltbot/contacts?search=${encodeURIComponent(searchTerm)}`, { headers });
-        const data = await res.json();
-        if (data.contacts?.length) {
-          const contact = data.contacts[0];
-          return `👤 **${contact.first_name} ${contact.last_name}**\n\n📧 ${contact.email || 'N/A'}\n📱 ${contact.phone || 'N/A'}\n🏢 ${contact.company || 'N/A'}\n🏷️ Status: ${contact.status || 'N/A'}`;
-        }
-        return "❌ Aucun contact trouvé avec ce nom.";
-      }
-
-      if (lowerText.includes("crée") && lowerText.includes("contact")) {
-        return "Pour créer un contact, donnez-moi les informations suivantes:\n\n• Prénom et nom\n• Email\n• Téléphone\n• Entreprise (optionnel)\n\nExemple: \"Crée le contact Jean Dupont, jean@email.com, 0690123456\"";
-      }
-
-      if (lowerText.includes("nouveau") && (lowerText.includes("lead") || lowerText.includes("contact"))) {
-        const res = await fetch(`${API}/api/moltbot/contacts?limit=5`, { headers });
-        const data = await res.json();
-        let response = "📥 **Derniers contacts:**\n\n";
-        data.contacts?.slice(0, 5).forEach(c => {
-          response += `• ${c.first_name} ${c.last_name} (${c.source || 'direct'})\n`;
-        });
         return response;
       }
 
       // === TASKS ===
-      if (lowerText.includes("tâche") || lowerText.includes("task") || lowerText.includes("à faire")) {
-        if (lowerText.includes("crée") || lowerText.includes("ajoute") || lowerText.includes("nouvelle")) {
-          const titleMatch = text.match(/(?:crée|ajoute|nouvelle)\s+(?:une\s+)?(?:tâche|task)?\s*[:\-]?\s*(.+?)(?:\s+pour\s+|$)/i);
-          if (titleMatch) {
-            const title = titleMatch[1].trim();
+      if (lowerText.includes("tâche") || lowerText.includes("task") || lowerText.includes("todo")) {
+        if (lowerText.includes("ajoute") || lowerText.includes("crée") || lowerText.includes("nouvelle")) {
+          const taskTitle = text.replace(/ajoute|crée|une|nouvelle|tâche|task|todo|:/gi, '').trim();
+          if (taskTitle) {
             const res = await fetch(`${API}/api/moltbot/tasks`, {
               method: "POST",
               headers,
-              body: JSON.stringify({ title, priority: "medium" })
+              body: JSON.stringify({ title: taskTitle, priority: "medium" })
             });
             const data = await res.json();
-            return `✅ Tâche créée: "${title}"\n\n🔔 Je vous rappellerai !`;
+            return `✅ Tâche créée: "${data.title}"`;
           }
-          return "Pour créer une tâche, dites par exemple:\n\"Ajoute une tâche: Appeler le client Dupont\"";
+          return "Précisez le titre de la tâche:\n\"Ajoute une tâche: Appeler client Martin\"";
         }
 
-        if (lowerText.includes("terminé") || lowerText.includes("fait") || lowerText.includes("fini")) {
-          const taskMatch = text.match(/(?:terminé|fait|fini)[:\-]?\s*(.+)/i);
-          if (taskMatch) {
-            const taskName = taskMatch[1].trim();
-            const res = await fetch(`${API}/api/moltbot/tasks/${encodeURIComponent(taskName)}/complete`, {
-              method: "PUT",
-              headers
-            });
-            if (res.ok) {
-              return `✅ Tâche "${taskName}" marquée comme terminée ! Bravo ! 🎉`;
-            }
+        if (lowerText.includes("terminé") || lowerText.includes("fini") || lowerText.includes("complété")) {
+          const taskTitle = text.replace(/terminé|fini|complété|:/gi, '').trim();
+          const res = await fetch(`${API}/api/moltbot/tasks/complete`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ search: taskTitle })
+          });
+          if (res.ok) {
+            return `✅ Tâche marquée comme terminée !`;
           }
+          return "Tâche non trouvée. Vérifiez le titre.";
         }
 
-        // List tasks
-        const res = await fetch(`${API}/api/moltbot/tasks?status=todo`, { headers });
+        const res = await fetch(`${API}/api/moltbot/tasks`, { headers });
         const data = await res.json();
         if (data.tasks?.length) {
-          let response = "📋 **Vos tâches en cours:**\n\n";
-          data.tasks.slice(0, 10).forEach((t, i) => {
-            const priority = t.priority === "urgent" ? "🔴" : t.priority === "high" ? "🟠" : "🟢";
-            response += `${priority} ${t.title}\n`;
+          let response = "📋 **Vos tâches:**\n\n";
+          data.tasks.slice(0, 8).forEach(task => {
+            const icon = task.status === "completed" ? "✅" : task.priority === "high" ? "🔴" : "⚪";
+            response += `${icon} ${task.title}\n`;
           });
           return response;
         }
-        return "✅ Aucune tâche en cours ! Vous êtes à jour.";
+        return "📋 Aucune tâche en cours. Dites \"Ajoute une tâche: ...\" pour en créer une.";
       }
 
-      // === DEVIS / FACTURES ===
+      // === CONTACTS ===
+      if (lowerText.includes("contact") || lowerText.includes("client") || lowerText.includes("lead")) {
+        if (lowerText.includes("nouveau") || lowerText.includes("récent")) {
+          const res = await fetch(`${API}/api/moltbot/contacts?recent=true&limit=5`, { headers });
+          const data = await res.json();
+          if (data.contacts?.length) {
+            let response = "👥 **Derniers contacts:**\n\n";
+            data.contacts.forEach(c => {
+              response += `• ${c.first_name} ${c.last_name} ${c.company ? `(${c.company})` : ''}\n`;
+            });
+            return response;
+          }
+          return "Aucun contact récent trouvé.";
+        }
+
+        const searchTerm = text.replace(/contact|client|lead|trouve|cherche|le|la/gi, '').trim();
+        if (searchTerm) {
+          const res = await fetch(`${API}/api/moltbot/contacts?search=${encodeURIComponent(searchTerm)}`, { headers });
+          const data = await res.json();
+          if (data.contacts?.length) {
+            const c = data.contacts[0];
+            return `👤 **${c.first_name} ${c.last_name}**\n\n${c.company ? `🏢 ${c.company}\n` : ''}${c.email ? `📧 ${c.email}\n` : ''}${c.phone ? `📱 ${c.phone}\n` : ''}`;
+          }
+          return `Aucun contact trouvé pour "${searchTerm}"`;
+        }
+      }
+
+      // === INVOICES ===
       if (lowerText.includes("devis") || lowerText.includes("facture")) {
-        if (lowerText.includes("crée") || lowerText.includes("créer") || lowerText.includes("nouveau")) {
-          // Parse: "Crée un devis de 3000€ pour Dupont, site vitrine"
+        if (lowerText.includes("crée") || lowerText.includes("nouveau")) {
           const match = text.match(/(\d+)\s*€?\s*(?:pour|client)?\s*([^,]+),?\s*(.+)?/i);
           if (match) {
             const amount = parseFloat(match[1]);
@@ -214,12 +191,11 @@ const MoltBotPage = () => {
               })
             });
             const data = await res.json();
-            return `✅ **${lowerText.includes("facture") ? "Facture" : "Devis"} créé !**\n\n📄 N° ${data.number}\n👤 Client: ${clientName}\n💰 Montant: ${data.total?.toLocaleString('fr-FR')}€ TTC\n\n📎 Je peux vous l'envoyer par email ou WhatsApp. Dites "envoie le devis à ${clientName}"`;
+            return `✅ **${lowerText.includes("facture") ? "Facture" : "Devis"} créé !**\n\n📄 N° ${data.number}\n👤 ${clientName}\n💰 ${data.total?.toLocaleString('fr-FR')}€ TTC`;
           }
-          return "Pour créer un devis, dites par exemple:\n\"Crée un devis de 3000€ pour Dupont, création site web\"";
+          return "Exemple: \"Crée un devis de 3000€ pour Dupont, création site web\"";
         }
 
-        // List invoices
         const type = lowerText.includes("facture") ? "facture" : "devis";
         const res = await fetch(`${API}/api/moltbot/invoices?type=${type}`, { headers });
         const data = await res.json();
@@ -236,10 +212,6 @@ const MoltBotPage = () => {
 
       // === RDV ===
       if (lowerText.includes("rdv") || lowerText.includes("rendez-vous") || lowerText.includes("meeting")) {
-        if (lowerText.includes("crée") || lowerText.includes("planifie") || lowerText.includes("place")) {
-          return "Pour créer un RDV, dites par exemple:\n\"Place un RDV avec Dupont le 15 février à 14h pour présentation devis\"\n\nJe peux aussi envoyer une invitation visio Google Meet !";
-        }
-
         const res = await fetch(`${API}/api/moltbot/appointments?upcoming=true`, { headers });
         const data = await res.json();
         if (data.appointments?.length) {
@@ -250,7 +222,7 @@ const MoltBotPage = () => {
           });
           return response;
         }
-        return "📅 Aucun RDV prévu. Dites \"Crée un RDV\" pour en planifier un !";
+        return "📅 Aucun RDV prévu.";
       }
 
       // === SEARCH ===
@@ -268,389 +240,338 @@ const MoltBotPage = () => {
 
         if (data.results?.contacts?.length) {
           hasResults = true;
-          response += `**Contacts:**\n`;
-          data.results.contacts.forEach(c => {
-            response += `• ${c.first_name} ${c.last_name}\n`;
-          });
+          response += `**Contacts:** `;
+          response += data.results.contacts.map(c => `${c.first_name} ${c.last_name}`).join(', ') + '\n';
         }
         if (data.results?.invoices?.length) {
           hasResults = true;
-          response += `\n**Devis/Factures:**\n`;
-          data.results.invoices.forEach(i => {
-            response += `• ${i.number} - ${i.client_name}\n`;
-          });
-        }
-        if (data.results?.tasks?.length) {
-          hasResults = true;
-          response += `\n**Tâches:**\n`;
-          data.results.tasks.forEach(t => {
-            response += `• ${t.title}\n`;
-          });
+          response += `**Devis/Factures:** `;
+          response += data.results.invoices.map(i => i.number).join(', ') + '\n';
         }
 
-        return hasResults ? response : `Aucun résultat trouvé pour "${searchTerm}"`;
-      }
-
-      // === DOCUMENTS ===
-      if (lowerText.includes("document") || lowerText.includes("fichier") || lowerText.includes("contrat")) {
-        const searchTerm = text.replace(/document|fichier|contrat|envoie|montre|trouve/gi, '').trim();
-        const res = await fetch(`${API}/api/moltbot/documents?search=${encodeURIComponent(searchTerm)}`, { headers });
-        const data = await res.json();
-        if (data.documents?.length) {
-          let response = "📁 **Documents trouvés:**\n\n";
-          data.documents.slice(0, 5).forEach(doc => {
-            response += `• ${doc.name}\n`;
-          });
-          return response;
-        }
-        return "Aucun document trouvé. Vérifiez l'orthographe ou uploadez le document dans l'onglet Documents.";
-      }
-
-      // === RAPPELS ===
-      if (lowerText.includes("rappel") || lowerText.includes("rappelle")) {
-        if (lowerText.includes("crée") || lowerText.includes("mets") || lowerText.includes("programme")) {
-          return "Pour créer un rappel, dites par exemple:\n\"Rappelle-moi d'appeler Dupont demain à 10h\"";
-        }
-        const res = await fetch(`${API}/api/moltbot/reminders`, { headers });
-        const data = await res.json();
-        if (data.reminders?.length) {
-          let response = "🔔 **Vos rappels:**\n\n";
-          data.reminders.forEach(r => {
-            const date = new Date(r.remind_at);
-            response += `• ${date.toLocaleDateString('fr-FR')} ${date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - ${r.message}\n`;
-          });
-          return response;
-        }
-        return "Aucun rappel programmé.";
+        return hasResults ? response : `Aucun résultat pour "${searchTerm}"`;
       }
 
       // === HELP ===
       if (lowerText.includes("aide") || lowerText.includes("help") || lowerText.includes("commande")) {
-        return `🤖 **Commandes disponibles:**\n
-📊 **Stats:** "CA du mois", "Stats", "Briefing"
-👥 **Contacts:** "Cherche le client Dupont", "Nouveaux leads"
-📋 **Tâches:** "Mes tâches", "Ajoute une tâche: ...", "Terminé: ..."
-📄 **Devis:** "Crée un devis de X€ pour...", "Liste des devis"
-📅 **RDV:** "Mes RDV", "Place un RDV..."
-🔔 **Rappels:** "Rappelle-moi de...", "Mes rappels"
-🔍 **Recherche:** "Recherche Dupont", "Trouve le contrat..."
-📁 **Documents:** "Document Dupont", "Envoie le contrat..."`;
+        return `🤖 **Commandes MoltBot:**\n
+📊 "CA du mois" / "Stats" / "Briefing"
+👥 "Cherche client Dupont" / "Nouveaux contacts"
+📋 "Mes tâches" / "Ajoute tâche: ..." / "Terminé: ..."
+📄 "Crée devis de X€ pour..." / "Liste devis"
+📅 "Mes RDV"
+🔍 "Recherche Dupont"`;
       }
 
-      // Default response
-      return "Je n'ai pas compris votre demande. Dites \"aide\" pour voir les commandes disponibles, ou posez votre question autrement.\n\nExemples:\n• \"CA du mois\"\n• \"Mes tâches\"\n• \"Crée un devis de 1500€ pour Dupont\"";
+      // Default
+      return "Je n'ai pas compris. Dites \"aide\" pour voir les commandes disponibles.";
 
     } catch (error) {
-      console.error("Error processing command:", error);
-      return "Désolé, une erreur s'est produite. Réessayez ou dites \"aide\" pour voir les commandes disponibles.";
+      console.error("Error:", error);
+      return "Erreur. Réessayez ou dites \"aide\".";
     }
   };
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
-    const userMessage = {
-      type: "user",
-      text: input,
-      time: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    const userInput = input;
+    const userMessage = input.trim();
     setInput("");
+    setMessages(prev => [...prev, { type: "user", text: userMessage, time: new Date() }]);
     setLoading(true);
 
-    try {
-      const response = await processCommand(userInput);
-      setMessages(prev => [...prev, {
-        type: "bot",
-        text: response,
-        time: new Date()
-      }]);
-    } catch (error) {
-      setMessages(prev => [...prev, {
-        type: "bot",
-        text: "Désolé, une erreur s'est produite. Réessayez.",
-        time: new Date()
-      }]);
-    }
-
+    const response = await processCommand(userMessage);
+    
+    setMessages(prev => [...prev, { type: "bot", text: response, time: new Date() }]);
     setLoading(false);
     inputRef.current?.focus();
   };
 
   const quickActions = [
-    { label: "📊 Stats du mois", command: "CA du mois" },
-    { label: "📋 Mes tâches", command: "Mes tâches" },
-    { label: "📅 Mes RDV", command: "Mes RDV" },
-    { label: "📄 Derniers devis", command: "Liste des devis" },
-    { label: "☀️ Briefing", command: "Briefing du jour" },
-    { label: "🌙 Récap", command: "Récap de la journée" },
+    { label: "📊 Stats", command: "Stats du mois" },
+    { label: "📋 Tâches", command: "Mes tâches" },
+    { label: "📅 RDV", command: "Mes RDV" },
+    { label: "📄 Devis", command: "Liste des devis" },
+    { label: "☀️ Briefing", command: "Briefing" },
+    { label: "❓ Aide", command: "Aide" },
   ];
 
   return (
-    <div data-testid="moltbot-page" className="h-[calc(100vh-120px)] flex flex-col lg:flex-row gap-4">
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col glass-panel rounded-xl overflow-hidden">
-        {/* Header */}
-        <div className="p-4 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-violet-600/20 to-purple-600/20">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center">
-              <Bot className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">MoltBot</h1>
-              <p className="text-white/60 text-sm">Assistant IA • Remplace l'assistant précédent</p>
-            </div>
+    <div data-testid="moltbot-page" className="h-full flex flex-col overflow-hidden">
+      {/* Mobile Header */}
+      <div className="flex items-center justify-between p-3 border-b border-white/10 lg:hidden">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center">
+            <Bot className="w-4 h-4 text-white" />
           </div>
-          <div className="flex items-center gap-2">
-            <div className="px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-green-400 text-sm">En ligne</span>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowSettings(!showSettings)}
-              className="text-white/70 hover:text-white hover:bg-white/10"
-            >
-              <Settings className="w-5 h-5" />
-            </Button>
-          </div>
+          <span className="text-white font-semibold">MoltBot</span>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowSidebar(!showSidebar)}
+          className="text-white/70"
+        >
+          <Menu className="w-5 h-5" />
+        </Button>
+      </div>
 
-        {/* Daily Briefing Banner */}
-        {briefing && showBriefing && (
-          <div className="mx-4 mt-4 p-4 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-amber-400" />
+      <div className="flex-1 flex overflow-hidden">
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Desktop Header */}
+          <div className="hidden lg:flex items-center justify-between p-4 border-b border-white/10 bg-gradient-to-r from-violet-600/10 to-purple-600/10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-white">MoltBot</h1>
+                <p className="text-white/50 text-xs">Assistant IA intégré au CRM</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="px-2 py-1 rounded-full bg-green-500/20 border border-green-500/30 flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-green-400 text-xs">En ligne</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSettings(!showSettings)}
+                className="text-white/70 hover:text-white hover:bg-white/10"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Briefing Banner */}
+          {briefing && showBriefing && (
+            <div className="mx-3 mt-3 p-3 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-white/80 text-sm truncate">
+                      📋 {briefing.tasks?.count || 0} tâches • 📅 {briefing.appointments?.count || 0} RDV • 💰 {briefing.stats?.ca_month?.toLocaleString('fr-FR') || 0}€
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-white font-semibold">Briefing du jour</h3>
-                  <p className="text-white/70 text-sm mt-1">
-                    📋 {briefing.tasks?.count || 0} tâches • 
-                    📅 {briefing.appointments?.count || 0} RDV • 
-                    💰 {briefing.stats?.ca_month?.toLocaleString('fr-FR') || 0}€ ce mois
+                <button onClick={() => setShowBriefing(false)} className="text-white/50 hover:text-white ml-2 flex-shrink-0">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-3">
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div className={`max-w-[85%] sm:max-w-[75%]`}>
+                  <div
+                    className={`px-3 py-2 rounded-xl text-sm ${
+                      msg.type === "user"
+                        ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-br-sm"
+                        : "bg-white/5 text-white/90 rounded-bl-sm border border-white/10"
+                    }`}
+                  >
+                    <p className="whitespace-pre-line break-words">{msg.text}</p>
+                  </div>
+                  <p className={`text-[10px] text-white/40 mt-0.5 ${msg.type === "user" ? "text-right" : "text-left"}`}>
+                    {msg.time.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
               </div>
-              <button onClick={() => setShowBriefing(false)} className="text-white/50 hover:text-white">
-                <X className="w-4 h-4" />
-              </button>
+            ))}
+
+            {loading && (
+              <div className="flex justify-start">
+                <div className="bg-white/5 px-3 py-2 rounded-xl rounded-bl-sm border border-white/10">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Actions */}
+          <div className="px-3 py-2 border-t border-white/10 overflow-x-auto">
+            <div className="flex gap-2">
+              {quickActions.map((action, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setInput(action.command);
+                    setTimeout(() => sendMessage(), 100);
+                  }}
+                  className="px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-xs whitespace-nowrap transition-colors border border-white/10"
+                >
+                  {action.label}
+                </button>
+              ))}
             </div>
           </div>
-        )}
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div className={`max-w-[80%] ${msg.type === "user" ? "" : ""}`}>
-                <div
-                  className={`px-4 py-3 rounded-2xl ${
-                    msg.type === "user"
-                      ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-br-md"
-                      : "bg-white/10 text-white rounded-bl-md border border-white/10"
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-line">{msg.text}</p>
-                </div>
-                <p className={`text-xs text-white/40 mt-1 ${msg.type === "user" ? "text-right" : "text-left"}`}>
-                  {msg.time.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                </p>
-              </div>
+          {/* Input */}
+          <div className="p-3 border-t border-white/10">
+            <div className="flex gap-2">
+              <Input
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                placeholder="Votre message..."
+                className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-white/40 text-sm h-9"
+              />
+              <Button
+                onClick={sendMessage}
+                disabled={!input.trim() || loading}
+                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 h-9 px-3"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
             </div>
-          ))}
+          </div>
+        </div>
 
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-white/10 px-4 py-3 rounded-2xl rounded-bl-md border border-white/10">
-                <div className="flex gap-1">
-                  <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+        {/* Sidebar */}
+        <div className={`
+          ${showSidebar ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+          fixed lg:relative right-0 top-0 lg:top-auto h-full lg:h-auto
+          w-72 lg:w-64 xl:w-72
+          bg-[#0a0a12] lg:bg-transparent
+          border-l border-white/10
+          p-3 space-y-3 overflow-y-auto
+          transition-transform duration-300 ease-in-out
+          z-50 lg:z-auto
+        `}>
+          {/* Close button mobile */}
+          <div className="flex justify-between items-center lg:hidden mb-2">
+            <span className="text-white font-semibold">Infos</span>
+            <button onClick={() => setShowSidebar(false)} className="text-white/50 hover:text-white">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Quick Stats */}
+          {stats && (
+            <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+              <h3 className="text-white font-medium mb-2 flex items-center gap-2 text-sm">
+                <TrendingUp className="w-4 h-4 text-violet-400" />
+                Stats du mois
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2 rounded bg-white/5">
+                  <p className="text-white/50 text-[10px]">CA</p>
+                  <p className="text-white font-semibold text-sm">{stats.revenue?.current?.toLocaleString('fr-FR') || 0}€</p>
+                </div>
+                <div className="p-2 rounded bg-white/5">
+                  <p className="text-white/50 text-[10px]">Contacts</p>
+                  <p className="text-white font-semibold text-sm">{stats.contacts?.new || 0}</p>
+                </div>
+                <div className="p-2 rounded bg-white/5">
+                  <p className="text-white/50 text-[10px]">Tâches</p>
+                  <p className="text-white font-semibold text-sm">{stats.tasks?.pending || 0}</p>
+                </div>
+                <div className="p-2 rounded bg-white/5">
+                  <p className="text-white/50 text-[10px]">RDV</p>
+                  <p className="text-white font-semibold text-sm">{stats.appointments?.upcoming || 0}</p>
                 </div>
               </div>
             </div>
           )}
 
-          <div ref={messagesEndRef} />
-        </div>
+          {/* Settings Panel */}
+          {showSettings && (
+            <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+              <h3 className="text-white font-medium mb-2 flex items-center gap-2 text-sm">
+                <Settings className="w-4 h-4 text-violet-400" />
+                Paramètres
+              </h3>
+              <div className="space-y-2">
+                <div>
+                  <label className="text-white/70 text-xs">Téléphone WhatsApp</label>
+                  <Input
+                    placeholder="+590690..."
+                    value={settings.adminPhone}
+                    onChange={(e) => setSettings({ ...settings, adminPhone: e.target.value })}
+                    className="mt-1 bg-white/5 border-white/10 text-white text-sm h-8"
+                  />
+                </div>
+                
+                {[
+                  { key: 'morningBriefing', label: 'Briefing matin' },
+                  { key: 'eveningRecap', label: 'Récap soir' },
+                  { key: 'notifyNewLeads', label: 'Alertes leads' },
+                ].map(({ key, label }) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <span className="text-white/70 text-xs">{label}</span>
+                    <button
+                      onClick={() => setSettings({ ...settings, [key]: !settings[key] })}
+                      className={`w-8 h-4 rounded-full relative transition-colors ${
+                        settings[key] ? 'bg-violet-600' : 'bg-white/20'
+                      }`}
+                    >
+                      <div className={`absolute w-3 h-3 rounded-full bg-white top-0.5 transition-all ${
+                        settings[key] ? 'left-4' : 'left-0.5'
+                      }`} />
+                    </button>
+                  </div>
+                ))}
 
-        {/* Quick Actions */}
-        <div className="px-4 py-2 border-t border-white/10 overflow-x-auto">
-          <div className="flex gap-2 min-w-max">
-            {quickActions.map((action, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  setInput(action.command);
-                  setTimeout(() => sendMessage(), 100);
-                }}
-                className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-sm whitespace-nowrap transition-colors border border-white/10"
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Input */}
-        <div className="p-4 border-t border-white/10">
-          <div className="flex gap-2">
-            <Input
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-              placeholder="Tapez votre message... (ex: CA du mois, Crée un devis...)"
-              className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-white/40"
-            />
-            <Button
-              onClick={sendMessage}
-              disabled={!input.trim() || loading}
-              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Sidebar - Stats & Settings */}
-      <div className="w-full lg:w-80 space-y-4">
-        {/* Quick Stats */}
-        {stats && (
-          <div className="glass-panel rounded-xl p-4">
-            <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-violet-400" />
-              Stats du mois
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-lg bg-white/5">
-                <p className="text-white/50 text-xs">CA</p>
-                <p className="text-white font-bold">{stats.revenue?.current?.toLocaleString('fr-FR') || 0}€</p>
-              </div>
-              <div className="p-3 rounded-lg bg-white/5">
-                <p className="text-white/50 text-xs">Nouveaux contacts</p>
-                <p className="text-white font-bold">{stats.contacts?.new || 0}</p>
-              </div>
-              <div className="p-3 rounded-lg bg-white/5">
-                <p className="text-white/50 text-xs">Tâches en cours</p>
-                <p className="text-white font-bold">{stats.tasks?.pending || 0}</p>
-              </div>
-              <div className="p-3 rounded-lg bg-white/5">
-                <p className="text-white/50 text-xs">RDV à venir</p>
-                <p className="text-white font-bold">{stats.appointments?.upcoming || 0}</p>
+                <Button size="sm" className="w-full mt-2 bg-white/10 hover:bg-white/20 text-white text-xs h-8">
+                  Sauvegarder
+                </Button>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Settings Panel */}
-        {showSettings && (
-          <div className="glass-panel rounded-xl p-4">
-            <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-              <Settings className="w-4 h-4 text-violet-400" />
-              Paramètres MoltBot
+          {/* WhatsApp */}
+          <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+            <h3 className="text-white font-medium mb-2 flex items-center gap-2 text-sm">
+              <Phone className="w-4 h-4 text-green-400" />
+              WhatsApp
             </h3>
-            <div className="space-y-3">
-              <div>
-                <label className="text-white/70 text-sm">Téléphone admin (WhatsApp)</label>
-                <Input
-                  placeholder="+590690..."
-                  value={settings.adminPhone}
-                  onChange={(e) => setSettings({ ...settings, adminPhone: e.target.value })}
-                  className="mt-1 bg-white/5 border-white/10 text-white"
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-white/70 text-sm">Briefing matin</span>
-                <button
-                  onClick={() => setSettings({ ...settings, morningBriefing: !settings.morningBriefing })}
-                  className={`w-10 h-5 rounded-full relative transition-colors ${
-                    settings.morningBriefing ? 'bg-violet-600' : 'bg-white/20'
-                  }`}
-                >
-                  <div className={`absolute w-4 h-4 rounded-full bg-white top-0.5 transition-all ${
-                    settings.morningBriefing ? 'left-5' : 'left-0.5'
-                  }`} />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-white/70 text-sm">Récap soir</span>
-                <button
-                  onClick={() => setSettings({ ...settings, eveningRecap: !settings.eveningRecap })}
-                  className={`w-10 h-5 rounded-full relative transition-colors ${
-                    settings.eveningRecap ? 'bg-violet-600' : 'bg-white/20'
-                  }`}
-                >
-                  <div className={`absolute w-4 h-4 rounded-full bg-white top-0.5 transition-all ${
-                    settings.eveningRecap ? 'left-5' : 'left-0.5'
-                  }`} />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-white/70 text-sm">Alertes nouveaux leads</span>
-                <button
-                  onClick={() => setSettings({ ...settings, notifyNewLeads: !settings.notifyNewLeads })}
-                  className={`w-10 h-5 rounded-full relative transition-colors ${
-                    settings.notifyNewLeads ? 'bg-violet-600' : 'bg-white/20'
-                  }`}
-                >
-                  <div className={`absolute w-4 h-4 rounded-full bg-white top-0.5 transition-all ${
-                    settings.notifyNewLeads ? 'left-5' : 'left-0.5'
-                  }`} />
-                </button>
-              </div>
-
-              <Button className="w-full mt-2 bg-white/10 hover:bg-white/20 text-white">
-                Sauvegarder
+            <p className="text-white/50 text-xs mb-2">
+              Contrôlez le CRM via WhatsApp.
+            </p>
+            <a href="/admin/whatsapp">
+              <Button size="sm" className="w-full bg-green-600 hover:bg-green-500 text-xs h-8">
+                <ExternalLink className="w-3 h-3 mr-1" />
+                Configurer
               </Button>
-            </div>
+            </a>
           </div>
+
+          {/* Tips */}
+          <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+            <h3 className="text-white font-medium mb-2 text-sm">💡 Astuces</h3>
+            <ul className="text-white/60 text-xs space-y-1">
+              <li>• "Crée un devis de 2000€ pour Dupont"</li>
+              <li>• "Ajoute une tâche: Rappeler client"</li>
+              <li>• "Cherche le client Martin"</li>
+              <li>• "CA du mois"</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Overlay for mobile sidebar */}
+        {showSidebar && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setShowSidebar(false)}
+          />
         )}
-
-        {/* WhatsApp Integration */}
-        <div className="glass-panel rounded-xl p-4">
-          <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-            <Phone className="w-4 h-4 text-green-400" />
-            Intégration WhatsApp
-          </h3>
-          <p className="text-white/50 text-sm mb-3">
-            Connectez votre WhatsApp pour recevoir les briefings, alertes et contrôler le CRM par message.
-          </p>
-          <a
-            href="https://app.emergent.sh/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button className="w-full bg-green-600 hover:bg-green-500">
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Configurer MoltBot
-            </Button>
-          </a>
-        </div>
-
-        {/* Help */}
-        <div className="glass-panel rounded-xl p-4">
-          <h3 className="text-white font-semibold mb-2">💡 Astuces</h3>
-          <ul className="text-white/60 text-sm space-y-1">
-            <li>• "Crée un devis de 2000€ pour Dupont"</li>
-            <li>• "Ajoute une tâche: Rappeler client"</li>
-            <li>• "Terminé: Appeler comptable"</li>
-            <li>• "Cherche le client Martin"</li>
-            <li>• "CA du mois"</li>
-          </ul>
-        </div>
       </div>
     </div>
   );
