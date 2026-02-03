@@ -775,6 +775,130 @@ const DashboardOverview = () => {
         </Card>
       </div>
 
+      {/* Hot Leads & Churn Alerts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Hot Leads */}
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-white text-base flex items-center gap-2">
+              <Flame className="w-4 h-4 text-orange-400" />
+              Leads Chauds
+            </CardTitle>
+            <Link to="/admin/contacts" className="text-xs text-orange-400 hover:text-orange-300">
+              Voir tous →
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {hotLeads.length === 0 ? (
+              <div className="text-center py-6">
+                <Target className="w-8 h-8 text-white/20 mx-auto mb-2" />
+                <p className="text-white/40 text-sm">Aucun lead chaud détecté</p>
+                <p className="text-white/30 text-xs mt-1">Les leads avec un score ≥ 60 apparaîtront ici</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {hotLeads.map((lead, i) => (
+                  <div 
+                    key={lead.contact_id || i} 
+                    className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-xl hover:from-orange-500/20 hover:to-red-500/20 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/admin/contacts/${lead.contact_id}`)}
+                  >
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white ${
+                      lead.grade === 'A' ? 'bg-green-500' :
+                      lead.grade === 'B' ? 'bg-blue-500' :
+                      'bg-orange-500'
+                    }`}>
+                      {lead.grade}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium truncate">{lead.contact_name || 'Sans nom'}</p>
+                      <p className="text-white/40 text-xs truncate">{lead.company || lead.email || 'Aucune info'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-orange-400 font-bold text-lg">{lead.score}</p>
+                      <p className="text-white/40 text-xs">points</p>
+                    </div>
+                  </div>
+                ))}
+                {hotLeads.length > 0 && (
+                  <div className="pt-2 border-t border-white/10">
+                    <p className="text-white/50 text-xs text-center">
+                      💡 {hotLeads.filter(l => l.grade === 'A').length} leads Grade A prêts à convertir
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Churn Alerts */}
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-white text-base flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-400" />
+              Alertes Churn
+            </CardTitle>
+            <Link to="/admin/contacts" className="text-xs text-red-400 hover:text-red-300">
+              Voir tous →
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {churnAlerts.length === 0 ? (
+              <div className="text-center py-6">
+                <UserCheck className="w-8 h-8 text-green-400/30 mx-auto mb-2" />
+                <p className="text-green-400/60 text-sm">Aucun client à risque</p>
+                <p className="text-white/30 text-xs mt-1">Tous vos clients sont actifs 🎉</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {churnAlerts.map((alert, i) => (
+                  <div 
+                    key={alert.contact_id || i} 
+                    className={`flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer ${
+                      alert.risk_level === 'critical' ? 'bg-red-500/20 border border-red-500/30' :
+                      alert.risk_level === 'high' ? 'bg-orange-500/15' :
+                      'bg-yellow-500/10'
+                    }`}
+                    onClick={() => navigate(`/admin/contacts/${alert.contact_id}`)}
+                  >
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      alert.risk_level === 'critical' ? 'bg-red-500' :
+                      alert.risk_level === 'high' ? 'bg-orange-500' :
+                      'bg-yellow-500'
+                    }`}>
+                      <TrendingDown className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium truncate">{alert.contact_name || 'Client'}</p>
+                      <p className="text-white/40 text-xs truncate">
+                        {alert.warning_signs?.[0] || `${alert.days_since_contact}j sans contact`}
+                      </p>
+                    </div>
+                    <Badge className={`text-xs ${
+                      alert.risk_level === 'critical' ? 'bg-red-500' :
+                      alert.risk_level === 'high' ? 'bg-orange-500' :
+                      'bg-yellow-500'
+                    }`}>
+                      {alert.risk_level === 'critical' ? '🚨 Critique' :
+                       alert.risk_level === 'high' ? '⚠️ Élevé' :
+                       '⚡ Moyen'}
+                    </Badge>
+                  </div>
+                ))}
+                {churnAlerts.filter(a => a.risk_level === 'critical').length > 0 && (
+                  <div className="pt-2 border-t border-white/10">
+                    <p className="text-red-400 text-xs text-center font-medium">
+                      🚨 {churnAlerts.filter(a => a.risk_level === 'critical').length} client(s) nécessitent une action urgente
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* AI Assistant Promo */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600/20 via-purple-600/20 to-pink-600/20 border border-white/10 p-6">
         <div className="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-full blur-3xl" />
