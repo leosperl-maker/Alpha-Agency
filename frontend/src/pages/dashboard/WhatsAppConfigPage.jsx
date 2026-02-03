@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   Phone, QrCode, Wifi, WifiOff, RefreshCw, CheckCircle2, 
   AlertCircle, Send, MessageSquare, Settings, Bell, Clock,
-  User, Loader2, X
+  User, Loader2, X, Camera, Edit2, Upload
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -12,6 +12,7 @@ const API = process.env.REACT_APP_BACKEND_URL;
 
 const WhatsAppConfigPage = () => {
   const [status, setStatus] = useState({ connected: false });
+  const [profile, setProfile] = useState({ name: "", profile_picture: null });
   const [qrCode, setQrCode] = useState(null);
   const [loading, setLoading] = useState(true);
   const [config, setConfig] = useState({
@@ -25,10 +26,15 @@ const WhatsAppConfigPage = () => {
   });
   const [testMessage, setTestMessage] = useState("");
   const [testPhone, setTestPhone] = useState("");
+  const [editingName, setEditingName] = useState(false);
+  const [newProfileName, setNewProfileName] = useState("");
+  const [uploadingPicture, setUploadingPicture] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     loadStatus();
     loadConfig();
+    loadProfile();
     // Poll for status updates
     const interval = setInterval(loadStatus, 5000);
     return () => clearInterval(interval);
@@ -52,6 +58,97 @@ const WhatsAppConfigPage = () => {
       console.error("Error loading status:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadProfile = async () => {
+    try {
+      const res = await fetch(`${API}/api/whatsapp/profile`);
+      const data = await res.json();
+      if (data.connected) {
+        setProfile(data);
+        setNewProfileName(data.name || "");
+      }
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    }
+  };
+
+  const updateProfileName = async () => {
+    if (!newProfileName.trim()) {
+      toast.error("Entrez un nom valide");
+      return;
+    }
+    
+    try {
+      const res = await fetch(`${API}/api/whatsapp/profile/name?name=${encodeURIComponent(newProfileName)}`, {
+        method: "POST",
+        headers: { 
+          "X-MoltBot-Secret": "moltbot-alpha-secret-2024"
+        }
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        toast.success("Nom de profil mis à jour !");
+        setProfile(prev => ({ ...prev, name: newProfileName }));
+        setEditingName(false);
+        loadStatus();
+      } else {
+        toast.error(data.error || "Erreur lors de la mise à jour");
+      }
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour du nom");
+    }
+  };
+
+  const handlePictureUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Veuillez sélectionner une image");
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image trop volumineuse (max 5 Mo)");
+      return;
+    }
+    
+    setUploadingPicture(true);
+    
+    try {
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = e.target.result.split(',')[1]; // Remove data:image/...;base64, prefix
+        
+        const res = await fetch(`${API}/api/whatsapp/profile/picture`, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "X-MoltBot-Secret": "moltbot-alpha-secret-2024"
+          },
+          body: JSON.stringify({ image_base64: base64 })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          toast.success("Photo de profil mise à jour !");
+          loadProfile();
+        } else {
+          toast.error(data.error || "Erreur lors de la mise à jour");
+        }
+        setUploadingPicture(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error("Erreur lors de l'upload");
+      setUploadingPicture(false);
     }
   };
 
