@@ -455,11 +455,14 @@ const MoltBotPage = () => {
           transition-transform duration-300 ease-in-out
           z-50 lg:z-auto
         `}>
-          {/* Close button mobile */}
-          <div className="flex justify-between items-center lg:hidden mb-2">
+          {/* Close button mobile - bien visible */}
+          <div className="flex justify-between items-center lg:hidden mb-3 pb-3 border-b border-white/20">
             <span className="text-white font-semibold">Infos</span>
-            <button onClick={() => setShowSidebar(false)} className="text-white/50 hover:text-white">
-              <X className="w-5 h-5" />
+            <button 
+              onClick={() => setShowSidebar(false)} 
+              className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-white" />
             </button>
           </div>
 
