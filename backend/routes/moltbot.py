@@ -1031,3 +1031,116 @@ async def submit_public_inquiry(
         "message": "Merci pour votre message ! Nous vous répondrons rapidement.",
         "contact_id": contact_id
     }
+
+
+# ----- AI CHAT (pour répondre à n'importe quelle question) -----
+
+class ChatRequest(BaseModel):
+    message: str
+    context: Optional[str] = None
+
+EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
+
+@router.post("/chat")
+async def chat_with_ai(
+    request: ChatRequest,
+    phone: Optional[str] = Header(None, alias="X-MoltBot-Phone"),
+    secret: Optional[str] = Header(None, alias="X-MoltBot-Secret")
+):
+    """
+    Chat with MoltBot using AI (Gemini) for any question.
+    Can answer general questions, provide CRM context, and more.
+    """
+    from emergentintegrations.llm.chat import LlmChat
+    
+    access = get_access_level(phone, secret)
+    if access == "none":
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    message = request.message
+    
+    try:
+        # Get CRM context for AI
+        crm_context = ""
+        
+        if access == "admin":
+            # Get recent stats
+            now = datetime.now(timezone.utc)
+            month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).isoformat()
+            
+            # Contacts count
+            contacts_count = await db.contacts.count_documents({})
+            leads_count = await db.contacts.count_documents({"status": "lead"})
+            clients_count = await db.contacts.count_documents({"status": {"$in": ["client", "active"]}})
+            
+            # Tasks
+            tasks_pending = await db.tasks.count_documents({"status": {"$in": ["todo", "in_progress"]}})
+            
+            # Revenue
+            revenue_data = await db.invoices.find(
+                {"type": "facture", "status": "paid", "created_at": {"$gte": month_start}},
+                {"total": 1}
+            ).to_list(1000)
+            ca_month = sum(inv.get("total", 0) for inv in revenue_data)
+            
+            # Recent activities
+            recent_contacts = await db.contacts.find({}, {"_id": 0, "first_name": 1, "last_name": 1, "company": 1, "created_at": 1}).sort("created_at", -1).limit(3).to_list(3)
+            recent_invoices = await db.invoices.find({}, {"_id": 0, "number": 1, "client_name": 1, "total": 1, "type": 1}).sort("created_at", -1).limit(3).to_list(3)
+            
+            crm_context = f"""
+Contexte CRM Alpha Agency:
+- {contacts_count} contacts total ({leads_count} leads, {clients_count} clients)
+- {tasks_pending} tâches en cours
+- CA ce mois: {ca_month:.2f}€
+- Derniers contacts: {', '.join([f"{c.get('first_name','')} {c.get('last_name','')}" for c in recent_contacts])}
+- Derniers documents: {', '.join([f"{i.get('number','')} ({i.get('type','')})" for i in recent_invoices])}
+"""
+        
+        # Build AI prompt
+        system_prompt = f"""Tu es MoltBot, l'assistant IA d'Alpha Agency, une agence de communication digitale basée en Guadeloupe.
+
+Tu peux répondre à TOUTES les questions:
+- Questions sur le CRM et les données (contacts, devis, factures, tâches)
+- Questions générales sur le business, le marketing, la communication
+- Questions techniques sur le développement web, les réseaux sociaux
+- Conseils stratégiques et recommandations
+- Aide pour la rédaction de contenus
+- N'importe quelle autre question
+
+Sois utile, professionnel et amical. Réponds en français.
+Si tu ne connais pas une information spécifique du CRM, propose d'utiliser les commandes disponibles.
+
+{crm_context if crm_context else ''}
+
+Commandes CRM disponibles:
+- "Stats" ou "CA du mois" pour les statistiques
+- "Mes tâches" pour voir les tâches
+- "Crée devis de X€ pour Client, description" pour créer un devis
+- "Recherche [terme]" pour chercher dans le CRM
+"""
+        
+        # Call AI
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            model="gemini-2.0-flash"
+        )
+        
+        response = await chat.send_message(
+            message=message,
+            system=system_prompt
+        )
+        
+        return {
+            "success": True,
+            "response": response,
+            "source": "ai"
+        }
+    
+    except Exception as e:
+        logger.error(f"AI Chat error: {e}")
+        return {
+            "success": False,
+            "response": f"Désolé, je n'ai pas pu traiter votre demande. Erreur: {str(e)}",
+            "source": "error"
+        }
+
