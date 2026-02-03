@@ -318,16 +318,11 @@ async def optimize_content(
     current_user: dict = Depends(get_current_user)
 ):
     """AI-powered content optimization for a platform"""
-    from emergentintegrations.llm.google import GeminiChat
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
     
     config = PLATFORM_LIMITS.get(target_platform, {})
     
     try:
-        chat = GeminiChat(
-            api_key=EMERGENT_LLM_KEY,
-            model="gemini-2.0-flash"
-        )
-        
         prompt = f"""Optimise ce contenu pour {config.get('name', target_platform)}:
 
 Texte original: "{content.text}"
@@ -345,7 +340,13 @@ Réponds en JSON:
     "engagement_tips": ["conseil 1"]
 }}"""
 
-        response = await chat.send_message(prompt)
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"optimize-{target_platform}",
+            system_message="Tu es un expert en marketing digital et optimisation de contenu pour les réseaux sociaux."
+        ).with_model("google", "gemini-2.0-flash")
+        
+        response = await chat.send_message(UserMessage(text=prompt))
         
         # Parse JSON
         import json
