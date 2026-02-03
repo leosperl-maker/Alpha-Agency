@@ -201,14 +201,9 @@ def validate_for_platform(content: PostContent, platform: str) -> Dict[str, Any]
 
 async def generate_hashtag_suggestions(text: str, platform: str) -> List[str]:
     """Use AI to suggest relevant hashtags"""
-    from emergentintegrations.llm.google import GeminiChat
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
     
     try:
-        chat = GeminiChat(
-            api_key=EMERGENT_LLM_KEY,
-            model="gemini-2.0-flash"
-        )
-        
         config = PLATFORM_LIMITS.get(platform, {})
         optimal = config.get("optimal_hashtags", 5)
         
@@ -224,7 +219,13 @@ Règles:
 
 Hashtags:"""
 
-        response = await chat.send_message(prompt)
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"hashtag-{platform}",
+            system_message="Tu es un expert en marketing digital et réseaux sociaux."
+        ).with_model("google", "gemini-2.0-flash")
+        
+        response = await chat.send_message(UserMessage(text=prompt))
         
         # Parse response
         hashtags = re.findall(r'\w+', response.strip())

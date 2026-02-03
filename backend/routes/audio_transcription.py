@@ -324,14 +324,9 @@ async def analyze_voice_command(text: str) -> Dict[str, Any]:
     Use AI to analyze voice command and determine what CRM entry to create.
     Returns: {action, data}
     """
-    from emergentintegrations.llm.google import GeminiChat
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
     
     try:
-        chat = GeminiChat(
-            api_key=EMERGENT_LLM_KEY,
-            model="gemini-2.0-flash"
-        )
-        
         prompt = f"""Analyse cette commande vocale et détermine quelle action CRM effectuer.
 
 Commande: "{text}"
@@ -359,7 +354,13 @@ Exemples:
 
 Analyse maintenant:"""
 
-        response = await chat.send_message(prompt)
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id="voice-to-crm",
+            system_message="Tu es un assistant CRM intelligent qui analyse les commandes vocales."
+        ).with_model("google", "gemini-2.0-flash")
+        
+        response = await chat.send_message(UserMessage(text=prompt))
         
         # Parse JSON response
         import json
