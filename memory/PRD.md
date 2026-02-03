@@ -91,6 +91,42 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 
 ## Changelog
 
+### 2026-02-03 (Session actuelle - Suite 6)
+
+#### ✅ WhatsApp Business Cloud API (Backend)
+- **Nouveau fichier**: `/app/backend/routes/whatsapp_cloud.py`
+- **Endpoints**:
+  - `POST /api/whatsapp-cloud/config` - Configurer credentials Meta
+  - `GET /api/whatsapp-cloud/status` - Vérifier connexion
+  - `POST /api/whatsapp-cloud/send/text` - Envoyer message texte
+  - `POST /api/whatsapp-cloud/send/media` - Envoyer image/doc/audio/video
+  - `POST /api/whatsapp-cloud/send/template` - Envoyer message template
+  - `GET/POST /api/whatsapp-cloud/webhook` - Recevoir messages entrants
+- **Avantages**: Pas de QR code, numéro dédié, 1000 msg/mois gratuits
+
+#### ✅ Commandes WhatsApp Avancées (Devis/Factures)
+- **"Crée devis 1500€ pour Client, description"** → Crée un devis complet
+- **"Crée facture 500€ pour Client, service"** → Crée une facture
+- **"Envoie devis DEV-2024-001"** → Génère PDF et prépare l'envoi
+- Fix `is_admin()` pour utiliser la config MongoDB dynamique
+- Testé et fonctionnel via webhook
+
+#### ✅ Instagram Story Editor (Backend P2)
+- **Nouveau fichier**: `/app/backend/routes/instagram_story.py`
+- **Endpoints**:
+  - `POST /api/instagram-story/drafts` - Créer brouillon de story
+  - `GET /api/instagram-story/drafts` - Lister brouillons
+  - `POST /api/instagram-story/drafts/{id}/publish` - Publier (warning: nécessite action manuelle)
+  - `GET /api/instagram-story/elements` - Liste des éléments disponibles
+- **Éléments supportés**: Poll, Question, Countdown, Mention, Link, Text
+- **Note importante**: L'API officielle Instagram Graph NE SUPPORTE PAS la publication de Stories
+
+#### ✅ UI WhatsApp Business Cloud
+- Section ajoutée dans `/admin/whatsapp`
+- Champs: Phone Number ID, Business Account ID, Access Token
+- Lien vers Meta for Developers
+- Bouton "Bientôt disponible" (en attente config utilisateur)
+
 ### 2026-02-03 (Session actuelle - Suite 5)
 
 #### ✅ WhatsApp P1 Features Finalisés et Testés
