@@ -394,3 +394,91 @@ async def get_story_analytics(
         "stories": stories,
         "note": "Pour les métriques détaillées (vues, réponses, swipe-ups), utilisez l'API Instagram Insights via le endpoint Meta."
     }
+
+
+# ==================== INSTAGRAM CREDENTIALS ====================
+
+class InstagramCredentials(BaseModel):
+    username: str
+    password: str
+
+@router.post("/credentials")
+async def save_instagram_credentials(
+    credentials: InstagramCredentials,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Save Instagram credentials for browser automation.
+    These are stored encrypted and used for automated story posting.
+    
+    WARNING: Using automation is against Instagram ToS.
+    """
+    user_id = get_user_id(current_user)
+    
+    from .instagram_automation import store_instagram_credentials, test_instagram_login
+    
+    # Store credentials
+    await store_instagram_credentials(user_id, credentials.username, credentials.password)
+    
+    # Test login
+    result = await test_instagram_login(user_id)
+    
+    if result.get("success"):
+        return {
+            "success": True,
+            "message": f"Connecté avec succès à @{credentials.username}",
+            "username": credentials.username
+        }
+    else:
+        return {
+            "success": False,
+            "message": "Credentials sauvegardés mais connexion échouée",
+            "error": result.get("error"),
+            "username": credentials.username
+        }
+
+@router.get("/credentials")
+async def get_instagram_credentials_status(
+    current_user: dict = Depends(get_current_user)
+):
+    """Check if Instagram credentials are configured"""
+    user_id = get_user_id(current_user)
+    
+    creds = await db.instagram_credentials.find_one(
+        {"user_id": user_id},
+        {"_id": 0, "password_encrypted": 0}
+    )
+    
+    if not creds:
+        return {"configured": False}
+    
+    return {
+        "configured": True,
+        "username": creds.get("username"),
+        "last_login": creds.get("last_login_attempt"),
+        "login_success": creds.get("login_success", False)
+    }
+
+@router.delete("/credentials")
+async def delete_instagram_credentials(
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete stored Instagram credentials"""
+    user_id = get_user_id(current_user)
+    
+    await db.instagram_credentials.delete_one({"user_id": user_id})
+    
+    return {"success": True, "message": "Credentials Instagram supprimés"}
+
+@router.post("/test-login")
+async def test_instagram_login_endpoint(
+    current_user: dict = Depends(get_current_user)
+):
+    """Test Instagram login with stored credentials"""
+    user_id = get_user_id(current_user)
+    
+    from .instagram_automation import test_instagram_login
+    
+    result = await test_instagram_login(user_id)
+    return result
+
