@@ -7,7 +7,7 @@ import {
   User, ChevronDown, AlertCircle, Clock, FileWarning, UserPlus, Sun, Moon,
   ListTodo, GitBranch, Send, Calendar, CalendarDays, Link2, Command, 
   FileSearch, Contact, Briefcase, DollarSign, Keyboard, HelpCircle,
-  Wifi, WifiOff
+  Wifi, WifiOff, Instagram
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
