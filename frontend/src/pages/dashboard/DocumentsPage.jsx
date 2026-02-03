@@ -556,6 +556,15 @@ const DocumentsPage = () => {
             >
               <Info className="w-5 h-5" />
             </button>
+            
+            {/* MoltBot AI toggle */}
+            <button
+              onClick={() => { setShowAiPanel(!showAiPanel); if (!showAiPanel) fetchAiSuggestions(); }}
+              className={`p-2 rounded-lg transition-colors ${showAiPanel ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+              title="MoltBot AI - Classification intelligente"
+            >
+              <Bot className="w-5 h-5" />
+            </button>
           </div>
         </header>
 
