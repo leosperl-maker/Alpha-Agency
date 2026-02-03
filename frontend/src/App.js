@@ -126,6 +126,7 @@ function App() {
             <Route path="editorial" element={<EditorialCalendarPage />} />
             <Route path="multilink" element={<MultilinkPage />} />
             <Route path="moltbot" element={<MoltBotPage />} />
+            <Route path="whatsapp" element={<WhatsAppConfigPage />} />
           </Route>
           
           {/* PWA Widget Page for iPhone */}
