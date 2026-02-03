@@ -52,6 +52,12 @@ const DocumentsPage = () => {
   const [renaming, setRenaming] = useState(false);
   const [detailsPanel, setDetailsPanel] = useState(false);
   const [selectedForDetails, setSelectedForDetails] = useState(null);
+  
+  // MoltBot AI states
+  const [analyzing, setAnalyzing] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [aiSuggestions, setAiSuggestions] = useState([]);
+  const [showAiPanel, setShowAiPanel] = useState(false);
 
   // Storage quota (configurable)
   const STORAGE_QUOTA_GB = 15; // 15 GB default like Google Drive
@@ -77,6 +83,50 @@ const DocumentsPage = () => {
       setLoading(false);
     }
   }, [currentFolder, searchQuery]);
+
+  // Fetch AI suggestions
+  const fetchAiSuggestions = async () => {
+    try {
+      const res = await documentAIAPI.getSuggestions();
+      setAiSuggestions(res.data?.suggestions || []);
+    } catch (error) {
+      console.error("AI suggestions error:", error);
+    }
+  };
+
+  // Analyze document with MoltBot
+  const analyzeWithMoltBot = async (documentId) => {
+    setAnalyzing(true);
+    setAiAnalysis(null);
+    try {
+      const res = await documentAIAPI.analyzeDocument(documentId);
+      setAiAnalysis(res.data);
+      if (res.data?.success) {
+        toast.success("Analyse terminée !");
+      } else {
+        toast.error(res.data?.error || "Échec de l'analyse");
+      }
+    } catch (error) {
+      toast.error("Erreur lors de l'analyse");
+      console.error("Analysis error:", error);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  // Apply AI classification
+  const applyAiClassification = async (documentId) => {
+    try {
+      const res = await documentAIAPI.autoClassify(documentId, true);
+      if (res.data?.changes_applied) {
+        toast.success(`Fichier renommé et déplacé vers "${res.data.new_folder_name}"`);
+        fetchData();
+        setAiAnalysis(null);
+      }
+    } catch (error) {
+      toast.error("Erreur lors de l'application");
+    }
+  };
 
   useEffect(() => {
     fetchData();
