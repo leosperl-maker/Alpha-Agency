@@ -136,7 +136,7 @@ const ChatWidget = () => {
     } catch (error) {
       setMessages(prev => [...prev, {
         type: "bot",
-        text: "Désolé, une erreur s'est produite. Vous pouvez nous contacter directement au 0690 05 34 44.",
+        text: "Désolé, une erreur s'est produite. Vous pouvez nous contacter directement au 0691 266 003.",
         time: new Date()
       }]);
     }
