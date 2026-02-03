@@ -584,6 +584,109 @@ async def get_meta_pages(current_user: dict = Depends(get_current_user)):
     return meta_account.get("pages", [])
 
 
+
+@router.post("/resync-pages", response_model=dict)
+async def resync_meta_pages(current_user: dict = Depends(get_current_user)):
+    """
+    Resynchronize all Facebook Pages and Instagram accounts.
+    Uses existing stored user token to refresh pages list.
+    Handles pagination to get ALL pages.
+    """
+    user_id = get_user_id(current_user)
+    
+    # Get stored meta connection with user token
+    meta_connection = await db.meta_connections.find_one({
+        "user_id": user_id,
+        "is_active": True
+    })
+    
+    if not meta_connection:
+        raise HTTPException(status_code=404, detail="Aucune connexion Meta active. Veuillez vous reconnecter.")
+    
+    user_access_token = meta_connection.get("user_access_token_encrypted")
+    if user_access_token:
+        user_access_token = decrypt_token(user_access_token)
+    
+    if not user_access_token:
+        raise HTTPException(status_code=400, detail="Token utilisateur non disponible. Veuillez vous reconnecter.")
+    
+    async with httpx.AsyncClient(timeout=60.0) as http_client:
+        # Fetch all pages with pagination
+        all_pages = []
+        next_url = f"https://graph.facebook.com/{META_API_VERSION}/me/accounts"
+        params = {
+            "fields": "id,name,category,access_token,picture{url},instagram_business_account{id,username,profile_picture_url,followers_count}",
+            "access_token": user_access_token,
+            "limit": 100
+        }
+        
+        while next_url:
+            try:
+                pages_response = await http_client.get(next_url, params=params if "?" not in next_url else None)
+                
+                if pages_response.status_code != 200:
+                    error_data = pages_response.json()
+                    logger.error(f"Resync failed: {error_data}")
+                    break
+                
+                response_data = pages_response.json()
+                all_pages.extend(response_data.get("data", []))
+                
+                paging = response_data.get("paging", {})
+                next_url = paging.get("next")
+                params = None
+            except Exception as e:
+                logger.error(f"Error during pagination: {e}")
+                break
+        
+        if not all_pages:
+            return {"success": False, "message": "Aucune page trouvée", "pages": 0, "instagram": 0}
+        
+        # Update/Add pages in database
+        synced_pages = 0
+        synced_instagram = 0
+        
+        for page in all_pages:
+            page_id = page.get("id")
+            page_name = page.get("name")
+            page_access_token = page.get("access_token")
+            
+            ig_business = page.get("instagram_business_account")
+            ig_business_id = ig_business.get("id") if ig_business else None
+            ig_username = ig_business.get("username") if ig_business else None
+            
+            # Update or insert page
+            await db.meta_pages.update_one(
+                {"page_id": page_id, "user_id": user_id},
+                {"$set": {
+                    "page_name": page_name,
+                    "category": page.get("category", ""),
+                    "picture_url": page.get("picture", {}).get("url"),
+                    "page_access_token_encrypted": encrypt_token(page_access_token),
+                    "token_expires_at": (datetime.now(timezone.utc) + timedelta(days=60)).isoformat(),
+                    "instagram_business_id": ig_business_id,
+                    "instagram_username": ig_username,
+                    "instagram_profile_pic": ig_business.get("profile_picture_url") if ig_business else None,
+                    "is_active": True,
+                    "last_synced": datetime.now(timezone.utc).isoformat()
+                }},
+                upsert=True
+            )
+            
+            synced_pages += 1
+            if ig_business_id:
+                synced_instagram += 1
+        
+        logger.info(f"Resync complete: {synced_pages} pages, {synced_instagram} Instagram accounts")
+        
+        return {
+            "success": True,
+            "message": f"Synchronisation réussie: {synced_pages} Pages Facebook, {synced_instagram} comptes Instagram",
+            "pages": synced_pages,
+            "instagram": synced_instagram
+        }
+
+
 # ==================== PUBLISHING - FACEBOOK ====================
 
 @router.post("/publish/facebook", response_model=dict)
