@@ -549,7 +549,6 @@ async def handle_message_status(status: dict):
     """Process message delivery status update"""
     message_id = status.get("id")
     status_value = status.get("status")
-    timestamp = status.get("timestamp")
     
     await db.whatsapp_cloud_messages.update_one(
         {"whatsapp_message_id": message_id},
