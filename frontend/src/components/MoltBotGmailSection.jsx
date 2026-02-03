@@ -4,7 +4,7 @@ import {
   AlertTriangle, XCircle, Play, Pause, Filter, ChevronDown, ChevronUp,
   Send, FileText, Clock, Loader2, Unplug, Link2
 } from "lucide-react";
-import { Button } from "../../components/ui/button";
+import { Button } from "./ui/button";
 import { toast } from "sonner";
 
 const API = process.env.REACT_APP_BACKEND_URL;
