@@ -1051,7 +1051,6 @@ async def chat_with_ai(
     Chat with MoltBot using AI (Gemini) for any question.
     Can answer general questions, provide CRM context, and more.
     """
-    from emergentintegrations.llm.chat import LlmChat
     
     access = get_access_level(phone, secret)
     if access == "none":
