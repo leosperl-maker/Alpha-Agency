@@ -631,3 +631,134 @@ async def publish_scheduled_articles(x_api_key: Optional[str] = Header(None)):
         "published_count": result.modified_count,
         "message": f"{result.modified_count} article(s) publié(s)"
     }
+
+
+# ==================== COMMENT MANAGEMENT ====================
+
+class CommentCreate(BaseModel):
+    author: str
+    email: str
+    content: str
+
+class CommentModerate(BaseModel):
+    status: str  # approved, rejected, spam
+
+@router.get("/articles/{slug}/comments")
+async def get_article_comments(slug: str):
+    """Get all comments for an article (public - only approved)"""
+    article = await db.blog_posts.find_one({"slug": slug}, {"_id": 0, "comments": 1})
+    if not article:
+        raise HTTPException(status_code=404, detail="Article non trouvé")
+    
+    comments = article.get("comments", [])
+    approved = [c for c in comments if c.get("status") == "approved"]
+    
+    return {"comments": approved, "count": len(approved)}
+
+@router.post("/articles/{slug}/comments")
+async def add_comment(slug: str, comment: CommentCreate):
+    """Add a comment to an article (requires moderation)"""
+    article = await db.blog_posts.find_one({"slug": slug})
+    if not article:
+        raise HTTPException(status_code=404, detail="Article non trouvé")
+    
+    comment_id = str(uuid.uuid4())
+    new_comment = {
+        "id": comment_id,
+        "author": comment.author,
+        "email": comment.email,
+        "content": comment.content,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.blog_posts.update_one(
+        {"slug": slug},
+        {"$push": {"comments": new_comment}}
+    )
+    
+    return {
+        "success": True,
+        "comment_id": comment_id,
+        "message": "Commentaire soumis. Il sera visible après modération."
+    }
+
+@router.get("/comments/pending")
+async def get_pending_comments(user = Depends(get_current_user)):
+    """Get all pending comments (Admin only)"""
+    articles = await db.blog_posts.find(
+        {"comments": {"$elemMatch": {"status": "pending"}}},
+        {"_id": 0, "id": 1, "slug": 1, "title": 1, "comments": 1}
+    ).to_list(100)
+    
+    pending_comments = []
+    for article in articles:
+        for comment in article.get("comments", []):
+            if comment.get("status") == "pending":
+                pending_comments.append({
+                    "article_id": article.get("id"),
+                    "article_slug": article.get("slug"),
+                    "article_title": article.get("title"),
+                    **comment
+                })
+    
+    pending_comments.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    return {"comments": pending_comments, "count": len(pending_comments)}
+
+@router.get("/comments/all")
+async def get_all_comments(status: Optional[str] = None, user = Depends(get_current_user)):
+    """Get all comments with optional filter (Admin only)"""
+    articles = await db.blog_posts.find(
+        {"comments": {"$exists": True, "$ne": []}},
+        {"_id": 0, "id": 1, "slug": 1, "title": 1, "comments": 1}
+    ).to_list(100)
+    
+    all_comments = []
+    for article in articles:
+        for comment in article.get("comments", []):
+            if status and comment.get("status") != status:
+                continue
+            all_comments.append({
+                "article_id": article.get("id"),
+                "article_slug": article.get("slug"),
+                "article_title": article.get("title"),
+                **comment
+            })
+    
+    all_comments.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    return {"comments": all_comments, "count": len(all_comments)}
+
+@router.put("/comments/{comment_id}/moderate")
+async def moderate_comment(comment_id: str, moderation: CommentModerate, user = Depends(get_current_user)):
+    """Approve, reject, or mark as spam (Admin only)"""
+    if moderation.status not in ["approved", "rejected", "spam"]:
+        raise HTTPException(status_code=400, detail="Statut invalide")
+    
+    article = await db.blog_posts.find_one({"comments.id": comment_id})
+    if not article:
+        raise HTTPException(status_code=404, detail="Commentaire non trouvé")
+    
+    await db.blog_posts.update_one(
+        {"comments.id": comment_id},
+        {"$set": {
+            "comments.$.status": moderation.status,
+            "comments.$.moderated_at": datetime.now(timezone.utc).isoformat(),
+            "comments.$.moderated_by": user.get("email")
+        }}
+    )
+    
+    status_text = {"approved": "approuvé", "rejected": "rejeté", "spam": "marqué comme spam"}
+    return {"success": True, "message": f"Commentaire {status_text.get(moderation.status)}"}
+
+@router.delete("/comments/{comment_id}")
+async def delete_comment(comment_id: str, user = Depends(get_current_user)):
+    """Delete a comment permanently (Admin only)"""
+    result = await db.blog_posts.update_one(
+        {"comments.id": comment_id},
+        {"$pull": {"comments": {"id": comment_id}}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Commentaire non trouvé")
+    
+    return {"success": True, "message": "Commentaire supprimé"}
