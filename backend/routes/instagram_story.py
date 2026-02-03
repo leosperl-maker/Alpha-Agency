@@ -227,10 +227,10 @@ async def publish_story(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Publish a story immediately.
+    Publish a story immediately using browser automation.
+    Supports multi-account system.
     
     WARNING: This uses browser automation and is against Instagram's Terms of Service.
-    The official API does not support Story posting.
     """
     user_id = get_user_id(current_user)
     
@@ -245,14 +245,17 @@ async def publish_story(
     if draft["status"] == "published":
         raise HTTPException(status_code=400, detail="Story déjà publiée")
     
-    # Check if Instagram credentials are stored
-    from .instagram_automation import get_instagram_credentials, post_instagram_story
+    # Get account from multi-account system
+    account_id = draft.get("account_id")
+    account = await db.instagram_accounts.find_one({
+        "id": account_id,
+        "user_id": user_id
+    })
     
-    creds = await get_instagram_credentials(user_id)
-    if not creds:
+    if not account:
         raise HTTPException(
             status_code=400, 
-            detail="Credentials Instagram non configurés. Ajoutez vos identifiants dans les paramètres."
+            detail="Compte Instagram non trouvé. Recréez le brouillon avec un compte valide."
         )
     
     # Update status to publishing
@@ -261,9 +264,16 @@ async def publish_story(
         {"$set": {"status": "publishing"}}
     )
     
-    # Post story using browser automation
-    result = await post_instagram_story(
-        user_id=user_id,
+    # Get credentials and post
+    from .token_encryption import decrypt_token
+    from .instagram_automation import post_story_for_account
+    
+    password = decrypt_token(account.get("password_encrypted", ""))
+    
+    result = await post_story_for_account(
+        account_id=account_id,
+        username=account["username"],
+        password=password,
         media_url=draft.get("media_url"),
         text=draft.get("elements", {}).get("text_overlay"),
         poll=draft.get("elements", {}).get("poll")
@@ -280,7 +290,7 @@ async def publish_story(
         )
         return {
             "success": True,
-            "message": "Story publiée avec succès !",
+            "message": f"Story publiée sur @{account['username']} !",
             "draft_id": draft_id
         }
     else:
