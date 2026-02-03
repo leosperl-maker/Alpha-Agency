@@ -78,7 +78,19 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 
 ## Changelog
 
-### 2026-02-03 (Session actuelle)
+### 2026-02-03 (Session actuelle - Suite)
+
+#### ✅ Corrections P0 terminées
+1. **Numéro téléphone Agent X** → 0691 266 003 (était 0690 05 34 44)
+2. **UI Modération commentaires** → Modal complète avec onglets
+3. **Business Search API** → Réécrite pour utiliser recherche-entreprises.api.gouv.fr
+
+#### ✅ Tests passés (100%)
+- Backend: 9/9 tests passés
+- Frontend: Toutes fonctionnalités vérifiées
+- Rapport: /app/test_reports/iteration_45.json
+
+### 2026-02-03 (Session précédente)
 
 #### ✅ Demandes utilisateur
 - Bulle téléphone supprimée de toutes pages publiques
