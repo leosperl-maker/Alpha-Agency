@@ -301,3 +301,292 @@ async def transcribe_for_moltbot(file_path: str = None, url: str = None, languag
     finally:
         if temp_path and os.path.exists(temp_path):
             os.unlink(temp_path)
+
+
+# ===========================================
+# VOICE-TO-CRM - Intelligent Entry Creation
+# ===========================================
+
+class VoiceToCRMRequest(BaseModel):
+    audio_text: Optional[str] = None  # Pre-transcribed text
+    language: Optional[str] = "fr"
+
+class VoiceToCRMResult(BaseModel):
+    success: bool
+    action: Optional[str] = None  # contact, task, note, appointment, invoice
+    entity_id: Optional[str] = None
+    message: str
+    transcription: Optional[str] = None
+    details: Optional[Dict[str, Any]] = None
+
+async def analyze_voice_command(text: str) -> Dict[str, Any]:
+    """
+    Use AI to analyze voice command and determine what CRM entry to create.
+    Returns: {action, data}
+    """
+    from emergentintegrations.llm.google import GeminiChat
+    
+    try:
+        chat = GeminiChat(
+            api_key=EMERGENT_LLM_KEY,
+            model="gemini-2.0-flash"
+        )
+        
+        prompt = f"""Analyse cette commande vocale et détermine quelle action CRM effectuer.
+
+Commande: "{text}"
+
+Réponds UNIQUEMENT avec un JSON valide sans markdown, format:
+{{
+    "action": "contact" | "task" | "note" | "appointment" | "invoice" | "unknown",
+    "confidence": 0.0 à 1.0,
+    "data": {{
+        // Pour contact: first_name, last_name, email, phone, company, notes
+        // Pour task: title, priority (low/medium/high/urgent), due_date (ISO format ou null)
+        // Pour note: title, content, tags (array)
+        // Pour appointment: title, date (ISO), duration_minutes, attendees
+        // Pour invoice: client_name, amount, description, type (devis/facture)
+    }},
+    "summary": "Description courte de l'action"
+}}
+
+Exemples:
+- "Rappeler Jean Dupont demain" → task avec title "Rappeler Jean Dupont", due_date = demain
+- "Nouveau contact Marie Martin de Acme Corp téléphone 0601020304" → contact
+- "Note importante: le client veut une réduction de 10%" → note
+- "RDV vendredi 15h avec le client Dupont" → appointment
+- "Créer un devis de 2000€ pour Entreprise X" → invoice type devis
+
+Analyse maintenant:"""
+
+        response = await chat.send_message(prompt)
+        
+        # Parse JSON response
+        import json
+        import re
+        
+        # Clean response
+        response_text = response.strip()
+        if response_text.startswith("```"):
+            response_text = re.sub(r'^```json?\s*', '', response_text)
+            response_text = re.sub(r'\s*```$', '', response_text)
+        
+        return json.loads(response_text)
+    
+    except Exception as e:
+        logger.error(f"Voice analysis error: {e}")
+        return {"action": "unknown", "confidence": 0, "data": {}, "summary": str(e)}
+
+
+@router.post("/voice-to-crm")
+async def voice_to_crm(
+    audio_file: Optional[UploadFile] = File(None),
+    text: Optional[str] = None,
+    language: str = "fr",
+    current_user: dict = Depends(get_current_user_for_audio)
+) -> VoiceToCRMResult:
+    """
+    Voice-to-CRM: Transcribe audio and intelligently create CRM entry.
+    Supports: contacts, tasks, notes, appointments, invoices
+    """
+    user_id = current_user.get("id", "")
+    transcribed_text = text
+    
+    # Step 1: Transcribe audio if provided
+    if audio_file and not text:
+        content = await audio_file.read()
+        ext = get_file_extension(audio_file.filename)
+        
+        if ext not in SUPPORTED_FORMATS:
+            return VoiceToCRMResult(
+                success=False,
+                message=f"Format non supporté. Formats acceptés: {', '.join(SUPPORTED_FORMATS)}"
+            )
+        
+        temp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=f".{ext}") as temp_file:
+                temp_file.write(content)
+                temp_path = temp_file.name
+            
+            result = await transcribe_audio_file(temp_path, language)
+            
+            if not result.success:
+                return VoiceToCRMResult(
+                    success=False,
+                    message=f"Erreur de transcription: {result.error}"
+                )
+            
+            transcribed_text = result.text
+        finally:
+            if temp_path and os.path.exists(temp_path):
+                os.unlink(temp_path)
+    
+    if not transcribed_text:
+        return VoiceToCRMResult(
+            success=False,
+            message="Aucun texte à analyser. Fournissez un fichier audio ou du texte."
+        )
+    
+    # Step 2: Analyze command with AI
+    analysis = await analyze_voice_command(transcribed_text)
+    
+    action = analysis.get("action", "unknown")
+    data = analysis.get("data", {})
+    summary = analysis.get("summary", "")
+    confidence = analysis.get("confidence", 0)
+    
+    if action == "unknown" or confidence < 0.5:
+        return VoiceToCRMResult(
+            success=False,
+            action="unknown",
+            message=f"Commande non reconnue: {summary}",
+            transcription=transcribed_text,
+            details=analysis
+        )
+    
+    # Step 3: Create CRM entry based on action
+    entity_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    try:
+        if action == "contact":
+            contact = {
+                "id": entity_id,
+                "first_name": data.get("first_name", ""),
+                "last_name": data.get("last_name", ""),
+                "email": data.get("email", ""),
+                "phone": data.get("phone", ""),
+                "company": data.get("company", ""),
+                "notes": data.get("notes", f"Créé par commande vocale: {transcribed_text}"),
+                "status": "lead",
+                "source": "voice_command",
+                "created_at": now,
+                "updated_at": now
+            }
+            await db.contacts.insert_one(contact)
+            message = f"✅ Contact créé: {data.get('first_name', '')} {data.get('last_name', '')}"
+        
+        elif action == "task":
+            task = {
+                "id": entity_id,
+                "title": data.get("title", transcribed_text[:100]),
+                "description": f"Créé par commande vocale: {transcribed_text}",
+                "status": "todo",
+                "priority": data.get("priority", "medium"),
+                "due_date": data.get("due_date"),
+                "user_id": user_id,
+                "source": "voice_command",
+                "created_at": now,
+                "updated_at": now
+            }
+            await db.tasks.insert_one(task)
+            message = f"✅ Tâche créée: {task['title']}"
+        
+        elif action == "note":
+            note = {
+                "id": entity_id,
+                "title": data.get("title", "Note vocale"),
+                "content": data.get("content", transcribed_text),
+                "tags": data.get("tags", ["vocal"]),
+                "user_id": user_id,
+                "source": "voice_command",
+                "created_at": now
+            }
+            await db.notes.insert_one(note)
+            message = f"✅ Note créée: {note['title']}"
+        
+        elif action == "appointment":
+            appointment = {
+                "id": entity_id,
+                "title": data.get("title", "RDV"),
+                "start_time": data.get("date", now),
+                "duration_minutes": data.get("duration_minutes", 60),
+                "attendees": data.get("attendees", []),
+                "description": f"Créé par commande vocale: {transcribed_text}",
+                "user_id": user_id,
+                "source": "voice_command",
+                "created_at": now
+            }
+            await db.appointments.insert_one(appointment)
+            message = f"✅ RDV créé: {appointment['title']}"
+        
+        elif action == "invoice":
+            inv_type = data.get("type", "devis")
+            count = await db.invoices.count_documents({"type": inv_type})
+            year = datetime.now().year
+            prefix = "DEV" if inv_type == "devis" else "FAC"
+            number = f"{prefix}-{year}-{str(count + 1).zfill(3)}"
+            
+            amount = float(data.get("amount", 0))
+            invoice = {
+                "id": entity_id,
+                "number": number,
+                "type": inv_type,
+                "client_name": data.get("client_name", "Client"),
+                "items": [{"description": data.get("description", "Prestation"), "quantity": 1, "unit_price": amount}],
+                "subtotal": amount,
+                "tax": amount * 0.20,
+                "total": amount * 1.20,
+                "status": "draft",
+                "notes": f"Créé par commande vocale: {transcribed_text}",
+                "source": "voice_command",
+                "created_at": now,
+                "updated_at": now
+            }
+            await db.invoices.insert_one(invoice)
+            message = f"✅ {inv_type.capitalize()} créé: {number} - {amount}€"
+        
+        else:
+            return VoiceToCRMResult(
+                success=False,
+                action=action,
+                message=f"Action '{action}' non implémentée",
+                transcription=transcribed_text,
+                details=analysis
+            )
+        
+        # Log the voice command
+        await db.voice_commands.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "transcription": transcribed_text,
+            "action": action,
+            "entity_id": entity_id,
+            "confidence": confidence,
+            "created_at": now
+        })
+        
+        return VoiceToCRMResult(
+            success=True,
+            action=action,
+            entity_id=entity_id,
+            message=message,
+            transcription=transcribed_text,
+            details={"summary": summary, "confidence": confidence, "data": data}
+        )
+    
+    except Exception as e:
+        logger.error(f"Voice-to-CRM error: {e}")
+        return VoiceToCRMResult(
+            success=False,
+            action=action,
+            message=f"Erreur: {str(e)}",
+            transcription=transcribed_text,
+            details=analysis
+        )
+
+
+@router.get("/voice-commands")
+async def get_voice_command_history(
+    limit: int = 20,
+    current_user: dict = Depends(get_current_user_for_audio)
+) -> Dict[str, Any]:
+    """Get voice command history"""
+    commands = await db.voice_commands.find(
+        {"user_id": current_user.get("id")},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    return {"count": len(commands), "commands": commands}
+
