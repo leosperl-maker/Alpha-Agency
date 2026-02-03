@@ -53,7 +53,7 @@ class StoryLink(BaseModel):
 
 class CreateStoryRequest(BaseModel):
     """Request to create a story draft"""
-    instagram_account_id: str
+    account_id: str  # Multi-account support
     media_url: Optional[str] = None  # Image or video URL
     media_type: str = "image"  # image or video
     background_color: Optional[str] = "#000000"
@@ -65,7 +65,7 @@ class CreateStoryRequest(BaseModel):
     countdown: Optional[StoryCountdown] = None
     mentions: Optional[List[StoryMention]] = None
     link: Optional[StoryLink] = None
-    schedule_time: Optional[str] = None  # ISO format, None = immediate
+    schedule_time: Optional[str] = None  # ISO format for scheduling
 
 class StoryDraft(BaseModel):
     """A saved story draft"""
