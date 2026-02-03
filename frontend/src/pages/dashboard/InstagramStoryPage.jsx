@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import {
   Instagram, Plus, Image, Video, Type, BarChart2, HelpCircle,
-  Clock, Calendar, Send, Trash2, Eye, Settings, User, Lock,
-  CheckCircle2, XCircle, Loader2, RefreshCw, ChevronDown
+  Clock, Calendar, Send, Trash2, Eye, EyeOff, Settings, User, Lock,
+  CheckCircle2, XCircle, Loader2, RefreshCw, ChevronDown, MessageCircle
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -21,6 +21,7 @@ const InstagramStoryPage = () => {
   // New account form
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [savingAccount, setSavingAccount] = useState(false);
   
   // Story creation
@@ -28,6 +29,7 @@ const InstagramStoryPage = () => {
   const [storyMediaPreview, setStoryMediaPreview] = useState(null);
   const [storyText, setStoryText] = useState("");
   const [storyPoll, setStoryPoll] = useState({ enabled: false, question: "", options: ["", ""] });
+  const [storyQuestion, setStoryQuestion] = useState({ enabled: false, question: "" });
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
   const [scheduleDate, setScheduleDate] = useState("");
   const [scheduleTime, setScheduleTime] = useState("");
