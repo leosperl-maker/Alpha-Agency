@@ -529,6 +529,7 @@ const StoryEditor = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
+              data-testid={`editor-tab-${tab.id}`}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${
                 activeTab === tab.id 
                   ? "bg-pink-500/20 text-pink-400" 
