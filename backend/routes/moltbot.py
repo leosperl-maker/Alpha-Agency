@@ -1120,6 +1120,7 @@ Commandes CRM disponibles:
 """
         
         # Call AI
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
         import uuid
         session_id = str(uuid.uuid4())
         
@@ -1129,7 +1130,8 @@ Commandes CRM disponibles:
             system_message=system_prompt
         )
         
-        response = await chat.send_message(message=message)
+        user_msg = UserMessage(text=message)
+        response = await chat.send_message(user_msg)
         
         return {
             "success": True,
