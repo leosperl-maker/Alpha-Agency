@@ -80,6 +80,14 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 
 ### 2026-02-03 (Session actuelle - Suite 2)
 
+#### ✅ MoltBot Document Intelligence (Gemini AI)
+- API `/api/document-ai/*` pour classification intelligente
+- Analyse OCR et contenu avec gemini-2.5-flash
+- Suggestion automatique de nom et dossier
+- UI intégrée dans page Documents avec bouton violet "Analyser avec MoltBot"
+- Panneau MoltBot AI avec liste des fichiers à analyser
+- Bouton "Appliquer les suggestions" pour renommer/déplacer automatiquement
+
 #### ✅ Interface Documents style Google Drive
 - Sidebar avec arborescence des dossiers
 - Indicateur de stockage (X Ko / 15 Go)
@@ -158,12 +166,13 @@ GET  /api/business/siren/{siren}
 - [x] UI modération commentaires dans BlogAdminPage
 - [x] Business Search API fonctionnelle
 - [x] Interface Documents style Google Drive
+- [x] MoltBot : Classification intelligente des documents (Gemini AI)
 
 ### P1 (Haute priorité)
-- [ ] MoltBot : Classification intelligente des documents (OCR + analyse)
 - [ ] Support vidéo/audio avec transcription (Whisper)
 - [ ] WhatsApp bidirectionnel complet (envoi/réception commandes)
 - [ ] Scheduler pour briefings automatiques (cron)
+- [ ] Sync Google Drive avec tri automatique MoltBot
 
 ### P2 (Moyenne priorité)
 - [ ] Gmail integration via MoltBot
