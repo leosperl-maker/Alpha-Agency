@@ -60,12 +60,24 @@ class WhatsAppStatus(BaseModel):
 
 # ==================== HELPER FUNCTIONS ====================
 
-def is_admin(phone: str) -> bool:
-    """Check if phone number is admin"""
+async def is_admin(phone: str) -> bool:
+    """Check if phone number is admin - checks both env and config"""
     clean_phone = phone.replace('+', '').replace(' ', '').replace('-', '')
+    
+    # Check env variable
     for admin in ADMIN_PHONES:
         if admin and clean_phone.endswith(admin.replace('+', '').replace(' ', '')[-9:]):
             return True
+    
+    # Check MongoDB config
+    config = await db.settings.find_one({"key": "whatsapp_config"})
+    if config and config.get("value"):
+        admin_phone = config["value"].get("admin_phone", "")
+        if admin_phone:
+            clean_admin = admin_phone.replace('+', '').replace(' ', '').replace('-', '')
+            if clean_phone.endswith(clean_admin[-9:]):
+                return True
+    
     return False
 
 async def process_admin_command(phone: str, message: str) -> str:
