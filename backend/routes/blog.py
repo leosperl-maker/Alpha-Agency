@@ -328,8 +328,9 @@ async def get_api_info():
             "title": {"type": "string", "required": True, "description": "Titre de l'article"},
             "slug": {"type": "string", "required": False, "description": "URL personnalisée (auto-générée si absent)"},
             "excerpt": {"type": "string", "required": False, "description": "Résumé/extrait de l'article"},
-            "content": {"type": "string", "required": True, "description": "Contenu de l'article (Markdown, HTML ou texte)"},
+            "content": {"type": "string", "required": False, "description": "Contenu de l'article (Markdown, HTML ou texte) - optionnel si content_blocks fourni"},
             "content_format": {"type": "string", "required": False, "default": "markdown", "options": ["markdown", "html", "text"]},
+            "content_blocks": {"type": "array", "required": False, "description": "Blocs de contenu directs avec support images (prioritaire sur content)"},
             "featured_image_url": {"type": "string", "required": False, "description": "URL de l'image à la une"},
             "tags": {"type": "array", "required": False, "description": "Liste des tags"},
             "category": {"type": "string", "required": False, "description": "Catégorie de l'article"},
@@ -340,7 +341,13 @@ async def get_api_info():
             "author_name": {"type": "string", "required": False, "default": "Alpha Agency"},
             "source_ia": {"type": "object", "required": False, "description": "Payload source pour audit (modèle, prompt, etc.)"}
         },
-        "example_request": {
+        "content_block_types": {
+            "heading": {"fields": ["content", "level (1-3)"], "example": {"type": "heading", "content": "Mon titre", "level": 2}},
+            "text": {"fields": ["content"], "example": {"type": "text", "content": "Paragraphe de texte..."}},
+            "image": {"fields": ["url", "caption (optional)", "alignment (optional)", "size (optional)"], "example": {"type": "image", "url": "https://example.com/image.jpg", "caption": "Ma légende", "alignment": "center", "size": "large"}},
+            "quote": {"fields": ["content", "author (optional)"], "example": {"type": "quote", "content": "Citation inspirante", "author": "Auteur"}}
+        },
+        "example_with_content": {
             "title": "Les tendances marketing digital 2024",
             "excerpt": "Découvrez les principales tendances qui vont façonner le marketing digital cette année.",
             "content": "## Introduction\n\nLe marketing digital évolue constamment...\n\n## 1. L'IA générative\n\nL'intelligence artificielle...",
@@ -348,14 +355,22 @@ async def get_api_info():
             "featured_image_url": "https://example.com/image.jpg",
             "tags": ["marketing", "digital", "tendances"],
             "category": "Marketing",
-            "status": "published",
-            "seo_title": "Tendances Marketing Digital 2024 | Alpha Agency",
-            "seo_description": "Guide complet des tendances marketing digital 2024. IA, personnalisation, vidéo courte...",
-            "source_ia": {
-                "model": "claude-sonnet-4.5",
-                "image_model": "dall-e-3",
-                "generated_at": "2024-01-15T10:30:00Z"
-            }
+            "status": "published"
+        },
+        "example_with_content_blocks": {
+            "title": "Article avec images intégrées",
+            "excerpt": "Un exemple d'article utilisant content_blocks pour insérer des images.",
+            "content_blocks": [
+                {"type": "heading", "content": "Introduction", "level": 1},
+                {"type": "text", "content": "Bienvenue dans cet article..."},
+                {"type": "image", "url": "https://example.com/photo1.jpg", "caption": "Photo d'illustration", "alignment": "center", "size": "large"},
+                {"type": "heading", "content": "Chapitre 1", "level": 2},
+                {"type": "text", "content": "Suite du contenu..."},
+                {"type": "image", "url": "https://example.com/photo2.jpg", "caption": "Autre image"}
+            ],
+            "featured_image_url": "https://example.com/cover.jpg",
+            "tags": ["tutoriel", "images"],
+            "status": "published"
         }
     }
 
