@@ -1,78 +1,106 @@
 # Alpha Agency CRM & Social Media Management Tool
 
-## Overview
-CRM complet et outil de gestion des réseaux sociaux pour Alpha Agency avec:
-- Gestion clients et pipeline
-- Devis/Factures
-- Calendrier éditorial
-- Multilink (clone zaap.bio)
-- **MoltBot** - Assistant IA avec accès CRM complet
-- **Agent X** - Chatbot public sur le site
+## Vue d'ensemble
+CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier éditorial, Multilink, et intégration IA complète via MoltBot.
 
 ## Fonctionnalités Principales
 
-### 1. MoltBot (Admin)
-- Accès complet au CRM via chat
+### 1. MoltBot (Assistant IA Admin)
+- Chat interface dans `/admin/moltbot`
 - Commandes naturelles : "CA du mois", "Crée un devis..."
-- Briefing matin et récap soir
-- Intégration WhatsApp (préparé)
-- Recherche SIRET/Kbis
+- Briefing matin et récap soir automatiques
+- Accès complet au CRM
 
-### 2. Agent X (Public)
-- Chatbot FAQ sur le site vitrine
+### 2. Agent X (Chatbot Public)
+- Widget chat rouge sur le site public
+- FAQ automatique
+- Capture de leads
 - Design rouge/blanc/noir
-- Capture de leads automatique
-- Questions fréquentes prédéfinies
 
-### 3. Widget PWA iPhone
+### 3. WhatsApp Business Integration
+- Page de configuration : `/admin/whatsapp`
+- Service Baileys Node.js pour connexion QR
+- Commandes via WhatsApp
+- Briefings automatiques
+
+### 4. Widget PWA iPhone
 - Page `/widget` optimisée mobile
-- Tâches du jour avec toggle
-- Stats rapides (CA, leads)
+- Tâches du jour
+- Stats rapides
 - Add to Home Screen ready
 
-### 4. Gestion Commentaires Blog (P1)
-- Endpoints: pending, all, moderate, delete
-- Statuts: pending, approved, rejected, spam
-- Modération depuis le CRM
+### 5. Gestion Commentaires Blog
+- Endpoints : pending, all, moderate, delete
+- Statuts : pending, approved, rejected, spam
 
-### 5. API Blog avec content_blocks
+### 6. API Blog avec content_blocks
 - Support images inline
 - Publication via n8n
+
+## Architecture
+
+```
+/app
+├── backend/
+│   ├── routes/
+│   │   ├── moltbot.py         # API MoltBot complète
+│   │   ├── whatsapp.py        # API WhatsApp
+│   │   ├── business_search.py # Recherche SIRET
+│   │   ├── blog.py            # Blog + commentaires
+│   │   └── ...
+│   └── server.py
+├── frontend/
+│   └── src/
+│       ├── components/
+│       │   ├── ChatWidget.jsx     # Agent X (rouge)
+│       │   └── ...
+│       ├── pages/
+│       │   ├── WidgetPage.jsx         # PWA iPhone
+│       │   └── dashboard/
+│       │       ├── MoltBotPage.jsx
+│       │       ├── WhatsAppConfigPage.jsx
+│       │       └── ...
+│       └── ...
+└── whatsapp-service/
+    ├── package.json
+    └── index.js               # Service Baileys
+```
 
 ## Changelog
 
 ### 2026-02-03 (Session actuelle)
 
-#### ✅ Modifications demandées
-- **Bulle téléphone supprimée** de toutes les pages publiques
-- **Agent X** (pas MoltBot) pour le chatbot public
-- **Couleurs rouge/blanc/noir** pour Agent X
+#### ✅ Demandes utilisateur
+- Bulle téléphone supprimée de toutes pages publiques
+- Agent X (pas MoltBot) pour chatbot public
+- Couleurs rouge/blanc/noir pour Agent X
 
 #### ✅ Implémentations
-- API MoltBot complète (`/api/moltbot/*`)
-- ChatWidget Agent X (rouge)
-- Widget PWA iPhone (`/widget`)
-- API WhatsApp préparée (`/api/whatsapp/*`)
-- Gestion commentaires blog
-- Recherche entreprise SIRET/Kbis
+1. **Agent X** - Chatbot public rouge
+2. **WhatsApp Service** - Node.js + Baileys
+3. **Page /admin/whatsapp** - Configuration QR + settings
+4. **Gestion commentaires** - Modération blog
+5. **Widget PWA** - `/widget` pour iPhone
 
-## Routes API
+## Routes API Principales
 
-### MoltBot (Admin - nécessite X-MoltBot-Secret)
+### MoltBot
 ```
-GET  /api/moltbot/contacts
-GET  /api/moltbot/tasks
-POST /api/moltbot/tasks
-PUT  /api/moltbot/tasks/{id}/complete
-GET  /api/moltbot/invoices
-POST /api/moltbot/invoices
-GET  /api/moltbot/appointments
-POST /api/moltbot/appointments
 GET  /api/moltbot/stats
 GET  /api/moltbot/briefing
 GET  /api/moltbot/recap
+POST /api/moltbot/tasks
+POST /api/moltbot/invoices
 POST /api/moltbot/search
-GET  /api/moltbot/business-search
+```
+
+### WhatsApp
+```
+GET  /api/whatsapp/status
+GET  /api/whatsapp/qr
+POST /api/whatsapp/webhook
+POST /api/whatsapp/send
+GET/POST /api/whatsapp/config
 ```
 
 ### Blog Comments
@@ -80,37 +108,26 @@ GET  /api/moltbot/business-search
 GET  /api/blog/articles/{slug}/comments
 POST /api/blog/articles/{slug}/comments
 GET  /api/blog/comments/pending
-GET  /api/blog/comments/all
 PUT  /api/blog/comments/{id}/moderate
 DELETE /api/blog/comments/{id}
 ```
 
-### WhatsApp (préparé)
-```
-GET  /api/whatsapp/status
-GET  /api/whatsapp/qr
-POST /api/whatsapp/webhook
-POST /api/whatsapp/send
-GET  /api/whatsapp/config
-POST /api/whatsapp/config
-```
-
-## Tâches restantes
+## Tâches Restantes
 
 ### P1 (Haute priorité)
-- [ ] Connexion WhatsApp réelle (QR code)
-- [ ] Notifications push automatiques
 - [ ] UI modération commentaires dans BlogAdminPage
+- [ ] Scheduler pour briefings automatiques (cron)
+- [ ] Tests complets WhatsApp
 
 ### P2 (Moyenne priorité)
-- [ ] Gmail integration
+- [ ] Gmail integration via MoltBot
 - [ ] Google Drive sync
 - [ ] Story Editor via MoltBot (Instagram)
 
 ### Backlog
 - [ ] Multi-platform post preview
-- [ ] Advanced analytics
 - [ ] Voice-to-CRM
+- [ ] Advanced analytics PDF
 
 ## Credentials
 - Email: admin@alphagency.fr
@@ -119,6 +136,7 @@ POST /api/whatsapp/config
 - Blog API Key: blog-alpha-auto-publish-2024-secure
 
 ## URLs
-- Site: https://marketingcore.preview.emergentagent.com
+- Preview: https://marketingcore.preview.emergentagent.com
 - Widget iPhone: /widget
 - MoltBot Admin: /admin/moltbot
+- WhatsApp Config: /admin/whatsapp
