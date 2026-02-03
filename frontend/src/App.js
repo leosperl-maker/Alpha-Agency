@@ -119,6 +119,7 @@ function App() {
             <Route path="blog" element={<BlogAdminPage />} />
             <Route path="social-media" element={<SocialMediaPage />} />
             <Route path="campagnes" element={<CampaignsPage />} />
+            <Route path="campaigns" element={<CampaignsPage />} />
             <Route path="tags" element={<TagsManagePage />} />
             <Route path="parametres" element={<SettingsPage />} />
             <Route path="things" element={<ThingsPage />} />
