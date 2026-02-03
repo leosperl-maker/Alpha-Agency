@@ -327,6 +327,212 @@ async def get_recent_quotes() -> str:
     
     return msg
 
+async def get_recent_invoices() -> str:
+    """Get recent invoices"""
+    invoices = await db.invoices.find(
+        {"type": "facture"},
+        {"_id": 0, "number": 1, "client_name": 1, "total": 1, "status": 1}
+    ).sort("created_at", -1).limit(5).to_list(5)
+    
+    if not invoices:
+        return "📄 Aucune facture récente"
+    
+    msg = "📄 *Dernières factures:*\n\n"
+    for inv in invoices:
+        status = "✅" if inv.get("status") == "paid" else "📤" if inv.get("status") == "sent" else "📝"
+        msg += f"{status} {inv['number']} - {inv['client_name']} - {inv.get('total', 0)}€\n"
+    
+    return msg
+
+async def create_quote_from_message(message: str, phone: str) -> str:
+    """
+    Create a quote from a WhatsApp message.
+    Format: "Crée devis 2000€ pour Client, description du service"
+    """
+    import re
+    
+    try:
+        # Extract amount
+        amount_match = re.search(r'(\d+(?:[.,]\d+)?)\s*€', message)
+        if not amount_match:
+            return "❌ Montant non trouvé. Format: 'Crée devis 2000€ pour Client, description'"
+        
+        amount = float(amount_match.group(1).replace(',', '.'))
+        
+        # Extract client name and description
+        # Pattern: "pour Client, description" or "pour Client description"
+        pour_match = re.search(r'pour\s+([^,]+)(?:,\s*(.+))?$', message, re.IGNORECASE)
+        
+        if not pour_match:
+            return "❌ Client non trouvé. Format: 'Crée devis 2000€ pour Client, description'"
+        
+        client_name = pour_match.group(1).strip()
+        description = pour_match.group(2).strip() if pour_match.group(2) else "Prestation de service"
+        
+        # Generate quote number
+        count = await db.invoices.count_documents({"type": "devis"})
+        year = datetime.now().year
+        number = f"DEV-{year}-{str(count + 1).zfill(3)}"
+        
+        # Create quote
+        quote_id = str(uuid.uuid4())
+        quote = {
+            "id": quote_id,
+            "number": number,
+            "type": "devis",
+            "client_name": client_name,
+            "client_email": "",
+            "items": [{"description": description, "quantity": 1, "unit_price": amount}],
+            "subtotal": amount,
+            "tax": amount * 0.20,
+            "total": amount * 1.20,
+            "status": "draft",
+            "notes": f"Créé via WhatsApp par {phone}",
+            "due_date": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "source": "whatsapp"
+        }
+        
+        await db.invoices.insert_one(quote)
+        
+        return f"""✅ *Devis créé !*
+
+📄 Numéro: {number}
+👤 Client: {client_name}
+💶 Montant HT: {amount:.2f}€
+💰 Total TTC: {amount * 1.20:.2f}€
+
+Pour envoyer le PDF: 
+"Envoie devis {number} à email@client.com" """
+        
+    except Exception as e:
+        logger.error(f"Error creating quote from WhatsApp: {e}")
+        return f"❌ Erreur lors de la création du devis: {str(e)}"
+
+async def create_invoice_from_message(message: str, phone: str) -> str:
+    """
+    Create an invoice from a WhatsApp message.
+    Format: "Crée facture 500€ pour Client, description du service"
+    """
+    import re
+    
+    try:
+        # Extract amount
+        amount_match = re.search(r'(\d+(?:[.,]\d+)?)\s*€', message)
+        if not amount_match:
+            return "❌ Montant non trouvé. Format: 'Crée facture 500€ pour Client, description'"
+        
+        amount = float(amount_match.group(1).replace(',', '.'))
+        
+        # Extract client name and description
+        pour_match = re.search(r'pour\s+([^,]+)(?:,\s*(.+))?$', message, re.IGNORECASE)
+        
+        if not pour_match:
+            return "❌ Client non trouvé. Format: 'Crée facture 500€ pour Client, description'"
+        
+        client_name = pour_match.group(1).strip()
+        description = pour_match.group(2).strip() if pour_match.group(2) else "Prestation de service"
+        
+        # Generate invoice number
+        count = await db.invoices.count_documents({"type": "facture"})
+        year = datetime.now().year
+        number = f"FAC-{year}-{str(count + 1).zfill(3)}"
+        
+        # Create invoice
+        invoice_id = str(uuid.uuid4())
+        invoice = {
+            "id": invoice_id,
+            "number": number,
+            "type": "facture",
+            "client_name": client_name,
+            "client_email": "",
+            "items": [{"description": description, "quantity": 1, "unit_price": amount}],
+            "subtotal": amount,
+            "tax": amount * 0.20,
+            "total": amount * 1.20,
+            "status": "draft",
+            "notes": f"Créée via WhatsApp par {phone}",
+            "due_date": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "source": "whatsapp"
+        }
+        
+        await db.invoices.insert_one(invoice)
+        
+        return f"""✅ *Facture créée !*
+
+📄 Numéro: {number}
+👤 Client: {client_name}
+💶 Montant HT: {amount:.2f}€
+💰 Total TTC: {amount * 1.20:.2f}€
+
+Pour envoyer le PDF: 
+"Envoie facture {number} à email@client.com" """
+        
+    except Exception as e:
+        logger.error(f"Error creating invoice from WhatsApp: {e}")
+        return f"❌ Erreur lors de la création de la facture: {str(e)}"
+
+async def send_quote_pdf(message: str, phone: str) -> str:
+    """
+    Send a quote/invoice PDF via WhatsApp.
+    Format: "Envoie devis DEV-2024-001 à email@client.com" or just "Envoie devis DEV-2024-001"
+    """
+    import re
+    from .invoices import generate_professional_pdf
+    
+    try:
+        # Extract document number
+        doc_match = re.search(r'(DEV|FAC)-\d{4}-\d{3}', message, re.IGNORECASE)
+        if not doc_match:
+            return "❌ Numéro de document non trouvé. Format: 'Envoie devis DEV-2024-001'"
+        
+        doc_number = doc_match.group(0).upper()
+        
+        # Find the document
+        doc = await db.invoices.find_one({"number": doc_number})
+        if not doc:
+            return f"❌ Document {doc_number} non trouvé"
+        
+        # Get contact info if available
+        contact = {}
+        if doc.get("contact_id"):
+            contact = await db.contacts.find_one({"id": doc["contact_id"]}) or {}
+        
+        # Generate PDF
+        doc_type = "devis" if doc["type"] == "devis" else "facture"
+        pdf_buffer = generate_professional_pdf(doc, contact, doc_type)
+        
+        # Save PDF temporarily
+        import os
+        pdf_path = f"/tmp/moltbot_{doc_number}.pdf"
+        with open(pdf_path, "wb") as f:
+            f.write(pdf_buffer.getvalue())
+        
+        # For now, we can't directly send PDF via WhatsApp Baileys without uploading to a URL
+        # We'll update the status and inform the user
+        await db.invoices.update_one(
+            {"number": doc_number},
+            {"$set": {"status": "sent", "sent_at": datetime.now(timezone.utc).isoformat()}}
+        )
+        
+        return f"""📄 *PDF Généré: {doc_number}*
+
+👤 Client: {doc['client_name']}
+💰 Total: {doc['total']:.2f}€
+📁 Fichier: /tmp/moltbot_{doc_number}.pdf
+
+Le document est prêt ! Vous pouvez le télécharger depuis le CRM ou demander l'envoi par email.
+
+Pour envoyer par email (bientôt): 
+"Email devis {doc_number} à client@email.com" """
+        
+    except Exception as e:
+        logger.error(f"Error sending PDF: {e}")
+        return f"❌ Erreur lors de la génération du PDF: {str(e)}"
+
 # ==================== API ENDPOINTS ====================
 
 @router.get("/status")
