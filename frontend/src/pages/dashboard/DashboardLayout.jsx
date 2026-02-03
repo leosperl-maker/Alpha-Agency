@@ -205,7 +205,7 @@ const DashboardLayout = () => {
     { id: 'nav-invoices', type: 'Navigation', title: "Facturation", icon: Receipt, action: () => navigate('/admin/facturation'), keywords: 'factures devis' },
     { id: 'nav-budget', type: 'Navigation', title: "Budget", icon: Wallet, action: () => navigate('/admin/budget'), keywords: 'finances argent' },
     { id: 'nav-social', type: 'Navigation', title: "Social Media", icon: Share2, action: () => navigate('/admin/social-media'), keywords: 'réseaux sociaux instagram facebook' },
-    { id: 'nav-assistant', type: 'Navigation', title: "Assistant IA", icon: Bot, action: () => navigate('/admin/assistant'), keywords: 'ai chat gpt' },
+    { id: 'nav-moltbot', type: 'Navigation', title: "MoltBot", icon: Bot, action: () => navigate('/admin/moltbot'), keywords: 'ai chat gpt assistant ia' },
     { id: 'nav-settings', type: 'Navigation', title: "Paramètres", icon: Settings, action: () => navigate('/admin/parametres'), keywords: 'config configuration' },
   ];
 
