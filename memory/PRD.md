@@ -136,7 +136,7 @@ DELETE /api/blog/comments/{id}
 - Blog API Key: blog-alpha-auto-publish-2024-secure
 
 ## URLs
-- Preview: https://marketingcore.preview.emergentagent.com
+- Preview: https://moltbot-crm.preview.emergentagent.com
 - Widget iPhone: /widget
 - MoltBot Admin: /admin/moltbot
 - WhatsApp Config: /admin/whatsapp
