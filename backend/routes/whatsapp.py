@@ -606,3 +606,59 @@ async def test_send_briefing(
                 return {"success": False, "error": response.text}
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+
+@router.get("/profile")
+async def get_whatsapp_profile():
+    """Get WhatsApp profile info (name, picture)"""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(f"{WHATSAPP_SERVICE_URL}/profile")
+            return response.json()
+    except Exception as e:
+        return {"connected": False, "error": str(e)}
+
+@router.post("/profile/name")
+async def update_whatsapp_name(
+    name: str,
+    secret: str = Header(None, alias="X-MoltBot-Secret")
+):
+    """Update WhatsApp profile name"""
+    if secret != MOLTBOT_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                f"{WHATSAPP_SERVICE_URL}/profile/name",
+                json={"name": name}
+            )
+            return response.json()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+class ProfilePictureRequest(BaseModel):
+    image_url: Optional[str] = None
+    image_base64: Optional[str] = None
+
+@router.post("/profile/picture")
+async def update_whatsapp_picture(
+    request: ProfilePictureRequest,
+    secret: str = Header(None, alias="X-MoltBot-Secret")
+):
+    """Update WhatsApp profile picture"""
+    if secret != MOLTBOT_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    if not request.image_url and not request.image_base64:
+        raise HTTPException(status_code=400, detail="image_url or image_base64 required")
+    
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(
+                f"{WHATSAPP_SERVICE_URL}/profile/picture",
+                json={"image_url": request.image_url, "image_base64": request.image_base64}
+            )
+            return response.json()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
