@@ -1120,14 +1120,16 @@ Commandes CRM disponibles:
 """
         
         # Call AI
+        import uuid
+        session_id = str(uuid.uuid4())
+        
         chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY
+            api_key=EMERGENT_LLM_KEY,
+            session_id=session_id,
+            system_message=system_prompt
         )
         
-        response = await chat.send_message(
-            message=message,
-            system=system_prompt
-        )
+        response = await chat.send_message(message=message)
         
         return {
             "success": True,
