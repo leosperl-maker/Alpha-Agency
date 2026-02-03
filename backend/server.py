@@ -6616,6 +6616,10 @@ app.include_router(whatsapp_cloud_router, prefix="/api/whatsapp-cloud", tags=["w
 from routes.instagram_story import router as instagram_story_router
 app.include_router(instagram_story_router, prefix="/api/instagram-story", tags=["instagram-story"])
 
+# MoltBot Gmail Integration
+from routes.moltbot_gmail import router as moltbot_gmail_router
+app.include_router(moltbot_gmail_router, prefix="/api/moltbot/gmail", tags=["moltbot-gmail"])
+
 # MoltBot Scheduler for automated briefings
 from routes.scheduler import moltbot_scheduler
 
