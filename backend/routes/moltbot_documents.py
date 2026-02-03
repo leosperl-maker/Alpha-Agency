@@ -19,7 +19,7 @@ from .database import db
 
 load_dotenv()
 
-router = APIRouter(prefix="/moltbot/documents", tags=["MoltBot Document Intelligence"])
+router = APIRouter(prefix="/document-ai", tags=["MoltBot Document Intelligence"])
 logger = logging.getLogger(__name__)
 
 # API Key
