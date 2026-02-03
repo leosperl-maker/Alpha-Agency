@@ -1666,14 +1666,38 @@ const SocialMediaPage = () => {
                     </div>
                     
                     {/* Actions */}
-                    <div className="flex gap-3 pt-4 border-t border-white/10">
+                    <div className="flex flex-wrap gap-3 pt-4 border-t border-white/10">
                       <Button
                         variant="outline"
                         onClick={fetchMetaPages}
                         disabled={metaLoading}
                       >
                         <RefreshCw className={`w-4 h-4 mr-2 ${metaLoading ? 'animate-spin' : ''}`} />
-                        Rafraîchir les pages
+                        Rafraîchir
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                        onClick={async () => {
+                          setMetaLoading(true);
+                          try {
+                            const res = await metaAPI.resyncPages();
+                            if (res.data.success) {
+                              toast.success(res.data.message);
+                              await fetchMetaPages();
+                            } else {
+                              toast.error(res.data.message || "Erreur lors de la synchronisation");
+                            }
+                          } catch (error) {
+                            toast.error("Erreur: " + (error.response?.data?.detail || "Reconnexion requise"));
+                          } finally {
+                            setMetaLoading(false);
+                          }
+                        }}
+                        disabled={metaLoading}
+                      >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${metaLoading ? 'animate-spin' : ''}`} />
+                        Resync depuis Meta
                       </Button>
                       <Button
                         variant="destructive"
