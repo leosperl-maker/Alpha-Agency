@@ -110,12 +110,16 @@ async def create_story_draft(
 ):
     """
     Create a story draft. This saves the story configuration
-    without publishing it yet.
+    without publishing it yet. Supports scheduling.
     """
     user_id = get_user_id(current_user)
     
-    # Verify Instagram account access
-    account = await get_meta_instagram_account(request.instagram_account_id, user_id)
+    # Get account from multi-account system
+    account = await db.instagram_accounts.find_one({
+        "id": request.account_id,
+        "user_id": user_id
+    })
+    
     if not account:
         raise HTTPException(status_code=404, detail="Compte Instagram non trouvé")
     
@@ -124,8 +128,8 @@ async def create_story_draft(
     draft = {
         "id": draft_id,
         "user_id": user_id,
-        "instagram_account_id": request.instagram_account_id,
-        "instagram_username": account.get("instagram_username", ""),
+        "account_id": request.account_id,
+        "instagram_username": account.get("username", ""),
         "media_url": request.media_url,
         "media_type": request.media_type,
         "background_color": request.background_color,
