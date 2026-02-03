@@ -15,9 +15,45 @@ from datetime import datetime, timezone
 
 from emergentintegrations.llm.chat import LlmChat, UserMessage, FileContentWithMimeType
 from dotenv import load_dotenv
-from .database import db, get_current_user
+from .database import db
 
 load_dotenv()
+
+router = APIRouter(prefix="/moltbot/documents", tags=["MoltBot Document Intelligence"])
+logger = logging.getLogger(__name__)
+
+# API Key
+EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
+
+# JWT Config for authentication
+JWT_SECRET = os.environ.get('JWT_SECRET', 'alpha-agency-secret-key-2024')
+JWT_ALGORITHM = "HS256"
+
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import jwt
+
+security = HTTPBearer(auto_error=False)
+
+async def get_current_user_for_docs(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify JWT token and return current user"""
+    if not credentials:
+        raise HTTPException(status_code=401, detail="Non authentifié")
+    
+    try:
+        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("user_id")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Token invalide")
+        
+        user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+        if not user:
+            raise HTTPException(status_code=401, detail="Utilisateur non trouvé")
+        
+        return user
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expiré")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Token invalide")
 
 router = APIRouter(prefix="/moltbot/documents", tags=["MoltBot Document Intelligence"])
 logger = logging.getLogger(__name__)
@@ -178,7 +214,7 @@ Retourne UNIQUEMENT le JSON, sans markdown ni texte supplémentaire."""
 @router.post("/analyze")
 async def analyze_uploaded_document(
     file: UploadFile = File(...),
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user_for_docs)
 ) -> DocumentAnalysisResult:
     """
     Analyze an uploaded document with AI
@@ -224,7 +260,7 @@ async def analyze_uploaded_document(
 @router.post("/analyze/{document_id}")
 async def analyze_existing_document(
     document_id: str,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user_for_docs)
 ) -> DocumentAnalysisResult:
     """
     Analyze an existing document from the file manager
@@ -288,7 +324,7 @@ async def analyze_existing_document(
 @router.post("/batch-analyze")
 async def batch_analyze_documents(
     request: BatchAnalysisRequest,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user_for_docs)
 ) -> Dict[str, Any]:
     """
     Analyze multiple documents in batch
@@ -324,7 +360,7 @@ async def batch_analyze_documents(
 async def auto_classify_document(
     document_id: str,
     apply_changes: bool = False,
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user_for_docs)
 ) -> Dict[str, Any]:
     """
     Automatically classify and optionally rename/move a document
@@ -400,7 +436,7 @@ async def auto_classify_document(
 
 @router.get("/suggestions")
 async def get_classification_suggestions(
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user_for_docs)
 ) -> Dict[str, Any]:
     """
     Get classification suggestions for unclassified documents
@@ -443,7 +479,7 @@ async def get_classification_suggestions(
 @router.post("/apply-suggestions")
 async def apply_classification_suggestions(
     document_ids: List[str],
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user_for_docs)
 ) -> Dict[str, Any]:
     """
     Apply classification suggestions to multiple documents
@@ -476,7 +512,7 @@ async def apply_classification_suggestions(
 
 @router.get("/categories")
 async def get_document_categories(
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user_for_docs)
 ) -> Dict[str, Any]:
     """
     Get available document categories
