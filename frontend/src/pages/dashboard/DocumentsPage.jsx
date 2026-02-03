@@ -984,6 +984,75 @@ const DocumentsPage = () => {
                   <div className="mt-6 space-y-2">
                     {selectedForDetails.type === "document" && (
                       <>
+                        {/* MoltBot AI Analysis */}
+                        <Button
+                          onClick={() => analyzeWithMoltBot(selectedForDetails.id)}
+                          disabled={analyzing}
+                          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500"
+                        >
+                          {analyzing ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                              Analyse en cours...
+                            </>
+                          ) : (
+                            <>
+                              <Wand2 className="w-4 h-4 mr-2" />
+                              Analyser avec MoltBot
+                            </>
+                          )}
+                        </Button>
+                        
+                        {/* AI Analysis Results */}
+                        {aiAnalysis && aiAnalysis.success && (
+                          <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg space-y-3">
+                            <div className="flex items-center gap-2 text-purple-400">
+                              <Sparkles className="w-4 h-4" />
+                              <span className="text-sm font-medium">Résultat de l'analyse</span>
+                            </div>
+                            
+                            <div className="space-y-2 text-sm">
+                              <div>
+                                <span className="text-white/50">Type :</span>
+                                <span className="text-white ml-2 capitalize">{aiAnalysis.document_type}</span>
+                              </div>
+                              <div>
+                                <span className="text-white/50">Nom suggéré :</span>
+                                <p className="text-white text-xs break-words">{aiAnalysis.suggested_name}</p>
+                              </div>
+                              <div>
+                                <span className="text-white/50">Dossier :</span>
+                                <span className="text-white ml-2">{aiAnalysis.suggested_folder}</span>
+                              </div>
+                              {aiAnalysis.summary && (
+                                <div>
+                                  <span className="text-white/50">Résumé :</span>
+                                  <p className="text-white/80 text-xs mt-1">{aiAnalysis.summary}</p>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2">
+                                <span className="text-white/50">Confiance :</span>
+                                <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                                    style={{ width: `${(aiAnalysis.confidence || 0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="text-white/60 text-xs">{Math.round((aiAnalysis.confidence || 0) * 100)}%</span>
+                              </div>
+                            </div>
+                            
+                            <Button
+                              onClick={() => applyAiClassification(selectedForDetails.id)}
+                              size="sm"
+                              className="w-full bg-purple-600 hover:bg-purple-500"
+                            >
+                              <CheckCircle2 className="w-4 h-4 mr-2" />
+                              Appliquer les suggestions
+                            </Button>
+                          </div>
+                        )}
+                        
                         <Button
                           onClick={() => setPreviewDoc(selectedForDetails)}
                           className="w-full bg-indigo-600 hover:bg-indigo-500"
@@ -1025,6 +1094,80 @@ const DocumentsPage = () => {
                   </div>
                 </div>
               )}
+            </aside>
+          )}
+          
+          {/* MoltBot AI Panel */}
+          {showAiPanel && (
+            <aside className="w-80 border-l border-white/10 bg-gradient-to-b from-purple-900/20 to-black/20 flex-shrink-0 overflow-auto">
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg">
+                    <Bot className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-medium">MoltBot AI</h3>
+                    <p className="text-white/50 text-xs">Classification intelligente</p>
+                  </div>
+                </div>
+                
+                {aiSuggestions.length > 0 ? (
+                  <div className="space-y-3">
+                    <p className="text-white/60 text-sm">
+                      {aiSuggestions.filter(s => s.needs_analysis).length} fichier(s) à analyser
+                    </p>
+                    
+                    <ScrollArea className="h-[400px]">
+                      <div className="space-y-2 pr-2">
+                        {aiSuggestions.map((suggestion) => (
+                          <div 
+                            key={suggestion.document_id}
+                            className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-purple-500/50 transition-colors"
+                          >
+                            <p className="text-white text-sm truncate mb-2">{suggestion.original_name || 'Sans nom'}</p>
+                            
+                            {suggestion.needs_analysis ? (
+                              <Button
+                                onClick={() => analyzeWithMoltBot(suggestion.document_id)}
+                                size="sm"
+                                variant="outline"
+                                className="w-full border-purple-500/50 text-purple-400 hover:bg-purple-500/20"
+                                disabled={analyzing}
+                              >
+                                <Wand2 className="w-3 h-3 mr-1" />
+                                Analyser
+                              </Button>
+                            ) : (
+                              <div className="space-y-1 text-xs">
+                                <div className="flex justify-between">
+                                  <span className="text-white/50">Suggéré :</span>
+                                  <span className="text-purple-400">{suggestion.document_type}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-white/50">Dossier :</span>
+                                  <span className="text-white/80">{suggestion.suggested_folder}</span>
+                                </div>
+                                <Button
+                                  onClick={() => applyAiClassification(suggestion.document_id)}
+                                  size="sm"
+                                  className="w-full mt-2 bg-purple-600/50 hover:bg-purple-600"
+                                >
+                                  Appliquer
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Sparkles className="w-12 h-12 mx-auto text-purple-400/50 mb-4" />
+                    <p className="text-white/60 text-sm">Tous vos fichiers sont classés !</p>
+                  </div>
+                )}
+              </div>
             </aside>
           )}
         </div>
