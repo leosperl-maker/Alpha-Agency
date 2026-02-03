@@ -45,7 +45,6 @@ class InstagramAutomation:
         playwright = await async_playwright().start()
         
         # Use persistent context to save session
-        session_path = os.path.join(INSTAGRAM_SESSION_DIR, f"session_{user_id}")
         
         self.browser = await playwright.chromium.launch(
             headless=True,
@@ -87,7 +86,7 @@ class InstagramAutomation:
                 if await cookies_btn.count() > 0:
                     await cookies_btn.first.click()
                     await asyncio.sleep(1)
-            except:
+            except Exception:
                 pass
             
             # Fill login form
@@ -124,7 +123,7 @@ class InstagramAutomation:
                 if await not_now.count() > 0:
                     await not_now.first.click()
                     await asyncio.sleep(1)
-            except:
+            except Exception:
                 pass
                 
             # Skip notifications popup
@@ -133,7 +132,7 @@ class InstagramAutomation:
                 if await not_now.count() > 0:
                     await not_now.first.click()
                     await asyncio.sleep(1)
-            except:
+            except Exception:
                 pass
             
             self.logged_in = True
@@ -162,7 +161,7 @@ class InstagramAutomation:
             profile = self.page.locator('[aria-label="Profile"], [aria-label="Profil"]')
             return await profile.count() > 0
             
-        except:
+        except Exception:
             return False
     
     async def create_story(
@@ -377,7 +376,7 @@ async def post_instagram_story(
     # Cleanup
     try:
         os.unlink(temp_path)
-    except:
+    except Exception:
         pass
     
     # Log result
