@@ -6628,6 +6628,10 @@ app.include_router(lead_scoring_router, prefix="/api", tags=["analytics"])
 from routes.analytics_reports import router as analytics_reports_router
 app.include_router(analytics_reports_router, prefix="/api", tags=["reports"])
 
+# Multi-Platform Social Preview
+from routes.social_preview import router as social_preview_router
+app.include_router(social_preview_router, prefix="/api", tags=["social"])
+
 # MoltBot Scheduler for automated briefings
 from routes.scheduler import moltbot_scheduler
 
