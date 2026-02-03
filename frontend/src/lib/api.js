@@ -553,6 +553,7 @@ export const metaAPI = {
   
   // Pages & Accounts
   getPages: () => api.get('/meta/pages'),
+  resyncPages: () => api.post('/meta/resync-pages'),
   disconnect: () => api.delete('/meta/disconnect'),
   
   // Publishing
