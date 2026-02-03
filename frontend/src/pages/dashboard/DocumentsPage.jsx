@@ -559,9 +559,9 @@ const DocumentsPage = () => {
       )}
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="flex items-center justify-between gap-4 p-4 border-b border-white/10">
+      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
+        {/* Header - Desktop only */}
+        <header className="hidden lg:flex items-center justify-between gap-4 p-3 border-b border-white/10">
           {/* Breadcrumb */}
           <div className="flex items-center gap-1 text-sm overflow-x-auto flex-shrink-0">
             {breadcrumb.map((item, idx) => (
@@ -581,13 +581,13 @@ const DocumentsPage = () => {
 
           <div className="flex items-center gap-2">
             {/* Search */}
-            <div className="relative w-64 hidden md:block">
+            <div className="relative w-48 xl:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
               <Input
-                placeholder="Rechercher dans Drive"
+                placeholder="Rechercher"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/5 border-white/10 text-white placeholder-white/40 rounded-full h-9"
+                className="pl-10 bg-white/5 border-white/10 text-white placeholder-white/40 rounded-full h-8 text-sm"
               />
             </div>
 
@@ -595,13 +595,13 @@ const DocumentsPage = () => {
             <div className="flex items-center bg-white/5 rounded-lg p-0.5 border border-white/10">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2 rounded transition-colors ${viewMode === "grid" ? "bg-indigo-600 text-white" : "text-white/60 hover:text-white"}`}
+                className={`p-1.5 rounded transition-colors ${viewMode === "grid" ? "bg-indigo-600 text-white" : "text-white/60 hover:text-white"}`}
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-2 rounded transition-colors ${viewMode === "list" ? "bg-indigo-600 text-white" : "text-white/60 hover:text-white"}`}
+                className={`p-1.5 rounded transition-colors ${viewMode === "list" ? "bg-indigo-600 text-white" : "text-white/60 hover:text-white"}`}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -610,9 +610,9 @@ const DocumentsPage = () => {
             {/* Info toggle */}
             <button
               onClick={() => setDetailsPanel(!detailsPanel)}
-              className={`p-2 rounded-lg transition-colors ${detailsPanel ? "bg-indigo-600 text-white" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+              className={`p-2 rounded-lg transition-colors hidden xl:block ${detailsPanel ? "bg-indigo-600 text-white" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
             >
-              <Info className="w-5 h-5" />
+              <Info className="w-4 h-4" />
             </button>
             
             {/* MoltBot AI toggle */}
