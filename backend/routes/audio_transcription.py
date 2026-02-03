@@ -381,61 +381,26 @@ Analyse maintenant:"""
 
 @router.post("/voice-to-crm")
 async def voice_to_crm(
-    request: VoiceToCRMRequest = None,
-    audio_file: Optional[UploadFile] = File(None),
-    text: Optional[str] = None,
-    language: str = "fr",
+    request: VoiceToCRMRequest,
     current_user: dict = Depends(get_current_user_for_audio)
 ) -> VoiceToCRMResult:
     """
-    Voice-to-CRM: Transcribe audio and intelligently create CRM entry.
+    Voice-to-CRM: Analyze text and intelligently create CRM entry.
     Supports: contacts, tasks, notes, appointments, invoices
     """
     user_id = current_user.get("id", "")
     
-    # Get text from request body or form field
-    transcribed_text = text
-    if request and request.audio_text:
-        transcribed_text = request.audio_text
-        language = request.language or language
-    
-    # Step 1: Transcribe audio if provided
-    if audio_file and not text:
-        content = await audio_file.read()
-        ext = get_file_extension(audio_file.filename)
-        
-        if ext not in SUPPORTED_FORMATS:
-            return VoiceToCRMResult(
-                success=False,
-                message=f"Format non supporté. Formats acceptés: {', '.join(SUPPORTED_FORMATS)}"
-            )
-        
-        temp_path = None
-        try:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=f".{ext}") as temp_file:
-                temp_file.write(content)
-                temp_path = temp_file.name
-            
-            result = await transcribe_audio_file(temp_path, language)
-            
-            if not result.success:
-                return VoiceToCRMResult(
-                    success=False,
-                    message=f"Erreur de transcription: {result.error}"
-                )
-            
-            transcribed_text = result.text
-        finally:
-            if temp_path and os.path.exists(temp_path):
-                os.unlink(temp_path)
+    # Get text from request body
+    transcribed_text = request.audio_text
+    language = request.language or "fr"
     
     if not transcribed_text:
         return VoiceToCRMResult(
             success=False,
-            message="Aucun texte à analyser. Fournissez un fichier audio ou du texte."
+            message="Aucun texte à analyser. Fournissez du texte via audio_text."
         )
     
-    # Step 2: Analyze command with AI
+    # Analyze command with AI
     analysis = await analyze_voice_command(transcribed_text)
     
     action = analysis.get("action", "unknown")
