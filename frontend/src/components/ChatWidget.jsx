@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { 
-  MessageCircle, X, Send, Bot, User, Loader2, 
-  ChevronDown, Sparkles, Phone, Mail, Clock
+  MessageCircle, X, Send, Bot, Loader2, 
+  Sparkles, Phone, Mail, Clock
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -18,12 +18,10 @@ const ChatWidget = () => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    // Load FAQ on mount
     loadFaq();
   }, []);
 
   useEffect(() => {
-    // Scroll to bottom when messages change
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
@@ -42,10 +40,9 @@ const ChatWidget = () => {
   const openChat = () => {
     setIsOpen(true);
     if (messages.length === 0) {
-      // Welcome message
       setMessages([{
         type: "bot",
-        text: "Bonjour ! 👋 Je suis l'assistant d'Alpha Agency. Comment puis-je vous aider ?",
+        text: "Bonjour ! 👋 Je suis Agent X, l'assistant d'Alpha Agency. Comment puis-je vous aider ?",
         time: new Date()
       }]);
     }
@@ -64,7 +61,6 @@ const ChatWidget = () => {
     setInput("");
     setLoading(true);
 
-    // Simple FAQ matching
     const userQuestion = input.toLowerCase();
     let botResponse = null;
 
@@ -81,7 +77,7 @@ const ChatWidget = () => {
       }
     }
 
-    // Keyword-based responses if no FAQ match
+    // Keyword-based responses
     if (!botResponse) {
       if (userQuestion.includes("tarif") || userQuestion.includes("prix") || userQuestion.includes("coût") || userQuestion.includes("combien")) {
         botResponse = "Nos tarifs sont personnalisés selon votre projet. Pour un site vitrine, comptez à partir de 990€. Pour un devis précis, laissez-moi vos coordonnées et nous vous recontacterons rapidement !";
@@ -119,14 +115,12 @@ const ChatWidget = () => {
   };
 
   const submitContactForm = async () => {
-    if (!contactForm.name || !contactForm.email) {
-      return;
-    }
+    if (!contactForm.name || !contactForm.email) return;
 
     setLoading(true);
 
     try {
-      const res = await fetch(`${API}/api/moltbot/public/inquiry?name=${encodeURIComponent(contactForm.name)}&email=${encodeURIComponent(contactForm.email)}&message=${encodeURIComponent(contactForm.message || "Demande via chatbot")}&phone=${encodeURIComponent(contactForm.phone || "")}`, {
+      const res = await fetch(`${API}/api/moltbot/public/inquiry?name=${encodeURIComponent(contactForm.name)}&email=${encodeURIComponent(contactForm.email)}&message=${encodeURIComponent(contactForm.message || "Demande via Agent X")}&phone=${encodeURIComponent(contactForm.phone || "")}`, {
         method: "POST"
       });
 
@@ -159,7 +153,7 @@ const ChatWidget = () => {
 
   return (
     <>
-      {/* Chat Button */}
+      {/* Chat Button - Red/Black theme */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -168,15 +162,17 @@ const ChatWidget = () => {
             exit={{ scale: 0, opacity: 0 }}
             onClick={openChat}
             data-testid="chat-widget-button"
-            className="fixed bottom-24 right-6 z-50 w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-lg hover:shadow-xl flex items-center justify-center group transition-all hover:scale-110"
+            className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#CE0202] hover:bg-[#B00202] rounded-full shadow-lg hover:shadow-xl flex items-center justify-center group transition-all hover:scale-110"
           >
             <MessageCircle className="w-6 h-6 text-white" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse" />
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full border-2 border-[#CE0202] flex items-center justify-center">
+              <span className="w-2 h-2 bg-[#CE0202] rounded-full animate-pulse" />
+            </span>
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* Chat Window */}
+      {/* Chat Window - Red/White/Black theme */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -184,16 +180,16 @@ const ChatWidget = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             data-testid="chat-widget-window"
-            className="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[500px] max-h-[70vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200"
+            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[500px] max-h-[70vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200"
           >
-            {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 flex items-center justify-between">
+            {/* Header - Red gradient */}
+            <div className="bg-gradient-to-r from-[#CE0202] to-[#8B0000] px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                   <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold text-sm">Alpha Assistant</h3>
+                  <h3 className="text-white font-semibold text-sm">Agent X</h3>
                   <div className="flex items-center gap-1">
                     <span className="w-2 h-2 bg-green-400 rounded-full" />
                     <span className="text-white/80 text-xs">En ligne</span>
@@ -215,11 +211,11 @@ const ChatWidget = () => {
                   key={idx}
                   className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <div className={`max-w-[85%] ${msg.type === "user" ? "order-1" : "order-2"}`}>
+                  <div className={`max-w-[85%]`}>
                     <div
                       className={`px-4 py-2.5 rounded-2xl ${
                         msg.type === "user"
-                          ? "bg-indigo-600 text-white rounded-br-md"
+                          ? "bg-[#CE0202] text-white rounded-br-md"
                           : "bg-white text-gray-800 rounded-bl-md shadow-sm border border-gray-100"
                       }`}
                     >
@@ -236,9 +232,9 @@ const ChatWidget = () => {
                 <div className="flex justify-start">
                   <div className="bg-white px-4 py-3 rounded-2xl rounded-bl-md shadow-sm border border-gray-100">
                     <div className="flex gap-1">
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                      <span className="w-2 h-2 bg-[#CE0202] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-2 h-2 bg-[#CE0202] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-2 h-2 bg-[#CE0202] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                     </div>
                   </div>
                 </div>
@@ -252,7 +248,7 @@ const ChatWidget = () => {
                   className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
                 >
                   <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-indigo-600" />
+                    <Sparkles className="w-4 h-4 text-[#CE0202]" />
                     Laissez-nous vos coordonnées
                   </h4>
                   <div className="space-y-2">
@@ -261,33 +257,33 @@ const ChatWidget = () => {
                       placeholder="Votre nom *"
                       value={contactForm.name}
                       onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#CE0202] focus:ring-1 focus:ring-[#CE0202]"
                     />
                     <input
                       type="email"
                       placeholder="Votre email *"
                       value={contactForm.email}
                       onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#CE0202] focus:ring-1 focus:ring-[#CE0202]"
                     />
                     <input
                       type="tel"
                       placeholder="Votre téléphone"
                       value={contactForm.phone}
                       onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#CE0202] focus:ring-1 focus:ring-[#CE0202]"
                     />
                     <textarea
                       placeholder="Votre message (optionnel)"
                       value={contactForm.message}
                       onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                       rows={2}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-indigo-500 resize-none"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#CE0202] focus:ring-1 focus:ring-[#CE0202] resize-none"
                     />
                     <button
                       onClick={submitContactForm}
                       disabled={loading || !contactForm.name || !contactForm.email}
-                      className="w-full py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 transition-all"
+                      className="w-full py-2 bg-[#CE0202] hover:bg-[#B00202] text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-all"
                     >
                       {loading ? "Envoi..." : "Envoyer"}
                     </button>
@@ -310,7 +306,7 @@ const ChatWidget = () => {
                         setInput(q);
                         setTimeout(() => sendMessage(), 100);
                       }}
-                      className="px-3 py-1 bg-gray-100 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 rounded-full text-xs transition-colors"
+                      className="px-3 py-1 bg-gray-100 hover:bg-[#CE0202]/10 text-gray-700 hover:text-[#CE0202] rounded-full text-xs transition-colors"
                     >
                       {q}
                     </button>
@@ -328,16 +324,23 @@ const ChatWidget = () => {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                   placeholder="Écrivez votre message..."
-                  className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#CE0202]"
                 />
                 <button
                   onClick={sendMessage}
                   disabled={!input.trim() || loading}
-                  className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white disabled:opacity-50 hover:shadow-md transition-all"
+                  className="w-10 h-10 bg-[#CE0202] hover:bg-[#B00202] rounded-full flex items-center justify-center text-white disabled:opacity-50 hover:shadow-md transition-all"
                 >
                   <Send className="w-4 h-4" />
                 </button>
               </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-3 py-2 bg-gray-50 border-t border-gray-100">
+              <p className="text-[10px] text-gray-400 text-center">
+                Propulsé par Alpha Agency • 🇬🇵 Guadeloupe
+              </p>
             </div>
           </motion.div>
         )}
