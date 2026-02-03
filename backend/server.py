@@ -6624,6 +6624,10 @@ app.include_router(moltbot_gmail_router, prefix="/api/moltbot/gmail", tags=["mol
 from routes.lead_scoring import router as lead_scoring_router
 app.include_router(lead_scoring_router, prefix="/api", tags=["analytics"])
 
+# Analytics PDF Reports
+from routes.analytics_reports import router as analytics_reports_router
+app.include_router(analytics_reports_router, prefix="/api", tags=["reports"])
+
 # MoltBot Scheduler for automated briefings
 from routes.scheduler import moltbot_scheduler
 
