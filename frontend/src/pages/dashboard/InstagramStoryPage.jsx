@@ -667,51 +667,85 @@ const InstagramStoryPage = () => {
                   />
                 </div>
                 
-                {/* Poll */}
-                <div>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={storyPoll.enabled}
-                      onChange={(e) => setStoryPoll({ ...storyPoll, enabled: e.target.checked })}
-                      className="rounded"
-                    />
-                    <span className="text-white/70 text-sm">
-                      <BarChart2 className="w-4 h-4 inline mr-1" />
-                      Ajouter un sondage
-                    </span>
-                  </label>
+                {/* Engagement Stickers Section */}
+                <div className="p-3 rounded-lg bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-500/20">
+                  <h4 className="text-pink-300 font-medium text-sm mb-3 flex items-center gap-2">
+                    ✨ Stickers d'engagement
+                  </h4>
                   
-                  {storyPoll.enabled && (
-                    <div className="mt-2 space-y-2 p-3 rounded-lg bg-white/5">
-                      <Input
-                        placeholder="Question du sondage"
-                        value={storyPoll.question}
-                        onChange={(e) => setStoryPoll({ ...storyPoll, question: e.target.value })}
-                        className="bg-white/5 border-white/10 text-white text-sm"
+                  {/* Poll Sticker */}
+                  <div className="mb-3">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={storyPoll.enabled}
+                        onChange={(e) => setStoryPoll({ ...storyPoll, enabled: e.target.checked })}
+                        className="rounded accent-pink-500"
                       />
-                      <div className="grid grid-cols-2 gap-2">
+                      <span className="text-white text-sm flex items-center gap-1">
+                        <BarChart2 className="w-4 h-4 text-pink-400" />
+                        Sondage
+                      </span>
+                    </label>
+                    
+                    {storyPoll.enabled && (
+                      <div className="mt-2 space-y-2 p-3 rounded-lg bg-black/30">
                         <Input
-                          placeholder="Option 1"
-                          value={storyPoll.options[0]}
-                          onChange={(e) => setStoryPoll({ 
-                            ...storyPoll, 
-                            options: [e.target.value, storyPoll.options[1]] 
-                          })}
+                          placeholder="Posez votre question..."
+                          value={storyPoll.question}
+                          onChange={(e) => setStoryPoll({ ...storyPoll, question: e.target.value })}
                           className="bg-white/5 border-white/10 text-white text-sm"
                         />
+                        <div className="grid grid-cols-2 gap-2">
+                          <Input
+                            placeholder="Oui ✅"
+                            value={storyPoll.options[0]}
+                            onChange={(e) => setStoryPoll({ 
+                              ...storyPoll, 
+                              options: [e.target.value, storyPoll.options[1]] 
+                            })}
+                            className="bg-white/5 border-white/10 text-white text-sm"
+                          />
+                          <Input
+                            placeholder="Non ❌"
+                            value={storyPoll.options[1]}
+                            onChange={(e) => setStoryPoll({ 
+                              ...storyPoll, 
+                              options: [storyPoll.options[0], e.target.value] 
+                            })}
+                            className="bg-white/5 border-white/10 text-white text-sm"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Question Sticker */}
+                  <div>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={storyQuestion.enabled}
+                        onChange={(e) => setStoryQuestion({ ...storyQuestion, enabled: e.target.checked })}
+                        className="rounded accent-purple-500"
+                      />
+                      <span className="text-white text-sm flex items-center gap-1">
+                        <MessageCircle className="w-4 h-4 text-purple-400" />
+                        Question ouverte
+                      </span>
+                    </label>
+                    
+                    {storyQuestion.enabled && (
+                      <div className="mt-2 p-3 rounded-lg bg-black/30">
                         <Input
-                          placeholder="Option 2"
-                          value={storyPoll.options[1]}
-                          onChange={(e) => setStoryPoll({ 
-                            ...storyPoll, 
-                            options: [storyPoll.options[0], e.target.value] 
-                          })}
+                          placeholder="Posez-moi une question..."
+                          value={storyQuestion.question}
+                          onChange={(e) => setStoryQuestion({ ...storyQuestion, question: e.target.value })}
                           className="bg-white/5 border-white/10 text-white text-sm"
                         />
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
                 
                 {/* Schedule */}
