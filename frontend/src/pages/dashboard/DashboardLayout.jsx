@@ -713,13 +713,13 @@ const DashboardLayout = () => {
                     </button>
                     <button
                       onClick={() => {
-                        navigate('/admin/assistant');
+                        navigate('/admin/moltbot');
                         setProfileOpen(false);
                       }}
                       className="w-full flex items-center gap-3 p-2 hover:bg-white/10 rounded-lg transition-colors text-white/80 text-sm"
                     >
                       <Bot className="w-4 h-4" />
-                      Assistant IA
+                      MoltBot
                     </button>
                     
                     {/* Theme Toggle */}
