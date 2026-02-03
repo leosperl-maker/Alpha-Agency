@@ -90,6 +90,12 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 - **Boutons de test briefings**: Interface UI pour tester manuellement l'envoi des briefings
 - **API test-briefing**: Nouvel endpoint `/api/whatsapp/test-briefing` pour déclencher manuellement
 
+#### ✅ Personnalisation profil WhatsApp
+- **Modification du nom de profil**: API `/api/whatsapp/profile/name` + UI avec crayon
+- **Modification de la photo**: API `/api/whatsapp/profile/picture` + overlay caméra
+- **Nom changé**: "Alpha Agency" → "Agent X - Alpha Agency"
+- **Interface intuitive**: Clic sur photo/nom pour modifier
+
 #### ✅ Tests passés: iteration_49
 - Backend: 20/20 tests (100%)
 - Frontend: 100% (UI vérifiée)
