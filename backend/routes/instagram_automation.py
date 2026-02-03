@@ -276,22 +276,83 @@ class InstagramAutomation:
             return {"success": False, "error": str(e)}
 
 
-# Singleton instance
-_automation_instance: Optional[InstagramAutomation] = None
+# Singleton instance - per account
+_automation_instances: Dict[str, InstagramAutomation] = {}
 
-async def get_automation(user_id: str) -> InstagramAutomation:
-    """Get or create automation instance"""
-    global _automation_instance
-    if _automation_instance is None:
-        _automation_instance = InstagramAutomation()
-        await _automation_instance.init_browser(user_id)
-    return _automation_instance
+async def get_automation(account_id: str) -> InstagramAutomation:
+    """Get or create automation instance for a specific account"""
+    global _automation_instances
+    if account_id not in _automation_instances:
+        _automation_instances[account_id] = InstagramAutomation()
+        await _automation_instances[account_id].init_browser(account_id)
+    return _automation_instances[account_id]
 
 
-# ==================== API Functions for Route ====================
+# ==================== API Functions for Multi-Account ====================
+
+async def test_account_login(account_id: str, username: str, password: str) -> Dict:
+    """Test login for a specific Instagram account"""
+    automation = await get_automation(account_id)
+    result = await automation.login(username, password)
+    return result
+
+async def post_story_for_account(
+    account_id: str,
+    username: str,
+    password: str,
+    media_url: str,
+    text: Optional[str] = None,
+    poll: Optional[Dict] = None
+) -> Dict:
+    """Post a story for a specific Instagram account"""
+    
+    # Download media to temp file
+    temp_path = f"/tmp/story_{uuid.uuid4()}.jpg"
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(media_url)
+            if response.status_code != 200:
+                return {"success": False, "error": "Impossible de télécharger le média"}
+            
+            with open(temp_path, "wb") as f:
+                f.write(response.content)
+    except Exception as e:
+        return {"success": False, "error": f"Erreur téléchargement média: {e}"}
+    
+    # Get automation for this account
+    automation = await get_automation(account_id)
+    
+    # Ensure logged in
+    if not automation.logged_in:
+        login_result = await automation.login(username, password)
+        if not login_result.get("success"):
+            try:
+                os.unlink(temp_path)
+            except Exception:
+                pass
+            return login_result
+    
+    # Post story
+    result = await automation.create_story(
+        media_path=temp_path,
+        text=text,
+        poll=poll
+    )
+    
+    # Cleanup
+    try:
+        os.unlink(temp_path)
+    except Exception:
+        pass
+    
+    return result
+
+
+# ==================== Legacy API Functions (for backward compatibility) ====================
 
 async def store_instagram_credentials(user_id: str, username: str, password: str) -> Dict:
-    """Store Instagram credentials (encrypted)"""
+    """Store Instagram credentials (encrypted) - Legacy"""
     await db.instagram_credentials.update_one(
         {"user_id": user_id},
         {"$set": {
@@ -305,7 +366,7 @@ async def store_instagram_credentials(user_id: str, username: str, password: str
     return {"success": True, "message": "Credentials sauvegardés"}
 
 async def get_instagram_credentials(user_id: str) -> Optional[Dict]:
-    """Get stored Instagram credentials"""
+    """Get stored Instagram credentials - Legacy"""
     creds = await db.instagram_credentials.find_one({"user_id": user_id})
     if creds:
         return {
