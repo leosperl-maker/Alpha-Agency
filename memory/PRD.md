@@ -80,6 +80,15 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 
 ### 2026-02-03 (Session actuelle - Suite 2)
 
+### 2026-02-03 (Session actuelle - Suite 3)
+
+#### ✅ Refonte interface MoltBot
+- Suppression de "Assistant IA" du menu (remplacé par MoltBot)
+- Nouveau layout responsive avec sidebar droite compacte
+- Version mobile optimisée avec sidebar cachée
+- Stats du mois, WhatsApp, et astuces dans sidebar
+- Quick actions en bas (Stats, Tâches, RDV, Devis, Briefing, Aide)
+
 #### ✅ MoltBot Document Intelligence (Gemini AI)
 - API `/api/document-ai/*` pour classification intelligente
 - Analyse OCR et contenu avec gemini-2.5-flash
