@@ -44,8 +44,8 @@ router = APIRouter()
 GMAIL_SCOPES = ['https://mail.google.com/']
 GOOGLE_CLIENT_ID = os.environ.get('GMAIL_CLIENT_ID', '61051497688-5uih5ogf70mkvb771fdv75sjbta77anj.apps.googleusercontent.com')
 GOOGLE_CLIENT_SECRET = os.environ.get('GMAIL_CLIENT_SECRET', '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')
-GOOGLE_REDIRECT_URI = os.environ.get('GMAIL_REDIRECT_URI', 'https://ai-crm-assistant-2.preview.emergentagent.com/api/moltbot/gmail/callback')
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://ai-crm-assistant-2.preview.emergentagent.com')
+GOOGLE_REDIRECT_URI = os.environ.get('GMAIL_REDIRECT_URI', 'https://alphagency.fr/api/moltbot/gmail/callback')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://alphagency.fr')
 
 # Liste blanche - Ne jamais supprimer/désabonner ces emails
 WHITELIST_DOMAINS = [
