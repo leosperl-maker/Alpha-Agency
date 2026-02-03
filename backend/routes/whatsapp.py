@@ -350,24 +350,43 @@ async def whatsapp_webhook(message: IncomingMessage):
     """
     Webhook for incoming WhatsApp messages
     Processes messages from admin users for CRM control
+    Supports text and audio messages
     """
-    logger.info(f"WhatsApp message from {message.phone_number}: {message.message}")
+    logger.info(f"WhatsApp message from {message.phone_number}: type={message.message_type}, text={message.message[:50] if message.message else 'audio'}")
+    
+    # Process text from message
+    text_content = message.message
+    
+    # If audio message, transcribe it first
+    if message.message_type == "audio" and message.audio_url:
+        from routes.audio_transcription import transcribe_for_moltbot
+        logger.info(f"Transcribing audio from {message.audio_url}")
+        transcribed_text = await transcribe_for_moltbot(url=message.audio_url)
+        if transcribed_text:
+            text_content = transcribed_text
+            logger.info(f"Transcribed: {transcribed_text[:100]}")
+        else:
+            text_content = "[Audio non reconnu]"
     
     # Store message
     await db.whatsapp_messages.insert_one({
         "phone_number": message.phone_number,
-        "message": message.message,
+        "message": text_content,
+        "original_message": message.message,
+        "message_type": message.message_type,
         "direction": "incoming",
         "message_id": message.message_id,
         "timestamp": message.timestamp or datetime.now(timezone.utc).timestamp(),
+        "audio_url": message.audio_url,
+        "transcribed": message.message_type == "audio",
         "created_at": datetime.now(timezone.utc).isoformat()
     })
     
     # Check if admin
     if is_admin(message.phone_number):
         # Process command
-        reply = await process_admin_command(message.phone_number, message.message)
-        return {"reply": reply, "is_admin": True}
+        reply = await process_admin_command(message.phone_number, text_content)
+        return {"reply": reply, "is_admin": True, "transcribed": message.message_type == "audio"}
     else:
         # Public response - limited
         return {
