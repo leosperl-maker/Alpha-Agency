@@ -721,6 +721,7 @@ const StoryEditor = ({
           <Button
             variant="outline"
             onClick={handleSave}
+            data-testid="editor-save-btn"
             className="flex-1 border-white/20 text-white hover:bg-white/10"
           >
             Sauvegarder
@@ -728,6 +729,7 @@ const StoryEditor = ({
           <Button
             onClick={handlePublish}
             disabled={isPublishing || !selectedAccountId}
+            data-testid="editor-publish-btn"
             className="flex-1 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
           >
             {isPublishing ? "Publication..." : "Publier"}
