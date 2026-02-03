@@ -20,11 +20,15 @@ from typing import Optional, List, Dict
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, BackgroundTasks
 from pydantic import BaseModel
 
-from .database import db, get_current_user, get_user_id
+from .database import db, get_current_user
 
 logger = logging.getLogger("instagram_story")
 
 router = APIRouter()
+
+def get_user_id(user: dict) -> str:
+    """Extract user ID from current_user dict"""
+    return user.get("user_id") or user.get("id") or str(user.get("_id", ""))
 
 # ==================== MODELS ====================
 
