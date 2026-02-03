@@ -6600,6 +6600,10 @@ app.include_router(business_search_router, prefix="/api", tags=["business-search
 from routes.whatsapp import router as whatsapp_router
 app.include_router(whatsapp_router, prefix="/api", tags=["whatsapp"])
 
+# MoltBot Document Intelligence (AI-powered classification)
+from routes.moltbot_documents import router as moltbot_docs_router
+app.include_router(moltbot_docs_router, prefix="/api", tags=["moltbot-documents"])
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
