@@ -116,3 +116,19 @@ SENDER_EMAIL=contact@alphagency.fr
 - Backend: 100% validé
 - Frontend: 100% validé
 - Dashboard widgets: Visible et fonctionnel
+
+## Routes Frontend
+| Route | Description |
+|-------|-------------|
+| `/admin/voice-crm` | Voice-to-CRM - création vocale |
+| `/admin/nurturing` | Séquences email automatisées |
+| `/admin/campagnes` | Campagnes marketing (Email/SMS) |
+| `/admin/campaigns` | Alias anglais pour campagnes |
+| `/admin/moltbot` | Assistant IA + Gmail |
+| `/admin/whatsapp` | Configuration WhatsApp |
+
+## Documentation API
+- **Blog API pour n8n**: `/app/docs/API_BLOG_N8N.md`
+
+## Tâches Archivées (pour plus tard)
+- UI Preview Multi-Plateformes (P2)
