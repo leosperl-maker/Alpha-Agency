@@ -433,40 +433,25 @@ async def add_instagram_account(
     if existing:
         return {"success": False, "error": "Ce compte est déjà ajouté"}
     
-    # Create account
+    # Create account (without testing login automatically)
     account_id = str(uuid.uuid4())
     account_doc = {
         "id": account_id,
         "user_id": user_id,
         "username": account.username,
         "password_encrypted": encrypt_token(account.password),
-        "login_success": False,
+        "login_success": None,  # Not tested yet
         "last_login_attempt": None,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     await db.instagram_accounts.insert_one(account_doc)
     
-    # Test login
-    from .instagram_automation import test_account_login
-    result = await test_account_login(account_id, account.username, account.password)
-    
-    # Update login status
-    await db.instagram_accounts.update_one(
-        {"id": account_id},
-        {"$set": {
-            "login_success": result.get("success", False),
-            "last_login_attempt": datetime.now(timezone.utc).isoformat(),
-            "login_error": result.get("error")
-        }}
-    )
-    
     return {
-        "success": result.get("success", False),
+        "success": True,
         "account_id": account_id,
         "username": account.username,
-        "error": result.get("error") if not result.get("success") else None,
-        "message": f"Compte @{account.username} ajouté" + (" et connecté !" if result.get("success") else " (connexion échouée)")
+        "message": f"Compte @{account.username} ajouté ! Cliquez sur 'Tester' pour vérifier la connexion."
     }
 
 @router.get("/accounts/{account_id}")
