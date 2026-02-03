@@ -421,6 +421,98 @@ app.get('/profile', async (req, res) => {
     }
 });
 
+// Send a document (PDF, etc.)
+app.post('/send-document', async (req, res) => {
+    const { phone_number, document_url, filename, caption } = req.body;
+    
+    if (!phone_number || !document_url) {
+        return res.status(400).json({ error: 'phone_number and document_url required' });
+    }
+    
+    if (!sock || !connectionStatus.connected) {
+        return res.status(400).json({ error: 'WhatsApp not connected' });
+    }
+    
+    try {
+        // Format phone number
+        let jid = phone_number.replace(/[^0-9]/g, '');
+        if (!jid.includes('@')) {
+            jid = `${jid}@s.whatsapp.net`;
+        }
+        
+        // Download the document
+        const response = await fetch(document_url);
+        if (!response.ok) {
+            throw new Error('Failed to download document');
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        const documentBuffer = Buffer.from(arrayBuffer);
+        
+        // Determine mimetype from filename
+        let mimetype = 'application/pdf';
+        if (filename) {
+            if (filename.endsWith('.pdf')) mimetype = 'application/pdf';
+            else if (filename.endsWith('.doc') || filename.endsWith('.docx')) mimetype = 'application/msword';
+            else if (filename.endsWith('.xls') || filename.endsWith('.xlsx')) mimetype = 'application/vnd.ms-excel';
+        }
+        
+        // Send document
+        await sock.sendMessage(jid, {
+            document: documentBuffer,
+            mimetype: mimetype,
+            fileName: filename || 'document.pdf',
+            caption: caption || ''
+        });
+        
+        logger.info(`Document sent to ${phone_number}: ${filename}`);
+        res.json({ success: true, message: 'Document envoyé' });
+    } catch (error) {
+        logger.error('Error sending document:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Send an image
+app.post('/send-image', async (req, res) => {
+    const { phone_number, image_url, caption } = req.body;
+    
+    if (!phone_number || !image_url) {
+        return res.status(400).json({ error: 'phone_number and image_url required' });
+    }
+    
+    if (!sock || !connectionStatus.connected) {
+        return res.status(400).json({ error: 'WhatsApp not connected' });
+    }
+    
+    try {
+        // Format phone number
+        let jid = phone_number.replace(/[^0-9]/g, '');
+        if (!jid.includes('@')) {
+            jid = `${jid}@s.whatsapp.net`;
+        }
+        
+        // Download the image
+        const response = await fetch(image_url);
+        if (!response.ok) {
+            throw new Error('Failed to download image');
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        const imageBuffer = Buffer.from(arrayBuffer);
+        
+        // Send image
+        await sock.sendMessage(jid, {
+            image: imageBuffer,
+            caption: caption || ''
+        });
+        
+        logger.info(`Image sent to ${phone_number}`);
+        res.json({ success: true, message: 'Image envoyée' });
+    } catch (error) {
+        logger.error('Error sending image:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ==================== START SERVER ====================
 
 app.listen(PORT, () => {
