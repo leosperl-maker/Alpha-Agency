@@ -42,7 +42,7 @@ const ChatWidget = () => {
     if (messages.length === 0) {
       setMessages([{
         type: "bot",
-        text: "Bonjour ! 👋 Je suis Agent X, l'assistant d'Alpha Agency. Comment puis-je vous aider ?",
+        text: "Bonjour ! 👋 Je suis MoltBot, l'assistant d'Alpha Agency. Comment puis-je vous aider ?",
         time: new Date()
       }]);
     }
@@ -189,7 +189,7 @@ const ChatWidget = () => {
                   <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold text-sm">Agent X</h3>
+                  <h3 className="text-white font-semibold text-sm">MoltBot</h3>
                   <div className="flex items-center gap-1">
                     <span className="w-2 h-2 bg-green-400 rounded-full" />
                     <span className="text-white/80 text-xs">En ligne</span>
