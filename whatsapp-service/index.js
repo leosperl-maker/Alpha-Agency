@@ -327,6 +327,100 @@ app.post('/disconnect', async (req, res) => {
     }
 });
 
+// Update profile name
+app.post('/profile/name', async (req, res) => {
+    const { name } = req.body;
+    
+    if (!name) {
+        return res.status(400).json({ error: 'name is required' });
+    }
+    
+    if (!sock || !connectionStatus.connected) {
+        return res.status(400).json({ error: 'WhatsApp not connected' });
+    }
+    
+    try {
+        await sock.updateProfileName(name);
+        connectionStatus.name = name;
+        logger.info(`Profile name updated to: ${name}`);
+        res.json({ success: true, message: `Nom changé en: ${name}` });
+    } catch (error) {
+        logger.error('Error updating profile name:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update profile picture
+app.post('/profile/picture', async (req, res) => {
+    const { image_url, image_base64 } = req.body;
+    
+    if (!image_url && !image_base64) {
+        return res.status(400).json({ error: 'image_url or image_base64 is required' });
+    }
+    
+    if (!sock || !connectionStatus.connected) {
+        return res.status(400).json({ error: 'WhatsApp not connected' });
+    }
+    
+    try {
+        let imageBuffer;
+        
+        if (image_base64) {
+            // Decode base64
+            imageBuffer = Buffer.from(image_base64, 'base64');
+        } else if (image_url) {
+            // Download from URL
+            const response = await fetch(image_url);
+            if (!response.ok) {
+                throw new Error('Failed to download image');
+            }
+            const arrayBuffer = await response.arrayBuffer();
+            imageBuffer = Buffer.from(arrayBuffer);
+        }
+        
+        // Update profile picture (requires own JID)
+        const ownJid = sock.user.id;
+        await sock.updateProfilePicture(ownJid, imageBuffer);
+        
+        logger.info('Profile picture updated');
+        res.json({ success: true, message: 'Photo de profil mise à jour' });
+    } catch (error) {
+        logger.error('Error updating profile picture:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get current profile info
+app.get('/profile', async (req, res) => {
+    if (!sock || !connectionStatus.connected) {
+        return res.json({ 
+            connected: false,
+            name: null,
+            phone_number: null 
+        });
+    }
+    
+    try {
+        const ownJid = sock.user.id;
+        let profilePicUrl = null;
+        
+        try {
+            profilePicUrl = await sock.profilePictureUrl(ownJid, 'image');
+        } catch (e) {
+            // No profile picture set
+        }
+        
+        res.json({
+            connected: true,
+            name: connectionStatus.name,
+            phone_number: connectionStatus.phoneNumber,
+            profile_picture: profilePicUrl
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ==================== START SERVER ====================
 
 app.listen(PORT, () => {
