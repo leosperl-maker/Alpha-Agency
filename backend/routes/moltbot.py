@@ -551,6 +551,91 @@ async def global_search(
     
     return results
 
+# ----- BUSINESS SEARCH (SIRET/SIREN/Kbis) -----
+
+@router.get("/business-search")
+async def search_business_info(
+    query: str,
+    phone: Optional[str] = Header(None, alias="X-MoltBot-Phone"),
+    secret: Optional[str] = Header(None, alias="X-MoltBot-Secret")
+):
+    """
+    Search for company information (SIRET, SIREN, Kbis data)
+    Uses French government API
+    """
+    if get_access_level(phone, secret) != "admin":
+        raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
+    
+    query = query.strip().replace(" ", "")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            # Determine search type
+            if len(query) == 14 and query.isdigit():
+                # SIRET search
+                url = f"https://entreprise.data.gouv.fr/api/sirene/v3/etablissements/{query}"
+            elif len(query) == 9 and query.isdigit():
+                # SIREN search
+                url = f"https://entreprise.data.gouv.fr/api/sirene/v3/unites_legales/{query}"
+            else:
+                # Name search
+                url = f"https://entreprise.data.gouv.fr/api/sirene/v3/unites_legales?denomination={query}&per_page=5"
+            
+            response = await client.get(url)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Parse the response based on search type
+                if "etablissement" in data:
+                    # SIRET result
+                    etab = data["etablissement"]
+                    ul = etab.get("unite_legale", {})
+                    addr = etab.get("adresse", {})
+                    
+                    return {
+                        "found": True,
+                        "company_name": ul.get("denomination") or f"{ul.get('prenom_1', '')} {ul.get('nom', '')}".strip(),
+                        "siren": ul.get("siren"),
+                        "siret": etab.get("siret"),
+                        "creation_date": ul.get("date_creation"),
+                        "address": f"{addr.get('numero_voie', '')} {addr.get('type_voie', '')} {addr.get('libelle_voie', '')}".strip(),
+                        "city": addr.get("libelle_commune"),
+                        "postal_code": addr.get("code_postal"),
+                        "activity": etab.get("activite_principale"),
+                        "source": "entreprise.data.gouv.fr"
+                    }
+                elif "unite_legale" in data:
+                    # SIREN result
+                    ul = data["unite_legale"]
+                    return {
+                        "found": True,
+                        "company_name": ul.get("denomination") or f"{ul.get('prenom_1', '')} {ul.get('nom', '')}".strip(),
+                        "siren": ul.get("siren"),
+                        "creation_date": ul.get("date_creation"),
+                        "activity": ul.get("activite_principale"),
+                        "source": "entreprise.data.gouv.fr"
+                    }
+                elif "unites_legales" in data and data["unites_legales"]:
+                    # Name search results
+                    results = []
+                    for ul in data["unites_legales"][:5]:
+                        results.append({
+                            "company_name": ul.get("denomination") or f"{ul.get('prenom_1', '')} {ul.get('nom', '')}".strip(),
+                            "siren": ul.get("siren"),
+                            "creation_date": ul.get("date_creation"),
+                            "activity": ul.get("activite_principale")
+                        })
+                    return {"found": True, "results": results, "count": len(results)}
+                else:
+                    return {"found": False, "message": "Aucune entreprise trouvée"}
+            else:
+                return {"found": False, "message": "Aucune entreprise trouvée"}
+                
+    except Exception as e:
+        logger.error(f"Business search error: {str(e)}")
+        return {"found": False, "error": str(e)}
+
 # ----- STATS / DASHBOARD -----
 
 @router.get("/stats")
