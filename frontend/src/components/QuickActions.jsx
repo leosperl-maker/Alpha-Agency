@@ -40,7 +40,7 @@ const QuickActions = () => {
     { id: "opportunity", icon: Briefcase, label: "Nouvelle opportunité", color: "from-purple-500 to-pink-500" },
     { id: "multilink", icon: Link2, label: "Multilink", color: "from-indigo-500 to-violet-500", navigate: "/admin/multilink" },
     { id: "social", icon: Share2, label: "Publier", color: "from-pink-500 to-rose-500", navigate: "/admin/social-media" },
-    { id: "assistant", icon: Bot, label: "Assistant IA", color: "from-cyan-500 to-teal-500", navigate: "/admin/assistant" },
+    { id: "moltbot", icon: Bot, label: "MoltBot", color: "from-violet-500 to-purple-500", navigate: "/admin/moltbot" },
   ];
 
   const handleAction = (action) => {
