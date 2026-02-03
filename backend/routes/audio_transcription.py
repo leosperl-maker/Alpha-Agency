@@ -381,6 +381,7 @@ Analyse maintenant:"""
 
 @router.post("/voice-to-crm")
 async def voice_to_crm(
+    request: VoiceToCRMRequest = None,
     audio_file: Optional[UploadFile] = File(None),
     text: Optional[str] = None,
     language: str = "fr",
@@ -391,7 +392,12 @@ async def voice_to_crm(
     Supports: contacts, tasks, notes, appointments, invoices
     """
     user_id = current_user.get("id", "")
+    
+    # Get text from request body or form field
     transcribed_text = text
+    if request and request.audio_text:
+        transcribed_text = request.audio_text
+        language = request.language or language
     
     # Step 1: Transcribe audio if provided
     if audio_file and not text:
