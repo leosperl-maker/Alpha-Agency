@@ -757,15 +757,15 @@ const DashboardOverview = () => {
       </div>
 
       {/* AI Assistant Promo */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-600/20 via-indigo-600/20 to-purple-600/20 border border-white/10 p-6">
-        <div className="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-3xl" />
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600/20 via-purple-600/20 to-pink-600/20 border border-white/10 p-6">
+        <div className="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-full blur-3xl" />
         <div className="relative flex flex-col sm:flex-row items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-            <Sparkles className="w-7 h-7 text-white" />
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+            <Bot className="w-7 h-7 text-white" />
           </div>
           <div className="flex-1 text-center sm:text-left">
-            <h3 className="text-white font-semibold text-lg">Assistant IA disponible</h3>
-            <p className="text-white/60 text-sm">Générez des idées de posts, hashtags optimisés et découvrez les meilleurs moments pour publier</p>
+            <h3 className="text-white font-semibold text-lg">MoltBot disponible</h3>
+            <p className="text-white/60 text-sm">Gérez votre CRM par commandes: créez des devis, planifiez des RDV, suivez vos tâches et bien plus</p>
           </div>
           <div className="flex gap-2">
             <Button 
@@ -777,8 +777,8 @@ const DashboardOverview = () => {
               Hashtags
             </Button>
             <Button 
-              onClick={() => navigate('/admin/assistant')}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500"
+              onClick={() => navigate('/admin/moltbot')}
+              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500"
             >
               <Bot className="w-4 h-4 mr-2" />
               Ouvrir
