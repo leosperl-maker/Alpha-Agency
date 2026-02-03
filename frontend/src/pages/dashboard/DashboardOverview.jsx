@@ -267,12 +267,12 @@ const DashboardOverview = () => {
             </p>
           </div>
           <Button 
-            onClick={() => navigate('/admin/assistant')}
-            className="bg-white/10 hover:bg-white/20 text-white border-0 text-xs sm:text-sm px-2 sm:px-4"
+            onClick={() => navigate('/admin/moltbot')}
+            className="bg-gradient-to-r from-violet-600/80 to-purple-600/80 hover:from-violet-600 hover:to-purple-600 text-white border-0 text-xs sm:text-sm px-2 sm:px-4"
             size="sm"
           >
             <Sparkles className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Assistant IA</span>
+            <span className="hidden sm:inline">MoltBot</span>
           </Button>
         </div>
 
