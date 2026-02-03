@@ -1,0 +1,89 @@
+{
+  "summary": "Tested MoltBot CRM new features: Gmail Integration, Voice-to-CRM, Lead Scoring, Churn Alerts, Analytics PDF, Multi-platform Preview, Hashtag Suggestions. All 21 backend tests passed. Frontend UI verified - Gmail section visible with Connect button.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_new_features_iteration51.py",
+    "/app/test_reports/pytest/pytest_new_features_iteration51.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Fixed LLM import: Changed from 'emergentintegrations.llm.google.GeminiChat' to 'emergentintegrations.llm.chat.LlmChat' - the google module doesn't exist",
+    "Fixed Voice-to-CRM endpoint to accept JSON body with VoiceToCRMRequest model",
+    "Removed .with_model() calls as they cause model name errors - default model works correctly"
+  ],
+  "updated_files": [
+    "/app/backend/routes/social_preview.py",
+    "/app/backend/routes/audio_transcription.py",
+    "/app/backend/tests/test_new_features_iteration51.py"
+  ],
+  "success_rate": {
+    "backend": "100% (21/21 tests passed)",
+    "frontend": "100% (Gmail section, Connect button verified)"
+  },
+  "test_credentials": {
+    "email": "admin@alphagency.fr",
+    "password": "Test123!"
+  },
+  "seed_data_creation": "Voice-to-CRM tests created test contacts and tasks",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All new features working: Gmail OAuth (returns authorization URL), Voice-to-CRM (AI analysis creates contacts/tasks), Lead Scoring (grades A-F), Churn Alerts, Analytics PDF/JSON, Multi-platform Preview, Hashtag Suggestions. Login URL is /admin/login not /login.",
+  "verified_features": {
+    "Gmail Integration": {
+      "GET /api/moltbot/gmail/auth": "PASS - Returns Google OAuth URL with full Gmail scope",
+      "GET /api/moltbot/gmail/status": "PASS - Returns connection status",
+      "UI Gmail Section": "PASS - Visible on MoltBot page with Connect button"
+    },
+    "Voice-to-CRM": {
+      "POST /api/audio/voice-to-crm": "PASS - AI analyzes text and creates CRM entries",
+      "Contact Creation": "PASS - Creates contacts from voice commands",
+      "Task Creation": "PASS - Creates tasks from voice commands"
+    },
+    "Lead Scoring": {
+      "GET /api/analytics/lead-scores": "PASS - Returns all leads with scores 0-100 and grades A-F",
+      "GET /api/analytics/lead-score/{id}": "PASS - Returns score for specific contact",
+      "Score Factors": "PASS - Includes has_email, has_phone, has_company, recent_contact"
+    },
+    "Churn Alerts": {
+      "GET /api/analytics/churn-alerts": "PASS - Returns alerts with risk levels"
+    },
+    "Analytics Dashboard": {
+      "GET /api/analytics/dashboard": "PASS - Returns leads, clients, revenue stats"
+    },
+    "Analytics Reports": {
+      "GET /api/reports/analytics-json": "PASS - Returns period, revenue, leads, clients, tasks",
+      "GET /api/reports/analytics-pdf": "PASS - Returns valid PDF file"
+    },
+    "Multi-platform Preview": {
+      "POST /api/social/preview": "PASS - Generates previews for Facebook, Instagram, LinkedIn, Twitter",
+      "GET /api/social/platform-info": "PASS - Returns all platform configs with limits"
+    },
+    "Hashtag Suggestions": {
+      "POST /api/social/suggest-hashtags": "PASS - AI generates relevant hashtags"
+    }
+  },
+  "fixes_applied": [
+    {
+      "file": "/app/backend/routes/social_preview.py",
+      "issue": "Import error: emergentintegrations.llm.google.GeminiChat not found",
+      "fix": "Changed to emergentintegrations.llm.chat.LlmChat with UserMessage"
+    },
+    {
+      "file": "/app/backend/routes/audio_transcription.py",
+      "issue": "Same import error + Voice-to-CRM not accepting JSON body",
+      "fix": "Fixed import and changed endpoint to accept VoiceToCRMRequest model"
+    }
+  ],
+  "mocked_apis": {
+    "has_mocked_apis": false,
+    "note": "All APIs are real. Gmail OAuth requires user authorization via Google. Voice-to-CRM uses real AI analysis."
+  }
+}
