@@ -395,8 +395,155 @@ async def get_story_analytics(
         "note": "Pour les métriques détaillées (vues, réponses, swipe-ups), utilisez l'API Instagram Insights via le endpoint Meta."
     }
 
+# ==================== MULTI-ACCOUNT MANAGEMENT ====================
 
-# ==================== INSTAGRAM CREDENTIALS ====================
+class InstagramAccountCreate(BaseModel):
+    username: str
+    password: str
+
+@router.get("/accounts")
+async def list_instagram_accounts(
+    current_user: dict = Depends(get_current_user)
+):
+    """List all Instagram accounts for the user"""
+    user_id = get_user_id(current_user)
+    
+    accounts = await db.instagram_accounts.find(
+        {"user_id": user_id},
+        {"_id": 0, "password_encrypted": 0}
+    ).to_list(50)
+    
+    return {"accounts": accounts, "count": len(accounts)}
+
+@router.post("/accounts")
+async def add_instagram_account(
+    account: InstagramAccountCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Add a new Instagram account for story automation.
+    Supports multiple accounts.
+    """
+    user_id = get_user_id(current_user)
+    
+    from .token_encryption import encrypt_token
+    
+    # Check if account already exists
+    existing = await db.instagram_accounts.find_one({
+        "user_id": user_id,
+        "username": account.username
+    })
+    
+    if existing:
+        return {"success": False, "error": "Ce compte est déjà ajouté"}
+    
+    # Create account
+    account_id = str(uuid.uuid4())
+    account_doc = {
+        "id": account_id,
+        "user_id": user_id,
+        "username": account.username,
+        "password_encrypted": encrypt_token(account.password),
+        "login_success": False,
+        "last_login_attempt": None,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.instagram_accounts.insert_one(account_doc)
+    
+    # Test login
+    from .instagram_automation import test_account_login
+    result = await test_account_login(account_id, account.username, account.password)
+    
+    # Update login status
+    await db.instagram_accounts.update_one(
+        {"id": account_id},
+        {"$set": {
+            "login_success": result.get("success", False),
+            "last_login_attempt": datetime.now(timezone.utc).isoformat(),
+            "login_error": result.get("error")
+        }}
+    )
+    
+    return {
+        "success": result.get("success", False),
+        "account_id": account_id,
+        "username": account.username,
+        "error": result.get("error") if not result.get("success") else None,
+        "message": f"Compte @{account.username} ajouté" + (" et connecté !" if result.get("success") else " (connexion échouée)")
+    }
+
+@router.get("/accounts/{account_id}")
+async def get_instagram_account(
+    account_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get details of a specific Instagram account"""
+    user_id = get_user_id(current_user)
+    
+    account = await db.instagram_accounts.find_one(
+        {"id": account_id, "user_id": user_id},
+        {"_id": 0, "password_encrypted": 0}
+    )
+    
+    if not account:
+        raise HTTPException(status_code=404, detail="Compte non trouvé")
+    
+    return account
+
+@router.delete("/accounts/{account_id}")
+async def delete_instagram_account(
+    account_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete an Instagram account"""
+    user_id = get_user_id(current_user)
+    
+    result = await db.instagram_accounts.delete_one({
+        "id": account_id,
+        "user_id": user_id
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Compte non trouvé")
+    
+    return {"success": True, "message": "Compte supprimé"}
+
+@router.post("/accounts/{account_id}/test")
+async def test_instagram_account(
+    account_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Test login for a specific Instagram account"""
+    user_id = get_user_id(current_user)
+    
+    account = await db.instagram_accounts.find_one({
+        "id": account_id,
+        "user_id": user_id
+    })
+    
+    if not account:
+        raise HTTPException(status_code=404, detail="Compte non trouvé")
+    
+    from .token_encryption import decrypt_token
+    from .instagram_automation import test_account_login
+    
+    password = decrypt_token(account.get("password_encrypted", ""))
+    result = await test_account_login(account_id, account["username"], password)
+    
+    # Update login status
+    await db.instagram_accounts.update_one(
+        {"id": account_id},
+        {"$set": {
+            "login_success": result.get("success", False),
+            "last_login_attempt": datetime.now(timezone.utc).isoformat(),
+            "login_error": result.get("error")
+        }}
+    )
+    
+    return result
+
+# ==================== LEGACY SINGLE CREDENTIALS (Backward compatibility) ====================
 
 class InstagramCredentials(BaseModel):
     username: str
@@ -408,65 +555,45 @@ async def save_instagram_credentials(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Save Instagram credentials for browser automation.
-    These are stored encrypted and used for automated story posting.
-    
-    WARNING: Using automation is against Instagram ToS.
+    Save Instagram credentials (legacy - use /accounts for multi-account).
     """
-    user_id = get_user_id(current_user)
-    
-    from .instagram_automation import store_instagram_credentials, test_instagram_login
-    
-    # Store credentials
-    await store_instagram_credentials(user_id, credentials.username, credentials.password)
-    
-    # Test login
-    result = await test_instagram_login(user_id)
-    
-    if result.get("success"):
-        return {
-            "success": True,
-            "message": f"Connecté avec succès à @{credentials.username}",
-            "username": credentials.username
-        }
-    else:
-        return {
-            "success": False,
-            "message": "Credentials sauvegardés mais connexion échouée",
-            "error": result.get("error"),
-            "username": credentials.username
-        }
+    # Redirect to multi-account system
+    return await add_instagram_account(
+        InstagramAccountCreate(username=credentials.username, password=credentials.password),
+        current_user
+    )
 
 @router.get("/credentials")
 async def get_instagram_credentials_status(
     current_user: dict = Depends(get_current_user)
 ):
-    """Check if Instagram credentials are configured"""
+    """Check if Instagram credentials are configured (legacy)"""
     user_id = get_user_id(current_user)
     
-    creds = await db.instagram_credentials.find_one(
+    # Check multi-account system
+    account = await db.instagram_accounts.find_one(
         {"user_id": user_id},
         {"_id": 0, "password_encrypted": 0}
     )
     
-    if not creds:
+    if not account:
         return {"configured": False}
     
     return {
         "configured": True,
-        "username": creds.get("username"),
-        "last_login": creds.get("last_login_attempt"),
-        "login_success": creds.get("login_success", False)
+        "username": account.get("username"),
+        "last_login": account.get("last_login_attempt"),
+        "login_success": account.get("login_success", False)
     }
 
 @router.delete("/credentials")
 async def delete_instagram_credentials(
     current_user: dict = Depends(get_current_user)
 ):
-    """Delete stored Instagram credentials"""
+    """Delete stored Instagram credentials (deletes first account)"""
     user_id = get_user_id(current_user)
     
-    await db.instagram_credentials.delete_one({"user_id": user_id})
+    await db.instagram_accounts.delete_one({"user_id": user_id})
     
     return {"success": True, "message": "Credentials Instagram supprimés"}
 
@@ -474,10 +601,15 @@ async def delete_instagram_credentials(
 async def test_instagram_login_endpoint(
     current_user: dict = Depends(get_current_user)
 ):
-    """Test Instagram login with stored credentials"""
+    """Test Instagram login with stored credentials (first account)"""
     user_id = get_user_id(current_user)
     
-    from .instagram_automation import test_instagram_login
+    account = await db.instagram_accounts.find_one({"user_id": user_id})
+    
+    if not account:
+        return {"success": False, "error": "Aucun compte configuré"}
+    
+    return await test_instagram_account(account["id"], current_user)
     
     result = await test_instagram_login(user_id)
     return result
