@@ -539,6 +539,9 @@ const MoltBotPage = () => {
             </div>
           )}
 
+          {/* Gmail Section */}
+          <MoltBotGmailSection />
+
           {/* WhatsApp */}
           <div className="bg-white/5 rounded-lg p-3 border border-white/10">
             <h3 className="text-white font-medium mb-2 flex items-center gap-2 text-sm">
