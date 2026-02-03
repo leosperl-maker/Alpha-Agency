@@ -127,6 +127,9 @@ function App() {
             <Route path="moltbot" element={<MoltBotPage />} />
           </Route>
           
+          {/* PWA Widget Page for iPhone */}
+          <Route path="/widget" element={<WidgetPage />} />
+          
           {/* Public Multilink Pages */}
           <Route path="/lien-bio/:slug" element={<LinkBioPage />} />
           
