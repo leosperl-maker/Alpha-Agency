@@ -163,7 +163,16 @@ const WhatsAppConfigPage = () => {
       });
       if (res.ok) {
         const data = await res.json();
-        setConfig(prev => ({ ...prev, ...data }));
+        // Map backend snake_case to frontend camelCase
+        setConfig({
+          adminPhone: data.admin_phone || "",
+          morningBriefing: data.morning_briefing ?? true,
+          morningTime: data.morning_time || "08:00",
+          eveningRecap: data.evening_recap ?? true,
+          eveningTime: data.evening_time || "18:00",
+          notifyNewLeads: data.notify_new_leads ?? true,
+          notifyPayments: data.notify_payments ?? true
+        });
       }
     } catch (error) {
       console.error("Error loading config:", error);
