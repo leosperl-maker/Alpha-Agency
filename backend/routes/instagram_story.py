@@ -241,23 +241,57 @@ async def publish_story(
     if draft["status"] == "published":
         raise HTTPException(status_code=400, detail="Story déjà publiée")
     
+    # Check if Instagram credentials are stored
+    from .instagram_automation import get_instagram_credentials, post_instagram_story
+    
+    creds = await get_instagram_credentials(user_id)
+    if not creds:
+        raise HTTPException(
+            status_code=400, 
+            detail="Credentials Instagram non configurés. Ajoutez vos identifiants dans les paramètres."
+        )
+    
     # Update status to publishing
     await db.instagram_story_drafts.update_one(
         {"id": draft_id},
         {"$set": {"status": "publishing"}}
     )
     
-    # Note: Actual browser automation would go here
-    # This is a placeholder that marks it as needing manual action
-    # because automated posting is against Instagram ToS
+    # Post story using browser automation
+    result = await post_instagram_story(
+        user_id=user_id,
+        media_url=draft.get("media_url"),
+        text=draft.get("elements", {}).get("text_overlay"),
+        poll=draft.get("elements", {}).get("poll")
+    )
     
-    return {
-        "success": True,
-        "message": "Publication initiée",
-        "warning": "⚠️ L'API officielle Instagram ne supporte pas la publication de Stories. Cette fonctionnalité nécessite une action manuelle ou une automatisation browser (contre les CGU).",
-        "draft_id": draft_id,
-        "status": "requires_manual_action"
-    }
+    # Update draft status
+    if result.get("success"):
+        await db.instagram_story_drafts.update_one(
+            {"id": draft_id},
+            {"$set": {
+                "status": "published",
+                "published_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        return {
+            "success": True,
+            "message": "Story publiée avec succès !",
+            "draft_id": draft_id
+        }
+    else:
+        await db.instagram_story_drafts.update_one(
+            {"id": draft_id},
+            {"$set": {
+                "status": "failed",
+                "error_message": result.get("error")
+            }}
+        )
+        return {
+            "success": False,
+            "error": result.get("error"),
+            "draft_id": draft_id
+        }
 
 # ==================== STORY ELEMENTS INFO ====================
 
