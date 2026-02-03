@@ -420,7 +420,6 @@ const DashboardLayout = () => {
     { path: "/admin/documents", icon: FileCheck, label: "Documents" },
     { path: "/admin/transfer", icon: Send, label: "Transfert" },
     { path: "/admin/sauvegardes", icon: Database, label: "Sauvegardes" },
-    { path: "/admin/assistant", icon: Bot, label: "Assistant IA" },
     { path: "/admin/actualites", icon: Newspaper, label: "Actualités" },
     { path: "/admin/blog", icon: FileText, label: "Blog" },
     { path: "/admin/social-media", icon: Share2, label: "Social Media" },
