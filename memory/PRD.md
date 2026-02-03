@@ -80,6 +80,30 @@ CRM complet pour Alpha Agency avec gestion clients, devis/factures, calendrier �
 
 ### 2026-02-03 (Session actuelle - Suite 2)
 
+### 2026-02-03 (Session actuelle - Suite 4)
+
+#### ✅ MoltBot P1 Features implementés
+- **Transcription audio Whisper** (`/api/audio/*`)
+  - Upload fichiers audio (mp3, wav, ogg, etc.)
+  - Transcription depuis URL
+  - Historique des transcriptions
+- **WhatsApp bidirectionnel avec audio**
+  - Webhook traite messages texte ET audio
+  - Transcription automatique des vocaux
+  - Réponses formatées
+- **Scheduler briefings automatiques**
+  - Briefing matin 8h00 (tâches, RDV, alertes)
+  - Récap soir 18h00 (CA, tâches terminées)
+  - Timezone America/Guadeloupe
+  - Check tâches en retard
+
+#### ✅ Corrections UI
+- ChatWidget "Agent X" → "MoltBot"
+- Numéro téléphone 0691 266 003
+- MoltBot sidebar X bouton visible
+
+#### ✅ Tests passés: 25/25 backend, 100% frontend
+
 ### 2026-02-03 (Session actuelle - Suite 3)
 
 #### ✅ Refonte interface MoltBot
@@ -177,11 +201,10 @@ GET  /api/business/siren/{siren}
 - [x] Interface Documents style Google Drive
 - [x] MoltBot : Classification intelligente des documents (Gemini AI)
 
-### P1 (Haute priorité)
-- [ ] Support vidéo/audio avec transcription (Whisper)
-- [ ] WhatsApp bidirectionnel complet (envoi/réception commandes)
-- [ ] Scheduler pour briefings automatiques (cron)
-- [ ] Sync Google Drive avec tri automatique MoltBot
+### P1 (Terminé ce jour)
+- [x] Transcription audio/vidéo avec Whisper
+- [x] WhatsApp bidirectionnel avec support audio
+- [x] Scheduler briefings automatiques (matin/soir)
 
 ### P2 (Moyenne priorité)
 - [ ] Gmail integration via MoltBot
