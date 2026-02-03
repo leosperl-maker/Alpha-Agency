@@ -610,7 +610,4 @@ async def test_instagram_login_endpoint(
         return {"success": False, "error": "Aucun compte configuré"}
     
     return await test_instagram_account(account["id"], current_user)
-    
-    result = await test_instagram_login(user_id)
-    return result
 
