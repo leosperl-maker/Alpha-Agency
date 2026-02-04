@@ -6640,6 +6640,10 @@ app.include_router(nurturing_router, prefix="/api", tags=["nurturing"])
 from routes.notifications import router as notifications_router
 app.include_router(notifications_router, prefix="/api", tags=["notifications"])
 
+# Advanced Analytics Dashboard
+from routes.analytics_dashboard import router as analytics_dashboard_router
+app.include_router(analytics_dashboard_router, prefix="/api", tags=["analytics-dashboard"])
+
 # MoltBot Scheduler for automated briefings
 from routes.scheduler import moltbot_scheduler
 
