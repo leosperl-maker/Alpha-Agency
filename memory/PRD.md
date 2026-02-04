@@ -7,123 +7,100 @@ CRM complet avec assistant IA MoltBot, intégrations multiples, et analytics ava
 
 ## Fonctionnalités Implémentées
 
-### 1. MoltBot Intelligent ✅ (AMÉLIORÉ)
+### 1. MoltBot Intelligent ✅
 - Chat IA conversationnel (Gemini)
-- **Requêtes CRM intelligentes** : "Combien de clients ce mois-ci?", "Résume mon activité"
+- Requêtes CRM : "Combien de clients?", "Résume mon activité"
 - Recherche automatique dans contacts, devis, factures
-- Réponses contextuelles avec données CRM en temps réel
+- Résumé quotidien par WhatsApp (déjà actif)
 - **Route**: `/api/moltbot/chat`
 - **Frontend**: `/admin/moltbot`
 
-### 2. Notifications Push en Temps Réel ✅ (NOUVEAU)
+### 2. Dashboard Analytics Avancé ✅ (NOUVEAU)
+- 4 KPIs avec comparaison période précédente
+- Graphique évolution CA
+- Entonnoir des leads avec taux de conversion
+- Top Clients par CA
+- Timeline activité récente
+- Filtres : aujourd'hui, semaine, mois, trimestre, année
+- Export CSV/JSON
+- **Route**: `/api/analytics/*`
+- **Frontend**: `/admin/analytics-dashboard`
+
+### 3. Notifications Push en Temps Réel ✅
 - WebSocket pour notifications instantanées
-- Types : nouveau lead, paiement reçu, email traité, Voice-CRM, alerte churn
-- Préférences utilisateur configurables
-- Son de notification (activable/désactivable)
+- Types : nouveau lead, paiement, email traité, Voice-CRM, churn
 - **Route**: `/api/notifications/*`
 - **WebSocket**: `/api/notifications/ws/{user_id}`
-- **Frontend**: Icône cloche dans le header
 
-### 3. Gmail Integration ✅
-- OAuth 2.0 avec scope complet
+### 4. Gmail Integration ✅
+- OAuth 2.0 complet
 - Nettoyage intelligent (Soft/Medium/Hard)
 - Désabonnement automatique newsletters
+- Liste blanche emails importants
 - Interface compacte dans sidebar MoltBot
 - **Route**: `/api/moltbot/gmail/*`
 - **Redirect URI Production**: `https://alphagency.fr/api/moltbot/gmail/callback`
 
-### 4. Voice-to-CRM ✅
+### 5. Voice-to-CRM ✅
 - Transcription audio via Whisper
-- Création automatique via IA : contacts, tâches, notes, RDV, devis
-- **Interface dédiée**: `/admin/voice-crm`
-- Exemples de commandes vocales
-- Saisie manuelle possible
+- Création automatique : contacts, tâches, notes, RDV, devis
+- **Frontend**: `/admin/voice-crm`
 - **Route**: `/api/audio/voice-to-crm`
 
-### 5. Email Nurturing (Séquences) ✅
-- Création de séquences email automatisées
-- Triggers : lead créé, score, inactivité, devis envoyé
+### 6. Email Nurturing ✅
+- Séquences email automatisées
 - Templates prédéfinis
-- Personnalisation {{first_name}}, {{company}}
-- **Route**: `/api/nurturing/*`
 - **Frontend**: `/admin/nurturing`
 
-### 6. Lead Scoring & Alertes Churn ✅
-- Scores 0-100 basés sur profil, engagement, activité
-- Détection clients à risque
+### 7. Instagram Stories ✅
+- Éditeur visuel avec stickers
+- Automation Playwright
+- **Note**: Peut être rate-limité (429) sur certains serveurs
+- **Frontend**: `/admin/instagram-stories`
+
+### 8. Lead Scoring & Alertes Churn ✅
+- Scores 0-100
 - Widgets dashboard
-- **Route**: `/api/analytics/lead-scores`, `/api/analytics/churn-alerts`
-
-### 7. Analytics PDF ✅
-- Rapports PDF téléchargeables
-- **Route**: `/api/reports/analytics-pdf`
-
-### 8. Multi-Platform Preview ✅
-- Facebook, Instagram, LinkedIn, Twitter, TikTok
-- **Route**: `/api/social/preview`
-
-### 9. Instagram Story Editor ✅
-- Éditeur visuel WYSIWYG avec stickers drag-and-drop
-
-### 10. WhatsApp Integration ✅
-- Baileys + commandes avancées + envoi PDF
 
 ## Routes Frontend
 | Route | Description |
 |-------|-------------|
-| `/admin/moltbot` | Assistant IA + Gmail + Chat intelligent |
-| `/admin/voice-crm` | Voice-to-CRM - création vocale |
-| `/admin/nurturing` | Séquences email automatisées |
-| `/admin/campagnes` | Campagnes marketing (Email/SMS) |
-| `/admin/campaigns` | Alias anglais pour campagnes |
-| `/admin/whatsapp` | Configuration WhatsApp |
-| `/admin/blog` | Gestion des articles |
+| `/admin/analytics-dashboard` | Dashboard Analytics avancé |
+| `/admin/moltbot` | Assistant IA + Gmail |
+| `/admin/voice-crm` | Voice-to-CRM |
+| `/admin/nurturing` | Séquences email |
+| `/admin/instagram-stories` | Stories Instagram |
+| `/admin/campagnes` | Campagnes Email/SMS |
 
-## APIs Principales
-
-### MoltBot Chat Intelligent
+## APIs Analytics
 ```
-POST /api/moltbot/chat
-Body: { "message": "Combien de clients ce mois-ci?" }
-Headers: X-MoltBot-Secret: moltbot-alpha-secret-2024
+GET /api/analytics/dashboard      # KPIs principaux
+GET /api/analytics/revenue-chart  # Graphique CA
+GET /api/analytics/leads-funnel   # Entonnoir leads
+GET /api/analytics/top-clients    # Meilleurs clients
+GET /api/analytics/activity-timeline  # Activité récente
+GET /api/analytics/kpi-trends     # Tendances 12 mois
+GET /api/analytics/export         # Export CSV/JSON
 ```
-
-### Notifications
-```
-GET  /api/notifications/              # Lister notifications
-POST /api/notifications/              # Créer notification
-PUT  /api/notifications/{id}/read     # Marquer lu
-PUT  /api/notifications/read-all      # Tout marquer lu
-DELETE /api/notifications/{id}        # Supprimer
-GET  /api/notifications/preferences   # Préférences
-WebSocket: /api/notifications/ws/{user_id}
-```
-
-### Nurturing
-```
-POST /api/nurturing/sequences        # Créer séquence
-GET  /api/nurturing/sequences        # Lister séquences
-POST /api/nurturing/enroll           # Inscrire contact
-```
-
-## Documentation
-- **Blog API pour n8n**: `/app/docs/API_BLOG_N8N.md`
 
 ## Configuration Production
 ```env
 GMAIL_REDIRECT_URI=https://alphagency.fr/api/moltbot/gmail/callback
-BREVO_API_KEY=votre_clé_api
 ```
 
 ## Credentials Test
 - Email: admin@alphagency.fr
 - Password: Test123!
-- MoltBot Secret: moltbot-alpha-secret-2024
 
-## Tests (Iteration 53)
-- Backend: 100% (15/15 tests)
-- Frontend: 100% (toutes pages fonctionnelles)
+## Tests (Iteration 54)
+- Backend: 100% (27/27)
+- Frontend: 100%
 
-## Tâches Archivées (P2 - pour plus tard)
+## Notes Instagram Stories
+L'automation peut recevoir une erreur 429 (rate limit) d'Instagram sur certains serveurs. Les messages d'erreur sont maintenant en français et explicites:
+- "⚠️ Instagram limite les connexions depuis ce serveur..."
+- "🔐 Instagram demande une vérification de sécurité..."
+- "🔑 Authentification à deux facteurs requise..."
+
+## Tâches Archivées (P2)
 - UI Preview Multi-Plateformes
-- Dashboard Analytics Avancé
