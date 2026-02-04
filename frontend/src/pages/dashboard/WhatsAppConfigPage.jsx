@@ -305,6 +305,26 @@ const WhatsAppConfigPage = () => {
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 text-white/50 animate-spin" />
             </div>
+          ) : serviceError ? (
+            <div className="text-center py-8">
+              <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <p className="text-red-400 font-medium mb-2">
+                Service WhatsApp non disponible
+              </p>
+              <p className="text-white/50 text-sm mb-4 max-w-xs mx-auto">
+                {serviceError}
+              </p>
+              <Button 
+                onClick={loadStatus}
+                className="bg-green-600 hover:bg-green-500"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Réessayer
+              </Button>
+              <p className="text-white/30 text-xs mt-4">
+                💡 Le service WhatsApp (Node.js) doit être démarré sur le serveur.
+              </p>
+            </div>
           ) : status.connected ? (
             <div className="text-center py-6">
               {/* Profile Picture */}
