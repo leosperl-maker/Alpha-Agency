@@ -6646,6 +6646,7 @@ app.include_router(analytics_dashboard_router, prefix="/api", tags=["analytics-d
 
 # MoltBot Scheduler for automated briefings
 from routes.scheduler import moltbot_scheduler
+from whatsapp_launcher import start_whatsapp_service, stop_whatsapp_service, ensure_whatsapp_running
 
 @app.on_event("startup")
 async def start_moltbot_scheduler():
@@ -6653,9 +6654,22 @@ async def start_moltbot_scheduler():
     moltbot_scheduler.set_database(db)
     await moltbot_scheduler.start()
 
+@app.on_event("startup")
+async def start_whatsapp_service_on_startup():
+    """Start WhatsApp Node.js service on app startup"""
+    logger.info("Starting WhatsApp service...")
+    success = start_whatsapp_service()
+    if success:
+        logger.info("WhatsApp service startup initiated")
+        # Start background health check task
+        asyncio.create_task(ensure_whatsapp_running())
+    else:
+        logger.warning("WhatsApp service could not be started - service may not be available")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     backup_scheduler.stop()
     moltbot_scheduler.stop()
+    stop_whatsapp_service()  # Stop WhatsApp service on shutdown
     client.close()
 
