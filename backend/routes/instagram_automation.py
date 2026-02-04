@@ -183,9 +183,25 @@ class InstagramAutomation:
             
             # Wait for login form
             try:
-                await self.page.wait_for_selector('input[name="username"]', timeout=15000)
+                await self.page.wait_for_selector('input[name="username"]', timeout=20000)
             except Exception:
-                return {"success": False, "error": "Page de connexion Instagram non chargée. Réessayez."}
+                # Check if rate limited (429 shows blank page)
+                if last_status == 429:
+                    return {
+                        "success": False, 
+                        "error": "⚠️ Instagram a temporairement bloqué les connexions depuis ce serveur (erreur 429). Réessayez dans 5-10 minutes."
+                    }
+                # Check for other issues
+                current_content = await self.page.content()
+                if "checkpoint" in current_content.lower() or "challenge" in current_content.lower():
+                    return {
+                        "success": False, 
+                        "error": "🔐 Instagram demande une vérification. Connectez-vous d'abord sur Instagram via votre téléphone."
+                    }
+                return {
+                    "success": False, 
+                    "error": "📱 Page de connexion non disponible. Instagram peut bloquer les connexions automatiques. Réessayez plus tard."
+                }
             
             # Fill login form
             await self.page.fill('input[name="username"]', clean_username)
