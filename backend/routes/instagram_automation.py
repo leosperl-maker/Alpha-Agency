@@ -102,12 +102,29 @@ class InstagramAutomation:
             # Remove @ if present
             clean_username = username.lstrip('@')
             
-            await self.page.goto("https://www.instagram.com/accounts/login/", wait_until="domcontentloaded", timeout=45000)
-            await asyncio.sleep(3)
+            # Try to load login page with retries
+            max_retries = 2
+            for attempt in range(max_retries):
+                try:
+                    response = await self.page.goto(
+                        "https://www.instagram.com/accounts/login/", 
+                        wait_until="domcontentloaded", 
+                        timeout=60000
+                    )
+                    if response and response.ok:
+                        break
+                    await asyncio.sleep(2)
+                except Exception as e:
+                    logger.warning(f"Page load attempt {attempt+1} failed: {e}")
+                    if attempt == max_retries - 1:
+                        return {"success": False, "error": "⚠️ Impossible de charger Instagram. Vérifiez votre connexion internet."}
+                    await asyncio.sleep(3)
+            
+            await asyncio.sleep(4)
             
             # Accept cookies if present
             try:
-                cookies_btn = self.page.locator('button:has-text("Autoriser"), button:has-text("Allow"), button:has-text("Tout accepter"), button:has-text("Accept")')
+                cookies_btn = self.page.locator('button:has-text("Autoriser"), button:has-text("Allow"), button:has-text("Tout accepter"), button:has-text("Accept"), button:has-text("Autoriser les cookies essentiels")')
                 if await cookies_btn.count() > 0:
                     await cookies_btn.first.click(timeout=5000)
                     await asyncio.sleep(2)
