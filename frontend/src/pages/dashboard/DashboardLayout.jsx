@@ -415,6 +415,7 @@ const DashboardLayout = () => {
     { path: "/admin/facturation", icon: Receipt, label: "Facturation" },
     { path: "/admin/budget", icon: Wallet, label: "Budget" },
     { path: "/admin/abonnements", icon: CreditCard, label: "Abonnements" },
+    { path: "/admin/analytics-dashboard", icon: BarChart3, label: "Analytics" },
     { path: "/admin/realisations", icon: Image, label: "Réalisations" },
     { path: "/admin/mindmap", icon: GitBranch, label: "MindMap" },
     { path: "/admin/tags", icon: Tag, label: "Tags" },
