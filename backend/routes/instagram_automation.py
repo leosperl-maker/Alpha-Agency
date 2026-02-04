@@ -332,19 +332,51 @@ _automation_instances: Dict[str, InstagramAutomation] = {}
 async def get_automation(account_id: str) -> InstagramAutomation:
     """Get or create automation instance for a specific account"""
     global _automation_instances
+    
+    # Check if existing instance is still valid
+    if account_id in _automation_instances:
+        instance = _automation_instances[account_id]
+        # If browser closed, recreate
+        if instance.browser is None or not instance.browser.is_connected():
+            del _automation_instances[account_id]
+    
     if account_id not in _automation_instances:
         _automation_instances[account_id] = InstagramAutomation()
         await _automation_instances[account_id].init_browser(account_id)
+    
     return _automation_instances[account_id]
+
+async def cleanup_automation(account_id: str):
+    """Clean up automation instance for an account"""
+    global _automation_instances
+    if account_id in _automation_instances:
+        try:
+            await _automation_instances[account_id].close()
+        except Exception:
+            pass
+        del _automation_instances[account_id]
 
 
 # ==================== API Functions for Multi-Account ====================
 
 async def test_account_login(account_id: str, username: str, password: str) -> Dict:
     """Test login for a specific Instagram account"""
-    automation = await get_automation(account_id)
-    result = await automation.login(username, password)
-    return result
+    try:
+        # Cleanup any existing session first to start fresh
+        await cleanup_automation(account_id)
+        
+        automation = await get_automation(account_id)
+        result = await automation.login(username, password)
+        
+        # If failed, cleanup the instance
+        if not result.get("success"):
+            await cleanup_automation(account_id)
+        
+        return result
+    except Exception as e:
+        logger.error(f"Test login error: {e}")
+        await cleanup_automation(account_id)
+        return {"success": False, "error": f"Erreur lors du test: {str(e)}"}
 
 async def post_story_for_account(
     account_id: str,
