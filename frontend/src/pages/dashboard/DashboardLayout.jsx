@@ -627,62 +627,8 @@ const DashboardLayout = () => {
               <Search className="w-5 h-5" />
             </button>
 
-            {/* Notifications */}
-            <div ref={notifRef} className="relative">
-              <button 
-                onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="relative p-2 rounded-xl hover:bg-white/10 text-white/60 hover:text-white transition-colors"
-              >
-                <Bell className="w-5 h-5" />
-                {notifications.length > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-                )}
-              </button>
-              
-              {/* Notifications Dropdown */}
-              {notificationsOpen && (
-                <div className="absolute top-full right-0 mt-2 w-80 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-xl z-50">
-                  <div className="p-3 border-b border-white/10">
-                    <h3 className="text-white font-semibold text-sm">Notifications</h3>
-                  </div>
-                  {notifications.length === 0 ? (
-                    <div className="p-4 text-center text-white/50 text-sm">
-                      Aucune notification
-                    </div>
-                  ) : (
-                    <div className="max-h-64 overflow-y-auto">
-                      {notifications.map((notif) => (
-                        <button
-                          key={notif.id}
-                          onClick={() => {
-                            navigate(notif.link);
-                            setNotificationsOpen(false);
-                          }}
-                          className="w-full flex items-start gap-3 p-3 hover:bg-white/10 transition-colors text-left"
-                        >
-                          <div className={`p-1.5 rounded-lg bg-white/5 ${notif.color}`}>
-                            <notif.icon className="w-4 h-4" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white text-sm font-medium">{notif.title}</p>
-                            <p className="text-white/50 text-xs truncate">{notif.message}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  <button
-                    onClick={() => {
-                      navigate('/admin/taches');
-                      setNotificationsOpen(false);
-                    }}
-                    className="w-full p-2 text-center text-indigo-400 text-sm hover:bg-white/5 border-t border-white/10"
-                  >
-                    Voir tout
-                  </button>
-                </div>
-              )}
-            </div>
+            {/* Notifications - Using NotificationCenter component */}
+            <NotificationCenter />
 
             {/* User Profile */}
             <div ref={profileRef} className="relative hidden sm:block">
