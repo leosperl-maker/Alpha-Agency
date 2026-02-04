@@ -610,16 +610,32 @@ async def get_whatsapp_status():
     """Get WhatsApp connection status"""
     # Check if connected to WhatsApp service
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(f"{WHATSAPP_SERVICE_URL}/status")
             if response.status_code == 200:
                 return response.json()
-    except:
-        pass
+    except httpx.ConnectError:
+        return {
+            "connected": False,
+            "error": "service_not_running",
+            "message": "Le service WhatsApp n'est pas démarré sur le serveur.",
+            "setup_required": True,
+            "instructions": "Contactez l'administrateur pour démarrer le service WhatsApp (Node.js sur port 3001)."
+        }
+    except httpx.TimeoutException:
+        return {
+            "connected": False,
+            "error": "timeout",
+            "message": "Le service WhatsApp ne répond pas (timeout).",
+            "setup_required": True
+        }
+    except Exception as e:
+        logger.error(f"WhatsApp status error: {e}")
     
     # Return disconnected status with setup instructions
     return {
         "connected": False,
+        "error": "unknown",
         "message": "WhatsApp non connecté",
         "setup_required": True,
         "instructions": "Lancez le service WhatsApp et scannez le QR code"
@@ -629,10 +645,17 @@ async def get_whatsapp_status():
 async def get_qr_code():
     """Get QR code for WhatsApp authentication"""
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(f"{WHATSAPP_SERVICE_URL}/qr")
             return response.json()
-    except:
+    except httpx.ConnectError:
+        return {
+            "qr": None, 
+            "error": "service_not_running",
+            "message": "Service WhatsApp non démarré. Le service Node.js doit être lancé sur le serveur."
+        }
+    except Exception as e:
+        logger.error(f"QR code error: {e}")
         return {"qr": None, "message": "Service WhatsApp non disponible"}
 
 @router.post("/webhook")
