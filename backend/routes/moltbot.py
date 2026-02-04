@@ -1248,3 +1248,35 @@ STYLE:
             "source": "error"
         }
 
+
+
+async def chat_with_moltbot_ai(message: str, context: str = "") -> str:
+    """
+    Helper function for WhatsApp integration.
+    Returns AI response as plain text string.
+    """
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        import uuid
+        
+        session_id = str(uuid.uuid4())
+        
+        system_prompt = context if context else """Tu es MoltBot, l'assistant IA d'Alpha Agency.
+Réponds de manière concise et utile en français.
+Tu aides avec le CRM, le marketing, et les questions générales."""
+        
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=session_id,
+            system_message=system_prompt
+        )
+        
+        user_msg = UserMessage(text=message)
+        response = await chat.send_message(user_msg)
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"chat_with_moltbot_ai error: {e}")
+        return f"Désolé, une erreur est survenue. Essayez une commande comme 'aide', 'stats' ou 'briefing'."
+
