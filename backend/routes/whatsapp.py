@@ -217,12 +217,11 @@ Tu peux aider l'utilisateur avec:
 Réponds de manière utile et concise (max 500 caractères). Utilise des emojis avec modération."""
 
         # Use Gemini via MoltBot chat
-        from routes.moltbot import get_ai_chat_response
+        from routes.moltbot import chat_with_moltbot_ai
         
-        response = await get_ai_chat_response(
-            user_message=message,
-            system_context=context,
-            user_id="whatsapp_admin"
+        response = await chat_with_moltbot_ai(
+            message=message,
+            context=context
         )
         
         # Truncate if too long for WhatsApp
