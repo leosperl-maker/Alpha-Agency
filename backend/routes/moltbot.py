@@ -1049,76 +1049,177 @@ async def chat_with_ai(
 ):
     """
     Chat with MoltBot using AI (Gemini) for any question.
-    Can answer general questions, provide CRM context, and more.
+    Can answer general questions, provide CRM context, search data, and more.
     """
     
     access = get_access_level(phone, secret)
     if access == "none":
         raise HTTPException(status_code=403, detail="Accès non autorisé")
     
-    message = request.message
+    message = request.message.lower()
+    original_message = request.message
     
     try:
-        # Get CRM context for AI
+        # ========== SMART CRM QUERIES ==========
+        # Check if user is asking for specific CRM data
+        
+        specific_data = ""
+        
+        # Search for specific client/contact
+        if any(kw in message for kw in ["trouve", "cherche", "recherche", "où est", "quel est", "combien"]):
+            
+            # Extract search term - look for names, companies, etc
+            search_terms = []
+            for word in original_message.split():
+                if len(word) > 2 and word[0].isupper():
+                    search_terms.append(word)
+            
+            if search_terms:
+                search_query = " ".join(search_terms)
+                
+                # Search contacts
+                contacts_found = await db.contacts.find(
+                    {"$or": [
+                        {"first_name": {"$regex": search_query, "$options": "i"}},
+                        {"last_name": {"$regex": search_query, "$options": "i"}},
+                        {"company": {"$regex": search_query, "$options": "i"}},
+                        {"email": {"$regex": search_query, "$options": "i"}}
+                    ]},
+                    {"_id": 0, "first_name": 1, "last_name": 1, "company": 1, "email": 1, "phone": 1, "status": 1}
+                ).limit(5).to_list(5)
+                
+                # Search invoices
+                invoices_found = await db.invoices.find(
+                    {"$or": [
+                        {"client_name": {"$regex": search_query, "$options": "i"}},
+                        {"number": {"$regex": search_query, "$options": "i"}}
+                    ]},
+                    {"_id": 0, "number": 1, "client_name": 1, "total": 1, "status": 1, "type": 1, "created_at": 1}
+                ).limit(5).to_list(5)
+                
+                if contacts_found:
+                    specific_data += f"\n📇 Contacts trouvés pour '{search_query}':\n"
+                    for c in contacts_found:
+                        specific_data += f"- {c.get('first_name','')} {c.get('last_name','')} ({c.get('company','N/A')}) - {c.get('email','N/A')} - {c.get('phone','N/A')}\n"
+                
+                if invoices_found:
+                    specific_data += f"\n📄 Documents trouvés pour '{search_query}':\n"
+                    for i in invoices_found:
+                        specific_data += f"- {i.get('number','')} - {i.get('client_name','')} - {i.get('total',0):.2f}€ ({i.get('type','')}, {i.get('status','')})\n"
+        
+        # Count queries
+        if "combien" in message:
+            now = datetime.now(timezone.utc)
+            
+            if "client" in message or "contact" in message:
+                if "mois" in message or "ce mois" in message:
+                    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                    count = await db.contacts.count_documents({"created_at": {"$gte": month_start.isoformat()}})
+                    specific_data += f"\n📊 Nouveaux contacts ce mois-ci: {count}\n"
+                elif "semaine" in message:
+                    week_start = now - timedelta(days=now.weekday())
+                    count = await db.contacts.count_documents({"created_at": {"$gte": week_start.isoformat()}})
+                    specific_data += f"\n📊 Nouveaux contacts cette semaine: {count}\n"
+                else:
+                    total = await db.contacts.count_documents({})
+                    clients = await db.contacts.count_documents({"status": {"$in": ["client", "active"]}})
+                    leads = await db.contacts.count_documents({"status": "lead"})
+                    specific_data += f"\n📊 Total contacts: {total} ({clients} clients, {leads} leads)\n"
+            
+            if "facture" in message or "devis" in message:
+                if "mois" in message:
+                    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                    factures = await db.invoices.count_documents({"type": "facture", "created_at": {"$gte": month_start.isoformat()}})
+                    devis = await db.invoices.count_documents({"type": "devis", "created_at": {"$gte": month_start.isoformat()}})
+                    specific_data += f"\n📊 Ce mois: {factures} factures, {devis} devis\n"
+                else:
+                    factures = await db.invoices.count_documents({"type": "facture"})
+                    devis = await db.invoices.count_documents({"type": "devis"})
+                    specific_data += f"\n📊 Total: {factures} factures, {devis} devis\n"
+            
+            if "tâche" in message or "tache" in message:
+                pending = await db.tasks.count_documents({"status": {"$in": ["todo", "in_progress"]}})
+                completed = await db.tasks.count_documents({"status": "completed"})
+                specific_data += f"\n📊 Tâches: {pending} en cours, {completed} terminées\n"
+            
+            if "ca" in message or "chiffre" in message or "revenu" in message:
+                month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                revenue = await db.invoices.aggregate([
+                    {"$match": {"type": "facture", "status": "paid", "created_at": {"$gte": month_start.isoformat()}}},
+                    {"$group": {"_id": None, "total": {"$sum": "$total"}}}
+                ]).to_list(1)
+                ca = revenue[0]["total"] if revenue else 0
+                specific_data += f"\n💰 CA ce mois: {ca:.2f}€\n"
+        
+        # Activity summary
+        if any(kw in message for kw in ["résume", "résumé", "activité", "récap", "recap"]):
+            now = datetime.now(timezone.utc)
+            today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            week_start = now - timedelta(days=now.weekday())
+            
+            # Today's activity
+            tasks_today = await db.tasks.count_documents({"due_date": {"$gte": today.isoformat(), "$lt": (today + timedelta(days=1)).isoformat()}})
+            appts_today = await db.appointments.count_documents({"start_time": {"$gte": today.isoformat(), "$lt": (today + timedelta(days=1)).isoformat()}})
+            
+            # Week activity
+            new_contacts_week = await db.contacts.count_documents({"created_at": {"$gte": week_start.isoformat()}})
+            invoices_week = await db.invoices.count_documents({"created_at": {"$gte": week_start.isoformat()}})
+            
+            specific_data += f"""
+📆 Résumé d'activité:
+Aujourd'hui: {tasks_today} tâches dues, {appts_today} RDV
+Cette semaine: {new_contacts_week} nouveaux contacts, {invoices_week} documents créés
+"""
+        
+        # ========== BUILD CRM CONTEXT ==========
         crm_context = ""
         
         if access == "admin":
-            # Get recent stats
             now = datetime.now(timezone.utc)
             month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).isoformat()
             
-            # Contacts count
             contacts_count = await db.contacts.count_documents({})
             leads_count = await db.contacts.count_documents({"status": "lead"})
             clients_count = await db.contacts.count_documents({"status": {"$in": ["client", "active"]}})
-            
-            # Tasks
             tasks_pending = await db.tasks.count_documents({"status": {"$in": ["todo", "in_progress"]}})
             
-            # Revenue
             revenue_data = await db.invoices.find(
                 {"type": "facture", "status": "paid", "created_at": {"$gte": month_start}},
                 {"total": 1}
             ).to_list(1000)
             ca_month = sum(inv.get("total", 0) for inv in revenue_data)
             
-            # Recent activities
-            recent_contacts = await db.contacts.find({}, {"_id": 0, "first_name": 1, "last_name": 1, "company": 1, "created_at": 1}).sort("created_at", -1).limit(3).to_list(3)
-            recent_invoices = await db.invoices.find({}, {"_id": 0, "number": 1, "client_name": 1, "total": 1, "type": 1}).sort("created_at", -1).limit(3).to_list(3)
-            
             crm_context = f"""
-Contexte CRM Alpha Agency:
-- {contacts_count} contacts total ({leads_count} leads, {clients_count} clients)
+Contexte CRM Alpha Agency (données en temps réel):
+- {contacts_count} contacts ({leads_count} leads, {clients_count} clients)
 - {tasks_pending} tâches en cours
 - CA ce mois: {ca_month:.2f}€
-- Derniers contacts: {', '.join([f"{c.get('first_name','')} {c.get('last_name','')}" for c in recent_contacts])}
-- Derniers documents: {', '.join([f"{i.get('number','')} ({i.get('type','')})" for i in recent_invoices])}
 """
         
-        # Build AI prompt
-        system_prompt = f"""Tu es MoltBot, l'assistant IA d'Alpha Agency, une agence de communication digitale basée en Guadeloupe.
+        # Add specific data found
+        if specific_data:
+            crm_context += f"\n--- Données trouvées pour ta question ---{specific_data}"
+        
+        # ========== AI RESPONSE ==========
+        system_prompt = f"""Tu es MoltBot, l'assistant IA d'Alpha Agency (agence de communication digitale en Guadeloupe).
 
-Tu peux répondre à TOUTES les questions:
-- Questions sur le CRM et les données (contacts, devis, factures, tâches)
-- Questions générales sur le business, le marketing, la communication
-- Questions techniques sur le développement web, les réseaux sociaux
-- Conseils stratégiques et recommandations
-- Aide pour la rédaction de contenus
-- N'importe quelle autre question
+CAPACITÉS:
+✅ Répondre aux questions sur le CRM (contacts, devis, factures, tâches)
+✅ Fournir des statistiques et métriques business
+✅ Chercher des informations spécifiques (clients, documents)
+✅ Conseiller sur le marketing, la communication, les réseaux sociaux
+✅ Aider à la rédaction de contenus
+✅ Répondre à n'importe quelle question générale
 
-Sois utile, professionnel et amical. Réponds en français.
-Si tu ne connais pas une information spécifique du CRM, propose d'utiliser les commandes disponibles.
+STYLE:
+- Réponds toujours en français
+- Sois concis et utile
+- Si des données CRM sont fournies, utilise-les pour répondre précisément
+- Si tu ne trouves pas d'information, suggère d'utiliser les commandes CRM
 
-{crm_context if crm_context else ''}
-
-Commandes CRM disponibles:
-- "Stats" ou "CA du mois" pour les statistiques
-- "Mes tâches" pour voir les tâches
-- "Crée devis de X€ pour Client, description" pour créer un devis
-- "Recherche [terme]" pour chercher dans le CRM
+{crm_context}
 """
         
-        # Call AI
         from emergentintegrations.llm.chat import LlmChat, UserMessage
         import uuid
         session_id = str(uuid.uuid4())
@@ -1129,13 +1230,14 @@ Commandes CRM disponibles:
             system_message=system_prompt
         )
         
-        user_msg = UserMessage(text=message)
+        user_msg = UserMessage(text=original_message)
         response = await chat.send_message(user_msg)
         
         return {
             "success": True,
             "response": response,
-            "source": "ai"
+            "source": "ai",
+            "data_found": bool(specific_data)
         }
     
     except Exception as e:
