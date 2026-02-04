@@ -41,7 +41,13 @@ router = APIRouter()
 # CONFIGURATION
 # ===========================================
 
-GMAIL_SCOPES = ['https://mail.google.com/']
+# Gmail scopes - keep minimal to avoid scope change errors
+GMAIL_SCOPES = [
+    'https://mail.google.com/',
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+    'openid'
+]
 GOOGLE_CLIENT_ID = os.environ.get('GMAIL_CLIENT_ID', '61051497688-5uih5ogf70mkvb771fdv75sjbta77anj.apps.googleusercontent.com')
 GOOGLE_CLIENT_SECRET = os.environ.get('GMAIL_CLIENT_SECRET', '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')
 GOOGLE_REDIRECT_URI = os.environ.get('GMAIL_REDIRECT_URI', 'https://alphagency.fr/api/moltbot/gmail/callback')
