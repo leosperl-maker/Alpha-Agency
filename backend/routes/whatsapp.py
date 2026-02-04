@@ -163,7 +163,13 @@ async def process_admin_command(phone: str, message: str) -> str:
 Tapez une commande pour commencer !"""
 
         else:
-            return """Je n'ai pas compris. Tapez "aide" pour voir les commandes disponibles.
+            # Use AI to respond to any message
+            try:
+                ai_response = await get_ai_response(original_msg, phone)
+                return ai_response
+            except Exception as ai_err:
+                logger.error(f"AI response error: {ai_err}")
+                return """Je n'ai pas compris. Tapez "aide" pour voir les commandes disponibles.
 
 Exemples rapides:
 • "CA du mois"
@@ -174,6 +180,60 @@ Exemples rapides:
     except Exception as e:
         logger.error(f"Error processing command: {e}")
         return "Erreur lors du traitement. Réessayez ou tapez 'aide'."
+
+
+async def get_ai_response(message: str, phone: str) -> str:
+    """Use AI to respond to any message with CRM context"""
+    try:
+        # Get CRM context
+        stats = await get_crm_stats()
+        tasks = await db.tasks.find({"status": "todo"}).limit(5).to_list(5)
+        tasks_text = "\n".join([f"- {t.get('title', 'Sans titre')}" for t in tasks]) if tasks else "Aucune tâche en cours"
+        
+        recent_contacts = await db.contacts.find().sort("created_at", -1).limit(3).to_list(3)
+        contacts_text = "\n".join([f"- {c.get('first_name', '')} {c.get('last_name', '')}" for c in recent_contacts]) if recent_contacts else "Aucun contact récent"
+        
+        # Build context
+        context = f"""Tu es MoltBot, l'assistant IA du CRM Alpha Agency. Tu réponds en français de manière concise et professionnelle.
+        
+Contexte CRM actuel:
+- CA du mois: {stats['revenue']}€
+- Nouveaux contacts ce mois: {stats['new_contacts']}
+- Tâches en attente: {stats['pending_tasks']}
+- RDV à venir: {stats['upcoming_appointments']}
+
+Tâches en cours:
+{tasks_text}
+
+Contacts récents:
+{contacts_text}
+
+Tu peux aider l'utilisateur avec:
+- Informations sur le CRM (stats, tâches, contacts)
+- Création de devis et factures
+- Questions générales sur la gestion d'entreprise
+- Conseils et suggestions
+
+Réponds de manière utile et concise (max 500 caractères). Utilise des emojis avec modération."""
+
+        # Use Gemini via MoltBot chat
+        from routes.moltbot import get_ai_chat_response
+        
+        response = await get_ai_chat_response(
+            user_message=message,
+            system_context=context,
+            user_id="whatsapp_admin"
+        )
+        
+        # Truncate if too long for WhatsApp
+        if len(response) > 1000:
+            response = response[:997] + "..."
+            
+        return response
+        
+    except Exception as e:
+        logger.error(f"AI response error: {e}")
+        raise
 
 async def get_crm_stats() -> Dict:
     """Get CRM stats for WhatsApp response"""
