@@ -268,15 +268,17 @@ async def log_gmail_action(user_id: str, action: str, message_id: str, details: 
 @router.get("/auth")
 async def initiate_gmail_auth(current_user: dict = Depends(get_current_user)):
     """Start Gmail OAuth flow"""
+    user_id = get_user_id(current_user)
+    
+    # First, delete any existing credentials to force fresh auth
+    await db.gmail_credentials.delete_one({"user_id": user_id})
+    
     flow = get_oauth_flow()
     
     authorization_url, state = flow.authorization_url(
         access_type='offline',
-        include_granted_scopes='true',
-        prompt='consent'
+        prompt='consent'  # Force consent screen to get fresh scopes
     )
-    
-    user_id = get_user_id(current_user)
     
     # Store state for verification
     await db.gmail_oauth_states.update_one(
