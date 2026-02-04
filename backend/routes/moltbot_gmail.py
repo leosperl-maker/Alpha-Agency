@@ -207,12 +207,22 @@ async def get_gmail_service(user_id: str) -> Optional[Any]:
     should_refresh = False
     if token_expiry:
         try:
-            expiry_dt = datetime.fromisoformat(token_expiry.replace('Z', '+00:00'))
+            # Parse expiry datetime - handle various formats
+            expiry_str = str(token_expiry).replace('Z', '+00:00')
+            expiry_dt = datetime.fromisoformat(expiry_str)
+            
+            # Ensure expiry_dt is timezone-aware
+            if expiry_dt.tzinfo is None:
+                expiry_dt = expiry_dt.replace(tzinfo=timezone.utc)
+            
+            # Compare with current UTC time
+            now_utc = datetime.now(timezone.utc)
+            
             # Refresh 5 minutes before actual expiry
-            if expiry_dt < (datetime.now(timezone.utc) + timedelta(minutes=5)):
+            if expiry_dt < (now_utc + timedelta(minutes=5)):
                 should_refresh = True
         except Exception as e:
-            logger.warning(f"Could not parse token expiry: {e}")
+            logger.warning(f"Could not parse token expiry '{token_expiry}': {e}")
             should_refresh = True
     else:
         # No expiry stored, try to refresh anyway
