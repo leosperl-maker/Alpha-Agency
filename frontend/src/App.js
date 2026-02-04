@@ -135,6 +135,7 @@ function App() {
             <Route path="instagram-stories" element={<InstagramStoryPage />} />
             <Route path="nurturing" element={<NurturingPage />} />
             <Route path="voice-crm" element={<VoiceCRMPage />} />
+            <Route path="analytics-dashboard" element={<AnalyticsDashboardPage />} />
           </Route>
           
           {/* PWA Widget Page for iPhone */}
