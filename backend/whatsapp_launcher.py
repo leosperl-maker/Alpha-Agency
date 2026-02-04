@@ -8,11 +8,37 @@ import logging
 import asyncio
 import signal
 import sys
+import shutil
 
 logger = logging.getLogger(__name__)
 
 # Global process reference
 whatsapp_process = None
+node_available = None  # Cache for Node.js availability check
+
+def is_node_available():
+    """Check if Node.js is installed on the system"""
+    global node_available
+    
+    if node_available is not None:
+        return node_available
+    
+    # Try multiple locations
+    node_paths = ["/usr/bin/node", "/usr/local/bin/node", "/opt/node/bin/node"]
+    
+    for path in node_paths:
+        if os.path.isfile(path):
+            node_available = path
+            return path
+    
+    # Try from PATH
+    node_from_path = shutil.which("node")
+    if node_from_path:
+        node_available = node_from_path
+        return node_from_path
+    
+    node_available = False
+    return False
 
 def start_whatsapp_service():
     """Start the WhatsApp Node.js service as a subprocess"""
@@ -30,10 +56,12 @@ def start_whatsapp_service():
         logger.warning(f"WhatsApp service script not found: {node_script}")
         return False
     
-    # Check if node is available
-    node_path = "/usr/bin/node"
-    if not os.path.isfile(node_path):
-        node_path = "node"  # Try from PATH
+    # Check if Node.js is available
+    node_path = is_node_available()
+    if not node_path:
+        logger.error("Node.js is NOT installed on this server. WhatsApp service requires Node.js.")
+        logger.error("Please install Node.js or use WhatsApp Business Cloud API instead.")
+        return False
     
     try:
         # Check if already running by trying to connect
@@ -47,7 +75,7 @@ def start_whatsapp_service():
             pass  # Service not running, we'll start it
         
         # Start the process
-        logger.info(f"Starting WhatsApp service from {whatsapp_dir}")
+        logger.info(f"Starting WhatsApp service from {whatsapp_dir} using {node_path}")
         
         # Create log files
         log_dir = "/var/log/supervisor"
