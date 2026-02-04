@@ -13,6 +13,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import FloatingAIChat from "../../components/FloatingAIChat";
 import QuickActions from "../../components/QuickActions";
+import NotificationCenter from "../../components/NotificationCenter";
 import { tasksAPI, contactsAPI, invoicesAPI, opportunitiesAPI } from "../../lib/api";
 import { useTheme } from "../../contexts/ThemeContext";
 import {
