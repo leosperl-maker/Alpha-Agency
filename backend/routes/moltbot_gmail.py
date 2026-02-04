@@ -385,13 +385,34 @@ async def get_gmail_status(current_user: dict = Depends(get_current_user)):
                 "threads_total": profile.get("threadsTotal"),
                 "connected_at": gmail_creds.get("connected_at")
             }
+    except HttpError as e:
+        logger.error(f"Gmail API error: {e.status_code} - {e.reason}")
+        # If 401 or 403, token is invalid - need reauth
+        if e.status_code in [401, 403]:
+            return {
+                "connected": True,
+                "email": gmail_creds.get("email"),
+                "needs_reauth": True,
+                "error": f"Token invalide: {e.reason}"
+            }
     except Exception as e:
         logger.error(f"Gmail status check failed: {e}")
+        # Try to determine if it's a token issue
+        error_str = str(e).lower()
+        if "invalid_grant" in error_str or "token" in error_str:
+            return {
+                "connected": True,
+                "email": gmail_creds.get("email"),
+                "needs_reauth": True,
+                "error": str(e)
+            }
     
+    # If we get here, credentials exist but we couldn't verify - assume OK for now
     return {
         "connected": True,
         "email": gmail_creds.get("email"),
-        "needs_reauth": True
+        "messages_total": None,
+        "connected_at": gmail_creds.get("connected_at")
     }
 
 @router.delete("/disconnect")
