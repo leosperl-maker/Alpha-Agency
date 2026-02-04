@@ -47,6 +47,7 @@ class InstagramAutomation:
     async def init_browser(self, user_id: str):
         """Initialize browser with persistent context"""
         playwright = await async_playwright().start()
+        self._playwright = playwright  # Keep reference for cleanup
         
         # Session directory for this user
         session_dir = os.path.join(INSTAGRAM_SESSION_DIR, user_id)
@@ -65,17 +66,32 @@ class InstagramAutomation:
             timeout=60000  # 60 seconds timeout for browser launch
         )
         
+        # Try to load existing session, but don't fail if it doesn't exist
+        state_file = os.path.join(session_dir, "state.json")
+        storage_state = None
+        if os.path.exists(state_file):
+            try:
+                # Verify the file is valid JSON
+                import json
+                with open(state_file, 'r') as f:
+                    json.load(f)
+                storage_state = state_file
+                logger.info(f"Loaded existing session from {state_file}")
+            except Exception as e:
+                logger.warning(f"Invalid session file, starting fresh: {e}")
+                os.remove(state_file)  # Remove invalid file
+        
         self.context = await self.browser.new_context(
             viewport={"width": 430, "height": 932},  # Mobile viewport
             user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
             locale="fr-FR",
-            storage_state=os.path.join(session_dir, "state.json") if os.path.exists(os.path.join(session_dir, "state.json")) else None
+            storage_state=storage_state
         )
         
         # Store session dir for saving later
         self.session_dir = session_dir
         self.page = await self.context.new_page()
-        self.page.set_default_timeout(30000)  # 30 seconds default timeout
+        self.page.set_default_timeout(45000)  # 45 seconds default timeout
         
     async def save_session(self):
         """Save browser session to reuse later"""
