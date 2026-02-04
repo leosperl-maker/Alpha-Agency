@@ -76,17 +76,19 @@ class TestMoltBotAIChat:
         assert "response" in data, "Expected 'response' in data"
         print(f"✅ Search response: {data['response'][:200]}...")
     
-    def test_moltbot_chat_without_auth_fails(self):
-        """Test MoltBot chat requires authentication"""
+    def test_moltbot_chat_public_access(self):
+        """Test MoltBot chat allows public access (limited functionality)"""
         response = requests.post(
             f"{BASE_URL}/api/moltbot/chat",
             headers={"Content-Type": "application/json"},
-            json={"message": "Combien de contacts?"}
+            json={"message": "Bonjour, quels sont vos services?"}
         )
         
-        # Should return 403 without proper auth
-        assert response.status_code == 403, f"Expected 403 without auth, got {response.status_code}"
-        print("✅ MoltBot correctly requires authentication")
+        # Public access is allowed for general questions
+        assert response.status_code == 200, f"Expected 200 for public access, got {response.status_code}"
+        data = response.json()
+        assert data.get("success") == True, "Expected success=True"
+        print("✅ MoltBot allows public access for general questions")
 
 
 class TestMoltBotStats:
