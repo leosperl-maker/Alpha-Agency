@@ -6636,6 +6636,10 @@ app.include_router(social_preview_router, prefix="/api", tags=["social"])
 from routes.nurturing import router as nurturing_router
 app.include_router(nurturing_router, prefix="/api", tags=["nurturing"])
 
+# Real-time Notifications System
+from routes.notifications import router as notifications_router
+app.include_router(notifications_router, prefix="/api", tags=["notifications"])
+
 # MoltBot Scheduler for automated briefings
 from routes.scheduler import moltbot_scheduler
 
