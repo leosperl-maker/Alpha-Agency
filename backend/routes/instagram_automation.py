@@ -136,7 +136,8 @@ class InstagramAutomation:
             clean_username = username.lstrip('@')
             
             # Try to load login page with retries
-            max_retries = 2
+            max_retries = 3
+            last_status = None
             for attempt in range(max_retries):
                 try:
                     response = await self.page.goto(
@@ -144,16 +145,32 @@ class InstagramAutomation:
                         wait_until="domcontentloaded", 
                         timeout=60000
                     )
+                    last_status = response.status if response else None
+                    logger.info(f"Instagram response status: {last_status}")
+                    
+                    # Check for rate limiting
+                    if last_status == 429:
+                        if attempt < max_retries - 1:
+                            wait_time = (attempt + 1) * 10
+                            logger.warning(f"Rate limited, waiting {wait_time}s...")
+                            await asyncio.sleep(wait_time)
+                            continue
+                        else:
+                            return {
+                                "success": False, 
+                                "error": "⚠️ Instagram limite les connexions depuis ce serveur. Réessayez dans quelques minutes ou testez depuis votre navigateur personnel."
+                            }
+                    
                     if response and response.ok:
                         break
-                    await asyncio.sleep(2)
+                    await asyncio.sleep(3)
                 except Exception as e:
                     logger.warning(f"Page load attempt {attempt+1} failed: {e}")
                     if attempt == max_retries - 1:
                         return {"success": False, "error": "⚠️ Impossible de charger Instagram. Vérifiez votre connexion internet."}
-                    await asyncio.sleep(3)
+                    await asyncio.sleep(5)
             
-            await asyncio.sleep(4)
+            await asyncio.sleep(5)
             
             # Accept cookies if present
             try:
