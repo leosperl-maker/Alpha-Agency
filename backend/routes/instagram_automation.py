@@ -99,51 +99,76 @@ class InstagramAutomation:
         try:
             logger.info(f"Attempting Instagram login for {username}")
             
-            await self.page.goto("https://www.instagram.com/accounts/login/", wait_until="networkidle")
-            await asyncio.sleep(2)
+            # Remove @ if present
+            clean_username = username.lstrip('@')
+            
+            await self.page.goto("https://www.instagram.com/accounts/login/", wait_until="domcontentloaded", timeout=45000)
+            await asyncio.sleep(3)
             
             # Accept cookies if present
             try:
-                cookies_btn = self.page.locator('button:has-text("Autoriser"), button:has-text("Allow")')
+                cookies_btn = self.page.locator('button:has-text("Autoriser"), button:has-text("Allow"), button:has-text("Tout accepter"), button:has-text("Accept")')
                 if await cookies_btn.count() > 0:
-                    await cookies_btn.first.click()
-                    await asyncio.sleep(1)
+                    await cookies_btn.first.click(timeout=5000)
+                    await asyncio.sleep(2)
             except Exception:
                 pass
             
+            # Wait for login form
+            try:
+                await self.page.wait_for_selector('input[name="username"]', timeout=15000)
+            except Exception:
+                return {"success": False, "error": "Page de connexion Instagram non chargée. Réessayez."}
+            
             # Fill login form
-            await self.page.fill('input[name="username"]', username)
+            await self.page.fill('input[name="username"]', clean_username)
+            await asyncio.sleep(0.5)
             await self.page.fill('input[name="password"]', password)
+            await asyncio.sleep(0.5)
             
             # Click login button
             await self.page.click('button[type="submit"]')
             
             # Wait for navigation or error
-            await asyncio.sleep(5)
+            await asyncio.sleep(6)
             
             # Check if login succeeded
             current_url = self.page.url
             
-            if "challenge" in current_url:
+            # Security challenge
+            if "challenge" in current_url or "suspicious" in current_url:
                 return {
                     "success": False,
-                    "error": "Vérification de sécurité requise. Connectez-vous manuellement sur Instagram et réessayez.",
-                    "requires_verification": True
+                    "error": "🔐 Instagram demande une vérification de sécurité. Connectez-vous manuellement sur Instagram depuis votre téléphone, approuvez la connexion, puis réessayez ici.",
+                    "requires_verification": True,
+                    "action_required": "manual_verification"
                 }
             
+            # Two-factor auth
+            if "two_factor" in current_url:
+                return {
+                    "success": False,
+                    "error": "🔑 Authentification à deux facteurs requise. Désactivez temporairement la 2FA ou utilisez un mot de passe d'application.",
+                    "requires_2fa": True
+                }
+            
+            # Still on login page = bad credentials
             if "/accounts/login" in current_url:
                 # Check for error message
-                error_el = self.page.locator('#slfErrorAlert, [role="alert"]')
-                if await error_el.count() > 0:
-                    error_text = await error_el.first.inner_text()
-                    return {"success": False, "error": f"Échec connexion: {error_text}"}
-                return {"success": False, "error": "Identifiants incorrects"}
+                try:
+                    error_el = self.page.locator('#slfErrorAlert, [role="alert"], .eiCW-')
+                    if await error_el.count() > 0:
+                        error_text = await error_el.first.inner_text()
+                        return {"success": False, "error": f"❌ {error_text}"}
+                except Exception:
+                    pass
+                return {"success": False, "error": "❌ Identifiants incorrects. Vérifiez votre nom d'utilisateur et mot de passe."}
             
             # Save "Not now" on save login info popup
             try:
-                not_now = self.page.locator('button:has-text("Plus tard"), button:has-text("Not Now")')
+                not_now = self.page.locator('button:has-text("Plus tard"), button:has-text("Not Now"), div[role="button"]:has-text("Plus tard")')
                 if await not_now.count() > 0:
-                    await not_now.first.click()
+                    await not_now.first.click(timeout=3000)
                     await asyncio.sleep(1)
             except Exception:
                 pass
@@ -152,22 +177,25 @@ class InstagramAutomation:
             try:
                 not_now = self.page.locator('button:has-text("Plus tard"), button:has-text("Not Now")')
                 if await not_now.count() > 0:
-                    await not_now.first.click()
+                    await not_now.first.click(timeout=3000)
                     await asyncio.sleep(1)
             except Exception:
                 pass
             
-            self.logged_in = True
-            self.username = username
-            logger.info(f"Successfully logged in as {username}")
+            # Save session for future use
+            await self.save_session()
             
-            return {"success": True, "username": username}
+            self.logged_in = True
+            self.username = clean_username
+            logger.info(f"Successfully logged in as {clean_username}")
+            
+            return {"success": True, "username": clean_username, "message": "✅ Connexion réussie !"}
             
         except PlaywrightTimeout:
-            return {"success": False, "error": "Timeout lors de la connexion"}
+            return {"success": False, "error": "⏱️ Timeout - Instagram met trop de temps à répondre. Réessayez dans quelques minutes."}
         except Exception as e:
             logger.error(f"Login error: {e}")
-            return {"success": False, "error": str(e)}
+            return {"success": False, "error": f"❌ Erreur: {str(e)}"}
     
     async def check_logged_in(self) -> bool:
         """Check if currently logged in"""
