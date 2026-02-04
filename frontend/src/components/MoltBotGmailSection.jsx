@@ -270,84 +270,75 @@ const MoltBotGmailSection = () => {
     );
   }
 
-  // Connected state
+  // Connected state - Compact version for sidebar
   return (
-    <div className="space-y-4" data-testid="gmail-connected-section">
-      {/* Header with status */}
-      <div className="glass-panel rounded-xl p-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
-              <Mail className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-white font-medium">{gmailStatus.email}</h3>
-                <CheckCircle2 className="w-4 h-4 text-green-400" />
-              </div>
-              <p className="text-white/50 text-xs">
-                {gmailStatus.messages_total?.toLocaleString()} emails • {gmailStatus.threads_total?.toLocaleString()} threads
-              </p>
-            </div>
+    <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 space-y-2" data-testid="gmail-connected-section">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center flex-shrink-0">
+            <Mail className="w-3.5 h-3.5 text-white" />
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => loadEmails()}
-              className="border-white/20"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={disconnectGmail}
-            >
-              <Unplug className="w-4 h-4" />
-            </Button>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1">
+              <span className="text-white text-xs font-medium truncate">{gmailStatus.email?.split('@')[0]}</span>
+              <CheckCircle2 className="w-3 h-3 text-green-400 flex-shrink-0" />
+            </div>
+            <p className="text-white/50 text-[9px] truncate">
+              {gmailStatus.messages_total?.toLocaleString()} emails
+            </p>
           </div>
         </div>
+        
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={disconnectGmail}
+          className="h-6 w-6 p-0 text-white/40 hover:text-red-400"
+        >
+          <Unplug className="w-3 h-3" />
+        </Button>
       </div>
 
-      {/* Stats */}
+      {/* Quick Stats */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="glass-panel rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-white">{stats.total_actions}</p>
-            <p className="text-white/50 text-xs">Actions totales</p>
+        <div className="grid grid-cols-3 gap-1">
+          <div className="bg-white/5 rounded p-1 text-center">
+            <p className="text-xs font-bold text-green-400">{stats.action_breakdown?.clean || 0}</p>
+            <p className="text-white/40 text-[8px]">Nettoyés</p>
           </div>
-          <div className="glass-panel rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-green-400">{stats.action_breakdown?.clean || 0}</p>
-            <p className="text-white/50 text-xs">Emails nettoyés</p>
+          <div className="bg-white/5 rounded p-1 text-center">
+            <p className="text-xs font-bold text-blue-400">{stats.action_breakdown?.unsubscribe || 0}</p>
+            <p className="text-white/40 text-[8px]">Désabo</p>
           </div>
-          <div className="glass-panel rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-blue-400">{stats.action_breakdown?.unsubscribe || 0}</p>
-            <p className="text-white/50 text-xs">Désabonnements</p>
-          </div>
-          <div className="glass-panel rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-purple-400">{stats.action_breakdown?.send || 0}</p>
-            <p className="text-white/50 text-xs">Emails envoyés</p>
+          <div className="bg-white/5 rounded p-1 text-center">
+            <p className="text-xs font-bold text-purple-400">{stats.action_breakdown?.send || 0}</p>
+            <p className="text-white/40 text-[8px]">Envoyés</p>
           </div>
         </div>
       )}
 
-      {/* Cleaning Controls */}
-      <div className="glass-panel rounded-xl p-4">
-        <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-          <Trash2 className="w-4 h-4 text-red-400" />
-          Nettoyage intelligent
-        </h4>
-        
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
-            <label className="text-white/60 text-xs block mb-1">Mode de nettoyage</label>
-            <select
-              value={cleaningMode}
-              onChange={(e) => setCleaningMode(e.target.value)}
-              className="w-full p-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm"
-              data-testid="cleaning-mode-select"
+      {/* Quick Clean Button */}
+      <Button
+        size="sm"
+        onClick={() => cleanInbox("soft")}
+        disabled={isCleaning}
+        className="w-full h-7 text-[10px] bg-gradient-to-r from-red-600/80 to-orange-600/80 hover:from-red-500 hover:to-orange-500"
+      >
+        {isCleaning ? (
+          <>
+            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+            Nettoyage...
+          </>
+        ) : (
+          <>
+            <Trash2 className="w-3 h-3 mr-1" />
+            Nettoyer inbox
+          </>
+        )}
+      </Button>
+    </div>
+  );
             >
               <option value="soft" className="bg-gray-900">🛡️ Soft - Label + Archive (recommandé)</option>
               <option value="medium" className="bg-gray-900">⚠️ Medium - Suppression différée 30j</option>
