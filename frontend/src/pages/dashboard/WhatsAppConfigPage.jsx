@@ -31,6 +31,8 @@ const WhatsAppConfigPage = () => {
   const [uploadingPicture, setUploadingPicture] = useState(false);
   const fileInputRef = useRef(null);
 
+  const [serviceError, setServiceError] = useState(null);
+
   useEffect(() => {
     loadStatus();
     loadConfig();
@@ -43,19 +45,49 @@ const WhatsAppConfigPage = () => {
   const loadStatus = async () => {
     try {
       const res = await fetch(`${API}/api/whatsapp/status`);
+      
+      if (!res.ok) {
+        setServiceError("Le service WhatsApp n'est pas disponible. Contactez l'administrateur.");
+        setStatus({ connected: false });
+        return;
+      }
+      
       const data = await res.json();
+      
+      // Check if service responded but with an error
+      if (data.error) {
+        setServiceError(data.error);
+        setStatus({ connected: false });
+        return;
+      }
+      
+      setServiceError(null);
       setStatus(data);
       
       // If not connected, try to get QR code
       if (!data.connected) {
-        const qrRes = await fetch(`${API}/api/whatsapp/qr`);
-        const qrData = await qrRes.json();
-        setQrCode(qrData.qr);
+        try {
+          const qrRes = await fetch(`${API}/api/whatsapp/qr`);
+          if (qrRes.ok) {
+            const qrData = await qrRes.json();
+            setQrCode(qrData.qr);
+            if (!qrData.qr && qrData.message) {
+              // No QR but has message (e.g., "Déjà connecté")
+              setServiceError(null);
+            }
+          } else {
+            setServiceError("Impossible de générer le QR code. Le service WhatsApp n'est pas démarré.");
+          }
+        } catch (e) {
+          setServiceError("Erreur de connexion au service WhatsApp.");
+        }
       } else {
         setQrCode(null);
       }
     } catch (error) {
       console.error("Error loading status:", error);
+      setServiceError("Le service WhatsApp n'est pas accessible. Vérifiez que le service est démarré sur le serveur.");
+      setStatus({ connected: false });
     } finally {
       setLoading(false);
     }
