@@ -203,18 +203,18 @@ const AnalyticsDashboardPage = () => {
                     <DollarSign className="w-5 h-5 text-green-400" />
                   </div>
                   <div className={`flex items-center gap-1 text-xs ${
-                    dashboardData.revenue.current >= dashboardData.revenue.previous 
+                    (dashboardData.revenue?.current || 0) >= (dashboardData.revenue?.previous || 0) 
                       ? "text-green-400" : "text-red-400"
                   }`}>
-                    {dashboardData.revenue.current >= dashboardData.revenue.previous 
+                    {(dashboardData.revenue?.current || 0) >= (dashboardData.revenue?.previous || 0) 
                       ? <TrendingUp className="w-3 h-3" /> 
                       : <TrendingDown className="w-3 h-3" />
                     }
-                    {getChangePercent(dashboardData.revenue.current, dashboardData.revenue.previous)}%
+                    {getChangePercent(dashboardData.revenue?.current || 0, dashboardData.revenue?.previous || 0)}%
                   </div>
                 </div>
                 <p className="text-2xl font-bold text-white mt-3">
-                  {formatCurrency(dashboardData.revenue.current)}
+                  {formatCurrency(dashboardData.revenue?.current || 0)}
                 </p>
                 <p className="text-white/50 text-xs mt-1">
                   Chiffre d'affaires • {periodLabels[period]}
@@ -230,18 +230,18 @@ const AnalyticsDashboardPage = () => {
                     <Users className="w-5 h-5 text-blue-400" />
                   </div>
                   <div className={`flex items-center gap-1 text-xs ${
-                    dashboardData.contacts.new >= dashboardData.contacts.previous 
+                    (dashboardData.contacts?.new || 0) >= (dashboardData.contacts?.previous || 0) 
                       ? "text-green-400" : "text-red-400"
                   }`}>
-                    {dashboardData.contacts.new >= dashboardData.contacts.previous 
+                    {(dashboardData.contacts?.new || 0) >= (dashboardData.contacts?.previous || 0) 
                       ? <TrendingUp className="w-3 h-3" /> 
                       : <TrendingDown className="w-3 h-3" />
                     }
-                    {getChangePercent(dashboardData.contacts.new, dashboardData.contacts.previous)}%
+                    {getChangePercent(dashboardData.contacts?.new || 0, dashboardData.contacts?.previous || 0)}%
                   </div>
                 </div>
                 <p className="text-2xl font-bold text-white mt-3">
-                  {dashboardData.contacts.new}
+                  {dashboardData.contacts?.new || 0}
                 </p>
                 <p className="text-white/50 text-xs mt-1">
                   Nouveaux contacts • {periodLabels[period]}
