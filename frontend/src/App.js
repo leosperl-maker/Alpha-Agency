@@ -52,6 +52,7 @@ import InstagramStoryPage from "./pages/dashboard/InstagramStoryPage";
 import WhatsAppConfigPage from "./pages/dashboard/WhatsAppConfigPage";
 import NurturingPage from "./pages/dashboard/NurturingPage";
 import VoiceCRMPage from "./pages/dashboard/VoiceCRMPage";
+import AnalyticsDashboardPage from "./pages/dashboard/AnalyticsDashboardPage";
 
 // Public pages
 import TransferDownloadPage from "./pages/TransferDownloadPage";
