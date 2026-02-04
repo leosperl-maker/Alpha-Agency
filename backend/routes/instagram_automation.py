@@ -104,11 +104,28 @@ class InstagramAutomation:
         
     async def close(self):
         """Close browser"""
-        await self.save_session()  # Save session before closing
-        if self.context:
-            await self.context.close()
-        if self.browser:
-            await self.browser.close()
+        try:
+            await self.save_session()  # Save session before closing
+        except Exception as e:
+            logger.warning(f"Could not save session: {e}")
+        
+        try:
+            if self.context:
+                await self.context.close()
+        except Exception:
+            pass
+            
+        try:
+            if self.browser:
+                await self.browser.close()
+        except Exception:
+            pass
+        
+        try:
+            if hasattr(self, '_playwright') and self._playwright:
+                await self._playwright.stop()
+        except Exception:
+            pass
             
     async def login(self, username: str, password: str) -> Dict:
         """Login to Instagram"""
