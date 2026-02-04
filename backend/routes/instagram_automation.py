@@ -48,7 +48,9 @@ class InstagramAutomation:
         """Initialize browser with persistent context"""
         playwright = await async_playwright().start()
         
-        # Use persistent context to save session
+        # Session directory for this user
+        session_dir = os.path.join(INSTAGRAM_SESSION_DIR, user_id)
+        os.makedirs(session_dir, exist_ok=True)
         
         self.browser = await playwright.chromium.launch(
             headless=True,
@@ -57,20 +59,36 @@ class InstagramAutomation:
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--disable-accelerated-2d-canvas',
-                '--disable-gpu'
-            ]
+                '--disable-gpu',
+                '--single-process'
+            ],
+            timeout=60000  # 60 seconds timeout for browser launch
         )
         
         self.context = await self.browser.new_context(
             viewport={"width": 430, "height": 932},  # Mobile viewport
             user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
-            locale="fr-FR"
+            locale="fr-FR",
+            storage_state=os.path.join(session_dir, "state.json") if os.path.exists(os.path.join(session_dir, "state.json")) else None
         )
         
+        # Store session dir for saving later
+        self.session_dir = session_dir
         self.page = await self.context.new_page()
+        self.page.set_default_timeout(30000)  # 30 seconds default timeout
+        
+    async def save_session(self):
+        """Save browser session to reuse later"""
+        if self.context and hasattr(self, 'session_dir'):
+            try:
+                await self.context.storage_state(path=os.path.join(self.session_dir, "state.json"))
+                logger.info("Session saved successfully")
+            except Exception as e:
+                logger.error(f"Failed to save session: {e}")
         
     async def close(self):
         """Close browser"""
+        await self.save_session()  # Save session before closing
         if self.context:
             await self.context.close()
         if self.browser:
