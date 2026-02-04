@@ -192,28 +192,48 @@ async def get_gmail_service(user_id: str) -> Optional[Any]:
     """Get authenticated Gmail service for a user"""
     gmail_creds = await db.gmail_credentials.find_one({"user_id": user_id})
     if not gmail_creds:
+        logger.warning(f"No Gmail credentials found for user {user_id}")
         return None
     
     access_token = decrypt_token(gmail_creds.get("access_token_encrypted", ""))
     refresh_token = decrypt_token(gmail_creds.get("refresh_token_encrypted", ""))
     token_expiry = gmail_creds.get("token_expiry")
     
-    # Check if token needs refresh
+    if not access_token or not refresh_token:
+        logger.warning(f"Empty tokens for user {user_id}")
+        return None
+    
+    # Check if token needs refresh (refresh 5 minutes before expiry for safety)
+    should_refresh = False
     if token_expiry:
-        expiry_dt = datetime.fromisoformat(token_expiry.replace('Z', '+00:00'))
-        if expiry_dt < datetime.now(timezone.utc):
-            # Refresh token
-            new_tokens = await refresh_gmail_token(refresh_token)
-            if new_tokens:
-                access_token = new_tokens["access_token"]
-                # Update stored token
-                await db.gmail_credentials.update_one(
-                    {"user_id": user_id},
-                    {"$set": {
-                        "access_token_encrypted": encrypt_token(access_token),
-                        "token_expiry": new_tokens["token_expiry"]
-                    }}
-                )
+        try:
+            expiry_dt = datetime.fromisoformat(token_expiry.replace('Z', '+00:00'))
+            # Refresh 5 minutes before actual expiry
+            if expiry_dt < (datetime.now(timezone.utc) + timedelta(minutes=5)):
+                should_refresh = True
+        except Exception as e:
+            logger.warning(f"Could not parse token expiry: {e}")
+            should_refresh = True
+    else:
+        # No expiry stored, try to refresh anyway
+        should_refresh = True
+    
+    if should_refresh:
+        logger.info(f"Attempting to refresh Gmail token for user {user_id}")
+        new_tokens = await refresh_gmail_token(refresh_token)
+        if new_tokens:
+            access_token = new_tokens["access_token"]
+            # Update stored token
+            await db.gmail_credentials.update_one(
+                {"user_id": user_id},
+                {"$set": {
+                    "access_token_encrypted": encrypt_token(access_token),
+                    "token_expiry": new_tokens["token_expiry"]
+                }}
+            )
+            logger.info(f"Gmail token refreshed successfully for user {user_id}")
+        else:
+            logger.warning(f"Token refresh failed for user {user_id}, using existing token")
     
     credentials = Credentials(
         token=access_token,
