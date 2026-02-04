@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Antilla - Liens</title>
+    
+    <!-- SEO -->
+    <meta name="description" content="Retrouvez tous les liens d'Antilla">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Antilla">
+    <meta property="og:description" content="Retrouvez tous nos liens">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://antilla.bio">
+    
+    <!-- Favicon (remplacez par votre logo) -->
+    <link rel="icon" type="image/png" href="https://alphagency.fr/favicon.ico">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        /* Loading state */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #8b5cf6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading indicator -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- Iframe with your link bio -->
+    <iframe 
+        id="linkbio"
+        src="https://alphagency.fr/lien-bio/antilla"
+        loading="eager"
+        allow="clipboard-write"
+        onload="document.getElementById('loading').classList.add('hidden')"
+    ></iframe>
+    
+    <script>
+        // Fallback: hide loading after 5 seconds even if iframe doesn't trigger onload
+        setTimeout(function() {
+            document.getElementById('loading').classList.add('hidden');
+        }, 5000);
+    </script>
+</body>
+</html>
