@@ -257,14 +257,14 @@ const AnalyticsDashboardPage = () => {
                     <FileText className="w-5 h-5 text-purple-400" />
                   </div>
                   <div className="text-xs text-purple-400">
-                    {dashboardData.documents.conversion_rate}% conversion
+                    {dashboardData.documents?.conversion_rate || 0}% conversion
                   </div>
                 </div>
                 <p className="text-2xl font-bold text-white mt-3">
-                  {dashboardData.documents.invoices + dashboardData.documents.quotes}
+                  {(dashboardData.documents?.invoices || 0) + (dashboardData.documents?.quotes || 0)}
                 </p>
                 <p className="text-white/50 text-xs mt-1">
-                  {dashboardData.documents.invoices} factures • {dashboardData.documents.quotes} devis
+                  {dashboardData.documents?.invoices || 0} factures • {dashboardData.documents?.quotes || 0} devis
                 </p>
               </CardContent>
             </Card>
@@ -276,17 +276,17 @@ const AnalyticsDashboardPage = () => {
                   <div className="p-2 rounded-lg bg-amber-500/20">
                     <CheckCircle className="w-5 h-5 text-amber-400" />
                   </div>
-                  {dashboardData.tasks.overdue > 0 && (
+                  {(dashboardData.tasks?.overdue || 0) > 0 && (
                     <div className="text-xs text-red-400">
-                      {dashboardData.tasks.overdue} en retard
+                      {dashboardData.tasks?.overdue || 0} en retard
                     </div>
                   )}
                 </div>
                 <p className="text-2xl font-bold text-white mt-3">
-                  {dashboardData.tasks.completed}
+                  {dashboardData.tasks?.completed || 0}
                 </p>
                 <p className="text-white/50 text-xs mt-1">
-                  Tâches complétées • {dashboardData.tasks.pending} en cours
+                  Tâches complétées • {dashboardData.tasks?.pending || 0} en cours
                 </p>
               </CardContent>
             </Card>
