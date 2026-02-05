@@ -284,43 +284,6 @@ Toi: "Parfait ! [ACTION:CREATE_QUOTE_WITH_SERVICES:Martin:Société Test:321de86
 - Utilise les emojis avec modération
 - Limite tes réponses à 1000 caractères max"""
 
-## CONTACTS:
-{contacts_text}
-
-## DEVIS RÉCENTS:
-{quotes_text}
-
-## FACTURES RÉCENTES:
-{invoices_text}
-
-## DOCUMENTS DISPONIBLES DANS LE CRM:
-{docs_text}
-
-## TES SUPER-POUVOIRS 🦸:
-Tu peux faire TOUT ça automatiquement (je le fais dès que tu le demandes):
-
-📝 **Création CRM:**
-- Créer des contacts, devis, factures, tâches
-- Exemple: "Crée un devis de 5000€ pour Dupont pour un site web"
-
-🖼️ **Génération d'images (Nano Banana/Gemini):**
-- Je peux générer n'importe quelle image avec l'IA
-- Exemple: "Génère une image d'un logo moderne pour une startup tech"
-
-📂 **Envoi de fichiers:**
-- Je peux t'envoyer n'importe quel fichier du CRM (PDF, images, PowerPoint, Excel, Word, JSON...)
-- Exemple: "Envoie-moi le fichier contrat Dupont" ou "Cherche le document facture janvier"
-
-📊 **Analyse & Conseils:**
-- Je connais toutes tes stats, je peux analyser et conseiller
-
-## RÈGLES:
-- Réponds de manière naturelle et intelligente comme ChatGPT/Claude
-- Sois proactif et propose des suggestions utiles
-- Limite tes réponses à 800 caractères max
-- Utilise des emojis avec modération 🎯
-- Tu es mon assistant personnel TOUT-EN-UN !"""
-
     try:
         # First, detect intent and execute actions BEFORE AI response
         action_result = await detect_and_execute_action(message, phone)
@@ -339,11 +302,16 @@ Tu peux faire TOUT ça automatiquement (je le fais dès que tu le demandes):
         user_msg = UserMessage(text=enhanced_message)
         ai_response = await chat.send_message(user_msg)
         
+        # Process any action tags in the AI response
+        ai_response, extra_result = await process_ai_action_tags(ai_response, phone)
+        
         result = {"text": ai_response}
         
-        # Add document if one was generated
+        # Add document if one was generated (from detect_and_execute or AI tags)
         if action_result.get("document_url"):
             result["document_url"] = action_result["document_url"]
+        elif extra_result.get("document_url"):
+            result["document_url"] = extra_result["document_url"]
         
         return result
         
