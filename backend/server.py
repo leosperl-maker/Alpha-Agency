@@ -6648,6 +6648,10 @@ app.include_router(analytics_dashboard_router, prefix="/api", tags=["analytics-d
 from routes.google_drive import router as google_drive_router
 app.include_router(google_drive_router, prefix="/api", tags=["google-drive"])
 
+# Societe.com API Integration (SIRET/SIREN/Bilans)
+from routes.societe_api import router as societe_router
+app.include_router(societe_router, prefix="/api", tags=["societe"])
+
 # MoltBot Scheduler for automated briefings
 from routes.scheduler import moltbot_scheduler
 from whatsapp_launcher import start_whatsapp_service, stop_whatsapp_service, ensure_whatsapp_running
