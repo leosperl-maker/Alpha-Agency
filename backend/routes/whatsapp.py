@@ -508,6 +508,184 @@ async def generate_image_nano_banana(prompt: str) -> str:
         return None
 
 
+async def generate_image_with_reference(prompt: str, reference_image_base64: str) -> str:
+    """Generate/edit an image using a reference image with Nano Banana."""
+    try:
+        import base64
+        import uuid
+        from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+        import cloudinary
+        import cloudinary.uploader
+        
+        EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+        
+        cloudinary.config(
+            cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+            api_key=os.environ.get('CLOUDINARY_API_KEY'),
+            api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+        )
+        
+        chat = LlmChat(
+            api_key=EMERGENT_KEY, 
+            session_id=f"image_edit_{uuid.uuid4()}", 
+            system_message="You are an image editing assistant"
+        )
+        
+        chat.with_model("gemini", "gemini-3-pro-image-preview").with_params(modalities=["image", "text"])
+        
+        # Create message with reference image
+        msg = UserMessage(
+            text=prompt,
+            file_contents=[ImageContent(reference_image_base64)]
+        )
+        
+        text, images = await chat.send_message_multimodal_response(msg)
+        
+        logger.info(f"Image edit response - images: {len(images) if images else 0}")
+        
+        if images and len(images) > 0:
+            img_data = images[0]
+            image_bytes = base64.b64decode(img_data['data'])
+            
+            image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+            data_uri = f"data:image/png;base64,{image_base64}"
+            
+            result = cloudinary.uploader.upload(
+                data_uri,
+                public_id=f"moltbot/edited_{uuid.uuid4().hex[:8]}",
+                folder="moltbot_images"
+            )
+            
+            return result.get('secure_url', '')
+        
+        return None
+        
+    except Exception as e:
+        logger.error(f"Image edit error: {e}")
+        return None
+
+
+async def generate_image_gpt(prompt: str, reference_image_base64: str = None) -> str:
+    """Generate an image using GPT Image 1 (OpenAI) as fallback."""
+    try:
+        import base64
+        import uuid
+        from emergentintegrations.llm.openai import OpenAIImageGenerator
+        import cloudinary
+        import cloudinary.uploader
+        
+        EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+        
+        cloudinary.config(
+            cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+            api_key=os.environ.get('CLOUDINARY_API_KEY'),
+            api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+        )
+        
+        generator = OpenAIImageGenerator(api_key=EMERGENT_KEY)
+        
+        # Generate image
+        if reference_image_base64:
+            # Edit existing image
+            result = await generator.edit_image(
+                prompt=prompt,
+                image_base64=reference_image_base64,
+                size="1024x1024"
+            )
+        else:
+            # Generate new image
+            result = await generator.generate_image(
+                prompt=prompt,
+                size="1024x1024",
+                quality="standard"
+            )
+        
+        if result and result.get("url"):
+            return result["url"]
+        elif result and result.get("data"):
+            # Upload base64 to Cloudinary
+            image_bytes = base64.b64decode(result["data"])
+            image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+            data_uri = f"data:image/png;base64,{image_base64}"
+            
+            upload_result = cloudinary.uploader.upload(
+                data_uri,
+                public_id=f"moltbot/gpt_{uuid.uuid4().hex[:8]}",
+                folder="moltbot_images"
+            )
+            return upload_result.get('secure_url', '')
+        
+        return None
+        
+    except Exception as e:
+        logger.error(f"GPT image generation error: {e}")
+        return None
+
+
+async def analyze_image(image_base64: str, prompt: str = "Décris cette image en détail") -> str:
+    """Analyze an image using Gemini Vision."""
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
+        
+        EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+        
+        chat = LlmChat(
+            api_key=EMERGENT_KEY, 
+            session_id=f"vision_{datetime.now().strftime('%Y%m%d%H%M%S')}", 
+            system_message="Tu es un assistant qui analyse les images en détail. Réponds en français."
+        )
+        
+        msg = UserMessage(
+            text=prompt,
+            file_contents=[ImageContent(image_base64)]
+        )
+        
+        response = await chat.send_message(msg)
+        return response
+        
+    except Exception as e:
+        logger.error(f"Image analysis error: {e}")
+        return f"Désolé, je n'ai pas pu analyser cette image: {str(e)}"
+
+
+async def analyze_document(doc_base64: str, mime_type: str, file_name: str, prompt: str = "Analyse ce document") -> str:
+    """Analyze a document (PDF, etc.) using AI."""
+    try:
+        import base64
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+        
+        # For PDFs, we'd need to extract text first or use a vision model
+        # For now, we'll acknowledge receipt and provide basic info
+        
+        doc_bytes = base64.b64decode(doc_base64)
+        doc_size = len(doc_bytes)
+        
+        chat = LlmChat(
+            api_key=EMERGENT_KEY, 
+            session_id=f"doc_{datetime.now().strftime('%Y%m%d%H%M%S')}", 
+            system_message="Tu es un assistant qui aide avec les documents. Réponds en français."
+        )
+        
+        analysis_prompt = f"""L'utilisateur a envoyé un document:
+- Nom: {file_name}
+- Type: {mime_type}
+- Taille: {doc_size} bytes
+
+Question de l'utilisateur: {prompt}
+
+Note: Je ne peux pas lire le contenu du fichier directement, mais je peux aider avec des questions générales sur ce type de document."""
+        
+        msg = UserMessage(text=analysis_prompt)
+        response = await chat.send_message(msg)
+        return response
+        
+    except Exception as e:
+        logger.error(f"Document analysis error: {e}")
+        return f"Désolé, je n'ai pas pu analyser ce document: {str(e)}"
+
+
 async def process_ai_actions(ai_response: str, phone: str) -> dict:
     """Process any action codes in the AI response and execute them."""
     import re
