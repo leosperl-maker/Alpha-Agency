@@ -486,6 +486,46 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                 if image_url:
                     result["document_url"] = image_url
                     result["is_image"] = True
+            
+            elif action_type == "IMPORT_DRIVE":
+                # Import files from Google Drive
+                # Format: search_term:count
+                search_term = parts[0] if len(parts) > 0 and parts[0] else None
+                count = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 5
+                
+                try:
+                    from routes.google_drive import import_drive_files_for_whatsapp
+                    
+                    # Get admin user ID for Drive access
+                    admin_config = await db.settings.find_one({"key": "whatsapp_config"})
+                    admin_phone = admin_config.get("value", {}).get("admin_phone", "") if admin_config else ""
+                    
+                    # Find user by phone
+                    admin_user = await db.users.find_one({
+                        "$or": [
+                            {"phone": {"$regex": admin_phone[-9:]}},
+                            {"email": "admin@alphagency.fr"}
+                        ]
+                    })
+                    
+                    if admin_user:
+                        import_result = await import_drive_files_for_whatsapp(
+                            admin_user.get("id", str(admin_user["_id"])),
+                            search_term,
+                            count
+                        )
+                        
+                        if import_result.get("success"):
+                            result["drive_import"] = import_result
+                            logger.info(f"Imported {import_result.get('imported_count', 0)} files from Drive")
+                        else:
+                            result["drive_error"] = import_result.get("error", "Erreur inconnue")
+                    else:
+                        result["drive_error"] = "Utilisateur admin non trouvé"
+                        
+                except Exception as drive_err:
+                    logger.error(f"Drive import error: {drive_err}")
+                    result["drive_error"] = str(drive_err)
                     
         except Exception as e:
             logger.error(f"Error processing action {action_type}: {e}")
