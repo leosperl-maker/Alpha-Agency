@@ -311,12 +311,25 @@ async def process_ai_actions(ai_response: str, phone: str) -> dict:
                     
             elif action_type == "CREATE_INVOICE" and len(parts) >= 2:
                 last_inv = await db.invoices.find_one(sort=[("invoice_number", -1)])
-                next_num = (last_inv.get("invoice_number", 0) if last_inv else 0) + 1
+                if last_inv and last_inv.get("invoice_number"):
+                    try:
+                        next_num = int(last_inv.get("invoice_number", 0)) + 1
+                    except:
+                        next_num = 1
+                else:
+                    next_num = 1
+                
+                # Parse amount
+                amount_str = parts[1].strip() if len(parts) > 1 else "0"
+                try:
+                    amount = float(re.sub(r'[^\d.]', '', amount_str)) if amount_str else 0
+                except:
+                    amount = 0
                 
                 invoice_data = {
                     "invoice_number": next_num,
                     "client_name": parts[0].strip(),
-                    "total": float(re.sub(r'[^\d.]', '', parts[1])) if len(parts) > 1 else 0,
+                    "total": amount,
                     "description": parts[2].strip() if len(parts) > 2 else "Services",
                     "status": "pending",
                     "created_at": datetime.now(timezone.utc),
