@@ -403,9 +403,13 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                     if service:
                         discount = discounts[i] if i < len(discounts) else 0
                         price = float(service.get('price', 0))
+                        # Use FULL description from service (title + description)
+                        service_title = service.get('title', 'Service')
+                        service_desc = service.get('description', '')
+                        # Combine title and description for the quote line item
+                        full_desc = f"{service_title}\n{service_desc}" if service_desc else service_title
                         items.append({
-                            "description": service.get('title', 'Service'),
-                            "full_description": service.get('description', ''),
+                            "description": full_desc,  # Full description in quote
                             "unit_price": price,
                             "quantity": 1,
                             "discount": discount,
@@ -416,15 +420,19 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                 
                 if items:
                     # Generate quote number
-                    last_inv = await db.invoices.find_one({"type": "devis"}, sort=[("created_at", -1)])
+                    last_inv = await db.invoices.find_one({"document_type": "devis"}, sort=[("created_at", -1)])
                     next_num = 1
-                    if last_inv and last_inv.get("number"):
-                        try:
-                            parts_num = last_inv["number"].split("-")
-                            if len(parts_num) >= 3:
-                                next_num = int(parts_num[-1]) + 1
-                        except:
-                            pass
+                    if last_inv:
+                        inv_num = last_inv.get("invoice_number", last_inv.get("number", ""))
+                        if isinstance(inv_num, str) and "-" in inv_num:
+                            try:
+                                parts_num = inv_num.split("-")
+                                if len(parts_num) >= 3:
+                                    next_num = int(parts_num[-1]) + 1
+                            except:
+                                pass
+                        elif isinstance(inv_num, int):
+                            next_num = inv_num + 1
                     
                     year = datetime.now().year
                     quote_number = f"DEV-{year}-{str(next_num).zfill(3)}"
@@ -433,23 +441,32 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                     tax = net_total * (tva_rate / 100)
                     total_ttc = net_total + tax
                     
+                    quote_id = str(uuid.uuid4())
                     quote_data = {
-                        "id": str(uuid.uuid4()),
-                        "number": quote_number,
-                        "type": "devis",
+                        "id": quote_id,
+                        "invoice_number": quote_number,
+                        "document_type": "devis",
                         "client_name": f"{client_name}" + (f" ({company})" if company else ""),
                         "items": items,
                         "subtotal": subtotal,
-                        "discount": total_discount,
-                        "tax_rate": tva_rate,
-                        "tax": tax,
+                        "globalDiscount": total_discount,
+                        "globalDiscountType": "€",
+                        "tva": tax,
                         "total": total_ttc,
-                        "status": "draft",
-                        "created_at": datetime.now(timezone.utc),
+                        "status": "brouillon",
+                        "created_at": datetime.now(timezone.utc).isoformat(),
                         "source": "whatsapp_moltbot"
                     }
                     await db.invoices.insert_one(quote_data)
                     logger.info(f"Created quote {quote_number} via AI action")
+                    
+                    # Generate PDF and upload to Cloudinary
+                    pdf_url = await generate_and_upload_quote_pdf(quote_id)
+                    if pdf_url:
+                        result["document_url"] = pdf_url
+                        result["document_name"] = f"{quote_number}.pdf"
+                        result["document_type"] = "application/pdf"
+                        logger.info(f"PDF generated for quote {quote_number}: {pdf_url}")
                     
             elif action_type == "CREATE_CONTACT":
                 # Format: first_name:last_name:company:email:phone:siret
