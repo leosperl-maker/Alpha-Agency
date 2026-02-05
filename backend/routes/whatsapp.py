@@ -1447,36 +1447,110 @@ async def process_ai_actions(ai_response: str, phone: str) -> dict:
     return result
 
 
-async def generate_quote_pdf(quote_id: str) -> str:
-    """Generate PDF for a quote and return URL."""
+async def generate_and_upload_quote_pdf(quote_id: str) -> str:
+    """
+    Generate PDF for a quote/invoice and upload to Cloudinary.
+    Uses the professional PDF generator from invoices.py.
+    Returns the Cloudinary URL.
+    """
     try:
-        from bson import ObjectId
-        quote = await db.quotes.find_one({"_id": ObjectId(quote_id)})
-        if not quote:
+        import cloudinary
+        import cloudinary.uploader
+        import base64
+        from routes.invoices import generate_professional_pdf
+        
+        # Fetch the invoice/quote
+        invoice = await db.invoices.find_one({"id": quote_id}, {"_id": 0})
+        if not invoice:
+            logger.error(f"Quote/Invoice not found: {quote_id}")
             return None
-            
+        
         # Check if PDF already exists
-        if quote.get("pdf_url"):
-            return quote["pdf_url"]
-            
-        # For now, return None - PDF generation would be added here
-        # This would integrate with a PDF service or generate locally
-        return None
+        if invoice.get("pdf_url"):
+            return invoice["pdf_url"]
+        
+        # Get contact info if available
+        contact = {}
+        if invoice.get("contact_id"):
+            contact = await db.contacts.find_one({"id": invoice["contact_id"]}, {"_id": 0})
+        
+        if not contact:
+            # Extract contact info from client_name
+            client_name = invoice.get("client_name", "Client")
+            contact = {
+                "first_name": client_name.split()[0] if client_name else "",
+                "last_name": " ".join(client_name.split()[1:]) if len(client_name.split()) > 1 else "",
+                "company": "",
+                "email": ""
+            }
+        
+        # Load invoice settings
+        invoice_settings = await db.settings.find_one({"type": "invoice_settings"}, {"_id": 0})
+        
+        # Generate PDF
+        doc_type = invoice.get("document_type", "devis")
+        pdf_buffer = generate_professional_pdf(invoice, contact, doc_type, invoice_settings)
+        
+        # Reset buffer and read data
+        pdf_buffer.seek(0)
+        pdf_data = pdf_buffer.read()
+        
+        if len(pdf_data) == 0:
+            logger.error("Generated PDF is empty")
+            return None
+        
+        logger.info(f"Generated PDF size: {len(pdf_data)} bytes")
+        
+        # Configure Cloudinary
+        cloudinary.config(
+            cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
+            api_key=os.environ.get('CLOUDINARY_API_KEY', ''),
+            api_secret=os.environ.get('CLOUDINARY_API_SECRET', '')
+        )
+        
+        # Create unique filename
+        invoice_number = invoice.get("invoice_number", invoice.get("number", quote_id))
+        filename = f"{'devis' if doc_type == 'devis' else 'facture'}_{invoice_number}"
+        unique_filename = f"{filename}_{int(datetime.now(timezone.utc).timestamp())}"
+        
+        # Convert to base64 and upload
+        pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
+        data_uri = f"data:application/pdf;base64,{pdf_base64}"
+        
+        result = cloudinary.uploader.upload(
+            data_uri,
+            resource_type="raw",
+            public_id=f"whatsapp_quotes/{unique_filename}",
+            overwrite=True
+        )
+        
+        secure_url = result.get('secure_url', '')
+        logger.info(f"PDF uploaded to Cloudinary: {secure_url}")
+        
+        # Store PDF URL in database
+        if secure_url:
+            await db.invoices.update_one(
+                {"id": quote_id},
+                {"$set": {"pdf_url": secure_url}}
+            )
+        
+        return secure_url
+        
     except Exception as e:
-        logger.error(f"PDF generation error: {e}")
+        logger.error(f"PDF generation/upload error: {e}")
+        import traceback
+        traceback.print_exc()
         return None
+
+
+async def generate_quote_pdf(quote_id: str) -> str:
+    """Generate PDF for a quote and return URL (legacy wrapper)."""
+    return await generate_and_upload_quote_pdf(quote_id)
 
 
 async def generate_invoice_pdf(invoice_id: str) -> str:
-    """Generate PDF for an invoice and return URL."""
-    try:
-        from bson import ObjectId
-        invoice = await db.invoices.find_one({"_id": ObjectId(invoice_id)})
-        if not invoice:
-            return None
-            
-        if invoice.get("pdf_url"):
-            return invoice["pdf_url"]
+    """Generate PDF for an invoice and return URL (legacy wrapper)."""
+    return await generate_and_upload_quote_pdf(invoice_id)
             
         return None
     except Exception as e:
