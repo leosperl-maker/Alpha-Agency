@@ -9,6 +9,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { toast } from "sonner";
 import MoltBotGmailSection from "../../components/MoltBotGmailSection";
+import MoltBotDriveSection from "../../components/MoltBotDriveSection";
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
