@@ -335,11 +335,13 @@ app.listen(PORT, () => {
 
 ## Variables d'environnement Railway
 
-Assurez-vous que cette variable est définie dans Railway:
+**⚠️ IMPORTANT**: Vous devez utiliser votre URL de production, pas l'URL de preview!
 
 ```
-BACKEND_WEBHOOK_URL=https://crmalphaagency-f7ab9328.svc-us5.zcloud.ws/api/whatsapp/webhook
+BACKEND_WEBHOOK_URL=https://alphagency.fr/api/whatsapp/webhook
 ```
+
+Si vous utilisez l'URL preview d'Emergent (comme `crmalphaagency-xxxxx.svc-usX.zcloud.ws`), MoltBot ne fonctionnera pas en production car ce certificat n'est pas valide depuis Railway.
 
 ---
 
