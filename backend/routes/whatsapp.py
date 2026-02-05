@@ -288,16 +288,28 @@ Toi: "Parfait ! [ACTION:CREATE_QUOTE_WITH_SERVICES:Martin:Société Test:321de86
         # First, detect intent and execute actions BEFORE AI response
         action_result = await detect_and_execute_action(message, phone)
         
+        # Build conversation history context from recent messages
+        recent_msgs = await db.whatsapp_messages.find(
+            {"phone_number": {"$regex": phone[-9:]}}
+        ).sort("created_at", -1).limit(10).to_list(10)
+        
+        history_context = ""
+        if recent_msgs:
+            history_context = "\n\n## HISTORIQUE CONVERSATION RÉCENTE:\n"
+            for msg in reversed(recent_msgs):
+                direction = "UTILISATEUR" if msg.get("direction") == "incoming" else "MOLTBOT"
+                history_context += f"{direction}: {msg.get('message', '')[:300]}\n"
+        
         chat = LlmChat(
             api_key=EMERGENT_KEY,
-            session_id=f"whatsapp_{phone}_{datetime.now().strftime('%Y%m%d')}",
+            session_id=f"whatsapp_{phone[-9:]}_{datetime.now().strftime('%Y%m%d%H')}",  # Session by hour
             system_message=system_prompt
         )
         
         # Add action context if an action was executed
-        enhanced_message = message
+        enhanced_message = message + history_context
         if action_result.get("action_executed"):
-            enhanced_message = f"{message}\n\n[SYSTÈME: Action exécutée avec succès: {action_result.get('action_description')}]"
+            enhanced_message = f"{message}\n\n[SYSTÈME: Action exécutée avec succès: {action_result.get('action_description')}]{history_context}"
         
         user_msg = UserMessage(text=enhanced_message)
         ai_response = await chat.send_message(user_msg)
