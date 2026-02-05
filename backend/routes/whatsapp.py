@@ -133,8 +133,11 @@ async def process_admin_command(phone: str, message: str) -> dict:
 
 async def intelligent_assistant(message: str, phone: str) -> dict:
     """
-    MoltBot AI Assistant - Understands natural language and executes CRM actions.
-    Returns dict with 'text' response and optionally 'document_url' for PDFs.
+    MoltBot AI Assistant - Truly intelligent CRM assistant.
+    - Uses pre-registered services with full descriptions and prices
+    - Asks questions for missing info (email, phone, SIRET...)
+    - Searches documents intelligently by content
+    - Uses real CRM settings (TVA rate, etc.)
     """
     from emergentintegrations.llm.chat import LlmChat, UserMessage
     import re
@@ -144,39 +147,142 @@ async def intelligent_assistant(message: str, phone: str) -> dict:
     # Get full CRM context
     stats = await get_crm_stats()
     
+    # Get CRM settings (TVA rate, etc.)
+    invoice_settings = await db.settings.find_one({"key": "invoice_settings"})
+    tva_rate = 8.5  # Default for Martinique/Guadeloupe
+    if invoice_settings and invoice_settings.get("value"):
+        tva_rate = float(invoice_settings["value"].get("tva_rate", 8.5))
+    
+    # Get ALL pre-registered services
+    services = await db.services.find().to_list(100)
+    services_text = ""
+    if services:
+        services_text = "## SERVICES PRÉENREGISTRÉS (utilise-les pour les devis/factures):\n"
+        for s in services:
+            services_text += f"""
+### {s.get('title', 'Service')}
+- ID: {s.get('id', '')}
+- Prix: {s.get('price', 0)}€
+- Description: {s.get('description', '')[:500]}...
+"""
+    
     # Recent tasks
     tasks = await db.tasks.find({"status": {"$ne": "done"}}).sort("created_at", -1).limit(10).to_list(10)
     tasks_text = "\n".join([f"- [{t.get('status','?')}] {t.get('title', 'Sans titre')} (ID: {str(t.get('_id',''))[-6:]})" for t in tasks]) if tasks else "Aucune tâche"
     
-    # Recent contacts
-    contacts = await db.contacts.find().sort("created_at", -1).limit(10).to_list(10)
-    no_email = "pas email"
-    no_tel = "pas de tel"
-    contacts_text = "\n".join([f"- {c.get('first_name', '')} {c.get('last_name', '')} - {c.get('email', no_email)} - {c.get('phone', no_tel)}" for c in contacts]) if contacts else "Aucun contact"
+    # Get contacts with full details
+    contacts = await db.contacts.find().sort("created_at", -1).limit(20).to_list(20)
+    contacts_text = ""
+    for c in contacts:
+        contacts_text += f"- {c.get('first_name', '')} {c.get('last_name', '')} | {c.get('company', 'N/A')} | {c.get('email', 'N/A')} | {c.get('phone', 'N/A')} | SIRET: {c.get('siret', 'N/A')}\n"
+    if not contacts_text:
+        contacts_text = "Aucun contact"
     
-    # Recent quotes
+    # Recent quotes and invoices
     quotes = await db.quotes.find().sort("created_at", -1).limit(5).to_list(5)
+    invoices_db = await db.invoices.find().sort("created_at", -1).limit(10).to_list(10)
+    
     quotes_text = "\n".join([f"- Devis #{q.get('quote_number', '?')}: {q.get('total', 0)}€ pour {q.get('client_name', '?')} - {q.get('status', '?')}" for q in quotes]) if quotes else "Aucun devis"
+    invoices_text = "\n".join([f"- {i.get('number', '?')}: {i.get('total', 0)}€ pour {i.get('client_name', '?')} - {i.get('status', '?')}" for i in invoices_db]) if invoices_db else "Aucune facture"
     
-    # Recent invoices
-    invoices = await db.invoices.find().sort("created_at", -1).limit(5).to_list(5)
-    invoices_text = "\n".join([f"- Facture #{i.get('invoice_number', '?')}: {i.get('total', 0)}€ pour {i.get('client_name', '?')} - {i.get('status', '?')}" for i in invoices]) if invoices else "Aucune facture"
+    # Documents AND files in CRM (for intelligent search)
+    documents = await db.documents.find().sort("created_at", -1).limit(30).to_list(30)
+    files = await db.files.find().sort("created_at", -1).limit(30).to_list(30) if await db.files.count_documents({}) > 0 else []
     
-    # Documents in CRM
-    documents = await db.documents.find().sort("created_at", -1).limit(10).to_list(10)
-    docs_text = "\n".join([f"- {d.get('name', 'Sans nom')} ({d.get('type', '?')}) - URL: {d.get('url', 'N/A')}" for d in documents]) if documents else "Aucun document"
+    docs_text = "## DOCUMENTS ET FICHIERS DISPONIBLES:\n"
+    for d in documents:
+        docs_text += f"- [{d.get('type', 'doc')}] {d.get('internal_name', d.get('name', 'Sans nom'))} | Client: {d.get('client_name', 'N/A')} | URL: {d.get('url', d.get('pdf_url', 'N/A'))}\n"
+    for f in files:
+        docs_text += f"- [fichier] {f.get('name', f.get('filename', 'Sans nom'))} | Type: {f.get('type', f.get('mimetype', '?'))} | URL: {f.get('url', 'N/A')}\n"
     
-    system_prompt = f"""Tu es MoltBot (aussi appelé ClawdBot), l'assistant IA ultra-intelligent du CRM Alpha Agency. Tu parles en français.
+    if not documents and not files:
+        docs_text = "Aucun document ou fichier"
+    
+    # Conversation history for this user (for multi-turn)
+    recent_messages = await db.whatsapp_messages.find(
+        {"phone_number": {"$regex": phone[-9:]}}
+    ).sort("created_at", -1).limit(10).to_list(10)
+    
+    conversation_context = ""
+    if recent_messages:
+        conversation_context = "\n## CONVERSATION RÉCENTE:\n"
+        for msg in reversed(recent_messages[-5:]):
+            direction = "👤 Vous" if msg.get("direction") == "incoming" else "🤖 MoltBot"
+            conversation_context += f"{direction}: {msg.get('message', '')[:200]}\n"
+    
+    system_prompt = f"""Tu es MoltBot, l'assistant IA ULTRA-INTELLIGENT du CRM Alpha Agency. Tu parles en français.
 Tu as accès COMPLET au CRM et tu peux EXÉCUTER des actions.
+
+## RÈGLES IMPORTANTES:
+1. **TVA**: Le taux de TVA est de {tva_rate}% (pas 20%)
+2. **Services préenregistrés**: Quand on te demande un devis/facture, CHERCHE d'abord dans les services ci-dessous. Utilise le prix et la description COMPLÈTE du service.
+3. **Contacts**: Si tu dois créer un contact, DEMANDE les infos manquantes (email, téléphone, société, SIRET) AVANT de créer. Si l'utilisateur dit qu'il n'a pas l'info, crée quand même avec ce qui est disponible.
+4. **Documents**: Quand on te demande un fichier/document, cherche par titre ET par contenu décrit. Si tu trouves, ENVOIE-LE.
+5. **Conversation naturelle**: Tu peux poser des questions de suivi. Mémorise le contexte de la conversation.
 
 ## CONTEXTE CRM ACTUEL:
 - CA du mois: {stats['revenue']}€
 - Nouveaux contacts: {stats['new_contacts']}
 - Tâches en attente: {stats['pending_tasks']}
 - RDV à venir: {stats['upcoming_appointments']}
+- Taux TVA: {tva_rate}%
 
-## TÂCHES:
+{services_text}
+
+## CONTACTS EXISTANTS:
+{contacts_text}
+
+## DEVIS RÉCENTS:
+{quotes_text}
+
+## FACTURES RÉCENTES:
+{invoices_text}
+
+{docs_text}
+
+## TÂCHES EN COURS:
 {tasks_text}
+
+{conversation_context}
+
+## ACTIONS DISPONIBLES:
+Quand tu veux exécuter une action, inclus un tag [ACTION:...] dans ta réponse:
+
+1. **Créer devis avec services préenregistrés**:
+   [ACTION:CREATE_QUOTE_WITH_SERVICES:client_name:company:service_ids_comma_separated:discounts_comma_separated:global_discount]
+   Exemple: [ACTION:CREATE_QUOTE_WITH_SERVICES:Jean Dupont:Dupont SARL:74087002-a632-4c3c-92d6-794dcb5dc333,321de865-62c0-4250-bd46-c368c0cd44ad:100,50:0]
+
+2. **Créer contact (demande les infos d'abord!)**:
+   [ACTION:CREATE_CONTACT:first_name:last_name:company:email:phone:siret]
+
+3. **Chercher et envoyer document**:
+   [ACTION:SEND_DOCUMENT:search_term]
+
+4. **Créer tâche**:
+   [ACTION:CREATE_TASK:title:description]
+
+5. **Générer image**:
+   [ACTION:GENERATE_IMAGE:prompt]
+
+## EXEMPLE DE CONVERSATION:
+Utilisateur: "Crée un devis pour Martin avec community management"
+Toi: "Je vais créer un devis avec le service Community Management (600€/mois). Avant de finaliser:
+- Quelle est la société de M. Martin ?
+- Avez-vous son email ou téléphone ?
+- Souhaitez-vous appliquer une remise ?"
+
+Utilisateur: "Société Test, pas d'email, remise de 50€"
+Toi: "Parfait ! [ACTION:CREATE_QUOTE_WITH_SERVICES:Martin:Société Test:321de865-62c0-4250-bd46-c368c0cd44ad:50:0]
+✅ Devis créé pour Martin (Société Test):
+- Community Management: 600€ - 50€ = 550€
+- TVA {tva_rate}%: {550 * tva_rate / 100:.2f}€
+- Total TTC: {550 * (1 + tva_rate/100):.2f}€"
+
+## STYLE:
+- Sois naturel et conversationnel
+- Pose des questions quand il manque des infos
+- Utilise les emojis avec modération
+- Limite tes réponses à 1000 caractères max"""
 
 ## CONTACTS:
 {contacts_text}
