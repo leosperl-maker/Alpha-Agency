@@ -111,153 +111,268 @@ async def is_admin(phone: str) -> bool:
     logger.info(f"Not admin: {clean_phone}")
     return False
 
-async def process_admin_command(phone: str, message: str) -> str:
-    """Process commands from admin via WhatsApp"""
-    msg = message.lower().strip()
+async def process_admin_command(phone: str, message: str) -> dict:
+    """
+    Process all messages from admin via WhatsApp using AI as the main brain.
+    Returns dict with 'text' and optionally 'document_url' for PDF attachments.
+    """
     original_msg = message.strip()
     
     try:
-        # Stats commands
-        if any(x in msg for x in ['ca', 'chiffre', 'stats', 'revenue']):
-            stats = await get_crm_stats()
-            return f"""📊 *Stats du mois*
-
-💰 CA: {stats['revenue']}€
-👥 Nouveaux contacts: {stats['new_contacts']}
-📋 Tâches en cours: {stats['pending_tasks']}
-📅 RDV à venir: {stats['upcoming_appointments']}"""
-
-        # Briefing
-        elif any(x in msg for x in ['briefing', 'journée', 'aujourd']):
-            briefing = await get_daily_briefing()
-            return briefing
-
-        # Recap
-        elif any(x in msg for x in ['recap', 'récap', 'bilan']):
-            recap = await get_daily_recap()
-            return recap
-
-        # Tasks
-        elif 'tâche' in msg or 'task' in msg:
-            if 'crée' in msg or 'ajoute' in msg:
-                # Extract task title
-                parts = msg.split(':')
-                if len(parts) > 1:
-                    title = parts[1].strip()
-                    task_id = await create_task(title)
-                    return f"✅ Tâche créée: {title}"
-                return "Pour créer une tâche: 'Crée tâche: titre de la tâche'"
-            elif 'terminé' in msg or 'fait' in msg:
-                return "✅ Tâche marquée comme terminée"
-            else:
-                tasks = await get_pending_tasks()
-                return tasks
-
-        # Contacts
-        elif 'contact' in msg or 'client' in msg:
-            if 'cherche' in msg or 'trouve' in msg:
-                search_term = msg.split('cherche')[-1].split('trouve')[-1].strip()
-                result = await search_contact(search_term)
-                return result
-            else:
-                return "Utilisez: 'Cherche contact: nom'"
-
-        # Devis - Enhanced with PDF generation
-        elif 'devis' in msg:
-            if 'crée' in msg or 'créer' in msg or 'faire' in msg:
-                result = await create_quote_from_message(original_msg, phone)
-                return result
-            elif 'envoie' in msg or 'envoi' in msg:
-                result = await send_quote_pdf(original_msg, phone)
-                return result
-            return await get_recent_quotes()
-
-        # Facture
-        elif 'facture' in msg:
-            if 'crée' in msg or 'créer' in msg:
-                result = await create_invoice_from_message(original_msg, phone)
-                return result
-            return await get_recent_invoices()
-
-        # Help
-        elif any(x in msg for x in ['aide', 'help', 'commande']):
-            return """🤖 *Commandes MoltBot*
-
-📊 Stats: "CA du mois", "Stats"
-☀️ Briefing: "Briefing", "Ma journée"
-🌙 Récap: "Récap", "Bilan"
-📋 Tâches: "Mes tâches", "Crée tâche: ..."
-👥 Contacts: "Cherche contact: nom"
-📄 Devis: "Crée devis 2000€ pour Client, description"
-📄 Facture: "Crée facture 500€ pour Client, service"
-
-Tapez une commande pour commencer !"""
-
-        else:
-            # Use AI to respond to any message
-            try:
-                ai_response = await get_ai_response(original_msg, phone)
-                return ai_response
-            except Exception as ai_err:
-                logger.error(f"AI response error: {ai_err}")
-                return """Je n'ai pas compris. Tapez "aide" pour voir les commandes disponibles.
-
-Exemples rapides:
-• "CA du mois"
-• "Mes tâches"  
-• "Briefing"
-• "Crée devis 1500€ pour Dupont, création site web" """
-
+        # Use AI to understand intent and execute actions
+        result = await intelligent_assistant(original_msg, phone)
+        return result
+        
     except Exception as e:
         logger.error(f"Error processing command: {e}")
-        return "Erreur lors du traitement. Réessayez ou tapez 'aide'."
+        return {"text": "Désolé, une erreur est survenue. Réessayez ou tapez 'aide'."}
 
 
-async def get_ai_response(message: str, phone: str) -> str:
-    """Use AI to respond to any message with CRM context"""
-    try:
-        # Get CRM context
-        stats = await get_crm_stats()
-        tasks = await db.tasks.find({"status": "todo"}).limit(5).to_list(5)
-        tasks_text = "\n".join([f"- {t.get('title', 'Sans titre')}" for t in tasks]) if tasks else "Aucune tâche en cours"
-        
-        recent_contacts = await db.contacts.find().sort("created_at", -1).limit(3).to_list(3)
-        contacts_text = "\n".join([f"- {c.get('first_name', '')} {c.get('last_name', '')}" for c in recent_contacts]) if recent_contacts else "Aucun contact récent"
-        
-        # Build context
-        context = f"""Tu es MoltBot, l'assistant IA du CRM Alpha Agency. Tu réponds en français de manière concise et professionnelle.
-        
-Contexte CRM actuel:
+async def intelligent_assistant(message: str, phone: str) -> dict:
+    """
+    MoltBot AI Assistant - Understands natural language and executes CRM actions.
+    Returns dict with 'text' response and optionally 'document_url' for PDFs.
+    """
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    import re
+    
+    EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+    
+    # Get full CRM context
+    stats = await get_crm_stats()
+    
+    # Recent tasks
+    tasks = await db.tasks.find({"status": {"$ne": "done"}}).sort("created_at", -1).limit(10).to_list(10)
+    tasks_text = "\n".join([f"- [{t.get('status','?')}] {t.get('title', 'Sans titre')} (ID: {str(t.get('_id',''))[-6:]})" for t in tasks]) if tasks else "Aucune tâche"
+    
+    # Recent contacts
+    contacts = await db.contacts.find().sort("created_at", -1).limit(10).to_list(10)
+    contacts_text = "\n".join([f"- {c.get('first_name', '')} {c.get('last_name', '')} - {c.get('email', 'pas d\'email')} - {c.get('phone', 'pas de tel')}" for c in contacts]) if contacts else "Aucun contact"
+    
+    # Recent quotes
+    quotes = await db.quotes.find().sort("created_at", -1).limit(5).to_list(5)
+    quotes_text = "\n".join([f"- Devis #{q.get('quote_number', '?')}: {q.get('total', 0)}€ pour {q.get('client_name', '?')} - {q.get('status', '?')}" for q in quotes]) if quotes else "Aucun devis"
+    
+    # Recent invoices
+    invoices = await db.invoices.find().sort("created_at", -1).limit(5).to_list(5)
+    invoices_text = "\n".join([f"- Facture #{i.get('invoice_number', '?')}: {i.get('total', 0)}€ pour {i.get('client_name', '?')} - {i.get('status', '?')}" for i in invoices]) if invoices else "Aucune facture"
+    
+    # Documents in CRM
+    documents = await db.documents.find().sort("created_at", -1).limit(10).to_list(10)
+    docs_text = "\n".join([f"- {d.get('name', 'Sans nom')} ({d.get('type', '?')}) - URL: {d.get('url', 'N/A')}" for d in documents]) if documents else "Aucun document"
+    
+    system_prompt = f"""Tu es MoltBot, l'assistant IA ultra-intelligent du CRM Alpha Agency. Tu parles en français.
+Tu as accès COMPLET au CRM et tu peux EXÉCUTER des actions.
+
+## CONTEXTE CRM ACTUEL:
 - CA du mois: {stats['revenue']}€
-- Nouveaux contacts ce mois: {stats['new_contacts']}
+- Nouveaux contacts: {stats['new_contacts']}
 - Tâches en attente: {stats['pending_tasks']}
 - RDV à venir: {stats['upcoming_appointments']}
 
-Tâches en cours:
+## TÂCHES:
 {tasks_text}
 
-Contacts récents:
+## CONTACTS:
 {contacts_text}
 
-Tu peux aider l'utilisateur avec:
-- Informations sur le CRM (stats, tâches, contacts)
-- Création de devis et factures
-- Questions générales sur la gestion d'entreprise
-- Conseils et suggestions
+## DEVIS RÉCENTS:
+{quotes_text}
 
-Réponds de manière utile et concise (max 500 caractères). Utilise des emojis avec modération."""
+## FACTURES RÉCENTES:
+{invoices_text}
 
-        # Use Gemini via MoltBot chat
-        from routes.moltbot import chat_with_moltbot_ai
-        
-        response = await chat_with_moltbot_ai(
-            message=message,
-            context=context
+## DOCUMENTS DISPONIBLES:
+{docs_text}
+
+## TES CAPACITÉS:
+Tu peux répondre à TOUTE question et exécuter ces ACTIONS en incluant le code d'action dans ta réponse:
+
+1. Créer un contact: [ACTION:CREATE_CONTACT:prénom:nom:email:téléphone]
+2. Créer une tâche: [ACTION:CREATE_TASK:titre:description]
+3. Créer un devis: [ACTION:CREATE_QUOTE:client:montant:description]
+4. Créer une facture: [ACTION:CREATE_INVOICE:client:montant:description]
+5. Envoyer un document: [ACTION:SEND_DOCUMENT:url_du_document]
+6. Chercher un contact: [ACTION:SEARCH_CONTACT:terme]
+
+## INSTRUCTIONS:
+- Réponds de manière naturelle et intelligente comme ChatGPT
+- Si l'utilisateur demande de créer quelque chose, INCLUS le code d'action approprié
+- Si l'utilisateur demande un document/PDF, INCLUS [ACTION:SEND_DOCUMENT:url]
+- Sois proactif et propose des suggestions utiles
+- Limite tes réponses à 800 caractères max
+- Utilise des emojis avec modération 🎯"""
+
+    try:
+        chat = LlmChat(
+            api_key=EMERGENT_KEY,
+            model="gemini-2.0-flash",
+            session_id=f"whatsapp_{phone}_{datetime.now().strftime('%Y%m%d')}",
+            system_message=system_prompt
         )
         
-        # Truncate if too long for WhatsApp
-        if len(response) > 1000:
-            response = response[:997] + "..."
+        user_msg = UserMessage(text=message)
+        ai_response = await chat.send_message(user_msg)
+        
+        # Process any actions in the response
+        result = await process_ai_actions(ai_response, phone)
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"AI assistant error: {e}")
+        # Fallback to basic response
+        return {"text": f"Je suis MoltBot. Comment puis-je vous aider?\n\n📊 Stats: {stats['revenue']}€ CA\n📋 {stats['pending_tasks']} tâches en cours\n\nTapez votre demande en langage naturel !"}
+
+
+async def process_ai_actions(ai_response: str, phone: str) -> dict:
+    """Process any action codes in the AI response and execute them."""
+    import re
+    
+    result = {"text": ai_response}
+    document_url = None
+    
+    # Find and process action codes
+    action_pattern = r'\[ACTION:(\w+):([^\]]+)\]'
+    matches = re.findall(action_pattern, ai_response)
+    
+    for action_type, params in matches:
+        try:
+            parts = params.split(':')
+            
+            if action_type == "CREATE_CONTACT" and len(parts) >= 2:
+                contact_data = {
+                    "first_name": parts[0].strip(),
+                    "last_name": parts[1].strip() if len(parts) > 1 else "",
+                    "email": parts[2].strip() if len(parts) > 2 else "",
+                    "phone": parts[3].strip() if len(parts) > 3 else "",
+                    "created_at": datetime.now(timezone.utc),
+                    "source": "whatsapp_moltbot"
+                }
+                await db.contacts.insert_one(contact_data)
+                logger.info(f"Created contact: {contact_data['first_name']} {contact_data['last_name']}")
+                
+            elif action_type == "CREATE_TASK" and len(parts) >= 1:
+                task_data = {
+                    "title": parts[0].strip(),
+                    "description": parts[1].strip() if len(parts) > 1 else "",
+                    "status": "todo",
+                    "priority": "medium",
+                    "created_at": datetime.now(timezone.utc),
+                    "source": "whatsapp_moltbot"
+                }
+                await db.tasks.insert_one(task_data)
+                logger.info(f"Created task: {task_data['title']}")
+                
+            elif action_type == "CREATE_QUOTE" and len(parts) >= 2:
+                # Get next quote number
+                last_quote = await db.quotes.find_one(sort=[("quote_number", -1)])
+                next_num = (last_quote.get("quote_number", 0) if last_quote else 0) + 1
+                
+                quote_data = {
+                    "quote_number": next_num,
+                    "client_name": parts[0].strip(),
+                    "total": float(re.sub(r'[^\d.]', '', parts[1])) if len(parts) > 1 else 0,
+                    "description": parts[2].strip() if len(parts) > 2 else "Services",
+                    "status": "draft",
+                    "created_at": datetime.now(timezone.utc),
+                    "source": "whatsapp_moltbot"
+                }
+                inserted = await db.quotes.insert_one(quote_data)
+                logger.info(f"Created quote #{next_num} for {quote_data['client_name']}")
+                
+                # Generate PDF URL if available
+                pdf_url = await generate_quote_pdf(str(inserted.inserted_id))
+                if pdf_url:
+                    document_url = pdf_url
+                    
+            elif action_type == "CREATE_INVOICE" and len(parts) >= 2:
+                last_inv = await db.invoices.find_one(sort=[("invoice_number", -1)])
+                next_num = (last_inv.get("invoice_number", 0) if last_inv else 0) + 1
+                
+                invoice_data = {
+                    "invoice_number": next_num,
+                    "client_name": parts[0].strip(),
+                    "total": float(re.sub(r'[^\d.]', '', parts[1])) if len(parts) > 1 else 0,
+                    "description": parts[2].strip() if len(parts) > 2 else "Services",
+                    "status": "pending",
+                    "created_at": datetime.now(timezone.utc),
+                    "source": "whatsapp_moltbot"
+                }
+                inserted = await db.invoices.insert_one(invoice_data)
+                logger.info(f"Created invoice #{next_num}")
+                
+                pdf_url = await generate_invoice_pdf(str(inserted.inserted_id))
+                if pdf_url:
+                    document_url = pdf_url
+                    
+            elif action_type == "SEND_DOCUMENT" and len(parts) >= 1:
+                doc_url = parts[0].strip()
+                if doc_url.startswith('http'):
+                    document_url = doc_url
+                    
+            elif action_type == "SEARCH_CONTACT" and len(parts) >= 1:
+                search_term = parts[0].strip().lower()
+                found = await db.contacts.find({
+                    "$or": [
+                        {"first_name": {"$regex": search_term, "$options": "i"}},
+                        {"last_name": {"$regex": search_term, "$options": "i"}},
+                        {"email": {"$regex": search_term, "$options": "i"}}
+                    ]
+                }).limit(5).to_list(5)
+                
+                if found:
+                    contacts_info = "\n".join([f"📞 {c.get('first_name','')} {c.get('last_name','')}: {c.get('phone', 'N/A')} - {c.get('email', 'N/A')}" for c in found])
+                    result["text"] = ai_response.replace(f"[ACTION:SEARCH_CONTACT:{params}]", "") + f"\n\n{contacts_info}"
+                    
+        except Exception as e:
+            logger.error(f"Error executing action {action_type}: {e}")
+    
+    # Clean action codes from response
+    clean_response = re.sub(action_pattern, '', result["text"]).strip()
+    result["text"] = clean_response
+    
+    if document_url:
+        result["document_url"] = document_url
+        
+    return result
+
+
+async def generate_quote_pdf(quote_id: str) -> str:
+    """Generate PDF for a quote and return URL."""
+    try:
+        from bson import ObjectId
+        quote = await db.quotes.find_one({"_id": ObjectId(quote_id)})
+        if not quote:
+            return None
+            
+        # Check if PDF already exists
+        if quote.get("pdf_url"):
+            return quote["pdf_url"]
+            
+        # For now, return None - PDF generation would be added here
+        # This would integrate with a PDF service or generate locally
+        return None
+    except Exception as e:
+        logger.error(f"PDF generation error: {e}")
+        return None
+
+
+async def generate_invoice_pdf(invoice_id: str) -> str:
+    """Generate PDF for an invoice and return URL."""
+    try:
+        from bson import ObjectId
+        invoice = await db.invoices.find_one({"_id": ObjectId(invoice_id)})
+        if not invoice:
+            return None
+            
+        if invoice.get("pdf_url"):
+            return invoice["pdf_url"]
+            
+        return None
+    except Exception as e:
+        logger.error(f"Invoice PDF error: {e}")
+        return None
             
         return response
         
