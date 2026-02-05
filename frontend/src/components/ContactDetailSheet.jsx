@@ -20,6 +20,7 @@ import {
   Receipt,
   CheckSquare,
   TrendingUp,
+  TrendingDown,
   Euro,
   ExternalLink,
   User,
@@ -40,7 +41,9 @@ import {
   Eye,
   Download,
   MoreVertical,
-  Star
+  Star,
+  BarChart3,
+  Users
 } from "lucide-react";
 import { contactsAPI, quotesAPI, invoicesAPI } from "../lib/api";
 import api from "../lib/api";
