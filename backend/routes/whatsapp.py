@@ -321,6 +321,164 @@ Toi: "Parfait ! [ACTION:CREATE_QUOTE_WITH_SERVICES:Martin:Société Test:321de86
         return {"text": f"Je suis MoltBot. Comment puis-je vous aider?\n\n📊 Stats: {stats['revenue']}€ CA\n📋 {stats['pending_tasks']} tâches en cours\n\nTapez votre demande en langage naturel !"}
 
 
+async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
+    """
+    Process action tags in AI response and execute them.
+    Returns (cleaned_response, result_dict)
+    """
+    import re
+    result = {}
+    
+    # Get TVA rate from settings
+    invoice_settings = await db.settings.find_one({"key": "invoice_settings"})
+    tva_rate = 8.5
+    if invoice_settings and invoice_settings.get("value"):
+        tva_rate = float(invoice_settings["value"].get("tva_rate", 8.5))
+    
+    # Pattern: [ACTION:TYPE:params...]
+    action_pattern = r'\[ACTION:([A-Z_]+):([^\]]+)\]'
+    matches = re.findall(action_pattern, ai_response)
+    
+    for action_type, params in matches:
+        parts = params.split(':')
+        
+        try:
+            if action_type == "CREATE_QUOTE_WITH_SERVICES":
+                # Format: client_name:company:service_ids:discounts:global_discount
+                client_name = parts[0] if len(parts) > 0 else "Client"
+                company = parts[1] if len(parts) > 1 else ""
+                service_ids = parts[2].split(',') if len(parts) > 2 and parts[2] else []
+                discounts = [float(d) for d in parts[3].split(',') if d] if len(parts) > 3 and parts[3] else []
+                global_discount = float(parts[4]) if len(parts) > 4 and parts[4] else 0
+                
+                # Fetch services from DB
+                items = []
+                subtotal = 0
+                total_discount = global_discount
+                
+                for i, sid in enumerate(service_ids):
+                    service = await db.services.find_one({"id": sid.strip()})
+                    if service:
+                        discount = discounts[i] if i < len(discounts) else 0
+                        price = float(service.get('price', 0))
+                        items.append({
+                            "description": service.get('title', 'Service'),
+                            "full_description": service.get('description', ''),
+                            "unit_price": price,
+                            "quantity": 1,
+                            "discount": discount,
+                            "total": price - discount
+                        })
+                        subtotal += price
+                        total_discount += discount
+                
+                if items:
+                    # Generate quote number
+                    last_inv = await db.invoices.find_one({"type": "devis"}, sort=[("created_at", -1)])
+                    next_num = 1
+                    if last_inv and last_inv.get("number"):
+                        try:
+                            parts_num = last_inv["number"].split("-")
+                            if len(parts_num) >= 3:
+                                next_num = int(parts_num[-1]) + 1
+                        except:
+                            pass
+                    
+                    year = datetime.now().year
+                    quote_number = f"DEV-{year}-{str(next_num).zfill(3)}"
+                    
+                    net_total = subtotal - total_discount
+                    tax = net_total * (tva_rate / 100)
+                    total_ttc = net_total + tax
+                    
+                    quote_data = {
+                        "id": str(uuid.uuid4()),
+                        "number": quote_number,
+                        "type": "devis",
+                        "client_name": f"{client_name}" + (f" ({company})" if company else ""),
+                        "items": items,
+                        "subtotal": subtotal,
+                        "discount": total_discount,
+                        "tax_rate": tva_rate,
+                        "tax": tax,
+                        "total": total_ttc,
+                        "status": "draft",
+                        "created_at": datetime.now(timezone.utc),
+                        "source": "whatsapp_moltbot"
+                    }
+                    await db.invoices.insert_one(quote_data)
+                    logger.info(f"Created quote {quote_number} via AI action")
+                    
+            elif action_type == "CREATE_CONTACT":
+                # Format: first_name:last_name:company:email:phone:siret
+                contact_data = {
+                    "id": str(uuid.uuid4()),
+                    "first_name": parts[0] if len(parts) > 0 else "Nouveau",
+                    "last_name": parts[1] if len(parts) > 1 else "Contact",
+                    "company": parts[2] if len(parts) > 2 and parts[2] != "N/A" else "",
+                    "email": parts[3] if len(parts) > 3 and parts[3] != "N/A" else "",
+                    "phone": parts[4] if len(parts) > 4 and parts[4] != "N/A" else "",
+                    "siret": parts[5] if len(parts) > 5 and parts[5] != "N/A" else "",
+                    "created_at": datetime.now(timezone.utc),
+                    "source": "whatsapp_moltbot"
+                }
+                await db.contacts.insert_one(contact_data)
+                logger.info(f"Created contact: {contact_data['first_name']} {contact_data['last_name']}")
+                
+            elif action_type == "SEND_DOCUMENT":
+                # Search for document
+                search_term = parts[0] if parts else ""
+                if search_term:
+                    # Search in documents
+                    doc = await db.documents.find_one({
+                        "$or": [
+                            {"internal_name": {"$regex": search_term, "$options": "i"}},
+                            {"client_name": {"$regex": search_term, "$options": "i"}},
+                            {"description": {"$regex": search_term, "$options": "i"}}
+                        ]
+                    })
+                    if doc and (doc.get("url") or doc.get("pdf_url")):
+                        result["document_url"] = doc.get("url") or doc.get("pdf_url")
+                    else:
+                        # Search in files
+                        file_doc = await db.files.find_one({
+                            "$or": [
+                                {"name": {"$regex": search_term, "$options": "i"}},
+                                {"filename": {"$regex": search_term, "$options": "i"}}
+                            ]
+                        })
+                        if file_doc and file_doc.get("url"):
+                            result["document_url"] = file_doc["url"]
+                            
+            elif action_type == "CREATE_TASK":
+                task_data = {
+                    "id": str(uuid.uuid4()),
+                    "title": parts[0] if parts else "Nouvelle tâche",
+                    "description": parts[1] if len(parts) > 1 else "",
+                    "status": "todo",
+                    "priority": "medium",
+                    "created_at": datetime.now(timezone.utc),
+                    "source": "whatsapp_moltbot"
+                }
+                await db.tasks.insert_one(task_data)
+                logger.info(f"Created task: {task_data['title']}")
+                
+            elif action_type == "GENERATE_IMAGE":
+                prompt = parts[0] if parts else "image"
+                image_url = await generate_image_nano_banana(prompt)
+                if image_url:
+                    result["document_url"] = image_url
+                    result["is_image"] = True
+                    
+        except Exception as e:
+            logger.error(f"Error processing action {action_type}: {e}")
+    
+    # Clean action tags from response
+    cleaned_response = re.sub(action_pattern, '', ai_response).strip()
+    
+    return cleaned_response, result
+
+
 async def parse_complex_quote_with_ai(message: str) -> dict:
     """
     Use AI to parse complex quote requests with multiple lines, discounts, contacts.
