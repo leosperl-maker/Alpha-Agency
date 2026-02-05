@@ -61,12 +61,23 @@ class WhatsAppStatus(BaseModel):
 # ==================== HELPER FUNCTIONS ====================
 
 async def is_admin(phone: str) -> bool:
-    """Check if phone number is admin - checks both env and config"""
-    clean_phone = phone.replace('+', '').replace(' ', '').replace('-', '')
+    """Check if phone number is admin - checks both env, config, and LID mapping"""
+    clean_phone = phone.replace('+', '').replace(' ', '').replace('-', '').replace('@lid', '').replace('@s.whatsapp.net', '')
+    
+    logger.info(f"Checking admin for phone: {clean_phone}")
+    
+    # Check LID mapping first (for WhatsApp Business accounts)
+    lid_mapping = await db.settings.find_one({"key": "whatsapp_lid_mapping"})
+    if lid_mapping and lid_mapping.get("value"):
+        mapped_phone = lid_mapping["value"].get(clean_phone)
+        if mapped_phone:
+            logger.info(f"Found LID mapping: {clean_phone} -> {mapped_phone}")
+            clean_phone = mapped_phone.replace('+', '').replace(' ', '').replace('-', '')
     
     # Check env variable
     for admin in ADMIN_PHONES:
         if admin and clean_phone.endswith(admin.replace('+', '').replace(' ', '')[-9:]):
+            logger.info(f"Admin match via env: {clean_phone}")
             return True
     
     # Check MongoDB config
@@ -76,8 +87,28 @@ async def is_admin(phone: str) -> bool:
         if admin_phone:
             clean_admin = admin_phone.replace('+', '').replace(' ', '').replace('-', '')
             if clean_phone.endswith(clean_admin[-9:]):
+                logger.info(f"Admin match via config: {clean_phone} matches {clean_admin}")
+                return True
+            # Also check if the incoming phone contains admin digits
+            if clean_admin[-9:] in clean_phone or clean_phone in clean_admin:
+                logger.info(f"Admin partial match: {clean_phone} ~ {clean_admin}")
                 return True
     
+    # If phone looks like a LID (long number), auto-register as admin on first message
+    if len(clean_phone) > 12 and clean_phone.isdigit():
+        # Check if any admin is configured
+        if config and config.get("value", {}).get("admin_phone"):
+            # Store LID mapping
+            admin_phone = config["value"]["admin_phone"]
+            await db.settings.update_one(
+                {"key": "whatsapp_lid_mapping"},
+                {"$set": {f"value.{clean_phone}": admin_phone}},
+                upsert=True
+            )
+            logger.info(f"Auto-registered LID {clean_phone} as admin {admin_phone}")
+            return True
+    
+    logger.info(f"Not admin: {clean_phone}")
     return False
 
 async def process_admin_command(phone: str, message: str) -> str:
