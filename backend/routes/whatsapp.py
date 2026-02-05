@@ -1551,11 +1551,7 @@ async def generate_quote_pdf(quote_id: str) -> str:
 async def generate_invoice_pdf(invoice_id: str) -> str:
     """Generate PDF for an invoice and return URL (legacy wrapper)."""
     return await generate_and_upload_quote_pdf(invoice_id)
-            
-        return None
-    except Exception as e:
-        logger.error(f"Invoice PDF error: {e}")
-        return None
+
 
 async def get_crm_stats() -> Dict:
     """Get CRM stats for WhatsApp response"""
