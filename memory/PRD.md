@@ -15,7 +15,7 @@ CRM complet avec assistant IA MoltBot, intégrations multiples, et analytics ava
 - **Route**: `/api/moltbot/chat`
 - **Frontend**: `/admin/moltbot`
 
-### 2. Dashboard Analytics Avancé ✅ (NOUVEAU)
+### 2. Dashboard Analytics Avancé ✅
 - 4 KPIs avec comparaison période précédente
 - Graphique évolution CA
 - Entonnoir des leads avec taux de conversion
@@ -62,65 +62,23 @@ CRM complet avec assistant IA MoltBot, intégrations multiples, et analytics ava
 - Scores 0-100
 - Widgets dashboard
 
-## Routes Frontend
-| Route | Description |
-|-------|-------------|
-| `/admin/analytics-dashboard` | Dashboard Analytics avancé |
-| `/admin/moltbot` | Assistant IA + Gmail |
-| `/admin/voice-crm` | Voice-to-CRM |
-| `/admin/nurturing` | Séquences email |
-| `/admin/instagram-stories` | Stories Instagram |
-| `/admin/campagnes` | Campagnes Email/SMS |
-
-## APIs Analytics
-```
-GET /api/analytics/dashboard      # KPIs principaux
-GET /api/analytics/revenue-chart  # Graphique CA
-GET /api/analytics/leads-funnel   # Entonnoir leads
-GET /api/analytics/top-clients    # Meilleurs clients
-GET /api/analytics/activity-timeline  # Activité récente
-GET /api/analytics/kpi-trends     # Tendances 12 mois
-GET /api/analytics/export         # Export CSV/JSON
-```
-
-## Configuration Production
-```env
-GMAIL_REDIRECT_URI=https://alphagency.fr/api/moltbot/gmail/callback
-```
-
-## Credentials Test
-- Email: admin@alphagency.fr
-- Password: Test123!
-
-## Tests (Iteration 54)
-- Backend: 100% (27/27)
-- Frontend: 100%
-
-## Notes Instagram Stories
-L'automation peut recevoir une erreur 429 (rate limit) d'Instagram sur certains serveurs. Les messages d'erreur sont maintenant en français et explicites:
-- "⚠️ Instagram limite les connexions depuis ce serveur..."
-- "🔐 Instagram demande une vérification de sécurité..."
-- "🔑 Authentification à deux facteurs requise..."
-
-## Tâches Archivées (P2)
-- UI Preview Multi-Plateformes
-
 ---
 
 ## WhatsApp MoltBot - Assistant IA (ClawdBot) ✅
 
 ### Fonctionnalités Implémentées
-- **Chat conversationnel IA** - Répond naturellement comme ChatGPT avec mémoire de conversation
-- **Services préenregistrés** - Utilise les services du CRM avec prix et description complète ✅ TESTÉ
+- **Chat conversationnel IA** - Répond naturellement avec mémoire de conversation
+- **Services préenregistrés** - Utilise les services du CRM avec prix et **DESCRIPTION COMPLÈTE** ✅ CORRIGÉ
 - **Création CRM par message** - Devis, factures, contacts, tâches via langage naturel
 - **Questions intelligentes** - Demande les infos manquantes (email, SIRET, etc.) avant création
 - **TVA correcte** - Utilise le taux configuré (8.5%) pas 20%
 - **Génération d'images** - Nano Banana (Gemini) intégré
 - **Envoi de fichiers CRM** - PDF, images, documents
-- **Analyse d'images** - Vision IA sur images reçues ✅ TESTÉ
-- **Analyse de documents** - PDF avec extraction de texte (PyMuPDF) ✅ TESTÉ
-- **Analyse de vidéos** - Extraction de frame et analyse ✅ TESTÉ
-- **Transcription audio** - Messages vocaux via Whisper (OGG→MP3 auto-conversion) ✅ TESTÉ
+- **Génération PDF automatique** - Les devis créés sont générés en PDF et uploadés sur Cloudinary ✅ NOUVEAU
+- **Analyse d'images** - Vision IA sur images reçues ✅
+- **Analyse de documents** - PDF avec extraction de texte (PyMuPDF) ✅
+- **Analyse de vidéos** - Extraction de frame et analyse ✅
+- **Transcription audio** - Messages vocaux via Whisper (OGG→MP3 auto-conversion) ✅
 - **Recherche de documents** - Cherche par titre et contenu
 
 ### Architecture
@@ -131,22 +89,88 @@ L'automation peut recevoir une erreur 429 (rate limit) d'Instagram sur certains 
 ### Variables d'environnement
 ```env
 WHATSAPP_SERVICE_URL=https://whatsapp-moltbot-production.up.railway.app
-BACKEND_WEBHOOK_URL=https://crmalphaagency-f7ab9328.svc-us5.zcloud.ws/api/whatsapp/webhook
+BACKEND_WEBHOOK_URL=https://alphagency.fr/api/whatsapp/webhook  # PRODUCTION
 ```
 
-### Tâches Restantes
-1. **(P0) ⚠️ Mettre à jour `index.js` sur GitHub** - Voir `/app/docs/MISE_A_JOUR_INDEX_JS_RAILWAY.md` - **REQUIS pour que Railway capture les médias**
-2. **(P1) API Blog pour n8n** - Modifier `/app/backend/routes/blog.py` selon spec `content_blocks`
-3. **(P1) Résumé quotidien WhatsApp** - Tâche planifiée
+⚠️ **IMPORTANT**: L'URL Railway doit pointer vers **alphagency.fr** (production), PAS vers l'URL preview.
 
-### Fonctionnalités Ajoutées (Session actuelle)
-- **Google Drive Integration** - `/app/backend/routes/google_drive.py`
-  - OAuth connexion/déconnexion
-  - Liste des fichiers Drive
-  - Import avec classification IA automatique
-  - Commande WhatsApp "Importe mes fichiers de Drive"
-- **UI Google Drive** - `/app/frontend/src/components/MoltBotDriveSection.jsx`
+---
 
-### Documentation
+## Intégration Societe.com ✅ NOUVEAU
+
+### Backend API
+- `GET /api/societe/search/company?q={query}` - Recherche entreprise par nom
+- `POST /api/societe/search/dirigeant` - Recherche par nom de dirigeant
+- `GET /api/societe/company/{siret_or_siren}` - Détails entreprise + dirigeants + bilans
+- `GET /api/societe/company/{siret}/financials` - Données financières uniquement
+
+### Frontend
+- **Champ SIRET/SIREN** ajouté au formulaire de contact
+- **Onglet "Finances"** dans ContactDetailSheet - affiche les bilans publics quand le SIRET est renseigné
+- Lien vers Societe.com pour plus de détails
+
+### Clé API
+```env
+SOCIETE_API_KEY=6324e71a28971350a9ea387c82c5ff65
+```
+
+---
+
+## Intégration Google Drive ✅
+
+### Backend API
+- `GET /api/gdrive/auth` - Démarrer OAuth
+- `GET /api/gdrive/auth/callback` - Callback OAuth
+- `GET /api/gdrive/files` - Lister fichiers
+- `POST /api/gdrive/import` - Importer fichiers avec classification IA
+
+### Frontend
+- **Bouton "Connect Google Drive"** sur `/admin/moltbot`
+- Commande WhatsApp: `"Importe mes fichiers de Drive"`
+
+### Status
+- En attente de connexion OAuth par l'utilisateur
+
+---
+
+## Routes Frontend
+| Route | Description |
+|-------|-------------|
+| `/admin/analytics-dashboard` | Dashboard Analytics avancé |
+| `/admin/moltbot` | Assistant IA + Gmail + Google Drive |
+| `/admin/voice-crm` | Voice-to-CRM |
+| `/admin/nurturing` | Séquences email |
+| `/admin/instagram-stories` | Stories Instagram |
+| `/admin/campagnes` | Campagnes Email/SMS |
+| `/admin/contacts` | Gestion contacts + Finances |
+
+---
+
+## Tâches Restantes
+
+### P0 - Critique
+- ⬜ **API Blog pour n8n** - Modifier `/app/backend/routes/blog.py` selon spec `content_blocks`
+
+### P1 - Important
+- ⬜ **Résumé quotidien WhatsApp** - Tâche planifiée automatique
+
+### P2 - Backlog
+- ⬜ Analytics avec alertes
+- ⬜ UI Preview Multi-Plateformes
+
+---
+
+## Credentials Test
+- Email: `admin@alphagency.fr`
+- Password: `Test123!`
+- Admin WhatsApp: `+596696447353`
+
+## Tests (Iteration 55)
+- Backend: 93% (13/14 tests)
+- Frontend: 100%
+
+---
+
+## Documentation
 - `/app/docs/MISE_A_JOUR_INDEX_JS_RAILWAY.md` - Guide mise à jour Railway
 - `/app/docs/GUIDE_DOMAINE_PERSONNALISE_MULTILINK.md` - Domaines personnalisés
