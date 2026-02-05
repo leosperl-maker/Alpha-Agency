@@ -429,23 +429,31 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                         logger.info(f"Added service: {service_title} - {price}€")
                 
                 if items:
-                    # Generate quote number
-                    last_inv = await db.invoices.find_one({"document_type": "devis"}, sort=[("created_at", -1)])
+                    # Generate quote number - check both field names
+                    last_inv = await db.invoices.find_one(
+                        {"$or": [{"document_type": "devis"}, {"type": "devis"}]}, 
+                        sort=[("created_at", -1)]
+                    )
                     next_num = 1
                     if last_inv:
-                        inv_num = last_inv.get("invoice_number", last_inv.get("number", ""))
+                        inv_num = last_inv.get("invoice_number") or last_inv.get("number") or ""
                         if isinstance(inv_num, str) and "-" in inv_num:
                             try:
                                 parts_num = inv_num.split("-")
                                 if len(parts_num) >= 3:
                                     next_num = int(parts_num[-1]) + 1
                             except:
-                                pass
+                                next_num = 1
                         elif isinstance(inv_num, int):
                             next_num = inv_num + 1
                     
+                    # Ensure we have a valid number
+                    if next_num < 1:
+                        next_num = 1
+                    
                     year = datetime.now().year
                     quote_number = f"DEV-{year}-{str(next_num).zfill(3)}"
+                    logger.info(f"Generated quote number: {quote_number}")
                     
                     net_total = subtotal - total_discount
                     tax = net_total * (tva_rate / 100)
