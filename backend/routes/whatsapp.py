@@ -649,19 +649,89 @@ async def analyze_image(image_base64: str, prompt: str = "Décris cette image en
 
 
 async def analyze_document(doc_base64: str, mime_type: str, file_name: str, prompt: str = "Analyse ce document") -> str:
-    """Analyze a document (PDF, etc.) using AI."""
+    """Analyze a document (PDF, images, etc.) using AI Vision."""
     try:
         import base64
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        from emergentintegrations.llm.chat import LlmChat, UserMessage, ImageContent
         
         EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
-        
-        # For PDFs, we'd need to extract text first or use a vision model
-        # For now, we'll acknowledge receipt and provide basic info
-        
         doc_bytes = base64.b64decode(doc_base64)
         doc_size = len(doc_bytes)
         
+        # For PDFs, convert pages to images for vision analysis
+        if 'pdf' in mime_type.lower():
+            try:
+                import fitz  # PyMuPDF
+                import io
+                
+                pdf_doc = fitz.open(stream=doc_bytes, filetype="pdf")
+                num_pages = min(pdf_doc.page_count, 5)  # Limit to first 5 pages
+                
+                extracted_text = []
+                images_base64 = []
+                
+                for page_num in range(num_pages):
+                    page = pdf_doc[page_num]
+                    # Extract text
+                    text = page.get_text()
+                    if text.strip():
+                        extracted_text.append(f"--- Page {page_num + 1} ---\n{text}")
+                    
+                    # Convert page to image for vision
+                    pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))
+                    img_bytes = pix.tobytes("png")
+                    img_b64 = base64.b64encode(img_bytes).decode('utf-8')
+                    images_base64.append(img_b64)
+                
+                pdf_doc.close()
+                
+                # If we have text, use text-based analysis
+                if extracted_text:
+                    full_text = "\n".join(extracted_text)
+                    chat = LlmChat(
+                        api_key=EMERGENT_KEY, 
+                        session_id=f"doc_{datetime.now().strftime('%Y%m%d%H%M%S')}", 
+                        system_message="Tu es un assistant expert en analyse de documents. Réponds en français de manière concise."
+                    )
+                    
+                    analysis_prompt = f"""Analyse ce document PDF ({file_name}, {num_pages} pages, {doc_size} bytes):
+
+CONTENU EXTRAIT:
+{full_text[:8000]}
+
+Question de l'utilisateur: {prompt}
+
+Fournis une analyse claire et utile."""
+                    
+                    msg = UserMessage(text=analysis_prompt)
+                    response = await chat.send_message(msg)
+                    return response
+                
+                # If no text (scanned PDF), use vision on first page
+                elif images_base64:
+                    chat = LlmChat(
+                        api_key=EMERGENT_KEY, 
+                        session_id=f"doc_vision_{datetime.now().strftime('%Y%m%d%H%M%S')}", 
+                        system_message="Tu es un assistant qui analyse les documents scannés. Réponds en français."
+                    )
+                    
+                    msg = UserMessage(
+                        text=f"Analyse cette page du document '{file_name}'. {prompt}",
+                        file_contents=[ImageContent(images_base64[0])]
+                    )
+                    response = await chat.send_message(msg)
+                    return response
+                    
+            except ImportError:
+                logger.warning("PyMuPDF not available, falling back to basic analysis")
+            except Exception as pdf_err:
+                logger.error(f"PDF processing error: {pdf_err}")
+        
+        # For images in documents, use vision
+        if any(x in mime_type.lower() for x in ['image', 'png', 'jpg', 'jpeg', 'webp']):
+            return await analyze_image(doc_base64, prompt)
+        
+        # Fallback for other document types
         chat = LlmChat(
             api_key=EMERGENT_KEY, 
             session_id=f"doc_{datetime.now().strftime('%Y%m%d%H%M%S')}", 
@@ -673,9 +743,9 @@ async def analyze_document(doc_base64: str, mime_type: str, file_name: str, prom
 - Type: {mime_type}
 - Taille: {doc_size} bytes
 
-Question de l'utilisateur: {prompt}
+Question: {prompt}
 
-Note: Je ne peux pas lire le contenu du fichier directement, mais je peux aider avec des questions générales sur ce type de document."""
+Je ne peux pas lire ce format directement. Suggère des alternatives ou aide avec des questions générales."""
         
         msg = UserMessage(text=analysis_prompt)
         response = await chat.send_message(msg)
