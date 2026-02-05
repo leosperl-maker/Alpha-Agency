@@ -262,8 +262,16 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     # Document info with date formatting
     doc_number = doc_data.get('invoice_number') or doc_data.get('quote_number', '')
     created_at_raw = doc_data.get('created_at', '')
+    
+    # Handle different date formats (string ISO or datetime object)
     if created_at_raw:
-        doc_date = created_at_raw.split('T')[0] if 'T' in created_at_raw else created_at_raw[:10]
+        if isinstance(created_at_raw, str):
+            doc_date = created_at_raw.split('T')[0] if 'T' in created_at_raw else created_at_raw[:10]
+        elif hasattr(created_at_raw, 'strftime'):
+            # It's a datetime object
+            doc_date = created_at_raw.strftime('%Y-%m-%d')
+        else:
+            doc_date = str(created_at_raw)[:10]
     else:
         from datetime import datetime
         doc_date = datetime.now().strftime('%Y-%m-%d')
