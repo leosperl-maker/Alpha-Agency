@@ -139,6 +139,14 @@ BACKEND_WEBHOOK_URL=https://crmalphaagency-f7ab9328.svc-us5.zcloud.ws/api/whatsa
 2. **(P1) API Blog pour n8n** - Modifier `/app/backend/routes/blog.py` selon spec `content_blocks`
 3. **(P1) Résumé quotidien WhatsApp** - Tâche planifiée
 
+### Fonctionnalités Ajoutées (Session actuelle)
+- **Google Drive Integration** - `/app/backend/routes/google_drive.py`
+  - OAuth connexion/déconnexion
+  - Liste des fichiers Drive
+  - Import avec classification IA automatique
+  - Commande WhatsApp "Importe mes fichiers de Drive"
+- **UI Google Drive** - `/app/frontend/src/components/MoltBotDriveSection.jsx`
+
 ### Documentation
 - `/app/docs/MISE_A_JOUR_INDEX_JS_RAILWAY.md` - Guide mise à jour Railway
 - `/app/docs/GUIDE_DOMAINE_PERSONNALISE_MULTILINK.md` - Domaines personnalisés
