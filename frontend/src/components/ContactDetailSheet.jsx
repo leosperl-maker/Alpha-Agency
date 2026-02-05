@@ -652,6 +652,183 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 </ScrollArea>
               </TabsContent>
 
+              {/* Financial Data Tab - Societe.com */}
+              {contact?.siret && (
+                <TabsContent value="finances" className="flex-1 overflow-hidden mt-0 px-3 sm:px-4 pb-4">
+                  <ScrollArea className="h-full">
+                    <div className="space-y-4 pt-3">
+                      {loadingFinancials ? (
+                        <div className="flex items-center justify-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+                        </div>
+                      ) : financialData ? (
+                        <>
+                          {/* Company Info */}
+                          <Card className="border-white/10 bg-gradient-to-br from-indigo-600/20 to-purple-600/20">
+                            <CardContent className="p-4">
+                              <div className="flex items-start gap-3">
+                                <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
+                                  <Building className="w-6 h-6 text-indigo-400" />
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="font-bold text-white text-lg">{financialData.nom}</h3>
+                                  <p className="text-white/60 text-sm">{financialData.forme_juridique}</p>
+                                  <div className="flex flex-wrap gap-2 mt-2">
+                                    <Badge variant="outline" className="border-indigo-500/50 text-indigo-300">
+                                      SIREN: {financialData.siren}
+                                    </Badge>
+                                    {financialData.siret && (
+                                      <Badge variant="outline" className="border-purple-500/50 text-purple-300">
+                                        SIRET: {financialData.siret}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Company Details */}
+                              <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
+                                {financialData.ville && (
+                                  <div className="flex items-center gap-2 text-white/70">
+                                    <MapPin className="w-4 h-4" />
+                                    <span>{financialData.code_postal} {financialData.ville}</span>
+                                  </div>
+                                )}
+                                {financialData.activite && (
+                                  <div className="flex items-center gap-2 text-white/70">
+                                    <Briefcase className="w-4 h-4" />
+                                    <span className="truncate">{financialData.activite}</span>
+                                  </div>
+                                )}
+                                {financialData.tranche_effectif && (
+                                  <div className="flex items-center gap-2 text-white/70">
+                                    <Users className="w-4 h-4" />
+                                    <span>{financialData.tranche_effectif}</span>
+                                  </div>
+                                )}
+                                {financialData.capital_social > 0 && (
+                                  <div className="flex items-center gap-2 text-white/70">
+                                    <Euro className="w-4 h-4" />
+                                    <span>Capital: {formatCurrency(financialData.capital_social)}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Directors */}
+                          {financialData.dirigeants && financialData.dirigeants.length > 0 && (
+                            <Card className="border-white/10">
+                              <CardContent className="p-4">
+                                <h3 className="font-semibold text-white flex items-center gap-2 mb-3">
+                                  <User className="w-4 h-4 text-indigo-400" />
+                                  Dirigeants
+                                </h3>
+                                <div className="space-y-2">
+                                  {financialData.dirigeants.map((d, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
+                                      <span className="text-white font-medium">{d.nom}</span>
+                                      <Badge variant="outline" className="text-xs">{d.fonction}</Badge>
+                                    </div>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
+
+                          {/* Financial Statements - Bilans */}
+                          {financialData.bilans && financialData.bilans.length > 0 && (
+                            <Card className="border-white/10">
+                              <CardContent className="p-4">
+                                <h3 className="font-semibold text-white flex items-center gap-2 mb-3">
+                                  <BarChart3 className="w-4 h-4 text-green-400" />
+                                  Bilans Publics
+                                </h3>
+                                <div className="space-y-3">
+                                  {financialData.bilans.map((bilan, idx) => (
+                                    <div key={idx} className="bg-white/5 rounded-lg p-3">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <Badge className="bg-indigo-600/30 text-indigo-300">{bilan.annee}</Badge>
+                                        {idx > 0 && financialData.bilans[idx-1] && bilan.chiffre_affaires && financialData.bilans[idx-1].chiffre_affaires && (
+                                          <div className="flex items-center gap-1 text-xs">
+                                            {bilan.chiffre_affaires > financialData.bilans[idx-1].chiffre_affaires ? (
+                                              <>
+                                                <TrendingUp className="w-3 h-3 text-green-400" />
+                                                <span className="text-green-400">
+                                                  +{(((bilan.chiffre_affaires - financialData.bilans[idx-1].chiffre_affaires) / financialData.bilans[idx-1].chiffre_affaires) * 100).toFixed(1)}%
+                                                </span>
+                                              </>
+                                            ) : (
+                                              <>
+                                                <TrendingDown className="w-3 h-3 text-red-400" />
+                                                <span className="text-red-400">
+                                                  {(((bilan.chiffre_affaires - financialData.bilans[idx-1].chiffre_affaires) / financialData.bilans[idx-1].chiffre_affaires) * 100).toFixed(1)}%
+                                                </span>
+                                              </>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-2 text-sm">
+                                        {bilan.chiffre_affaires !== null && bilan.chiffre_affaires !== undefined && (
+                                          <div>
+                                            <p className="text-white/50 text-xs">Chiffre d'affaires</p>
+                                            <p className="text-white font-semibold">{formatCurrency(bilan.chiffre_affaires)}</p>
+                                          </div>
+                                        )}
+                                        {bilan.resultat_net !== null && bilan.resultat_net !== undefined && (
+                                          <div>
+                                            <p className="text-white/50 text-xs">Résultat net</p>
+                                            <p className={`font-semibold ${bilan.resultat_net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                              {formatCurrency(bilan.resultat_net)}
+                                            </p>
+                                          </div>
+                                        )}
+                                        {bilan.effectif && (
+                                          <div>
+                                            <p className="text-white/50 text-xs">Effectif</p>
+                                            <p className="text-white">{bilan.effectif} salariés</p>
+                                          </div>
+                                        )}
+                                        {bilan.ebitda !== null && bilan.ebitda !== undefined && (
+                                          <div>
+                                            <p className="text-white/50 text-xs">EBITDA</p>
+                                            <p className={`font-semibold ${bilan.ebitda >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                              {formatCurrency(bilan.ebitda)}
+                                            </p>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
+
+                          {/* Link to Societe.com */}
+                          <a
+                            href={`https://www.societe.com/societe/${financialData.siren || contact.siret}.html`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-2 p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-white/70 hover:text-white"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            <span className="text-sm">Voir sur Societe.com</span>
+                          </a>
+                        </>
+                      ) : (
+                        <div className="text-center py-8">
+                          <BarChart3 className="w-10 h-10 mx-auto text-white/20 mb-3" />
+                          <p className="text-white/60 text-sm">Aucune donnée financière disponible</p>
+                          <p className="text-white/40 text-xs mt-1">SIRET: {contact.siret}</p>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              )}
+
               {/* Editorial Calendar Tab */}
               <TabsContent value="editorial" className="flex-1 overflow-hidden mt-0 px-3 sm:px-4 pb-4">
                 <ScrollArea className="h-full">
