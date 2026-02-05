@@ -1211,19 +1211,40 @@ async def whatsapp_webhook(message: IncomingMessage):
         if document_url:
             try:
                 async with httpx.AsyncClient(timeout=30.0) as client:
-                    await client.post(
-                        f"{WHATSAPP_SERVICE_URL}/send-document",
-                        json={
-                            "phone_number": message.phone_number,
-                            "document_url": document_url,
-                            "filename": "document.pdf",
-                            "caption": "📄 Document demandé"
-                        }
-                    )
-                    logger.info(f"Document sent to {message.phone_number}: {document_url}")
+                    # Check if it's an image or a document
+                    is_image = result.get("is_image", False) or any(ext in document_url.lower() for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp'])
+                    
+                    if is_image:
+                        # Send as image
+                        await client.post(
+                            f"{WHATSAPP_SERVICE_URL}/send-image",
+                            json={
+                                "phone_number": message.phone_number,
+                                "image_url": document_url,
+                                "caption": "🖼️ Image générée par MoltBot"
+                            }
+                        )
+                        logger.info(f"Image sent to {message.phone_number}: {document_url}")
+                    else:
+                        # Send as document
+                        # Determine filename based on URL
+                        filename = document_url.split('/')[-1] if '/' in document_url else "document"
+                        if not any(filename.endswith(ext) for ext in ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.json', '.txt']):
+                            filename = "document.pdf"
+                        
+                        await client.post(
+                            f"{WHATSAPP_SERVICE_URL}/send-document",
+                            json={
+                                "phone_number": message.phone_number,
+                                "document_url": document_url,
+                                "filename": filename,
+                                "caption": "📄 Document demandé"
+                            }
+                        )
+                        logger.info(f"Document sent to {message.phone_number}: {document_url}")
             except Exception as e:
-                logger.error(f"Error sending document: {e}")
-                reply_text += f"\n\n📎 Document: {document_url}"
+                logger.error(f"Error sending document/image: {e}")
+                reply_text += f"\n\n📎 Fichier: {document_url}"
         
         return {"reply": reply_text, "is_admin": True, "transcribed": was_transcribed, "document_sent": bool(document_url)}
     else:
