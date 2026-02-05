@@ -1,193 +1,206 @@
 <analysis>**original_problem_statement:**
-The user's primary goal is the continued development and expansion of MoltBot, a sophisticated AI assistant integrated into their CRM. The user reported several critical production bugs (Gmail, WhatsApp, Instagram) and requested new features. The focus of this session shifted heavily to resolving the WhatsApp integration by migrating it to an external service (Railway) and transforming the bot into an intelligent, conversational AI assistant (nicknamed ClawdBot) capable of performing CRM actions, generating images, and analyzing files. The user also needed to fix a custom domain setup (), which was migrated to GitHub Pages.
+The user's primary objective is the ongoing enhancement of MoltBot, an AI assistant integrated into their CRM. The user has requested the implementation of several advanced features for MoltBot, primarily for the WhatsApp channel.
 
-**Key User Requests & Issues:**
-1.  **Critical Production Bugs:**
-    *   **Gmail:** Connection fails with a Reconnexion demandée message.
-    *   **WhatsApp:** The QR code was not appearing on the production site, and the service was not running.
-    *   **Instagram Stories:** The connection to Instagram fails.
-2.  **New AI Features (ClawdBot/MoltBot on WhatsApp):**
-    *   The bot must be fully conversational, like ChatGPT.
-    *   It must be able to create CRM entities (quotes, invoices, contacts, tasks) from natural language commands.
-    *   It must be able to generate images using Nano Banana and potentially GPT Image 1.
-    *   It must be able to search for and send files from the CRM via WhatsApp.
-    *   It must be able to analyze images and files sent to it by the user.
-3.  **Custom Domain:**
-    *   The user wants to use  to display a specific link-in-bio page from the CRM. The previous Netlify setup was failing.
-4.  **Documentation:**
-    *   The user requested a step-by-step guide on how to configure custom domains for the multilink feature using both GitHub Pages and Railway.
+**Key User Requests & Features:**
+1.  **MoltBot Intelligence Upgrade:**
+    *   **Use Pre-recorded Services:** When creating quotes/invoices, MoltBot should use the full details (title, description, price) of services already saved in the CRM.
+    *   **Interactive Conversation:** The bot should ask clarifying questions to gather missing information (e.g., email, phone, SIRET for a new contact) before performing an action.
+    *   **Intelligent Document Search:** Search for documents within the CRM based on their content, not just their filenames.
+    *   **Correct CRM Configuration:** Automatically use settings from the CRM, such as the correct VAT rate (e.g., 8.5% instead of a hardcoded 20%).
+2.  **Google Drive Integration:**
+    *   Implement functionality for MoltBot to import documents from a connected Google Drive account.
+    *   The bot should be able to automatically analyze, title, and classify these imported documents within the CRM.
+3.  **Societe.com Integration:**
+    *   Integrate the Societe.com API using a key provided by the user.
+    *   Add a  field to contact records in the CRM.
+    *   Enable MoltBot to search for company information via WhatsApp using a name or SIREN.
+    *   Display public financial data (balance sheets) for a contact within the CRM, similar to a provided screenshot.
+4.  **WhatsApp Service Stabilisation:**
+    *   Resolve recurring crashes and connection issues with the external Node.js WhatsApp service hosted on Railway.
+    *   Ensure MoltBot can receive all media types (audio, image, video, document) and send back generated files (PDF quotes, AI-generated images).
 
 **User's preferred language**: Français
 
 **what currently exists?**
 - A full-stack CRM application (React/FastAPI/MongoDB).
-- The Node.js WhatsApp service has been successfully migrated from the local environment to a free-tier **Railway** project to solve the production deployment issue (Node.js not being installed on the server).
-- The  custom domain is now successfully pointing to a static  file hosted on **GitHub Pages**, which iframes the correct CRM page.
-- A highly advanced AI assistant (**ClawdBot**) is integrated via WhatsApp. It can understand natural language, create CRM entities (quotes, invoices), generate images with Nano Banana, and retrieve files.
-- A manual mapping system has been implemented in the database to link a user's WhatsApp Business  (e.g., ) to their standard phone number to correctly identify them as an admin.
-- A new documentation file () has been created explaining how to set up custom domains.
-- The backend  route has been completely overhauled to support the new AI-driven capabilities.
+- The WhatsApp service is an external Node.js application deployed on **Railway**.
+- MoltBot has been significantly upgraded to be a conversational AI assistant that can:
+    - Transcribe audio messages (after converting OGG to MP3).
+    - Analyze images and documents.
+    - Create complex, multi-line quotes using pre-recorded services and applying correct VAT/discounts.
+    - Engage in multi-turn conversations to gather information.
+- A **Google Drive integration** has been added to the backend and frontend, awaiting user authentication via an OAuth flow on the  page.
+- A **Societe.com API integration** has been implemented. MoltBot can search for companies, and a  field has been added to the frontend contact form.
+- The external WhatsApp  service has been repeatedly debugged and updated to handle various media types and resolve numerous connection and runtime errors on Railway.
 
 **Last working item**:
-- **Last item agent was working:** Adding the final features to the WhatsApp AI assistant: (1) Analyzing files and images sent by the user to the bot. (2) Generating images from a reference image provided by the user.
-- **Status:** IN PROGRESS
+- **Last item agent was working:** Debugging the live production WhatsApp integration. The user reported that after connecting, MoltBot was not sending generated documents (like PDF quotes) or images, and was not using the full description for pre-recorded services.
+- **Status:** USER VERIFICATION PENDING
 - **Agent Testing Done:** N
-- **Which testing method agent to use?** backend testing agent
-- **User Testing Done:** N
+- **Which testing method agent to use?** Manual testing by user. The agent needs to guide the user to test on their live production WhatsApp after the next fix.
+- **User Testing Done:** Y
 
 **All Pending/In progress Issue list**:
-- **Issue 1: WhatsApp connection is unstable on Railway (P0)**
-    - **Description:** The user reports that the WhatsApp connection drops, and the QR code disappears shortly after connecting. This is likely due to the Railway free-tier service going to sleep or restarting, causing the session to be lost.
-    - **Attempted fixes:** The agent has made the Node.js service more resilient with auto-reconnect logic, but the underlying platform behavior persists.
+- **Issue 1: WhatsApp service has functional gaps on production (P0)**
+    - **Description:** Despite the connection being established, MoltBot's responses are incomplete.
+        1.  It cannot send generated PDF quotes or AI-generated images back to the user.
+        2.  When creating a quote, it uses the title of a pre-recorded service but not its full description.
+    - **Attempted fixes:** The agent provided an updated  for Railway designed to handle sending  and  from the backend's response. The backend logic to provide these URLs was the next step.
     - **Next debug checklist:**
-        1.  Investigate if the  directory on Railway is being persisted across deployments/restarts. If not, the session is lost every time. Railway volumes may be needed.
-        2.  Review the   logic to ensure it robustly handles restarts without requiring a new QR scan every time, if session files are persisted.
-        3.  Consider adding a manual reconnect or refresh QR button in the CRM UI that triggers a specific endpoint on the Railway service.
-    - **Why fix this issue and what will be achieved with the fix?** A stable connection is essential for the entire WhatsApp AI assistant functionality.
+        1.  Review  in the  function.
+        2.  After an action like , ensure the code generates a PDF, uploads it (e.g., to Cloudinary), and adds , , and  to the JSON response sent to Railway.
+        3.  For image generation, ensure  is added to the response.
+        4.  Review the  prompt to explicitly instruct the AI to include the full service description in quotes.
     - **Status:** IN PROGRESS
     - **Is recurring issue?** Y
-    - **Should Test frontend/backend/both after fix?** Both
+    - **Should Test frontend/backend/both after fix?** Backend (The fix is in the backend response and AI prompt).
     - **Blocked on other issue:** None.
 
-- **Issue 2: Gmail connection fails on production (P1)**
-    - **Description:** User gets a Reconnexion demandée message.
-    - **Attempted fixes:** The agent improved token refresh logic in .
-    - **Status:** USER VERIFICATION PENDING (User needs to deploy and test).
-    - **Is recurring issue?** Y
-    - **Should Test frontend/backend/both after fix?** Backend.
-
-- **Issue 3: Instagram Story connection fails (P1)**
-    - **Description:** Connection fails due to rate-limiting on the preview environment's IP.
-    - **Status:** BLOCKED (Requires user to deploy and test from their production server's IP).
-    - **Is recurring issue?** Y
-    - **Should Test frontend/backend/both after fix?** Backend.
-
 **In progress Task List**:
-- **Task 1: Complete WhatsApp AI file/image analysis (P0)**
-    - **Where to resume:** Continue development in .
-        1.  Implement the logic for  and  functions. These currently exist as skeletons.
-        2.  Update the main webhook handler to call these functions when an image or document is received in a message.
-        3.  Ensure the  file for Railway is updated to correctly capture and forward incoming media files (images, documents, audio) to the backend webhook, including the media type and a way to access the file data (e.g., download URL or base64 string).
-    - **What will be achieved with this?** MoltBot will be able to have conversations about images/documents the user sends and use them as input for generative tasks.
+- **Task 1: Complete Societe.com Frontend Integration (P1)**
+    - **Where to resume:** The user wants to see financial data (balance sheets) on the contact page.
+    - **What will be achieved with this?** The CRM will display key financial metrics for a contact if their SIRET is known, matching the user's screenshot.
+    - **Next Steps:**
+        1.  Create a new React component () to render the balance sheet data returned from the Societe.com API.
+        2.  In , when viewing a contact's details, fetch data from the  endpoint.
+        3.  Render the new component with the fetched data.
     - **Status:** IN PROGRESS
-    - **Should Test frontend/backend/both after fix?** Backend.
+    - **Should Test frontend/backend/both after fix?** Frontend.
     - **Blocked on something:** None.
+
+- **Task 2: Complete Google Drive Integration (P1)**
+    - **Where to resume:** Guide the user to complete the authentication.
+    - **What will be achieved with this?** MoltBot will be able to import and classify files from the user's Google Drive.
+    - **Next Steps:**
+        1.  Instruct the user to navigate to the  page on their production site.
+        2.  Tell them to click the Connect Google Drive button and complete the Google OAuth2 flow.
+        3.  Once connected, ask them to test the feature via WhatsApp (e.g., Importe les derniers fichiers de mon Drive).
+    - **Status:** USER VERIFICATION PENDING
+    - **Should Test frontend/backend/both after fix?** Both (User action on frontend, tested via backend).
+    - **Blocked on something:** User action is required.
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-  - **(P0) Re-implement Blog API for n8n:** This high-priority task from the previous handoff has not been started. The API in  needs to be modified to match a strict  specification provided by the user.
+  - **(P0) Re-implement Blog API for n8n:** This high-priority task from a previous handoff has not been started. The API in  needs to be modified to match a strict  specification.
   - **(P1) Implement Daily WhatsApp Summary:** A scheduled task to generate and send a daily summary via WhatsApp. Not started.
-  - **(P1) WhatsApp Audio Message Analysis:** The user wants the AI to be able to analyze audio messages. This is currently not working because the Railway service is not set up to handle audio file downloads. This is a lower priority for the user but remains an open request.
 - **Future Tasks:**
   - **(P2) Advanced Analytics with Alerts:** Add a notification/alert system to the analytics dashboard.
   - **(P2) UI for Multi-Platform Post Preview.**
 
 **Completed work in this session**
-- **WhatsApp Service Migration:** Moved the Node.js service from being part of the main repo to an external service hosted on **Railway**, resolving the Node.js not installed on production issue.
-- **Custom Domain Fix:** Migrated the  setup from a failing Netlify configuration to a simpler, working **GitHub Pages** implementation.
-- **WhatsApp AI ClawdBot Implementation:**
-  - Rewrote  to use an LLM-driven engine that understands natural language.
-  - Implemented actions for creating quotes, invoices, and contacts via WhatsApp messages.
-  - Integrated image generation using Gemini (Nano Banana) via the  library.
-  - Added the ability for the bot to find and send files from the CRM.
-- **Bug Fixes:**
-  - Resolved the WhatsApp Service not available error by moving the service to Railway.
-  - Fixed the WhatsApp admin check by implementing a  to phone number mapping system.
-- **Documentation:**
-  - Created , a detailed guide for the user on setting up custom domains with GitHub Pages and Railway.
+- **WhatsApp Media Analysis:** Implemented backend logic to analyze audio (with OGG to MP3 conversion), images, documents, and videos sent by the user.
+- **Advanced Conversational AI (MoltBot):**
+  - Reworked the AI to create complex, multi-line quotes with discounts using pre-recorded services from the CRM.
+  - Implemented multi-turn conversational memory to allow the bot to ask follow-up questions.
+  - Corrected the bot to use the proper VAT rate (8.5%) from CRM settings.
+- **Societe.com Integration:**
+  - Added a backend route () and integrated the user's API key to search for company data.
+  - Added a  input field to the frontend contact creation form.
+  - Enabled MoltBot to trigger company searches from a WhatsApp command.
+- **Google Drive Integration:**
+  - Implemented backend OAuth2 routes () and a frontend connection button.
+  - Added the  action to MoltBot's capabilities.
+- **Critical WhatsApp (Railway) Debugging:**
+  - Resolved multiple service crashes by providing correct  dependencies and fixing Node.js compatibility issues ().
+  - Fixed the QR code display on the CRM frontend by using a QR code generation library.
+  - **Identified and guided the user to fix a critical misconfiguration where the Railway service was pointing to the preview webhook URL instead of the production one ().**
 
 **Earlier issues found/mentioned but not fixed**
-- The n8n Blog API and Daily WhatsApp Summary tasks were carried over from the previous session but were not addressed due to the focus on fixing the critical WhatsApp and custom domain issues.
+- **(P0) Re-implement Blog API for n8n:** Carried over and still not addressed.
+- **(P1) Implement Daily WhatsApp Summary:** Carried over and still not addressed.
+- The Gmail and Instagram connection issues are still pending user verification from a previous session.
 
 **Known issue recurrence from previous fork**
-- The core issues with production services (WhatsApp, Gmail, Instagram) were recurring. The root cause for WhatsApp (Node.js unavailability) has been addressed with the Railway migration. The others are pending user deployment and verification.
+- The instability of the external WhatsApp service on Railway is a persistent, recurring issue. While individual crashes have been fixed, the architecture's reliance on a free-tier external service remains a point of failure.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **External Service Deployment (PaaS):** Overcame a production environment limitation (missing Node.js) by deploying the dependent WhatsApp service to a third-party Platform-as-a-Service (Railway). Communication happens via environment variables and HTTP requests.
-- **Static Site Hosting for Domain Pointing:** Switched from a complex Netlify setup to a simpler, more robust GitHub Pages solution for hosting a single  file to handle the  custom domain iframe.
-- **AI-Driven Action Engine:** Re-architected the WhatsApp bot from simple command matching to a sophisticated AI-first system. An LLM (Gemini) interprets natural language prompts to determine user intent and extracts parameters to trigger specific CRM functions (e.g., create a quote for X for Y euros).
-- **WhatsApp Business ID (LID) Mapping:** Solved a critical admin-check issue by creating a persistent mapping between a user's phone number and their non-obvious WhatsApp Business LID (e.g., ).
-- **Image Generation Integration:** Integrated Gemini (Nano Banana) for text-to-image generation and implemented the workflow to upload the generated image to Cloudinary and send it via WhatsApp.
+- **External API Integration:** Integrated the Societe.com REST API using a user-provided API key.
+- **OAuth 2.0 Flow:** Implemented the backend logic for the Google Drive integration.
+- **Advanced Prompt Engineering:** The system prompt in  has evolved into a complex instruction set defining AI behavior, context loading (CRM services, conversation history), and a structured action-tag system (e.g., ).
+- **Live PaaS Debugging:** Iteratively diagnosed and fixed issues on the user's live Railway deployment by analyzing logs and providing updated code for  and .
+- **Frontend QR Code Rendering:** Switched from attempting to display a raw string to using the  library to correctly render the QR code image.
 
 **key DB schema**
-- **configurations:**  (lid_map was added)
-- **notifications:** 
+- **services:** 
+- **contacts:** Now includes a  field (string).
 
 **All files of reference**
-- : The core of the new AI assistant logic.
-- **GitHub Repo  (, ):** The code for the external WhatsApp service running on Railway. *This is not in the  directory.*
-- **GitHub Repo  ():** The file for the custom domain hosted on GitHub Pages. *This is not in the  directory.*
-- : Contains the  pointing to the Railway app.
-- : The new documentation created for the user.
+- : The core AI and action logic for MoltBot.
+- : The Societe.com integration logic.
+- : The Google Drive integration logic.
+- : The frontend page displaying the WhatsApp QR code.
+- : The CRM page for managing contacts.
+- : A reference document for the external Node.js service code.
+- **External GitHub Repo :** This project (especially  and ) is managed by the user on GitHub and deployed to Railway. It is critical for the WhatsApp functionality but exists outside the  directory.
 
 **Areas that need refactoring**:
-- The  file and its associated startup logic in  are now obsolete and should be removed to avoid confusion.
+- The  file has grown very large. The action processing logic () could be refactored into smaller, dedicated functions for each action (, , etc.) to improve maintainability.
 
 **key api endpoints**
-- **Railway Service:** 
-  - : Checks connection status.
-  - : Gets the QR code for linking a device.
-  - : Disconnects the WhatsApp session.
-- **Backend Webhook:** 
-  - Receives incoming messages from the Railway service.
+- : Receives all incoming messages from the Railway service.
+-  & : Endpoints for the Google Drive OAuth flow.
+-  & : Endpoints for the Societe.com integration.
 
 **Critical Info for New Agent**
-1.  **Parlez Français:** You MUST continue to communicate with the user in French.
-2.  **External Services are Key:** The WhatsApp functionality is **entirely dependent** on the **Railway** service, which is deployed from the  GitHub repo. The  domain depends on the  repo and **GitHub Pages**. Debugging these features requires checking their respective platforms.
-3.  **WhatsApp Admin Logic:** The bot only provides AI responses to the admin user. Admin identification now relies on a mapping between the WhatsApp Business LID and the phone number stored in the  collection in MongoDB.
-4.  **Deployment is Required:** The user has made many changes but may not have deployed the latest backend code to Emergent. Many of the pending verification issues and new AI features will only work after the user deploys the main CRM application. You must remind them of this.
-5.  **User is Frustrated with Instability:** The user has experienced significant frustration with features not working after deployment. Be clear about what is fixed, what requires deployment, and what depends on external services. The instability of the Railway connection is a major pain point.
+1.  **Parlez Français.** Your communication with the user MUST be in French.
+2.  **WhatsApp is on Railway.** The WhatsApp service is an external Node.js app deployed on Railway from the user's GitHub repo (). Debugging often requires analyzing logs from Railway (which the user provides) and giving the user updated code for  and .
+3.  **Production Webhook is Key.** The Railway service's  environment variable **must** point to the user's production domain (), not the Emergent preview URL. This has been a major source of bugs.
+4.  **User Tests on Production.** The user deploys changes and tests directly on their live site and WhatsApp number. Be prepared for live debugging cycles.
 
 **documents and test reports created in this job**
-- /app/docs/GUIDE_DOMAINE_PERSONNALISE_MULTILINK.md
+- 
+- 
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Asks if MoltBot can generate images (Nano Banana) and send files from the CRM of any format (PDF, image, JSON, PowerPoint). (Agent agrees to implement).
-2.  **User:** Clarifies that he wants a real AI assistant like ClawdBot. (Agent confirms and continues implementation).
-3.  **User:** Now Im not seeing messages." Reports "Waiting for this message" error on WhatsApp. (Agent identifies it as an encryption key sync issue).
-4.  **User:** "I disconnected WhatsApp and now I have no QR code." (Agent investigates Railway service).
-5.  **User:** The "Refresh" button on the WhatsApp page is not clickable. (Agent investigates frontend code).
-6.  **User:** Provides Railway logs showing the app crashed. (Agent identifies a syntax error in `index.js`).
-7.  **User:** Asks if its a problem that the CRM hasnt been redeployed yet. (Agent clarifies the order of operations: fix Railway first, then deploy CRM).
-8.  **User:** Provides new Railway logs showing the service is online and connected, but he receives no reply to messages. (Agent identifies the `@lid` vs `@s.whatsapp.net` issue).
-9.  **User:** Asks for clarification on a "[Code identique au code original]" message. (Agent provides the full corrected code).
-10. **User:** "Now he answers my messages but I get generic answers... I dont have an AI in front of me, just an answering machine. (Agent explains the need to deploy the CRM to activate admin recognition and AI responses).
+1.  **User:** Reports the Railway service is crashing after updating . Provides logs.
+2.  **Agent:** Identifies a syntax error from a bad copy-paste and provides a fully corrected .
+3.  **User:** Reports a Connection Failure loop in the new Railway logs.
+4.  **Agent:** Suspects the IP is blocked. Provides a different version of the  library in  and a simplified .
+5.  **User:** Reports the QR code is generated but not visible on the CRM page.
+6.  **Agent:** Identifies the frontend needs a library to render the QR code string. Installs  and updates .
+7.  **User:** Confirms QR code is now visible on the preview and they are deploying to production.
+8.  **User:** Confirms deployment worked and they are connected, but messages are not being sent/received. Provides logs showing self-signed certificate error.
+9.  **Agent:** Identifies the error is because the Railway service is calling the preview webhook URL. Instructs user to change the  variable on Railway to their production URL ().
+10. **User:** Reports two new issues: (1) MoltBot doesn't include the full service description in quotes, and (2) it can't send generated PDF/image files back.
 
 **Project Health Check:**
 - **Broken:**
-    - WhatsApp connection stability on Railway is poor, leading to frequent disconnects and QR code issues.
+  - The WhatsApp messaging flow on production is not fully functional. The bot cannot send generated files (PDFs, images) back to the user.
+  - The bot is not using the complete pre-recorded service description in generated quotes.
 - **Mocked:**
-    - None.
+  - None.
 - **Blocked:**
-    - Instagram Story connection is blocked pending user testing on their production IP address.
+  - Instagram Story connection (pending user testing on production IP).
+- **User Verification Pending:**
+  - Gmail connection.
+  - Google Drive connection (user needs to complete the OAuth flow).
 
 **3rd Party Integrations**
-- **Railway:** **NEW**. Used to host the Node.js WhatsApp service.
-- **GitHub Pages:** **NEW**. Used to host the static  for the  custom domain.
-- **Meta (Facebook/Instagram):** Publishing, Account Sync. (Instagram connection is blocked).
-- **Baileys (Node.js):** Non-official WhatsApp integration, now running on Railway.
-- **Gemini (via Emergent LLM Key):** Used for AI chat, image generation (Nano Banana).
-- **OpenAI Whisper (via Emergent LLM Key):** Used for audio transcription (currently not fully implemented for WhatsApp).
-- **Cloudinary:** Used for hosting generated images and CRM files.
-- **Google APIs (Gmail):** Scopes updated, pending user re-authorization on production.
+- **Societe.com:** **NEW**. For fetching French company data. Requires User API Key.
+- **Google Drive:** **NEW**. For file import and classification. Uses OAuth2.
+- **Railway:** **EXISTING**. Hosts the external Node.js WhatsApp service.
+- **GitHub Pages:** **EXISTING**. Hosts the custom domain redirect.
+- **WhiskeySockets/baileys:** **EXISTING**. Node.js library for WhatsApp integration.
+- **Gemini (via Emergent LLM Key):** Used for AI chat and image generation.
+- **OpenAI Whisper (via Emergent LLM Key):** Used for audio transcription.
+- **Cloudinary:** Used for hosting CRM files and AI-generated images.
+- **Google APIs (Gmail):** Existing integration, pending verification.
 
 **Testing status**
 - **Testing agent used after significant changes:** NO
 - **Troubleshoot agent used after agent stuck in loop:** NO
-- **Test files created:** None.
-- **Known regressions:** The WhatsApp connection, while functional, is less stable due to the move to a free-tier external service that can sleep or restart.
+- **Test files created:** None
+- **Known regressions:** The simplified  provided to stabilize the connection removed media handling, which was later added back. The current core regression is that generated files cannot be sent to the user.
 
 **Credentials to test flow:**
 - **email:** 
 - **password:** 
 - **Admin WhatsApp Number:** 
+- **Societe.com API Key:** 
 
 **What agent forgot to execute**
-- The agent did not address two high-priority tasks from the original handoff:
-    1.  Re-implementing the Blog API for n8n integration.
-    2.  Implementing the Daily WhatsApp Summary feature.
-- The agent created placeholder functions for WhatsApp media analysis (, ) but did not implement their core logic.
-- The agent did not fully update the Railway  to handle incoming media files (images, audio, documents).</analysis>
+- The two highest priority tasks from the previous session (N8n Blog API, Daily WhatsApp Summary) were not started.
+- The frontend implementation for displaying financial data from Societe.com on the contact page was started but not completed.</analysis>
