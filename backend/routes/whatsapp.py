@@ -374,7 +374,102 @@ async def detect_and_execute_action(message: str, phone: str) -> dict:
         result["action_executed"] = True
         result["action_description"] = f"Tâche créée: {title}"
     
+    # Detect IMAGE GENERATION request
+    elif any(x in msg_lower for x in ["génère une image", "crée une image", "dessine", "génère moi", "image de", "photo de", "illustration"]):
+        # Extract the image description
+        desc_match = re.search(r'(?:image|photo|illustration|dessine|génère)\s+(?:de\s+|d\')?(.+?)(?:\.|$)', message, re.IGNORECASE)
+        image_prompt = desc_match.group(1).strip() if desc_match else message
+        
+        # Generate image using Nano Banana
+        image_url = await generate_image_nano_banana(image_prompt)
+        
+        if image_url:
+            result["action_executed"] = True
+            result["action_description"] = f"Image générée: {image_prompt[:50]}"
+            result["document_url"] = image_url
+            result["is_image"] = True
+        else:
+            result["action_executed"] = True
+            result["action_description"] = "Erreur lors de la génération de l'image"
+    
+    # Detect FILE/DOCUMENT request from CRM
+    elif any(x in msg_lower for x in ["envoie-moi le fichier", "envoie le document", "donne-moi le fichier", "récupère le fichier", "cherche le fichier", "trouve le document", "envoie-moi le pdf", "envoie le pdf"]):
+        # Extract file name or search term
+        file_match = re.search(r'(?:fichier|document|pdf)\s+(?:de\s+|d\'|intitulé\s+|nommé\s+|appelé\s+)?["\']?([^"\'\.]+)["\']?', message, re.IGNORECASE)
+        search_term = file_match.group(1).strip() if file_match else ""
+        
+        if search_term:
+            # Search in documents collection
+            doc = await db.documents.find_one({
+                "$or": [
+                    {"name": {"$regex": search_term, "$options": "i"}},
+                    {"title": {"$regex": search_term, "$options": "i"}},
+                    {"filename": {"$regex": search_term, "$options": "i"}}
+                ]
+            })
+            
+            if doc and doc.get("url"):
+                result["action_executed"] = True
+                result["action_description"] = f"Document trouvé: {doc.get('name', doc.get('filename', 'Document'))}"
+                result["document_url"] = doc["url"]
+            else:
+                # Try files collection
+                file_doc = await db.files.find_one({
+                    "$or": [
+                        {"name": {"$regex": search_term, "$options": "i"}},
+                        {"filename": {"$regex": search_term, "$options": "i"}}
+                    ]
+                })
+                
+                if file_doc and file_doc.get("url"):
+                    result["action_executed"] = True
+                    result["action_description"] = f"Fichier trouvé: {file_doc.get('name', file_doc.get('filename', 'Fichier'))}"
+                    result["document_url"] = file_doc["url"]
+                else:
+                    result["action_executed"] = True
+                    result["action_description"] = f"Fichier '{search_term}' non trouvé dans le CRM"
+    
+    # Detect request to LIST files
+    elif any(x in msg_lower for x in ["liste mes fichiers", "mes documents", "quels fichiers", "liste des fichiers", "tous mes fichiers"]):
+        files = await db.documents.find().sort("created_at", -1).limit(10).to_list(10)
+        files2 = await db.files.find().sort("created_at", -1).limit(10).to_list(10)
+        
+        all_files = files + files2
+        if all_files:
+            file_list = "\n".join([f"📄 {f.get('name', f.get('filename', 'Sans nom'))} ({f.get('type', 'N/A')})" for f in all_files[:15]])
+            result["action_executed"] = True
+            result["action_description"] = f"Fichiers trouvés:\n{file_list}"
+        else:
+            result["action_executed"] = True
+            result["action_description"] = "Aucun fichier dans le CRM"
+    
     return result
+
+
+async def generate_image_nano_banana(prompt: str) -> str:
+    """Generate an image using Gemini Nano Banana and return the URL."""
+    try:
+        from emergentintegrations.llm.gemini import GeminiImageGenerator
+        
+        EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+        
+        generator = GeminiImageGenerator(api_key=EMERGENT_KEY)
+        
+        # Generate the image
+        result = await generator.generate_image(
+            prompt=prompt,
+            aspect_ratio="1:1"
+        )
+        
+        if result and result.get("url"):
+            logger.info(f"Image generated: {result['url']}")
+            return result["url"]
+        
+        return None
+        
+    except Exception as e:
+        logger.error(f"Image generation error: {e}")
+        return None
 
 
 async def process_ai_actions(ai_response: str, phone: str) -> dict:
