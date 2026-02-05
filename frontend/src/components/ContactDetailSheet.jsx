@@ -370,7 +370,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
 
             {/* Tabs - Pipedrive Style */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-              <TabsList className="grid grid-cols-4 mx-3 sm:mx-4 mt-3 bg-white/5 h-9">
+              <TabsList className="grid grid-cols-5 mx-3 sm:mx-4 mt-3 bg-white/5 h-9">
                 <TabsTrigger value="overview" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
                   <User className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Profil</span>
@@ -387,6 +387,12 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                   <FileText className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Docs</span>
                 </TabsTrigger>
+                {contact?.siret && (
+                  <TabsTrigger value="finances" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
+                    <BarChart3 className="w-3.5 h-3.5 sm:mr-1" />
+                    <span className="hidden sm:inline">Finances</span>
+                  </TabsTrigger>
+                )}
                 <TabsTrigger value="editorial" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
                   <CalendarDays className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Éditorial</span>
