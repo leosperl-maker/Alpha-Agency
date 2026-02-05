@@ -1524,6 +1524,48 @@ async def whatsapp_webhook(message: IncomingMessage):
         )
         text_content = f"[Document reçu: {message.file_name}] {message.message}" if message.message else f"[Document reçu: {message.file_name}]"
     
+    # If video message, extract frame and analyze
+    elif message.message_type == "video" and message.media_base64:
+        prompt = message.message if message.message else "Décris cette vidéo"
+        logger.info(f"Analyzing video")
+        
+        try:
+            import base64
+            import tempfile
+            import subprocess
+            
+            # Save video to temp file
+            video_bytes = base64.b64decode(message.media_base64)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video:
+                temp_video.write(video_bytes)
+                video_path = temp_video.name
+            
+            # Extract first frame using ffmpeg
+            frame_path = video_path.replace(".mp4", "_frame.jpg")
+            subprocess.run([
+                'ffmpeg', '-i', video_path, '-vf', 'select=eq(n\\,0)', 
+                '-vframes', '1', '-y', frame_path
+            ], capture_output=True, timeout=30)
+            
+            # Read frame and analyze
+            if os.path.exists(frame_path):
+                with open(frame_path, 'rb') as f:
+                    frame_base64 = base64.b64encode(f.read()).decode('utf-8')
+                media_analysis = await analyze_image(frame_base64, f"Cette image est la première frame d'une vidéo. {prompt}")
+                os.unlink(frame_path)
+            else:
+                media_analysis = "Impossible d'extraire une image de la vidéo."
+            
+            # Cleanup
+            if os.path.exists(video_path):
+                os.unlink(video_path)
+                
+        except Exception as vid_err:
+            logger.error(f"Video analysis error: {vid_err}")
+            media_analysis = f"Erreur lors de l'analyse de la vidéo: {str(vid_err)}"
+        
+        text_content = f"[Vidéo reçue] {message.message}" if message.message else "[Vidéo reçue - analyse demandée]"
+    
     # Store message
     await db.whatsapp_messages.insert_one({
         "phone_number": message.phone_number,
