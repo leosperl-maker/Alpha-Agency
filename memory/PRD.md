@@ -114,10 +114,10 @@ L'automation peut recevoir une erreur 429 (rate limit) d'Instagram sur certains 
 - **Création CRM par message** - Devis, factures, contacts, tâches via langage naturel
 - **Génération d'images** - Nano Banana (Gemini) intégré
 - **Envoi de fichiers CRM** - PDF, images, documents
-- **Analyse d'images** - Vision IA sur images reçues
-- **Analyse de documents** - PDF avec extraction de texte (PyMuPDF)
-- **Analyse de vidéos** - Extraction de frame et analyse
-- **Transcription audio** - Messages vocaux via Whisper
+- **Analyse d'images** - Vision IA sur images reçues ✅ TESTÉ
+- **Analyse de documents** - PDF avec extraction de texte (PyMuPDF) ✅ TESTÉ
+- **Analyse de vidéos** - Extraction de frame et analyse ✅ TESTÉ
+- **Transcription audio** - Messages vocaux via Whisper (OGG→MP3 auto-conversion) ✅ TESTÉ
 
 ### Architecture
 - **Service WhatsApp**: Hébergé sur **Railway** (Node.js/Baileys)
