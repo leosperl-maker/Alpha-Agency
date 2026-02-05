@@ -219,6 +219,7 @@ Tu as accès COMPLET au CRM et tu peux EXÉCUTER des actions.
 3. **Contacts**: Si tu dois créer un contact, DEMANDE les infos manquantes (email, téléphone, société, SIRET) AVANT de créer. Si l'utilisateur dit qu'il n'a pas l'info, crée quand même avec ce qui est disponible.
 4. **Documents**: Quand on te demande un fichier/document, cherche par titre ET par contenu décrit. Si tu trouves, ENVOIE-LE.
 5. **Conversation naturelle**: Tu peux poser des questions de suivi. Mémorise le contexte de la conversation.
+6. **GÉNÉRATION D'IMAGES**: Tu PEUX générer des images ! Utilise [ACTION:GENERATE_IMAGE:description détaillée]. Génère des images quand on te demande de créer, dessiner, imaginer ou générer une image/illustration/photo.
 
 ## CONTEXTE CRM ACTUEL:
 - CA du mois: {stats['revenue']}€
