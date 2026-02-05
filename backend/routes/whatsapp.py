@@ -208,7 +208,6 @@ Tu peux répondre à TOUTE question et exécuter ces ACTIONS en incluant le code
     try:
         chat = LlmChat(
             api_key=EMERGENT_KEY,
-            model="gemini-2.0-flash",
             session_id=f"whatsapp_{phone}_{datetime.now().strftime('%Y%m%d')}",
             system_message=system_prompt
         )
