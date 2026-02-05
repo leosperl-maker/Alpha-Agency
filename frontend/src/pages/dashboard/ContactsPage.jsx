@@ -287,6 +287,61 @@ const ContactsPage = () => {
                 </div>
               </div>
 
+              {/* SIRET/SIREN */}
+              <div className="space-y-2">
+                <Label className="text-white flex items-center gap-1">
+                  <Building className="w-3 h-3" />
+                  SIRET / SIREN
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={formData.siret || ""}
+                    onChange={(e) => setFormData({...formData, siret: e.target.value})}
+                    placeholder="Ex: 12345678901234"
+                    className="bg-white/5 border-white/10 text-white flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={async () => {
+                      if (!formData.siret) {
+                        toast.error("Entrez un SIRET ou SIREN");
+                        return;
+                      }
+                      try {
+                        const token = localStorage.getItem("alpha_token");
+                        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/societe/company/${formData.siret}`, {
+                          headers: { "Authorization": `Bearer ${token}` }
+                        });
+                        if (res.ok) {
+                          const data = await res.json();
+                          if (data.company) {
+                            setFormData({
+                              ...formData,
+                              company: data.company.nom || formData.company,
+                              city: data.company.ville || formData.city,
+                              company_address: `${data.company.adresse || ""} ${data.company.code_postal || ""} ${data.company.ville || ""}`.trim(),
+                              company_activite: data.company.activite || ""
+                            });
+                            toast.success(`Entreprise trouvée: ${data.company.nom}`);
+                          }
+                        } else {
+                          toast.error("Entreprise non trouvée");
+                        }
+                      } catch (err) {
+                        toast.error("Erreur recherche entreprise");
+                      }
+                    }}
+                    className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-600/10"
+                  >
+                    <Search className="w-4 h-4" />
+                  </Button>
+                </div>
+                {formData.company_address && (
+                  <p className="text-xs text-white/50 mt-1">📍 {formData.company_address}</p>
+                )}
+              </div>
+
               {/* Poste / Ville */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
