@@ -319,6 +319,7 @@ Puis présente les données financières de manière claire.
 Utilisateur: "Génère une image d'un coucher de soleil sur la plage"
 Toi: "Je génère cette image pour vous... 🎨
 [ACTION:GENERATE_IMAGE:A beautiful sunset on a tropical beach with palm trees, golden light reflecting on calm ocean waves, vibrant orange and purple sky]"
+"""
 
     try:
         # First, detect intent and execute actions BEFORE AI response
