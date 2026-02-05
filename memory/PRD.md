@@ -104,3 +104,37 @@ L'automation peut recevoir une erreur 429 (rate limit) d'Instagram sur certains 
 
 ## Tâches Archivées (P2)
 - UI Preview Multi-Plateformes
+
+---
+
+## WhatsApp MoltBot - Assistant IA (ClawdBot) ✅
+
+### Fonctionnalités Implémentées
+- **Chat conversationnel IA** - Répond naturellement comme ChatGPT
+- **Création CRM par message** - Devis, factures, contacts, tâches via langage naturel
+- **Génération d'images** - Nano Banana (Gemini) intégré
+- **Envoi de fichiers CRM** - PDF, images, documents
+- **Analyse d'images** - Vision IA sur images reçues
+- **Analyse de documents** - PDF avec extraction de texte (PyMuPDF)
+- **Analyse de vidéos** - Extraction de frame et analyse
+- **Transcription audio** - Messages vocaux via Whisper
+
+### Architecture
+- **Service WhatsApp**: Hébergé sur **Railway** (Node.js/Baileys)
+- **Backend CRM**: FastAPI `/api/whatsapp/webhook`
+- **Repo GitHub**: `leosperl-maker/whatsapp-moltbot`
+
+### Variables d'environnement
+```env
+WHATSAPP_SERVICE_URL=https://whatsapp-moltbot-production.up.railway.app
+BACKEND_WEBHOOK_URL=https://crmalphaagency-f7ab9328.svc-us5.zcloud.ws/api/whatsapp/webhook
+```
+
+### Tâches Restantes
+1. **(P0) Mettre à jour `index.js` sur GitHub** - Voir `/app/docs/MISE_A_JOUR_INDEX_JS_RAILWAY.md`
+2. **(P1) API Blog pour n8n** - Modifier `/app/backend/routes/blog.py` selon spec `content_blocks`
+3. **(P1) Résumé quotidien WhatsApp** - Tâche planifiée
+
+### Documentation
+- `/app/docs/MISE_A_JOUR_INDEX_JS_RAILWAY.md` - Guide mise à jour Railway
+- `/app/docs/GUIDE_DOMAINE_PERSONNALISE_MULTILINK.md` - Domaines personnalisés
