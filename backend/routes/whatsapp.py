@@ -277,19 +277,32 @@ async def process_ai_actions(ai_response: str, phone: str) -> dict:
             elif action_type == "CREATE_QUOTE" and len(parts) >= 2:
                 # Get next quote number
                 last_quote = await db.quotes.find_one(sort=[("quote_number", -1)])
-                next_num = (last_quote.get("quote_number", 0) if last_quote else 0) + 1
+                if last_quote and last_quote.get("quote_number"):
+                    try:
+                        next_num = int(last_quote.get("quote_number", 0)) + 1
+                    except:
+                        next_num = 1
+                else:
+                    next_num = 1
+                
+                # Parse amount - extract numbers only
+                amount_str = parts[1].strip() if len(parts) > 1 else "0"
+                try:
+                    amount = float(re.sub(r'[^\d.]', '', amount_str)) if amount_str else 0
+                except:
+                    amount = 0
                 
                 quote_data = {
                     "quote_number": next_num,
                     "client_name": parts[0].strip(),
-                    "total": float(re.sub(r'[^\d.]', '', parts[1])) if len(parts) > 1 else 0,
+                    "total": amount,
                     "description": parts[2].strip() if len(parts) > 2 else "Services",
                     "status": "draft",
                     "created_at": datetime.now(timezone.utc),
                     "source": "whatsapp_moltbot"
                 }
                 inserted = await db.quotes.insert_one(quote_data)
-                logger.info(f"Created quote #{next_num} for {quote_data['client_name']}")
+                logger.info(f"Created quote #{next_num} for {quote_data['client_name']} - {amount}€")
                 
                 # Generate PDF URL if available
                 pdf_url = await generate_quote_pdf(str(inserted.inserted_id))
