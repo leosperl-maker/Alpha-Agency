@@ -367,12 +367,30 @@ async def detect_and_execute_action(message: str, phone: str) -> dict:
             global_discount = float(parsed.get("global_discount", 0))
             total_discount += global_discount
             
-            # Get next quote number
-            last_quote = await db.quotes.find_one(sort=[("quote_number", -1)])
-            next_num = int(last_quote.get("quote_number", 0)) + 1 if last_quote else 1
+            # Get next quote number - check both collections
+            next_num = 1
             
-            # Also check invoices collection for DEV numbers
+            # Check quotes collection
+            last_quote = await db.quotes.find_one(sort=[("quote_number", -1)])
+            if last_quote:
+                qn = last_quote.get("quote_number", 0)
+                if isinstance(qn, int):
+                    next_num = max(next_num, qn + 1)
+                elif isinstance(qn, str) and qn.isdigit():
+                    next_num = max(next_num, int(qn) + 1)
+            
+            # Check invoices collection for DEV numbers
             last_inv_quote = await db.invoices.find_one({"type": "devis"}, sort=[("created_at", -1)])
+            if last_inv_quote:
+                num_str = last_inv_quote.get("number", "")
+                if "DEV-" in num_str:
+                    try:
+                        # Extract number from DEV-2026-XXX
+                        parts = num_str.split("-")
+                        if len(parts) >= 3:
+                            next_num = max(next_num, int(parts[-1]) + 1)
+                    except:
+                        pass
             
             year = datetime.now().year
             quote_number_str = f"DEV-{year}-{str(next_num).zfill(3)}"
