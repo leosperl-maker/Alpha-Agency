@@ -923,9 +923,36 @@ async def whatsapp_webhook(message: IncomingMessage):
     
     # Check if admin
     if await is_admin(message.phone_number):
-        # Process command
-        reply = await process_admin_command(message.phone_number, text_content)
-        return {"reply": reply, "is_admin": True, "transcribed": was_transcribed}
+        # Process command with AI
+        result = await process_admin_command(message.phone_number, text_content)
+        
+        # Handle both old string format and new dict format
+        if isinstance(result, str):
+            reply_text = result
+            document_url = None
+        else:
+            reply_text = result.get("text", "")
+            document_url = result.get("document_url")
+        
+        # If there's a document to send, send it via WhatsApp
+        if document_url:
+            try:
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    await client.post(
+                        f"{WHATSAPP_SERVICE_URL}/send-document",
+                        json={
+                            "phone_number": message.phone_number,
+                            "document_url": document_url,
+                            "filename": "document.pdf",
+                            "caption": "📄 Document demandé"
+                        }
+                    )
+                    logger.info(f"Document sent to {message.phone_number}: {document_url}")
+            except Exception as e:
+                logger.error(f"Error sending document: {e}")
+                reply_text += f"\n\n📎 Document: {document_url}"
+        
+        return {"reply": reply_text, "is_admin": True, "transcribed": was_transcribed, "document_sent": bool(document_url)}
     else:
         # Public response - limited
         return {
