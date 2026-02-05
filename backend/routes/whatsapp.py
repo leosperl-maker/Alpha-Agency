@@ -2266,50 +2266,38 @@ async def whatsapp_webhook(message: IncomingMessage):
         if isinstance(result, str):
             reply_text = result
             document_url = None
+            image_url = None
         else:
             reply_text = result.get("text", "")
             document_url = result.get("document_url")
+            image_url = result.get("image_url")
         
-        # If there's a document to send, send it via WhatsApp
+        # Build response - Railway will handle the actual file sending
+        response = {
+            "reply": reply_text, 
+            "is_admin": True, 
+            "transcribed": was_transcribed
+        }
+        
+        # Add document URL if present (for PDFs, etc.)
         if document_url:
-            try:
-                async with httpx.AsyncClient(timeout=30.0) as client:
-                    # Check if it's an image or a document
-                    is_image = result.get("is_image", False) or any(ext in document_url.lower() for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp'])
-                    
-                    if is_image:
-                        # Send as image
-                        await client.post(
-                            f"{WHATSAPP_SERVICE_URL}/send-image",
-                            json={
-                                "phone_number": message.phone_number,
-                                "image_url": document_url,
-                                "caption": "🖼️ Image générée par MoltBot"
-                            }
-                        )
-                        logger.info(f"Image sent to {message.phone_number}: {document_url}")
-                    else:
-                        # Send as document
-                        # Determine filename based on URL
-                        filename = document_url.split('/')[-1] if '/' in document_url else "document"
-                        if not any(filename.endswith(ext) for ext in ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.json', '.txt']):
-                            filename = "document.pdf"
-                        
-                        await client.post(
-                            f"{WHATSAPP_SERVICE_URL}/send-document",
-                            json={
-                                "phone_number": message.phone_number,
-                                "document_url": document_url,
-                                "filename": filename,
-                                "caption": "📄 Document demandé"
-                            }
-                        )
-                        logger.info(f"Document sent to {message.phone_number}: {document_url}")
-            except Exception as e:
-                logger.error(f"Error sending document/image: {e}")
-                reply_text += f"\n\n📎 Fichier: {document_url}"
+            # Check if it's an image or a document
+            is_image = result.get("is_image", False) or any(ext in document_url.lower() for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp'])
+            
+            if is_image:
+                response["image_url"] = document_url
+                logger.info(f"Image URL added to response: {document_url}")
+            else:
+                response["document_url"] = document_url
+                response["document_name"] = result.get("document_name", "document.pdf")
+                logger.info(f"Document URL added to response: {document_url}")
         
-        return {"reply": reply_text, "is_admin": True, "transcribed": was_transcribed, "document_sent": bool(document_url)}
+        # Add separate image URL if present
+        if image_url and "image_url" not in response:
+            response["image_url"] = image_url
+            logger.info(f"Image URL added to response: {image_url}")
+        
+        return response
     else:
         # Public response - limited
         return {
