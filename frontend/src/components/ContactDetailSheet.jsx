@@ -55,6 +55,8 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
   const [contact, setContact] = useState(null);
   const [history, setHistory] = useState(null);
   const [editorialCalendars, setEditorialCalendars] = useState([]);
+  const [financialData, setFinancialData] = useState(null);
+  const [loadingFinancials, setLoadingFinancials] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -63,6 +65,28 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
       fetchData();
     }
   }, [open, contactId]);
+
+  // Fetch financial data when contact has SIRET
+  useEffect(() => {
+    if (contact?.siret) {
+      fetchFinancialData(contact.siret);
+    }
+  }, [contact?.siret]);
+
+  const fetchFinancialData = async (siret) => {
+    if (!siret) return;
+    setLoadingFinancials(true);
+    try {
+      const response = await api.get(`/societe/company/${siret}`);
+      if (response.data?.success) {
+        setFinancialData(response.data.company);
+      }
+    } catch (error) {
+      console.log("No financial data available for this SIRET");
+    } finally {
+      setLoadingFinancials(false);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
