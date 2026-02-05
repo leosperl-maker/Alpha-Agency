@@ -82,6 +82,7 @@ def get_file_extension(filename: str) -> str:
 async def transcribe_audio_file(file_path: str, language: str = "fr") -> TranscriptionResult:
     """
     Transcribe an audio file using OpenAI Whisper
+    Automatically converts unsupported formats (ogg/opus) to mp3
     """
     if not EMERGENT_LLM_KEY:
         return TranscriptionResult(
@@ -89,12 +90,34 @@ async def transcribe_audio_file(file_path: str, language: str = "fr") -> Transcr
             error="Clé API non configurée"
         )
     
+    converted_path = None
     try:
+        # Check if format needs conversion (ogg/opus from WhatsApp)
+        actual_path = file_path
+        if file_path.endswith('.ogg') or file_path.endswith('.opus'):
+            import subprocess
+            converted_path = file_path.replace('.ogg', '.mp3').replace('.opus', '.mp3')
+            if converted_path == file_path:
+                converted_path = file_path + '.mp3'
+            
+            # Convert using ffmpeg
+            result = subprocess.run(
+                ['ffmpeg', '-y', '-i', file_path, '-acodec', 'libmp3lame', '-q:a', '2', converted_path],
+                capture_output=True,
+                timeout=30
+            )
+            
+            if result.returncode == 0 and os.path.exists(converted_path):
+                actual_path = converted_path
+                logger.info(f"Converted audio from OGG to MP3: {converted_path}")
+            else:
+                logger.warning(f"FFmpeg conversion failed: {result.stderr.decode()}")
+        
         # Initialize STT
         stt = OpenAISpeechToText(api_key=EMERGENT_LLM_KEY)
         
         # Open and transcribe file
-        with open(file_path, "rb") as audio_file:
+        with open(actual_path, "rb") as audio_file:
             response = await stt.transcribe(
                 file=audio_file,
                 model="whisper-1",
@@ -121,6 +144,13 @@ async def transcribe_audio_file(file_path: str, language: str = "fr") -> Transcr
             success=False,
             error=str(e)
         )
+    finally:
+        # Cleanup converted file
+        if converted_path and os.path.exists(converted_path):
+            try:
+                os.unlink(converted_path)
+            except:
+                pass
 
 
 @router.post("/transcribe")
