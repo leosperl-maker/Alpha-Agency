@@ -403,20 +403,23 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                     if service:
                         discount = discounts[i] if i < len(discounts) else 0
                         price = float(service.get('price', 0))
-                        # Use FULL description from service (title + description)
+                        # Use FULL description from service
                         service_title = service.get('title', 'Service')
                         service_desc = service.get('description', '')
-                        # Combine title and description for the quote line item
-                        full_desc = f"{service_title}\n{service_desc}" if service_desc else service_title
+                        
+                        # Structure items correctly for PDF generation
                         items.append({
-                            "description": full_desc,  # Full description in quote
-                            "unit_price": price,
+                            "title": service_title,           # Titre du service
+                            "description": service_desc,      # Description complète
+                            "unit_price": price,              # Prix unitaire
                             "quantity": 1,
                             "discount": discount,
+                            "discountType": "€",              # Type de remise
                             "total": price - discount
                         })
                         subtotal += price
                         total_discount += discount
+                        logger.info(f"Added service: {service_title} - {price}€")
                 
                 if items:
                     # Generate quote number
