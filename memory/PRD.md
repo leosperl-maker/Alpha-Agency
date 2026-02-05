@@ -110,14 +110,18 @@ L'automation peut recevoir une erreur 429 (rate limit) d'Instagram sur certains 
 ## WhatsApp MoltBot - Assistant IA (ClawdBot) ✅
 
 ### Fonctionnalités Implémentées
-- **Chat conversationnel IA** - Répond naturellement comme ChatGPT
+- **Chat conversationnel IA** - Répond naturellement comme ChatGPT avec mémoire de conversation
+- **Services préenregistrés** - Utilise les services du CRM avec prix et description complète ✅ TESTÉ
 - **Création CRM par message** - Devis, factures, contacts, tâches via langage naturel
+- **Questions intelligentes** - Demande les infos manquantes (email, SIRET, etc.) avant création
+- **TVA correcte** - Utilise le taux configuré (8.5%) pas 20%
 - **Génération d'images** - Nano Banana (Gemini) intégré
 - **Envoi de fichiers CRM** - PDF, images, documents
 - **Analyse d'images** - Vision IA sur images reçues ✅ TESTÉ
 - **Analyse de documents** - PDF avec extraction de texte (PyMuPDF) ✅ TESTÉ
 - **Analyse de vidéos** - Extraction de frame et analyse ✅ TESTÉ
 - **Transcription audio** - Messages vocaux via Whisper (OGG→MP3 auto-conversion) ✅ TESTÉ
+- **Recherche de documents** - Cherche par titre et contenu
 
 ### Architecture
 - **Service WhatsApp**: Hébergé sur **Railway** (Node.js/Baileys)
