@@ -152,15 +152,30 @@ async def search_company_by_name(
     
     try:
         # API Societe.com endpoint: entreprise/search
-        data = await societe_api_request("entreprise/search", params)
+        response_data = await societe_api_request("entreprise/search", params)
+        
+        # Handle nested data structure
+        data = response_data.get("data", response_data)
         
         companies = []
-        for item in data.get("resultats", data.get("results", data.get("entreprises", [])))[:10]:
-            companies.append(format_company_from_api(item))
+        for item in data.get("results", [])[:10]:
+            companies.append({
+                "siren": item.get("siren", ""),
+                "siret": item.get("siret", ""),
+                "nom": item.get("nomcommercial", item.get("denomination", "")),
+                "forme_juridique": item.get("forme_juridique", ""),
+                "adresse": "",
+                "code_postal": item.get("cpville", "").split()[0] if item.get("cpville") else "",
+                "ville": " ".join(item.get("cpville", "").split()[1:]) if item.get("cpville") else "",
+                "code_naf": item.get("nafcode", ""),
+                "activite": item.get("naflib", ""),
+                "date_creation": "",
+            })
         
         return {
             "success": True,
             "count": len(companies),
+            "total": data.get("nbtot", len(companies)),
             "companies": companies
         }
         
