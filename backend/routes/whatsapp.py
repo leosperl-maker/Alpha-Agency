@@ -147,7 +147,9 @@ async def intelligent_assistant(message: str, phone: str) -> dict:
     
     # Recent contacts
     contacts = await db.contacts.find().sort("created_at", -1).limit(10).to_list(10)
-    contacts_text = "\n".join([f"- {c.get('first_name', '')} {c.get('last_name', '')} - {c.get('email', 'pas d\'email')} - {c.get('phone', 'pas de tel')}" for c in contacts]) if contacts else "Aucun contact"
+    no_email = "pas email"
+    no_tel = "pas de tel"
+    contacts_text = "\n".join([f"- {c.get('first_name', '')} {c.get('last_name', '')} - {c.get('email', no_email)} - {c.get('phone', no_tel)}" for c in contacts]) if contacts else "Aucun contact"
     
     # Recent quotes
     quotes = await db.quotes.find().sort("created_at", -1).limit(5).to_list(5)
