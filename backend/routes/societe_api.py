@@ -423,25 +423,26 @@ async def search_company_for_whatsapp(query: str, search_type: str = "auto") -> 
             clean_id = query.replace(" ", "").replace(".", "")
             params = {"siren": clean_id} if len(clean_id) == 9 else {"siret": clean_id}
             
-            data = await societe_api_request("entreprise", params)
+            response_data = await societe_api_request("entreprise", params)
+            data = response_data.get("data", response_data)
             
             company_data = data.get("entreprise", data)
             if isinstance(company_data, list) and len(company_data) > 0:
                 company_data = company_data[0]
             
             if company_data and not data.get("error"):
-                company = format_company_from_api(company_data)
-                bilans = format_financial_data(company_data.get("bilans", []))
-                
                 return {
                     "success": True,
                     "type": "company_details",
-                    "company": company,
-                    "bilans": [b.dict() for b in bilans[:3]],
-                    "dirigeants": [
-                        f"{d.get('prenom', '')} {d.get('nom', '')} ({d.get('fonction', '')})"
-                        for d in company_data.get("dirigeants", [])[:3]
-                    ]
+                    "company": {
+                        "nom": company_data.get("denomination", company_data.get("nom", "")),
+                        "siren": company_data.get("siren", ""),
+                        "siret": company_data.get("siret", ""),
+                        "ville": company_data.get("cpville", ""),
+                        "activite": company_data.get("naflib", "")
+                    },
+                    "bilans": [],
+                    "dirigeants": []
                 }
             else:
                 return {"success": False, "error": "Entreprise non trouvée"}
@@ -454,18 +455,18 @@ async def search_company_for_whatsapp(query: str, search_type: str = "auto") -> 
             else:
                 params = {"nom": query}
             
-            data = await societe_api_request("dirigeant/search", params)
+            response_data = await societe_api_request("dirigeant/search", params)
+            data = response_data.get("data", response_data)
             
-            results = data.get("resultats", data.get("results", data.get("dirigeants", [])))[:5]
+            results = data.get("results", [])[:5]
             if results:
                 companies = []
                 for item in results:
-                    company_info = item.get("entreprise", item)
                     companies.append({
-                        "nom": company_info.get("denomination", company_info.get("nom", "")),
-                        "siren": company_info.get("siren", ""),
+                        "nom": item.get("nomcommercial", item.get("denomination", item.get("entreprise", ""))),
+                        "siren": item.get("siren", ""),
                         "fonction": item.get("fonction", item.get("qualite", "")),
-                        "ville": company_info.get("siege", {}).get("ville", company_info.get("ville", ""))
+                        "ville": " ".join(item.get("cpville", "").split()[1:]) if item.get("cpville") else ""
                     })
                 
                 return {
@@ -478,23 +479,25 @@ async def search_company_for_whatsapp(query: str, search_type: str = "auto") -> 
                 return {"success": False, "error": f"Aucune entreprise trouvée pour {query}"}
         
         else:  # company name search
-            data = await societe_api_request("entreprise/search", {"nom": query})
+            response_data = await societe_api_request("entreprise/search", {"nom": query})
+            data = response_data.get("data", response_data)
             
-            results = data.get("resultats", data.get("results", data.get("entreprises", [])))[:5]
+            results = data.get("results", [])[:5]
             if results:
                 companies = []
                 for item in results:
                     companies.append({
-                        "nom": item.get("denomination", item.get("nom", "")),
+                        "nom": item.get("nomcommercial", item.get("denomination", "")),
                         "siren": item.get("siren", ""),
-                        "ville": item.get("siege", {}).get("ville", item.get("ville", "")),
-                        "activite": item.get("activite", item.get("libelle_naf", ""))[:50]
+                        "ville": " ".join(item.get("cpville", "").split()[1:]) if item.get("cpville") else "",
+                        "activite": item.get("naflib", "")[:50]
                     })
                 
                 return {
                     "success": True,
                     "type": "company_search",
                     "query": query,
+                    "count": data.get("nbtot", len(results)),
                     "companies": companies
                 }
             else:
