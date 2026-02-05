@@ -59,7 +59,10 @@ const ContactsPage = () => {
     note: "",
     infos_sup: "",
     status: "nouveau",
-    score: "tiède"
+    score: "tiède",
+    siret: "",
+    company_address: "",
+    company_activite: ""
   });
 
   const fetchContacts = async () => {
