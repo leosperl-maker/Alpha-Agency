@@ -406,13 +406,17 @@ async def search_company_for_whatsapp(query: str, search_type: str = "auto") -> 
         if search_type == "siret":
             # Direct SIRET/SIREN lookup
             clean_id = query.replace(" ", "").replace(".", "")
-            endpoint = "entreprises/siren" if len(clean_id) == 9 else "entreprises/siret"
+            params = {"siren": clean_id} if len(clean_id) == 9 else {"siret": clean_id}
             
-            data = await societe_api_request(f"{endpoint}/{clean_id}")
+            data = await societe_api_request("entreprise", params)
             
-            if data and not data.get("error"):
-                company = format_company_from_api(data)
-                bilans = format_financial_data(data.get("bilans", []))
+            company_data = data.get("entreprise", data)
+            if isinstance(company_data, list) and len(company_data) > 0:
+                company_data = company_data[0]
+            
+            if company_data and not data.get("error"):
+                company = format_company_from_api(company_data)
+                bilans = format_financial_data(company_data.get("bilans", []))
                 
                 return {
                     "success": True,
@@ -421,7 +425,7 @@ async def search_company_for_whatsapp(query: str, search_type: str = "auto") -> 
                     "bilans": [b.dict() for b in bilans[:3]],
                     "dirigeants": [
                         f"{d.get('prenom', '')} {d.get('nom', '')} ({d.get('fonction', '')})"
-                        for d in data.get("dirigeants", [])[:3]
+                        for d in company_data.get("dirigeants", [])[:3]
                     ]
                 }
             else:
@@ -435,9 +439,9 @@ async def search_company_for_whatsapp(query: str, search_type: str = "auto") -> 
             else:
                 params = {"nom": query}
             
-            data = await societe_api_request("dirigeants/recherche", params)
+            data = await societe_api_request("dirigeant/search", params)
             
-            results = data.get("resultats", data.get("results", []))[:5]
+            results = data.get("resultats", data.get("results", data.get("dirigeants", [])))[:5]
             if results:
                 companies = []
                 for item in results:
@@ -459,9 +463,9 @@ async def search_company_for_whatsapp(query: str, search_type: str = "auto") -> 
                 return {"success": False, "error": f"Aucune entreprise trouvée pour {query}"}
         
         else:  # company name search
-            data = await societe_api_request("entreprises/recherche", {"q": query})
+            data = await societe_api_request("entreprise/search", {"nom": query})
             
-            results = data.get("resultats", data.get("results", []))[:5]
+            results = data.get("resultats", data.get("results", data.get("entreprises", [])))[:5]
             if results:
                 companies = []
                 for item in results:
