@@ -418,10 +418,11 @@ const WhatsAppConfigPage = () => {
                 Scannez ce QR code avec WhatsApp
               </p>
               <div className="bg-white p-4 rounded-xl inline-block">
-                <img 
-                  src={qrCode} 
-                  alt="QR Code WhatsApp" 
-                  className="w-48 h-48"
+                <QRCodeSVG 
+                  value={qrCode} 
+                  size={192}
+                  level="M"
+                  includeMargin={false}
                 />
               </div>
               <p className="text-white/50 text-sm mt-4">
