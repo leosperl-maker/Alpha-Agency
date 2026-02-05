@@ -6644,6 +6644,10 @@ app.include_router(notifications_router, prefix="/api", tags=["notifications"])
 from routes.analytics_dashboard import router as analytics_dashboard_router
 app.include_router(analytics_dashboard_router, prefix="/api", tags=["analytics-dashboard"])
 
+# Google Drive Integration
+from routes.google_drive import router as google_drive_router
+app.include_router(google_drive_router, prefix="/api", tags=["google-drive"])
+
 # MoltBot Scheduler for automated briefings
 from routes.scheduler import moltbot_scheduler
 from whatsapp_launcher import start_whatsapp_service, stop_whatsapp_service, ensure_whatsapp_running
