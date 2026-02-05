@@ -146,16 +146,16 @@ async def search_company_by_name(
     current_user: dict = Depends(get_current_user)
 ):
     """Search companies by name"""
-    params = {"q": q}
+    params = {"nom": q}
     if ville:
         params["ville"] = ville
     
     try:
-        # Try Societe.com API
-        data = await societe_api_request("entreprises/recherche", params)
+        # API Societe.com endpoint: entreprise/search
+        data = await societe_api_request("entreprise/search", params)
         
         companies = []
-        for item in data.get("resultats", data.get("results", []))[:10]:
+        for item in data.get("resultats", data.get("results", data.get("entreprises", [])))[:10]:
             companies.append(format_company_from_api(item))
         
         return {
