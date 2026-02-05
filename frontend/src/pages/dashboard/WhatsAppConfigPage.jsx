@@ -442,12 +442,19 @@ const WhatsAppConfigPage = () => {
                 QR code en cours de génération...
               </p>
               <Button 
-                onClick={loadStatus}
-                className="bg-green-600 hover:bg-green-500"
+                onClick={() => {
+                  console.log("Actualiser clicked");
+                  loadStatus();
+                  toast.info("Actualisation en cours...");
+                }}
+                className="bg-green-600 hover:bg-green-500 cursor-pointer z-50 relative"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Actualiser
               </Button>
+              <p className="text-white/40 text-xs mt-4">
+                Si le QR code n'apparaît pas, allez sur Railway et cliquez "Redeploy"
+              </p>
             </div>
           )}
         </div>
