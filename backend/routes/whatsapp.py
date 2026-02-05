@@ -215,17 +215,28 @@ Quand l'utilisateur demande de CRÉER quelque chose, tu DOIS TOUJOURS inclure le
 - Tu es capable de TOUT : répondre aux questions, donner des conseils business, analyser les données CRM"""
 
     try:
+        # First, detect intent and execute actions BEFORE AI response
+        action_result = await detect_and_execute_action(message, phone)
+        
         chat = LlmChat(
             api_key=EMERGENT_KEY,
             session_id=f"whatsapp_{phone}_{datetime.now().strftime('%Y%m%d')}",
             system_message=system_prompt
         )
         
-        user_msg = UserMessage(text=message)
+        # Add action context if an action was executed
+        enhanced_message = message
+        if action_result.get("action_executed"):
+            enhanced_message = f"{message}\n\n[SYSTÈME: Action exécutée avec succès: {action_result.get('action_description')}]"
+        
+        user_msg = UserMessage(text=enhanced_message)
         ai_response = await chat.send_message(user_msg)
         
-        # Process any actions in the response
-        result = await process_ai_actions(ai_response, phone)
+        result = {"text": ai_response}
+        
+        # Add document if one was generated
+        if action_result.get("document_url"):
+            result["document_url"] = action_result["document_url"]
         
         return result
         
@@ -233,6 +244,137 @@ Quand l'utilisateur demande de CRÉER quelque chose, tu DOIS TOUJOURS inclure le
         logger.error(f"AI assistant error: {e}")
         # Fallback to basic response
         return {"text": f"Je suis MoltBot. Comment puis-je vous aider?\n\n📊 Stats: {stats['revenue']}€ CA\n📋 {stats['pending_tasks']} tâches en cours\n\nTapez votre demande en langage naturel !"}
+
+
+async def detect_and_execute_action(message: str, phone: str) -> dict:
+    """Detect intent from message and execute CRM actions."""
+    import re
+    
+    msg_lower = message.lower()
+    result = {"action_executed": False}
+    
+    # Detect QUOTE creation
+    if any(x in msg_lower for x in ["crée un devis", "créer un devis", "faire un devis", "devis de", "devis pour"]):
+        # Extract amount
+        amount_match = re.search(r'(\d+(?:[.,]\d+)?)\s*(?:€|euros?|eur)', msg_lower)
+        amount = float(amount_match.group(1).replace(',', '.')) if amount_match else 0
+        
+        # Extract client name - look for "pour [Client]"
+        client_match = re.search(r'pour\s+(?:la\s+)?(?:société\s+)?(?:l\'entreprise\s+)?([A-Za-zÀ-ÿ\s]+?)(?:\s+pour|\s+d\'un|\s*$|,)', message, re.IGNORECASE)
+        client_name = client_match.group(1).strip() if client_match else "Client"
+        
+        # Extract description - everything after the client name
+        desc_match = re.search(r'pour\s+(?:la\s+)?(?:création|refonte|développement|réalisation|conception|une?)\s+(.+?)(?:\.|$)', message, re.IGNORECASE)
+        description = desc_match.group(1).strip() if desc_match else "Services"
+        
+        # Create the quote
+        last_quote = await db.quotes.find_one(sort=[("quote_number", -1)])
+        next_num = 1
+        if last_quote:
+            try:
+                next_num = int(last_quote.get("quote_number", 0)) + 1
+            except:
+                next_num = 1
+        
+        quote_data = {
+            "quote_number": next_num,
+            "client_name": client_name,
+            "total": amount,
+            "description": description,
+            "status": "draft",
+            "created_at": datetime.now(timezone.utc),
+            "source": "whatsapp_moltbot"
+        }
+        await db.quotes.insert_one(quote_data)
+        logger.info(f"Created quote #{next_num} for {client_name} - {amount}€")
+        
+        result["action_executed"] = True
+        result["action_description"] = f"Devis #{next_num} créé: {amount}€ pour {client_name} - {description}"
+        
+    # Detect INVOICE creation
+    elif any(x in msg_lower for x in ["crée une facture", "créer une facture", "faire une facture", "facture de", "facture pour"]):
+        amount_match = re.search(r'(\d+(?:[.,]\d+)?)\s*(?:€|euros?|eur)', msg_lower)
+        amount = float(amount_match.group(1).replace(',', '.')) if amount_match else 0
+        
+        client_match = re.search(r'pour\s+(?:la\s+)?(?:société\s+)?([A-Za-zÀ-ÿ\s]+?)(?:\s+pour|\s+d\'un|\s*$|,)', message, re.IGNORECASE)
+        client_name = client_match.group(1).strip() if client_match else "Client"
+        
+        desc_match = re.search(r'pour\s+(?:la\s+)?(?:prestation|service|travaux)\s+(.+?)(?:\.|$)', message, re.IGNORECASE)
+        description = desc_match.group(1).strip() if desc_match else "Services"
+        
+        last_inv = await db.invoices.find_one(sort=[("invoice_number", -1)])
+        next_num = 1
+        if last_inv:
+            try:
+                next_num = int(last_inv.get("invoice_number", 0)) + 1
+            except:
+                next_num = 1
+        
+        invoice_data = {
+            "invoice_number": next_num,
+            "client_name": client_name,
+            "total": amount,
+            "description": description,
+            "status": "pending",
+            "created_at": datetime.now(timezone.utc),
+            "source": "whatsapp_moltbot"
+        }
+        await db.invoices.insert_one(invoice_data)
+        logger.info(f"Created invoice #{next_num} for {client_name} - {amount}€")
+        
+        result["action_executed"] = True
+        result["action_description"] = f"Facture #{next_num} créée: {amount}€ pour {client_name}"
+        
+    # Detect CONTACT creation
+    elif any(x in msg_lower for x in ["crée un contact", "créer un contact", "ajoute un contact", "nouveau contact"]):
+        # Extract name
+        name_match = re.search(r'(?:pour|contact)\s+([A-Za-zÀ-ÿ]+)\s+([A-Za-zÀ-ÿ]+)', message, re.IGNORECASE)
+        first_name = name_match.group(1) if name_match else "Nouveau"
+        last_name = name_match.group(2) if name_match else "Contact"
+        
+        # Extract email
+        email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', message)
+        email = email_match.group(0) if email_match else ""
+        
+        # Extract phone
+        phone_match = re.search(r'(?:tel|téléphone|tél|0)\s*:?\s*([\d\s\-\.]+)', message, re.IGNORECASE)
+        contact_phone = phone_match.group(1).strip() if phone_match else ""
+        
+        contact_data = {
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "phone": contact_phone,
+            "created_at": datetime.now(timezone.utc),
+            "source": "whatsapp_moltbot"
+        }
+        await db.contacts.insert_one(contact_data)
+        logger.info(f"Created contact: {first_name} {last_name}")
+        
+        result["action_executed"] = True
+        result["action_description"] = f"Contact créé: {first_name} {last_name}"
+        
+    # Detect TASK creation
+    elif any(x in msg_lower for x in ["crée une tâche", "créer une tâche", "ajoute une tâche", "nouvelle tâche", "rappelle-moi"]):
+        # Extract task title - everything after "tâche" or "rappelle-moi"
+        task_match = re.search(r'(?:tâche|rappelle-moi)\s*:?\s*(.+?)(?:\.|$)', message, re.IGNORECASE)
+        title = task_match.group(1).strip() if task_match else message[:50]
+        
+        task_data = {
+            "title": title,
+            "description": "",
+            "status": "todo",
+            "priority": "medium",
+            "created_at": datetime.now(timezone.utc),
+            "source": "whatsapp_moltbot"
+        }
+        await db.tasks.insert_one(task_data)
+        logger.info(f"Created task: {title}")
+        
+        result["action_executed"] = True
+        result["action_description"] = f"Tâche créée: {title}"
+    
+    return result
 
 
 async def process_ai_actions(ai_response: str, phone: str) -> dict:
