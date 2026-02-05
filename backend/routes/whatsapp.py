@@ -551,6 +551,46 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                 except Exception as drive_err:
                     logger.error(f"Drive import error: {drive_err}")
                     result["drive_error"] = str(drive_err)
+            
+            elif action_type == "SEARCH_COMPANY":
+                # Search company via Societe.com
+                # Format: query:type (type = dirigeant, company, siret)
+                query = parts[0] if len(parts) > 0 else ""
+                search_type = parts[1] if len(parts) > 1 else "auto"
+                
+                try:
+                    from routes.societe_api import search_company_for_whatsapp
+                    
+                    search_result = await search_company_for_whatsapp(query, search_type)
+                    
+                    if search_result.get("success"):
+                        result["company_search"] = search_result
+                        logger.info(f"Company search for '{query}': {search_result.get('type')}")
+                    else:
+                        result["company_error"] = search_result.get("error", "Erreur recherche")
+                        
+                except Exception as search_err:
+                    logger.error(f"Company search error: {search_err}")
+                    result["company_error"] = str(search_err)
+            
+            elif action_type == "COMPANY_FINANCIALS":
+                # Get company financial data
+                siret_siren = parts[0] if parts else ""
+                
+                try:
+                    from routes.societe_api import get_company_financial_summary_for_whatsapp
+                    
+                    financial_result = await get_company_financial_summary_for_whatsapp(siret_siren)
+                    
+                    if financial_result.get("success"):
+                        result["financials"] = financial_result
+                        logger.info(f"Financial data retrieved for {siret_siren}")
+                    else:
+                        result["financials_error"] = financial_result.get("error", "Erreur données financières")
+                        
+                except Exception as fin_err:
+                    logger.error(f"Financials error: {fin_err}")
+                    result["financials_error"] = str(fin_err)
                     
         except Exception as e:
             logger.error(f"Error processing action {action_type}: {e}")
