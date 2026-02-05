@@ -184,11 +184,11 @@ async def search_company_by_person(
         params["ville"] = request.ville
     
     try:
-        # Search dirigeants
-        data = await societe_api_request("dirigeants/recherche", params)
+        # API Societe.com endpoint: dirigeant/search
+        data = await societe_api_request("dirigeant/search", params)
         
         companies = []
-        for item in data.get("resultats", data.get("results", []))[:10]:
+        for item in data.get("resultats", data.get("results", data.get("dirigeants", [])))[:10]:
             # Each result links to companies
             company_info = item.get("entreprise", item)
             formatted = format_company_from_api(company_info)
