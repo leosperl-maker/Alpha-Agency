@@ -247,6 +247,67 @@ Tu peux faire TOUT ça automatiquement (je le fais dès que tu le demandes):
         return {"text": f"Je suis MoltBot. Comment puis-je vous aider?\n\n📊 Stats: {stats['revenue']}€ CA\n📋 {stats['pending_tasks']} tâches en cours\n\nTapez votre demande en langage naturel !"}
 
 
+async def parse_complex_quote_with_ai(message: str) -> dict:
+    """
+    Use AI to parse complex quote requests with multiple lines, discounts, contacts.
+    Returns structured data for quote creation.
+    """
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    import json
+    
+    EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+    
+    try:
+        chat = LlmChat(
+            api_key=EMERGENT_KEY,
+            session_id=f"quote_parser_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            system_message="""Tu es un parser JSON pour les demandes de devis CRM. 
+Analyse la demande et retourne UNIQUEMENT un JSON valide (sans markdown, sans explication).
+
+Format attendu:
+{
+  "client": {
+    "name": "Nom complet ou entreprise",
+    "company": "Nom entreprise si mentionné",
+    "is_new_contact": true/false
+  },
+  "items": [
+    {
+      "description": "Description du service",
+      "unit_price": 0,
+      "quantity": 1,
+      "discount": 0
+    }
+  ],
+  "global_discount": 0,
+  "notes": "Notes additionnelles"
+}
+
+Règles:
+- Si le prix n'est pas mentionné, mets unit_price à 0 (sera défini plus tard)
+- discount est le montant de remise en euros sur la ligne
+- is_new_contact = true si "nouveau contact" ou "nouveau client" mentionné
+- Extrais TOUTES les lignes de service mentionnées"""
+        )
+        
+        msg = UserMessage(text=f"Parse cette demande de devis:\n{message}")
+        response = await chat.send_message(msg)
+        
+        # Clean response and parse JSON
+        json_str = response.strip()
+        if json_str.startswith("```"):
+            json_str = json_str.split("```")[1]
+            if json_str.startswith("json"):
+                json_str = json_str[4:]
+        json_str = json_str.strip()
+        
+        return json.loads(json_str)
+        
+    except Exception as e:
+        logger.error(f"AI quote parsing error: {e}")
+        return None
+
+
 async def detect_and_execute_action(message: str, phone: str) -> dict:
     """Detect intent from message and execute CRM actions."""
     import re
@@ -254,7 +315,109 @@ async def detect_and_execute_action(message: str, phone: str) -> dict:
     msg_lower = message.lower()
     result = {"action_executed": False}
     
-    # Detect QUOTE creation
+    # Detect COMPLEX QUOTE creation (multiple lines, discounts, new contact)
+    is_complex_quote = any(x in msg_lower for x in ["crée un devis", "créer un devis", "faire un devis", "devis pour"]) and \
+                       any(x in msg_lower for x in ["remise", "ligne", "services", "et la", "et le", "nouveau contact", "ajoute"])
+    
+    if is_complex_quote:
+        # Use AI to parse complex quote
+        parsed = await parse_complex_quote_with_ai(message)
+        
+        if parsed:
+            # Create contact if needed
+            contact_id = None
+            client_name = parsed.get("client", {}).get("name", "Client")
+            company = parsed.get("client", {}).get("company", "")
+            
+            if parsed.get("client", {}).get("is_new_contact"):
+                # Create new contact
+                contact_data = {
+                    "id": str(uuid.uuid4()),
+                    "first_name": client_name.split()[0] if client_name else "Nouveau",
+                    "last_name": " ".join(client_name.split()[1:]) if len(client_name.split()) > 1 else "Contact",
+                    "company": company,
+                    "created_at": datetime.now(timezone.utc),
+                    "source": "whatsapp_moltbot"
+                }
+                await db.contacts.insert_one(contact_data)
+                contact_id = contact_data["id"]
+                logger.info(f"Created contact: {client_name}")
+            
+            # Build quote items
+            items = []
+            subtotal = 0
+            total_discount = 0
+            
+            for item in parsed.get("items", []):
+                unit_price = float(item.get("unit_price", 0))
+                quantity = int(item.get("quantity", 1))
+                discount = float(item.get("discount", 0))
+                line_total = (unit_price * quantity) - discount
+                
+                items.append({
+                    "description": item.get("description", "Service"),
+                    "unit_price": unit_price,
+                    "quantity": quantity,
+                    "discount": discount,
+                    "total": line_total
+                })
+                subtotal += unit_price * quantity
+                total_discount += discount
+            
+            global_discount = float(parsed.get("global_discount", 0))
+            total_discount += global_discount
+            
+            # Get next quote number
+            last_quote = await db.quotes.find_one(sort=[("quote_number", -1)])
+            next_num = int(last_quote.get("quote_number", 0)) + 1 if last_quote else 1
+            
+            # Also check invoices collection for DEV numbers
+            last_inv_quote = await db.invoices.find_one({"type": "devis"}, sort=[("created_at", -1)])
+            
+            year = datetime.now().year
+            quote_number_str = f"DEV-{year}-{str(next_num).zfill(3)}"
+            
+            # Create quote
+            quote_data = {
+                "id": str(uuid.uuid4()),
+                "quote_number": next_num,
+                "number": quote_number_str,
+                "type": "devis",
+                "client_name": f"{client_name}" + (f" ({company})" if company else ""),
+                "contact_id": contact_id,
+                "items": items,
+                "subtotal": subtotal,
+                "discount": total_discount,
+                "tax": (subtotal - total_discount) * 0.20,
+                "total": (subtotal - total_discount) * 1.20,
+                "status": "draft",
+                "notes": parsed.get("notes", f"Créé via WhatsApp MoltBot"),
+                "created_at": datetime.now(timezone.utc),
+                "source": "whatsapp_moltbot"
+            }
+            
+            await db.invoices.insert_one(quote_data)
+            logger.info(f"Created complex quote {quote_number_str} for {client_name}")
+            
+            # Build response
+            items_desc = "\n".join([f"  • {it['description']}" + (f" (-{it['discount']}€)" if it['discount'] > 0 else "") for it in items])
+            
+            result["action_executed"] = True
+            result["action_description"] = f"""Devis {quote_number_str} créé !
+👤 Client: {client_name}{' (NOUVEAU CONTACT)' if contact_id else ''}
+🏢 Entreprise: {company if company else 'N/A'}
+
+📋 Services:
+{items_desc}
+
+💰 Sous-total: {subtotal:.2f}€
+🏷️ Remises: -{total_discount:.2f}€
+📊 Total HT: {subtotal - total_discount:.2f}€
+💶 Total TTC: {quote_data['total']:.2f}€"""
+            
+            return result
+    
+    # Detect SIMPLE QUOTE creation
     if any(x in msg_lower for x in ["crée un devis", "créer un devis", "faire un devis", "devis de", "devis pour"]):
         # Extract amount
         amount_match = re.search(r'(\d+(?:[.,]\d+)?)\s*(?:€|euros?|eur)', msg_lower)
