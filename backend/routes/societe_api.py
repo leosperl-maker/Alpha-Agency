@@ -75,18 +75,19 @@ async def societe_api_request(endpoint: str, params: dict = None) -> dict:
     if not SOCIETE_API_KEY:
         raise HTTPException(status_code=500, detail="Clé API Societe.com non configurée")
     
-    headers = {
-        "Authorization": f"Bearer {SOCIETE_API_KEY}",
-        "Accept": "application/json"
-    }
+    # Add token to params
+    if params is None:
+        params = {}
+    params["token"] = SOCIETE_API_KEY
     
     async with httpx.AsyncClient(timeout=30.0) as client:
         try:
             response = await client.get(
                 f"{SOCIETE_BASE_URL}/{endpoint}",
-                headers=headers,
                 params=params
             )
+            
+            logger.info(f"Societe.com API: {response.status_code} for {endpoint}")
             
             if response.status_code == 200:
                 return response.json()
