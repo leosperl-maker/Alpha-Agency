@@ -930,12 +930,6 @@ async def generate_invoice_pdf(invoice_id: str) -> str:
     except Exception as e:
         logger.error(f"Invoice PDF error: {e}")
         return None
-            
-        return response
-        
-    except Exception as e:
-        logger.error(f"AI response error: {e}")
-        raise
 
 async def get_crm_stats() -> Dict:
     """Get CRM stats for WhatsApp response"""
