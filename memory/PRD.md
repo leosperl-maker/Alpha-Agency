@@ -3,7 +3,7 @@
 ## Vue d'ensemble
 CRM complet avec assistant IA MoltBot, intégrations multiples, et analytics avancées.
 
-**Dernière mise à jour**: 4 Février 2026
+**Dernière mise à jour**: 5 Février 2026
 
 ## Fonctionnalités Implémentées
 
