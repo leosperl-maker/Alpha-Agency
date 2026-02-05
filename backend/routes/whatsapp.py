@@ -46,6 +46,9 @@ class IncomingMessage(BaseModel):
     audio_url: Optional[str] = None
     audio_path: Optional[str] = None  # Local path for downloaded audio
     media_url: Optional[str] = None
+    media_base64: Optional[str] = None  # Base64 encoded media (image, document, audio, video)
+    media_type: Optional[str] = None  # MIME type of the media
+    file_name: Optional[str] = None  # Original filename for documents
 
 class OutgoingMessage(BaseModel):
     phone_number: str
