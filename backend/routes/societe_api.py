@@ -223,20 +223,28 @@ async def get_company_details(
     clean_id = siret_or_siren.replace(" ", "").replace(".", "")
     
     # Determine if SIREN (9 digits) or SIRET (14 digits)
-    endpoint = "entreprises/siren" if len(clean_id) == 9 else "entreprises/siret"
+    if len(clean_id) == 9:
+        params = {"siren": clean_id}
+    else:
+        params = {"siret": clean_id}
     
     try:
-        data = await societe_api_request(f"{endpoint}/{clean_id}")
+        data = await societe_api_request("entreprise", params)
         
         if not data or data.get("error"):
             raise HTTPException(status_code=404, detail="Entreprise non trouvée")
         
+        # The response might be a single company or list
+        company_data = data.get("entreprise", data)
+        if isinstance(company_data, list) and len(company_data) > 0:
+            company_data = company_data[0]
+        
         # Format basic company info
-        company = format_company_from_api(data)
+        company = format_company_from_api(company_data)
         
         # Get dirigeants
         dirigeants = []
-        for d in data.get("dirigeants", []):
+        for d in company_data.get("dirigeants", []):
             dirigeants.append({
                 "nom": f"{d.get('prenom', '')} {d.get('nom', '')}".strip(),
                 "fonction": d.get("fonction", d.get("qualite", "")),
@@ -244,7 +252,7 @@ async def get_company_details(
             })
         
         # Get financial data (bilans)
-        bilans_raw = data.get("bilans", data.get("comptes", []))
+        bilans_raw = company_data.get("bilans", company_data.get("comptes", []))
         bilans = format_financial_data(bilans_raw)
         
         return {
@@ -253,7 +261,7 @@ async def get_company_details(
                 **company,
                 "dirigeants": dirigeants,
                 "bilans": [b.dict() for b in bilans],
-                "etablissements": data.get("nombre_etablissements", 1)
+                "etablissements": company_data.get("nombre_etablissements", 1)
             }
         }
         
