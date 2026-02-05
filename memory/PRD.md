@@ -131,7 +131,7 @@ BACKEND_WEBHOOK_URL=https://crmalphaagency-f7ab9328.svc-us5.zcloud.ws/api/whatsa
 ```
 
 ### Tâches Restantes
-1. **(P0) Mettre à jour `index.js` sur GitHub** - Voir `/app/docs/MISE_A_JOUR_INDEX_JS_RAILWAY.md`
+1. **(P0) ⚠️ Mettre à jour `index.js` sur GitHub** - Voir `/app/docs/MISE_A_JOUR_INDEX_JS_RAILWAY.md` - **REQUIS pour que Railway capture les médias**
 2. **(P1) API Blog pour n8n** - Modifier `/app/backend/routes/blog.py` selon spec `content_blocks`
 3. **(P1) Résumé quotidien WhatsApp** - Tâche planifiée
 
