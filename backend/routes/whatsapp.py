@@ -1355,34 +1355,65 @@ async def whatsapp_webhook(message: IncomingMessage):
     """
     Webhook for incoming WhatsApp messages
     Processes messages from admin users for CRM control
-    Supports text and audio messages
+    Supports text, audio, images, and documents
     """
-    logger.info(f"WhatsApp message from {message.phone_number}: type={message.message_type}, text={message.message[:50] if message.message else 'audio/media'}")
+    logger.info(f"WhatsApp message from {message.phone_number}: type={message.message_type}, text={message.message[:50] if message.message else 'media'}, has_media={bool(message.media_base64)}")
     
     # Process text from message
     text_content = message.message
     was_transcribed = False
+    media_analysis = None
     
-    # If audio message, transcribe it first
-    if message.message_type == "audio":
+    # If audio message with base64 data, transcribe it
+    if message.message_type == "audio" and message.media_base64:
+        from routes.audio_transcription import transcribe_for_moltbot
+        import tempfile
+        import base64
+        
+        try:
+            # Save base64 audio to temp file
+            audio_bytes = base64.b64decode(message.media_base64)
+            ext = "ogg" if "ogg" in (message.media_type or "") else "mp3"
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix=f".{ext}") as temp_file:
+                temp_file.write(audio_bytes)
+                temp_path = temp_file.name
+            
+            transcribed_text = await transcribe_for_moltbot(file_path=temp_path)
+            
+            # Clean up temp file
+            try:
+                import os
+                if os.path.exists(temp_path):
+                    os.unlink(temp_path)
+            except:
+                pass
+            
+            if transcribed_text:
+                text_content = transcribed_text
+                was_transcribed = True
+                logger.info(f"Transcribed: {transcribed_text[:100]}")
+            else:
+                text_content = "[Audio non reconnu]"
+        except Exception as e:
+            logger.error(f"Audio transcription error: {e}")
+            text_content = "[Erreur transcription audio]"
+    
+    # If audio message without base64, try URL methods
+    elif message.message_type == "audio":
         from routes.audio_transcription import transcribe_for_moltbot
         
         transcribed_text = None
         
-        # Try local file path first (from Node service)
         if message.audio_path:
             logger.info(f"Transcribing audio from local path: {message.audio_path}")
             transcribed_text = await transcribe_for_moltbot(file_path=message.audio_path)
-            
-            # Clean up temp file after transcription
             try:
                 import os
                 if os.path.exists(message.audio_path):
                     os.unlink(message.audio_path)
-            except Exception as e:
-                logger.warning(f"Could not delete temp audio file: {e}")
-        
-        # Fall back to URL if available
+            except:
+                pass
         elif message.audio_url:
             logger.info(f"Transcribing audio from URL: {message.audio_url}")
             transcribed_text = await transcribe_for_moltbot(url=message.audio_url)
@@ -1393,6 +1424,35 @@ async def whatsapp_webhook(message: IncomingMessage):
             logger.info(f"Transcribed: {transcribed_text[:100]}")
         else:
             text_content = "[Audio non reconnu]"
+    
+    # If image message, analyze it
+    elif message.message_type == "image" and message.media_base64:
+        prompt = message.message if message.message else "Décris cette image en détail et dis-moi ce que tu vois"
+        
+        # Check if user wants to generate a new image based on this reference
+        msg_lower = (message.message or "").lower()
+        if any(x in msg_lower for x in ["modifie", "transforme", "change", "génère", "crée", "édite", "refais"]):
+            # User wants to edit/transform the image
+            logger.info(f"Image edit request with reference: {prompt}")
+            media_analysis = f"[IMAGE_EDIT_REQUEST:{message.media_base64}:{prompt}]"
+            text_content = prompt or "Transforme cette image"
+        else:
+            # User wants analysis
+            logger.info(f"Analyzing image with prompt: {prompt}")
+            media_analysis = await analyze_image(message.media_base64, prompt)
+            text_content = f"[Image reçue] {message.message}" if message.message else "[Image reçue - analyse demandée]"
+    
+    # If document message, analyze it
+    elif message.message_type == "document" and message.media_base64:
+        prompt = message.message if message.message else "Analyse ce document"
+        logger.info(f"Analyzing document: {message.file_name}")
+        media_analysis = await analyze_document(
+            message.media_base64, 
+            message.media_type or "application/octet-stream",
+            message.file_name or "document",
+            prompt
+        )
+        text_content = f"[Document reçu: {message.file_name}] {message.message}" if message.message else f"[Document reçu: {message.file_name}]"
     
     # Store message
     await db.whatsapp_messages.insert_one({
@@ -1405,11 +1465,54 @@ async def whatsapp_webhook(message: IncomingMessage):
         "timestamp": message.timestamp or datetime.now(timezone.utc).timestamp(),
         "audio_url": message.audio_url,
         "transcribed": was_transcribed,
+        "has_media": bool(message.media_base64),
+        "media_type": message.media_type,
+        "file_name": message.file_name,
         "created_at": datetime.now(timezone.utc).isoformat()
     })
     
     # Check if admin
     if await is_admin(message.phone_number):
+        # Check if this is an image edit request
+        if media_analysis and media_analysis.startswith("[IMAGE_EDIT_REQUEST:"):
+            # Extract image and prompt
+            import re
+            match = re.match(r'\[IMAGE_EDIT_REQUEST:(.+):(.+)\]', media_analysis)
+            if match:
+                ref_image = match.group(1)
+                edit_prompt = match.group(2)
+                
+                # Try Nano Banana first, then GPT Image
+                logger.info(f"Processing image edit request: {edit_prompt[:50]}")
+                image_url = await generate_image_with_reference(edit_prompt, ref_image)
+                
+                if not image_url:
+                    logger.info("Nano Banana failed, trying GPT Image...")
+                    image_url = await generate_image_gpt(edit_prompt, ref_image)
+                
+                if image_url:
+                    # Send the generated image
+                    try:
+                        async with httpx.AsyncClient(timeout=30.0) as client:
+                            await client.post(
+                                f"{WHATSAPP_SERVICE_URL}/send-image",
+                                json={
+                                    "phone_number": message.phone_number,
+                                    "image_url": image_url,
+                                    "caption": f"🖼️ Image générée: {edit_prompt[:50]}..."
+                                }
+                            )
+                        return {"reply": "✨ Voici l'image générée à partir de ta référence !", "is_admin": True, "document_sent": True}
+                    except Exception as e:
+                        logger.error(f"Error sending generated image: {e}")
+                        return {"reply": f"Image générée mais erreur d'envoi. URL: {image_url}", "is_admin": True}
+                else:
+                    return {"reply": "Désolé, je n'ai pas pu générer l'image. Essaie avec une description différente.", "is_admin": True}
+        
+        # If media analysis available, include it in context
+        if media_analysis and not media_analysis.startswith("[IMAGE_EDIT_REQUEST:"):
+            text_content = f"{text_content}\n\n[Analyse du média]: {media_analysis}"
+        
         # Process command with AI
         result = await process_admin_command(message.phone_number, text_content)
         
