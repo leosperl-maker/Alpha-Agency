@@ -331,8 +331,17 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         
         subtotal += line_total
         
-        title = item.get('title', '').strip() or "Service"
+        # Handle title/description - be more flexible
+        title = item.get('title', '').strip()
         desc = item.get('description', '').strip()
+        
+        # If no title but description exists, extract title from description
+        if not title and desc:
+            lines = desc.split('\n')
+            title = lines[0].strip() if lines else "Service"
+            desc = '\n'.join(lines[1:]).strip() if len(lines) > 1 else ""
+        elif not title:
+            title = "Service"
         
         if discount:
             if discount_type == 'percent' or discount_type == '%':
