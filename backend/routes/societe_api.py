@@ -498,14 +498,18 @@ async def get_company_financial_summary_for_whatsapp(siret_or_siren: str) -> dic
         return {"success": False, "error": "SIRET/SIREN invalide"}
     
     try:
-        endpoint = "entreprises/siren" if len(clean_id) == 9 else "entreprises/siret"
-        data = await societe_api_request(f"{endpoint}/{clean_id}")
+        params = {"siren": clean_id} if len(clean_id) == 9 else {"siret": clean_id}
+        data = await societe_api_request("entreprise", params)
         
-        if not data or data.get("error"):
+        company_data = data.get("entreprise", data)
+        if isinstance(company_data, list) and len(company_data) > 0:
+            company_data = company_data[0]
+        
+        if not company_data or data.get("error"):
             return {"success": False, "error": "Entreprise non trouvée"}
         
-        company_name = data.get("denomination", data.get("nom", "Entreprise"))
-        bilans = data.get("bilans", data.get("comptes", []))
+        company_name = company_data.get("denomination", company_data.get("nom", "Entreprise"))
+        bilans = company_data.get("bilans", company_data.get("comptes", []))
         
         if not bilans:
             return {
