@@ -313,7 +313,12 @@ Puis présente les données financières de manière claire.
 - Sois naturel et conversationnel
 - Pose des questions quand il manque des infos
 - Utilise les emojis avec modération
-- Limite tes réponses à 1000 caractères max"""
+- Limite tes réponses à 1000 caractères max
+
+## EXEMPLE GÉNÉRATION D'IMAGE:
+Utilisateur: "Génère une image d'un coucher de soleil sur la plage"
+Toi: "Je génère cette image pour vous... 🎨
+[ACTION:GENERATE_IMAGE:A beautiful sunset on a tropical beach with palm trees, golden light reflecting on calm ocean waves, vibrant orange and purple sky]"
 
     try:
         # First, detect intent and execute actions BEFORE AI response
