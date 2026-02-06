@@ -325,10 +325,17 @@ Quand tu veux exécuter une action, inclus un tag [ACTION:...] dans ta réponse:
     [ACTION:CREATE_MULTILINK:title:slug:description]
 
 ### FICHIERS & DOCUMENTS
-15. **Chercher et envoyer fichier**:
-    [ACTION:SEND_FILE:search_term]
+15. **Chercher et envoyer fichier (avec filtre de type optionnel)**:
+    [ACTION:SEND_FILE:search_term] ou [ACTION:SEND_FILE:search_term:type]
+    Types disponibles: image, pdf, excel, powerpoint, video, audio, archive
+    Exemples: 
+    - [ACTION:SEND_FILE:logo client] → cherche n'importe quel fichier
+    - [ACTION:SEND_FILE:rapport Martin:pdf] → cherche un PDF
+    - [ACTION:SEND_FILE:photo produit:image] → cherche une image
+    - [ACTION:SEND_FILE:budget 2026:excel] → cherche un fichier Excel
+    - [ACTION:SEND_FILE:presentation projet:powerpoint] → cherche un PowerPoint
     
-16. **Chercher et envoyer document**:
+16. **Chercher document interne**:
     [ACTION:SEND_DOCUMENT:search_term]
 
 ### IMAGES
