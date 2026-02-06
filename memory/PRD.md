@@ -68,20 +68,22 @@ CRM complet avec assistant IA MoltBot, intégrations multiples, et analytics ava
 
 ### Fonctionnalités Implémentées
 - **Chat conversationnel IA** - Répond naturellement avec mémoire de conversation
-- **Services préenregistrés** - Utilise les services du CRM avec prix et **DESCRIPTION COMPLÈTE** ✅ CORRIGÉ
+- **Services préenregistrés** - Utilise les services du CRM avec prix et DESCRIPTION COMPLÈTE
 - **Création CRM par message** - Devis, factures, contacts, tâches via langage naturel
 - **Questions intelligentes** - Demande les infos manquantes (email, SIRET, etc.) avant création
 - **TVA correcte** - Utilise le taux configuré (8.5%) pas 20%
 - **Génération d'images** - Nano Banana (Gemini) intégré
 - **Envoi de fichiers CRM** - PDF, images, documents
-- **Génération PDF automatique** - Les devis créés sont générés en PDF et uploadés sur Cloudinary ✅
-- **Analyse d'images** - Vision IA sur images reçues ✅
-- **Analyse de documents** - PDF avec extraction de texte (PyMuPDF) ✅
-- **Analyse de vidéos** - Extraction de frame et analyse ✅
-- **Transcription audio** - Messages vocaux via Whisper (OGG→MP3 auto-conversion) ✅
+- **Génération PDF automatique** - Les devis créés sont générés en PDF et uploadés sur Cloudinary
+- **Analyse d'images** - Vision IA sur images reçues
+- **Analyse de documents** - PDF avec extraction de texte (PyMuPDF)
+- **Analyse de vidéos COMPLÈTE** - Analyse visuelle + transcription audio ✅ NOUVEAU
+- **Transcription audio** - Messages vocaux via Whisper (OGG→MP3 auto-conversion)
 - **Recherche de documents** - Cherche par titre et contenu
-- **Programmation réseaux sociaux** - Peut programmer des posts Instagram/Facebook ✅ NOUVEAU
-- **Classification de fichiers** - Classe les fichiers reçus dans le CRM ✅ NOUVEAU
+- **Programmation réseaux sociaux** - Peut programmer des posts Instagram/Facebook
+- **Classification de fichiers** - Classe les fichiers reçus dans le CRM
+- **Rappels RDV automatiques** - Notification WhatsApp 30 min avant chaque RDV ✅ NOUVEAU
+- **Notifications de publication** - Notification quand un post programmé est publié ✅ NOUVEAU
 
 ### Actions MoltBot Disponibles (26 au total)
 1. CREATE_QUOTE_WITH_SERVICES - Créer devis avec services
@@ -107,9 +109,18 @@ CRM complet avec assistant IA MoltBot, intégrations multiples, et analytics ava
 21. CREATE_USER - Créer utilisateur
 22. SEARCH_COMPANY - Recherche Societe.com
 23. IMPORT_DRIVE - Importer fichiers Google Drive
-24. **SCHEDULE_SOCIAL_POST** - Programmer post réseaux sociaux ✅ NOUVEAU
-25. **LIST_SOCIAL_POSTS** - Lister posts programmés ✅ NOUVEAU
-26. **CLASSIFY_FILE** - Classer fichier reçu ✅ NOUVEAU
+24. SCHEDULE_SOCIAL_POST - Programmer post réseaux sociaux
+25. LIST_SOCIAL_POSTS - Lister posts programmés
+26. CLASSIFY_FILE - Classer fichier reçu
+
+### Scheduler MoltBot - Tâches automatiques
+| Tâche | Fréquence | Description |
+|-------|-----------|-------------|
+| Morning Briefing | 8h00 Lun-Ven | Résumé du jour (tâches, RDV, leads) |
+| Evening Recap | 18h00 Lun-Ven | Bilan de la journée |
+| Overdue Tasks | Toutes les 2h | Alerte tâches en retard |
+| **Appointment Reminders** | Toutes les 5 min | Rappel 30 min avant chaque RDV ✅ NOUVEAU |
+| **Publication Notifications** | Toutes les 10 min | Notification quand post publié ✅ NOUVEAU |
 
 ### Architecture
 - **Service WhatsApp**: Hébergé sur **Railway** (Node.js/Baileys)
@@ -134,11 +145,6 @@ BACKEND_WEBHOOK_URL=https://alphagency.fr/api/whatsapp/webhook  # PRODUCTION
 - `GET /api/societe/company/{siret_or_siren}` - Détails entreprise + dirigeants + bilans
 - `GET /api/societe/company/{siret}/financials` - Données financières uniquement
 
-### Frontend
-- **Champ SIRET/SIREN** ajouté au formulaire de contact
-- **Onglet "Finances"** dans ContactDetailSheet - affiche les bilans publics quand le SIRET est renseigné
-- Lien vers Societe.com pour plus de détails
-
 ### Clé API
 ```env
 SOCIETE_API_KEY=6324e71a28971350a9ea387c82c5ff65
@@ -153,10 +159,6 @@ SOCIETE_API_KEY=6324e71a28971350a9ea387c82c5ff65
 - `GET /api/gdrive/auth/callback` - Callback OAuth
 - `GET /api/gdrive/files` - Lister fichiers
 - `POST /api/gdrive/import` - Importer fichiers avec classification IA
-
-### Frontend
-- **Bouton "Connect Google Drive"** sur `/admin/moltbot`
-- Commande WhatsApp: `"Importe mes fichiers de Drive"`
 
 ### Status
 - En attente de connexion OAuth par l'utilisateur
@@ -180,16 +182,13 @@ SOCIETE_API_KEY=6324e71a28971350a9ea387c82c5ff65
 ## Tâches Restantes
 
 ### P0 - Critique
-- ⬜ **Stabilité service Railway WhatsApp** - Code mis à jour fourni, en attente de déploiement utilisateur
+- ⬜ **Stabilité service Railway WhatsApp** - Code v2.0 fourni dans `/app/docs/MISE_A_JOUR_INDEX_JS_RAILWAY.md`, en attente de déploiement utilisateur
 
 ### P1 - Important
 - ⬜ **API Blog pour n8n** - Modifier `/app/backend/routes/blog.py` selon spec `content_blocks`
-- ⬜ **Notifications post publication** - Envoyer notification WhatsApp quand post programmé est publié
-- ⬜ **Analyse vidéo complète** - Transcription audio de la vidéo en plus de l'analyse visuelle
 
 ### P2 - Backlog
-- ⬜ Résumé quotidien WhatsApp automatique
-- ⬜ Analytics avec alertes
+- ⬜ Analytics avec alertes configurables
 - ⬜ UI Preview Multi-Plateformes
 
 ---
@@ -198,10 +197,6 @@ SOCIETE_API_KEY=6324e71a28971350a9ea387c82c5ff65
 - Email: `admin@alphagency.fr`
 - Password: `Test123!`
 - Admin WhatsApp: `+596696447353`
-
-## Tests (Iteration 55)
-- Backend: 93% (13/14 tests)
-- Frontend: 100%
 
 ---
 
