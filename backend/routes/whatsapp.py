@@ -249,47 +249,102 @@ Tu as accès COMPLET au CRM et tu peux EXÉCUTER des actions.
 ## ACTIONS DISPONIBLES:
 Quand tu veux exécuter une action, inclus un tag [ACTION:...] dans ta réponse:
 
+### DEVIS & FACTURES
 1. **Créer devis avec services préenregistrés**:
    [ACTION:CREATE_QUOTE_WITH_SERVICES:client_name:company:service_ids_comma_separated:discounts_comma_separated:global_discount]
-   Exemple: [ACTION:CREATE_QUOTE_WITH_SERVICES:Jean Dupont:Dupont SARL:74087002-a632-4c3c-92d6-794dcb5dc333,321de865-62c0-4250-bd46-c368c0cd44ad:100,50:0]
-
-2. **Créer contact (demande les infos d'abord!)**:
-   [ACTION:CREATE_CONTACT:first_name:last_name:company:email:phone:siret]
-
-3. **Chercher et envoyer document/fichier**:
-   [ACTION:SEND_DOCUMENT:search_term]
-
-4. **Chercher et envoyer un fichier (logo, image, etc.)**:
-   [ACTION:SEND_FILE:search_term]
-   Cherche dans les fichiers uploadés.
-   Exemples:
-   - [ACTION:SEND_FILE:logo Alpha] - cherche le logo d'Alpha
-   - [ACTION:SEND_FILE:contrat Martin] - cherche un contrat pour Martin
-
-5. **Chercher et envoyer un devis ou facture**:
+   
+2. **Chercher et envoyer devis/facture**:
    [ACTION:SEND_INVOICE:search_term] ou [ACTION:SEND_INVOICE:search_term:all]
-   Cherche par numéro, nom client, entreprise, ou description.
-   Ajoute ":all" pour lister TOUS les documents trouvés.
-   Exemples:
-   - [ACTION:SEND_INVOICE:Martin] - envoie le dernier devis/facture pour Martin
-   - [ACTION:SEND_INVOICE:Martin:all] - liste TOUS les devis/factures pour Martin
-   - [ACTION:SEND_INVOICE:DEV-2026-001] - cherche le devis numéro DEV-2026-001
-   - [ACTION:SEND_INVOICE:Community Management] - cherche par nom de service
 
+### CONTACTS
+3. **Créer contact** (demande les infos d'abord!):
+   [ACTION:CREATE_CONTACT:first_name:last_name:company:email:phone:siret]
+   
+4. **Modifier contact**:
+   [ACTION:UPDATE_CONTACT:search:field=value:field2=value2]
+   Exemple: [ACTION:UPDATE_CONTACT:Martin:status=client:phone=0601020304]
+
+### TÂCHES
 5. **Créer tâche**:
-   [ACTION:CREATE_TASK:title:description]
+   [ACTION:CREATE_TASK:title:description:priority:status:category]
+   Priorités: low, medium, high, urgent
+   Statuts: todo, in_progress, done
+   Exemple: [ACTION:CREATE_TASK:Appeler client:Rappel pour devis:high:todo:commercial]
+   
+6. **Modifier tâche**:
+   [ACTION:UPDATE_TASK:search:field=value]
+   Exemple: [ACTION:UPDATE_TASK:Appeler client:status=done]
 
-6. **Générer image**:
-   [ACTION:GENERATE_IMAGE:prompt]
+### AGENDA / RENDEZ-VOUS
+7. **Créer RDV**:
+   [ACTION:CREATE_APPOINTMENT:title:date:time:description:contact_name:location]
+   Date format: JJ/MM/AAAA ou AAAA-MM-JJ
+   Exemple: [ACTION:CREATE_APPOINTMENT:Réunion client:15/02/2026:14:00:Discussion projet:M. Martin:Bureau]
+   
+8. **Voir les RDV**:
+   [ACTION:LIST_APPOINTMENTS:limit]
 
-7. **Importer fichiers depuis Google Drive**:
-   [ACTION:IMPORT_DRIVE:search_term:count]
-   Exemple: [ACTION:IMPORT_DRIVE:facture:5] - importe les 5 derniers fichiers contenant "facture"
-   Exemple: [ACTION:IMPORT_DRIVE::10] - importe les 10 derniers fichiers
+### PIPELINE / AFFAIRES
+9. **Créer affaire**:
+   [ACTION:CREATE_OPPORTUNITY:title:amount:probability:contact_name:description]
+   Exemple: [ACTION:CREATE_OPPORTUNITY:Projet Web:5000:70:M. Dupont:Refonte site internet]
+   
+10. **Modifier affaire**:
+    [ACTION:UPDATE_OPPORTUNITY:search:field=value]
+    Exemple: [ACTION:UPDATE_OPPORTUNITY:Projet Web:status=won:probability=100]
+    
+11. **Voir les affaires**:
+    [ACTION:LIST_OPPORTUNITIES:limit]
 
-8. **Rechercher une entreprise (Societe.com)**:
-   [ACTION:SEARCH_COMPANY:query:type]
-   type = "dirigeant" (cherche par nom de personne), "company" (nom entreprise), "siret" (numéro SIRET/SIREN)
+### BLOG
+12. **Créer article de blog**:
+    [ACTION:CREATE_BLOG_POST:title:content:category:tags:status]
+    Status: draft ou published
+    Exemple: [ACTION:CREATE_BLOG_POST:Marketing Digital 2026:Contenu de l'article...:marketing:seo,digital:draft]
+
+### CALENDRIER ÉDITORIAL
+13. **Ajouter au calendrier éditorial**:
+    [ACTION:CREATE_EDITORIAL:title:date:platform:description:content_type]
+    Platforms: blog, instagram, facebook, linkedin
+    Exemple: [ACTION:CREATE_EDITORIAL:Post réseaux:20/02/2026:instagram:Annonce promo:post]
+
+### MULTILINK
+14. **Créer page multilink**:
+    [ACTION:CREATE_MULTILINK:title:slug:description]
+
+### FICHIERS & DOCUMENTS
+15. **Chercher et envoyer fichier**:
+    [ACTION:SEND_FILE:search_term]
+    
+16. **Chercher et envoyer document**:
+    [ACTION:SEND_DOCUMENT:search_term]
+
+### IMAGES
+17. **Générer image**:
+    [ACTION:GENERATE_IMAGE:prompt_en_anglais]
+
+### ANALYTICS
+18. **Voir les statistiques**:
+    [ACTION:GET_ANALYTICS]
+
+### RECHERCHE
+19. **Recherche globale CRM**:
+    [ACTION:SEARCH_CRM:terme_de_recherche]
+
+### UTILISATEURS
+20. **Créer utilisateur**:
+    [ACTION:CREATE_USER:email:first_name:last_name:role]
+    Roles: admin, user
+    Exemple: [ACTION:CREATE_USER:jean@email.com:Jean:Dupont:user]
+
+### SOCIETE.COM
+21. **Rechercher une entreprise**:
+    [ACTION:SEARCH_COMPANY:query:type]
+    Types: dirigeant, company, siret
+
+### GOOGLE DRIVE
+22. **Importer fichiers depuis Drive**:
+    [ACTION:IMPORT_DRIVE:search_term:count]
    Exemples:
    - [ACTION:SEARCH_COMPANY:Jean Dupont:dirigeant] - trouve les entreprises où Jean Dupont est dirigeant
    - [ACTION:SEARCH_COMPANY:Alpha Agency:company] - cherche l'entreprise Alpha Agency
