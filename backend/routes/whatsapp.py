@@ -260,8 +260,13 @@ Quand tu veux exécuter une action, inclus un tag [ACTION:...] dans ta réponse:
 1. **Créer devis avec services préenregistrés**:
    [ACTION:CREATE_QUOTE_WITH_SERVICES:client_name:company:service_ids_comma_separated:discounts_comma_separated:global_discount]
    
-2. **Chercher et envoyer devis/facture**:
+2. **Chercher et envoyer un DEVIS**:
+   [ACTION:SEND_QUOTE:search_term] ou [ACTION:SEND_QUOTE:search_term:all]
+   Utilise cette action quand l'utilisateur demande un DEVIS (commence par DEV-)
+   
+3. **Chercher et envoyer une FACTURE**:
    [ACTION:SEND_INVOICE:search_term] ou [ACTION:SEND_INVOICE:search_term:all]
+   Utilise cette action quand l'utilisateur demande une FACTURE (commence par FAC-)
 
 ### CONTACTS
 3. **Créer contact** (demande les infos d'abord!):
