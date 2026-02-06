@@ -1,6 +1,7 @@
 """
 MoltBot CRM Actions - Toutes les actions que MoltBot peut effectuer sur le CRM
 """
+import os
 import uuid
 import logging
 from datetime import datetime, timezone, timedelta
