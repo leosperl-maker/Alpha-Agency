@@ -819,11 +819,19 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                                 result["document_name"] = f"{doc_type}_{first_invoice.get('invoice_number', first_invoice.get('number', 'document'))}.pdf"
                                 logger.info(f"✅ SEND_INVOICE: PDF ready: {pdf_url}")
                             
-                            # Build list of all found
+                            # Build list of all found with FULL contact info
                             invoice_list = []
                             for inv in invoices:
                                 dt = "Devis" if inv.get("document_type") == "devis" or inv.get("type") == "devis" else "Facture"
-                                invoice_list.append(f"- {dt} {inv.get('invoice_number', inv.get('number', '?'))}: {inv.get('client_name', '?')} - {inv.get('total', 0)}€")
+                                # Get full contact name
+                                contact_display = inv.get('client_name', '')
+                                if inv.get('contact_id'):
+                                    contact = await db.contacts.find_one({"id": inv.get('contact_id')})
+                                    if contact:
+                                        contact_display = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+                                        if contact.get('company'):
+                                            contact_display += f" ({contact.get('company')})"
+                                invoice_list.append(f"- {dt} {inv.get('invoice_number', inv.get('number', '?'))}: {contact_display} - {inv.get('total', 0)}€")
                             
                             result["text"] = f"📋 {len(invoices)} document(s) trouvé(s) pour '{search_term}':\n" + "\n".join(invoice_list) + "\n\n📎 Je t'envoie le plus récent."
                         else:
@@ -833,7 +841,16 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                         invoice = await db.invoices.find_one(search_query, sort=[("created_at", -1)])
                         
                         if invoice:
-                            logger.info(f"✅ SEND_INVOICE: Found invoice: {invoice.get('invoice_number')} for {invoice.get('client_name')}")
+                            # Get full contact name
+                            contact_display = invoice.get('client_name', '?')
+                            if invoice.get('contact_id'):
+                                contact = await db.contacts.find_one({"id": invoice.get('contact_id')})
+                                if contact:
+                                    contact_display = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+                                    if contact.get('company'):
+                                        contact_display += f" ({contact.get('company')})"
+                            
+                            logger.info(f"✅ SEND_INVOICE: Found invoice: {invoice.get('invoice_number')} for {contact_display}")
                             
                             # Generate PDF if not exists
                             pdf_url = invoice.get("pdf_url")
@@ -846,38 +863,25 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                                 result["document_url"] = pdf_url
                                 doc_type = "Devis" if invoice.get("document_type") == "devis" or invoice.get("type") == "devis" else "Facture"
                                 result["document_name"] = f"{doc_type}_{invoice.get('invoice_number', invoice.get('number', 'document'))}.pdf"
-                                result["text"] = f"✅ {doc_type} trouvé: {invoice.get('invoice_number', invoice.get('number', '?'))} pour {invoice.get('client_name', '?')} - {invoice.get('total', 0)}€"
+                                result["text"] = f"✅ {doc_type} trouvé: {invoice.get('invoice_number', invoice.get('number', '?'))} pour {contact_display} - {invoice.get('total', 0)}€"
                                 logger.info(f"Invoice PDF ready: {pdf_url}")
                             else:
                                 result["text"] = f"⚠️ Devis/facture trouvé mais impossible de générer le PDF."
                         else:
-                            # Try a more flexible search (by individual words)
-                            words = search_term.split()
-                            found = False
-                            for word in words:
-                                if len(word) >= 3 and not found:
-                                    invoice = await db.invoices.find_one({
-                                        "$or": [
-                                            {"client_name": {"$regex": word, "$options": "i"}},
-                                            {"invoice_number": {"$regex": word, "$options": "i"}}
-                                        ]
-                                    }, sort=[("created_at", -1)])
-                                    if invoice:
-                                        pdf_url = invoice.get("pdf_url")
-                                        if not pdf_url:
-                                            pdf_url = await generate_and_upload_quote_pdf(invoice.get("id"))
-                                        if pdf_url:
-                                            result["document_url"] = pdf_url
-                                            doc_type = "Devis" if invoice.get("document_type") == "devis" or invoice.get("type") == "devis" else "Facture"
-                                            result["document_name"] = f"{doc_type}_{invoice.get('invoice_number', invoice.get('number', 'document'))}.pdf"
-                                            result["text"] = f"✅ {doc_type} trouvé: {invoice.get('invoice_number', invoice.get('number', '?'))} pour {invoice.get('client_name', '?')} - {invoice.get('total', 0)}€"
-                                            found = True
-                            
-                            if not found:
-                                # List available invoices to help user
-                                recent_invoices = await db.invoices.find({}).sort("created_at", -1).limit(5).to_list(5)
-                                if recent_invoices:
-                                    invoice_list = "\n".join([f"- {i.get('invoice_number', i.get('number', '?'))}: {i.get('client_name', '?')} ({i.get('total', 0)}€)" for i in recent_invoices])
+                            # List available invoices to help user with FULL contact info
+                            recent_invoices = await db.invoices.find({}).sort("created_at", -1).limit(5).to_list(5)
+                            if recent_invoices:
+                                invoice_list = []
+                                for i in recent_invoices:
+                                    contact_display = i.get('client_name', '?')
+                                    if i.get('contact_id'):
+                                        contact = await db.contacts.find_one({"id": i.get('contact_id')})
+                                        if contact:
+                                            contact_display = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+                                            if contact.get('company'):
+                                                contact_display += f" ({contact.get('company')})"
+                                    invoice_list.append(f"- {i.get('invoice_number', i.get('number', '?'))}: {contact_display} ({i.get('total', 0)}€)")
+                                result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'.\n\n📋 Documents récents:\n" + "\n".join(invoice_list)
                                     result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'.\n\n📋 Documents récents:\n{invoice_list}"
                                 else:
                                     result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'."
