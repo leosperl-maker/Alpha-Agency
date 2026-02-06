@@ -2974,6 +2974,9 @@ async def whatsapp_webhook(message: IncomingMessage):
             response["image_url"] = image_url
             logger.info(f"Image URL added to response: {image_url}")
         
+        # FINAL LOG: What we're sending back to Railway
+        logger.info(f"📨 FINAL RESPONSE TO RAILWAY: reply_len={len(response.get('reply', ''))}, document_url={response.get('document_url', 'NONE')}, image_url={response.get('image_url', 'NONE')}")
+        
         return response
     else:
         # Non-admin: aucune réponse
