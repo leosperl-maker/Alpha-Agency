@@ -483,8 +483,18 @@ Toi: "Je génère cette image pour vous... 🎨
         # Add document if one was generated (from detect_and_execute or AI tags)
         if action_result.get("document_url"):
             result["document_url"] = action_result["document_url"]
+            result["document_name"] = action_result.get("document_name", "document.pdf")
+            result["is_image"] = action_result.get("is_image", False)
+            logger.info(f"Document URL from action_result: {result['document_url']}")
         elif extra_result.get("document_url"):
             result["document_url"] = extra_result["document_url"]
+            result["document_name"] = extra_result.get("document_name", "document.pdf")
+            result["is_image"] = extra_result.get("is_image", False)
+            logger.info(f"Document URL from extra_result: {result['document_url']}")
+        
+        # Also copy text from extra_result if it adds info
+        if extra_result.get("text") and extra_result["text"] not in result["text"]:
+            result["text"] = result["text"] + "\n\n" + extra_result["text"]
         
         return result
         
