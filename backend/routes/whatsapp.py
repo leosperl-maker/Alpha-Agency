@@ -693,36 +693,75 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                                     result["document_name"] = f"{invoice.get('invoice_number', 'document')}.pdf"
                             
             elif action_type == "SEND_FILE":
-                # Search for uploaded files (logos, images, documents)
+                # Search for uploaded files with type filtering
                 search_term = parts[0] if parts else ""
+                file_type_filter = parts[1].lower() if len(parts) > 1 else None  # [ACTION:SEND_FILE:contrat:pdf]
+                
                 if search_term:
-                    logger.info(f"Searching file with term: {search_term}")
+                    logger.info(f"🔍 SEND_FILE: Searching '{search_term}', type filter: {file_type_filter}")
                     
-                    # Search in multiple collections
-                    file_doc = None
+                    search_words = search_term.split()
                     
-                    # 1. Search in files collection
-                    file_doc = await db.files.find_one({
-                        "$or": [
-                            {"name": {"$regex": search_term, "$options": "i"}},
-                            {"filename": {"$regex": search_term, "$options": "i"}},
-                            {"original_name": {"$regex": search_term, "$options": "i"}},
-                            {"tags": {"$regex": search_term, "$options": "i"}}
-                        ]
-                    })
+                    # Build search conditions for documents collection (File Manager)
+                    or_conditions = [
+                        {"name": {"$regex": search_term, "$options": "i"}},
+                        {"tags": {"$elemMatch": {"$regex": search_term, "$options": "i"}}},
+                    ]
                     
-                    # 2. Search in documents collection
+                    # Search by each word
+                    for word in search_words:
+                        if len(word) >= 2:
+                            or_conditions.append({"name": {"$regex": word, "$options": "i"}})
+                    
+                    search_query = {"$or": or_conditions}
+                    
+                    # Apply type filter if specified
+                    type_mapping = {
+                        "image": "image",
+                        "photo": "image",
+                        "img": "image",
+                        "pdf": "document",
+                        "doc": "document",
+                        "word": "document",
+                        "excel": "spreadsheet",
+                        "xls": "spreadsheet",
+                        "xlsx": "spreadsheet",
+                        "csv": "spreadsheet",
+                        "tableur": "spreadsheet",
+                        "powerpoint": "presentation",
+                        "ppt": "presentation",
+                        "pptx": "presentation",
+                        "presentation": "presentation",
+                        "video": "video",
+                        "audio": "audio",
+                        "musique": "audio",
+                        "zip": "archive",
+                        "archive": "archive"
+                    }
+                    
+                    if file_type_filter and file_type_filter in type_mapping:
+                        search_query["file_type"] = type_mapping[file_type_filter]
+                        logger.info(f"🔍 SEND_FILE: Filtering by type: {type_mapping[file_type_filter]}")
+                    
+                    # Search in documents collection (File Manager)
+                    file_doc = await db.documents.find_one(search_query, sort=[("created_at", -1)])
+                    
+                    # If not found by exact match, try broader search
                     if not file_doc:
-                        file_doc = await db.documents.find_one({
+                        broader_query = {"$or": or_conditions}
+                        file_doc = await db.documents.find_one(broader_query, sort=[("created_at", -1)])
+                    
+                    # Also try files collection as fallback
+                    if not file_doc:
+                        file_doc = await db.files.find_one({
                             "$or": [
-                                {"internal_name": {"$regex": search_term, "$options": "i"}},
                                 {"name": {"$regex": search_term, "$options": "i"}},
-                                {"client_name": {"$regex": search_term, "$options": "i"}},
-                                {"description": {"$regex": search_term, "$options": "i"}}
+                                {"filename": {"$regex": search_term, "$options": "i"}},
+                                {"original_name": {"$regex": search_term, "$options": "i"}}
                             ]
                         })
                     
-                    # 3. Search in contacts for logo
+                    # Search in contacts for logo
                     if not file_doc and "logo" in search_term.lower():
                         contact = await db.contacts.find_one({
                             "$or": [
@@ -741,14 +780,24 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                         if url:
                             result["document_url"] = url
                             result["document_name"] = file_doc.get("name", file_doc.get("filename", file_doc.get("internal_name", "fichier")))
+                            file_type = file_doc.get("file_type", "")
+                            
                             # Check if it's an image
-                            if any(ext in url.lower() for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']):
+                            if file_type == "image" or any(ext in url.lower() for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']):
                                 result["is_image"] = True
-                            result["text"] = f"✅ Fichier trouvé: {result['document_name']}"
+                            
+                            result["text"] = f"✅ Fichier trouvé: {result['document_name']} ({file_type})"
+                            logger.info(f"✅ SEND_FILE: Found {result['document_name']} - URL: {url}")
                         else:
                             result["text"] = f"⚠️ Fichier trouvé mais pas d'URL disponible"
                     else:
-                        result["text"] = f"❌ Aucun fichier trouvé pour '{search_term}'"
+                        # List available files to help user
+                        recent_files = await db.documents.find({}).sort("created_at", -1).limit(5).to_list(5)
+                        if recent_files:
+                            file_list = "\n".join([f"- {f.get('name', '?')} ({f.get('file_type', '?')})" for f in recent_files])
+                            result["text"] = f"❌ Aucun fichier trouvé pour '{search_term}'.\n\n📂 Fichiers récents:\n{file_list}"
+                        else:
+                            result["text"] = f"❌ Aucun fichier trouvé pour '{search_term}'"
                             
             elif action_type in ["SEND_INVOICE", "SEND_QUOTE"]:
                 # Search for invoice OR quote - supports filtering by document type
