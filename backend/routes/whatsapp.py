@@ -259,13 +259,22 @@ Quand tu veux exécuter une action, inclus un tag [ACTION:...] dans ta réponse:
 3. **Chercher et envoyer document/fichier**:
    [ACTION:SEND_DOCUMENT:search_term]
 
-4. **Chercher et envoyer un devis ou facture**:
-   [ACTION:SEND_INVOICE:search_term]
-   Cherche par numéro, nom client, entreprise, ou description.
+4. **Chercher et envoyer un fichier (logo, image, etc.)**:
+   [ACTION:SEND_FILE:search_term]
+   Cherche dans les fichiers uploadés.
    Exemples:
-   - [ACTION:SEND_INVOICE:Martin] - cherche devis/facture pour client Martin
+   - [ACTION:SEND_FILE:logo Alpha] - cherche le logo d'Alpha
+   - [ACTION:SEND_FILE:contrat Martin] - cherche un contrat pour Martin
+
+5. **Chercher et envoyer un devis ou facture**:
+   [ACTION:SEND_INVOICE:search_term] ou [ACTION:SEND_INVOICE:search_term:all]
+   Cherche par numéro, nom client, entreprise, ou description.
+   Ajoute ":all" pour lister TOUS les documents trouvés.
+   Exemples:
+   - [ACTION:SEND_INVOICE:Martin] - envoie le dernier devis/facture pour Martin
+   - [ACTION:SEND_INVOICE:Martin:all] - liste TOUS les devis/factures pour Martin
    - [ACTION:SEND_INVOICE:DEV-2026-001] - cherche le devis numéro DEV-2026-001
-   - [ACTION:SEND_INVOICE:Alpha Agency] - cherche devis/facture pour Alpha Agency
+   - [ACTION:SEND_INVOICE:Community Management] - cherche par nom de service
 
 5. **Créer tâche**:
    [ACTION:CREATE_TASK:title:description]
