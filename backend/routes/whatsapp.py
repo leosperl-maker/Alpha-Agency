@@ -1143,6 +1143,9 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
     # Clean action tags from response
     cleaned_response = re.sub(action_pattern, '', ai_response).strip()
     
+    # LOG: Final result being returned
+    logger.info(f"📤 process_ai_action_tags returning: document_url={result.get('document_url', 'NONE')}, text_len={len(result.get('text', ''))}")
+    
     return cleaned_response, result
 
 
