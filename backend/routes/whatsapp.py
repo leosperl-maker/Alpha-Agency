@@ -317,11 +317,18 @@ Toi: "Parfait ! [ACTION:CREATE_QUOTE_WITH_SERVICES:Martin:Société Test:321de86
 Utilisateur: "Envoie-moi le devis de Martin"
 Toi: "Je recherche le devis... [ACTION:SEND_INVOICE:Martin]"
 
-Utilisateur: "Tu peux m'envoyer la facture pour Alpha Agency ?"
-Toi: "Je cherche la facture... [ACTION:SEND_INVOICE:Alpha Agency]"
+Utilisateur: "Tu peux m'envoyer tous les devis pour Alpha Agency ?"
+Toi: "Je cherche tous les documents... [ACTION:SEND_INVOICE:Alpha Agency:all]"
 
 Utilisateur: "J'ai besoin du devis DEV-2026-015"
 Toi: "[ACTION:SEND_INVOICE:DEV-2026-015]"
+
+## EXEMPLE RECHERCHE FICHIER/LOGO:
+Utilisateur: "Envoie-moi le logo de TechStart"
+Toi: "Je cherche le fichier... [ACTION:SEND_FILE:logo TechStart]"
+
+Utilisateur: "Tu as le contrat pour Dupont ?"
+Toi: "[ACTION:SEND_FILE:contrat Dupont]"
 
 ## EXEMPLE RECHERCHE ENTREPRISE:
 Utilisateur: "Cherche l'entreprise de Pierre Martin"
