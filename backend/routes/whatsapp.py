@@ -539,11 +539,13 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                         file_doc = await db.files.find_one({
                             "$or": [
                                 {"name": {"$regex": search_term, "$options": "i"}},
-                                {"filename": {"$regex": search_term, "$options": "i"}}
+                                {"filename": {"$regex": search_term, "$options": "i"}},
+                                {"original_name": {"$regex": search_term, "$options": "i"}}
                             ]
                         })
                         if file_doc and file_doc.get("url"):
                             result["document_url"] = file_doc["url"]
+                            result["document_name"] = file_doc.get("name", file_doc.get("filename", "fichier"))
                         else:
                             # Also search in invoices/quotes
                             invoice = await db.invoices.find_one({
@@ -561,11 +563,71 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                                     result["document_url"] = pdf_url
                                     result["document_name"] = f"{invoice.get('invoice_number', 'document')}.pdf"
                             
-            elif action_type == "SEND_INVOICE":
-                # Search for invoice/quote by client name, company, number, or description
+            elif action_type == "SEND_FILE":
+                # Search for uploaded files (logos, images, documents)
                 search_term = parts[0] if parts else ""
                 if search_term:
-                    logger.info(f"Searching invoice/quote with term: {search_term}")
+                    logger.info(f"Searching file with term: {search_term}")
+                    
+                    # Search in multiple collections
+                    file_doc = None
+                    
+                    # 1. Search in files collection
+                    file_doc = await db.files.find_one({
+                        "$or": [
+                            {"name": {"$regex": search_term, "$options": "i"}},
+                            {"filename": {"$regex": search_term, "$options": "i"}},
+                            {"original_name": {"$regex": search_term, "$options": "i"}},
+                            {"tags": {"$regex": search_term, "$options": "i"}}
+                        ]
+                    })
+                    
+                    # 2. Search in documents collection
+                    if not file_doc:
+                        file_doc = await db.documents.find_one({
+                            "$or": [
+                                {"internal_name": {"$regex": search_term, "$options": "i"}},
+                                {"name": {"$regex": search_term, "$options": "i"}},
+                                {"client_name": {"$regex": search_term, "$options": "i"}},
+                                {"description": {"$regex": search_term, "$options": "i"}}
+                            ]
+                        })
+                    
+                    # 3. Search in contacts for logo
+                    if not file_doc and "logo" in search_term.lower():
+                        contact = await db.contacts.find_one({
+                            "$or": [
+                                {"company": {"$regex": search_term.replace("logo", "").strip(), "$options": "i"}},
+                                {"first_name": {"$regex": search_term.replace("logo", "").strip(), "$options": "i"}},
+                                {"last_name": {"$regex": search_term.replace("logo", "").strip(), "$options": "i"}}
+                            ]
+                        })
+                        if contact and contact.get("logo_url"):
+                            result["document_url"] = contact["logo_url"]
+                            result["is_image"] = True
+                            result["text"] = f"✅ Logo trouvé pour {contact.get('company', contact.get('first_name', '?'))}"
+                    
+                    if file_doc:
+                        url = file_doc.get("url") or file_doc.get("pdf_url") or file_doc.get("file_url")
+                        if url:
+                            result["document_url"] = url
+                            result["document_name"] = file_doc.get("name", file_doc.get("filename", file_doc.get("internal_name", "fichier")))
+                            # Check if it's an image
+                            if any(ext in url.lower() for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']):
+                                result["is_image"] = True
+                            result["text"] = f"✅ Fichier trouvé: {result['document_name']}"
+                        else:
+                            result["text"] = f"⚠️ Fichier trouvé mais pas d'URL disponible"
+                    else:
+                        result["text"] = f"❌ Aucun fichier trouvé pour '{search_term}'"
+                            
+            elif action_type == "SEND_INVOICE":
+                # Search for invoice/quote - supports multiple results and date filtering
+                search_term = parts[0] if parts else ""
+                send_all = len(parts) > 1 and parts[1].lower() == "all"  # [ACTION:SEND_INVOICE:Martin:all]
+                
+                if search_term:
+                    logger.info(f"Searching invoice/quote with term: {search_term}, send_all: {send_all}")
                     
                     # Build search query - search in multiple fields
                     search_query = {
@@ -578,46 +640,83 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                         ]
                     }
                     
-                    # Find the most recent matching invoice/quote
-                    invoice = await db.invoices.find_one(search_query, sort=[("created_at", -1)])
-                    
-                    if invoice:
-                        logger.info(f"Found invoice: {invoice.get('invoice_number')} for {invoice.get('client_name')}")
+                    if send_all:
+                        # Find ALL matching invoices (max 5)
+                        invoices = await db.invoices.find(search_query).sort("created_at", -1).limit(5).to_list(5)
                         
-                        # Generate PDF if not exists
-                        pdf_url = invoice.get("pdf_url")
-                        if not pdf_url:
-                            logger.info(f"Generating PDF for invoice {invoice.get('id')}")
-                            pdf_url = await generate_and_upload_quote_pdf(invoice.get("id"))
-                        
-                        if pdf_url:
-                            result["document_url"] = pdf_url
-                            doc_type = "Devis" if invoice.get("document_type") == "devis" or invoice.get("type") == "devis" else "Facture"
-                            result["document_name"] = f"{doc_type}_{invoice.get('invoice_number', invoice.get('number', 'document'))}.pdf"
-                            result["text"] = f"✅ {doc_type} trouvé: {invoice.get('invoice_number', invoice.get('number', '?'))} pour {invoice.get('client_name', '?')} - {invoice.get('total', 0)}€"
-                            logger.info(f"Invoice PDF ready: {pdf_url}")
+                        if invoices:
+                            # Send the first one as file, list the others
+                            first_invoice = invoices[0]
+                            pdf_url = first_invoice.get("pdf_url")
+                            if not pdf_url:
+                                pdf_url = await generate_and_upload_quote_pdf(first_invoice.get("id"))
+                            
+                            if pdf_url:
+                                result["document_url"] = pdf_url
+                                doc_type = "Devis" if first_invoice.get("document_type") == "devis" or first_invoice.get("type") == "devis" else "Facture"
+                                result["document_name"] = f"{doc_type}_{first_invoice.get('invoice_number', first_invoice.get('number', 'document'))}.pdf"
+                            
+                            # Build list of all found
+                            invoice_list = []
+                            for inv in invoices:
+                                dt = "Devis" if inv.get("document_type") == "devis" or inv.get("type") == "devis" else "Facture"
+                                invoice_list.append(f"- {dt} {inv.get('invoice_number', inv.get('number', '?'))}: {inv.get('client_name', '?')} - {inv.get('total', 0)}€")
+                            
+                            result["text"] = f"📋 {len(invoices)} document(s) trouvé(s) pour '{search_term}':\n" + "\n".join(invoice_list) + "\n\n📎 Je t'envoie le plus récent."
                         else:
-                            result["text"] = f"⚠️ Devis/facture trouvé mais impossible de générer le PDF."
+                            result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'"
                     else:
-                        # Try a more flexible search
-                        words = search_term.split()
-                        for word in words:
-                            if len(word) >= 3:
-                                invoice = await db.invoices.find_one({
-                                    "$or": [
-                                        {"client_name": {"$regex": word, "$options": "i"}},
-                                        {"invoice_number": {"$regex": word, "$options": "i"}}
-                                    ]
-                                }, sort=[("created_at", -1)])
-                                if invoice:
-                                    pdf_url = invoice.get("pdf_url")
-                                    if not pdf_url:
-                                        pdf_url = await generate_and_upload_quote_pdf(invoice.get("id"))
-                                    if pdf_url:
-                                        result["document_url"] = pdf_url
-                                        doc_type = "Devis" if invoice.get("document_type") == "devis" or invoice.get("type") == "devis" else "Facture"
-                                        result["document_name"] = f"{doc_type}_{invoice.get('invoice_number', invoice.get('number', 'document'))}.pdf"
-                                        result["text"] = f"✅ {doc_type} trouvé: {invoice.get('invoice_number', invoice.get('number', '?'))} pour {invoice.get('client_name', '?')} - {invoice.get('total', 0)}€"
+                        # Find the most recent matching invoice/quote
+                        invoice = await db.invoices.find_one(search_query, sort=[("created_at", -1)])
+                        
+                        if invoice:
+                            logger.info(f"Found invoice: {invoice.get('invoice_number')} for {invoice.get('client_name')}")
+                            
+                            # Generate PDF if not exists
+                            pdf_url = invoice.get("pdf_url")
+                            if not pdf_url:
+                                logger.info(f"Generating PDF for invoice {invoice.get('id')}")
+                                pdf_url = await generate_and_upload_quote_pdf(invoice.get("id"))
+                            
+                            if pdf_url:
+                                result["document_url"] = pdf_url
+                                doc_type = "Devis" if invoice.get("document_type") == "devis" or invoice.get("type") == "devis" else "Facture"
+                                result["document_name"] = f"{doc_type}_{invoice.get('invoice_number', invoice.get('number', 'document'))}.pdf"
+                                result["text"] = f"✅ {doc_type} trouvé: {invoice.get('invoice_number', invoice.get('number', '?'))} pour {invoice.get('client_name', '?')} - {invoice.get('total', 0)}€"
+                                logger.info(f"Invoice PDF ready: {pdf_url}")
+                            else:
+                                result["text"] = f"⚠️ Devis/facture trouvé mais impossible de générer le PDF."
+                        else:
+                            # Try a more flexible search (by individual words)
+                            words = search_term.split()
+                            found = False
+                            for word in words:
+                                if len(word) >= 3 and not found:
+                                    invoice = await db.invoices.find_one({
+                                        "$or": [
+                                            {"client_name": {"$regex": word, "$options": "i"}},
+                                            {"invoice_number": {"$regex": word, "$options": "i"}}
+                                        ]
+                                    }, sort=[("created_at", -1)])
+                                    if invoice:
+                                        pdf_url = invoice.get("pdf_url")
+                                        if not pdf_url:
+                                            pdf_url = await generate_and_upload_quote_pdf(invoice.get("id"))
+                                        if pdf_url:
+                                            result["document_url"] = pdf_url
+                                            doc_type = "Devis" if invoice.get("document_type") == "devis" or invoice.get("type") == "devis" else "Facture"
+                                            result["document_name"] = f"{doc_type}_{invoice.get('invoice_number', invoice.get('number', 'document'))}.pdf"
+                                            result["text"] = f"✅ {doc_type} trouvé: {invoice.get('invoice_number', invoice.get('number', '?'))} pour {invoice.get('client_name', '?')} - {invoice.get('total', 0)}€"
+                                            found = True
+                            
+                            if not found:
+                                # List available invoices to help user
+                                recent_invoices = await db.invoices.find({}).sort("created_at", -1).limit(5).to_list(5)
+                                if recent_invoices:
+                                    invoice_list = "\n".join([f"- {i.get('invoice_number', i.get('number', '?'))}: {i.get('client_name', '?')} ({i.get('total', 0)}€)" for i in recent_invoices])
+                                    result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'.\n\n📋 Documents récents:\n{invoice_list}"
+                                else:
+                                    result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'."
                                     break
                         
                         if "document_url" not in result:
