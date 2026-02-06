@@ -338,26 +338,25 @@ Quand tu veux exécuter une action, inclus un tag [ACTION:...] dans ta réponse:
 19. **Recherche globale CRM**:
     [ACTION:SEARCH_CRM:terme_de_recherche]
 
+### ANALYSE DE SITE WEB
+20. **Analyser un site web**:
+    [ACTION:ANALYZE_WEBSITE:url]
+    Exemple: [ACTION:ANALYZE_WEBSITE:https://example.com]
+    Analyse le contenu, la structure, le SEO d'un site web.
+
 ### UTILISATEURS
-20. **Créer utilisateur**:
+21. **Créer utilisateur**:
     [ACTION:CREATE_USER:email:first_name:last_name:role]
     Roles: admin, user
-    Exemple: [ACTION:CREATE_USER:jean@email.com:Jean:Dupont:user]
 
 ### SOCIETE.COM
-21. **Rechercher une entreprise**:
+22. **Rechercher une entreprise**:
     [ACTION:SEARCH_COMPANY:query:type]
     Types: dirigeant, company, siret
 
 ### GOOGLE DRIVE
-22. **Importer fichiers depuis Drive**:
+23. **Importer fichiers depuis Drive**:
     [ACTION:IMPORT_DRIVE:search_term:count]
-   Exemples:
-   - [ACTION:SEARCH_COMPANY:Jean Dupont:dirigeant] - trouve les entreprises où Jean Dupont est dirigeant
-   - [ACTION:SEARCH_COMPANY:Alpha Agency:company] - cherche l'entreprise Alpha Agency
-   - [ACTION:SEARCH_COMPANY:12345678901234:siret] - infos sur le SIRET
-
-8. **Données financières d'une entreprise**:
    [ACTION:COMPANY_FINANCIALS:siret_or_siren]
    Exemple: [ACTION:COMPANY_FINANCIALS:123456789] - bilans et CA de l'entreprise
 
