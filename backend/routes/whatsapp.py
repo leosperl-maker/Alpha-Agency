@@ -2759,10 +2759,10 @@ async def whatsapp_webhook(message: IncomingMessage):
         )
         text_content = f"[Document reçu: {message.file_name}] {message.message}" if message.message else f"[Document reçu: {message.file_name}]"
     
-    # If video message, extract frame and analyze
+    # If video message, extract frame and analyze + transcribe audio
     elif message.message_type == "video" and message.media_base64:
         prompt = message.message if message.message else "Décris cette vidéo"
-        logger.info(f"Analyzing video")
+        logger.info(f"Analyzing video with audio transcription")
         
         try:
             import base64
@@ -2775,23 +2775,71 @@ async def whatsapp_webhook(message: IncomingMessage):
                 temp_video.write(video_bytes)
                 video_path = temp_video.name
             
-            # Extract first frame using ffmpeg
+            # 1. Extract first frame using ffmpeg for visual analysis
             frame_path = video_path.replace(".mp4", "_frame.jpg")
             subprocess.run([
                 'ffmpeg', '-i', video_path, '-vf', 'select=eq(n\\,0)', 
                 '-vframes', '1', '-y', frame_path
             ], capture_output=True, timeout=30)
             
-            # Read frame and analyze
+            # Read frame and analyze visually
+            visual_analysis = ""
             if os.path.exists(frame_path):
                 with open(frame_path, 'rb') as f:
                     frame_base64 = base64.b64encode(f.read()).decode('utf-8')
-                media_analysis = await analyze_image(frame_base64, f"Cette image est la première frame d'une vidéo. {prompt}")
+                visual_analysis = await analyze_image(frame_base64, f"Cette image est une frame d'une vidéo. Décris ce que tu vois: {prompt}")
                 os.unlink(frame_path)
-            else:
-                media_analysis = "Impossible d'extraire une image de la vidéo."
             
-            # Cleanup
+            # 2. Extract audio and transcribe
+            audio_transcription = ""
+            audio_path = video_path.replace(".mp4", "_audio.mp3")
+            try:
+                # Extract audio from video
+                extract_result = subprocess.run([
+                    'ffmpeg', '-i', video_path, '-vn', '-acodec', 'libmp3lame',
+                    '-ar', '16000', '-ac', '1', '-y', audio_path
+                ], capture_output=True, timeout=60)
+                
+                if os.path.exists(audio_path) and os.path.getsize(audio_path) > 1000:
+                    logger.info(f"Audio extracted: {os.path.getsize(audio_path)} bytes")
+                    
+                    # Transcribe using Whisper
+                    from routes.audio_transcription import transcribe_for_moltbot
+                    audio_transcription = await transcribe_for_moltbot(file_path=audio_path)
+                    
+                    if audio_transcription:
+                        logger.info(f"Video audio transcribed: {audio_transcription[:100]}...")
+                    else:
+                        audio_transcription = ""
+                        
+            except Exception as audio_err:
+                logger.warning(f"Video audio extraction/transcription failed: {audio_err}")
+                audio_transcription = ""
+            finally:
+                if os.path.exists(audio_path):
+                    os.unlink(audio_path)
+            
+            # 3. Combine visual and audio analysis
+            if visual_analysis and audio_transcription:
+                media_analysis = f"""🎬 **Analyse vidéo complète**
+
+👁️ **Contenu visuel:**
+{visual_analysis}
+
+🎤 **Transcription audio:**
+"{audio_transcription}"
+"""
+            elif visual_analysis:
+                media_analysis = f"""🎬 **Analyse vidéo**
+
+👁️ **Contenu visuel:**
+{visual_analysis}
+
+🔇 Pas d'audio détecté ou transcription impossible."""
+            else:
+                media_analysis = "Impossible d'analyser la vidéo."
+            
+            # Cleanup video file
             if os.path.exists(video_path):
                 os.unlink(video_path)
                 
