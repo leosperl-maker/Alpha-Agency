@@ -807,17 +807,17 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                                 result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'."
                             
             elif action_type == "CREATE_TASK":
-                task_data = {
-                    "id": str(uuid.uuid4()),
-                    "title": parts[0] if parts else "Nouvelle tâche",
+                # Format: title:description:priority:status:category
+                params = {
+                    "title": parts[0] if len(parts) > 0 else "Nouvelle tâche",
                     "description": parts[1] if len(parts) > 1 else "",
-                    "status": "todo",
-                    "priority": "medium",
-                    "created_at": datetime.now(timezone.utc),
-                    "source": "whatsapp_moltbot"
+                    "priority": parts[2] if len(parts) > 2 else "medium",
+                    "status": parts[3] if len(parts) > 3 else "todo",
+                    "category": parts[4] if len(parts) > 4 else "general"
                 }
-                await db.tasks.insert_one(task_data)
-                logger.info(f"Created task: {task_data['title']}")
+                action_result = await create_task(db, params)
+                result["text"] = action_result.get("text", "")
+                logger.info(f"Created task: {params['title']}")
                 
             elif action_type == "GENERATE_IMAGE":
                 prompt = parts[0] if parts else "image"
