@@ -1034,6 +1034,14 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                 }
                 action_result = await create_user(db, params)
                 result["text"] = action_result.get("text", "")
+            
+            elif action_type == "ANALYZE_WEBSITE":
+                # Analyser un site web
+                url = parts[0] if parts else ""
+                if url:
+                    logger.info(f"Analyzing website: {url}")
+                    analysis = await analyze_website(url)
+                    result["text"] = analysis
                     
         except Exception as e:
             logger.error(f"Error processing action {action_type}: {e}")
