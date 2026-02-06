@@ -474,45 +474,97 @@ async def create_user(db: AsyncIOMotorDatabase, params: Dict[str, Any]) -> Dict[
 
 
 async def search_crm(db: AsyncIOMotorDatabase, params: Dict[str, Any]) -> Dict[str, Any]:
-    """Recherche globale dans le CRM"""
+    """Recherche globale dans le CRM - recherche intelligente dans tous les champs"""
     search_term = params.get("query", "")
     if not search_term:
         return {"success": False, "text": "❌ Terme de recherche requis"}
     
     results = []
+    search_words = search_term.split()
     
     # Chercher dans les contacts
-    contacts = await db.contacts.find({
-        "$or": [
-            {"first_name": {"$regex": search_term, "$options": "i"}},
-            {"last_name": {"$regex": search_term, "$options": "i"}},
-            {"company": {"$regex": search_term, "$options": "i"}},
-            {"email": {"$regex": search_term, "$options": "i"}}
-        ]
-    }).limit(3).to_list(3)
-    for c in contacts:
-        results.append(f"👤 Contact: {c.get('first_name', '')} {c.get('last_name', '')} ({c.get('company', '')})")
+    contact_query = {"$or": []}
+    for word in search_words:
+        if len(word) >= 2:
+            contact_query["$or"].extend([
+                {"first_name": {"$regex": word, "$options": "i"}},
+                {"last_name": {"$regex": word, "$options": "i"}},
+                {"company": {"$regex": word, "$options": "i"}},
+                {"email": {"$regex": word, "$options": "i"}},
+                {"phone": {"$regex": word, "$options": "i"}}
+            ])
+    
+    if contact_query["$or"]:
+        contacts = await db.contacts.find(contact_query).limit(5).to_list(5)
+        for c in contacts:
+            name = f"{c.get('first_name', '')} {c.get('last_name', '')}".strip()
+            company = f" ({c.get('company')})" if c.get('company') else ""
+            results.append(f"👤 Contact: {name}{company}")
+    
+    # Trouver les contact_ids correspondants pour chercher dans les factures
+    matching_contact_ids = []
+    if contact_query["$or"]:
+        contacts_for_ids = await db.contacts.find(contact_query, {"id": 1}).to_list(50)
+        matching_contact_ids = [c.get("id") for c in contacts_for_ids if c.get("id")]
     
     # Chercher dans les factures/devis
-    invoices = await db.invoices.find({
-        "$or": [
-            {"client_name": {"$regex": search_term, "$options": "i"}},
-            {"invoice_number": {"$regex": search_term, "$options": "i"}}
-        ]
-    }).limit(3).to_list(3)
-    for i in invoices:
-        doc_type = "Devis" if i.get("document_type") == "devis" or i.get("type") == "devis" else "Facture"
-        results.append(f"📄 {doc_type}: {i.get('invoice_number', '?')} - {i.get('client_name', '?')} ({i.get('total', 0)}€)")
+    invoice_query = {"$or": []}
+    for word in search_words:
+        if len(word) >= 2:
+            invoice_query["$or"].extend([
+                {"client_name": {"$regex": word, "$options": "i"}},
+                {"invoice_number": {"$regex": word, "$options": "i"}},
+                {"number": {"$regex": word, "$options": "i"}},
+                {"items.title": {"$regex": word, "$options": "i"}},
+                {"items.description": {"$regex": word, "$options": "i"}}
+            ])
+    
+    # Ajouter recherche par contact_id
+    if matching_contact_ids:
+        invoice_query["$or"].append({"contact_id": {"$in": matching_contact_ids}})
+    
+    if invoice_query["$or"]:
+        invoices = await db.invoices.find(invoice_query).limit(5).to_list(5)
+        for i in invoices:
+            doc_type = "Devis" if i.get("document_type") == "devis" or i.get("type") == "devis" else "Facture"
+            # Get full contact name
+            contact_display = i.get('client_name', '?')
+            if i.get('contact_id'):
+                contact = await db.contacts.find_one({"id": i.get('contact_id')})
+                if contact:
+                    contact_display = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+                    if contact.get('company'):
+                        contact_display += f" ({contact.get('company')})"
+            results.append(f"📄 {doc_type}: {i.get('invoice_number', i.get('number', '?'))} - {contact_display} ({i.get('total', 0)}€)")
     
     # Chercher dans les tâches
-    tasks = await db.tasks.find({
-        "$or": [
-            {"title": {"$regex": search_term, "$options": "i"}},
-            {"description": {"$regex": search_term, "$options": "i"}}
-        ]
-    }).limit(3).to_list(3)
-    for t in tasks:
-        results.append(f"✅ Tâche: {t.get('title', '?')} ({t.get('status', '?')})")
+    task_query = {"$or": []}
+    for word in search_words:
+        if len(word) >= 2:
+            task_query["$or"].extend([
+                {"title": {"$regex": word, "$options": "i"}},
+                {"description": {"$regex": word, "$options": "i"}}
+            ])
+    
+    if task_query["$or"]:
+        tasks = await db.tasks.find(task_query).limit(3).to_list(3)
+        for t in tasks:
+            results.append(f"✅ Tâche: {t.get('title', '?')} ({t.get('status', '?')})")
+    
+    # Chercher dans les opportunités
+    opp_query = {"$or": []}
+    for word in search_words:
+        if len(word) >= 2:
+            opp_query["$or"].extend([
+                {"title": {"$regex": word, "$options": "i"}},
+                {"contact_name": {"$regex": word, "$options": "i"}},
+                {"description": {"$regex": word, "$options": "i"}}
+            ])
+    
+    if opp_query["$or"]:
+        opportunities = await db.opportunities.find(opp_query).limit(3).to_list(3)
+        for o in opportunities:
+            results.append(f"💼 Affaire: {o.get('title', '?')} - {o.get('amount', 0)}€")
     
     if not results:
         return {"success": True, "text": f"🔍 Aucun résultat pour '{search_term}'"}
