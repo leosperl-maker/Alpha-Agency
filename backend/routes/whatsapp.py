@@ -882,17 +882,6 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                                                 contact_display += f" ({contact.get('company')})"
                                     invoice_list.append(f"- {i.get('invoice_number', i.get('number', '?'))}: {contact_display} ({i.get('total', 0)}€)")
                                 result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'.\n\n📋 Documents récents:\n" + "\n".join(invoice_list)
-                                    result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'.\n\n📋 Documents récents:\n{invoice_list}"
-                                else:
-                                    result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'."
-                                    break
-                        
-                        if "document_url" not in result:
-                            # List available invoices to help user
-                            recent_invoices = await db.invoices.find({}).sort("created_at", -1).limit(5).to_list(5)
-                            if recent_invoices:
-                                invoice_list = "\n".join([f"- {i.get('invoice_number', i.get('number', '?'))}: {i.get('client_name', '?')} ({i.get('total', 0)}€)" for i in recent_invoices])
-                                result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'.\n\n📋 Devis/factures récents:\n{invoice_list}"
                             else:
                                 result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'."
                             
