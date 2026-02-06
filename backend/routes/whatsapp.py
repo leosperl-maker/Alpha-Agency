@@ -1230,55 +1230,65 @@ L'article doit avoir:
 Écris directement l'article en français, de manière professionnelle et engageante. Environ 500-800 mots."""
 
                 try:
-                    from emergentintegrations.llm.gemini import GeminiChat
+                    from emergentintegrations.llm.chat import LlmChat, UserMessage
                     
-                    EMERGENT_LLM_KEY = os.environ.get("EMERGENT_API_KEY", "")
-                    content_chat = GeminiChat(api_key=EMERGENT_LLM_KEY)
-                    content_response = await content_chat.send_message(content_prompt)
-                    generated_content = content_response.text if hasattr(content_response, 'text') else str(content_response)
+                    EMERGENT_LLM_KEY = os.environ.get("EMERGENT_API_KEY", os.environ.get("EMERGENT_LLM_KEY", ""))
                     
-                    logger.info(f"📝 Generated content: {len(generated_content)} characters")
-                    
-                    # Générer l'image de couverture
-                    cover_image = await generate_image_nano_banana(f"Professional modern blog header image about {topic}, clean corporate style, high quality, 16:9 aspect ratio")
-                    
-                    logger.info(f"🖼️ Generated cover image: {cover_image}")
-                    
-                    # Créer l'article
-                    post_data = {
-                        "id": str(uuid.uuid4()),
-                        "title": title,
-                        "slug": title.lower().replace(" ", "-").replace("'", ""),
-                        "excerpt": generated_content[:200] + "...",
-                        "content": generated_content,
-                        "content_blocks": [
-                            {
-                                "id": str(uuid.uuid4()),
-                                "type": "paragraph",
-                                "content": generated_content
-                            }
-                        ],
-                        "cover_image": cover_image,
-                        "category": category,
-                        "tags": tags,
-                        "status": "draft",
-                        "author": "MoltBot",
-                        "seo_title": title,
-                        "seo_description": generated_content[:160],
-                        "source": "whatsapp_moltbot_ai",
-                        "created_at": datetime.now(timezone.utc),
-                        "updated_at": datetime.now(timezone.utc)
-                    }
-                    
-                    await db.blog_posts.insert_one(post_data)
-                    logger.info(f"✅ Article créé avec succès: {post_data['id']}")
-                    
-                    result["text"] = f"✅ Article créé avec succès!\n\n📝 Titre: {title}\n📁 Catégorie: {category}\n🏷️ Tags: {', '.join(tags) if tags else 'Aucun'}\n\nL'article est en brouillon. Tu peux le consulter et le publier depuis le CRM."
-                    
-                    if cover_image:
-                        result["document_url"] = cover_image
-                        result["is_image"] = True
-                        result["document_name"] = f"cover_{title[:30]}.png"
+                    if not EMERGENT_LLM_KEY:
+                        result["text"] = "❌ Clé API Emergent non configurée"
+                    else:
+                        content_chat = LlmChat(
+                            api_key=EMERGENT_LLM_KEY,
+                            model="gemini-2.0-flash",
+                            session_id=f"blog_creation_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                            system_message="Tu es un rédacteur web professionnel spécialisé dans la création de contenu engageant."
+                        )
+                        
+                        content_response = await content_chat.send_async(UserMessage(text=content_prompt))
+                        generated_content = content_response.text if hasattr(content_response, 'text') else str(content_response)
+                        
+                        logger.info(f"📝 Generated content: {len(generated_content)} characters")
+                        
+                        # Générer l'image de couverture
+                        cover_image = await generate_image_nano_banana(f"Professional modern blog header image about {topic}, clean corporate style, high quality, 16:9 aspect ratio")
+                        
+                        logger.info(f"🖼️ Generated cover image: {cover_image}")
+                        
+                        # Créer l'article
+                        post_data = {
+                            "id": str(uuid.uuid4()),
+                            "title": title,
+                            "slug": title.lower().replace(" ", "-").replace("'", ""),
+                            "excerpt": generated_content[:200] + "...",
+                            "content": generated_content,
+                            "content_blocks": [
+                                {
+                                    "id": str(uuid.uuid4()),
+                                    "type": "paragraph",
+                                    "content": generated_content
+                                }
+                            ],
+                            "cover_image": cover_image,
+                            "category": category,
+                            "tags": tags,
+                            "status": "draft",
+                            "author": "MoltBot",
+                            "seo_title": title,
+                            "seo_description": generated_content[:160],
+                            "source": "whatsapp_moltbot_ai",
+                            "created_at": datetime.now(timezone.utc),
+                            "updated_at": datetime.now(timezone.utc)
+                        }
+                        
+                        await db.blog_posts.insert_one(post_data)
+                        logger.info(f"✅ Article créé avec succès: {post_data['id']}")
+                        
+                        result["text"] = f"✅ Article créé avec succès!\n\n📝 Titre: {title}\n📁 Catégorie: {category}\n🏷️ Tags: {', '.join(tags) if tags else 'Aucun'}\n\nL'article est en brouillon. Tu peux le consulter et le publier depuis le CRM."
+                        
+                        if cover_image:
+                            result["document_url"] = cover_image
+                            result["is_image"] = True
+                            result["document_name"] = f"cover_{title[:30]}.png"
                     
                 except Exception as e:
                     logger.error(f"❌ CREATE_BLOG_WITH_AI error: {e}")
