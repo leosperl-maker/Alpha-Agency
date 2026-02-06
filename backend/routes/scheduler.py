@@ -86,6 +86,24 @@ class MoltBotScheduler:
             replace_existing=True
         )
         
+        # Add appointment reminders (check every 5 minutes during business hours)
+        self.scheduler.add_job(
+            self.check_upcoming_appointments,
+            CronTrigger(hour='7-20', minute='*/5'),  # Every 5 minutes from 7am to 8pm
+            id='appointment_reminders',
+            name='Appointment Reminders (30 min before)',
+            replace_existing=True
+        )
+        
+        # Add scheduled posts notification (check every 10 minutes)
+        self.scheduler.add_job(
+            self.check_scheduled_posts,
+            CronTrigger(hour='6-23', minute='*/10'),  # Every 10 minutes from 6am to 11pm
+            id='scheduled_posts_check',
+            name='Scheduled Posts Publication',
+            replace_existing=True
+        )
+        
         self.scheduler.start()
         logger.info("MoltBot Scheduler started")
         
