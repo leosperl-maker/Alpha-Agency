@@ -3,7 +3,7 @@
 ## Vue d'ensemble
 CRM complet avec assistant IA MoltBot, intégrations multiples, et analytics avancées.
 
-**Dernière mise à jour**: 5 Février 2026
+**Dernière mise à jour**: 6 Février 2026
 
 ## Fonctionnalités Implémentées
 
@@ -74,12 +74,42 @@ CRM complet avec assistant IA MoltBot, intégrations multiples, et analytics ava
 - **TVA correcte** - Utilise le taux configuré (8.5%) pas 20%
 - **Génération d'images** - Nano Banana (Gemini) intégré
 - **Envoi de fichiers CRM** - PDF, images, documents
-- **Génération PDF automatique** - Les devis créés sont générés en PDF et uploadés sur Cloudinary ✅ NOUVEAU
+- **Génération PDF automatique** - Les devis créés sont générés en PDF et uploadés sur Cloudinary ✅
 - **Analyse d'images** - Vision IA sur images reçues ✅
 - **Analyse de documents** - PDF avec extraction de texte (PyMuPDF) ✅
 - **Analyse de vidéos** - Extraction de frame et analyse ✅
 - **Transcription audio** - Messages vocaux via Whisper (OGG→MP3 auto-conversion) ✅
 - **Recherche de documents** - Cherche par titre et contenu
+- **Programmation réseaux sociaux** - Peut programmer des posts Instagram/Facebook ✅ NOUVEAU
+- **Classification de fichiers** - Classe les fichiers reçus dans le CRM ✅ NOUVEAU
+
+### Actions MoltBot Disponibles (26 au total)
+1. CREATE_QUOTE_WITH_SERVICES - Créer devis avec services
+2. SEND_INVOICE - Chercher et envoyer devis/facture
+3. CREATE_CONTACT - Créer contact
+4. UPDATE_CONTACT - Modifier contact
+5. CREATE_TASK - Créer tâche
+6. UPDATE_TASK - Modifier tâche
+7. CREATE_APPOINTMENT - Créer RDV
+8. LIST_APPOINTMENTS - Lister RDV
+9. CREATE_OPPORTUNITY - Créer affaire pipeline
+10. UPDATE_OPPORTUNITY - Modifier affaire
+11. LIST_OPPORTUNITIES - Lister affaires
+12. CREATE_BLOG_POST - Créer article blog
+13. CREATE_EDITORIAL - Ajouter au calendrier éditorial
+14. CREATE_MULTILINK - Créer page multilink
+15. SEND_FILE - Chercher et envoyer fichier
+16. SEND_DOCUMENT - Chercher et envoyer document
+17. GENERATE_IMAGE - Générer image IA
+18. GET_ANALYTICS - Voir statistiques
+19. SEARCH_CRM - Recherche globale
+20. ANALYZE_WEBSITE - Analyser site web
+21. CREATE_USER - Créer utilisateur
+22. SEARCH_COMPANY - Recherche Societe.com
+23. IMPORT_DRIVE - Importer fichiers Google Drive
+24. **SCHEDULE_SOCIAL_POST** - Programmer post réseaux sociaux ✅ NOUVEAU
+25. **LIST_SOCIAL_POSTS** - Lister posts programmés ✅ NOUVEAU
+26. **CLASSIFY_FILE** - Classer fichier reçu ✅ NOUVEAU
 
 ### Architecture
 - **Service WhatsApp**: Hébergé sur **Railway** (Node.js/Baileys)
@@ -96,7 +126,7 @@ BACKEND_WEBHOOK_URL=https://alphagency.fr/api/whatsapp/webhook  # PRODUCTION
 
 ---
 
-## Intégration Societe.com ✅ NOUVEAU
+## Intégration Societe.com ✅
 
 ### Backend API
 - `GET /api/societe/search/company?q={query}` - Recherche entreprise par nom
@@ -143,18 +173,22 @@ SOCIETE_API_KEY=6324e71a28971350a9ea387c82c5ff65
 | `/admin/instagram-stories` | Stories Instagram |
 | `/admin/campagnes` | Campagnes Email/SMS |
 | `/admin/contacts` | Gestion contacts + Finances |
+| `/admin/editorial` | Calendrier éditorial (posts sociaux) |
 
 ---
 
 ## Tâches Restantes
 
 ### P0 - Critique
-- ⬜ **API Blog pour n8n** - Modifier `/app/backend/routes/blog.py` selon spec `content_blocks`
+- ⬜ **Stabilité service Railway WhatsApp** - Code mis à jour fourni, en attente de déploiement utilisateur
 
 ### P1 - Important
-- ⬜ **Résumé quotidien WhatsApp** - Tâche planifiée automatique
+- ⬜ **API Blog pour n8n** - Modifier `/app/backend/routes/blog.py` selon spec `content_blocks`
+- ⬜ **Notifications post publication** - Envoyer notification WhatsApp quand post programmé est publié
+- ⬜ **Analyse vidéo complète** - Transcription audio de la vidéo en plus de l'analyse visuelle
 
 ### P2 - Backlog
+- ⬜ Résumé quotidien WhatsApp automatique
 - ⬜ Analytics avec alertes
 - ⬜ UI Preview Multi-Plateformes
 
@@ -172,5 +206,5 @@ SOCIETE_API_KEY=6324e71a28971350a9ea387c82c5ff65
 ---
 
 ## Documentation
-- `/app/docs/MISE_A_JOUR_INDEX_JS_RAILWAY.md` - Guide mise à jour Railway
+- `/app/docs/MISE_A_JOUR_INDEX_JS_RAILWAY.md` - Guide mise à jour Railway v2.0 (MISE À JOUR)
 - `/app/docs/GUIDE_DOMAINE_PERSONNALISE_MULTILINK.md` - Domaines personnalisés
