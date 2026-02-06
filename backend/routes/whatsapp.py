@@ -256,21 +256,29 @@ Quand tu veux exécuter une action, inclus un tag [ACTION:...] dans ta réponse:
 2. **Créer contact (demande les infos d'abord!)**:
    [ACTION:CREATE_CONTACT:first_name:last_name:company:email:phone:siret]
 
-3. **Chercher et envoyer document**:
+3. **Chercher et envoyer document/fichier**:
    [ACTION:SEND_DOCUMENT:search_term]
 
-4. **Créer tâche**:
+4. **Chercher et envoyer un devis ou facture**:
+   [ACTION:SEND_INVOICE:search_term]
+   Cherche par numéro, nom client, entreprise, ou description.
+   Exemples:
+   - [ACTION:SEND_INVOICE:Martin] - cherche devis/facture pour client Martin
+   - [ACTION:SEND_INVOICE:DEV-2026-001] - cherche le devis numéro DEV-2026-001
+   - [ACTION:SEND_INVOICE:Alpha Agency] - cherche devis/facture pour Alpha Agency
+
+5. **Créer tâche**:
    [ACTION:CREATE_TASK:title:description]
 
-5. **Générer image**:
+6. **Générer image**:
    [ACTION:GENERATE_IMAGE:prompt]
 
-6. **Importer fichiers depuis Google Drive**:
+7. **Importer fichiers depuis Google Drive**:
    [ACTION:IMPORT_DRIVE:search_term:count]
    Exemple: [ACTION:IMPORT_DRIVE:facture:5] - importe les 5 derniers fichiers contenant "facture"
    Exemple: [ACTION:IMPORT_DRIVE::10] - importe les 10 derniers fichiers
 
-7. **Rechercher une entreprise (Societe.com)**:
+8. **Rechercher une entreprise (Societe.com)**:
    [ACTION:SEARCH_COMPANY:query:type]
    type = "dirigeant" (cherche par nom de personne), "company" (nom entreprise), "siret" (numéro SIRET/SIREN)
    Exemples:
