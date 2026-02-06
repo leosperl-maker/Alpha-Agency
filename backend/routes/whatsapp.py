@@ -753,16 +753,49 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                 if search_term:
                     logger.info(f"🔍 SEND_INVOICE: Searching with term: '{search_term}', send_all: {send_all}")
                     
-                    # Build search query - search in multiple fields
-                    search_query = {
-                        "$or": [
-                            {"client_name": {"$regex": search_term, "$options": "i"}},
-                            {"invoice_number": {"$regex": search_term, "$options": "i"}},
-                            {"number": {"$regex": search_term, "$options": "i"}},
-                            {"items.title": {"$regex": search_term, "$options": "i"}},
-                            {"items.description": {"$regex": search_term, "$options": "i"}}
-                        ]
-                    }
+                    # RECHERCHE AMELIOREE: D'abord chercher les contacts correspondants
+                    search_words = search_term.split()
+                    matching_contact_ids = []
+                    
+                    # Chercher dans les contacts par chaque mot
+                    for word in search_words:
+                        if len(word) >= 2:
+                            contacts_found = await db.contacts.find({
+                                "$or": [
+                                    {"first_name": {"$regex": word, "$options": "i"}},
+                                    {"last_name": {"$regex": word, "$options": "i"}},
+                                    {"company": {"$regex": word, "$options": "i"}},
+                                    {"email": {"$regex": word, "$options": "i"}}
+                                ]
+                            }, {"id": 1}).to_list(50)
+                            for c in contacts_found:
+                                if c.get("id") and c["id"] not in matching_contact_ids:
+                                    matching_contact_ids.append(c["id"])
+                    
+                    logger.info(f"🔍 SEND_INVOICE: Found {len(matching_contact_ids)} matching contacts")
+                    
+                    # Build search query - search in multiple fields + contact_ids
+                    or_conditions = [
+                        {"client_name": {"$regex": search_term, "$options": "i"}},
+                        {"invoice_number": {"$regex": search_term, "$options": "i"}},
+                        {"number": {"$regex": search_term, "$options": "i"}},
+                        {"items.title": {"$regex": search_term, "$options": "i"}},
+                        {"items.description": {"$regex": search_term, "$options": "i"}},
+                        {"reference": {"$regex": search_term, "$options": "i"}},
+                        {"notes": {"$regex": search_term, "$options": "i"}}
+                    ]
+                    
+                    # Ajouter la recherche par contact_id
+                    if matching_contact_ids:
+                        or_conditions.append({"contact_id": {"$in": matching_contact_ids}})
+                    
+                    # Ajouter recherche par chaque mot individuellement
+                    for word in search_words:
+                        if len(word) >= 2:
+                            or_conditions.append({"client_name": {"$regex": word, "$options": "i"}})
+                            or_conditions.append({"invoice_number": {"$regex": word, "$options": "i"}})
+                    
+                    search_query = {"$or": or_conditions}
                     
                     # Count total matching
                     total_count = await db.invoices.count_documents(search_query)
