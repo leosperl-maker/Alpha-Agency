@@ -304,6 +304,16 @@ Toi: "Parfait ! [ACTION:CREATE_QUOTE_WITH_SERVICES:Martin:Société Test:321de86
 - TVA {tva_rate}%: {550 * tva_rate / 100:.2f}€
 - Total TTC: {550 * (1 + tva_rate/100):.2f}€"
 
+## EXEMPLE RECHERCHE ET ENVOI DEVIS/FACTURE:
+Utilisateur: "Envoie-moi le devis de Martin"
+Toi: "Je recherche le devis... [ACTION:SEND_INVOICE:Martin]"
+
+Utilisateur: "Tu peux m'envoyer la facture pour Alpha Agency ?"
+Toi: "Je cherche la facture... [ACTION:SEND_INVOICE:Alpha Agency]"
+
+Utilisateur: "J'ai besoin du devis DEV-2026-015"
+Toi: "[ACTION:SEND_INVOICE:DEV-2026-015]"
+
 ## EXEMPLE RECHERCHE ENTREPRISE:
 Utilisateur: "Cherche l'entreprise de Pierre Martin"
 Toi: "[ACTION:SEARCH_COMPANY:Pierre Martin:dirigeant]"
