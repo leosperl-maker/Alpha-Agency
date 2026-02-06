@@ -293,6 +293,156 @@ class MoltBotScheduler:
                 )
             
             await self.send_whatsapp_message(self.admin_phone, msg)
+    
+    async def check_upcoming_appointments(self):
+        """
+        Check for appointments happening in 30 minutes and send reminders
+        Runs every 5 minutes during business hours
+        """
+        if not self.admin_phone or not self.db:
+            return
+        
+        now = datetime.now(timezone.utc)
+        reminder_window_start = now + timedelta(minutes=25)
+        reminder_window_end = now + timedelta(minutes=35)
+        
+        try:
+            # Find appointments in the next 25-35 minutes that haven't been reminded
+            # This gives us a 10-minute window to catch appointments starting in ~30 min
+            appointments = await self.db.appointments.find({
+                "status": {"$in": ["scheduled", "confirmed", None]},
+                "reminder_sent": {"$ne": True}
+            }, {"_id": 0}).to_list(100)
+            
+            appointments_to_remind = []
+            for appt in appointments:
+                try:
+                    start_time_str = appt.get("start_time", "")
+                    if not start_time_str:
+                        continue
+                    
+                    # Parse the start time
+                    if start_time_str.endswith('Z'):
+                        start_time = datetime.fromisoformat(start_time_str.replace('Z', '+00:00'))
+                    elif '+' in start_time_str or start_time_str.endswith('+00:00'):
+                        start_time = datetime.fromisoformat(start_time_str)
+                    else:
+                        start_time = datetime.fromisoformat(start_time_str).replace(tzinfo=timezone.utc)
+                    
+                    # Check if appointment is in the reminder window
+                    if reminder_window_start <= start_time <= reminder_window_end:
+                        appointments_to_remind.append({
+                            **appt,
+                            "parsed_time": start_time
+                        })
+                except Exception as parse_err:
+                    logger.debug(f"Could not parse appointment time: {parse_err}")
+                    continue
+            
+            # Send reminders
+            for appt in appointments_to_remind:
+                start_time = appt["parsed_time"]
+                title = appt.get("title", "Rendez-vous")
+                contact_name = appt.get("contact_name", "")
+                location = appt.get("location", "")
+                description = appt.get("description", "")
+                
+                # Build reminder message
+                msg = f"⏰ *Rappel RDV dans 30 minutes !*\n\n"
+                msg += f"📅 *{title}*\n"
+                msg += f"🕐 {start_time.strftime('%H:%M')}\n"
+                
+                if contact_name:
+                    msg += f"👤 {contact_name}\n"
+                if location:
+                    msg += f"📍 {location}\n"
+                if description:
+                    msg += f"📝 {description[:100]}\n"
+                
+                msg += "\n_Via MoltBot_ 🤖"
+                
+                # Send reminder
+                success = await self.send_whatsapp_message(self.admin_phone, msg)
+                
+                if success:
+                    # Mark as reminded
+                    await self.db.appointments.update_one(
+                        {"id": appt.get("id")},
+                        {"$set": {"reminder_sent": True, "reminder_sent_at": now.isoformat()}}
+                    )
+                    logger.info(f"Appointment reminder sent for: {title}")
+                    
+                    # Log
+                    await self.db.scheduler_logs.insert_one({
+                        "type": "appointment_reminder",
+                        "appointment_id": appt.get("id"),
+                        "appointment_title": title,
+                        "phone": self.admin_phone,
+                        "sent_at": now.isoformat(),
+                        "success": True
+                    })
+                    
+        except Exception as e:
+            logger.error(f"Error checking upcoming appointments: {e}")
+    
+    async def check_scheduled_posts(self):
+        """
+        Check for scheduled social media posts and send notification when published
+        Runs every 10 minutes
+        """
+        if not self.admin_phone or not self.db:
+            return
+        
+        now = datetime.now(timezone.utc)
+        now_str = now.strftime("%Y-%m-%d")
+        now_time = now.strftime("%H:%M")
+        
+        try:
+            # Find posts scheduled for now or past that haven't been marked as published
+            scheduled_posts = await self.db.editorial_posts.find({
+                "status": "scheduled",
+                "publication_notified": {"$ne": True}
+            }, {"_id": 0}).to_list(50)
+            
+            for post in scheduled_posts:
+                scheduled_date = post.get("scheduled_date", "")
+                scheduled_time = post.get("scheduled_time", "23:59")
+                
+                # Check if it's time to publish (or past time)
+                if scheduled_date < now_str or (scheduled_date == now_str and scheduled_time <= now_time):
+                    # Post should be published now
+                    networks = post.get("networks", [])
+                    network_str = ", ".join([n.capitalize() for n in networks]) if networks else "Réseaux sociaux"
+                    
+                    msg = f"✅ *Publication effectuée !*\n\n"
+                    msg += f"📱 {network_str}\n"
+                    msg += f"📝 {post.get('title', 'Post')}\n"
+                    msg += f"📅 {scheduled_date} {scheduled_time}\n"
+                    
+                    caption = post.get("caption", "")
+                    if caption:
+                        msg += f"\n💬 _{caption[:100]}{'...' if len(caption) > 100 else ''}_\n"
+                    
+                    msg += "\n🎉 Le post a été programmé avec succès !\n"
+                    msg += "_Via MoltBot_ 🤖"
+                    
+                    # Send notification
+                    success = await self.send_whatsapp_message(self.admin_phone, msg)
+                    
+                    if success:
+                        # Mark post as published and notified
+                        await self.db.editorial_posts.update_one(
+                            {"id": post.get("id")},
+                            {"$set": {
+                                "status": "published",
+                                "publication_notified": True,
+                                "published_at": now.isoformat()
+                            }}
+                        )
+                        logger.info(f"Publication notification sent for: {post.get('title')}")
+                        
+        except Exception as e:
+            logger.error(f"Error checking scheduled posts: {e}")
 
 
 # Global scheduler instance
