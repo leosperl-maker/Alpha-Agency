@@ -743,7 +743,7 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                 send_all = len(parts) > 1 and parts[1].lower() == "all"  # [ACTION:SEND_INVOICE:Martin:all]
                 
                 if search_term:
-                    logger.info(f"Searching invoice/quote with term: {search_term}, send_all: {send_all}")
+                    logger.info(f"🔍 SEND_INVOICE: Searching with term: '{search_term}', send_all: {send_all}")
                     
                     # Build search query - search in multiple fields
                     search_query = {
@@ -756,6 +756,10 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                         ]
                     }
                     
+                    # Count total matching
+                    total_count = await db.invoices.count_documents(search_query)
+                    logger.info(f"🔍 SEND_INVOICE: Found {total_count} matching documents in DB")
+                    
                     if send_all:
                         # Find ALL matching invoices (max 5)
                         invoices = await db.invoices.find(search_query).sort("created_at", -1).limit(5).to_list(5)
@@ -765,12 +769,14 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                             first_invoice = invoices[0]
                             pdf_url = first_invoice.get("pdf_url")
                             if not pdf_url:
+                                logger.info(f"📄 Generating PDF for invoice {first_invoice.get('id')}")
                                 pdf_url = await generate_and_upload_quote_pdf(first_invoice.get("id"))
                             
                             if pdf_url:
                                 result["document_url"] = pdf_url
                                 doc_type = "Devis" if first_invoice.get("document_type") == "devis" or first_invoice.get("type") == "devis" else "Facture"
                                 result["document_name"] = f"{doc_type}_{first_invoice.get('invoice_number', first_invoice.get('number', 'document'))}.pdf"
+                                logger.info(f"✅ SEND_INVOICE: PDF ready: {pdf_url}")
                             
                             # Build list of all found
                             invoice_list = []
@@ -786,13 +792,14 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                         invoice = await db.invoices.find_one(search_query, sort=[("created_at", -1)])
                         
                         if invoice:
-                            logger.info(f"Found invoice: {invoice.get('invoice_number')} for {invoice.get('client_name')}")
+                            logger.info(f"✅ SEND_INVOICE: Found invoice: {invoice.get('invoice_number')} for {invoice.get('client_name')}")
                             
                             # Generate PDF if not exists
                             pdf_url = invoice.get("pdf_url")
                             if not pdf_url:
-                                logger.info(f"Generating PDF for invoice {invoice.get('id')}")
+                                logger.info(f"📄 SEND_INVOICE: Generating PDF for invoice {invoice.get('id')}")
                                 pdf_url = await generate_and_upload_quote_pdf(invoice.get("id"))
+                                logger.info(f"📄 SEND_INVOICE: PDF generation result: {pdf_url}")
                             
                             if pdf_url:
                                 result["document_url"] = pdf_url
