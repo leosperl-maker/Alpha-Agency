@@ -745,13 +745,17 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                     else:
                         result["text"] = f"❌ Aucun fichier trouvé pour '{search_term}'"
                             
-            elif action_type == "SEND_INVOICE":
-                # Search for invoice/quote - supports multiple results and date filtering
+            elif action_type in ["SEND_INVOICE", "SEND_QUOTE"]:
+                # Search for invoice OR quote - supports filtering by document type
                 search_term = parts[0] if parts else ""
-                send_all = len(parts) > 1 and parts[1].lower() == "all"  # [ACTION:SEND_INVOICE:Martin:all]
+                send_all = len(parts) > 1 and parts[1].lower() == "all"
+                
+                # Determine if user wants specifically a quote or invoice
+                is_quote_request = action_type == "SEND_QUOTE"
+                doc_type_label = "Devis" if is_quote_request else "Facture"
                 
                 if search_term:
-                    logger.info(f"🔍 SEND_INVOICE: Searching with term: '{search_term}', send_all: {send_all}")
+                    logger.info(f"🔍 {action_type}: Searching with term: '{search_term}', type: {doc_type_label}")
                     
                     # RECHERCHE AMELIOREE: D'abord chercher les contacts correspondants
                     search_words = search_term.split()
@@ -772,7 +776,7 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                                 if c.get("id") and c["id"] not in matching_contact_ids:
                                     matching_contact_ids.append(c["id"])
                     
-                    logger.info(f"🔍 SEND_INVOICE: Found {len(matching_contact_ids)} matching contacts")
+                    logger.info(f"🔍 {action_type}: Found {len(matching_contact_ids)} matching contacts")
                     
                     # Build search query - search in multiple fields + contact_ids
                     or_conditions = [
@@ -795,11 +799,37 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                             or_conditions.append({"client_name": {"$regex": word, "$options": "i"}})
                             or_conditions.append({"invoice_number": {"$regex": word, "$options": "i"}})
                     
+                    # FILTRER PAR TYPE DE DOCUMENT
                     search_query = {"$or": or_conditions}
+                    
+                    if is_quote_request:
+                        # Chercher uniquement les DEVIS
+                        search_query["$and"] = [
+                            {"$or": or_conditions},
+                            {"$or": [
+                                {"document_type": "devis"},
+                                {"type": "devis"},
+                                {"invoice_number": {"$regex": "^DEV", "$options": "i"}},
+                                {"number": {"$regex": "^DEV", "$options": "i"}}
+                            ]}
+                        ]
+                        del search_query["$or"]
+                    else:
+                        # Chercher uniquement les FACTURES
+                        search_query["$and"] = [
+                            {"$or": or_conditions},
+                            {"$or": [
+                                {"document_type": "facture"},
+                                {"type": "facture"},
+                                {"invoice_number": {"$regex": "^FAC", "$options": "i"}},
+                                {"number": {"$regex": "^FAC", "$options": "i"}}
+                            ]}
+                        ]
+                        del search_query["$or"]
                     
                     # Count total matching
                     total_count = await db.invoices.count_documents(search_query)
-                    logger.info(f"🔍 SEND_INVOICE: Found {total_count} matching documents in DB")
+                    logger.info(f"🔍 {action_type}: Found {total_count} matching {doc_type_label.lower()}s in DB")
                     
                     if send_all:
                         # Find ALL matching invoices (max 5)
