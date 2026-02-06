@@ -1113,6 +1113,122 @@ Règles:
         return None
 
 
+async def analyze_website(url: str) -> str:
+    """Analyser un site web et retourner un résumé."""
+    import httpx
+    from bs4 import BeautifulSoup
+    
+    try:
+        # Valider l'URL
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+        
+        logger.info(f"Fetching website: {url}")
+        
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+            response = await client.get(url, headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            })
+            
+            if response.status_code != 200:
+                return f"❌ Impossible d'accéder au site (erreur {response.status_code})"
+            
+            html = response.text
+            soup = BeautifulSoup(html, 'html.parser')
+            
+            # Extraire les informations
+            title = soup.title.string if soup.title else "Sans titre"
+            
+            # Meta description
+            meta_desc = ""
+            meta_tag = soup.find('meta', attrs={'name': 'description'})
+            if meta_tag:
+                meta_desc = meta_tag.get('content', '')
+            
+            # Compter les éléments
+            h1_count = len(soup.find_all('h1'))
+            h2_count = len(soup.find_all('h2'))
+            img_count = len(soup.find_all('img'))
+            link_count = len(soup.find_all('a'))
+            
+            # Extraire les H1 et H2
+            h1_texts = [h.get_text().strip()[:50] for h in soup.find_all('h1')[:3]]
+            h2_texts = [h.get_text().strip()[:50] for h in soup.find_all('h2')[:5]]
+            
+            # Extraire le texte principal
+            for script in soup(["script", "style", "nav", "footer", "header"]):
+                script.decompose()
+            
+            text = soup.get_text()
+            lines = [line.strip() for line in text.splitlines() if line.strip()]
+            content_preview = ' '.join(lines[:20])[:500]
+            
+            # Analyser avec l'IA
+            from emergentintegrations.llm.chat import LlmChat, UserMessage
+            EMERGENT_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+            
+            if EMERGENT_KEY:
+                chat = LlmChat(
+                    api_key=EMERGENT_KEY,
+                    model="gemini-2.0-flash",
+                    session_id=f"website_analysis_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                    system_message="Tu es un expert en analyse de sites web. Donne une analyse concise mais complète."
+                )
+                
+                analysis_prompt = f"""Analyse ce site web:
+URL: {url}
+Titre: {title}
+Description: {meta_desc}
+Contenu aperçu: {content_preview}
+
+Statistiques:
+- {h1_count} titres H1
+- {h2_count} titres H2
+- {img_count} images
+- {link_count} liens
+
+Donne une analyse en français (max 500 caractères) sur:
+1. Le type de site
+2. Son objectif principal
+3. Points forts
+4. Axes d'amélioration SEO"""
+                
+                ai_analysis = await chat.send_async(UserMessage(text=analysis_prompt))
+                
+                return f"""🌐 **Analyse de {url}**
+
+📌 **Titre**: {title}
+📝 **Description**: {meta_desc[:150]}...
+
+📊 **Structure**:
+- {h1_count} titre(s) H1
+- {h2_count} titre(s) H2  
+- {img_count} images
+- {link_count} liens
+
+🤖 **Analyse IA**:
+{ai_analysis}"""
+            
+            else:
+                return f"""🌐 **Analyse de {url}**
+
+📌 **Titre**: {title}
+📝 **Description**: {meta_desc[:150] if meta_desc else 'Non définie'}
+
+📊 **Structure**:
+- {h1_count} titre(s) H1
+- {h2_count} titre(s) H2  
+- {img_count} images
+- {link_count} liens
+
+📑 **Titres H1**: {', '.join(h1_texts) if h1_texts else 'Aucun'}
+📑 **Titres H2**: {', '.join(h2_texts) if h2_texts else 'Aucun'}"""
+                
+    except Exception as e:
+        logger.error(f"Website analysis error: {e}")
+        return f"❌ Erreur lors de l'analyse du site: {str(e)}"
+
+
 async def detect_and_execute_action(message: str, phone: str) -> dict:
     """Detect intent from message and execute CRM actions."""
     import re
