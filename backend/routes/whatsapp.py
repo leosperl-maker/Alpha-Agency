@@ -522,8 +522,16 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
     action_pattern = r'\[ACTION:([A-Z_]+):([^\]]+)\]'
     matches = re.findall(action_pattern, ai_response)
     
+    # LOG: Trace what the AI returned and what actions were found
+    logger.info(f"🤖 AI Response length: {len(ai_response)} chars")
+    logger.info(f"🤖 AI Response preview: {ai_response[:500]}...")
+    logger.info(f"🔍 Action pattern matches found: {len(matches)}")
+    for m in matches:
+        logger.info(f"🔍 Found action: {m[0]} with params: {m[1][:100]}")
+    
     for action_type, params in matches:
         parts = params.split(':')
+        logger.info(f"⚡ Executing action: {action_type} with {len(parts)} parts")
         
         try:
             if action_type == "CREATE_QUOTE_WITH_SERVICES":
