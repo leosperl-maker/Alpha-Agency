@@ -5,14 +5,14 @@ Test suite for 4 corrections in CRM AlphaAgency:
 3. Affichage des paiements reçus sur le PDF de facture
 4. Report automatique des tâches non terminées (code review - frontend)
 
-API_URL: https://whatsapp-ai-32.preview.emergentagent.com
+API_URL: https://moltbot-ai-4.preview.emergentagent.com
 """
 import pytest
 import requests
 import os
 from datetime import datetime
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://whatsapp-ai-32.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://moltbot-ai-4.preview.emergentagent.com')
 
 
 class TestAuthentication:
