@@ -2299,11 +2299,9 @@ async def whatsapp_webhook(message: IncomingMessage):
         
         return response
     else:
-        # Public response - limited
-        return {
-            "reply": "Bonjour ! Je suis l'assistant Alpha Agency. Pour plus d'informations, visitez notre site web ou contactez-nous au 0691 266 003.",
-            "is_admin": False
-        }
+        # Non-admin: aucune réponse
+        logger.info(f"Message from non-admin {message.phone_number} - ignoring")
+        return {"reply": "", "is_admin": False}
 
 @router.post("/send")
 async def send_whatsapp_message(
