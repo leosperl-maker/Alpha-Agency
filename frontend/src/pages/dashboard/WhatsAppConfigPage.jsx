@@ -418,12 +418,16 @@ const WhatsAppConfigPage = () => {
                 Scannez ce QR code avec WhatsApp
               </p>
               <div className="bg-white p-4 rounded-xl inline-block">
-                <QRCodeSVG 
-                  value={qrCode} 
-                  size={192}
-                  level="M"
-                  includeMargin={false}
-                />
+                {qrCode.startsWith('data:') ? (
+                  <img src={qrCode} alt="QR Code" width={192} height={192} />
+                ) : (
+                  <QRCodeSVG 
+                    value={qrCode} 
+                    size={192}
+                    level="M"
+                    includeMargin={false}
+                  />
+                )}
               </div>
               <p className="text-white/50 text-sm mt-4">
                 WhatsApp → Menu → Appareils connectés → Connecter un appareil
