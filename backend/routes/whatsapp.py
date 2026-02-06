@@ -309,23 +309,30 @@ Quand tu veux exécuter une action, inclus un tag [ACTION:...] dans ta réponse:
     [ACTION:LIST_OPPORTUNITIES:limit]
 
 ### BLOG
-12. **Créer article de blog**:
+12. **Créer article de blog SIMPLE**:
     [ACTION:CREATE_BLOG_POST:title:content:category:tags:status]
     Status: draft ou published
     Exemple: [ACTION:CREATE_BLOG_POST:Marketing Digital 2026:Contenu de l'article...:marketing:seo,digital:draft]
 
+13. **Créer article de blog COMPLET avec IA** (génère contenu + image):
+    [ACTION:CREATE_BLOG_WITH_AI:title:topic:category:tags]
+    Cette action génère automatiquement:
+    - Un article structuré avec intro, sections et conclusion
+    - Une image de couverture générée par IA
+    Exemple: [ACTION:CREATE_BLOG_WITH_AI:Marketing Digital en 2026:Les tendances du marketing digital:marketing:seo,digital,tendances]
+
 ### CALENDRIER ÉDITORIAL
-13. **Ajouter au calendrier éditorial**:
+14. **Ajouter au calendrier éditorial**:
     [ACTION:CREATE_EDITORIAL:title:date:platform:description:content_type]
     Platforms: blog, instagram, facebook, linkedin
     Exemple: [ACTION:CREATE_EDITORIAL:Post réseaux:20/02/2026:instagram:Annonce promo:post]
 
 ### MULTILINK
-14. **Créer page multilink**:
+15. **Créer page multilink**:
     [ACTION:CREATE_MULTILINK:title:slug:description]
 
 ### FICHIERS & DOCUMENTS
-15. **Chercher et envoyer fichier (avec filtre de type optionnel)**:
+16. **Chercher et envoyer fichier (avec filtre de type optionnel)**:
     [ACTION:SEND_FILE:search_term] ou [ACTION:SEND_FILE:search_term:type]
     Types disponibles: image, pdf, excel, powerpoint, video, audio, archive
     Exemples: 
@@ -335,19 +342,19 @@ Quand tu veux exécuter une action, inclus un tag [ACTION:...] dans ta réponse:
     - [ACTION:SEND_FILE:budget 2026:excel] → cherche un fichier Excel
     - [ACTION:SEND_FILE:presentation projet:powerpoint] → cherche un PowerPoint
     
-16. **Chercher document interne**:
+17. **Chercher document interne**:
     [ACTION:SEND_DOCUMENT:search_term]
 
 ### IMAGES
-17. **Générer image**:
+18. **Générer image**:
     [ACTION:GENERATE_IMAGE:prompt_en_anglais]
 
 ### ANALYTICS
-18. **Voir les statistiques**:
+19. **Voir les statistiques**:
     [ACTION:GET_ANALYTICS]
 
 ### RECHERCHE
-19. **Recherche globale CRM**:
+20. **Recherche globale CRM**:
     [ACTION:SEARCH_CRM:terme_de_recherche]
 
 ### ANALYSE DE SITE WEB
