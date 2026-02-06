@@ -1071,6 +1071,46 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                     logger.info(f"Analyzing website: {url}")
                     analysis = await analyze_website(url)
                     result["text"] = analysis
+            
+            elif action_type == "SCHEDULE_SOCIAL_POST":
+                # Programmer un post sur les réseaux sociaux
+                # Format: title:caption:network:date:time
+                from routes.moltbot_actions import schedule_social_post
+                params = {
+                    "title": parts[0] if len(parts) > 0 else "Post",
+                    "caption": parts[1] if len(parts) > 1 else "",
+                    "network": parts[2] if len(parts) > 2 else "instagram",
+                    "date": parts[3] if len(parts) > 3 else "",
+                    "time": parts[4] if len(parts) > 4 else "12:00"
+                }
+                action_result = await schedule_social_post(db, params)
+                result["text"] = action_result.get("text", "")
+                logger.info(f"Social post scheduled: {params['title']} on {params['network']}")
+            
+            elif action_type == "LIST_SOCIAL_POSTS":
+                # Lister les posts programmés
+                from routes.moltbot_actions import list_social_posts
+                params = {
+                    "limit": int(parts[0]) if len(parts) > 0 and parts[0].isdigit() else 5,
+                    "network": parts[1] if len(parts) > 1 else None
+                }
+                action_result = await list_social_posts(db, params)
+                result["text"] = action_result.get("text", "")
+            
+            elif action_type == "CLASSIFY_FILE":
+                # Classer un fichier reçu
+                # Format: file_url:file_name:category:contact:description
+                from routes.moltbot_actions import classify_file
+                params = {
+                    "file_url": parts[0] if len(parts) > 0 else "",
+                    "file_name": parts[1] if len(parts) > 1 else "fichier",
+                    "category": parts[2] if len(parts) > 2 else "general",
+                    "contact": parts[3] if len(parts) > 3 else "",
+                    "description": parts[4] if len(parts) > 4 else ""
+                }
+                action_result = await classify_file(db, params)
+                result["text"] = action_result.get("text", "")
+                logger.info(f"File classified: {params['file_name']} in {params['category']}")
                     
         except Exception as e:
             logger.error(f"Error processing action {action_type}: {e}")
