@@ -905,6 +905,136 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                 except Exception as fin_err:
                     logger.error(f"Financials error: {fin_err}")
                     result["financials_error"] = str(fin_err)
+            
+            # ========== NOUVELLES ACTIONS CRM COMPLÈTES ==========
+            
+            elif action_type == "UPDATE_CONTACT":
+                # Format: search:field=value:field2=value2
+                if parts:
+                    search = parts[0]
+                    params = {"search": search}
+                    for p in parts[1:]:
+                        if "=" in p:
+                            key, val = p.split("=", 1)
+                            params[key.strip()] = val.strip()
+                    action_result = await update_contact(db, params)
+                    result["text"] = action_result.get("text", "")
+            
+            elif action_type == "UPDATE_TASK":
+                # Format: search:field=value
+                if parts:
+                    search = parts[0]
+                    params = {"search": search}
+                    for p in parts[1:]:
+                        if "=" in p:
+                            key, val = p.split("=", 1)
+                            params[key.strip()] = val.strip()
+                    action_result = await update_task(db, params)
+                    result["text"] = action_result.get("text", "")
+            
+            elif action_type == "CREATE_APPOINTMENT":
+                # Format: title:date:time:description:contact_name:location
+                params = {
+                    "title": parts[0] if len(parts) > 0 else "Rendez-vous",
+                    "date": parts[1] if len(parts) > 1 else "",
+                    "time": parts[2] if len(parts) > 2 else "09:00",
+                    "description": parts[3] if len(parts) > 3 else "",
+                    "contact_name": parts[4] if len(parts) > 4 else "",
+                    "location": parts[5] if len(parts) > 5 else ""
+                }
+                action_result = await create_appointment(db, params)
+                result["text"] = action_result.get("text", "")
+            
+            elif action_type == "LIST_APPOINTMENTS":
+                limit = int(parts[0]) if parts and parts[0].isdigit() else 5
+                action_result = await list_appointments(db, {"limit": limit})
+                result["text"] = action_result.get("text", "")
+            
+            elif action_type == "CREATE_OPPORTUNITY":
+                # Format: title:amount:probability:contact_name:description
+                params = {
+                    "title": parts[0] if len(parts) > 0 else "Nouvelle affaire",
+                    "amount": parts[1] if len(parts) > 1 else "0",
+                    "probability": parts[2] if len(parts) > 2 else "50",
+                    "contact_name": parts[3] if len(parts) > 3 else "",
+                    "description": parts[4] if len(parts) > 4 else ""
+                }
+                action_result = await create_opportunity(db, params)
+                result["text"] = action_result.get("text", "")
+            
+            elif action_type == "UPDATE_OPPORTUNITY":
+                # Format: search:field=value
+                if parts:
+                    search = parts[0]
+                    params = {"search": search}
+                    for p in parts[1:]:
+                        if "=" in p:
+                            key, val = p.split("=", 1)
+                            params[key.strip()] = val.strip()
+                    action_result = await update_opportunity(db, params)
+                    result["text"] = action_result.get("text", "")
+            
+            elif action_type == "LIST_OPPORTUNITIES":
+                limit = int(parts[0]) if parts and parts[0].isdigit() else 5
+                action_result = await list_opportunities(db, {"limit": limit})
+                result["text"] = action_result.get("text", "")
+            
+            elif action_type == "CREATE_BLOG_POST":
+                # Format: title:content:category:tags:status
+                params = {
+                    "title": parts[0] if len(parts) > 0 else "Nouvel article",
+                    "content": parts[1] if len(parts) > 1 else "",
+                    "category": parts[2] if len(parts) > 2 else "general",
+                    "tags": parts[3].split(",") if len(parts) > 3 else [],
+                    "status": parts[4] if len(parts) > 4 else "draft"
+                }
+                action_result = await create_blog_post(db, params, generate_image_func=generate_image_nano_banana)
+                result["text"] = action_result.get("text", "")
+                if action_result.get("cover_image"):
+                    result["document_url"] = action_result["cover_image"]
+                    result["is_image"] = True
+            
+            elif action_type == "CREATE_EDITORIAL":
+                # Format: title:date:platform:description:content_type
+                params = {
+                    "title": parts[0] if len(parts) > 0 else "Publication",
+                    "date": parts[1] if len(parts) > 1 else "",
+                    "platform": parts[2] if len(parts) > 2 else "blog",
+                    "description": parts[3] if len(parts) > 3 else "",
+                    "content_type": parts[4] if len(parts) > 4 else "article"
+                }
+                action_result = await create_editorial_entry(db, params)
+                result["text"] = action_result.get("text", "")
+            
+            elif action_type == "CREATE_MULTILINK":
+                # Format: title:slug:description
+                params = {
+                    "title": parts[0] if len(parts) > 0 else "Ma page",
+                    "slug": parts[1] if len(parts) > 1 else "",
+                    "description": parts[2] if len(parts) > 2 else ""
+                }
+                action_result = await create_multilink(db, params)
+                result["text"] = action_result.get("text", "")
+            
+            elif action_type == "GET_ANALYTICS":
+                action_result = await get_analytics(db, {})
+                result["text"] = action_result.get("text", "")
+            
+            elif action_type == "SEARCH_CRM":
+                query = parts[0] if parts else ""
+                action_result = await search_crm(db, {"query": query})
+                result["text"] = action_result.get("text", "")
+            
+            elif action_type == "CREATE_USER":
+                # Format: email:first_name:last_name:role
+                params = {
+                    "email": parts[0] if len(parts) > 0 else "",
+                    "first_name": parts[1] if len(parts) > 1 else "",
+                    "last_name": parts[2] if len(parts) > 2 else "",
+                    "role": parts[3] if len(parts) > 3 else "user"
+                }
+                action_result = await create_user(db, params)
+                result["text"] = action_result.get("text", "")
                     
         except Exception as e:
             logger.error(f"Error processing action {action_type}: {e}")
