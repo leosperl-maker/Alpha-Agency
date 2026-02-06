@@ -534,6 +534,90 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                         })
                         if file_doc and file_doc.get("url"):
                             result["document_url"] = file_doc["url"]
+                        else:
+                            # Also search in invoices/quotes
+                            invoice = await db.invoices.find_one({
+                                "$or": [
+                                    {"client_name": {"$regex": search_term, "$options": "i"}},
+                                    {"invoice_number": {"$regex": search_term, "$options": "i"}},
+                                    {"number": {"$regex": search_term, "$options": "i"}}
+                                ]
+                            }, sort=[("created_at", -1)])
+                            if invoice:
+                                pdf_url = invoice.get("pdf_url")
+                                if not pdf_url:
+                                    pdf_url = await generate_and_upload_quote_pdf(invoice.get("id"))
+                                if pdf_url:
+                                    result["document_url"] = pdf_url
+                                    result["document_name"] = f"{invoice.get('invoice_number', 'document')}.pdf"
+                            
+            elif action_type == "SEND_INVOICE":
+                # Search for invoice/quote by client name, company, number, or description
+                search_term = parts[0] if parts else ""
+                if search_term:
+                    logger.info(f"Searching invoice/quote with term: {search_term}")
+                    
+                    # Build search query - search in multiple fields
+                    search_query = {
+                        "$or": [
+                            {"client_name": {"$regex": search_term, "$options": "i"}},
+                            {"invoice_number": {"$regex": search_term, "$options": "i"}},
+                            {"number": {"$regex": search_term, "$options": "i"}},
+                            {"items.title": {"$regex": search_term, "$options": "i"}},
+                            {"items.description": {"$regex": search_term, "$options": "i"}}
+                        ]
+                    }
+                    
+                    # Find the most recent matching invoice/quote
+                    invoice = await db.invoices.find_one(search_query, sort=[("created_at", -1)])
+                    
+                    if invoice:
+                        logger.info(f"Found invoice: {invoice.get('invoice_number')} for {invoice.get('client_name')}")
+                        
+                        # Generate PDF if not exists
+                        pdf_url = invoice.get("pdf_url")
+                        if not pdf_url:
+                            logger.info(f"Generating PDF for invoice {invoice.get('id')}")
+                            pdf_url = await generate_and_upload_quote_pdf(invoice.get("id"))
+                        
+                        if pdf_url:
+                            result["document_url"] = pdf_url
+                            doc_type = "Devis" if invoice.get("document_type") == "devis" or invoice.get("type") == "devis" else "Facture"
+                            result["document_name"] = f"{doc_type}_{invoice.get('invoice_number', invoice.get('number', 'document'))}.pdf"
+                            result["text"] = f"✅ {doc_type} trouvé: {invoice.get('invoice_number', invoice.get('number', '?'))} pour {invoice.get('client_name', '?')} - {invoice.get('total', 0)}€"
+                            logger.info(f"Invoice PDF ready: {pdf_url}")
+                        else:
+                            result["text"] = f"⚠️ Devis/facture trouvé mais impossible de générer le PDF."
+                    else:
+                        # Try a more flexible search
+                        words = search_term.split()
+                        for word in words:
+                            if len(word) >= 3:
+                                invoice = await db.invoices.find_one({
+                                    "$or": [
+                                        {"client_name": {"$regex": word, "$options": "i"}},
+                                        {"invoice_number": {"$regex": word, "$options": "i"}}
+                                    ]
+                                }, sort=[("created_at", -1)])
+                                if invoice:
+                                    pdf_url = invoice.get("pdf_url")
+                                    if not pdf_url:
+                                        pdf_url = await generate_and_upload_quote_pdf(invoice.get("id"))
+                                    if pdf_url:
+                                        result["document_url"] = pdf_url
+                                        doc_type = "Devis" if invoice.get("document_type") == "devis" or invoice.get("type") == "devis" else "Facture"
+                                        result["document_name"] = f"{doc_type}_{invoice.get('invoice_number', invoice.get('number', 'document'))}.pdf"
+                                        result["text"] = f"✅ {doc_type} trouvé: {invoice.get('invoice_number', invoice.get('number', '?'))} pour {invoice.get('client_name', '?')} - {invoice.get('total', 0)}€"
+                                    break
+                        
+                        if "document_url" not in result:
+                            # List available invoices to help user
+                            recent_invoices = await db.invoices.find({}).sort("created_at", -1).limit(5).to_list(5)
+                            if recent_invoices:
+                                invoice_list = "\n".join([f"- {i.get('invoice_number', i.get('number', '?'))}: {i.get('client_name', '?')} ({i.get('total', 0)}€)" for i in recent_invoices])
+                                result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'.\n\n📋 Devis/factures récents:\n{invoice_list}"
+                            else:
+                                result["text"] = f"❌ Aucun devis/facture trouvé pour '{search_term}'."
                             
             elif action_type == "CREATE_TASK":
                 task_data = {
