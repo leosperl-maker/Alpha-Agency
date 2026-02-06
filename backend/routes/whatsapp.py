@@ -1173,6 +1173,82 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                     result["document_url"] = action_result["cover_image"]
                     result["is_image"] = True
             
+            elif action_type == "CREATE_BLOG_WITH_AI":
+                # Format: title:topic:category:tags
+                # Cette action génère automatiquement le contenu et l'image
+                title = parts[0] if len(parts) > 0 else "Nouvel article"
+                topic = parts[1] if len(parts) > 1 else title
+                category = parts[2] if len(parts) > 2 else "general"
+                tags = parts[3].split(",") if len(parts) > 3 else []
+                
+                logger.info(f"📝 CREATE_BLOG_WITH_AI: Generating article about '{topic}'")
+                
+                # Générer le contenu de l'article avec l'IA
+                content_prompt = f"""Écris un article de blog professionnel et complet sur le sujet suivant: {topic}
+
+L'article doit avoir:
+- Une introduction accrocheuse (2-3 phrases)
+- 3-4 sections avec des sous-titres pertinents
+- Du contenu détaillé et informatif pour chaque section
+- Une conclusion avec un appel à l'action
+
+Écris directement l'article en français, de manière professionnelle et engageante. Environ 500-800 mots."""
+
+                try:
+                    from emergentintegrations.llm.gemini import GeminiChat
+                    
+                    EMERGENT_LLM_KEY = os.environ.get("EMERGENT_API_KEY", "")
+                    content_chat = GeminiChat(api_key=EMERGENT_LLM_KEY)
+                    content_response = await content_chat.send_message(content_prompt)
+                    generated_content = content_response.text if hasattr(content_response, 'text') else str(content_response)
+                    
+                    logger.info(f"📝 Generated content: {len(generated_content)} characters")
+                    
+                    # Générer l'image de couverture
+                    cover_image = await generate_image_nano_banana(f"Professional modern blog header image about {topic}, clean corporate style, high quality, 16:9 aspect ratio")
+                    
+                    logger.info(f"🖼️ Generated cover image: {cover_image}")
+                    
+                    # Créer l'article
+                    post_data = {
+                        "id": str(uuid.uuid4()),
+                        "title": title,
+                        "slug": title.lower().replace(" ", "-").replace("'", ""),
+                        "excerpt": generated_content[:200] + "...",
+                        "content": generated_content,
+                        "content_blocks": [
+                            {
+                                "id": str(uuid.uuid4()),
+                                "type": "paragraph",
+                                "content": generated_content
+                            }
+                        ],
+                        "cover_image": cover_image,
+                        "category": category,
+                        "tags": tags,
+                        "status": "draft",
+                        "author": "MoltBot",
+                        "seo_title": title,
+                        "seo_description": generated_content[:160],
+                        "source": "whatsapp_moltbot_ai",
+                        "created_at": datetime.now(timezone.utc),
+                        "updated_at": datetime.now(timezone.utc)
+                    }
+                    
+                    await db.blog_posts.insert_one(post_data)
+                    logger.info(f"✅ Article créé avec succès: {post_data['id']}")
+                    
+                    result["text"] = f"✅ Article créé avec succès!\n\n📝 Titre: {title}\n📁 Catégorie: {category}\n🏷️ Tags: {', '.join(tags) if tags else 'Aucun'}\n\nL'article est en brouillon. Tu peux le consulter et le publier depuis le CRM."
+                    
+                    if cover_image:
+                        result["document_url"] = cover_image
+                        result["is_image"] = True
+                        result["document_name"] = f"cover_{title[:30]}.png"
+                    
+                except Exception as e:
+                    logger.error(f"❌ CREATE_BLOG_WITH_AI error: {e}")
+                    result["text"] = f"❌ Erreur lors de la création de l'article: {str(e)}"
+            
             elif action_type == "CREATE_EDITORIAL":
                 # Format: title:date:platform:description:content_type
                 params = {
