@@ -14,6 +14,13 @@ import logging
 import json
 
 from .database import db
+from .moltbot_actions import (
+    create_contact, update_contact, create_task, update_task,
+    create_appointment, list_appointments, create_opportunity, 
+    update_opportunity, list_opportunities, create_blog_post,
+    create_editorial_entry, create_multilink, get_analytics,
+    create_user, search_crm
+)
 
 router = APIRouter(prefix="/whatsapp", tags=["WhatsApp"])
 logger = logging.getLogger(__name__)
