@@ -85,33 +85,35 @@ CRM complet avec assistant IA MoltBot, intégrations multiples, et analytics ava
 - **Rappels RDV automatiques** - Notification WhatsApp 30 min avant chaque RDV ✅ NOUVEAU
 - **Notifications de publication** - Notification quand un post programmé est publié ✅ NOUVEAU
 
-### Actions MoltBot Disponibles (26 au total)
+### Actions MoltBot Disponibles (28 au total)
 1. CREATE_QUOTE_WITH_SERVICES - Créer devis avec services
-2. SEND_INVOICE - Chercher et envoyer devis/facture
-3. CREATE_CONTACT - Créer contact
-4. UPDATE_CONTACT - Modifier contact
-5. CREATE_TASK - Créer tâche
-6. UPDATE_TASK - Modifier tâche
-7. CREATE_APPOINTMENT - Créer RDV
-8. LIST_APPOINTMENTS - Lister RDV
-9. CREATE_OPPORTUNITY - Créer affaire pipeline
-10. UPDATE_OPPORTUNITY - Modifier affaire
-11. LIST_OPPORTUNITIES - Lister affaires
-12. CREATE_BLOG_POST - Créer article blog
-13. CREATE_EDITORIAL - Ajouter au calendrier éditorial
-14. CREATE_MULTILINK - Créer page multilink
-15. SEND_FILE - Chercher et envoyer fichier
-16. SEND_DOCUMENT - Chercher et envoyer document
-17. GENERATE_IMAGE - Générer image IA
-18. GET_ANALYTICS - Voir statistiques
-19. SEARCH_CRM - Recherche globale
-20. ANALYZE_WEBSITE - Analyser site web
-21. CREATE_USER - Créer utilisateur
-22. SEARCH_COMPANY - Recherche Societe.com
-23. IMPORT_DRIVE - Importer fichiers Google Drive
-24. SCHEDULE_SOCIAL_POST - Programmer post réseaux sociaux
-25. LIST_SOCIAL_POSTS - Lister posts programmés
-26. CLASSIFY_FILE - Classer fichier reçu
+2. SEND_QUOTE - Chercher et envoyer DEVIS uniquement (DEV-xxx) ✅ NOUVEAU
+3. SEND_INVOICE - Chercher et envoyer FACTURE uniquement (FAC-xxx) ✅ AMÉLIORÉ
+4. CREATE_CONTACT - Créer contact
+5. UPDATE_CONTACT - Modifier contact
+6. CREATE_TASK - Créer tâche
+7. UPDATE_TASK - Modifier tâche
+8. CREATE_APPOINTMENT - Créer RDV
+9. LIST_APPOINTMENTS - Lister RDV
+10. CREATE_OPPORTUNITY - Créer affaire pipeline
+11. UPDATE_OPPORTUNITY - Modifier affaire
+12. LIST_OPPORTUNITIES - Lister affaires
+13. CREATE_BLOG_POST - Créer article blog simple
+14. CREATE_BLOG_WITH_AI - Créer article complet avec IA (contenu + image) ✅ NOUVEAU
+15. CREATE_EDITORIAL - Ajouter au calendrier éditorial
+16. CREATE_MULTILINK - Créer page multilink
+17. SEND_FILE - Chercher et envoyer fichier avec filtre type (image/pdf/excel/ppt) ✅ AMÉLIORÉ
+18. SEND_DOCUMENT - Chercher et envoyer document
+19. GENERATE_IMAGE - Générer image IA
+20. GET_ANALYTICS - Voir statistiques
+21. SEARCH_CRM - Recherche globale améliorée (contacts + factures via contact_id) ✅ AMÉLIORÉ
+22. ANALYZE_WEBSITE - Analyser site web
+23. CREATE_USER - Créer utilisateur
+24. SEARCH_COMPANY - Recherche Societe.com
+25. IMPORT_DRIVE - Importer fichiers Google Drive
+26. SCHEDULE_SOCIAL_POST - Programmer post réseaux sociaux
+27. LIST_SOCIAL_POSTS - Lister posts programmés
+28. CLASSIFY_FILE - Classer fichier reçu
 
 ### Scheduler MoltBot - Tâches automatiques
 | Tâche | Fréquence | Description |
