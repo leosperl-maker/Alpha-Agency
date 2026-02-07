@@ -1239,10 +1239,9 @@ L'article doit avoir:
                     else:
                         content_chat = LlmChat(
                             api_key=EMERGENT_LLM_KEY,
-                            model="gemini-2.0-flash",
                             session_id=f"blog_creation_{datetime.now().strftime('%Y%m%d%H%M%S')}",
                             system_message="Tu es un rédacteur web professionnel spécialisé dans la création de contenu engageant."
-                        )
+                        ).with_model("gemini-2.0-flash")
                         
                         content_response = await content_chat.send_async(UserMessage(text=content_prompt))
                         generated_content = content_response.text if hasattr(content_response, 'text') else str(content_response)
