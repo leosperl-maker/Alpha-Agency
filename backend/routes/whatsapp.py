@@ -1193,18 +1193,134 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                     action_result = await update_task(db, params)
                     result["text"] = action_result.get("text", "")
             
+            elif action_type == "SEARCH_CONTACT":
+                # Chercher un contact pour l'associer à un RDV
+                search_term = parts[0] if parts else ""
+                if search_term:
+                    logger.info(f"🔍 SEARCH_CONTACT: Searching for '{search_term}'")
+                    
+                    # Recherche dans plusieurs champs
+                    search_words = search_term.split()
+                    or_conditions = []
+                    for word in search_words:
+                        if len(word) >= 2:
+                            or_conditions.extend([
+                                {"first_name": {"$regex": word, "$options": "i"}},
+                                {"last_name": {"$regex": word, "$options": "i"}},
+                                {"company": {"$regex": word, "$options": "i"}},
+                                {"email": {"$regex": word, "$options": "i"}}
+                            ])
+                    
+                    if or_conditions:
+                        contacts = await db.contacts.find({"$or": or_conditions}).limit(5).to_list(5)
+                        
+                        if contacts:
+                            contact_list = []
+                            for c in contacts:
+                                name = f"{c.get('first_name', '')} {c.get('last_name', '')}".strip()
+                                company = c.get('company', '')
+                                contact_id = c.get('id', '')
+                                contact_list.append(f"- {name} ({company}) - ID: {contact_id}")
+                            
+                            result["text"] = f"🔍 Contacts trouvés pour '{search_term}':\n" + "\n".join(contact_list) + "\n\nDis-moi lequel tu veux inviter au RDV."
+                        else:
+                            result["text"] = f"❌ Aucun contact trouvé pour '{search_term}'. Veux-tu que je crée un nouveau contact ?"
+                    else:
+                        result["text"] = "❌ Terme de recherche trop court"
+                else:
+                    result["text"] = "❌ Précise le nom ou l'entreprise du contact à rechercher"
+            
             elif action_type == "CREATE_APPOINTMENT":
-                # Format: title:date:time:description:contact_name:location
+                # Format: title:date:time:duration:contact_id:description:location
                 params = {
                     "title": parts[0] if len(parts) > 0 else "Rendez-vous",
                     "date": parts[1] if len(parts) > 1 else "",
                     "time": parts[2] if len(parts) > 2 else "09:00",
-                    "description": parts[3] if len(parts) > 3 else "",
-                    "contact_name": parts[4] if len(parts) > 4 else "",
-                    "location": parts[5] if len(parts) > 5 else ""
+                    "duration": parts[3] if len(parts) > 3 else "60",
+                    "contact_id": parts[4] if len(parts) > 4 else "",
+                    "description": parts[5] if len(parts) > 5 else "",
+                    "location": parts[6] if len(parts) > 6 else ""
                 }
+                
+                # Si contact_id fourni, vérifier qu'il existe
+                if params.get("contact_id"):
+                    contact = await db.contacts.find_one({"id": params["contact_id"]})
+                    if contact:
+                        params["contact_name"] = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+                
                 action_result = await create_appointment(db, params)
                 result["text"] = action_result.get("text", "")
+            
+            elif action_type == "UPDATE_APPOINTMENT":
+                # Format: search:field=value:field2=value2
+                if parts:
+                    search = parts[0]
+                    updates = {}
+                    for p in parts[1:]:
+                        if "=" in p:
+                            key, val = p.split("=", 1)
+                            updates[key.strip()] = val.strip()
+                    
+                    # Trouver le RDV
+                    appointment = await db.appointments.find_one({
+                        "$or": [
+                            {"title": {"$regex": search, "$options": "i"}},
+                            {"id": search}
+                        ]
+                    })
+                    
+                    if appointment:
+                        # Préparer les mises à jour
+                        update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
+                        
+                        if "duration" in updates:
+                            update_data["duration_minutes"] = int(updates["duration"])
+                        if "contact_id" in updates:
+                            contact = await db.contacts.find_one({"id": updates["contact_id"]})
+                            if contact:
+                                update_data["contact_id"] = updates["contact_id"]
+                                update_data["contact_name"] = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+                        if "title" in updates:
+                            update_data["title"] = updates["title"]
+                        if "description" in updates:
+                            update_data["description"] = updates["description"]
+                        if "location" in updates:
+                            update_data["location"] = updates["location"]
+                        if "status" in updates:
+                            update_data["status"] = updates["status"]
+                        if "date" in updates or "time" in updates:
+                            import pytz
+                            tz = pytz.timezone("America/Guadeloupe")
+                            
+                            # Parser la nouvelle date/heure
+                            current_start = datetime.fromisoformat(appointment.get("start_datetime", "").replace("Z", "+00:00"))
+                            
+                            if "date" in updates:
+                                for fmt in ["%d/%m/%Y", "%Y-%m-%d"]:
+                                    try:
+                                        new_date = datetime.strptime(updates["date"], fmt)
+                                        current_start = current_start.replace(year=new_date.year, month=new_date.month, day=new_date.day)
+                                        break
+                                    except:
+                                        pass
+                            
+                            if "time" in updates:
+                                try:
+                                    time_parts = updates["time"].replace("h", ":").split(":")
+                                    current_start = current_start.replace(hour=int(time_parts[0]), minute=int(time_parts[1]) if len(time_parts) > 1 else 0)
+                                except:
+                                    pass
+                            
+                            update_data["start_datetime"] = current_start.isoformat()
+                            duration = update_data.get("duration_minutes", appointment.get("duration_minutes", 60))
+                            update_data["end_datetime"] = (current_start + timedelta(minutes=duration)).isoformat()
+                        
+                        await db.appointments.update_one({"id": appointment["id"]}, {"$set": update_data})
+                        result["text"] = f"✅ RDV '{appointment.get('title')}' mis à jour avec succès!"
+                    else:
+                        result["text"] = f"❌ Aucun RDV trouvé pour '{search}'"
+                else:
+                    result["text"] = "❌ Précise le RDV à modifier et les champs à changer"
             
             elif action_type == "LIST_APPOINTMENTS":
                 limit = int(parts[0]) if parts and parts[0].isdigit() else 5
