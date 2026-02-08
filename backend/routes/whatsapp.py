@@ -1148,12 +1148,26 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                         if result_type == "company_details":
                             # Résultat pour recherche par SIRET
                             company = search_result.get("company", {})
+                            dirigeants = search_result.get("dirigeants", [])
+                            
                             result["text"] = f"🏢 **Entreprise trouvée:**\n\n"
                             result["text"] += f"📋 Nom: {company.get('nom', 'N/A')}\n"
                             result["text"] += f"🔢 SIREN: {company.get('siren', 'N/A')}\n"
                             result["text"] += f"🔢 SIRET: {company.get('siret', 'N/A')}\n"
                             result["text"] += f"📍 Ville: {company.get('ville', 'N/A')}\n"
-                            result["text"] += f"💼 Activité: {company.get('activite', 'N/A')}"
+                            if company.get('adresse'):
+                                result["text"] += f"📍 Adresse: {company.get('adresse')}\n"
+                            result["text"] += f"💼 Activité: {company.get('activite', 'N/A')}\n"
+                            
+                            # Afficher le dirigeant
+                            if company.get('dirigeant'):
+                                result["text"] += f"\n👤 **Dirigeant:** {company.get('dirigeant')}"
+                            elif dirigeants:
+                                result["text"] += f"\n👤 **Dirigeants:**\n"
+                                for d in dirigeants[:3]:
+                                    name = f"{d.get('prenoms', '')} {d.get('nom', '')}".strip()
+                                    qualite = d.get('qualite', d.get('fonction', ''))
+                                    result["text"] += f"- {name} ({qualite})\n"
                             
                         elif result_type == "dirigeant_search":
                             # Résultat pour recherche par dirigeant
