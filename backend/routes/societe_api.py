@@ -430,7 +430,7 @@ async def search_company_for_whatsapp(query: str, search_type: str = "auto") -> 
             if isinstance(company_data, list) and len(company_data) > 0:
                 company_data = company_data[0]
             
-            if company_data and not data.get("error"):
+            if company_data and company_data.get("denomination") and not data.get("error"):
                 return {
                     "success": True,
                     "type": "company_details",
@@ -445,6 +445,40 @@ async def search_company_for_whatsapp(query: str, search_type: str = "auto") -> 
                     "dirigeants": []
                 }
             else:
+                # Fallback: API gouvernementale française (recherche-entreprises.api.gouv.fr)
+                logger.info(f"Societe.com failed, trying gouvernement API for {clean_id}")
+                try:
+                    async with httpx.AsyncClient(timeout=30) as client:
+                        gov_response = await client.get(f"https://recherche-entreprises.api.gouv.fr/search?q={clean_id}")
+                        if gov_response.status_code == 200:
+                            gov_data = gov_response.json()
+                            results = gov_data.get("results", [])
+                            if results:
+                                company = results[0]
+                                dirigeants = company.get("dirigeants", [])
+                                dirigeant_text = ""
+                                if dirigeants:
+                                    d = dirigeants[0]
+                                    dirigeant_text = f"{d.get('prenoms', '')} {d.get('nom', '')} ({d.get('qualite', '')})"
+                                
+                                return {
+                                    "success": True,
+                                    "type": "company_details",
+                                    "company": {
+                                        "nom": company.get("nom_complet", company.get("nom_raison_sociale", "")),
+                                        "siren": company.get("siren", ""),
+                                        "siret": company.get("siege", {}).get("siret", ""),
+                                        "ville": company.get("siege", {}).get("libelle_commune", ""),
+                                        "activite": company.get("siege", {}).get("activite_principale", ""),
+                                        "adresse": company.get("siege", {}).get("adresse", ""),
+                                        "dirigeant": dirigeant_text
+                                    },
+                                    "bilans": [],
+                                    "dirigeants": dirigeants
+                                }
+                except Exception as e:
+                    logger.error(f"Gouvernement API error: {e}")
+                
                 return {"success": False, "error": "Entreprise non trouvée"}
         
         elif search_type == "dirigeant":
