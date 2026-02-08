@@ -1970,9 +1970,7 @@ async def generate_image_with_reference(prompt: str, reference_image_base64: str
             api_key=EMERGENT_KEY, 
             session_id=f"image_edit_{uuid.uuid4()}", 
             system_message="You are an image editing assistant"
-        )
-        
-        chat.with_model("gemini", "gemini-3-pro-image-preview").with_params(modalities=["image", "text"])
+        ).with_model("gemini", "gemini-3-pro-image-preview").with_params(modalities=["image", "text"])
         
         # Create message with reference image
         msg = UserMessage(
