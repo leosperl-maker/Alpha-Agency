@@ -1243,7 +1243,7 @@ L'article doit avoir:
                             system_message="Tu es un rédacteur web professionnel spécialisé dans la création de contenu engageant."
                         ).with_model("google", "gemini-2.0-flash")
                         
-                        content_response = await content_chat.send_async(UserMessage(text=content_prompt))
+                        content_response = await content_chat.send_message(UserMessage(text=content_prompt))
                         generated_content = content_response.text if hasattr(content_response, 'text') else str(content_response)
                         
                         logger.info(f"📝 Generated content: {len(generated_content)} characters")
