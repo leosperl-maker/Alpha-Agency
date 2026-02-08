@@ -108,47 +108,93 @@ async def update_task(db: AsyncIOMotorDatabase, params: Dict[str, Any]) -> Dict[
 
 async def create_appointment(db: AsyncIOMotorDatabase, params: Dict[str, Any]) -> Dict[str, Any]:
     """Créer un nouveau rendez-vous"""
+    import pytz
+    
+    # Fuseau horaire Guadeloupe/Martinique
+    tz = pytz.timezone("America/Guadeloupe")
+    now = datetime.now(tz)
+    
     # Parser la date
     date_str = params.get("date", "")
     time_str = params.get("time", "09:00")
     
+    logger.info(f"CREATE_APPOINTMENT: date={date_str}, time={time_str}, title={params.get('title')}")
+    
     try:
         if date_str:
+            # Nettoyer la date
+            date_str = date_str.strip()
+            
             # Essayer différents formats
-            for fmt in ["%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y"]:
+            date_obj = None
+            for fmt in ["%d/%m/%Y", "%Y-%m-%d", "%d-%m-%Y", "%d.%m.%Y"]:
                 try:
                     date_obj = datetime.strptime(date_str, fmt)
                     break
                 except:
                     continue
-            else:
-                date_obj = datetime.now() + timedelta(days=1)
+            
+            if not date_obj:
+                # Si la date n'a pas pu être parsée, utiliser demain
+                logger.warning(f"Could not parse date: {date_str}, using tomorrow")
+                date_obj = now + timedelta(days=1)
         else:
-            date_obj = datetime.now() + timedelta(days=1)
+            date_obj = now + timedelta(days=1)
         
         # Ajouter l'heure
-        hour, minute = map(int, time_str.split(":"))
-        date_obj = date_obj.replace(hour=hour, minute=minute)
-    except:
-        date_obj = datetime.now() + timedelta(days=1, hours=9)
+        try:
+            time_str = time_str.strip().replace("h", ":").replace("H", ":")
+            if ":" in time_str:
+                parts = time_str.split(":")
+                hour = int(parts[0])
+                minute = int(parts[1]) if len(parts) > 1 else 0
+            else:
+                hour = int(time_str)
+                minute = 0
+            date_obj = date_obj.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        except Exception as e:
+            logger.warning(f"Could not parse time: {time_str}, using 09:00 - {e}")
+            date_obj = date_obj.replace(hour=9, minute=0, second=0, microsecond=0)
+        
+        # Localiser la date
+        date_obj = tz.localize(date_obj)
+        
+    except Exception as e:
+        logger.error(f"Date parsing error: {e}")
+        date_obj = tz.localize((now + timedelta(days=1)).replace(hour=9, minute=0, second=0, microsecond=0))
     
+    appointment_id = str(uuid.uuid4())
     appointment_data = {
-        "id": str(uuid.uuid4()),
+        "id": appointment_id,
         "title": params.get("title", "Rendez-vous"),
         "description": params.get("description", ""),
-        "start_time": date_obj.isoformat(),
-        "end_time": (date_obj + timedelta(hours=1)).isoformat(),
+        "start_datetime": date_obj.isoformat(),
+        "end_datetime": (date_obj + timedelta(hours=1)).isoformat(),
+        "duration_minutes": 60,
         "contact_id": params.get("contact_id"),
         "contact_name": params.get("contact_name", ""),
         "location": params.get("location", ""),
         "type": params.get("type", "meeting"),
         "status": "scheduled",
+        "google_event_id": None,
+        "google_meet_link": None,
+        "email_sent": False,
+        "reminders": [],
         "source": "whatsapp_moltbot",
-        "created_at": datetime.now(timezone.utc)
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
     }
+    
     await db.appointments.insert_one(appointment_data)
-    logger.info(f"RDV créé: {appointment_data['title']} le {date_obj.strftime('%d/%m/%Y à %H:%M')}")
-    return {"success": True, "appointment_id": appointment_data["id"], "text": f"✅ RDV créé: {appointment_data['title']} le {date_obj.strftime('%d/%m/%Y à %H:%M')}"}
+    
+    formatted_date = date_obj.strftime('%d/%m/%Y à %H:%M')
+    logger.info(f"✅ RDV créé: {appointment_data['title']} le {formatted_date}")
+    
+    return {
+        "success": True, 
+        "appointment_id": appointment_id, 
+        "text": f"✅ RDV créé: {appointment_data['title']} le {formatted_date}"
+    }
 
 
 async def list_appointments(db: AsyncIOMotorDatabase, params: Dict[str, Any]) -> Dict[str, Any]:
