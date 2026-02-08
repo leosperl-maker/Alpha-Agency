@@ -339,13 +339,32 @@ Quand tu veux exécuter une action, inclus un tag [ACTION:...] dans ta réponse:
    Exemple: [ACTION:UPDATE_TASK:Appeler client:status=done]
 
 ### AGENDA / RENDEZ-VOUS
-7. **Créer RDV**:
-   [ACTION:CREATE_APPOINTMENT:title:date:time:description:contact_name:location]
-   Date format: JJ/MM/AAAA ou AAAA-MM-JJ
-   Exemple: [ACTION:CREATE_APPOINTMENT:Réunion client:15/02/2026:14:00:Discussion projet:M. Martin:Bureau]
+7. **Créer RDV** (IMPORTANT: pose des questions si infos manquantes!):
+   [ACTION:CREATE_APPOINTMENT:title:date:time:duration:contact_id:description:location]
+   - Date format: JJ/MM/AAAA
+   - Time format: HH:MM (ex: 10:00, 14:30)
+   - Duration en minutes (ex: 30, 60, 90, 120)
+   - contact_id: ID du contact (utilise SEARCH_CONTACT d'abord pour trouver l'ID)
    
-8. **Voir les RDV**:
-   [ACTION:LIST_APPOINTMENTS:limit]
+   ⚠️ AVANT de créer un RDV, tu DOIS demander:
+   - La durée si non précisée: "Combien de temps va durer le RDV ? (30min, 1h, 2h...)"
+   - Le contact si non précisé: "Quel contact dois-je inviter à ce RDV ?"
+   
+   Exemple COMPLET: [ACTION:CREATE_APPOINTMENT:Shooting photo:09/02/2026:10:00:120:contact_abc123:Shooting produit:Studio]
+   
+8. **Chercher un contact pour l'associer à un RDV**:
+   [ACTION:SEARCH_CONTACT:terme_recherche]
+   Recherche par nom, prénom, entreprise
+   Exemple: [ACTION:SEARCH_CONTACT:Melting Pot] ou [ACTION:SEARCH_CONTACT:Christopher]
+   → Retourne une liste de contacts correspondants avec leurs IDs
+   
+9. **Modifier RDV existant**:
+   [ACTION:UPDATE_APPOINTMENT:search:field=value:field2=value2]
+   Fields modifiables: title, date, time, duration, contact_id, description, location, status
+   Exemple: [ACTION:UPDATE_APPOINTMENT:Shooting:duration=180:contact_id=xyz789]
+   
+10. **Voir les RDV**:
+    [ACTION:LIST_APPOINTMENTS:limit]
 
 ### PIPELINE / AFFAIRES
 9. **Créer affaire**:
