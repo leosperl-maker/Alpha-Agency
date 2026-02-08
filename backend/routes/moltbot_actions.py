@@ -117,8 +117,15 @@ async def create_appointment(db: AsyncIOMotorDatabase, params: Dict[str, Any]) -
     # Parser la date
     date_str = params.get("date", "")
     time_str = params.get("time", "09:00")
+    duration_str = params.get("duration", "60")
     
-    logger.info(f"CREATE_APPOINTMENT: date={date_str}, time={time_str}, title={params.get('title')}")
+    logger.info(f"CREATE_APPOINTMENT: date={date_str}, time={time_str}, duration={duration_str}, title={params.get('title')}")
+    
+    # Parser la durée
+    try:
+        duration_minutes = int(duration_str)
+    except:
+        duration_minutes = 60
     
     try:
         if date_str:
@@ -164,15 +171,25 @@ async def create_appointment(db: AsyncIOMotorDatabase, params: Dict[str, Any]) -
         date_obj = tz.localize((now + timedelta(days=1)).replace(hour=9, minute=0, second=0, microsecond=0))
     
     appointment_id = str(uuid.uuid4())
+    
+    # Récupérer les infos du contact si contact_id fourni
+    contact_id = params.get("contact_id", "")
+    contact_name = params.get("contact_name", "")
+    
+    if contact_id and not contact_name:
+        contact = await db.contacts.find_one({"id": contact_id})
+        if contact:
+            contact_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+    
     appointment_data = {
         "id": appointment_id,
         "title": params.get("title", "Rendez-vous"),
         "description": params.get("description", ""),
         "start_datetime": date_obj.isoformat(),
-        "end_datetime": (date_obj + timedelta(hours=1)).isoformat(),
-        "duration_minutes": 60,
-        "contact_id": params.get("contact_id"),
-        "contact_name": params.get("contact_name", ""),
+        "end_datetime": (date_obj + timedelta(minutes=duration_minutes)).isoformat(),
+        "duration_minutes": duration_minutes,
+        "contact_id": contact_id if contact_id else None,
+        "contact_name": contact_name,
         "location": params.get("location", ""),
         "type": params.get("type", "meeting"),
         "status": "scheduled",
@@ -188,12 +205,15 @@ async def create_appointment(db: AsyncIOMotorDatabase, params: Dict[str, Any]) -
     await db.appointments.insert_one(appointment_data)
     
     formatted_date = date_obj.strftime('%d/%m/%Y à %H:%M')
-    logger.info(f"✅ RDV créé: {appointment_data['title']} le {formatted_date}")
+    duration_text = f"{duration_minutes} minutes" if duration_minutes != 60 else "1 heure"
+    contact_text = f" avec {contact_name}" if contact_name else ""
+    
+    logger.info(f"✅ RDV créé: {appointment_data['title']} le {formatted_date}{contact_text}")
     
     return {
         "success": True, 
         "appointment_id": appointment_id, 
-        "text": f"✅ RDV créé: {appointment_data['title']} le {formatted_date}"
+        "text": f"✅ RDV créé: {appointment_data['title']}\n📅 {formatted_date}\n⏱️ Durée: {duration_text}{contact_text}"
     }
 
 
