@@ -1513,10 +1513,9 @@ async def analyze_website(url: str) -> str:
             if EMERGENT_KEY:
                 chat = LlmChat(
                     api_key=EMERGENT_KEY,
-                    model="gemini-2.0-flash",
                     session_id=f"website_analysis_{datetime.now().strftime('%Y%m%d%H%M%S')}",
                     system_message="Tu es un expert en analyse de sites web. Donne une analyse concise mais complète."
-                )
+                ).with_model("google", "gemini-2.0-flash")
                 
                 analysis_prompt = f"""Analyse ce site web:
 URL: {url}
