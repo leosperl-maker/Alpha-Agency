@@ -1914,10 +1914,7 @@ async def generate_image_nano_banana(prompt: str) -> str:
             api_key=EMERGENT_KEY, 
             session_id=f"image_gen_{uuid.uuid4()}", 
             system_message="You are an image generation assistant"
-        )
-        
-        # Configure for Nano Banana image generation
-        chat.with_model("gemini", "gemini-3-pro-image-preview").with_params(modalities=["image", "text"])
+        ).with_model("gemini", "gemini-3-pro-image-preview").with_params(modalities=["image", "text"])
         
         # Generate image
         msg = UserMessage(text=prompt)
