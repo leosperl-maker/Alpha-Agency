@@ -1535,7 +1535,7 @@ Donne une analyse en français (max 500 caractères) sur:
 3. Points forts
 4. Axes d'amélioration SEO"""
                 
-                ai_analysis = await chat.send_async(UserMessage(text=analysis_prompt))
+                ai_analysis = await chat.send_message(UserMessage(text=analysis_prompt))
                 
                 return f"""🌐 **Analyse de {url}**
 
