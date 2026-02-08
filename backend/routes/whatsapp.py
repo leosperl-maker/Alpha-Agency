@@ -1141,11 +1141,49 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                     if search_result.get("success"):
                         result["company_search"] = search_result
                         logger.info(f"Company search for '{query}': {search_result.get('type')}")
+                        
+                        # Générer le texte de réponse
+                        result_type = search_result.get("type")
+                        
+                        if result_type == "company_details":
+                            # Résultat pour recherche par SIRET
+                            company = search_result.get("company", {})
+                            result["text"] = f"🏢 **Entreprise trouvée:**\n\n"
+                            result["text"] += f"📋 Nom: {company.get('nom', 'N/A')}\n"
+                            result["text"] += f"🔢 SIREN: {company.get('siren', 'N/A')}\n"
+                            result["text"] += f"🔢 SIRET: {company.get('siret', 'N/A')}\n"
+                            result["text"] += f"📍 Ville: {company.get('ville', 'N/A')}\n"
+                            result["text"] += f"💼 Activité: {company.get('activite', 'N/A')}"
+                            
+                        elif result_type == "dirigeant_search":
+                            # Résultat pour recherche par dirigeant
+                            companies = search_result.get("companies", [])
+                            person = search_result.get("person", query)
+                            result["text"] = f"👤 **Entreprises de {person}:**\n\n"
+                            for i, c in enumerate(companies, 1):
+                                result["text"] += f"{i}. {c.get('nom', 'N/A')}\n"
+                                result["text"] += f"   SIREN: {c.get('siren', 'N/A')}\n"
+                                result["text"] += f"   Fonction: {c.get('fonction', 'N/A')}\n"
+                                result["text"] += f"   Ville: {c.get('ville', 'N/A')}\n\n"
+                                
+                        elif result_type == "company_search":
+                            # Résultat pour recherche par nom d'entreprise
+                            companies = search_result.get("companies", [])
+                            result["text"] = f"🔍 **{search_result.get('count', len(companies))} entreprise(s) trouvée(s) pour '{query}':**\n\n"
+                            for i, c in enumerate(companies, 1):
+                                result["text"] += f"{i}. {c.get('nom', 'N/A')}\n"
+                                result["text"] += f"   SIREN: {c.get('siren', 'N/A')}\n"
+                                result["text"] += f"   Ville: {c.get('ville', 'N/A')}\n"
+                                result["text"] += f"   Activité: {c.get('activite', 'N/A')}\n\n"
+                        else:
+                            result["text"] = f"✅ Recherche effectuée pour '{query}'"
                     else:
+                        result["text"] = f"❌ {search_result.get('error', 'Aucun résultat trouvé')}"
                         result["company_error"] = search_result.get("error", "Erreur recherche")
                         
                 except Exception as search_err:
                     logger.error(f"Company search error: {search_err}")
+                    result["text"] = f"❌ Erreur lors de la recherche: {str(search_err)}"
                     result["company_error"] = str(search_err)
             
             elif action_type == "COMPANY_FINANCIALS":
@@ -1160,11 +1198,28 @@ async def process_ai_action_tags(ai_response: str, phone: str) -> tuple:
                     if financial_result.get("success"):
                         result["financials"] = financial_result
                         logger.info(f"Financial data retrieved for {siret_siren}")
+                        
+                        # Générer le texte de réponse
+                        company = financial_result.get("company", {})
+                        bilans = financial_result.get("bilans", [])
+                        
+                        result["text"] = f"📊 **Données financières:**\n\n"
+                        result["text"] += f"🏢 {company.get('nom', 'N/A')}\n"
+                        result["text"] += f"🔢 SIREN: {company.get('siren', 'N/A')}\n\n"
+                        
+                        if bilans:
+                            result["text"] += "📈 **Bilans:**\n"
+                            for b in bilans[:3]:
+                                result["text"] += f"- {b.get('annee', 'N/A')}: CA {b.get('ca', 'N/A')}€, Résultat {b.get('resultat', 'N/A')}€\n"
+                        else:
+                            result["text"] += "Aucun bilan disponible."
                     else:
+                        result["text"] = f"❌ {financial_result.get('error', 'Données financières non trouvées')}"
                         result["financials_error"] = financial_result.get("error", "Erreur données financières")
                         
                 except Exception as fin_err:
                     logger.error(f"Financials error: {fin_err}")
+                    result["text"] = f"❌ Erreur lors de la récupération des données: {str(fin_err)}"
                     result["financials_error"] = str(fin_err)
             
             # ========== NOUVELLES ACTIONS CRM COMPLÈTES ==========
