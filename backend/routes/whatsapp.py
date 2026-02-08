@@ -217,8 +217,30 @@ async def intelligent_assistant(message: str, phone: str) -> dict:
             direction = "👤 Vous" if msg.get("direction") == "incoming" else "🤖 MoltBot"
             conversation_context += f"{direction}: {msg.get('message', '')[:200]}\n"
     
+    # Obtenir la date/heure actuelle dans le fuseau horaire local
+    import pytz
+    tz = pytz.timezone("America/Guadeloupe")
+    now = datetime.now(tz)
+    current_date = now.strftime("%A %d %B %Y")
+    current_time = now.strftime("%H:%M")
+    tomorrow = (now + timedelta(days=1)).strftime("%d/%m/%Y")
+    
+    # Traduire le jour en français
+    days_fr = {"Monday": "Lundi", "Tuesday": "Mardi", "Wednesday": "Mercredi", "Thursday": "Jeudi", "Friday": "Vendredi", "Saturday": "Samedi", "Sunday": "Dimanche"}
+    months_fr = {"January": "janvier", "February": "février", "March": "mars", "April": "avril", "May": "mai", "June": "juin", "July": "juillet", "August": "août", "September": "septembre", "October": "octobre", "November": "novembre", "December": "décembre"}
+    
+    for en, fr in days_fr.items():
+        current_date = current_date.replace(en, fr)
+    for en, fr in months_fr.items():
+        current_date = current_date.replace(en, fr)
+    
     system_prompt = f"""Tu es MoltBot, l'assistant IA ULTRA-INTELLIGENT du CRM Alpha Agency. Tu parles en français.
 Tu as accès COMPLET au CRM et tu EXÉCUTES des actions en temps réel.
+
+## DATE ET HEURE ACTUELLES (Fuseau: Guadeloupe/Martinique)
+- **Aujourd'hui**: {current_date}
+- **Heure actuelle**: {current_time}
+- **Demain sera le**: {tomorrow}
 
 ## RÈGLES ABSOLUES - JAMAIS D'EXCEPTION:
 
@@ -238,13 +260,19 @@ Tu as accès COMPLET au CRM et tu EXÉCUTES des actions en temps réel.
 - Si on te demande plusieurs choses, tu exécutes TOUTES les actions dans la même réponse
 - Exemple: "Crée un article et génère une image" → Tu inclus les DEUX tags d'action
 
-### 4. RÈGLES MÉTIER
+### 4. DATES ET HEURES
+- Quand on dit "demain", utilise la date: {tomorrow}
+- Quand on dit "aujourd'hui", utilise la date: {now.strftime('%d/%m/%Y')}
+- Pour les heures, utilise le format 24h (ex: 14:00, pas 2pm)
+- Format de date pour les actions: DD/MM/YYYY (ex: {tomorrow})
+
+### 5. RÈGLES MÉTIER
 - TVA: {tva_rate}% (pas 20%)
 - Services: Cherche d'abord dans les services préenregistrés
 - Contacts: Demande les infos manquantes AVANT de créer
 - Documents: Cherche par nom ET contenu, puis ENVOIE le fichier
 
-### 5. CAPACITÉS SPÉCIALES
+### 6. CAPACITÉS SPÉCIALES
 - GÉNÉRATION D'IMAGES: [ACTION:GENERATE_IMAGE:description en anglais]
 - ARTICLE DE BLOG COMPLET: [ACTION:CREATE_BLOG_WITH_AI:titre:sujet:catégorie:tags]
 - RECHERCHE DE FICHIERS: [ACTION:SEND_FILE:nom:type] (types: pdf, image, excel, powerpoint)
