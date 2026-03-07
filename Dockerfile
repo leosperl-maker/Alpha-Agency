@@ -40,7 +40,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libffi-dev \
     libssl-dev \
     nginx \
-    supervisor \
     gettext-base \
     curl \
     && rm -rf /var/lib/apt/lists/*
@@ -59,7 +58,6 @@ COPY --from=frontend-build /app/build /app/frontend/build
 
 # Copy configuration files
 COPY nginx.conf        /etc/nginx/nginx.conf.template
-COPY supervisord.conf  /etc/supervisor/conf.d/supervisord.conf
 COPY start.sh          /start.sh
 
 RUN chmod +x /start.sh
