@@ -34,8 +34,11 @@ RUN yarn build
 # ─────────────────────────────────────────────────────────────────────────────
 FROM python:3.11-slim
 
+# Prevent interactive prompts during apt-get (fixes debconf Dialog error)
+ENV DEBIAN_FRONTEND=noninteractive
+
 # System dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libffi-dev \
     libssl-dev \
