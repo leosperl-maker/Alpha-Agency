@@ -1,15 +1,21 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Stage 1 : Build React frontend (CRA + CRACO)
 # ─────────────────────────────────────────────────────────────────────────────
-FROM node:18-alpine AS frontend-build
+FROM node:20-alpine AS frontend-build
+
+# Build tools needed by some npm packages (node-gyp, etc.)
+RUN apk add --no-cache python3 make g++ git
 
 WORKDIR /app
 
-# Copy package files
+# Install yarn globally (matching packageManager field)
+RUN npm install -g yarn@1.22.22 --quiet
+
+# Copy package.json only (no yarn.lock present in repo)
 COPY frontend/package.json ./
 
-# Install dependencies (--legacy-peer-deps for React 19 compatibility)
-RUN npm install --legacy-peer-deps
+# Install dependencies — no lockfile since none exists in repo
+RUN yarn install --no-lockfile --non-interactive
 
 # Copy all frontend source
 COPY frontend/ .
@@ -18,8 +24,9 @@ COPY frontend/ .
 ENV NODE_ENV=production
 ENV GENERATE_SOURCEMAP=false
 ENV CI=false
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-RUN npm run build
+RUN yarn build
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -27,7 +34,7 @@ RUN npm run build
 # ─────────────────────────────────────────────────────────────────────────────
 FROM python:3.11-slim
 
-# System dependencies: gcc for compiled packages, nginx + supervisor for serving
+# System dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     libffi-dev \
@@ -56,8 +63,5 @@ COPY supervisord.conf  /etc/supervisor/conf.d/supervisord.conf
 COPY start.sh          /start.sh
 
 RUN chmod +x /start.sh
-
-# Railway will inject $PORT at runtime — default 8080
-EXPOSE 8080
 
 CMD ["/start.sh"]
