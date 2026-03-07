@@ -13,7 +13,14 @@ import json
 import base64
 from datetime import datetime, timezone
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage, FileContentWithMimeType
+try:
+    from emergentintegrations.llm.chat import LlmChat, UserMessage, FileContentWithMimeType
+    EMERGENT_AVAILABLE = True
+except ImportError:
+    LlmChat = None
+    UserMessage = None
+    FileContentWithMimeType = None
+    EMERGENT_AVAILABLE = False
 from dotenv import load_dotenv
 from .database import db
 

@@ -12,7 +12,12 @@ import logging
 import httpx
 from datetime import datetime, timezone
 
-from emergentintegrations.llm.openai import OpenAISpeechToText
+try:
+    from emergentintegrations.llm.openai import OpenAISpeechToText
+    EMERGENT_AVAILABLE = True
+except ImportError:
+    OpenAISpeechToText = None
+    EMERGENT_AVAILABLE = False
 from dotenv import load_dotenv
 
 load_dotenv()
