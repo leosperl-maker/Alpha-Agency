@@ -8,9 +8,6 @@ RUN apk add --no-cache python3 make g++ git
 
 WORKDIR /app
 
-# Install yarn globally (matching packageManager field)
-RUN npm install -g yarn@1.22.22 --quiet
-
 # Copy package.json only (no yarn.lock present in repo)
 COPY frontend/package.json ./
 
