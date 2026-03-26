@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+// En production (Railway) : REACT_APP_BACKEND_URL="" → chemins relatifs, nginx proxifie /api/ vers FastAPI
+// En dev local : utilise http://localhost:8001
+const API_URL = process.env.REACT_APP_BACKEND_URL !== undefined ? process.env.REACT_APP_BACKEND_URL : 'http://localhost:8001';
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,

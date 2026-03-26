@@ -46,7 +46,14 @@ const NotificationCenter = () => {
   };
 
   const connectWebSocket = () => {
-    const wsUrl = API.replace("http", "ws") + "/api/notifications/ws/admin";
+    // Si API est vide (déploiement Railway), construire l'URL WS relative au domaine courant
+    let wsUrl;
+    if (API) {
+      wsUrl = API.replace("http", "ws") + "/api/notifications/ws/admin";
+    } else {
+      const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+      wsUrl = `${proto}//${window.location.host}/api/notifications/ws/admin`;
+    }
     
     try {
       wsRef.current = new WebSocket(wsUrl);

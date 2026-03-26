@@ -18,10 +18,12 @@ RUN yarn install --no-lockfile --non-interactive
 COPY frontend/ .
 
 # Build production bundle
+# REACT_APP_BACKEND_URL vide = chemins relatifs → nginx proxifie /api/ vers FastAPI
 ENV NODE_ENV=production
 ENV GENERATE_SOURCEMAP=false
 ENV CI=false
 ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV REACT_APP_BACKEND_URL=""
 
 RUN yarn build
 
