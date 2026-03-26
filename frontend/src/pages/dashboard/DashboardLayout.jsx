@@ -462,7 +462,7 @@ const DashboardLayout = () => {
         <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 flex-shrink-0">
           {sidebarOpen ? (
             <img 
-              src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png"
+              src={process.env.PUBLIC_URL + "/logo-header-white.png"}
               alt="Alpha Agency"
               className="h-9 w-auto brightness-0 invert"
             />
@@ -537,7 +537,7 @@ const DashboardLayout = () => {
       `}>
         <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 flex-shrink-0">
           <img 
-            src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png"
+            src={process.env.PUBLIC_URL + "/logo-header-white.png"}
             alt="Alpha Agency"
             className="h-8 w-auto brightness-0 invert"
           />

@@ -179,7 +179,7 @@ const TransferDownloadPage = () => {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <img 
-              src="https://customer-assets.emergentagent.com/job_46adb236-f8e1-4856-a9f0-1ea29ce009cd/artifacts/kpvir23o_LOGO%20DEVIS%20FACTURES.png" 
+              src={process.env.PUBLIC_URL + "/logo-header-black.png"} 
               alt="Alphagency"
               className="h-10"
             />

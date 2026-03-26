@@ -79,7 +79,7 @@ const COMPANY_INFO = {
   website: "www.alphagency.fr",
   siret: "XXX XXX XXX XXXXX",
   tva: "FR XX XXX XXX XXX",
-  logo: "https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png"
+  logo: process.env.PUBLIC_URL + "/logo-header-white.png"
 };
 
 const InvoicesPage = () => {

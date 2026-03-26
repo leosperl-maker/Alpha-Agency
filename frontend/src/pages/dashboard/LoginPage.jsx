@@ -81,7 +81,7 @@ const LoginPage = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <img 
-            src="https://customer-assets.emergentagent.com/job_665d7358-b6b9-4803-b811-43294f38d041/artifacts/tttfxeo1_Logo%20Header.png"
+            src={process.env.PUBLIC_URL + "/logo-header-white.png"}
             alt="Alpha Agency"
             className="h-12 mx-auto brightness-0 invert"
           />
