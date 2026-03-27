@@ -78,9 +78,13 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
         "sticker_position": elements.get("sticker_position", {"x": 0.5, "y": 0.5}),
     }
     
-    # Ajouter l'URL du média (image ou vidéo)
+    # Ajouter le média (local_path prioritaire si disponible, sinon URL)
+    local_path = draft.get("local_path")
     media_url = draft.get("media_url")
-    if media_url:
+    if local_path:
+        payload["local_path"] = local_path
+        payload["media_type"] = draft.get("media_type", "image")
+    elif media_url:
         if draft.get("media_type") == "video":
             payload["video_url"] = media_url
         else:
@@ -191,6 +195,7 @@ class CreateStoryRequest(BaseModel):
     hashtag: Optional[StoryHashtag] = None
     slider: Optional[StorySlider] = None
     sticker_position: Optional[Dict[str, float]] = None
+    local_path: Optional[str] = None  # chemin local Mac si upload via bridge
     schedule_time: Optional[str] = None  # ISO format for scheduling
 
 class StoryDraft(BaseModel):
@@ -240,6 +245,7 @@ async def create_story_draft(
         "instagram_username": account.get("username", ""),
         "media_url": request.media_url,
         "media_type": request.media_type,
+        "local_path": request.local_path,
         "background_color": request.background_color,
         "elements": {
             "text_overlay": request.text_overlay,
@@ -571,6 +577,45 @@ async def get_stories_queue(
             return res.json()
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+@router.post("/upload")
+async def upload_story_media(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload image or video — proxies to bridge (Mac local), fallback Cloudinary."""
+    content_type = file.content_type or ""
+    if not (content_type.startswith("image/") or content_type.startswith("video/")):
+        raise HTTPException(status_code=400, detail="Seules les images et vidéos sont acceptées")
+    content = await file.read()
+    # Try bridge first
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            files = {"file": (file.filename, content, content_type)}
+            res = await client.post(f"{BRIDGE_URL}/api/stories/upload", files=files)
+            if res.status_code == 200:
+                data = res.json()
+                return {"url": data.get("url"), "local_path": data.get("local_path"),
+                        "media_type": data.get("media_type", "image"), "source": "bridge"}
+    except Exception as e:
+        logger.warning(f"Bridge upload failed, trying Cloudinary: {e}")
+    # Fallback: Cloudinary
+    try:
+        import cloudinary, cloudinary.uploader
+        cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME')
+        api_key = os.environ.get('CLOUDINARY_API_KEY')
+        api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+        if not all([cloud_name, api_key, api_secret]):
+            raise HTTPException(status_code=503, detail="Bridge indisponible et Cloudinary non configuré.")
+        cloudinary.config(cloud_name=cloud_name, api_key=api_key, api_secret=api_secret)
+        result = cloudinary.uploader.upload(content, folder="story_media",
+            resource_type="video" if content_type.startswith("video/") else "image")
+        return {"url": result["secure_url"], "media_type": "video" if content_type.startswith("video/") else "image", "source": "cloudinary"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur upload: {str(e)}")
+
 
 @router.get("/analytics")
 async def get_story_analytics(

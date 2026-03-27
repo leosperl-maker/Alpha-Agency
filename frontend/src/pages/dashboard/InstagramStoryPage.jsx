@@ -1069,6 +1069,7 @@ export default function InstagramStoryPage() {
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [mediaUrl, setMediaUrl] = useState(null);
   const [mediaType, setMediaType] = useState(null);
+  const [mediaLocalPath, setMediaLocalPath] = useState(null);
   const [stickers, setStickers] = useState([]);
   const [textOverlay, setTextOverlay] = useState(null);
   const [isScheduling, setIsScheduling] = useState(false);
@@ -1161,7 +1162,7 @@ export default function InstagramStoryPage() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch(`${API}/api/social/upload-media`, {
+      const res = await fetch(`${API}/api/instagram-story/upload`, {
         method: 'POST',
         headers: getMultipartHeaders(),
         body: formData,
@@ -1173,7 +1174,8 @@ export default function InstagramStoryPage() {
 
       const data = await res.json();
       setMediaUrl(data.url);
-      setMediaType(file.type.startsWith('image/') ? 'image' : 'video');
+      setMediaType(data.media_type || (file.type.startsWith('image/') ? 'image' : 'video'));
+      if (data.local_path) setMediaLocalPath(data.local_path);
       toast.success('Média uploadé avec succès');
     } catch (error) {
       console.error('Error uploading media:', error);
@@ -1295,6 +1297,7 @@ export default function InstagramStoryPage() {
         account_id: selectedAccount,
         media_url: mediaUrl,
         media_type: mediaType,
+        local_path: mediaLocalPath || null,
         schedule_time: isScheduling && scheduleTime ? new Date(scheduleTime).toISOString() : null,
         text_overlay: textOverlay ? textOverlay.text : null,
         text_position: textOverlay ? textOverlay.position : { x: 0.5, y: 0.3 },
@@ -1361,6 +1364,7 @@ export default function InstagramStoryPage() {
 
       setMediaUrl(null);
       setMediaType(null);
+      setMediaLocalPath(null);
       setStickers([]);
       setTextOverlay(null);
       setSelectedAccount(null);
