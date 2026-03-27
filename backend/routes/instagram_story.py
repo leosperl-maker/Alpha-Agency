@@ -25,6 +25,123 @@ from .database import db, get_current_user
 logger = logging.getLogger("instagram_story")
 
 router = APIRouter()
+import os
+
+# === BRIDGE BLUESTACKS (ngrok) ===
+BRIDGE_URL = os.environ.get("STORIES_BRIDGE_URL", "https://subrotund-punchiest-marylouise.ngrok-free.dev")
+
+async def publish_via_bridge(draft: dict, account: dict) -> dict:
+    """
+    Publie une story via le bridge BlueStacks (ngrok → localhost:4567).
+    Le bridge gère : téléchargement image/vidéo, ADB push, Appium automation.
+    """
+    elements = draft.get("elements", {})
+    
+    # Déterminer le type de sticker et ses paramètres
+    sticker_type = None
+    sticker_params = {}
+    
+    if elements.get("poll"):
+        sticker_type = "poll"
+        sticker_params = {
+            "question": elements["poll"].get("question", ""),
+            "options": elements["poll"].get("options", ["Oui", "Non"])
+        }
+    elif elements.get("link"):
+        sticker_type = "link"
+        sticker_params = {"url": elements["link"].get("url", "https://alphagency.fr")}
+    elif elements.get("question"):
+        sticker_type = "faq"
+        sticker_params = {"question": elements["question"].get("question", "")}
+    elif elements.get("mention"):
+        sticker_type = "mention"
+        sticker_params = {"username": elements["mention"].get("username", "")}
+    elif elements.get("hashtag"):
+        sticker_type = "hashtag"
+        sticker_params = {"hashtag": elements["hashtag"].get("tag", "")}
+    elif elements.get("countdown"):
+        sticker_type = "countdown"
+        sticker_params = {"target_date": elements["countdown"].get("end_time", "")}
+    elif elements.get("slider"):
+        sticker_type = "slider"
+        sticker_params = {"question": elements["slider"].get("question", "")}
+    else:
+        # Fallback : lien alphagency si aucun sticker défini
+        sticker_type = "link"
+        sticker_params = {"url": "https://alphagency.fr"}
+    
+    payload = {
+        "sticker": sticker_type,
+        **sticker_params,
+        "account_username": account.get("username", ""),
+        "media_type": draft.get("media_type", "image"),
+        "sticker_position": elements.get("sticker_position", {"x": 0.5, "y": 0.5}),
+    }
+    
+    # Ajouter l'URL du média (image ou vidéo)
+    media_url = draft.get("media_url")
+    if media_url:
+        if draft.get("media_type") == "video":
+            payload["video_url"] = media_url
+        else:
+            payload["image_url"] = media_url
+    
+    # Ajouter le texte natif Instagram si configuré
+    text_overlay = elements.get("text_overlay_config")
+    if text_overlay:
+        payload["text_overlay"] = text_overlay
+    elif elements.get("text_overlay"):
+        # Format simple : juste le texte, police par défaut
+        payload["text_overlay"] = {
+            "text": elements["text_overlay"],
+            "font": elements.get("text_font", "classique"),
+            "color": elements.get("text_color", "#FFFFFF"),
+            "x": elements.get("text_position", {}).get("x", 0.5),
+            "y": elements.get("text_position", {}).get("y", 0.3),
+        }
+    
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            res = await client.post(f"{BRIDGE_URL}/api/stories/publish", json=payload)
+            result = res.json()
+            logger.info(f"Bridge response: {result}")
+            return result
+    except Exception as e:
+        logger.error(f"Erreur bridge: {e}")
+        return {"success": False, "error": str(e)}
+
+async def schedule_via_bridge(draft: dict, account: dict, schedule_time: str) -> dict:
+    """Programme une story via le bridge BlueStacks."""
+    elements = draft.get("elements", {})
+    
+    # Réutiliser la logique de publish_via_bridge pour construire le payload
+    result = {"sticker": "link", "url": "https://alphagency.fr"}
+    if elements.get("poll"):
+        result = {"sticker": "poll", "question": elements["poll"].get("question",""),
+                  "options": elements["poll"].get("options", ["Oui","Non"])}
+    elif elements.get("link"):
+        result = {"sticker": "link", "url": elements["link"].get("url","")}
+    elif elements.get("question"):
+        result = {"sticker": "faq", "question": elements["question"].get("question","")}
+    
+    payload = {
+        **result,
+        "account_username": account.get("username", ""),
+        "media_type": draft.get("media_type", "image"),
+        "sticker_position": elements.get("sticker_position", {"x": 0.5, "y": 0.5}),
+        "schedule": schedule_time,
+    }
+    if draft.get("media_url"):
+        payload["image_url" if draft.get("media_type") != "video" else "video_url"] = draft["media_url"]
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            res = await client.post(f"{BRIDGE_URL}/api/stories/schedule", json=payload)
+            return res.json()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
 
 def get_user_id(user: dict) -> str:
     """Extract user ID from current_user dict"""
@@ -296,20 +413,8 @@ async def publish_story(
         {"$set": {"status": "publishing"}}
     )
     
-    # Get credentials and post
-    from .token_encryption import decrypt_token
-    from .instagram_automation import post_story_for_account
-    
-    password = decrypt_token(account.get("password_encrypted", ""))
-    
-    result = await post_story_for_account(
-        account_id=account_id,
-        username=account["username"],
-        password=password,
-        media_url=draft.get("media_url"),
-        text=draft.get("elements", {}).get("text_overlay"),
-        poll=draft.get("elements", {}).get("poll")
-    )
+    # === APPEL DU BRIDGE BLUESTACKS ===
+    result = await publish_via_bridge(draft, account)
     
     # Update draft status
     if result.get("success"):
@@ -413,6 +518,31 @@ async def get_available_elements():
     }
 
 # ==================== ANALYTICS ====================
+
+
+@router.get("/accounts/bluestacks")
+async def get_bluestacks_accounts(
+    current_user: dict = Depends(get_current_user)
+):
+    """Retourne les comptes Instagram disponibles sur BlueStacks (via bridge)."""
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            res = await client.get(f"{BRIDGE_URL}/api/stories/accounts")
+            return res.json()
+    except Exception as e:
+        return {"success": False, "error": str(e), "devices": []}
+
+@router.get("/queue")
+async def get_stories_queue(
+    current_user: dict = Depends(get_current_user)
+):
+    """Retourne la file d'attente des stories programmées (depuis bridge)."""
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            res = await client.get(f"{BRIDGE_URL}/api/stories/queue")
+            return res.json()
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @router.get("/analytics")
 async def get_story_analytics(
