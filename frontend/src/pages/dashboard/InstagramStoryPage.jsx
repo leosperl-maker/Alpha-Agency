@@ -562,169 +562,239 @@ const StickerConfigurator = ({ onConfigured, onCancel }) => {
 };
 
 // ============================================================================
-// PHONE PREVIEW
+// STICKER VISUAL — real Instagram sticker look
+// ============================================================================
+const getStickerVisual = (sticker) => {
+  const c = sticker.config || {};
+  switch (sticker.type) {
+    case 'poll':
+      return (
+        <div className="bg-white rounded-2xl p-2 shadow-lg text-center" style={{ width: 130 }}>
+          <div className="text-gray-900 font-bold text-xs mb-2 leading-tight">{c.question || 'Votre sondage'}</div>
+          <div className="flex gap-1">
+            <div className="flex-1 bg-gray-100 rounded-full py-1 px-1 text-gray-700 font-semibold text-xs text-center">{c.options?.[0] || 'Oui'}</div>
+            <div className="flex-1 bg-gray-100 rounded-full py-1 px-1 text-gray-700 font-semibold text-xs text-center">{c.options?.[1] || 'Non'}</div>
+          </div>
+        </div>
+      );
+    case 'question':
+      return (
+        <div className="rounded-2xl p-2 shadow-lg" style={{ width: 130, background: 'linear-gradient(135deg,#6c47ff,#a855f7)' }}>
+          <div className="text-white text-xs font-semibold text-center leading-tight mb-1">{c.question || 'Posez-moi une question 👀'}</div>
+          <div className="bg-white/20 rounded-xl px-2 py-1 text-white/70 text-xs">Répondre...</div>
+        </div>
+      );
+    case 'link':
+      return (
+        <div className="bg-white rounded-full shadow-lg flex items-center gap-1 px-3 py-1.5">
+          <span className="text-xs">🔗</span>
+          <span className="text-gray-800 text-xs font-semibold">{c.text || 'Voir plus'}</span>
+        </div>
+      );
+    case 'mention':
+      return (
+        <div className="bg-white/90 backdrop-blur rounded-full shadow-lg px-3 py-1.5">
+          <span className="text-gray-900 text-xs font-bold">@{c.username || 'mention'}</span>
+        </div>
+      );
+    case 'hashtag':
+      return (
+        <div className="bg-white/90 backdrop-blur rounded-full shadow-lg px-3 py-1.5">
+          <span className="text-gray-900 text-xs font-bold">#{c.tag || 'hashtag'}</span>
+        </div>
+      );
+    case 'countdown':
+      return (
+        <div className="bg-white rounded-2xl p-2 shadow-lg text-center" style={{ width: 120 }}>
+          <div className="text-gray-900 text-xs font-bold leading-tight mb-1">{c.title || 'Événement'}</div>
+          <div className="text-2xl font-black text-gray-900 leading-none">00:00</div>
+          <div className="text-gray-500 text-xs mt-1">Restant</div>
+        </div>
+      );
+    case 'slider':
+      return (
+        <div className="bg-white rounded-2xl p-2 shadow-lg" style={{ width: 140 }}>
+          <div className="text-gray-800 text-xs font-semibold text-center mb-2 leading-tight">{c.question || 'Votre avis ?'}</div>
+          <div className="relative h-2 bg-gray-200 rounded-full mx-1">
+            <div className="h-full w-1/2 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full" />
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-lg">😍</div>
+          </div>
+        </div>
+      );
+    default:
+      return <div className="bg-white/90 rounded-xl px-2 py-1 text-gray-800 text-xs font-medium">{sticker.type}</div>;
+  }
+};
+
+const getFontStyle = (font) => {
+  switch (font) {
+    case 'Moderne': return { fontFamily: 'Helvetica Neue, Arial, sans-serif', fontWeight: 900, letterSpacing: '0.05em' };
+    case 'Néon': return { fontFamily: 'monospace', fontWeight: 700, textShadow: '0 0 8px currentColor, 0 0 16px currentColor' };
+    case 'Machine à écrire': return { fontFamily: '"Courier New", monospace', fontWeight: 700 };
+    case 'Strong': return { fontFamily: 'Georgia, serif', fontWeight: 900, fontStyle: 'italic' };
+    default: return { fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700 };
+  }
+};
+
+// ============================================================================
+// PHONE PREVIEW — drag-and-drop for stickers AND text
 // ============================================================================
 const PhonePreview = ({
   mediaUrl,
   mediaType,
   stickers,
   textOverlay,
-  onClickPreview,
+  onStickerMove,
+  onTextMove,
   onRemoveSticker,
-  onStickerDragEnd,
+  onRemoveText,
   selectedStickerId,
+  onSelectSticker,
 }) => {
   const previewRef = useRef(null);
+  const dragState = useRef(null);
+  const [livePosMap, setLivePosMap] = useState({});
+
+  useEffect(() => {
+    const getPos = (e) => {
+      if (!previewRef.current) return null;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const rect = previewRef.current.getBoundingClientRect();
+      return {
+        x: Math.max(0.05, Math.min(0.95, (clientX - rect.left) / rect.width)),
+        y: Math.max(0.05, Math.min(0.95, (clientY - rect.top) / rect.height)),
+      };
+    };
+    const onMove = (e) => {
+      if (!dragState.current) return;
+      const pos = getPos(e);
+      if (pos) setLivePosMap((p) => ({ ...p, [dragState.current.id]: pos }));
+    };
+    const onUp = (e) => {
+      if (!dragState.current) return;
+      const pos = getPos(e);
+      if (pos) {
+        const { type, id } = dragState.current;
+        if (type === 'sticker') onStickerMove(id, pos);
+        else if (type === 'text') onTextMove(pos);
+      }
+      dragState.current = null;
+      setLivePosMap({});
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchmove', onMove, { passive: true });
+    document.addEventListener('touchend', onUp);
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onUp);
+    };
+  }, [onStickerMove, onTextMove]);
+
+  const startDrag = (e, type, id, selectId) => {
+    e.stopPropagation();
+    e.preventDefault();
+    dragState.current = { type, id };
+    if (selectId) onSelectSticker(selectId);
+  };
+
+  const getStickerPos = (s) => livePosMap[s.id] || s.position;
+  const textPos = livePosMap['text'] || textOverlay?.position || { x: 0.5, y: 0.3 };
 
   return (
-    <div className="flex justify-center py-4">
+    <div className="flex justify-center py-2">
       <div
         ref={previewRef}
-        className="relative w-64 h-[576px] bg-black rounded-3xl border-8 border-gray-800 overflow-hidden cursor-crosshair shadow-2xl"
-        onClick={(e) => {
-          if (previewRef.current) {
-            const rect = previewRef.current.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width;
-            const y = (e.clientY - rect.top) / rect.height;
-            onClickPreview({ x: Math.max(0, Math.min(1, x)), y: Math.max(0, Math.min(1, y)) });
-          }
-        }}
+        className="relative rounded-[2rem] border-4 border-gray-700 overflow-hidden shadow-2xl"
+        style={{ width: 270, height: 480, background: '#111', userSelect: 'none', flexShrink: 0 }}
       >
-        {/* Media */}
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-900 to-black">
+        {/* Background */}
+        <div className="absolute inset-0">
+          {!mediaUrl && (
+            <div className="w-full h-full bg-gradient-to-b from-gray-800 to-gray-900 flex items-center justify-center">
+              <p className="text-white/30 text-xs text-center px-6">Ajoutez une image ou vidéo</p>
+            </div>
+          )}
           {mediaUrl && mediaType === 'image' && (
-            <img
-              src={mediaUrl}
-              alt="Story"
-              className="w-full h-full object-cover"
-            />
+            <img src={mediaUrl} alt="Story" className="w-full h-full object-cover" draggable={false} />
           )}
           {mediaUrl && mediaType === 'video' && (
-            <video
-              src={mediaUrl}
-              className="w-full h-full object-cover"
-              controls
-            />
+            <video src={mediaUrl} className="w-full h-full object-cover" autoPlay muted loop playsInline />
           )}
         </div>
 
-        {/* Stickers */}
-        {stickers.map((sticker) => (
-          <StickerPreview
-            key={sticker.id}
-            sticker={sticker}
-            isSelected={selectedStickerId === sticker.id}
-            onRemove={() => onRemoveSticker(sticker.id)}
-            onDragEnd={onStickerDragEnd}
-          />
-        ))}
+        {/* Instagram header */}
+        <div className="absolute top-3 left-3 right-3 flex items-center gap-2 pointer-events-none z-20">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 border border-white/50 flex-shrink-0" />
+          <span className="text-white text-xs font-semibold drop-shadow">Votre compte</span>
+        </div>
 
-        {/* Text Overlay */}
+        {/* Stickers — draggable */}
+        {stickers.map((s) => {
+          const pos = getStickerPos(s);
+          return (
+            <div
+              key={s.id}
+              className={`absolute cursor-grab active:cursor-grabbing ${selectedStickerId === s.id ? 'ring-2 ring-pink-400 ring-offset-1' : ''}`}
+              style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%`, transform: 'translate(-50%,-50%)', touchAction: 'none', zIndex: 10 }}
+              onMouseDown={(e) => startDrag(e, 'sticker', s.id, s.id)}
+              onTouchStart={(e) => startDrag(e, 'sticker', s.id, s.id)}
+            >
+              {getStickerVisual(s)}
+              <button
+                className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white shadow z-20"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); onRemoveSticker(s.id); }}
+              >
+                <X size={10} />
+              </button>
+            </div>
+          );
+        })}
+
+        {/* Text — draggable */}
         {textOverlay && (
           <div
-            className="absolute text-white font-bold pointer-events-none select-none"
+            className="absolute cursor-grab active:cursor-grabbing"
             style={{
-              left: `${(textOverlay.position?.x || 0.5) * 100}%`,
-              top: `${(textOverlay.position?.y || 0.5) * 100}%`,
-              transform: 'translate(-50%, -50%)',
-              fontSize: '18px',
-              fontFamily:
-                textOverlay.config?.font === 'Moderne'
-                  ? 'sans-serif'
-                  : textOverlay.config?.font === 'Néon'
-                    ? 'monospace'
-                    : 'Georgia, serif',
+              left: `${textPos.x * 100}%`,
+              top: `${textPos.y * 100}%`,
+              transform: 'translate(-50%,-50%)',
+              touchAction: 'none',
+              zIndex: 10,
+              padding: '4px 10px',
+              borderRadius: 6,
+              background: 'rgba(0,0,0,0.3)',
               color: textOverlay.config?.color || 'white',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+              fontSize: 18,
+              lineHeight: 1.2,
+              ...getFontStyle(textOverlay.config?.font),
+              maxWidth: 200,
+              wordBreak: 'break-word',
+              textAlign: 'center',
             }}
+            onMouseDown={(e) => startDrag(e, 'text', 'text', null)}
+            onTouchStart={(e) => startDrag(e, 'text', 'text', null)}
           >
             {textOverlay.text}
+            <button
+              className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white shadow z-20"
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => { e.stopPropagation(); onRemoveText(); }}
+            >
+              <X size={10} />
+            </button>
           </div>
         )}
 
-        {/* Click indicator */}
-        <div className="absolute top-4 right-4 text-white/50 text-xs pointer-events-none">
-          Cliquez pour placer
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ============================================================================
-// STICKER PREVIEW (in phone frame)
-// ============================================================================
-const StickerPreview = ({ sticker, isSelected, onRemove, onDragEnd }) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-
-  const handleMouseDown = (e) => {
-    e.stopPropagation();
-    setIsDragging(true);
-    setOffset({
-      x: e.clientX - sticker.position.x * (256 * (576 / 256)),
-      y: e.clientY - sticker.position.y * 576,
-    });
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-  };
-
-  const handleMouseUp = (e) => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    const rect = e.currentTarget.parentElement.getBoundingClientRect();
-    if (rect) {
-      onDragEnd(sticker.id, {
-        x: (e.clientX - rect.left) / rect.width,
-        y: (e.clientY - rect.top) / rect.height,
-      });
-    }
-  };
-
-  const getStickerTypeIcon = () => {
-    const types = {
-      poll: BarChart2,
-      question: HelpCircle,
-      link: LinkIcon,
-      mention: AtSign,
-      hashtag: Hash,
-      countdown: Timer,
-      slider: Sliders,
-    };
-    const Icon = types[sticker.type] || BarChart2;
-    return <Icon size={14} />;
-  };
-
-  return (
-    <div
-      className={`absolute bg-white/10 border rounded-lg p-2 cursor-move transition ${
-        isSelected
-          ? 'border-pink-500 bg-white/20'
-          : 'border-white/20 hover:border-white/40'
-      }`}
-      style={{
-        left: `${sticker.position.x * 100}%`,
-        top: `${sticker.position.y * 100}%`,
-        transform: 'translate(-50%, -50%)',
-      }}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={() => setIsDragging(false)}
-    >
-      <div className="flex items-center gap-2">
-        <div className="text-white/70">{getStickerTypeIcon()}</div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove();
-          }}
-          className="ml-2 text-white/50 hover:text-red-400 transition"
-        >
-          <X size={12} />
-        </button>
+        {stickers.length === 0 && !textOverlay && mediaUrl && (
+          <div className="absolute bottom-8 left-0 right-0 text-center pointer-events-none">
+            <span className="text-white/40 text-xs">Glissez les stickers pour les placer</span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1170,10 +1240,15 @@ export default function InstagramStoryPage() {
   };
 
   const handleStickerDragEnd = (stickerId, position) => {
-    const newStickers = stickers.map((s) =>
-      s.id === stickerId ? { ...s, position } : s
-    );
-    setStickers(newStickers);
+    setStickers((prev) => prev.map((s) => s.id === stickerId ? { ...s, position } : s));
+  };
+
+  const handleTextMove = (position) => {
+    if (position === null) {
+      setTextOverlay(null);
+    } else if (textOverlay) {
+      setTextOverlay({ ...textOverlay, position });
+    }
   };
 
   // ========================================================================
@@ -1476,22 +1551,18 @@ export default function InstagramStoryPage() {
               <div className="sticky top-6 bg-white/5 border border-white/10 rounded-xl p-6">
                 <h2 className="text-lg font-semibold mb-4">Aperçu</h2>
 
-                {mediaUrl ? (
-                  <PhonePreview
-                    mediaUrl={mediaUrl}
-                    mediaType={mediaType}
-                    stickers={stickers}
-                    textOverlay={textOverlay}
-                    onClickPreview={handlePreviewClick}
-                    onRemoveSticker={handleRemoveSticker}
-                    onStickerDragEnd={handleStickerDragEnd}
-                    selectedStickerId={selectedStickerId}
-                  />
-                ) : (
-                  <div className="aspect-[9/16] bg-gradient-to-b from-gray-900 to-black rounded-2xl flex items-center justify-center text-white/50">
-                    Votre story
-                  </div>
-                )}
+                <PhonePreview
+                  mediaUrl={mediaUrl}
+                  mediaType={mediaType}
+                  stickers={stickers}
+                  textOverlay={textOverlay}
+                  onStickerMove={handleStickerDragEnd}
+                  onTextMove={handleTextMove}
+                  onRemoveSticker={handleRemoveSticker}
+                  onRemoveText={() => setTextOverlay(null)}
+                  selectedStickerId={selectedStickerId}
+                  onSelectSticker={setSelectedStickerId}
+                />
               </div>
             </div>
 
