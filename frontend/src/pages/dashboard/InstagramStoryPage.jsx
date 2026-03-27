@@ -5,8 +5,8 @@ import {
   X, Image as ImageIcon, Loader2, Check, Calendar, Clock, Send, RefreshCw,
   Eye, Edit3, Filter, ChevronDown as ChevronDownIcon
 } from 'lucide-react';
-import Button from '../../components/ui/button';
-import Input from '../../components/ui/input';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
 import { toast } from 'sonner';
 
 const API = process.env.REACT_APP_BACKEND_URL;
