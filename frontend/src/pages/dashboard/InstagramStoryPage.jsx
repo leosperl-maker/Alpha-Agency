@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   ArrowLeft, Upload, Link as LinkIcon, Hash, AtSign, BarChart2,
-  HelpCircle, Timer, Type, Plus, Trash2, ChevronUp, ChevronDown,
-  X, Loader2, Check, Clock, Send, RefreshCw, Edit3, Eye
+  HelpCircle, Timer, Plus, Trash2, ChevronUp, ChevronDown,
+  X, Loader2, Check, Clock, Send, Edit3, Eye
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
