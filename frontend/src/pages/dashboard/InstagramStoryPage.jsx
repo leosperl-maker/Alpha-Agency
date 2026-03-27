@@ -1051,7 +1051,16 @@ export default function InstagramStoryPage() {
 
       if (bluestacksRes.ok) {
         const data = await bluestacksRes.json();
-        setBluestacksAccounts(data.accounts || []);
+        // Le backend retourne {accounts:[...]} ou {devices:[...]}
+        const bsAccounts = data.accounts || (data.devices || []).map(d => ({
+          id: d.id || 'bluestacks-device',
+          username: (d.model || 'BlueStacks').replace(/_/g, ' '),
+          device_id: d.id,
+          model: d.model,
+          login_success: true,
+          source: 'bluestacks'
+        }));
+        setBluestacksAccounts(bsAccounts);
       }
     } catch (error) {
       console.error('Error loading accounts:', error);
@@ -1490,7 +1499,7 @@ export default function InstagramStoryPage() {
                   <option value="">Sélectionner un compte</option>
                   {bluestacksAccounts.map((a) => (
                     <option key={a.id} value={a.id}>
-                      BlueStacks: @{a.username}
+                      {a.source === 'bluestacks' ? `📱 ${a.username || a.model}` : `@${a.username}`}
                     </option>
                   ))}
                   {accounts.map((a) => (

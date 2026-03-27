@@ -528,9 +528,25 @@ async def get_bluestacks_accounts(
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
             res = await client.get(f"{BRIDGE_URL}/api/stories/accounts")
-            return res.json()
+            data = res.json()
+            # Transformer devices en format accounts pour le frontend
+            devices = data.get("devices", [])
+            accounts = [
+                {
+                    "id": d.get("id", "bluestacks-device"),
+                    "username": d.get("model", "Appareil BlueStacks").replace("_", " "),
+                    "device_id": d.get("id"),
+                    "model": d.get("model"),
+                    "status": d.get("device"),
+                    "login_success": True,
+                    "source": "bluestacks"
+                }
+                for d in devices
+            ]
+            return {"success": True, "accounts": accounts, "count": len(accounts)}
     except Exception as e:
-        return {"success": False, "error": str(e), "devices": []}
+        logger.error(f"Bridge bluestacks error: {e}")
+        return {"success": False, "error": str(e), "accounts": []}
 
 @router.get("/queue")
 async def get_stories_queue(
@@ -686,11 +702,19 @@ async def test_instagram_account(
     if not account:
         raise HTTPException(status_code=404, detail="Compte non trouvé")
     
-    from .token_encryption import decrypt_token
-    from .instagram_automation import test_account_login
-    
-    password = decrypt_token(account.get("password_encrypted", ""))
-    result = await test_account_login(account_id, account["username"], password)
+    # Test via bridge BlueStacks (vérifie que le device est connecté)
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            res = await client.get(f"{BRIDGE_URL}/api/stories/accounts")
+            data = res.json()
+            devices = data.get("devices", [])
+            result = {
+                "success": len(devices) > 0,
+                "message": f"BlueStacks connecté — {len(devices)} device(s) détecté(s)" if devices else "Aucun device BlueStacks détecté",
+                "devices": devices
+            }
+    except Exception as e:
+        result = {"success": False, "error": str(e)}
     
     # Update login status
     await db.instagram_accounts.update_one(
