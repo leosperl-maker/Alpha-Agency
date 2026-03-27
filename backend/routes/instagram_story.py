@@ -53,9 +53,9 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
     elif elements.get("question"):
         sticker_type = "faq"
         sticker_params = {"question": elements["question"].get("question", "")}
-    elif elements.get("mention"):
+    elif elements.get("mentions") and len(elements["mentions"]) > 0:
         sticker_type = "mention"
-        sticker_params = {"username": elements["mention"].get("username", "")}
+        sticker_params = {"username": elements["mentions"][0].get("username", "")}
     elif elements.get("hashtag"):
         sticker_type = "hashtag"
         sticker_params = {"hashtag": elements["hashtag"].get("tag", "")}
@@ -168,6 +168,12 @@ class StoryLink(BaseModel):
     url: str
     text: Optional[str] = "En savoir plus"
 
+class StoryHashtag(BaseModel):
+    tag: str
+
+class StorySlider(BaseModel):
+    question: str
+
 class CreateStoryRequest(BaseModel):
     """Request to create a story draft"""
     account_id: str  # Multi-account support
@@ -175,13 +181,16 @@ class CreateStoryRequest(BaseModel):
     media_type: str = "image"  # image or video
     background_color: Optional[str] = "#000000"
     text_overlay: Optional[str] = None
-    text_position: Dict[str, float] = {"x": 0.5, "y": 0.5}
+    text_position: Dict[str, float] = {"x": 0.5, "y": 0.3}
     text_color: Optional[str] = "#FFFFFF"
     poll: Optional[StoryPoll] = None
     question: Optional[StoryQuestion] = None
     countdown: Optional[StoryCountdown] = None
     mentions: Optional[List[StoryMention]] = None
     link: Optional[StoryLink] = None
+    hashtag: Optional[StoryHashtag] = None
+    slider: Optional[StorySlider] = None
+    sticker_position: Optional[Dict[str, float]] = None
     schedule_time: Optional[str] = None  # ISO format for scheduling
 
 class StoryDraft(BaseModel):
@@ -236,11 +245,14 @@ async def create_story_draft(
             "text_overlay": request.text_overlay,
             "text_position": request.text_position,
             "text_color": request.text_color,
+            "sticker_position": request.sticker_position or {"x": 0.5, "y": 0.5},
             "poll": request.poll.dict() if request.poll else None,
             "question": request.question.dict() if request.question else None,
             "countdown": request.countdown.dict() if request.countdown else None,
             "mentions": [m.dict() for m in request.mentions] if request.mentions else [],
-            "link": request.link.dict() if request.link else None
+            "link": request.link.dict() if request.link else None,
+            "hashtag": request.hashtag.dict() if request.hashtag else None,
+            "slider": request.slider.dict() if request.slider else None,
         },
         "status": "scheduled" if request.schedule_time else "draft",
         "schedule_time": request.schedule_time,

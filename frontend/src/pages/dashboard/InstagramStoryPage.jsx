@@ -49,8 +49,8 @@ const AddAccountModal = ({ isOpen, onClose, onAccountAdded }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
-      toast.error('Veuillez remplir tous les champs');
+    if (!username) {
+      toast.error('Veuillez entrer le nom d\'utilisateur Instagram');
       return;
     }
 
@@ -111,17 +111,7 @@ const AddAccountModal = ({ isOpen, onClose, onAccountAdded }) => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm text-white/70 mb-2">Mot de passe</label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              disabled={isLoading}
-              className="bg-white/5 border-white/10 text-white"
-            />
-          </div>
+          <p className="text-xs text-white/40 mt-1">Le compte doit être déjà connecté sur Instagram dans BlueStacks.</p>
 
           <div className="flex gap-3 pt-4">
             <Button
@@ -1101,7 +1091,7 @@ export default function InstagramStoryPage() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch(`${API}/api/upload`, {
+      const res = await fetch(`${API}/api/social/upload-media`, {
         method: 'POST',
         headers: getMultipartHeaders(),
         body: formData,
@@ -1222,18 +1212,49 @@ export default function InstagramStoryPage() {
     setIsPublishing(true);
 
     try {
+      // Map stickers to individual backend fields
+      const mainSticker = stickers[0];
+      const stickerPosition = mainSticker?.position || { x: 0.5, y: 0.5 };
+
       const payload = {
         account_id: selectedAccount,
         media_url: mediaUrl,
         media_type: mediaType,
         schedule_time: isScheduling && scheduleTime ? new Date(scheduleTime).toISOString() : null,
-        elements: {
-          stickers: stickers.length > 0 ? stickers : undefined,
-          text_overlay: textOverlay ? textOverlay.text : undefined,
-          text_overlay_config: textOverlay ? textOverlay.config : undefined,
-          text_position: textOverlay ? textOverlay.position : undefined,
-        },
+        text_overlay: textOverlay ? textOverlay.text : null,
+        text_position: textOverlay ? textOverlay.position : { x: 0.5, y: 0.3 },
+        text_color: textOverlay?.config?.color || '#FFFFFF',
+        sticker_position: stickerPosition,
       };
+
+      // Map sticker type to backend fields
+      if (mainSticker) {
+        switch (mainSticker.type) {
+          case 'poll':
+            payload.poll = { question: mainSticker.config.question, options: mainSticker.config.options };
+            break;
+          case 'question':
+            payload.question = { question: mainSticker.config.question };
+            break;
+          case 'link':
+            payload.link = { url: mainSticker.config.url, text: mainSticker.config.text || 'Lien' };
+            break;
+          case 'mention':
+            payload.mentions = [{ username: mainSticker.config.username, position: stickerPosition }];
+            break;
+          case 'hashtag':
+            payload.hashtag = { tag: mainSticker.config.tag };
+            break;
+          case 'countdown':
+            payload.countdown = { title: mainSticker.config.title, end_time: mainSticker.config.end_time };
+            break;
+          case 'slider':
+            payload.slider = { question: mainSticker.config.question };
+            break;
+          default:
+            break;
+        }
+      }
 
       const res = await fetch(`${API}/api/instagram-story/drafts`, {
         method: 'POST',
@@ -1251,7 +1272,7 @@ export default function InstagramStoryPage() {
         toast.success('Story programmée avec succès');
       } else {
         const publishRes = await fetch(
-          `${API}/api/instagram-story/drafts/${data.id}/publish`,
+          `${API}/api/instagram-story/drafts/${data.draft_id}/publish`,
           {
             method: 'POST',
             headers: getHeaders(),
@@ -1373,7 +1394,7 @@ export default function InstagramStoryPage() {
             <div className={`w-2 h-2 rounded-full flex-shrink-0 ${bluestacksAccounts.length > 0 ? 'bg-green-400 animate-pulse' : 'bg-orange-400'}`} />
             <span className={bluestacksAccounts.length > 0 ? 'text-green-400' : 'text-orange-400'}>
               {bluestacksAccounts.length > 0
-                ? `Publication automatique prête (${bluestacksAccounts[0]?.model || 'BlueStacks'})`
+                ? 'BlueStacks connecté — publication automatique prête'
                 : 'BlueStacks non détecté — ouvrez Instagram sur BlueStacks pour activer la publication'}
             </span>
           </div>
@@ -1483,16 +1504,14 @@ export default function InstagramStoryPage() {
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white"
                 >
                   <option value="">Sélectionner un compte</option>
-                  {bluestacksAccounts.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.source === 'bluestacks' ? `📱 ${a.username || a.model}` : `@${a.username}`}
-                    </option>
-                  ))}
                   {accounts.map((a) => (
                     <option key={a.id} value={a.id}>
-                      CRM: @{a.username}
+                      @{a.username}
                     </option>
                   ))}
+                  {accounts.length === 0 && (
+                    <option disabled value="">Aucun compte — cliquez sur &quot;+ Ajouter compte&quot;</option>
+                  )}
                 </select>
               </div>
 
