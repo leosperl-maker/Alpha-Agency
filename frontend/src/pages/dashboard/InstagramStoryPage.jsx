@@ -256,7 +256,13 @@ export default function InstagramStoryPage() {
 
       if (publish && !scheduleTime) {
         const pubRes = await fetch(`${API}/api/instagram-story/drafts/${draftId}/publish`, { method: 'POST', headers: getHeaders() });
-        if (!pubRes.ok) throw new Error('Failed to publish');
+        const pubData = await pubRes.json().catch(() => ({}));
+        if (!pubRes.ok || pubData.success === false) {
+          const errMsg = pubData.error || pubData.detail || pubData.message || 'Échec de la publication';
+          toast.error(`Publication échouée : ${errMsg}`);
+          setLoading(false);
+          return;
+        }
         toast.success('Story publiée !');
       } else if (scheduleTime) {
         toast.success('Story programmée !');
@@ -266,7 +272,7 @@ export default function InstagramStoryPage() {
 
       resetEditor();
       setView('accounts');
-    } catch { toast.error('Erreur lors de la publication'); }
+    } catch (err) { toast.error(`Erreur : ${err.message || 'Erreur inconnue'}`); }
     finally { setLoading(false); }
   };
 

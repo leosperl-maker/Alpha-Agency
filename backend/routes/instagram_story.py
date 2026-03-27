@@ -36,38 +36,76 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
     Publie une story via le bridge BlueStacks (ngrok → localhost:4567).
     Le bridge gère : téléchargement image/vidéo, ADB push, Appium automation.
     """
-    elements = draft.get("elements", {})
-    
-    # Déterminer le type de sticker et ses paramètres
+    elements = draft.get("elements", [])
+
+    # elements can be a list (new format) or dict (old format)
+    # New format: [{"type": "poll", "position": {...}, "data": {...}}, ...]
+    # Old format: {"poll": {...}, "link": {...}}
+
     sticker_type = None
     sticker_params = {}
-    
-    if elements.get("poll"):
-        sticker_type = "poll"
-        sticker_params = {
-            "question": elements["poll"].get("question", ""),
-            "options": elements["poll"].get("options", ["Oui", "Non"])
-        }
-    elif elements.get("link"):
-        sticker_type = "link"
-        sticker_params = {"url": elements["link"].get("url", "https://alphagency.fr")}
-    elif elements.get("question"):
-        sticker_type = "faq"
-        sticker_params = {"question": elements["question"].get("question", "")}
-    elif elements.get("mentions") and len(elements["mentions"]) > 0:
-        sticker_type = "mention"
-        sticker_params = {"username": elements["mentions"][0].get("username", "")}
-    elif elements.get("hashtag"):
-        sticker_type = "hashtag"
-        sticker_params = {"hashtag": elements["hashtag"].get("tag", "")}
-    elif elements.get("countdown"):
-        sticker_type = "countdown"
-        sticker_params = {"target_date": elements["countdown"].get("end_time", "")}
-    elif elements.get("slider"):
-        sticker_type = "slider"
-        sticker_params = {"question": elements["slider"].get("question", "")}
-    else:
-        # Fallback : lien alphagency si aucun sticker défini
+    sticker_position = {"x": 0.5, "y": 0.5}
+
+    if isinstance(elements, list) and len(elements) > 0:
+        # New format — take first sticker
+        first = elements[0]
+        stype = first.get("type", "")
+        sdata = first.get("data", {})
+        sticker_position = first.get("position", {"x": 0.5, "y": 0.5})
+
+        if stype == "poll":
+            sticker_type = "poll"
+            options = sdata.get("options", [])
+            sticker_params = {
+                "question": sdata.get("question", ""),
+                "options": [o.get("text", "") if isinstance(o, dict) else o for o in options] if options else ["Oui", "Non"]
+            }
+        elif stype == "link":
+            sticker_type = "link"
+            sticker_params = {"url": sdata.get("url", "https://alphagency.fr")}
+        elif stype == "question":
+            sticker_type = "faq"
+            sticker_params = {"question": sdata.get("question", "")}
+        elif stype == "mention":
+            sticker_type = "mention"
+            sticker_params = {"username": sdata.get("username", "")}
+        elif stype == "hashtag":
+            sticker_type = "hashtag"
+            sticker_params = {"hashtag": sdata.get("hashtag", "")}
+        elif stype == "countdown":
+            sticker_type = "countdown"
+            sticker_params = {"target_date": sdata.get("endTime", "")}
+        elif stype == "slider":
+            sticker_type = "slider"
+            sticker_params = {"question": sdata.get("question", "")}
+    elif isinstance(elements, dict):
+        # Old format — backwards compatibility
+        if elements.get("poll"):
+            sticker_type = "poll"
+            sticker_params = {
+                "question": elements["poll"].get("question", ""),
+                "options": elements["poll"].get("options", ["Oui", "Non"])
+            }
+        elif elements.get("link"):
+            sticker_type = "link"
+            sticker_params = {"url": elements["link"].get("url", "https://alphagency.fr")}
+        elif elements.get("question"):
+            sticker_type = "faq"
+            sticker_params = {"question": elements["question"].get("question", "")}
+        elif elements.get("mentions") and len(elements["mentions"]) > 0:
+            sticker_type = "mention"
+            sticker_params = {"username": elements["mentions"][0].get("username", "")}
+        elif elements.get("hashtag"):
+            sticker_type = "hashtag"
+            sticker_params = {"hashtag": elements["hashtag"].get("tag", "")}
+        elif elements.get("countdown"):
+            sticker_type = "countdown"
+            sticker_params = {"target_date": elements["countdown"].get("end_time", "")}
+        elif elements.get("slider"):
+            sticker_type = "slider"
+            sticker_params = {"question": elements["slider"].get("question", "")}
+
+    if not sticker_type:
         sticker_type = "link"
         sticker_params = {"url": "https://alphagency.fr"}
     
@@ -76,9 +114,9 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
         **sticker_params,
         "account_username": account.get("username", ""),
         "media_type": draft.get("media_type", "image"),
-        "sticker_position": elements.get("sticker_position", {"x": 0.5, "y": 0.5}),
+        "sticker_position": sticker_position,
     }
-    
+
     # Ajouter le média (local_path prioritaire si disponible, sinon URL)
     local_path = draft.get("local_path")
     media_url = draft.get("media_url")
@@ -120,32 +158,62 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
         return {"success": False, "error": str(e)}
 
 async def schedule_via_bridge(draft: dict, account: dict, schedule_time: str) -> dict:
-    """Programme une story via le bridge BlueStacks."""
-    elements = draft.get("elements", {})
-    
-    # Réutiliser la logique de publish_via_bridge pour construire le payload
-    result = {"sticker": "link", "url": "https://alphagency.fr"}
-    if elements.get("poll"):
-        result = {"sticker": "poll", "question": elements["poll"].get("question",""),
-                  "options": elements["poll"].get("options", ["Oui","Non"])}
-    elif elements.get("link"):
-        result = {"sticker": "link", "url": elements["link"].get("url","")}
-    elif elements.get("question"):
-        result = {"sticker": "faq", "question": elements["question"].get("question","")}
-    
+    """Programme une story via le bridge BlueStacks — reuses publish_via_bridge logic."""
+    # Build same payload as publish, then add schedule field
+    base_result = await publish_via_bridge.__wrapped__(draft, account) if hasattr(publish_via_bridge, '__wrapped__') else {"success": False}
+    # Simpler approach: just build payload inline
+    elements = draft.get("elements", [])
+    sticker_type = "link"
+    sticker_params = {"url": "https://alphagency.fr"}
+    sticker_position = {"x": 0.5, "y": 0.5}
+
+    if isinstance(elements, list) and len(elements) > 0:
+        first = elements[0]
+        stype = first.get("type", "")
+        sdata = first.get("data", {})
+        sticker_position = first.get("position", {"x": 0.5, "y": 0.5})
+        if stype == "poll":
+            sticker_type = "poll"
+            options = sdata.get("options", [])
+            sticker_params = {"question": sdata.get("question", ""), "options": [o.get("text","") if isinstance(o,dict) else o for o in options] if options else ["Oui","Non"]}
+        elif stype == "link":
+            sticker_type = "link"
+            sticker_params = {"url": sdata.get("url", "https://alphagency.fr")}
+        elif stype == "question":
+            sticker_type = "faq"
+            sticker_params = {"question": sdata.get("question", "")}
+        elif stype == "mention":
+            sticker_type = "mention"
+            sticker_params = {"username": sdata.get("username", "")}
+        elif stype == "hashtag":
+            sticker_type = "hashtag"
+            sticker_params = {"hashtag": sdata.get("hashtag", "")}
+        elif stype == "countdown":
+            sticker_type = "countdown"
+            sticker_params = {"target_date": sdata.get("endTime", "")}
+        elif stype == "slider":
+            sticker_type = "slider"
+            sticker_params = {"question": sdata.get("question", "")}
+
+    media_url = draft.get("media_url", "")
+    if media_url.startswith("/"):
+        media_url = f"{PUBLIC_URL}{media_url}"
+
     payload = {
-        **result,
+        "sticker": sticker_type,
+        **sticker_params,
         "account_username": account.get("username", ""),
         "media_type": draft.get("media_type", "image"),
-        "sticker_position": elements.get("sticker_position", {"x": 0.5, "y": 0.5}),
+        "sticker_position": sticker_position,
         "schedule": schedule_time,
     }
-    if draft.get("media_url"):
-        payload["image_url" if draft.get("media_type") != "video" else "video_url"] = draft["media_url"]
-    
+    if media_url:
+        payload["image_url" if draft.get("media_type") != "video" else "video_url"] = media_url
+
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            res = await client.post(f"{BRIDGE_URL}/api/stories/schedule", json=payload)
+            headers = {"ngrok-skip-browser-warning": "true"}
+            res = await client.post(f"{BRIDGE_URL}/api/stories/schedule", json=payload, headers=headers)
             return res.json()
     except Exception as e:
         return {"success": False, "error": str(e)}
