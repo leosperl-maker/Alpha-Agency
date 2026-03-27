@@ -29,6 +29,7 @@ import os
 
 # === BRIDGE BLUESTACKS (ngrok) ===
 BRIDGE_URL = os.environ.get("STORIES_BRIDGE_URL", "https://subrotund-punchiest-marylouise.ngrok-free.dev")
+PUBLIC_URL = os.environ.get("PUBLIC_URL", "https://www.alphagency.fr")
 
 async def publish_via_bridge(draft: dict, account: dict) -> dict:
     """
@@ -85,6 +86,9 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
         payload["local_path"] = local_path
         payload["media_type"] = draft.get("media_type", "image")
     elif media_url:
+        # Convert relative URLs to absolute for bridge download
+        if media_url.startswith("/"):
+            media_url = f"{PUBLIC_URL}{media_url}"
         if draft.get("media_type") == "video":
             payload["video_url"] = media_url
         else:
@@ -106,7 +110,8 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
     
     try:
         async with httpx.AsyncClient(timeout=120.0) as client:
-            res = await client.post(f"{BRIDGE_URL}/api/stories/publish", json=payload)
+            headers = {"ngrok-skip-browser-warning": "true"}
+            res = await client.post(f"{BRIDGE_URL}/api/stories/publish", json=payload, headers=headers)
             result = res.json()
             logger.info(f"Bridge response: {result}")
             return result
@@ -578,49 +583,82 @@ async def get_stories_queue(
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+# --- Upload media storage directory ---
+import tempfile, uuid, shutil
+from fastapi.responses import FileResponse
+
+UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "story-uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+@router.get("/media/{filename}")
+async def serve_uploaded_media(filename: str):
+    """Serve uploaded media files."""
+    filepath = os.path.join(UPLOAD_DIR, filename)
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="Fichier introuvable")
+    ext = os.path.splitext(filename)[1].lower()
+    media_types = {
+        ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+        ".gif": "image/gif", ".webp": "image/webp",
+        ".mp4": "video/mp4", ".mov": "video/quicktime", ".avi": "video/x-msvideo",
+    }
+    return FileResponse(filepath, media_type=media_types.get(ext, "application/octet-stream"))
+
+
 @router.post("/upload")
 async def upload_story_media(
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user)
 ):
-    """Upload image or video — proxies to bridge (Mac local), fallback Cloudinary."""
+    """Upload image or video — saves locally on Railway, tries bridge in background."""
     content_type = file.content_type or ""
     if not (content_type.startswith("image/") or content_type.startswith("video/")):
         raise HTTPException(status_code=400, detail="Seules les images et vidéos sont acceptées")
+
     content = await file.read()
-    filename = file.filename or f"upload_{int(__import__('time').time())}"
-    logger.info(f"Upload: {filename} ({content_type}, {len(content)} bytes)")
-    # Try bridge first
+    if len(content) > 200 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Fichier trop volumineux (max 200 Mo)")
+
+    # Generate unique filename
+    ext = os.path.splitext(file.filename or "upload")[1] or (
+        ".mp4" if content_type.startswith("video/") else ".jpg"
+    )
+    unique_name = f"story_{uuid.uuid4().hex[:12]}{ext}"
+    local_path = os.path.join(UPLOAD_DIR, unique_name)
+
+    # Save to Railway filesystem
+    with open(local_path, "wb") as f:
+        f.write(content)
+
+    media_type = "video" if content_type.startswith("video/") else "image"
+    # The URL will be relative — served by the /media/ endpoint above
+    media_url = f"/api/instagram-story/media/{unique_name}"
+
+    logger.info(f"Upload saved: {unique_name} ({media_type}, {len(content)} bytes)")
+
+    # Try to also upload to bridge (for local_path on Mac) — non-blocking
+    bridge_local_path = None
     try:
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            files = {"file": (filename, content, content_type)}
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            files_data = {"file": (unique_name, content, content_type)}
             headers = {"ngrok-skip-browser-warning": "true"}
-            res = await client.post(f"{BRIDGE_URL}/api/stories/upload", files=files, headers=headers)
-            logger.info(f"Bridge response: {res.status_code} - {res.text[:200]}")
+            res = await client.post(f"{BRIDGE_URL}/api/stories/upload", files=files_data, headers=headers)
             if res.status_code == 200:
                 data = res.json()
-                return {"url": data.get("url"), "local_path": data.get("local_path"),
-                        "media_type": data.get("media_type", "image"), "source": "bridge"}
-            else:
-                logger.warning(f"Bridge error {res.status_code}: {res.text[:300]}")
+                bridge_local_path = data.get("local_path")
+                logger.info(f"Bridge copy OK: {bridge_local_path}")
     except Exception as e:
-        logger.warning(f"Bridge upload failed, trying Cloudinary: {e}")
-    # Fallback: Cloudinary
-    try:
-        import cloudinary, cloudinary.uploader
-        cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME')
-        api_key = os.environ.get('CLOUDINARY_API_KEY')
-        api_secret = os.environ.get('CLOUDINARY_API_SECRET')
-        if not all([cloud_name, api_key, api_secret]):
-            raise HTTPException(status_code=503, detail="Bridge indisponible et Cloudinary non configuré.")
-        cloudinary.config(cloud_name=cloud_name, api_key=api_key, api_secret=api_secret)
-        result = cloudinary.uploader.upload(content, folder="story_media",
-            resource_type="video" if content_type.startswith("video/") else "image")
-        return {"url": result["secure_url"], "media_type": "video" if content_type.startswith("video/") else "image", "source": "cloudinary"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur upload: {str(e)}")
+        logger.info(f"Bridge copy skipped (not critical): {e}")
+
+    return {
+        "url": media_url,
+        "local_path": bridge_local_path,
+        "media_type": media_type,
+        "filename": unique_name,
+        "size": len(content),
+        "source": "local" if not bridge_local_path else "bridge",
+    }
 
 
 @router.get("/analytics")
