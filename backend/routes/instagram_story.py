@@ -591,7 +591,7 @@ async def get_story_analytics(
 
 class InstagramAccountCreate(BaseModel):
     username: str
-    password: str
+    password: Optional[str] = None  # Optionnel — BlueStacks déjà connecté
 
 @router.get("/accounts")
 async def list_instagram_accounts(
@@ -618,8 +618,6 @@ async def add_instagram_account(
     """
     user_id = get_user_id(current_user)
     
-    from .token_encryption import encrypt_token
-    
     # Check if account already exists
     existing = await db.instagram_accounts.find_one({
         "user_id": user_id,
@@ -629,14 +627,13 @@ async def add_instagram_account(
     if existing:
         return {"success": False, "error": "Ce compte est déjà ajouté"}
     
-    # Create account (without testing login automatically)
+    # Créer le compte — pas de mot de passe nécessaire (BlueStacks déjà connecté)
     account_id = str(uuid.uuid4())
     account_doc = {
         "id": account_id,
         "user_id": user_id,
         "username": account.username,
-        "password_encrypted": encrypt_token(account.password),
-        "login_success": None,  # Not tested yet
+        "login_success": True,  # On fait confiance à BlueStacks
         "last_login_attempt": None,
         "created_at": datetime.now(timezone.utc).isoformat()
     }

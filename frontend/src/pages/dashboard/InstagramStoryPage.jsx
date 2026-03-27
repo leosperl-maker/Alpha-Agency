@@ -193,7 +193,7 @@ const AccountCard = ({ account, isBlueStacks = false, onDelete, onTest }) => {
         <div className="flex-1 min-w-0">
           <p className="text-white font-medium truncate">@{account.username}</p>
           <p className="text-sm text-white/50">
-            {isBlueStacks ? 'Appareil BlueStacks' : 'Compte CRM'} •{' '}
+            {'Compte Instagram'} •{' '}
             {account.story_count || 0} stories
           </p>
         </div>
@@ -1368,29 +1368,15 @@ export default function InstagramStoryPage() {
             </p>
           </div>
 
-          <section className="mb-12">
-            <h2 className="text-xl font-semibold mb-4">Appareil BlueStacks</h2>
-            {isLoadingAccounts ? (
-              <div className="text-white/50 flex items-center gap-2">
-                <Loader2 size={16} className="animate-spin" />
-                Chargement...
-              </div>
-            ) : bluestacksAccounts.length > 0 ? (
-              <div className="space-y-3">
-                {bluestacksAccounts.map((account) => (
-                  <AccountCard
-                    key={account.id}
-                    account={account}
-                    isBlueStacks={true}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-white/50">
-                Aucun compte détecté. Connectez-vous à Instagram sur BlueStacks.
-              </p>
-            )}
-          </section>
+          {/* Statut automatisation — petit bandeau discret */}
+          <div className={`mb-8 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm ${bluestacksAccounts.length > 0 ? 'bg-green-500/10 border border-green-500/20' : 'bg-orange-500/10 border border-orange-500/20'}`}>
+            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${bluestacksAccounts.length > 0 ? 'bg-green-400 animate-pulse' : 'bg-orange-400'}`} />
+            <span className={bluestacksAccounts.length > 0 ? 'text-green-400' : 'text-orange-400'}>
+              {bluestacksAccounts.length > 0
+                ? `Publication automatique prête (${bluestacksAccounts[0]?.model || 'BlueStacks'})`
+                : 'BlueStacks non détecté — ouvrez Instagram sur BlueStacks pour activer la publication'}
+            </span>
+          </div>
 
           <section>
             <div className="flex items-center justify-between mb-4">
