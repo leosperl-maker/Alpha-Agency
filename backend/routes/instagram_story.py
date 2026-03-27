@@ -606,12 +606,29 @@ async def serve_uploaded_media(filename: str):
     return FileResponse(filepath, media_type=media_types.get(ext, "application/octet-stream"))
 
 
+def _bridge_copy_sync(bridge_url: str, filename: str, content: bytes, content_type: str):
+    """Copy file to bridge in background thread — never blocks the upload response."""
+    import httpx as _httpx
+    try:
+        with _httpx.Client(timeout=15.0) as client:
+            files_data = {"file": (filename, content, content_type)}
+            headers = {"ngrok-skip-browser-warning": "true"}
+            res = client.post(f"{bridge_url}/api/stories/upload", files=files_data, headers=headers)
+            if res.status_code == 200:
+                logger.info(f"Bridge copy OK: {res.json().get('local_path')}")
+            else:
+                logger.info(f"Bridge copy failed: {res.status_code}")
+    except Exception as e:
+        logger.info(f"Bridge copy skipped: {e}")
+
+
 @router.post("/upload")
 async def upload_story_media(
     file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = None,
     current_user: dict = Depends(get_current_user)
 ):
-    """Upload image or video — saves locally on Railway, tries bridge in background."""
+    """Upload image or video — saves locally on Railway, bridge copy in background."""
     content_type = file.content_type or ""
     if not (content_type.startswith("image/") or content_type.startswith("video/")):
         raise HTTPException(status_code=400, detail="Seules les images et vidéos sont acceptées")
@@ -625,39 +642,27 @@ async def upload_story_media(
         ".mp4" if content_type.startswith("video/") else ".jpg"
     )
     unique_name = f"story_{uuid.uuid4().hex[:12]}{ext}"
-    local_path = os.path.join(UPLOAD_DIR, unique_name)
+    save_path = os.path.join(UPLOAD_DIR, unique_name)
 
     # Save to Railway filesystem
-    with open(local_path, "wb") as f:
+    with open(save_path, "wb") as f:
         f.write(content)
 
     media_type = "video" if content_type.startswith("video/") else "image"
-    # The URL will be relative — served by the /media/ endpoint above
     media_url = f"/api/instagram-story/media/{unique_name}"
 
     logger.info(f"Upload saved: {unique_name} ({media_type}, {len(content)} bytes)")
 
-    # Try to also upload to bridge (for local_path on Mac) — non-blocking
-    bridge_local_path = None
-    try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            files_data = {"file": (unique_name, content, content_type)}
-            headers = {"ngrok-skip-browser-warning": "true"}
-            res = await client.post(f"{BRIDGE_URL}/api/stories/upload", files=files_data, headers=headers)
-            if res.status_code == 200:
-                data = res.json()
-                bridge_local_path = data.get("local_path")
-                logger.info(f"Bridge copy OK: {bridge_local_path}")
-    except Exception as e:
-        logger.info(f"Bridge copy skipped (not critical): {e}")
+    # Bridge copy — truly non-blocking background task
+    if background_tasks:
+        background_tasks.add_task(_bridge_copy_sync, BRIDGE_URL, unique_name, content, content_type)
 
     return {
         "url": media_url,
-        "local_path": bridge_local_path,
+        "local_path": save_path,
         "media_type": media_type,
         "filename": unique_name,
         "size": len(content),
-        "source": "local" if not bridge_local_path else "bridge",
     }
 
 
