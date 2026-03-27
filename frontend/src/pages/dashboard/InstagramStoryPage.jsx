@@ -603,7 +603,7 @@ function EditorView({
             >
               {mediaUrl ? (
                 <div>
-                  <img src={mediaUrl} alt="" className="w-full h-20 object-cover rounded-lg mb-2" />
+                  <img src={mediaUrl} alt="" className="w-full h-20 object-cover rounded-lg mb-2" onError={(e) => { e.target.style.display = 'none'; }} />
                   <p className="text-xs text-gray-400">Cliquez pour changer</p>
                 </div>
               ) : (
@@ -702,7 +702,7 @@ function EditorView({
                   {mediaType === 'video' ? (
                     <video src={mediaUrl} className="w-full h-full object-cover" muted />
                   ) : (
-                    <img src={mediaUrl} alt="" className="w-full h-full object-cover" />
+                    <img src={mediaUrl} alt="" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
                   )}
                 </div>
               ) : (
