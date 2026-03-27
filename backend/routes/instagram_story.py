@@ -588,15 +588,21 @@ async def upload_story_media(
     if not (content_type.startswith("image/") or content_type.startswith("video/")):
         raise HTTPException(status_code=400, detail="Seules les images et vidéos sont acceptées")
     content = await file.read()
+    filename = file.filename or f"upload_{int(__import__('time').time())}"
+    logger.info(f"Upload: {filename} ({content_type}, {len(content)} bytes)")
     # Try bridge first
     try:
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            files = {"file": (file.filename, content, content_type)}
-            res = await client.post(f"{BRIDGE_URL}/api/stories/upload", files=files)
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            files = {"file": (filename, content, content_type)}
+            headers = {"ngrok-skip-browser-warning": "true"}
+            res = await client.post(f"{BRIDGE_URL}/api/stories/upload", files=files, headers=headers)
+            logger.info(f"Bridge response: {res.status_code} - {res.text[:200]}")
             if res.status_code == 200:
                 data = res.json()
                 return {"url": data.get("url"), "local_path": data.get("local_path"),
                         "media_type": data.get("media_type", "image"), "source": "bridge"}
+            else:
+                logger.warning(f"Bridge error {res.status_code}: {res.text[:300]}")
     except Exception as e:
         logger.warning(f"Bridge upload failed, trying Cloudinary: {e}")
     # Fallback: Cloudinary
