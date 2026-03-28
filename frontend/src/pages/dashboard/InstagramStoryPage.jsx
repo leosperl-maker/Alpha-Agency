@@ -27,11 +27,14 @@ const FONTS = [
 
 const COLORS = ['#FFFFFF', '#000000', '#FF0000', '#FFD700', '#FF1493', '#800080', '#0000FF', '#00AA00', '#FFA500'];
 
-const POLL_COLORS = [
-  { name: 'Bleu/Rouge', optionColors: ['#3B82F6', '#EF4444'] },
-  { name: 'Vert/Violet', optionColors: ['#22C55E', '#A855F7'] },
-  { name: 'Rose/Bleu', optionColors: ['#EC4899', '#3B82F6'] },
-  { name: 'Orange/Bleu', optionColors: ['#F97316', '#06B6D4'] }
+// Instagram poll frame colors (the gradient around the entire sticker)
+const POLL_FRAME_COLORS = [
+  { id: 'gradient1', name: 'Rose-Violet', gradient: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCB045)', bg: '#833AB4' },
+  { id: 'gradient2', name: 'Bleu', gradient: 'linear-gradient(135deg, #0095F6, #00D4FF)', bg: '#0095F6' },
+  { id: 'gradient3', name: 'Vert', gradient: 'linear-gradient(135deg, #00C853, #64DD17)', bg: '#00C853' },
+  { id: 'gradient4', name: 'Orange', gradient: 'linear-gradient(135deg, #FF6F00, #FF9100)', bg: '#FF6F00' },
+  { id: 'gradient5', name: 'Violet', gradient: 'linear-gradient(135deg, #7C4DFF, #B388FF)', bg: '#7C4DFF' },
+  { id: 'gradient6', name: 'Rouge', gradient: 'linear-gradient(135deg, #FF1744, #FF5252)', bg: '#FF1744' },
 ];
 
 // Main component
@@ -167,7 +170,7 @@ export default function InstagramStoryPage() {
 
   const addSticker = (type) => {
     const defaults = {
-      poll: { question: '', options: [{ text: 'Oui', color: '#3B82F6' }, { text: 'Non', color: '#EF4444' }] },
+      poll: { question: '', options: ['Oui', 'Non'], frameColor: 'gradient1' },
       question: { question: '' },
       link: { url: '', text: 'Lien' },
       mention: { username: '' },
@@ -863,78 +866,48 @@ function EditorView({
 }
 
 /* ============================================
-   POLL CONFIG — Instagram-style with 2-4 options + colors
+   POLL CONFIG — Instagram-style: question, 2 options, frame color
    ============================================ */
 function PollConfig({ data, onChange }) {
-  const options = data.options || [{ text: 'Oui', color: '#3B82F6' }, { text: 'Non', color: '#EF4444' }];
+  const options = data.options || ['Oui', 'Non'];
+  const frameColor = data.frameColor || 'gradient1';
 
-  const updateOption = (idx, field, value) => {
+  const updateOption = (idx, value) => {
     const newOptions = [...options];
-    newOptions[idx] = { ...newOptions[idx], [field]: value };
+    newOptions[idx] = value;
     onChange({ ...data, options: newOptions });
-  };
-
-  const addOption = () => {
-    if (options.length >= 4) return;
-    const colors = ['#22C55E', '#A855F7', '#F97316', '#06B6D4'];
-    onChange({ ...data, options: [...options, { text: '', color: colors[options.length % colors.length] }] });
-  };
-
-  const removeOption = (idx) => {
-    if (options.length <= 2) return;
-    onChange({ ...data, options: options.filter((_, i) => i !== idx) });
   };
 
   return (
     <div className="space-y-3">
       <FieldInput label="Question" value={data.question || ''} onChange={(v) => onChange({ ...data, question: v })} />
       <div>
-        <label className="block text-xs text-gray-400 mb-2">Options ({options.length}/4)</label>
+        <label className="block text-xs text-gray-400 mb-2">Options</label>
         {options.map((opt, idx) => (
-          <div key={idx} className="flex items-center gap-2 mb-2">
-            <input
-              type="color"
-              value={opt.color}
-              onChange={(e) => updateOption(idx, 'color', e.target.value)}
-              className="w-7 h-7 rounded cursor-pointer bg-transparent border-0"
-            />
+          <div key={idx} className="mb-2">
             <input
               type="text"
-              value={opt.text}
-              onChange={(e) => updateOption(idx, 'text', e.target.value)}
-              placeholder={`Option ${idx + 1}`}
-              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm"
+              value={typeof opt === 'string' ? opt : opt.text || ''}
+              onChange={(e) => updateOption(idx, e.target.value)}
+              placeholder={idx === 0 ? 'Oui' : 'Non'}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
             />
-            {options.length > 2 && (
-              <button onClick={() => removeOption(idx)} className="text-red-400 hover:text-red-300 p-1"><X size={14} /></button>
-            )}
           </div>
         ))}
-        {options.length < 4 && (
-          <button onClick={addOption} className="text-xs text-pink-400 hover:text-pink-300 flex items-center gap-1 mt-1">
-            <Plus size={12} /> Ajouter option
-          </button>
-        )}
       </div>
 
-      {/* Quick Color Themes */}
+      {/* Frame Color — this is what Instagram actually lets you change */}
       <div>
-        <label className="block text-xs text-gray-400 mb-2">Thèmes rapides</label>
-        <div className="flex gap-2">
-          {POLL_COLORS.map((theme, idx) => (
+        <label className="block text-xs text-gray-400 mb-2">Couleur du sticker</label>
+        <div className="grid grid-cols-3 gap-2">
+          {POLL_FRAME_COLORS.map((c) => (
             <button
-              key={idx}
-              onClick={() => {
-                const newOptions = options.map((opt, i) => ({ ...opt, color: theme.optionColors[i % theme.optionColors.length] }));
-                onChange({ ...data, options: newOptions });
-              }}
-              className="flex gap-0.5 p-1 rounded hover:bg-white/10 transition"
-              title={theme.name}
-            >
-              {theme.optionColors.map((c, ci) => (
-                <div key={ci} className="w-4 h-4 rounded-sm" style={{ backgroundColor: c }} />
-              ))}
-            </button>
+              key={c.id}
+              onClick={() => onChange({ ...data, frameColor: c.id })}
+              className={`h-8 rounded-lg transition ${frameColor === c.id ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent' : 'opacity-70 hover:opacity-100'}`}
+              style={{ background: c.gradient }}
+              title={c.name}
+            />
           ))}
         </div>
       </div>
@@ -979,22 +952,17 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart }) {
   let content = null;
 
   if (sticker.type === 'poll') {
-    const options = sticker.data.options || [
-      { text: 'Oui', color: '#3B82F6' },
-      { text: 'Non', color: '#EF4444' }
-    ];
+    const options = sticker.data.options || ['Oui', 'Non'];
+    const frameId = sticker.data.frameColor || 'gradient1';
+    const frame = POLL_FRAME_COLORS.find(c => c.id === frameId) || POLL_FRAME_COLORS[0];
     content = (
-      <div className="rounded-2xl overflow-hidden shadow-xl" style={{ width: '180px', backdropFilter: 'blur(10px)' }}>
-        <div className="bg-white/95 p-3">
-          <p className="text-center text-sm font-bold text-gray-800 mb-2">{sticker.data.question || 'Question ?'}</p>
-          <div className="flex flex-col gap-1.5">
+      <div className="rounded-2xl overflow-hidden shadow-xl" style={{ width: '180px', background: frame.gradient }}>
+        <div className="p-3">
+          <p className="text-center text-sm font-bold text-white mb-2" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>{sticker.data.question || 'Question ?'}</p>
+          <div className="flex gap-1.5">
             {options.map((opt, idx) => (
-              <div
-                key={idx}
-                className="text-white text-center text-xs font-bold py-2.5 rounded-xl cursor-default"
-                style={{ backgroundColor: opt.color }}
-              >
-                {opt.text || `Option ${idx + 1}`}
+              <div key={idx} className="flex-1 bg-white text-center text-xs font-bold py-2.5 rounded-xl cursor-default text-gray-800">
+                {typeof opt === 'string' ? opt : opt.text || `Option ${idx + 1}`}
               </div>
             ))}
           </div>

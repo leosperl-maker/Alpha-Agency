@@ -117,13 +117,11 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
         "sticker_position": sticker_position,
     }
 
-    # Ajouter le média (local_path prioritaire si disponible, sinon URL)
-    local_path = draft.get("local_path")
+    # Ajouter le média — TOUJOURS envoyer l'URL absolue au bridge.
+    # Le local_path est un chemin Railway (/tmp/story-uploads/...) inaccessible depuis le Mac.
+    # Le bridge téléchargera le fichier depuis l'URL publique.
     media_url = draft.get("media_url")
-    if local_path:
-        payload["local_path"] = local_path
-        payload["media_type"] = draft.get("media_type", "image")
-    elif media_url:
+    if media_url:
         # Convert relative URLs to absolute for bridge download
         if media_url.startswith("/"):
             media_url = f"{PUBLIC_URL}{media_url}"
