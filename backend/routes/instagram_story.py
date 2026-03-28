@@ -37,6 +37,7 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
     Le bridge gère : téléchargement image/vidéo, ADB push, Appium automation.
     """
     elements = draft.get("elements", [])
+    logger.info(f"publish_via_bridge — elements type={type(elements).__name__}, value={elements}")
 
     # elements can be a list (new format) or dict (old format)
     # New format: [{"type": "poll", "position": {...}, "data": {...}}, ...]
@@ -258,6 +259,10 @@ class CreateStoryRequest(BaseModel):
     text_overlay: Optional[str] = None
     text_position: Dict[str, float] = {"x": 0.5, "y": 0.3}
     text_color: Optional[str] = "#FFFFFF"
+    text_font: Optional[str] = "Classique"
+    # New format: array of sticker elements [{type, position, data}, ...]
+    elements: Optional[List[Dict]] = None
+    # Legacy individual sticker fields (backward compat)
     poll: Optional[StoryPoll] = None
     question: Optional[StoryQuestion] = None
     countdown: Optional[StoryCountdown] = None
@@ -309,16 +314,14 @@ async def create_story_draft(
     
     # Create draft
     draft_id = str(uuid.uuid4())
-    draft = {
-        "id": draft_id,
-        "user_id": user_id,
-        "account_id": request.account_id,
-        "instagram_username": account.get("username", ""),
-        "media_url": request.media_url,
-        "media_type": request.media_type,
-        "local_path": request.local_path,
-        "background_color": request.background_color,
-        "elements": {
+
+    # Build elements: prefer new array format from frontend, fallback to legacy fields
+    if request.elements and isinstance(request.elements, list) and len(request.elements) > 0:
+        # New format: [{type: "poll", position: {...}, data: {...}}, ...]
+        elements_data = request.elements
+    else:
+        # Legacy format: build from individual fields
+        elements_data = {
             "text_overlay": request.text_overlay,
             "text_position": request.text_position,
             "text_color": request.text_color,
@@ -330,7 +333,22 @@ async def create_story_draft(
             "link": request.link.dict() if request.link else None,
             "hashtag": request.hashtag.dict() if request.hashtag else None,
             "slider": request.slider.dict() if request.slider else None,
-        },
+        }
+
+    draft = {
+        "id": draft_id,
+        "user_id": user_id,
+        "account_id": request.account_id,
+        "instagram_username": account.get("username", ""),
+        "media_url": request.media_url,
+        "media_type": request.media_type,
+        "local_path": request.local_path,
+        "background_color": request.background_color,
+        "elements": elements_data,
+        "text_overlay": request.text_overlay,
+        "text_position": request.text_position,
+        "text_color": request.text_color,
+        "text_font": request.text_font,
         "status": "scheduled" if request.schedule_time else "draft",
         "schedule_time": request.schedule_time,
         "created_at": datetime.now(timezone.utc).isoformat(),
