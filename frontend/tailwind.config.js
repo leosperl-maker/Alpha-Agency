@@ -58,13 +58,13 @@ module.exports = {
                                 '4': 'hsl(var(--chart-4))',
                                 '5': 'hsl(var(--chart-5))'
                         },
-                        // Neon palette for glassmorphic dashboard
-                        neon: {
-                                cyan: '#06b6d4',
-                                purple: '#d946ef',
-                                indigo: '#6366f1',
-                                green: '#10b981',
-                                orange: '#f97316'
+                        // CRM accent colors
+                        crm: {
+                                primary: '#3B82F6',
+                                success: '#10B981',
+                                warning: '#F59E0B',
+                                danger: '#EF4444',
+                                info: '#6366F1'
                         }
                 },
                 backdropBlur: {
@@ -73,10 +73,9 @@ module.exports = {
                         '3xl': '64px'
                 },
                 boxShadow: {
-                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.36)',
-                        'neon': '0 0 10px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.3)',
-                        'neon-cyan': '0 0 10px rgba(6, 182, 212, 0.5), 0 0 20px rgba(6, 182, 212, 0.3)',
-                        'neon-purple': '0 0 10px rgba(217, 70, 239, 0.5), 0 0 20px rgba(217, 70, 239, 0.3)'
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
+                        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
+                        'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'
                 },
                 keyframes: {
                         'accordion-down': {
@@ -95,9 +94,9 @@ module.exports = {
                                 from: { opacity: '0', transform: 'translateX(20px)' },
                                 to: { opacity: '1', transform: 'translateX(0)' }
                         },
-                        'pulse-neon': {
-                                '0%, 100%': { boxShadow: '0 0 5px rgba(99, 102, 241, 0.4)' },
-                                '50%': { boxShadow: '0 0 20px rgba(99, 102, 241, 0.6)' }
+                        'pulse-subtle': {
+                                '0%, 100%': { boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.2)' },
+                                '50%': { boxShadow: '0 0 0 4px rgba(59, 130, 246, 0.1)' }
                         },
                         'glow': {
                                 '0%, 100%': { opacity: '1' },
@@ -109,7 +108,7 @@ module.exports = {
                         'accordion-up': 'accordion-up 0.2s ease-out',
                         'fade-in': 'fade-in 0.3s ease-out',
                         'slide-in': 'slide-in-right 0.3s ease-out',
-                        'pulse-neon': 'pulse-neon 2s ease-in-out infinite',
+                        'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
                         'glow': 'glow 2s ease-in-out infinite'
                 }
         }

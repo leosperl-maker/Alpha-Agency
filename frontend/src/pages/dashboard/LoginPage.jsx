@@ -66,7 +66,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div data-testid="login-page" className="min-h-screen bg-[#02040A] flex items-center justify-center px-6 relative overflow-hidden">
+    <div data-testid="login-page" className="min-h-screen bg-slate-50 flex items-center justify-center px-6 relative overflow-hidden">
       {/* Background Effects */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl" />

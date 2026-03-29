@@ -244,18 +244,18 @@ const PortfolioManagePage = () => {
   const getCategoryInfo = (categoryId) => CATEGORIES.find(c => c.id === categoryId);
 
   return (
-    <div className="p-4 md:p-6 bg-white/5 min-h-screen" data-testid="portfolio-manage-page">
+    <div className="p-4 md:p-6 bg-white min-h-screen" data-testid="portfolio-manage-page">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Réalisations</h1>
-          <p className="text-white/60">Gérez votre portfolio de projets</p>
+          <h1 className="text-2xl font-bold text-slate-900">Réalisations</h1>
+          <p className="text-slate-500">Gérez votre portfolio de projets</p>
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
             onClick={() => window.open('/realisations', '_blank')}
-            className="border-indigo-500/50 text-indigo-400"
+            className="border-indigo-500/50 text-indigo-600"
           >
             <Globe className="w-4 h-4 mr-2" /> Voir le site
           </Button>
@@ -271,32 +271,32 @@ const PortfolioManagePage = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-white">{items.length}</div>
-            <div className="text-sm text-white/60">Total projets</div>
+            <div className="text-2xl font-bold text-slate-900">{items.length}</div>
+            <div className="text-sm text-slate-500">Total projets</div>
           </CardContent>
         </Card>
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-green-600">
               {items.filter(i => i.status === 'published').length}
             </div>
-            <div className="text-sm text-white/60">Publiés</div>
+            <div className="text-sm text-slate-500">Publiés</div>
           </CardContent>
         </Card>
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-orange-600">
               {items.filter(i => i.status === 'draft').length}
             </div>
-            <div className="text-sm text-white/60">Brouillons</div>
+            <div className="text-sm text-slate-500">Brouillons</div>
           </CardContent>
         </Card>
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-indigo-400">{CATEGORIES.length}</div>
-            <div className="text-sm text-white/60">Catégories</div>
+            <div className="text-2xl font-bold text-indigo-600">{CATEGORIES.length}</div>
+            <div className="text-sm text-slate-500">Catégories</div>
           </CardContent>
         </Card>
       </div>
@@ -304,31 +304,31 @@ const PortfolioManagePage = () => {
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher..."
-            className="pl-10 bg-white/5 backdrop-blur-xl border-white/10"
+            className="pl-10 bg-white backdrop-blur-xl border-slate-200"
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[150px] bg-white/5 backdrop-blur-xl border-white/10">
+          <SelectTrigger className="w-[150px] bg-white backdrop-blur-xl border-slate-200">
             <Filter className="w-4 h-4 mr-2" />
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e]">
+          <SelectContent className="bg-slate-50">
             <SelectItem value="all">Tous</SelectItem>
             <SelectItem value="published">Publiés</SelectItem>
             <SelectItem value="draft">Brouillons</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="w-[160px] bg-white/5 backdrop-blur-xl border-white/10">
+          <SelectTrigger className="w-[160px] bg-white backdrop-blur-xl border-slate-200">
             <Tag className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Catégorie" />
           </SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e]">
+          <SelectContent className="bg-slate-50">
             <SelectItem value="all">Toutes</SelectItem>
             {CATEGORIES.map(cat => (
               <SelectItem key={cat.id} value={cat.id}>
@@ -345,13 +345,13 @@ const PortfolioManagePage = () => {
       {/* Projects Grid */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
         </div>
       ) : filteredItems.length === 0 ? (
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Image className="w-16 h-16 text-[#E5E5E5] mb-4" />
-            <p className="text-white/60 text-lg mb-4">Aucun projet trouvé</p>
+            <p className="text-slate-500 text-lg mb-4">Aucun projet trouvé</p>
             <Button onClick={() => openEditor()} className="bg-indigo-600 hover:bg-indigo-500 text-white">
               <Plus className="w-4 h-4 mr-2" /> Créer votre premier projet
             </Button>
@@ -364,11 +364,11 @@ const PortfolioManagePage = () => {
             return (
               <Card
                 key={item.id}
-                className="bg-white/5 backdrop-blur-xl border-white/10 overflow-hidden group hover:shadow-lg transition-shadow"
+                className="bg-white backdrop-blur-xl border-slate-200 overflow-hidden group hover:shadow-lg transition-shadow"
                 data-testid={`portfolio-item-${item.id}`}
               >
                 {/* Image */}
-                <div className="relative aspect-video bg-white/5 overflow-hidden">
+                <div className="relative aspect-video bg-white overflow-hidden">
                   {item.featured_image ? (
                     <img
                       src={item.featured_image}
@@ -391,12 +391,12 @@ const PortfolioManagePage = () => {
                     {item.status === 'published' ? 'Publié' : 'Brouillon'}
                   </Badge>
                   {/* Overlay actions */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <Button
                       variant="secondary"
                       size="sm"
                       onClick={() => openPreview(item)}
-                      className="bg-white/5 backdrop-blur-xl text-white"
+                      className="bg-white backdrop-blur-xl text-slate-900"
                     >
                       <Eye className="w-4 h-4 mr-1" /> Aperçu
                     </Button>
@@ -404,7 +404,7 @@ const PortfolioManagePage = () => {
                       variant="secondary"
                       size="sm"
                       onClick={() => openEditor(item)}
-                      className="bg-white/5 backdrop-blur-xl text-white"
+                      className="bg-white backdrop-blur-xl text-slate-900"
                     >
                       <Edit className="w-4 h-4 mr-1" /> Éditer
                     </Button>
@@ -414,14 +414,14 @@ const PortfolioManagePage = () => {
                 {/* Content */}
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-semibold text-white line-clamp-1">{item.title}</h3>
+                    <h3 className="font-semibold text-slate-900 line-clamp-1">{item.title}</h3>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-[#1a1a2e] border-white/10" align="end">
+                      <DropdownMenuContent className="bg-slate-50 border-slate-200" align="end">
                         <DropdownMenuItem onClick={() => openEditor(item)}>
                           <Edit className="w-4 h-4 mr-2" /> Modifier
                         </DropdownMenuItem>
@@ -449,7 +449,7 @@ const PortfolioManagePage = () => {
                   </div>
 
                   {item.subtitle && (
-                    <p className="text-sm text-white/60 line-clamp-2 mb-3">{item.subtitle}</p>
+                    <p className="text-sm text-slate-500 line-clamp-2 mb-3">{item.subtitle}</p>
                   )}
 
                   <div className="flex items-center justify-between">
@@ -462,7 +462,7 @@ const PortfolioManagePage = () => {
                       </Badge>
                     )}
                     {item.tags?.length > 0 && (
-                      <span className="text-xs text-white/40">{item.tags.length} tags</span>
+                      <span className="text-xs text-slate-400">{item.tags.length} tags</span>
                     )}
                   </div>
                 </CardContent>
@@ -474,10 +474,10 @@ const PortfolioManagePage = () => {
 
       {/* Editor Sheet */}
       <Sheet open={editorOpen} onOpenChange={setEditorOpen}>
-        <SheetContent className="w-full sm:max-w-3xl overflow-y-auto bg-white/5 backdrop-blur-xl p-0">
-          <SheetHeader className="p-6 border-b border-white/10 sticky top-0 bg-white/5 backdrop-blur-xl z-10">
+        <SheetContent className="w-full sm:max-w-3xl overflow-y-auto bg-white backdrop-blur-xl p-0">
+          <SheetHeader className="p-6 border-b border-slate-200 sticky top-0 bg-white backdrop-blur-xl z-10">
             <div className="flex items-center justify-between">
-              <SheetTitle className="text-xl text-white">
+              <SheetTitle className="text-xl text-slate-900">
                 {editingItem ? 'Modifier le projet' : 'Nouveau projet'}
               </SheetTitle>
               <div className="flex gap-2">
@@ -498,7 +498,7 @@ const PortfolioManagePage = () => {
 
           <div className="p-6 space-y-6">
             <Tabs defaultValue="content" className="w-full">
-              <TabsList className="bg-white/5 border border-white/10 mb-6">
+              <TabsList className="bg-white border border-slate-200 mb-6">
                 <TabsTrigger value="content" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
                   Contenu
                 </TabsTrigger>
@@ -519,7 +519,7 @@ const PortfolioManagePage = () => {
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="Ex: Site web Restaurant Le Marin"
-                      className="bg-white/5 border-white/10"
+                      className="bg-white border-slate-200"
                     />
                   </div>
 
@@ -529,7 +529,7 @@ const PortfolioManagePage = () => {
                       value={formData.subtitle}
                       onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
                       placeholder="Une brève description du projet..."
-                      className="bg-white/5 border-white/10"
+                      className="bg-white border-slate-200"
                       rows={2}
                     />
                   </div>
@@ -554,7 +554,7 @@ const PortfolioManagePage = () => {
                         value={formData.featured_image}
                         onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
                         placeholder="URL de l'image"
-                        className="bg-white/5 border-white/10"
+                        className="bg-white border-slate-200"
                       />
                     </div>
                     <label className="cursor-pointer">
@@ -604,10 +604,10 @@ const PortfolioManagePage = () => {
                       value={formData.category}
                       onValueChange={(v) => setFormData({ ...formData, category: v })}
                     >
-                      <SelectTrigger className="bg-white/5 border-white/10">
+                      <SelectTrigger className="bg-white border-slate-200">
                         <SelectValue placeholder="Sélectionner" />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#1a1a2e]">
+                      <SelectContent className="bg-slate-50">
                         {CATEGORIES.map((cat) => (
                           <SelectItem key={cat.id} value={cat.id}>
                             <div className="flex items-center gap-2">
@@ -626,10 +626,10 @@ const PortfolioManagePage = () => {
                       value={formData.status}
                       onValueChange={(v) => setFormData({ ...formData, status: v })}
                     >
-                      <SelectTrigger className="bg-white/5 border-white/10">
+                      <SelectTrigger className="bg-white border-slate-200">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#1a1a2e]">
+                      <SelectContent className="bg-slate-50">
                         <SelectItem value="draft">Brouillon</SelectItem>
                         <SelectItem value="published">Publié</SelectItem>
                       </SelectContent>
@@ -644,7 +644,7 @@ const PortfolioManagePage = () => {
                       <Sparkles className="w-4 h-4 mr-1" /> Suggérer via IA
                     </Button>
                   </div>
-                  <div className="flex flex-wrap gap-2 p-3 bg-white/5 rounded-lg border border-white/10 min-h-12">
+                  <div className="flex flex-wrap gap-2 p-3 bg-white rounded-lg border border-slate-200 min-h-12">
                     {formData.tags.map((tag, i) => (
                       <Badge key={i} variant="secondary" className="flex items-center gap-1">
                         {tag}
@@ -684,7 +684,7 @@ const PortfolioManagePage = () => {
                           <Badge
                             key={tag.id}
                             variant="outline"
-                            className="cursor-pointer hover:bg-indigo-600 hover:text-white hover:border-indigo-500/50"
+                            className="cursor-pointer hover:bg-indigo-600 hover:text-slate-900 hover:border-indigo-500/50"
                             onClick={() => setFormData({ ...formData, tags: [...formData.tags, tag.name] })}
                           >
                             + {tag.name}
@@ -701,7 +701,7 @@ const PortfolioManagePage = () => {
                       value={formData.client_name}
                       onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
                       placeholder="Ex: Restaurant Le Marin"
-                      className="bg-white/5 border-white/10"
+                      className="bg-white border-slate-200"
                     />
                   </div>
                   <div className="space-y-2">
@@ -710,7 +710,7 @@ const PortfolioManagePage = () => {
                       type="month"
                       value={formData.project_date}
                       onChange={(e) => setFormData({ ...formData, project_date: e.target.value })}
-                      className="bg-white/5 border-white/10"
+                      className="bg-white border-slate-200"
                     />
                   </div>
                 </div>
@@ -721,7 +721,7 @@ const PortfolioManagePage = () => {
                     value={formData.project_url}
                     onChange={(e) => setFormData({ ...formData, project_url: e.target.value })}
                     placeholder="https://..."
-                    className="bg-white/5 border-white/10"
+                    className="bg-white border-slate-200"
                   />
                 </div>
 
@@ -731,7 +731,7 @@ const PortfolioManagePage = () => {
                     value={formData.slug}
                     onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                     placeholder="Généré automatiquement depuis le titre"
-                    className="bg-white/5 border-white/10"
+                    className="bg-white border-slate-200"
                   />
                 </div>
               </TabsContent>
@@ -742,7 +742,7 @@ const PortfolioManagePage = () => {
 
       {/* Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white/5 backdrop-blur-xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle>Aperçu du projet</DialogTitle>
           </DialogHeader>
@@ -756,9 +756,9 @@ const PortfolioManagePage = () => {
                 />
               )}
               <div>
-                <h2 className="text-3xl font-bold text-white mb-2">{previewItem.title}</h2>
+                <h2 className="text-3xl font-bold text-slate-900 mb-2">{previewItem.title}</h2>
                 {previewItem.subtitle && (
-                  <p className="text-lg text-white/60">{previewItem.subtitle}</p>
+                  <p className="text-lg text-slate-500">{previewItem.subtitle}</p>
                 )}
               </div>
               <div className="flex flex-wrap gap-2">
@@ -769,7 +769,7 @@ const PortfolioManagePage = () => {
                 ))}
               </div>
               {previewItem.content_blocks?.length > 0 && (
-                <div className="pt-6 border-t border-white/10">
+                <div className="pt-6 border-t border-slate-200">
                   <AdvancedBlockRenderer blocks={previewItem.content_blocks} />
                 </div>
               )}

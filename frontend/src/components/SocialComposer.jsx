@@ -102,7 +102,7 @@ const PlatformIcon = ({ platform, className = "w-4 h-4", showBg = false }) => {
   if (showBg) {
     return (
       <div className={`${config.bgColor} p-1.5 rounded-lg`}>
-        <Icon className={`${className} text-white`} />
+        <Icon className={`${className} text-slate-900`} />
       </div>
     );
   }
@@ -258,12 +258,12 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
       
       {/* Upload Progress */}
       {uploading && (
-        <div className="bg-white/5 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-white/60 text-sm mb-2">
+        <div className="bg-white rounded-lg p-3">
+          <div className="flex items-center gap-2 text-slate-500 text-sm mb-2">
             <Loader2 className="w-4 h-4 animate-spin" />
             <span>Upload en cours... {uploadProgress}%</span>
           </div>
-          <div className="w-full bg-white/10 rounded-full h-2">
+          <div className="w-full bg-slate-100 rounded-full h-2">
             <div 
               className="bg-indigo-500 h-2 rounded-full transition-all duration-300" 
               style={{ width: `${uploadProgress}%` }}
@@ -278,7 +278,7 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
           {medias.map((media, index) => (
             <div 
               key={media.id}
-              className="relative aspect-square rounded-lg overflow-hidden bg-white/5 group"
+              className="relative aspect-square rounded-lg overflow-hidden bg-white group"
             >
               {media.type === 'video' ? (
                 <video 
@@ -298,7 +298,7 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-8 w-8 text-white hover:bg-white/20"
+                  className="h-8 w-8 text-slate-900 hover:bg-white/20"
                   onClick={() => removeMedia(media.id)}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -306,13 +306,13 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
               </div>
               
               {/* Index badge */}
-              <div className="absolute top-1 left-1 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded">
+              <div className="absolute top-1 left-1 bg-white text-slate-900 text-xs px-1.5 py-0.5 rounded">
                 {index + 1}
               </div>
               
               {/* Type badge */}
               {media.type === 'video' && (
-                <div className="absolute bottom-1 right-1 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded flex items-center gap-1">
+                <div className="absolute bottom-1 right-1 bg-white text-slate-900 text-xs px-1.5 py-0.5 rounded flex items-center gap-1">
                   <Play className="w-3 h-3" />
                   Vidéo
                 </div>
@@ -325,7 +325,7 @@ const MediaUploader = ({ medias, onChange, maxMedia = 10 }) => {
       {/* Upload Button */}
       <Button
         variant="outline"
-        className="w-full border-dashed border-white/20 text-white/60 hover:text-white hover:border-white/40 h-20"
+        className="w-full border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-white/40 h-20"
         onClick={() => fileInputRef.current?.click()}
         disabled={uploading || medias.length >= maxMedia}
       >
@@ -429,7 +429,7 @@ const PlatformPreview = ({ platform, content, medias, hashtags, account }) => {
             {account?.profile_picture_url ? (
               <img src={account.profile_picture_url} alt="" className="w-full h-full rounded-full object-cover" />
             ) : (
-              <Facebook className="w-5 h-5 text-white" />
+              <Facebook className="w-5 h-5 text-slate-900" />
             )}
           </div>
           <div>
@@ -496,7 +496,7 @@ const PlatformPreview = ({ platform, content, medias, hashtags, account }) => {
             {account?.profile_picture_url ? (
               <img src={account.profile_picture_url} alt="" className="w-full h-full rounded-full object-cover" />
             ) : (
-              <Linkedin className="w-6 h-6 text-white" />
+              <Linkedin className="w-6 h-6 text-slate-900" />
             )}
           </div>
           <div className="flex-1">
@@ -563,7 +563,7 @@ const PlatformPreview = ({ platform, content, medias, hashtags, account }) => {
             <img src={medias[0].url} alt="" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Play className="w-16 h-16 text-white/30" />
+              <Play className="w-16 h-16 text-slate-400" />
             </div>
           )}
         </div>
@@ -574,34 +574,34 @@ const PlatformPreview = ({ platform, content, medias, hashtags, account }) => {
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
               ❤️
             </div>
-            <span className="text-white text-xs">12.3K</span>
+            <span className="text-slate-900 text-xs">12.3K</span>
           </div>
           <div className="text-center">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
               💬
             </div>
-            <span className="text-white text-xs">234</span>
+            <span className="text-slate-900 text-xs">234</span>
           </div>
           <div className="text-center">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
               🔖
             </div>
-            <span className="text-white text-xs">567</span>
+            <span className="text-slate-900 text-xs">567</span>
           </div>
           <div className="text-center">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
               ↗️
             </div>
-            <span className="text-white text-xs">89</span>
+            <span className="text-slate-900 text-xs">89</span>
           </div>
         </div>
         
         {/* Bottom info */}
         <div className="absolute bottom-4 left-3 right-14">
-          <p className="text-white font-semibold text-sm">@{account?.username || 'username'}</p>
-          <p className="text-white text-xs mt-1 line-clamp-2">{content}</p>
+          <p className="text-slate-900 font-semibold text-sm">@{account?.username || 'username'}</p>
+          <p className="text-slate-900 text-xs mt-1 line-clamp-2">{content}</p>
           {hashtags.length > 0 && (
-            <p className="text-white/80 text-xs mt-1">
+            <p className="text-slate-700 text-xs mt-1">
               {hashtags.slice(0, 3).map(h => `#${h}`).join(' ')}
             </p>
           )}
@@ -795,10 +795,10 @@ const SocialComposer = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl w-full h-[100dvh] md:h-[90vh] bg-slate-900 border-white/10 p-0 gap-0 overflow-hidden [&>button]:hidden">
+      <DialogContent className="max-w-6xl w-full h-[100dvh] md:h-[90vh] bg-slate-900 border-slate-200 p-0 gap-0 overflow-hidden [&>button]:hidden">
         {/* Header with safe area support for PWA mode */}
         <div 
-          className="flex items-center justify-between px-3 md:px-6 py-3 md:py-4 border-b border-white/10 bg-slate-900"
+          className="flex items-center justify-between px-3 md:px-6 py-3 md:py-4 border-b border-slate-200 bg-slate-900"
           style={{ paddingTop: 'max(12px, env(safe-area-inset-top, 12px))' }}
         >
           {/* Close button - Explicit for mobile PWA */}
@@ -806,16 +806,16 @@ const SocialComposer = ({
             variant="ghost"
             size="icon"
             onClick={() => onOpenChange(false)}
-            className="md:hidden text-white/60 hover:text-white hover:bg-white/10 h-8 w-8 mr-2 flex-shrink-0"
+            className="md:hidden text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-8 w-8 mr-2 flex-shrink-0"
           >
             <X className="w-5 h-5" />
           </Button>
           
           <div className="min-w-0 flex-1">
-            <DialogTitle className="text-white text-base md:text-lg truncate">
+            <DialogTitle className="text-slate-900 text-base md:text-lg truncate">
               {editingPost ? 'Modifier le post' : 'Créer un nouveau post'}
             </DialogTitle>
-            <p className="text-white/50 text-xs md:text-sm mt-0.5">
+            <p className="text-slate-500 text-xs md:text-sm mt-0.5">
               {selectedAccounts.length} compte{selectedAccounts.length > 1 ? 's' : ''} sélectionné{selectedAccounts.length > 1 ? 's' : ''}
             </p>
           </div>
@@ -825,7 +825,7 @@ const SocialComposer = ({
               variant="outline"
               onClick={() => handleSave(true)}
               disabled={saving}
-              className="text-white border-white/20 px-2 md:px-4 text-xs md:text-sm"
+              className="text-slate-900 border-slate-200 px-2 md:px-4 text-xs md:text-sm"
               size="sm"
             >
               <Save className="w-4 h-4 md:mr-1" />
@@ -849,14 +849,14 @@ const SocialComposer = ({
         </div>
 
         {/* Mobile Tab Navigation - Only visible on small screens */}
-        <div className="md:hidden border-b border-white/10 bg-slate-950/50">
+        <div className="md:hidden border-b border-slate-200 bg-slate-950/50">
           <div className="flex">
             <button
               onClick={() => setMobileTab('accounts')}
               className={`flex-1 py-3 text-xs font-medium transition-colors ${
                 mobileTab === 'accounts' 
-                  ? 'text-indigo-400 border-b-2 border-indigo-500 bg-white/5' 
-                  : 'text-white/60'
+                  ? 'text-indigo-600 border-b-2 border-indigo-500 bg-white' 
+                  : 'text-slate-500'
               }`}
             >
               Comptes
@@ -865,8 +865,8 @@ const SocialComposer = ({
               onClick={() => setMobileTab('content')}
               className={`flex-1 py-3 text-xs font-medium transition-colors ${
                 mobileTab === 'content' 
-                  ? 'text-indigo-400 border-b-2 border-indigo-500 bg-white/5' 
-                  : 'text-white/60'
+                  ? 'text-indigo-600 border-b-2 border-indigo-500 bg-white' 
+                  : 'text-slate-500'
               }`}
             >
               Contenu
@@ -877,9 +877,9 @@ const SocialComposer = ({
         {/* Content - Responsive layout */}
         <div className="flex flex-1 overflow-hidden">
           {/* Left Panel - Account Selection - Hidden on mobile unless tab selected */}
-          <div className={`${mobileTab === 'accounts' ? 'flex' : 'hidden'} md:flex w-full md:w-72 border-r border-white/10 flex-col`}>
-            <div className="p-4 border-b border-white/10">
-              <Label className="text-white/70 text-xs uppercase tracking-wide">Entité</Label>
+          <div className={`${mobileTab === 'accounts' ? 'flex' : 'hidden'} md:flex w-full md:w-72 border-r border-slate-200 flex-col`}>
+            <div className="p-4 border-b border-slate-200">
+              <Label className="text-slate-600 text-xs uppercase tracking-wide">Entité</Label>
               <Select 
                 value={selectedEntity?.id || ''} 
                 onValueChange={(id) => {
@@ -888,10 +888,10 @@ const SocialComposer = ({
                   setSelectedAccounts([]);
                 }}
               >
-                <SelectTrigger className="mt-2 bg-white/5 border-white/10 text-white">
+                <SelectTrigger className="mt-2 bg-white border-slate-200 text-slate-900">
                   <SelectValue placeholder="Sélectionner..." />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-white/10">
+                <SelectContent className="bg-slate-900 border-slate-200">
                   {entities.map(entity => (
                     <SelectItem key={entity.id} value={entity.id}>
                       <div className="flex items-center gap-2">
@@ -906,13 +906,13 @@ const SocialComposer = ({
             
             <div className="flex-1 overflow-auto p-4">
               <div className="flex items-center justify-between mb-3">
-                <Label className="text-white/70 text-xs uppercase tracking-wide">Comptes</Label>
+                <Label className="text-slate-600 text-xs uppercase tracking-wide">Comptes</Label>
                 {entityAccounts.length > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={selectAllAccounts}
-                    className="text-xs text-indigo-400 hover:text-indigo-300 h-auto py-1"
+                    className="text-xs text-indigo-600 hover:text-indigo-300 h-auto py-1"
                   >
                     Tout sélectionner
                   </Button>
@@ -920,7 +920,7 @@ const SocialComposer = ({
               </div>
               
               {entityAccounts.length === 0 ? (
-                <div className="text-center py-8 text-white/40">
+                <div className="text-center py-8 text-slate-400">
                   <Globe className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">Aucun compte lié</p>
                 </div>
@@ -932,7 +932,7 @@ const SocialComposer = ({
                       className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors
                         ${selectedAccounts.includes(account.id) 
                           ? 'bg-indigo-500/20 border border-indigo-500/50' 
-                          : 'bg-white/5 border border-transparent hover:bg-white/10'
+                          : 'bg-white border border-transparent hover:bg-slate-100'
                         }`}
                       onClick={() => toggleAccount(account.id)}
                     >
@@ -949,19 +949,19 @@ const SocialComposer = ({
                           />
                         ) : (
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${PLATFORMS[account.platform]?.bgColor || 'bg-white/20'}`}>
-                            <PlatformIcon platform={account.platform} className="w-4 h-4 text-white" />
+                            <PlatformIcon platform={account.platform} className="w-4 h-4 text-slate-900" />
                           </div>
                         )}
                         <div 
                           className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center border border-slate-900"
                           style={{ backgroundColor: PLATFORMS[account.platform]?.color }}
                         >
-                          <PlatformIcon platform={account.platform} className="w-2.5 h-2.5 text-white" />
+                          <PlatformIcon platform={account.platform} className="w-2.5 h-2.5 text-slate-900" />
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm truncate">{account.display_name}</p>
-                        <p className="text-white/50 text-xs truncate">@{account.username}</p>
+                        <p className="text-slate-900 text-sm truncate">{account.display_name}</p>
+                        <p className="text-slate-500 text-xs truncate">@{account.username}</p>
                       </div>
                     </div>
                   ))}
@@ -970,8 +970,8 @@ const SocialComposer = ({
             </div>
             
             {/* Post Type */}
-            <div className="p-4 border-t border-white/10">
-              <Label className="text-white/70 text-xs uppercase tracking-wide mb-2 block">Type de post</Label>
+            <div className="p-4 border-t border-slate-200">
+              <Label className="text-slate-600 text-xs uppercase tracking-wide mb-2 block">Type de post</Label>
               <div className="grid grid-cols-2 gap-2">
                 {POST_TYPES.map(type => (
                   <Button
@@ -981,7 +981,7 @@ const SocialComposer = ({
                     onClick={() => setPostType(type.id)}
                     className={postType === type.id 
                       ? 'bg-indigo-600' 
-                      : 'border-white/20 text-white/70 hover:text-white'
+                      : 'border-slate-200 text-slate-600 hover:text-slate-900'
                     }
                   >
                     <type.icon className="w-3 h-3 mr-1" />
@@ -999,8 +999,8 @@ const SocialComposer = ({
                 {/* Content */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <Label className="text-white">Contenu</Label>
-                    <span className={`text-xs ${isOverLimit ? 'text-red-400' : 'text-white/50'}`}>
+                    <Label className="text-slate-900">Contenu</Label>
+                    <span className={`text-xs ${isOverLimit ? 'text-red-400' : 'text-slate-500'}`}>
                       {characterCount} / {characterLimit}
                     </span>
                   </div>
@@ -1008,7 +1008,7 @@ const SocialComposer = ({
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Qu'avez-vous à partager ?"
-                    className="min-h-[150px] bg-white/5 border-white/10 text-white resize-none"
+                    className="min-h-[150px] bg-white border-slate-200 text-slate-900 resize-none"
                   />
                   {isOverLimit && (
                     <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
@@ -1020,7 +1020,7 @@ const SocialComposer = ({
                 
                 {/* Media */}
                 <div>
-                  <Label className="text-white mb-2 block">Médias</Label>
+                  <Label className="text-slate-900 mb-2 block">Médias</Label>
                   <MediaUploader 
                     medias={medias} 
                     onChange={setMedias}
@@ -1030,19 +1030,19 @@ const SocialComposer = ({
                 
                 {/* Hashtags */}
                 <div>
-                  <Label className="text-white mb-2 block">Hashtags</Label>
+                  <Label className="text-slate-900 mb-2 block">Hashtags</Label>
                   <div className="flex gap-2 mb-2">
                     <Input
                       value={hashtagInput}
                       onChange={(e) => setHashtagInput(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleAddHashtag()}
                       placeholder="Ajouter un hashtag..."
-                      className="bg-white/5 border-white/10 text-white"
+                      className="bg-white border-slate-200 text-slate-900"
                     />
                     <Button 
                       onClick={handleAddHashtag}
                       variant="outline"
-                      className="border-white/20 text-white"
+                      className="border-slate-200 text-slate-900"
                     >
                       <Plus className="w-4 h-4" />
                     </Button>
@@ -1067,37 +1067,37 @@ const SocialComposer = ({
                 {/* Link & Location */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-white mb-2 block">Lien</Label>
+                    <Label className="text-slate-900 mb-2 block">Lien</Label>
                     <div className="relative">
-                      <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                      <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <Input
                         value={linkUrl}
                         onChange={(e) => setLinkUrl(e.target.value)}
                         placeholder="https://..."
-                        className="pl-9 bg-white/5 border-white/10 text-white"
+                        className="pl-9 bg-white border-slate-200 text-slate-900"
                       />
                     </div>
                   </div>
                   <div>
-                    <Label className="text-white mb-2 block">Lieu</Label>
+                    <Label className="text-slate-900 mb-2 block">Lieu</Label>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <Input
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                         placeholder="Ajouter un lieu..."
-                        className="pl-9 bg-white/5 border-white/10 text-white"
+                        className="pl-9 bg-white border-slate-200 text-slate-900"
                       />
                     </div>
                   </div>
                 </div>
                 
                 {/* Scheduling */}
-                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <div className="bg-white rounded-xl p-4 border border-slate-200">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-indigo-400" />
-                      <span className="text-white font-medium">Programmer</span>
+                      <Clock className="w-5 h-5 text-indigo-600" />
+                      <span className="text-slate-900 font-medium">Programmer</span>
                     </div>
                     <Switch
                       checked={showScheduler}
@@ -1108,22 +1108,22 @@ const SocialComposer = ({
                   {showScheduler && (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label className="text-white/70 text-xs mb-1 block">Date</Label>
+                        <Label className="text-slate-600 text-xs mb-1 block">Date</Label>
                         <Input
                           type="date"
                           value={scheduledDate}
                           onChange={(e) => setScheduledDate(e.target.value)}
-                          className="bg-white/5 border-white/10 text-white"
+                          className="bg-white border-slate-200 text-slate-900"
                           min={new Date().toISOString().split('T')[0]}
                         />
                       </div>
                       <div>
-                        <Label className="text-white/70 text-xs mb-1 block">Heure</Label>
+                        <Label className="text-slate-600 text-xs mb-1 block">Heure</Label>
                         <Input
                           type="time"
                           value={scheduledTime}
                           onChange={(e) => setScheduledTime(e.target.value)}
-                          className="bg-white/5 border-white/10 text-white"
+                          className="bg-white border-slate-200 text-slate-900"
                         />
                       </div>
                     </div>
@@ -1134,12 +1134,12 @@ const SocialComposer = ({
           </div>
           
           {/* Right Panel - Previews - HIDDEN ON MOBILE */}
-          <div className="hidden lg:flex w-96 border-l border-white/10 flex-col bg-slate-950/50">
-            <div className="p-4 border-b border-white/10">
-              <Label className="text-white/70 text-xs uppercase tracking-wide mb-2 block">Prévisualisation</Label>
+          <div className="hidden lg:flex w-96 border-l border-slate-200 flex-col bg-slate-950/50">
+            <div className="p-4 border-b border-slate-200">
+              <Label className="text-slate-600 text-xs uppercase tracking-wide mb-2 block">Prévisualisation</Label>
               <div className="flex gap-1">
                 {selectedPlatforms.length === 0 ? (
-                  <p className="text-white/40 text-sm">Sélectionnez des comptes</p>
+                  <p className="text-slate-400 text-sm">Sélectionnez des comptes</p>
                 ) : (
                   selectedPlatforms.map(platform => (
                     <Button
@@ -1147,7 +1147,7 @@ const SocialComposer = ({
                       variant={activePreviewPlatform === platform ? 'default' : 'ghost'}
                       size="sm"
                       onClick={() => setActivePreviewPlatform(platform)}
-                      className={activePreviewPlatform === platform ? 'bg-white/10' : 'text-white/60'}
+                      className={activePreviewPlatform === platform ? 'bg-slate-100' : 'text-slate-500'}
                     >
                       <PlatformIcon platform={platform} className="w-4 h-4 mr-1" />
                       {PLATFORMS[platform]?.name}
@@ -1168,7 +1168,7 @@ const SocialComposer = ({
                     account={selectedAccountsData.find(a => a.platform === activePreviewPlatform)}
                   />
                 ) : (
-                  <div className="text-center py-12 text-white/40">
+                  <div className="text-center py-12 text-slate-400">
                     <Eye className="w-12 h-12 mx-auto mb-3 opacity-30" />
                     <p>Sélectionnez des comptes pour voir la prévisualisation</p>
                   </div>

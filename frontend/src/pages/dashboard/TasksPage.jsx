@@ -56,10 +56,10 @@ const DEFAULT_TASK_COLUMNS = [
 ];
 
 const priorityConfig = {
-  low: { label: "Basse", color: "bg-gray-100 text-gray-600" },
-  medium: { label: "Moyenne", color: "bg-amber-500/20 text-amber-400" },
-  high: { label: "Haute", color: "bg-orange-500/20 text-orange-400" },
-  urgent: { label: "Urgente", color: "bg-red-500/20 text-red-400" }
+  low: { label: "Basse", color: "bg-slate-100 text-slate-600" },
+  medium: { label: "Moyenne", color: "bg-yellow-100 text-yellow-700" },
+  high: { label: "Haute", color: "bg-orange-100 text-orange-700" },
+  urgent: { label: "Urgente", color: "bg-red-100 text-red-700" }
 };
 
 const categories = [
@@ -106,7 +106,7 @@ const SortableTaskCard = ({ task, onEdit, onDelete, onStatusChange, onViewDetail
     <div 
       ref={setNodeRef}
       style={style}
-      className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-3 hover:shadow-md transition-all ${
+      className={`bg-white backdrop-blur-xl border border-slate-200 rounded-lg p-3 hover:shadow-md transition-all ${
         isDragging ? 'shadow-xl ring-2 ring-[#CE0202]' : ''
       } ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}
       data-testid={`task-${task.id}`}
@@ -117,17 +117,17 @@ const SortableTaskCard = ({ task, onEdit, onDelete, onStatusChange, onViewDetail
           <div 
             {...attributes}
             {...listeners}
-            className="drag-handle cursor-grab active:cursor-grabbing p-1 -ml-1 mt-0.5 hover:bg-white/5 rounded flex-shrink-0"
+            className="drag-handle cursor-grab active:cursor-grabbing p-1 -ml-1 mt-0.5 hover:bg-slate-50 rounded flex-shrink-0"
             data-testid={`drag-handle-task-${task.id}`}
           >
-            <GripVertical className="w-4 h-4 text-white/40" />
+            <GripVertical className="w-4 h-4 text-slate-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className={`font-medium text-white text-sm ${task.status === 'done' ? 'line-through text-white/60' : ''}`}>
+            <p className={`font-medium text-slate-900 text-sm ${task.status === 'done' ? 'line-through text-slate-500' : ''}`}>
               {task.title}
             </p>
             {task.description && (
-              <p className="text-xs text-white/60 mt-1 line-clamp-2">{task.description}</p>
+              <p className="text-xs text-slate-500 mt-1 line-clamp-2">{task.description}</p>
             )}
           </div>
         </div>
@@ -137,7 +137,7 @@ const SortableTaskCard = ({ task, onEdit, onDelete, onStatusChange, onViewDetail
               <MoreVertical className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-[#1a1a2e]" align="end">
+          <DropdownMenuContent className="bg-slate-50" align="end">
             <DropdownMenuItem onClick={() => onEdit(task)} data-testid={`task-edit-${task.id}`}>
               <Edit className="w-4 h-4 mr-2" /> Modifier
             </DropdownMenuItem>
@@ -173,7 +173,7 @@ const SortableTaskCard = ({ task, onEdit, onDelete, onStatusChange, onViewDetail
           </Badge>
         )}
         {task.due_date && (
-          <Badge className={`${isOverdue ? 'bg-red-500/20 text-red-400' : 'bg-gray-100 text-gray-600'} border-none text-xs`}>
+          <Badge className={`${isOverdue ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'} border-none text-xs`}>
             <Calendar className="w-3 h-3 mr-1" />
             {new Date(task.due_date).toLocaleDateString('fr-FR')}
           </Badge>
@@ -181,8 +181,8 @@ const SortableTaskCard = ({ task, onEdit, onDelete, onStatusChange, onViewDetail
       </div>
       {/* Contact associé */}
       {task.contact_id && getContactName(task.contact_id) && (
-        <div className="mt-2 pt-2 border-t border-white/10">
-          <p className="text-xs text-white/60 flex items-center gap-1">
+        <div className="mt-2 pt-2 border-t border-slate-200">
+          <p className="text-xs text-slate-500 flex items-center gap-1">
             <User className="w-3 h-3" />
             {getContactName(task.contact_id)}
           </p>
@@ -234,18 +234,18 @@ const DroppableTaskColumn = ({ column, children, onEdit, onDelete, tasksCount, t
       data-testid={`task-column-${column.id}`}
       className={`flex-shrink-0 w-[260px] sm:w-[300px] md:w-[320px] ${isOver ? 'ring-2 ring-[#CE0202] ring-opacity-50' : ''}`}
     >
-      <div className={`bg-white/5 backdrop-blur-xl rounded-xl border shadow-sm h-full transition-all ${
-        isOver ? 'border-indigo-500/50 bg-indigo-600/5' : 'border-white/10'
+      <div className={`bg-white backdrop-blur-xl rounded-xl border shadow-sm h-full transition-all ${
+        isOver ? 'border-indigo-500/50 bg-indigo-600/5' : 'border-slate-200'
       }`}>
-        <div className="p-4 border-b border-white/10">
+        <div className="p-4 border-b border-slate-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <button
                 {...attributes}
                 {...listeners}
-                className="cursor-grab active:cursor-grabbing p-1 hover:bg-white/5 rounded"
+                className="cursor-grab active:cursor-grabbing p-1 hover:bg-slate-50 rounded"
               >
-                <GripVertical className="w-4 h-4 text-white/60" />
+                <GripVertical className="w-4 h-4 text-slate-500" />
               </button>
               <div 
                 className={`p-1.5 rounded-lg`}
@@ -253,20 +253,20 @@ const DroppableTaskColumn = ({ column, children, onEdit, onDelete, tasksCount, t
               >
                 <StatusIcon className="w-4 h-4" style={{ color: column.color }} />
               </div>
-              <span className="text-white text-sm font-semibold">
+              <span className="text-slate-900 text-sm font-semibold">
                 {column.label}
               </span>
-              <Badge variant="secondary" className="bg-white/5 text-white/60 text-xs">
+              <Badge variant="secondary" className="bg-white text-slate-500 text-xs">
                 {tasksCount}
               </Badge>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                  <MoreVertical className="w-4 h-4 text-white/60" />
+                  <MoreVertical className="w-4 h-4 text-slate-500" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
+              <DropdownMenuContent className="bg-slate-50 border-slate-200">
                 <DropdownMenuItem onClick={() => onEdit(column)}>
                   <Edit className="w-4 h-4 mr-2" /> Modifier
                 </DropdownMenuItem>
@@ -302,11 +302,11 @@ const TaskDetailSheet = ({ task, open, onOpenChange, onEdit, contacts, columns }
   
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="bg-white/5 backdrop-blur-xl w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader className="pb-4 border-b border-white/10">
+      <SheetContent className="bg-white backdrop-blur-xl w-full sm:max-w-lg overflow-y-auto">
+        <SheetHeader className="pb-4 border-b border-slate-200">
           <div className="flex items-start justify-between">
             <div>
-              <SheetTitle className={`text-xl text-white ${task.status === 'done' ? 'line-through' : ''}`}>
+              <SheetTitle className={`text-xl text-slate-900 ${task.status === 'done' ? 'line-through' : ''}`}>
                 {task.title}
               </SheetTitle>
             </div>
@@ -332,7 +332,7 @@ const TaskDetailSheet = ({ task, open, onOpenChange, onEdit, contacts, columns }
               </Badge>
             )}
             {isOverdue && (
-              <Badge className="bg-red-500/20 text-red-400">
+              <Badge className="bg-red-100 text-red-700">
                 <AlertCircle className="w-3 h-3 mr-1" /> En retard
               </Badge>
             )}
@@ -341,18 +341,18 @@ const TaskDetailSheet = ({ task, open, onOpenChange, onEdit, contacts, columns }
           {/* Description */}
           {task.description && (
             <div>
-              <h3 className="text-sm font-semibold text-white mb-2">Description</h3>
-              <p className="text-sm text-white/60 whitespace-pre-wrap">{task.description}</p>
+              <h3 className="text-sm font-semibold text-slate-900 mb-2">Description</h3>
+              <p className="text-sm text-slate-500 whitespace-pre-wrap">{task.description}</p>
             </div>
           )}
 
           {/* Due Date */}
           {task.due_date && (
             <div className="flex items-center gap-3">
-              <Calendar className={`w-5 h-5 ${isOverdue ? 'text-red-500' : 'text-white/60'}`} />
+              <Calendar className={`w-5 h-5 ${isOverdue ? 'text-red-500' : 'text-slate-500'}`} />
               <div>
-                <p className="text-xs text-white/60">Date d'échéance</p>
-                <p className={`text-sm font-medium ${isOverdue ? 'text-red-600' : 'text-white'}`}>
+                <p className="text-xs text-slate-500">Date d'échéance</p>
+                <p className={`text-sm font-medium ${isOverdue ? 'text-red-600' : 'text-slate-900'}`}>
                   {new Date(task.due_date).toLocaleDateString('fr-FR', { 
                     weekday: 'long', 
                     year: 'numeric', 
@@ -367,12 +367,12 @@ const TaskDetailSheet = ({ task, open, onOpenChange, onEdit, contacts, columns }
           {/* Contact */}
           {contact && (
             <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-white/60" />
+              <User className="w-5 h-5 text-slate-500" />
               <div>
-                <p className="text-xs text-white/60">Contact associé</p>
-                <p className="text-sm font-medium text-white">
+                <p className="text-xs text-slate-500">Contact associé</p>
+                <p className="text-sm font-medium text-slate-900">
                   {contact.first_name} {contact.last_name}
-                  {contact.company && <span className="text-white/60"> • {contact.company}</span>}
+                  {contact.company && <span className="text-slate-500"> • {contact.company}</span>}
                 </p>
               </div>
             </div>
@@ -380,14 +380,14 @@ const TaskDetailSheet = ({ task, open, onOpenChange, onEdit, contacts, columns }
 
           {/* Created date */}
           {task.created_at && (
-            <div className="text-xs text-white/60">
+            <div className="text-xs text-slate-500">
               Créée le {new Date(task.created_at).toLocaleDateString('fr-FR')}
             </div>
           )}
         </div>
 
         {/* Actions */}
-        <div className="pt-4 border-t border-white/10">
+        <div className="pt-4 border-t border-slate-200">
           <Button
             onClick={() => { onOpenChange(false); onEdit(task); }}
             className="w-full bg-indigo-600 hover:bg-indigo-500 text-white"
@@ -717,15 +717,15 @@ const TasksPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <h1 className="text-lg sm:text-xl font-bold text-white">Tâches</h1>
-          <p className="text-white/60 text-xs hidden sm:block">Gérez vos tâches</p>
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900">Tâches</h1>
+          <p className="text-slate-500 text-xs hidden sm:block">Gérez vos tâches</p>
         </div>
         <div className="flex gap-1.5 sm:gap-2">
           <Button 
             variant="outline" 
             size="sm"
             onClick={() => openColumnDialog()} 
-            className="border-indigo-500/50 text-indigo-400 h-8 px-2 sm:px-3"
+            className="border-indigo-500/50 text-indigo-600 h-8 px-2 sm:px-3"
           >
             <Settings2 className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
@@ -742,67 +742,67 @@ const TasksPage = () => {
 
       {/* Stats - Compact on mobile */}
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-2">
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="p-2 sm:p-3">
             <div className="text-center sm:flex sm:items-center sm:gap-2 sm:text-left">
               <div className="hidden sm:block p-1.5 rounded-lg bg-gray-500/20 flex-shrink-0">
                 <Clock className="w-3 h-3 text-gray-400" />
               </div>
               <div>
-                <p className="text-base sm:text-lg font-bold text-white">{stats.todo || 0}</p>
-                <p className="text-[9px] sm:text-[10px] text-white/60">À faire</p>
+                <p className="text-base sm:text-lg font-bold text-slate-900">{stats.todo || 0}</p>
+                <p className="text-[9px] sm:text-[10px] text-slate-500">À faire</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="p-2 sm:p-3">
             <div className="text-center sm:flex sm:items-center sm:gap-2 sm:text-left">
               <div className="hidden sm:block p-1.5 rounded-lg bg-blue-500/20 flex-shrink-0">
                 <Clock className="w-3 h-3 text-blue-400" />
               </div>
               <div>
-                <p className="text-base sm:text-lg font-bold text-white">{stats.in_progress || 0}</p>
-                <p className="text-[9px] sm:text-[10px] text-white/60">En cours</p>
+                <p className="text-base sm:text-lg font-bold text-slate-900">{stats.in_progress || 0}</p>
+                <p className="text-[9px] sm:text-[10px] text-slate-500">En cours</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="p-2 sm:p-3">
             <div className="text-center sm:flex sm:items-center sm:gap-2 sm:text-left">
               <div className="hidden sm:block p-1.5 rounded-lg bg-green-500/20 flex-shrink-0">
                 <CheckCircle className="w-3 h-3 text-green-400" />
               </div>
               <div>
-                <p className="text-base sm:text-lg font-bold text-white">{stats.done || 0}</p>
-                <p className="text-[9px] sm:text-[10px] text-white/60">Faites</p>
+                <p className="text-base sm:text-lg font-bold text-slate-900">{stats.done || 0}</p>
+                <p className="text-[9px] sm:text-[10px] text-slate-500">Faites</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10 hidden sm:block">
+        <Card className="bg-white backdrop-blur-xl border-slate-200 hidden sm:block">
           <CardContent className="p-2 sm:p-3">
             <div className="text-center sm:flex sm:items-center sm:gap-2 sm:text-left">
               <div className="hidden sm:block p-1.5 rounded-lg bg-red-500/20 flex-shrink-0">
                 <AlertCircle className="w-3 h-3 text-red-400" />
               </div>
               <div>
-                <p className="text-base sm:text-lg font-bold text-white">{overdueCount}</p>
-                <p className="text-[9px] sm:text-[10px] text-white/60">Retard</p>
+                <p className="text-base sm:text-lg font-bold text-slate-900">{overdueCount}</p>
+                <p className="text-[9px] sm:text-[10px] text-slate-500">Retard</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10 hidden sm:block">
+        <Card className="bg-white backdrop-blur-xl border-slate-200 hidden sm:block">
           <CardContent className="p-2 sm:p-3">
             <div className="text-center sm:flex sm:items-center sm:gap-2 sm:text-left">
               <div className="hidden sm:block p-1.5 rounded-lg bg-indigo-500/20 flex-shrink-0">
-                <CheckCircle className="w-3 h-3 text-indigo-400" />
+                <CheckCircle className="w-3 h-3 text-indigo-600" />
               </div>
               <div>
-                <p className="text-base sm:text-lg font-bold text-white">{stats.completion_rate || 0}%</p>
-                <p className="text-[9px] sm:text-[10px] text-white/60">Complet</p>
+                <p className="text-base sm:text-lg font-bold text-slate-900">{stats.completion_rate || 0}%</p>
+                <p className="text-[9px] sm:text-[10px] text-slate-500">Complet</p>
               </div>
             </div>
           </CardContent>
@@ -812,19 +812,19 @@ const TasksPage = () => {
       {/* Filters */}
       <div className="flex gap-1.5 sm:gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-white/60" />
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-slate-500" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Rechercher..."
-            className="pl-7 sm:pl-9 bg-white/5 backdrop-blur-xl border-white/10 h-8 sm:h-9 text-xs sm:text-sm"
+            className="pl-7 sm:pl-9 bg-white backdrop-blur-xl border-slate-200 h-8 sm:h-9 text-xs sm:text-sm"
           />
         </div>
         <Select value={filterPriority} onValueChange={setFilterPriority}>
-          <SelectTrigger className="w-20 sm:w-28 bg-white/5 backdrop-blur-xl border-white/10 h-8 sm:h-9 text-xs sm:text-sm">
+          <SelectTrigger className="w-20 sm:w-28 bg-white backdrop-blur-xl border-slate-200 h-8 sm:h-9 text-xs sm:text-sm">
             <SelectValue placeholder="Priorité" />
           </SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e]">
+          <SelectContent className="bg-slate-50">
             <SelectItem value="all" className="text-xs">Toutes</SelectItem>
             {Object.entries(priorityConfig).map(([key, config]) => (
               <SelectItem key={key} value={key} className="text-xs">{config.label}</SelectItem>
@@ -872,7 +872,7 @@ const TasksPage = () => {
                       />
                     ))}
                     {columnTasks.length === 0 && (
-                      <div className="text-center py-8 text-white/60">
+                      <div className="text-center py-8 text-slate-500">
                         <Target className="w-8 h-8 mx-auto mb-2 opacity-30" />
                         <p className="text-xs">Aucune tâche</p>
                       </div>
@@ -890,15 +890,15 @@ const TasksPage = () => {
           {activeItem && activeId && (
             <div className="opacity-90">
               {activeItem.label ? (
-                <div className="w-80 bg-white/5 backdrop-blur-xl rounded-xl border-2 border-indigo-500/50 shadow-xl p-4">
+                <div className="w-80 bg-white backdrop-blur-xl rounded-xl border-2 border-indigo-500/50 shadow-xl p-4">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: activeItem.color }} />
-                    <span className="text-white text-sm font-semibold">{activeItem.label}</span>
+                    <span className="text-slate-900 text-sm font-semibold">{activeItem.label}</span>
                   </div>
                 </div>
               ) : (
-                <div className="w-72 bg-white/5 backdrop-blur-xl rounded-lg border-2 border-indigo-500/50 shadow-xl p-3">
-                  <p className="font-medium text-white text-sm">{activeItem.title}</p>
+                <div className="w-72 bg-white backdrop-blur-xl rounded-lg border-2 border-indigo-500/50 shadow-xl p-3">
+                  <p className="font-medium text-slate-900 text-sm">{activeItem.title}</p>
                 </div>
               )}
             </div>
@@ -908,10 +908,10 @@ const TasksPage = () => {
 
       {/* Task Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-[#0a0a14] border-white/10 max-w-lg max-h-[90vh] overflow-y-auto p-0">
+        <DialogContent className="bg-white border-slate-200 max-w-lg max-h-[90vh] overflow-y-auto p-0">
           {/* Header with gradient */}
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-lg">
-            <DialogTitle className="text-white text-xl font-bold flex items-center gap-3">
+            <DialogTitle className="text-slate-900 text-xl font-bold flex items-center gap-3">
               {editingTask ? (
                 <>
                   <Edit className="w-5 h-5" />
@@ -924,7 +924,7 @@ const TasksPage = () => {
                 </>
               )}
             </DialogTitle>
-            <p className="text-white/70 text-sm mt-1">
+            <p className="text-slate-600 text-sm mt-1">
               {editingTask ? "Modifiez les détails ci-dessous" : "Créez une nouvelle tâche pour votre équipe"}
             </p>
           </div>
@@ -932,8 +932,8 @@ const TasksPage = () => {
           <form onSubmit={handleSubmit} className="space-y-5 p-6">
             {/* Title */}
             <div className="space-y-2">
-              <Label className="text-white font-medium flex items-center gap-2">
-                <Target className="w-4 h-4 text-indigo-400" />
+              <Label className="text-slate-900 font-medium flex items-center gap-2">
+                <Target className="w-4 h-4 text-indigo-600" />
                 Titre de la tâche *
               </Label>
               <Input
@@ -941,14 +941,14 @@ const TasksPage = () => {
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
                 placeholder="Ex: Finaliser le design du site web"
                 required
-                className="bg-white/5 border-white/10 h-11 text-white placeholder:text-white/40"
+                className="bg-white border-slate-200 h-11 text-slate-900 placeholder:text-slate-400"
               />
             </div>
             
             {/* Description */}
             <div className="space-y-2">
-              <Label className="text-white font-medium flex items-center gap-2">
-                <Edit className="w-4 h-4 text-indigo-400" />
+              <Label className="text-slate-900 font-medium flex items-center gap-2">
+                <Edit className="w-4 h-4 text-indigo-600" />
                 Description
               </Label>
               <Textarea
@@ -956,22 +956,22 @@ const TasksPage = () => {
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                 placeholder="Ajoutez des détails, des notes ou des instructions..."
                 rows={3}
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none"
+                className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 resize-none"
               />
             </div>
             
             {/* Priority & Category */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white font-medium flex items-center gap-2">
+                <Label className="text-slate-900 font-medium flex items-center gap-2">
                   <Flag className="w-4 h-4 text-amber-400" />
                   Priorité
                 </Label>
                 <Select value={formData.priority} onValueChange={(v) => setFormData({...formData, priority: v})}>
-                  <SelectTrigger className="bg-white/5 border-white/10 h-11">
+                  <SelectTrigger className="bg-white border-slate-200 h-11">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1a1a2e] border-white/10">
+                  <SelectContent className="bg-slate-50 border-slate-200">
                     {Object.entries(priorityConfig).map(([key, config]) => (
                       <SelectItem key={key} value={key}>
                         <div className="flex items-center gap-2">
@@ -989,15 +989,15 @@ const TasksPage = () => {
               </div>
               
               <div className="space-y-2">
-                <Label className="text-white font-medium flex items-center gap-2">
+                <Label className="text-slate-900 font-medium flex items-center gap-2">
                   <Settings2 className="w-4 h-4 text-purple-400" />
                   Catégorie
                 </Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData({...formData, category: v})}>
-                  <SelectTrigger className="bg-white/5 border-white/10 h-11">
+                  <SelectTrigger className="bg-white border-slate-200 h-11">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1a1a2e] border-white/10">
+                  <SelectContent className="bg-slate-50 border-slate-200">
                     {categories.map(cat => (
                       <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                     ))}
@@ -1008,15 +1008,15 @@ const TasksPage = () => {
 
             {/* Status */}
             <div className="space-y-2">
-              <Label className="text-white font-medium flex items-center gap-2">
+              <Label className="text-slate-900 font-medium flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-green-400" />
                 Statut
               </Label>
               <Select value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
-                <SelectTrigger className="bg-white/5 border-white/10 h-11">
+                <SelectTrigger className="bg-white border-slate-200 h-11">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e] border-white/10">
+                <SelectContent className="bg-slate-50 border-slate-200">
                   {columns.map(col => (
                     <SelectItem key={col.id} value={col.id}>
                       <div className="flex items-center gap-2">
@@ -1032,7 +1032,7 @@ const TasksPage = () => {
             {/* Due Date & Contact */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white font-medium flex items-center gap-2">
+                <Label className="text-slate-900 font-medium flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-blue-400" />
                   Date d'échéance
                 </Label>
@@ -1040,12 +1040,12 @@ const TasksPage = () => {
                   type="date"
                   value={formData.due_date}
                   onChange={(e) => setFormData({...formData, due_date: e.target.value})}
-                  className="bg-white/5 border-white/10 h-11 text-white"
+                  className="bg-white border-slate-200 h-11 text-slate-900"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-white font-medium flex items-center gap-2">
+                <Label className="text-slate-900 font-medium flex items-center gap-2">
                   <User className="w-4 h-4 text-cyan-400" />
                   Contact associé
                 </Label>
@@ -1053,10 +1053,10 @@ const TasksPage = () => {
                   value={formData.contact_id || "none"} 
                   onValueChange={(v) => setFormData({...formData, contact_id: v === "none" ? "" : v})}
                 >
-                  <SelectTrigger className="bg-white/5 border-white/10 h-11">
+                  <SelectTrigger className="bg-white border-slate-200 h-11">
                     <SelectValue placeholder="Aucun" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1a1a2e] border-white/10 max-h-60">
+                  <SelectContent className="bg-slate-50 border-slate-200 max-h-60">
                     <SelectItem value="none">— Aucun —</SelectItem>
                     {contacts.map(contact => (
                       <SelectItem key={contact.id} value={contact.id}>
@@ -1069,12 +1069,12 @@ const TasksPage = () => {
             </div>
             
             {/* Actions */}
-            <div className="flex gap-3 pt-4 border-t border-white/10">
+            <div className="flex gap-3 pt-4 border-t border-slate-200">
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={() => setDialogOpen(false)} 
-                className="flex-1 border-white/20 text-white/80 hover:bg-white/10 h-11"
+                className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-100 h-11"
               >
                 Annuler
               </Button>
@@ -1091,7 +1091,7 @@ const TasksPage = () => {
 
       {/* Column Dialog */}
       <Dialog open={columnDialogOpen} onOpenChange={setColumnDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-md">
           <DialogHeader>
             <DialogTitle>{editingColumn ? "Modifier la colonne" : "Nouvelle colonne"}</DialogTitle>
           </DialogHeader>
@@ -1102,7 +1102,7 @@ const TasksPage = () => {
                 value={columnForm.label} 
                 onChange={(e) => setColumnForm({...columnForm, label: e.target.value})} 
                 placeholder="Ex: En revue" 
-                className="bg-white/5 border-white/10" 
+                className="bg-white border-slate-200" 
               />
             </div>
             <div className="space-y-2">
@@ -1121,8 +1121,8 @@ const TasksPage = () => {
                 ))}
               </div>
             </div>
-            <div className="p-4 bg-white/5 rounded-lg">
-              <p className="text-xs text-white/60 mb-2">Aperçu</p>
+            <div className="p-4 bg-white rounded-lg">
+              <p className="text-xs text-slate-500 mb-2">Aperçu</p>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: columnForm.color }} />
                 <span className="text-sm font-medium">{columnForm.label || "Nom de la colonne"}</span>

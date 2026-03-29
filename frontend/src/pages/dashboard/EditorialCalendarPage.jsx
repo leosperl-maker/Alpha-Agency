@@ -100,7 +100,7 @@ const DraggablePostCard = ({ post, settings, onEdit, onPreview, getNetworkColor,
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-colors border border-white/10 ${isDragging ? 'ring-2 ring-indigo-500 shadow-lg' : ''}`}
+      className={`bg-white rounded-lg p-3 hover:bg-slate-100 transition-colors border border-slate-200 ${isDragging ? 'ring-2 ring-indigo-500 shadow-lg' : ''}`}
     >
       {/* Drag handle */}
       <div 
@@ -108,8 +108,8 @@ const DraggablePostCard = ({ post, settings, onEdit, onPreview, getNetworkColor,
         {...listeners}
         className="flex items-center gap-2 mb-2 cursor-grab active:cursor-grabbing"
       >
-        <GripVertical className="w-4 h-4 text-white/30" />
-        <span className="text-white/30 text-xs">Glisser pour déplacer</span>
+        <GripVertical className="w-4 h-4 text-slate-400" />
+        <span className="text-slate-400 text-xs">Glisser pour déplacer</span>
       </div>
       
       {/* Thumbnail */}
@@ -128,7 +128,7 @@ const DraggablePostCard = ({ post, settings, onEdit, onPreview, getNetworkColor,
       
       {/* Title */}
       <h4 
-        className="text-white text-sm font-medium mb-2 truncate cursor-pointer hover:text-indigo-400"
+        className="text-slate-900 text-sm font-medium mb-2 truncate cursor-pointer hover:text-indigo-600"
         onClick={() => onEdit(post)}
       >
         {post.title}
@@ -157,7 +157,7 @@ const DraggablePostCard = ({ post, settings, onEdit, onPreview, getNetworkColor,
           <Button
             size="sm"
             variant="ghost"
-            className="h-6 w-6 p-0 text-white/40 hover:text-white hover:bg-white/10"
+            className="h-6 w-6 p-0 text-slate-400 hover:text-slate-900 hover:bg-slate-100"
             onClick={(e) => {
               e.stopPropagation();
               onPreview(post);
@@ -166,7 +166,7 @@ const DraggablePostCard = ({ post, settings, onEdit, onPreview, getNetworkColor,
           >
             <Eye className="w-3 h-3" />
           </Button>
-          <span className="text-white/40 text-xs">
+          <span className="text-slate-400 text-xs">
             {post.scheduled_time || ''}
           </span>
         </div>
@@ -184,10 +184,10 @@ const DroppableColumn = ({ column, posts, settings, onEdit, onPreview, onAddPost
 
   return (
     <div className="flex-shrink-0 w-72">
-      <div className={`bg-white/5 backdrop-blur-xl rounded-xl border transition-colors ${isOver ? 'border-indigo-500 bg-indigo-500/10' : 'border-white/10'} p-3`}>
-        <h3 className="text-white font-medium mb-3 text-sm flex items-center justify-between">
+      <div className={`bg-white backdrop-blur-xl rounded-xl border transition-colors ${isOver ? 'border-indigo-500 bg-indigo-500/10' : 'border-slate-200'} p-3`}>
+        <h3 className="text-slate-900 font-medium mb-3 text-sm flex items-center justify-between">
           {column.label}
-          <span className="text-white/40 text-xs">{posts.length}</span>
+          <span className="text-slate-400 text-xs">{posts.length}</span>
         </h3>
         
         <div 
@@ -211,7 +211,7 @@ const DroppableColumn = ({ column, posts, settings, onEdit, onPreview, onAddPost
           {/* Add button */}
           <Button
             variant="ghost"
-            className="w-full border-dashed border border-white/10 text-white/40 hover:text-white hover:border-white/20"
+            className="w-full border-dashed border border-slate-200 text-slate-400 hover:text-slate-900 hover:border-slate-200"
             onClick={() => onAddPost(column.start)}
           >
             <Plus className="w-4 h-4 mr-1" />
@@ -971,8 +971,8 @@ const EditorialCalendarPage = () => {
       {/* Header - Mobile Optimized */}
       <div className="flex flex-col gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Calendrier Éditorial</h1>
-          <p className="text-white/60 text-sm">Planifiez vos contenus social media</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Calendrier Éditorial</h1>
+          <p className="text-slate-500 text-sm">Planifiez vos contenus social media</p>
         </div>
         
         <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
@@ -980,7 +980,7 @@ const EditorialCalendarPage = () => {
             onClick={() => setShowIdeasPanel(true)}
             variant="outline"
             size="sm"
-            className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/10 whitespace-nowrap flex-shrink-0"
+            className="border-indigo-500/50 text-indigo-600 hover:bg-indigo-500/10 whitespace-nowrap flex-shrink-0"
           >
             <Lightbulb className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Idées IA</span>
@@ -989,7 +989,7 @@ const EditorialCalendarPage = () => {
             onClick={() => { resetCalendarForm(); setShowCalendarModal(true); }}
             variant="outline"
             size="sm"
-            className="border-white/20 text-white hover:bg-white/10 whitespace-nowrap flex-shrink-0"
+            className="border-slate-200 text-slate-900 hover:bg-slate-100 whitespace-nowrap flex-shrink-0"
           >
             <Plus className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Calendrier</span>
@@ -1007,12 +1007,12 @@ const EditorialCalendarPage = () => {
       </div>
 
       {/* Filters & View Toggle - Mobile Optimized */}
-      <div className="flex flex-col gap-3 bg-white/5 backdrop-blur-xl rounded-xl p-3 sm:p-4 border border-white/10">
+      <div className="flex flex-col gap-3 bg-white backdrop-blur-xl rounded-xl p-3 sm:p-4 border border-slate-200">
         {/* First row: Calendar selector + Filters */}
         <div className="flex flex-wrap gap-2">
           {/* Calendar selector */}
           <Select value={selectedCalendarId} onValueChange={setSelectedCalendarId}>
-            <SelectTrigger className="w-full sm:w-48 bg-white/5 border-white/10 text-white text-sm">
+            <SelectTrigger className="w-full sm:w-48 bg-white border-slate-200 text-slate-900 text-sm">
               <SelectValue placeholder="Tous les calendriers" />
             </SelectTrigger>
             <SelectContent>
@@ -1033,7 +1033,7 @@ const EditorialCalendarPage = () => {
         <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
           {/* Filters */}
           <Select value={filters.network} onValueChange={(v) => setFilters(f => ({ ...f, network: v }))}>
-            <SelectTrigger className="min-w-[120px] sm:w-40 bg-white/5 border-white/10 text-white text-sm flex-shrink-0">
+            <SelectTrigger className="min-w-[120px] sm:w-40 bg-white border-slate-200 text-slate-900 text-sm flex-shrink-0">
               <SelectValue placeholder="Réseau" />
             </SelectTrigger>
             <SelectContent>
@@ -1045,7 +1045,7 @@ const EditorialCalendarPage = () => {
           </Select>
 
           <Select value={filters.status} onValueChange={(v) => setFilters(f => ({ ...f, status: v }))}>
-            <SelectTrigger className="min-w-[120px] sm:w-40 bg-white/5 border-white/10 text-white text-sm flex-shrink-0">
+            <SelectTrigger className="min-w-[120px] sm:w-40 bg-white border-slate-200 text-slate-900 text-sm flex-shrink-0">
               <SelectValue placeholder="Statut" />
             </SelectTrigger>
             <SelectContent>
@@ -1058,7 +1058,7 @@ const EditorialCalendarPage = () => {
 
         {/* Format filter */}
         <Select value={filters.format} onValueChange={(v) => setFilters(f => ({ ...f, format: v }))}>
-          <SelectTrigger className="min-w-[120px] sm:w-40 bg-white/5 border-white/10 text-white text-sm flex-shrink-0">
+          <SelectTrigger className="min-w-[120px] sm:w-40 bg-white border-slate-200 text-slate-900 text-sm flex-shrink-0">
             <SelectValue placeholder="Format" />
           </SelectTrigger>
           <SelectContent>
@@ -1075,7 +1075,7 @@ const EditorialCalendarPage = () => {
             variant="ghost"
             size="sm"
             onClick={() => setFilters({ network: 'all', status: 'all', format: 'all' })}
-            className="text-white/60 hover:text-white flex-shrink-0"
+            className="text-slate-500 hover:text-slate-900 flex-shrink-0"
             title="Réinitialiser les filtres"
           >
             <RotateCcw className="w-4 h-4" />
@@ -1084,12 +1084,12 @@ const EditorialCalendarPage = () => {
         </div>
 
         {/* View toggle - third row on mobile */}
-        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1 w-full sm:w-auto">
+        <div className="flex items-center gap-1 bg-white rounded-lg p-1 w-full sm:w-auto">
           <Button
             size="sm"
             variant={viewMode === 'calendar' ? 'default' : 'ghost'}
             onClick={() => setViewMode('calendar')}
-            className={`flex-1 sm:flex-initial ${viewMode === 'calendar' ? 'bg-indigo-600' : 'text-white/60'}`}
+            className={`flex-1 sm:flex-initial ${viewMode === 'calendar' ? 'bg-indigo-600' : 'text-slate-500'}`}
           >
             <CalendarIcon className="w-4 h-4 sm:mr-1" />
             <span className="hidden sm:inline">Calendrier</span>
@@ -1098,7 +1098,7 @@ const EditorialCalendarPage = () => {
             size="sm"
             variant={viewMode === 'trello' ? 'default' : 'ghost'}
             onClick={() => setViewMode('trello')}
-            className={`flex-1 sm:flex-initial ${viewMode === 'trello' ? 'bg-indigo-600' : 'text-white/60'}`}
+            className={`flex-1 sm:flex-initial ${viewMode === 'trello' ? 'bg-indigo-600' : 'text-slate-500'}`}
           >
             <Grid3X3 className="w-4 h-4 sm:mr-1" />
             <span className="hidden sm:inline">Trello</span>
@@ -1112,14 +1112,14 @@ const EditorialCalendarPage = () => {
           {calendars.map(cal => (
             <div 
               key={cal.id}
-              className="flex items-center gap-2 bg-white/5 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 border border-white/10 whitespace-nowrap flex-shrink-0"
+              className="flex items-center gap-2 bg-white rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 border border-slate-200 whitespace-nowrap flex-shrink-0"
             >
               <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full" style={{ backgroundColor: cal.color }} />
-              <span className="text-white text-xs sm:text-sm">{cal.title}</span>
-              <span className="text-white/40 text-[10px] sm:text-xs">({cal.post_count})</span>
+              <span className="text-slate-900 text-xs sm:text-sm">{cal.title}</span>
+              <span className="text-slate-400 text-[10px] sm:text-xs">({cal.post_count})</span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-white/60 hover:text-white">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-slate-500 hover:text-slate-900">
                     <MoreVertical className="w-3 h-3" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -1148,22 +1148,22 @@ const EditorialCalendarPage = () => {
 
       {/* Calendar View */}
       {viewMode === 'calendar' && (
-        <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden">
+        <div className="bg-white backdrop-blur-xl rounded-xl border border-slate-200 overflow-hidden">
           {/* Month navigation */}
-          <div className="flex items-center justify-between p-4 border-b border-white/10">
-            <Button variant="ghost" onClick={() => navigateMonth(-1)} className="text-white">
+          <div className="flex items-center justify-between p-4 border-b border-slate-200">
+            <Button variant="ghost" onClick={() => navigateMonth(-1)} className="text-slate-900">
               <ChevronLeft className="w-5 h-5" />
             </Button>
-            <h2 className="text-lg font-semibold text-white capitalize">{monthYearLabel}</h2>
-            <Button variant="ghost" onClick={() => navigateMonth(1)} className="text-white">
+            <h2 className="text-lg font-semibold text-slate-900 capitalize">{monthYearLabel}</h2>
+            <Button variant="ghost" onClick={() => navigateMonth(1)} className="text-slate-900">
               <ChevronRight className="w-5 h-5" />
             </Button>
           </div>
 
           {/* Day headers */}
-          <div className="grid grid-cols-7 border-b border-white/10">
+          <div className="grid grid-cols-7 border-b border-slate-200">
             {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
-              <div key={day} className="p-2 text-center text-white/60 text-sm font-medium">
+              <div key={day} className="p-2 text-center text-slate-500 text-sm font-medium">
                 {day}
               </div>
             ))}
@@ -1179,14 +1179,14 @@ const EditorialCalendarPage = () => {
               return (
                 <div
                   key={idx}
-                  className={`min-h-[120px] p-2 border-b border-r border-white/5 ${
-                    !day.isCurrentMonth ? 'bg-white/[0.02]' : ''
+                  className={`min-h-[120px] p-2 border-b border-r border-slate-200 ${
+                    !day.isCurrentMonth ? 'bg-slate-50' : ''
                   } ${isToday ? 'bg-indigo-500/10' : ''} ${dayKeyDates.length > 0 ? 'bg-amber-500/5' : ''}`}
                   onClick={() => openNewPost(day.date.toISOString().split('T')[0])}
                 >
                   <div className={`text-sm mb-1 flex items-center justify-between ${
-                    day.isCurrentMonth ? 'text-white' : 'text-white/30'
-                  } ${isToday ? 'font-bold text-indigo-400' : ''}`}>
+                    day.isCurrentMonth ? 'text-slate-900' : 'text-slate-400'
+                  } ${isToday ? 'font-bold text-indigo-600' : ''}`}>
                     <span>{day.date.getDate()}</span>
                     {dayKeyDates.length > 0 && (
                       <span className="text-amber-400 text-xs">📅</span>
@@ -1233,12 +1233,12 @@ const EditorialCalendarPage = () => {
                               <NetworkIcon network={n} className="w-3 h-3" />
                             </span>
                           ))}
-                          <span className="text-white truncate">{post.title}</span>
+                          <span className="text-slate-900 truncate">{post.title}</span>
                         </div>
                       </div>
                     ))}
                     {dayPosts.length > (dayKeyDates.length > 0 ? 2 : 3) && (
-                      <div className="text-xs text-white/40">+{dayPosts.length - (dayKeyDates.length > 0 ? 2 : 3)} autres</div>
+                      <div className="text-xs text-slate-400">+{dayPosts.length - (dayKeyDates.length > 0 ? 2 : 3)} autres</div>
                     )}
                   </div>
                 </div>
@@ -1286,8 +1286,8 @@ const EditorialCalendarPage = () => {
           {/* Drag Overlay - Shows while dragging */}
           <DragOverlay>
             {activePost ? (
-              <div className="bg-white/10 backdrop-blur-xl rounded-lg p-3 border-2 border-indigo-500 shadow-xl w-72 transform rotate-3">
-                <h4 className="text-white text-sm font-medium truncate">{activePost.title}</h4>
+              <div className="bg-slate-100 backdrop-blur-xl rounded-lg p-3 border-2 border-indigo-500 shadow-xl w-72 transform rotate-3">
+                <h4 className="text-slate-900 text-sm font-medium truncate">{activePost.title}</h4>
                 <div className="flex items-center gap-1 mt-2">
                   {activePost.networks?.map(n => (
                     <span key={n} style={{ color: getNetworkColor(n) }}>
@@ -1303,7 +1303,7 @@ const EditorialCalendarPage = () => {
 
       {/* Calendar Modal */}
       <Dialog open={showCalendarModal} onOpenChange={setShowCalendarModal}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-lg">
+        <DialogContent className="bg-slate-50 border-slate-200 text-white max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingCalendar ? 'Modifier le calendrier' : 'Nouveau calendrier'}</DialogTitle>
           </DialogHeader>
@@ -1315,7 +1315,7 @@ const EditorialCalendarPage = () => {
                 value={calendarForm.title}
                 onChange={(e) => setCalendarForm({ ...calendarForm, title: e.target.value })}
                 placeholder="Ex: Client ABC - Instagram"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             
@@ -1325,7 +1325,7 @@ const EditorialCalendarPage = () => {
                 value={calendarForm.contact_id} 
                 onValueChange={(v) => setCalendarForm({ ...calendarForm, contact_id: v })}
               >
-                <SelectTrigger className="bg-white/5 border-white/10">
+                <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue placeholder="Sélectionner un contact" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1342,19 +1342,19 @@ const EditorialCalendarPage = () => {
             {/* Country & Niche for Key Dates */}
             {!editingCalendar && (
               <div className="p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/20 space-y-4">
-                <div className="flex items-center gap-2 text-indigo-400">
+                <div className="flex items-center gap-2 text-indigo-600">
                   <Sparkles className="w-4 h-4" />
                   <span className="font-medium text-sm">Dates fortes intelligentes (IA)</span>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label className="text-xs text-white/70">Pays / Marché</Label>
+                    <Label className="text-xs text-slate-600">Pays / Marché</Label>
                     <Select 
                       value={calendarForm.country} 
                       onValueChange={(v) => setCalendarForm({ ...calendarForm, country: v })}
                     >
-                      <SelectTrigger className="bg-white/5 border-white/10 h-9">
+                      <SelectTrigger className="bg-white border-slate-200 h-9">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1368,12 +1368,12 @@ const EditorialCalendarPage = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="text-xs text-white/70">Secteur / Niche</Label>
+                    <Label className="text-xs text-slate-600">Secteur / Niche</Label>
                     <Select 
                       value={calendarForm.niche} 
                       onValueChange={(v) => setCalendarForm({ ...calendarForm, niche: v })}
                     >
-                      <SelectTrigger className="bg-white/5 border-white/10 h-9">
+                      <SelectTrigger className="bg-white border-slate-200 h-9">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1392,14 +1392,14 @@ const EditorialCalendarPage = () => {
                     type="checkbox"
                     checked={calendarForm.generate_key_dates}
                     onChange={(e) => setCalendarForm({ ...calendarForm, generate_key_dates: e.target.checked })}
-                    className="w-4 h-4 rounded border-white/20 bg-white/5 text-indigo-600"
+                    className="w-4 h-4 rounded border-slate-200 bg-white text-indigo-600"
                   />
-                  <span className="text-sm text-white/80">
+                  <span className="text-sm text-slate-700">
                     Générer automatiquement les dates fortes 2026
                   </span>
                 </label>
                 
-                <p className="text-xs text-white/50">
+                <p className="text-xs text-slate-500">
                   L&apos;IA va créer ~20-25 dates clés adaptées à votre secteur (jours fériés, événements marketing, dates spécifiques au secteur)
                 </p>
               </div>
@@ -1425,7 +1425,7 @@ const EditorialCalendarPage = () => {
                 value={calendarForm.description}
                 onChange={(e) => setCalendarForm({ ...calendarForm, description: e.target.value })}
                 placeholder="Description du calendrier..."
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
                 rows={2}
               />
             </div>
@@ -1453,13 +1453,13 @@ const EditorialCalendarPage = () => {
 
       {/* Post Modal */}
       <Dialog open={showPostModal} onOpenChange={setShowPostModal}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-slate-50 border-slate-200 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingPost ? 'Modifier le post' : 'Nouveau post'}</DialogTitle>
           </DialogHeader>
           
           <Tabs defaultValue="content" className="w-full">
-            <TabsList className="bg-white/5 mb-4">
+            <TabsList className="bg-white mb-4">
               <TabsTrigger value="content">Contenu</TabsTrigger>
               <TabsTrigger value="planning">Planification</TabsTrigger>
               <TabsTrigger value="media">Médias</TabsTrigger>
@@ -1473,7 +1473,7 @@ const EditorialCalendarPage = () => {
                     value={postForm.calendar_id} 
                     onValueChange={(v) => setPostForm({ ...postForm, calendar_id: v })}
                   >
-                    <SelectTrigger className="bg-white/5 border-white/10">
+                    <SelectTrigger className="bg-white border-slate-200">
                       <SelectValue placeholder="Choisir un calendrier" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1490,7 +1490,7 @@ const EditorialCalendarPage = () => {
                     value={postForm.format_type} 
                     onValueChange={(v) => setPostForm({ ...postForm, format_type: v })}
                   >
-                    <SelectTrigger className="bg-white/5 border-white/10">
+                    <SelectTrigger className="bg-white border-slate-200">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1513,7 +1513,7 @@ const EditorialCalendarPage = () => {
                   value={postForm.title}
                   onChange={(e) => setPostForm({ ...postForm, title: e.target.value })}
                   placeholder="Titre du post (usage interne)"
-                  className="bg-white/5 border-white/10"
+                  className="bg-white border-slate-200"
                 />
               </div>
               
@@ -1531,14 +1531,14 @@ const EditorialCalendarPage = () => {
                       }}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
                         postForm.networks.includes(n.id)
-                          ? 'border-white/40 bg-white/10'
-                          : 'border-white/10 bg-white/5'
+                          ? 'border-white/40 bg-slate-100'
+                          : 'border-slate-200 bg-white'
                       }`}
                     >
                       <span style={{ color: n.color }}>
                         <NetworkIcon network={n.id} />
                       </span>
-                      <span className="text-white text-sm">{n.name}</span>
+                      <span className="text-slate-900 text-sm">{n.name}</span>
                     </button>
                   ))}
                 </div>
@@ -1552,7 +1552,7 @@ const EditorialCalendarPage = () => {
                     size="sm"
                     variant="outline"
                     onClick={() => setShowAIModal(true)}
-                    className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/10"
+                    className="border-indigo-500/50 text-indigo-600 hover:bg-indigo-500/10"
                   >
                     <Wand2 className="w-4 h-4 mr-1" />
                     Aide IA
@@ -1562,7 +1562,7 @@ const EditorialCalendarPage = () => {
                   value={postForm.caption}
                   onChange={(e) => setPostForm({ ...postForm, caption: e.target.value })}
                   placeholder="Rédigez votre légende..."
-                  className="bg-white/5 border-white/10"
+                  className="bg-white border-slate-200"
                   rows={4}
                 />
               </div>
@@ -1574,7 +1574,7 @@ const EditorialCalendarPage = () => {
                     value={postForm.content_pillar} 
                     onValueChange={(v) => setPostForm({ ...postForm, content_pillar: v })}
                   >
-                    <SelectTrigger className="bg-white/5 border-white/10">
+                    <SelectTrigger className="bg-white border-slate-200">
                       <SelectValue placeholder="Choisir..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -1592,7 +1592,7 @@ const EditorialCalendarPage = () => {
                     value={postForm.objective} 
                     onValueChange={(v) => setPostForm({ ...postForm, objective: v })}
                   >
-                    <SelectTrigger className="bg-white/5 border-white/10">
+                    <SelectTrigger className="bg-white border-slate-200">
                       <SelectValue placeholder="Choisir..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -1611,7 +1611,7 @@ const EditorialCalendarPage = () => {
                   value={postForm.cta}
                   onChange={(e) => setPostForm({ ...postForm, cta: e.target.value })}
                   placeholder="Ex: Découvrez notre offre..."
-                  className="bg-white/5 border-white/10"
+                  className="bg-white border-slate-200"
                 />
               </div>
             </TabsContent>
@@ -1624,7 +1624,7 @@ const EditorialCalendarPage = () => {
                     type="date"
                     value={postForm.scheduled_date}
                     onChange={(e) => setPostForm({ ...postForm, scheduled_date: e.target.value })}
-                    className="bg-white/5 border-white/10"
+                    className="bg-white border-slate-200"
                   />
                 </div>
                 
@@ -1634,7 +1634,7 @@ const EditorialCalendarPage = () => {
                     type="time"
                     value={postForm.scheduled_time}
                     onChange={(e) => setPostForm({ ...postForm, scheduled_time: e.target.value })}
-                    className="bg-white/5 border-white/10"
+                    className="bg-white border-slate-200"
                   />
                 </div>
               </div>
@@ -1645,7 +1645,7 @@ const EditorialCalendarPage = () => {
                   value={postForm.status} 
                   onValueChange={(v) => setPostForm({ ...postForm, status: v })}
                 >
-                  <SelectTrigger className="bg-white/5 border-white/10">
+                  <SelectTrigger className="bg-white border-slate-200">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -1667,7 +1667,7 @@ const EditorialCalendarPage = () => {
                   value={postForm.external_links}
                   onChange={(e) => setPostForm({ ...postForm, external_links: e.target.value })}
                   placeholder="https://..."
-                  className="bg-white/5 border-white/10"
+                  className="bg-white border-slate-200"
                 />
               </div>
               
@@ -1677,7 +1677,7 @@ const EditorialCalendarPage = () => {
                   value={postForm.notes}
                   onChange={(e) => setPostForm({ ...postForm, notes: e.target.value })}
                   placeholder="Notes pour l'équipe..."
-                  className="bg-white/5 border-white/10"
+                  className="bg-white border-slate-200"
                   rows={3}
                 />
               </div>
@@ -1687,7 +1687,7 @@ const EditorialCalendarPage = () => {
               {editingPost ? (
                 <MediaManager postId={editingPost.id} medias={editingPost.medias || []} onUpdate={loadPosts} />
               ) : (
-                <div className="text-center text-white/60 py-8">
+                <div className="text-center text-slate-500 py-8">
                   <Upload className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>Créez d&apos;abord le post, puis ajoutez des médias</p>
                 </div>
@@ -1711,7 +1711,7 @@ const EditorialCalendarPage = () => {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-500/10"
+                  className="border-indigo-500/50 text-indigo-600 hover:bg-indigo-500/10"
                   onClick={() => {
                     setPreviewPost({...editingPost, ...postForm});
                     setShowPreviewModal(true);
@@ -1734,29 +1734,29 @@ const EditorialCalendarPage = () => {
 
       {/* AI Assistant Modal */}
       <Dialog open={showAIModal} onOpenChange={setShowAIModal}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogContent className="bg-slate-50 border-slate-200 text-white max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Wand2 className="w-5 h-5 text-indigo-400" />
+              <Wand2 className="w-5 h-5 text-indigo-600" />
               Assistant IA - Aide rédactionnelle
             </DialogTitle>
           </DialogHeader>
           
           <div className="flex-1 overflow-y-auto space-y-4 pr-2">
             {/* Input section */}
-            <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/10">
+            <div className="space-y-3 p-4 bg-white rounded-xl border border-slate-200">
               <div className="space-y-2">
                 <Label>Sujet / Thème du post *</Label>
                 <Textarea
                   value={aiTopic}
                   onChange={(e) => setAiTopic(e.target.value)}
                   placeholder="Ex: Lancement de notre nouvelle offre de création de site web, Témoignage client satisfait, Astuce marketing pour les entrepreneurs..."
-                  className="bg-white/5 border-white/10"
+                  className="bg-white border-slate-200"
                   rows={2}
                 />
               </div>
               
-              <div className="text-xs text-white/50">
+              <div className="text-xs text-slate-500">
                 <p>L&apos;IA tiendra compte des paramètres sélectionnés dans le formulaire du post :</p>
                 <ul className="mt-1 ml-4 list-disc">
                   {postForm.networks.length > 0 && <li>Réseaux : {postForm.networks.join(', ')}</li>}
@@ -1789,15 +1789,15 @@ const EditorialCalendarPage = () => {
             {aiResult && (
               <div className="space-y-4">
                 {/* Angles */}
-                <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <div className="p-4 bg-white rounded-xl border border-slate-200">
                   <div className="flex items-center gap-2 mb-3">
                     <Lightbulb className="w-4 h-4 text-yellow-400" />
-                    <h3 className="font-medium text-white">Angles / Idées de post</h3>
+                    <h3 className="font-medium text-slate-900">Angles / Idées de post</h3>
                   </div>
                   <div className="space-y-2">
                     {aiResult.angles?.map((angle, idx) => (
-                      <div key={idx} className="p-3 bg-white/5 rounded-lg text-sm text-white/80">
-                        <span className="text-indigo-400 font-medium mr-2">{idx + 1}.</span>
+                      <div key={idx} className="p-3 bg-white rounded-lg text-sm text-slate-700">
+                        <span className="text-indigo-600 font-medium mr-2">{idx + 1}.</span>
                         {angle}
                       </div>
                     ))}
@@ -1805,32 +1805,32 @@ const EditorialCalendarPage = () => {
                 </div>
                 
                 {/* Caption */}
-                <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <div className="p-4 bg-white rounded-xl border border-slate-200">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <MessageSquare className="w-4 h-4 text-blue-400" />
-                      <h3 className="font-medium text-white">Légende suggérée</h3>
+                      <h3 className="font-medium text-slate-900">Légende suggérée</h3>
                     </div>
                     <Button size="sm" variant="outline" onClick={applyAICaption} className="text-xs">
                       <Check className="w-3 h-3 mr-1" /> Utiliser
                     </Button>
                   </div>
-                  <div className="p-3 bg-white/5 rounded-lg text-sm text-white/80 whitespace-pre-wrap">
+                  <div className="p-3 bg-white rounded-lg text-sm text-slate-700 whitespace-pre-wrap">
                     {aiResult.caption}
                   </div>
                 </div>
                 
                 {/* Hooks */}
-                <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <div className="p-4 bg-white rounded-xl border border-slate-200">
                   <div className="flex items-center gap-2 mb-3">
                     <Target className="w-4 h-4 text-red-400" />
-                    <h3 className="font-medium text-white">Hooks accrocheurs</h3>
+                    <h3 className="font-medium text-slate-900">Hooks accrocheurs</h3>
                   </div>
                   <div className="space-y-2">
                     {aiResult.hooks?.map((hook, idx) => (
                       <div 
                         key={idx} 
-                        className="p-2 bg-white/5 rounded-lg text-sm text-white/80 cursor-pointer hover:bg-white/10 transition-colors"
+                        className="p-2 bg-white rounded-lg text-sm text-slate-700 cursor-pointer hover:bg-slate-100 transition-colors"
                         onClick={() => {
                           setPostForm(prev => ({ 
                             ...prev, 
@@ -1847,10 +1847,10 @@ const EditorialCalendarPage = () => {
                 </div>
                 
                 {/* Hashtags */}
-                <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                <div className="p-4 bg-white rounded-xl border border-slate-200">
                   <div className="flex items-center gap-2 mb-3">
                     <Hash className="w-4 h-4 text-green-400" />
-                    <h3 className="font-medium text-white">Hashtags recommandés</h3>
+                    <h3 className="font-medium text-slate-900">Hashtags recommandés</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {aiResult.hashtags?.map((tag, idx) => (
@@ -1875,17 +1875,17 @@ const EditorialCalendarPage = () => {
                 
                 {/* CTA */}
                 {aiResult.cta && (
-                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                  <div className="p-4 bg-white rounded-xl border border-slate-200">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <MousePointerClick className="w-4 h-4 text-purple-400" />
-                        <h3 className="font-medium text-white">Call-to-Action</h3>
+                        <h3 className="font-medium text-slate-900">Call-to-Action</h3>
                       </div>
                       <Button size="sm" variant="outline" onClick={applyAICTA} className="text-xs">
                         <Check className="w-3 h-3 mr-1" /> Utiliser
                       </Button>
                     </div>
-                    <div className="p-3 bg-white/5 rounded-lg text-sm text-white/80">
+                    <div className="p-3 bg-white rounded-lg text-sm text-slate-700">
                       {aiResult.cta}
                     </div>
                   </div>
@@ -1905,54 +1905,54 @@ const EditorialCalendarPage = () => {
       {/* Social Preview Modal */}
       {/* Statistics Modal */}
       <Dialog open={showStatsModal} onOpenChange={setShowStatsModal}>
-        <DialogContent className="max-w-2xl bg-slate-900 border-white/10">
+        <DialogContent className="max-w-2xl bg-slate-900 border-slate-200">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-indigo-400" />
+            <DialogTitle className="text-slate-900 flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-indigo-600" />
               Statistiques - {statsCalendar?.title}
             </DialogTitle>
           </DialogHeader>
           
           {statsLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+              <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
             </div>
           ) : statsData ? (
             <div className="space-y-6">
               {/* Summary Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white/5 rounded-lg p-4 text-center">
-                  <div className="text-3xl font-bold text-indigo-400">{statsData.summary?.total_posts || 0}</div>
-                  <div className="text-white/60 text-sm">Posts totaux</div>
+                <div className="bg-white rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold text-indigo-600">{statsData.summary?.total_posts || 0}</div>
+                  <div className="text-slate-500 text-sm">Posts totaux</div>
                 </div>
-                <div className="bg-white/5 rounded-lg p-4 text-center">
+                <div className="bg-white rounded-lg p-4 text-center">
                   <div className="text-3xl font-bold text-green-400">{statsData.summary?.completion_rate || 0}%</div>
-                  <div className="text-white/60 text-sm">Taux de complétion</div>
+                  <div className="text-slate-500 text-sm">Taux de complétion</div>
                 </div>
-                <div className="bg-white/5 rounded-lg p-4 text-center">
+                <div className="bg-white rounded-lg p-4 text-center">
                   <div className="text-3xl font-bold text-purple-400">{statsData.summary?.posts_with_media || 0}</div>
-                  <div className="text-white/60 text-sm">Avec médias</div>
+                  <div className="text-slate-500 text-sm">Avec médias</div>
                 </div>
-                <div className="bg-white/5 rounded-lg p-4 text-center">
+                <div className="bg-white rounded-lg p-4 text-center">
                   <div className="text-3xl font-bold text-yellow-400">{statsData.summary?.key_dates_count || 0}</div>
-                  <div className="text-white/60 text-sm">Dates fortes</div>
+                  <div className="text-slate-500 text-sm">Dates fortes</div>
                 </div>
               </div>
               
               {/* Status Breakdown */}
-              <div className="bg-white/5 rounded-lg p-4">
-                <h4 className="text-white font-medium mb-3">Par statut</h4>
+              <div className="bg-white rounded-lg p-4">
+                <h4 className="text-slate-900 font-medium mb-3">Par statut</h4>
                 <div className="space-y-2">
                   {statsData.status_breakdown?.map(item => (
                     <div key={item.status} className="flex items-center gap-2">
                       <div className="flex-1">
                         <div className="flex justify-between text-sm mb-1">
-                          <span className="text-white/80">
+                          <span className="text-slate-700">
                             {settings.statuses?.find(s => s.id === item.status)?.name || item.status}
                           </span>
-                          <span className="text-white/60">{item.count} ({item.percentage}%)</span>
+                          <span className="text-slate-500">{item.count} ({item.percentage}%)</span>
                         </div>
-                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-indigo-500 rounded-full transition-all"
                             style={{ width: `${item.percentage}%` }}
@@ -1966,14 +1966,14 @@ const EditorialCalendarPage = () => {
               
               {/* Networks Breakdown */}
               {statsData.network_breakdown?.length > 0 && (
-                <div className="bg-white/5 rounded-lg p-4">
-                  <h4 className="text-white font-medium mb-3">Par réseau social</h4>
+                <div className="bg-white rounded-lg p-4">
+                  <h4 className="text-slate-900 font-medium mb-3">Par réseau social</h4>
                   <div className="flex flex-wrap gap-2">
                     {statsData.network_breakdown.map(item => (
                       <Badge 
                         key={item.network} 
                         variant="outline" 
-                        className="text-white border-white/20"
+                        className="text-slate-900 border-slate-200"
                         style={{ borderColor: getNetworkColor(item.network), color: getNetworkColor(item.network) }}
                       >
                         <NetworkIcon network={item.network} className="w-3 h-3 mr-1" />
@@ -1985,11 +1985,11 @@ const EditorialCalendarPage = () => {
               )}
               
               {/* Format Breakdown */}
-              <div className="bg-white/5 rounded-lg p-4">
-                <h4 className="text-white font-medium mb-3">Par format</h4>
+              <div className="bg-white rounded-lg p-4">
+                <h4 className="text-slate-900 font-medium mb-3">Par format</h4>
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(statsData.by_format || {}).map(([format, count]) => (
-                    <Badge key={format} variant="outline" className="text-white/80 border-white/20">
+                    <Badge key={format} variant="outline" className="text-slate-700 border-slate-200">
                       <FormatIcon format={format} className="w-3 h-3 mr-1" />
                       {settings.formats?.find(f => f.id === format)?.name || format}: {count}
                     </Badge>
@@ -1998,13 +1998,13 @@ const EditorialCalendarPage = () => {
               </div>
             </div>
           ) : (
-            <div className="text-center text-white/60 py-8">
+            <div className="text-center text-slate-500 py-8">
               Aucune donnée disponible
             </div>
           )}
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowStatsModal(false)} className="text-white border-white/20">
+            <Button variant="outline" onClick={() => setShowStatsModal(false)} className="text-slate-900 border-slate-200">
               Fermer
             </Button>
             <Button onClick={() => handleExportPDF(statsCalendar?.id)} className="bg-indigo-600">
@@ -2017,32 +2017,32 @@ const EditorialCalendarPage = () => {
 
       {/* AI Ideas Panel (Slide-over) */}
       {showIdeasPanel && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={() => setShowIdeasPanel(false)}>
+        <div className="fixed inset-0 z-50 bg-white backdrop-blur-sm" onClick={() => setShowIdeasPanel(false)}>
           <div 
-            className="absolute inset-y-0 right-0 w-full max-w-md bg-gradient-to-b from-[#12121f] to-[#0a0a12] border-l border-white/10 flex flex-col shadow-2xl animate-in slide-in-from-right duration-300"
+            className="absolute inset-y-0 right-0 w-full max-w-md bg-gradient-to-b from-[#12121f] to-[#0a0a12] border-l border-slate-200 flex flex-col shadow-2xl animate-in slide-in-from-right duration-300"
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-white" />
+                  <Sparkles className="w-4 h-4 text-slate-900" />
                 </div>
                 <div>
-                  <h2 className="text-base font-semibold text-white">Assistant IA</h2>
-                  <p className="text-xs text-white/50">Idées, hashtags & timing</p>
+                  <h2 className="text-base font-semibold text-slate-900">Assistant IA</h2>
+                  <p className="text-xs text-slate-500">Idées, hashtags & timing</p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowIdeasPanel(false)} 
-                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors"
               >
-                <X className="w-4 h-4 text-white/60" />
+                <X className="w-4 h-4 text-slate-500" />
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-white/10">
+            <div className="flex border-b border-slate-200">
               {[
                 { id: 'ideas', label: 'Idées', icon: Lightbulb },
                 { id: 'hashtags', label: 'Hashtags', icon: Hash },
@@ -2053,8 +2053,8 @@ const EditorialCalendarPage = () => {
                   onClick={() => setIdeasTab(tab.id)}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-medium transition-colors ${
                     ideasTab === tab.id 
-                      ? 'text-indigo-400 border-b-2 border-indigo-500 bg-indigo-500/5' 
-                      : 'text-white/50 hover:text-white/70 hover:bg-white/5'
+                      ? 'text-indigo-600 border-b-2 border-indigo-500 bg-indigo-500/5' 
+                      : 'text-slate-500 hover:text-slate-900/70 hover:bg-slate-50'
                   }`}
                 >
                   <tab.icon className="w-4 h-4" />
@@ -2071,12 +2071,12 @@ const EditorialCalendarPage = () => {
                   {/* Generator */}
                   <div className="space-y-3">
                     <div className="space-y-2">
-                      <Label className="text-white/70 text-xs">Thèmes spécifiques (optionnel)</Label>
+                      <Label className="text-slate-600 text-xs">Thèmes spécifiques (optionnel)</Label>
                       <Input
                         value={ideasThemes}
                         onChange={(e) => setIdeasThemes(e.target.value)}
                         placeholder="Ex: promo été, témoignage, astuce..."
-                        className="bg-white/5 border-white/10 text-white text-sm"
+                        className="bg-white border-slate-200 text-slate-900 text-sm"
                       />
                     </div>
                     <Button
@@ -2100,7 +2100,7 @@ const EditorialCalendarPage = () => {
 
                   {/* Ideas List */}
                   {postIdeas.length === 0 ? (
-                    <div className="text-center py-8 text-white/40">
+                    <div className="text-center py-8 text-slate-400">
                       <Lightbulb className="w-10 h-10 mx-auto mb-2 opacity-40" />
                       <p className="text-sm">Générez des idées de posts créatives</p>
                     </div>
@@ -2109,21 +2109,21 @@ const EditorialCalendarPage = () => {
                       {postIdeas.map((idea, idx) => (
                         <div 
                           key={idx}
-                          className="p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all group"
+                          className="p-3 bg-white rounded-xl border border-slate-200 hover:bg-slate-100 transition-all group"
                         >
                           <div className="flex items-start justify-between mb-2">
-                            <h3 className="text-white font-medium text-sm flex-1">{idea.title}</h3>
-                            <Badge variant="outline" className="ml-2 text-[10px] border-indigo-500/50 text-indigo-400">
+                            <h3 className="text-slate-900 font-medium text-sm flex-1">{idea.title}</h3>
+                            <Badge variant="outline" className="ml-2 text-[10px] border-indigo-500/50 text-indigo-600">
                               {idea.format}
                             </Badge>
                           </div>
-                          <p className="text-white/60 text-xs line-clamp-2 mb-2">
+                          <p className="text-slate-500 text-xs line-clamp-2 mb-2">
                             {idea.caption?.substring(0, 100)}...
                           </p>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1">
                               {idea.networks?.slice(0, 3).map(n => (
-                                <NetworkIcon key={n} network={n} className="w-3 h-3 text-white/40" />
+                                <NetworkIcon key={n} network={n} className="w-3 h-3 text-slate-400" />
                               ))}
                             </div>
                             <Button
@@ -2147,18 +2147,18 @@ const EditorialCalendarPage = () => {
                   {/* Generator */}
                   <div className="space-y-3">
                     <div className="space-y-2">
-                      <Label className="text-white/70 text-xs">Sujet du post *</Label>
+                      <Label className="text-slate-600 text-xs">Sujet du post *</Label>
                       <Input
                         value={hashtagTopic}
                         onChange={(e) => setHashtagTopic(e.target.value)}
                         placeholder="Ex: recette healthy, nouveau produit, conseil beauté..."
-                        className="bg-white/5 border-white/10 text-white text-sm"
+                        className="bg-white border-slate-200 text-slate-900 text-sm"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-white/70 text-xs">Réseau social</Label>
+                      <Label className="text-slate-600 text-xs">Réseau social</Label>
                       <Select value={hashtagNetwork} onValueChange={setHashtagNetwork}>
-                        <SelectTrigger className="bg-white/5 border-white/10 text-white text-sm">
+                        <SelectTrigger className="bg-white border-slate-200 text-slate-900 text-sm">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -2190,7 +2190,7 @@ const EditorialCalendarPage = () => {
 
                   {/* Results */}
                   {!hashtagResults ? (
-                    <div className="text-center py-8 text-white/40">
+                    <div className="text-center py-8 text-slate-400">
                       <Hash className="w-10 h-10 mx-auto mb-2 opacity-40" />
                       <p className="text-sm">Entrez un sujet pour générer des hashtags optimisés</p>
                     </div>
@@ -2213,7 +2213,7 @@ const EditorialCalendarPage = () => {
                               Copier
                             </Button>
                           </div>
-                          <p className="text-white/80 text-sm">
+                          <p className="text-slate-700 text-sm">
                             {hashtagResults.recommended_set.join(' ')}
                           </p>
                           <Button
@@ -2231,7 +2231,7 @@ const EditorialCalendarPage = () => {
                         tags && tags.length > 0 && (
                           <div key={category} className="space-y-2">
                             <div className="flex items-center justify-between">
-                              <p className="text-white/50 text-xs uppercase tracking-wider">
+                              <p className="text-slate-500 text-xs uppercase tracking-wider">
                                 {category === 'high_volume' ? '📈 Volume élevé' :
                                  category === 'medium_volume' ? '📊 Volume moyen' :
                                  category === 'niche' ? '🎯 Niche' :
@@ -2239,7 +2239,7 @@ const EditorialCalendarPage = () => {
                               </p>
                               <button
                                 onClick={() => copyHashtags(tags)}
-                                className="text-xs text-white/30 hover:text-white/60"
+                                className="text-xs text-slate-400 hover:text-slate-900/60"
                               >
                                 Copier
                               </button>
@@ -2248,7 +2248,7 @@ const EditorialCalendarPage = () => {
                               {tags.map((tag, i) => (
                                 <span 
                                   key={i}
-                                  className="px-2 py-1 bg-white/5 rounded-lg text-xs text-white/70 hover:bg-white/10 cursor-pointer"
+                                  className="px-2 py-1 bg-white rounded-lg text-xs text-slate-600 hover:bg-slate-100 cursor-pointer"
                                   onClick={() => {
                                     navigator.clipboard.writeText(tag);
                                     toast.success(`${tag} copié`);
@@ -2264,11 +2264,11 @@ const EditorialCalendarPage = () => {
 
                       {/* Tips */}
                       {hashtagResults.tips && hashtagResults.tips.length > 0 && (
-                        <div className="p-3 bg-white/5 rounded-xl">
-                          <p className="text-white/50 text-xs font-medium mb-2">💡 Conseils</p>
+                        <div className="p-3 bg-white rounded-xl">
+                          <p className="text-slate-500 text-xs font-medium mb-2">💡 Conseils</p>
                           <ul className="space-y-1">
                             {hashtagResults.tips.map((tip, i) => (
-                              <li key={i} className="text-white/60 text-xs">• {tip}</li>
+                              <li key={i} className="text-slate-500 text-xs">• {tip}</li>
                             ))}
                           </ul>
                         </div>
@@ -2283,7 +2283,7 @@ const EditorialCalendarPage = () => {
                 <div className="p-4 space-y-4">
                   {/* Network selector */}
                   <div className="space-y-3">
-                    <Label className="text-white/70 text-xs">Réseaux sociaux</Label>
+                    <Label className="text-slate-600 text-xs">Réseaux sociaux</Label>
                     <div className="flex flex-wrap gap-2">
                       {['instagram', 'facebook', 'linkedin', 'twitter', 'tiktok', 'youtube'].map(network => (
                         <button
@@ -2298,7 +2298,7 @@ const EditorialCalendarPage = () => {
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all ${
                             bestTimeNetworks.includes(network)
                               ? 'bg-indigo-600 text-white'
-                              : 'bg-white/5 text-white/60 hover:bg-white/10'
+                              : 'bg-white text-slate-500 hover:bg-slate-100'
                           }`}
                         >
                           <NetworkIcon network={network} className="w-3 h-3" />
@@ -2327,28 +2327,28 @@ const EditorialCalendarPage = () => {
 
                   {/* Results */}
                   {!bestTimeResults ? (
-                    <div className="text-center py-8 text-white/40">
+                    <div className="text-center py-8 text-slate-400">
                       <Timer className="w-10 h-10 mx-auto mb-2 opacity-40" />
                       <p className="text-sm">Découvrez les meilleurs moments pour publier</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {Object.entries(bestTimeResults).map(([network, data]) => (
-                        <div key={network} className="p-3 bg-white/5 rounded-xl border border-white/10">
+                        <div key={network} className="p-3 bg-white rounded-xl border border-slate-200">
                           <div className="flex items-center gap-2 mb-3">
-                            <NetworkIcon network={network} className="w-4 h-4 text-white/60" />
-                            <span className="text-white font-medium capitalize">{network}</span>
+                            <NetworkIcon network={network} className="w-4 h-4 text-slate-500" />
+                            <span className="text-slate-900 font-medium capitalize">{network}</span>
                           </div>
 
                           {/* Best Hours */}
                           <div className="mb-3">
-                            <p className="text-white/50 text-xs mb-2">⏰ Meilleures heures</p>
+                            <p className="text-slate-500 text-xs mb-2">⏰ Meilleures heures</p>
                             <div className="flex flex-wrap gap-1.5">
                               {data.best_hours?.map((hour, i) => (
                                 <button
                                   key={i}
                                   onClick={() => applyBestTime(network, hour)}
-                                  className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs hover:bg-green-500/30 transition-colors"
+                                  className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-500/30 transition-colors"
                                 >
                                   {hour}
                                 </button>
@@ -2358,10 +2358,10 @@ const EditorialCalendarPage = () => {
 
                           {/* Best Days */}
                           <div className="mb-3">
-                            <p className="text-white/50 text-xs mb-2">📅 Meilleurs jours</p>
+                            <p className="text-slate-500 text-xs mb-2">📅 Meilleurs jours</p>
                             <div className="flex flex-wrap gap-1.5">
                               {data.best_days?.map((day, i) => (
-                                <span key={i} className="px-2 py-1 bg-indigo-500/20 text-indigo-400 rounded text-xs capitalize">
+                                <span key={i} className="px-2 py-1 bg-indigo-500/20 text-indigo-600 rounded text-xs capitalize">
                                   {day}
                                 </span>
                               ))}
@@ -2371,7 +2371,7 @@ const EditorialCalendarPage = () => {
                           {/* Avoid */}
                           {data.avoid && data.avoid.length > 0 && (
                             <div className="mb-3">
-                              <p className="text-white/50 text-xs mb-2">🚫 À éviter</p>
+                              <p className="text-slate-500 text-xs mb-2">🚫 À éviter</p>
                               <p className="text-red-400/70 text-xs">
                                 {data.avoid.join(', ')}
                               </p>
@@ -2388,8 +2388,8 @@ const EditorialCalendarPage = () => {
                       ))}
 
                       {/* General tip */}
-                      <div className="p-3 bg-white/5 rounded-xl text-center">
-                        <p className="text-white/40 text-xs">
+                      <div className="p-3 bg-white rounded-xl text-center">
+                        <p className="text-slate-400 text-xs">
                           Ces recommandations sont basées sur les études d&apos;engagement. Ajustez selon votre audience.
                         </p>
                       </div>
@@ -2458,7 +2458,7 @@ const MediaManager = ({ postId, medias = [], onUpdate }) => {
   return (
     <div className="space-y-4">
       {/* Upload zone */}
-      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-white/40 transition-colors">
+      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-white/40 transition-colors">
         <input
           type="file"
           multiple
@@ -2471,8 +2471,8 @@ const MediaManager = ({ postId, medias = [], onUpdate }) => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
         ) : (
           <>
-            <Upload className="w-8 h-8 text-white/40 mb-2" />
-            <span className="text-white/60 text-sm">Cliquez pour uploader des images ou vidéos</span>
+            <Upload className="w-8 h-8 text-slate-400 mb-2" />
+            <span className="text-slate-500 text-sm">Cliquez pour uploader des images ou vidéos</span>
           </>
         )}
       </label>
@@ -2496,7 +2496,7 @@ const MediaManager = ({ postId, medias = [], onUpdate }) => {
               )}
               
               {/* Order badge */}
-              <div className="absolute top-2 left-2 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-white text-xs">
+              <div className="absolute top-2 left-2 w-6 h-6 bg-slate-900/50 rounded-full flex items-center justify-center text-slate-900 text-xs">
                 {idx + 1}
               </div>
               
@@ -2509,7 +2509,7 @@ const MediaManager = ({ postId, medias = [], onUpdate }) => {
               </button>
               
               {/* Type badge */}
-              <div className="absolute bottom-2 left-2 bg-black/50 rounded px-2 py-1 text-white text-xs">
+              <div className="absolute bottom-2 left-2 bg-slate-900/50 rounded px-2 py-1 text-slate-900 text-xs">
                 {media.type === 'video' ? <Video className="w-3 h-3" /> : <Image className="w-3 h-3" />}
               </div>
             </div>

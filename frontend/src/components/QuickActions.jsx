@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Plus, X, UserPlus, Receipt, FileText, CheckSquare, 
-  FolderPlus, Calendar, Mail, Briefcase, Link2, Share2, Bot, Zap
+  FolderPlus, Calendar, Mail, Briefcase, Link2, Share2, Zap
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { 
@@ -40,7 +40,6 @@ const QuickActions = () => {
     { id: "opportunity", icon: Briefcase, label: "Nouvelle opportunité", color: "from-purple-500 to-pink-500" },
     { id: "multilink", icon: Link2, label: "Multilink", color: "from-indigo-500 to-violet-500", navigate: "/admin/multilink" },
     { id: "social", icon: Share2, label: "Publier", color: "from-pink-500 to-rose-500", navigate: "/admin/social-media" },
-    { id: "moltbot", icon: Bot, label: "MoltBot", color: "from-violet-500 to-purple-500", navigate: "/admin/moltbot" },
   ];
 
   const handleAction = (action) => {
@@ -229,7 +228,7 @@ const QuickActions = () => {
           className={`
             w-14 h-14 rounded-full shadow-lg transition-all duration-300 touch-none
             ${isOpen 
-              ? "bg-white/10 backdrop-blur-xl rotate-45" 
+              ? "bg-slate-100 backdrop-blur-xl rotate-45" 
               : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500"
             }
             ${isDragging ? 'scale-110 cursor-grabbing' : 'cursor-grab'}
@@ -237,17 +236,17 @@ const QuickActions = () => {
           data-testid="quick-actions-button"
         >
           {isOpen ? (
-            <X className="w-6 h-6 text-white" />
+            <X className="w-6 h-6 text-slate-900" />
           ) : (
-            <Plus className="w-6 h-6 text-white" />
+            <Plus className="w-6 h-6 text-slate-900" />
           )}
         </Button>
 
         {/* Actions Menu */}
         {isOpen && (
           <div className="absolute bottom-16 right-0 mb-2 animate-in slide-in-from-bottom-5 fade-in duration-200">
-            <div className="bg-black/90 backdrop-blur-2xl rounded-2xl border border-white/10 p-2 shadow-2xl min-w-[220px]">
-              <p className="px-4 py-2 text-[10px] uppercase tracking-wider text-white/30 font-medium">
+            <div className="bg-white backdrop-blur-2xl rounded-2xl border border-slate-200 p-2 shadow-2xl min-w-[220px]">
+              <p className="px-4 py-2 text-[10px] uppercase tracking-wider text-slate-400 font-medium">
                 Actions rapides
               </p>
               {quickActions.map((action, index) => {
@@ -256,12 +255,12 @@ const QuickActions = () => {
                   <button
                     key={action.id}
                     onClick={() => handleAction(action)}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-all"
                     style={{ animationDelay: `${index * 50}ms` }}
                     data-testid={`quick-action-${action.id}`}
                   >
                     <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center shadow-lg`}>
-                      <Icon className="w-4 h-4 text-white" />
+                      <Icon className="w-4 h-4 text-slate-900" />
                     </div>
                     <span className="text-sm font-medium">{action.label}</span>
                   </button>
@@ -274,7 +273,7 @@ const QuickActions = () => {
 
       {/* Contact Modal */}
       <Dialog open={activeModal === "contact"} onOpenChange={() => closeModal()}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white">
+        <DialogContent className="bg-[#1a1a2e] border-slate-200 text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
@@ -290,7 +289,7 @@ const QuickActions = () => {
                 value={contactForm.name}
                 onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Jean Dupont"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             <div>
@@ -300,7 +299,7 @@ const QuickActions = () => {
                 value={contactForm.email}
                 onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
                 placeholder="jean@example.com"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             <div>
@@ -309,7 +308,7 @@ const QuickActions = () => {
                 value={contactForm.phone}
                 onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
                 placeholder="06 12 34 56 78"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             <div>
@@ -318,12 +317,12 @@ const QuickActions = () => {
                 value={contactForm.company}
                 onChange={(e) => setContactForm(prev => ({ ...prev, company: e.target.value }))}
                 placeholder="Nom de l'entreprise"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={closeModal} className="border-white/20">Annuler</Button>
+            <Button variant="outline" onClick={closeModal} className="border-slate-200">Annuler</Button>
             <Button onClick={createContact} disabled={loading} className="bg-indigo-600">
               {loading ? "Création..." : "Créer"}
             </Button>
@@ -333,7 +332,7 @@ const QuickActions = () => {
 
       {/* Invoice Modal */}
       <Dialog open={activeModal === "invoice"} onOpenChange={() => closeModal()}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white">
+        <DialogContent className="bg-[#1a1a2e] border-slate-200 text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
@@ -349,7 +348,7 @@ const QuickActions = () => {
                 value={invoiceForm.client_name}
                 onChange={(e) => setInvoiceForm(prev => ({ ...prev, client_name: e.target.value }))}
                 placeholder="Nom du client"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             <div>
@@ -359,7 +358,7 @@ const QuickActions = () => {
                 value={invoiceForm.amount}
                 onChange={(e) => setInvoiceForm(prev => ({ ...prev, amount: e.target.value }))}
                 placeholder="1000"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             <div>
@@ -368,12 +367,12 @@ const QuickActions = () => {
                 value={invoiceForm.description}
                 onChange={(e) => setInvoiceForm(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Description de la prestation"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={closeModal} className="border-white/20">Annuler</Button>
+            <Button variant="outline" onClick={closeModal} className="border-slate-200">Annuler</Button>
             <Button onClick={createInvoice} disabled={loading} className="bg-indigo-600">
               {loading ? "Création..." : "Créer"}
             </Button>
@@ -383,7 +382,7 @@ const QuickActions = () => {
 
       {/* Task Modal */}
       <Dialog open={activeModal === "task"} onOpenChange={() => closeModal()}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white">
+        <DialogContent className="bg-[#1a1a2e] border-slate-200 text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
@@ -399,7 +398,7 @@ const QuickActions = () => {
                 value={taskForm.title}
                 onChange={(e) => setTaskForm(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="Titre de la tâche"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             <div>
@@ -408,25 +407,25 @@ const QuickActions = () => {
                 value={taskForm.description}
                 onChange={(e) => setTaskForm(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Description optionnelle"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             <div>
               <Label>Priorité</Label>
               <Select value={taskForm.priority} onValueChange={(v) => setTaskForm(prev => ({ ...prev, priority: v }))}>
-                <SelectTrigger className="bg-white/5 border-white/10">
+                <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e] border-white/10">
-                  <SelectItem value="low" className="text-white">Basse</SelectItem>
-                  <SelectItem value="medium" className="text-white">Moyenne</SelectItem>
-                  <SelectItem value="high" className="text-white">Haute</SelectItem>
+                <SelectContent className="bg-[#1a1a2e] border-slate-200">
+                  <SelectItem value="low" className="text-slate-900">Basse</SelectItem>
+                  <SelectItem value="medium" className="text-slate-900">Moyenne</SelectItem>
+                  <SelectItem value="high" className="text-slate-900">Haute</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={closeModal} className="border-white/20">Annuler</Button>
+            <Button variant="outline" onClick={closeModal} className="border-slate-200">Annuler</Button>
             <Button onClick={createTask} disabled={loading} className="bg-indigo-600">
               {loading ? "Création..." : "Créer"}
             </Button>
@@ -436,7 +435,7 @@ const QuickActions = () => {
 
       {/* Opportunity Modal */}
       <Dialog open={activeModal === "opportunity"} onOpenChange={() => closeModal()}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white">
+        <DialogContent className="bg-[#1a1a2e] border-slate-200 text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
@@ -452,7 +451,7 @@ const QuickActions = () => {
                 value={opportunityForm.name}
                 onChange={(e) => setOpportunityForm(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Nom de l'opportunité"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             <div>
@@ -462,7 +461,7 @@ const QuickActions = () => {
                 value={opportunityForm.amount}
                 onChange={(e) => setOpportunityForm(prev => ({ ...prev, amount: e.target.value }))}
                 placeholder="5000"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             <div>
@@ -471,12 +470,12 @@ const QuickActions = () => {
                 value={opportunityForm.company}
                 onChange={(e) => setOpportunityForm(prev => ({ ...prev, company: e.target.value }))}
                 placeholder="Nom de l'entreprise"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={closeModal} className="border-white/20">Annuler</Button>
+            <Button variant="outline" onClick={closeModal} className="border-slate-200">Annuler</Button>
             <Button onClick={createOpportunity} disabled={loading} className="bg-indigo-600">
               {loading ? "Création..." : "Créer"}
             </Button>

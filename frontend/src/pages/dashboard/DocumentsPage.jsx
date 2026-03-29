@@ -388,14 +388,14 @@ const DocumentsPage = () => {
         <div key={folder.id}>
           <div
             className={`flex items-center gap-1 py-1.5 px-2 rounded-lg cursor-pointer transition-colors ${
-              isActive ? "bg-indigo-600/20 text-indigo-400" : "hover:bg-white/5 text-white/70"
+              isActive ? "bg-indigo-50 text-indigo-600" : "hover:bg-slate-50 text-slate-600"
             }`}
             style={{ paddingLeft: `${level * 16 + 8}px` }}
           >
             {hasChildren ? (
               <button
                 onClick={(e) => { e.stopPropagation(); toggleFolderExpand(folder.id); }}
-                className="p-0.5 hover:bg-white/10 rounded"
+                className="p-0.5 hover:bg-slate-100 rounded"
               >
                 {isExpanded ? (
                   <ChevronDown className="w-4 h-4" />
@@ -410,7 +410,7 @@ const DocumentsPage = () => {
               onClick={() => navigateToFolder(folder.id, folder.name)}
               className="flex items-center gap-2 flex-1 text-left truncate"
             >
-              <Folder className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-indigo-400" : "text-yellow-500"}`} />
+              <Folder className={`w-4 h-4 flex-shrink-0 ${isActive ? "text-indigo-600" : "text-yellow-500"}`} />
               <span className="truncate text-sm">{folder.name}</span>
             </button>
           </div>
@@ -427,12 +427,12 @@ const DocumentsPage = () => {
         <button
           onClick={() => setMoveTarget(folder.id)}
           className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors ${
-            moveTarget === folder.id ? "bg-indigo-600/30 border border-indigo-500/50" : "hover:bg-white/5"
+            moveTarget === folder.id ? "bg-indigo-600/30 border border-indigo-500/50" : "hover:bg-slate-50"
           }`}
           style={{ paddingLeft: `${level * 16 + 12}px` }}
         >
           <Folder className="w-4 h-4 text-yellow-500" />
-          <span className="text-white text-sm">{folder.name}</span>
+          <span className="text-slate-900 text-sm">{folder.name}</span>
         </button>
         {folder.children?.length > 0 && renderMoveTree(folder.children, level + 1)}
       </div>
@@ -450,23 +450,23 @@ const DocumentsPage = () => {
       onDrop={handleDrop}
     >
       {/* Mobile Header */}
-      <div className="flex items-center justify-between p-3 border-b border-white/10 lg:hidden">
+      <div className="flex items-center justify-between p-3 border-b border-slate-200 lg:hidden">
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setShowMobileSidebar(true)}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
           >
-            <Menu className="w-5 h-5 text-white" />
+            <Menu className="w-5 h-5 text-slate-900" />
           </button>
           <div className="flex items-center gap-2">
-            <HardDrive className="w-5 h-5 text-indigo-400" />
-            <span className="text-white font-semibold">Documents</span>
+            <HardDrive className="w-5 h-5 text-indigo-600" />
+            <span className="text-slate-900 font-semibold">Documents</span>
           </div>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-            className="p-2 hover:bg-white/10 rounded-lg text-white/60"
+            className="p-2 hover:bg-slate-100 rounded-lg text-slate-500"
           >
             {viewMode === "grid" ? <List className="w-4 h-4" /> : <Grid className="w-4 h-4" />}
           </button>
@@ -474,7 +474,7 @@ const DocumentsPage = () => {
             onClick={() => setUploadModal(true)}
             className="p-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg"
           >
-            <Plus className="w-4 h-4 text-white" />
+            <Plus className="w-4 h-4 text-slate-900" />
           </button>
         </div>
       </div>
@@ -484,20 +484,20 @@ const DocumentsPage = () => {
         ${showMobileSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         fixed lg:relative left-0 top-0 h-full
         w-64 lg:w-56 xl:w-64
-        bg-[#0a0a12] lg:bg-transparent
-        border-r border-white/10
+        bg-slate-50 lg:bg-transparent
+        border-r border-slate-200
         flex flex-col
         transition-transform duration-300 ease-in-out
         z-50 lg:z-auto
       `}>
         {/* Mobile close button */}
-        <div className="flex items-center justify-between p-3 border-b border-white/20 lg:hidden">
-          <span className="text-white font-semibold">Mon Drive</span>
+        <div className="flex items-center justify-between p-3 border-b border-slate-200 lg:hidden">
+          <span className="text-slate-900 font-semibold">Mon Drive</span>
           <button 
             onClick={() => setShowMobileSidebar(false)}
-            className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+            className="p-2 bg-slate-100 hover:bg-white/20 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-white" />
+            <X className="w-5 h-5 text-slate-900" />
           </button>
         </div>
 
@@ -519,7 +519,7 @@ const DocumentsPage = () => {
             <button
               onClick={() => { navigateToFolder(null, "Mon Drive"); setShowMobileSidebar(false); }}
               className={`w-full flex items-center gap-3 py-2 px-3 rounded-xl transition-colors ${
-                currentFolder === null ? "bg-indigo-600/20 text-indigo-400" : "hover:bg-white/5 text-white/70"
+                currentFolder === null ? "bg-indigo-50 text-indigo-600" : "hover:bg-slate-50 text-slate-600"
               }`}
             >
               <HardDrive className="w-5 h-5" />
@@ -536,14 +536,14 @@ const DocumentsPage = () => {
         </ScrollArea>
 
         {/* Storage info */}
-        <div className="p-3 border-t border-white/10">
+        <div className="p-3 border-t border-slate-200">
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-white/60">Espace</span>
-              <span className="text-white/80">{formatSize(storage.used)} / {STORAGE_QUOTA_GB} Go</span>
+              <span className="text-slate-500">Espace</span>
+              <span className="text-slate-700">{formatSize(storage.used)} / {STORAGE_QUOTA_GB} Go</span>
             </div>
-            <Progress value={storage.percentage} className="h-1.5 bg-white/10" />
-            <p className="text-[10px] text-white/40">
+            <Progress value={storage.percentage} className="h-1.5 bg-slate-100" />
+            <p className="text-[10px] text-slate-400">
               {stats?.total_documents || 0} fichiers • {stats?.total_folders || 0} dossiers
             </p>
           </div>
@@ -553,7 +553,7 @@ const DocumentsPage = () => {
       {/* Mobile sidebar overlay */}
       {showMobileSidebar && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-slate-900/50 z-40 lg:hidden"
           onClick={() => setShowMobileSidebar(false)}
         />
       )}
@@ -561,16 +561,16 @@ const DocumentsPage = () => {
       {/* Main content */}
       <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Header - Desktop only */}
-        <header className="hidden lg:flex items-center justify-between gap-4 p-3 border-b border-white/10">
+        <header className="hidden lg:flex items-center justify-between gap-4 p-3 border-b border-slate-200">
           {/* Breadcrumb */}
           <div className="flex items-center gap-1 text-sm overflow-x-auto flex-shrink-0">
             {breadcrumb.map((item, idx) => (
               <div key={item.id || 'root'} className="flex items-center">
-                {idx > 0 && <ChevronRight className="w-4 h-4 text-white/30 mx-1 flex-shrink-0" />}
+                {idx > 0 && <ChevronRight className="w-4 h-4 text-slate-400 mx-1 flex-shrink-0" />}
                 <button
                   onClick={() => navigateToFolder(item.id, item.name)}
-                  className={`px-2 py-1 rounded-lg hover:bg-white/10 transition-colors whitespace-nowrap ${
-                    idx === breadcrumb.length - 1 ? "text-white font-medium" : "text-white/60"
+                  className={`px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors whitespace-nowrap ${
+                    idx === breadcrumb.length - 1 ? "text-slate-900 font-medium" : "text-slate-500"
                   }`}
                 >
                   {item.name}
@@ -582,26 +582,26 @@ const DocumentsPage = () => {
           <div className="flex items-center gap-2">
             {/* Search */}
             <div className="relative w-48 xl:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input
                 placeholder="Rechercher"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/5 border-white/10 text-white placeholder-white/40 rounded-full h-8 text-sm"
+                className="pl-10 bg-white border-slate-200 text-slate-900 placeholder-slate-400 rounded-full h-8 text-sm"
               />
             </div>
 
             {/* View toggle */}
-            <div className="flex items-center bg-white/5 rounded-lg p-0.5 border border-white/10">
+            <div className="flex items-center bg-white rounded-lg p-0.5 border border-slate-200">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded transition-colors ${viewMode === "grid" ? "bg-indigo-600 text-white" : "text-white/60 hover:text-white"}`}
+                className={`p-1.5 rounded transition-colors ${viewMode === "grid" ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-900"}`}
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-1.5 rounded transition-colors ${viewMode === "list" ? "bg-indigo-600 text-white" : "text-white/60 hover:text-white"}`}
+                className={`p-1.5 rounded transition-colors ${viewMode === "list" ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-900"}`}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -610,7 +610,7 @@ const DocumentsPage = () => {
             {/* Info toggle */}
             <button
               onClick={() => setDetailsPanel(!detailsPanel)}
-              className={`p-2 rounded-lg transition-colors hidden xl:block ${detailsPanel ? "bg-indigo-600 text-white" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+              className={`p-2 rounded-lg transition-colors hidden xl:block ${detailsPanel ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"}`}
             >
               <Info className="w-4 h-4" />
             </button>
@@ -618,7 +618,7 @@ const DocumentsPage = () => {
             {/* MoltBot AI toggle */}
             <button
               onClick={() => { setShowAiPanel(!showAiPanel); if (!showAiPanel) fetchAiSuggestions(); }}
-              className={`p-2 rounded-lg transition-colors ${showAiPanel ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+              className={`p-2 rounded-lg transition-colors ${showAiPanel ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"}`}
               title="MoltBot AI - Classification intelligente"
             >
               <Bot className="w-5 h-5" />
@@ -627,12 +627,12 @@ const DocumentsPage = () => {
         </header>
 
         {/* Toolbar for actions */}
-        <div className="flex items-center gap-3 px-4 py-2 border-b border-white/10 bg-black/20">
+        <div className="flex items-center gap-3 px-4 py-2 border-b border-slate-200 bg-black/20">
           <Button
             onClick={() => setNewFolderModal(true)}
             variant="ghost"
             size="sm"
-            className="text-white/70 hover:text-white hover:bg-white/10"
+            className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
           >
             <FolderPlus className="w-4 h-4 mr-2" />
             Nouveau dossier
@@ -641,7 +641,7 @@ const DocumentsPage = () => {
             onClick={() => fileInputRef.current?.click()}
             variant="ghost"
             size="sm"
-            className="text-white/70 hover:text-white hover:bg-white/10"
+            className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
           >
             <Upload className="w-4 h-4 mr-2" />
             Importer
@@ -660,12 +660,12 @@ const DocumentsPage = () => {
           {selectedItems.length > 0 && (
             <>
               <div className="w-px h-6 bg-white/20" />
-              <span className="text-white/60 text-sm">{selectedItems.length} sélectionné(s)</span>
+              <span className="text-slate-500 text-sm">{selectedItems.length} sélectionné(s)</span>
               <Button
                 onClick={() => setMoveModal(true)}
                 variant="ghost"
                 size="sm"
-                className="text-white/70 hover:text-white hover:bg-white/10"
+                className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               >
                 <Move className="w-4 h-4 mr-1" />
                 Déplacer
@@ -683,7 +683,7 @@ const DocumentsPage = () => {
                 onClick={() => setSelectedItems([])}
                 variant="ghost"
                 size="sm"
-                className="text-white/60 hover:text-white"
+                className="text-slate-500 hover:text-slate-900"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -701,21 +701,21 @@ const DocumentsPage = () => {
               </div>
             ) : folders.length === 0 && documents.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
-                <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-6">
+                <div className="w-24 h-24 rounded-full bg-white border border-slate-200 flex items-center justify-center mb-6">
                   {dragOver ? (
-                    <Upload className="w-10 h-10 text-indigo-400 animate-bounce" />
+                    <Upload className="w-10 h-10 text-indigo-600 animate-bounce" />
                   ) : (
-                    <FolderOpen className="w-10 h-10 text-white/30" />
+                    <FolderOpen className="w-10 h-10 text-slate-400" />
                   )}
                 </div>
-                <h3 className="text-white font-medium mb-2 text-lg">
+                <h3 className="text-slate-900 font-medium mb-2 text-lg">
                   {dragOver ? "Déposez vos fichiers ici" : "Ce dossier est vide"}
                 </h3>
-                <p className="text-white/50 text-sm mb-6 max-w-sm">
+                <p className="text-slate-500 text-sm mb-6 max-w-sm">
                   Glissez-déposez des fichiers ou utilisez le bouton "Nouveau" pour ajouter du contenu
                 </p>
                 <div className="flex gap-3">
-                  <Button onClick={() => setNewFolderModal(true)} variant="outline" className="border-white/20 text-white">
+                  <Button onClick={() => setNewFolderModal(true)} variant="outline" className="border-slate-200 text-slate-900">
                     <FolderPlus className="w-4 h-4 mr-2" />
                     Créer un dossier
                   </Button>
@@ -730,7 +730,7 @@ const DocumentsPage = () => {
                 {/* Folders section */}
                 {folders.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-white/60 mb-3 px-1">Dossiers</h3>
+                    <h3 className="text-sm font-medium text-slate-500 mb-3 px-1">Dossiers</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                       {folders.map(folder => (
                         <div
@@ -750,15 +750,15 @@ const DocumentsPage = () => {
                           }}
                           className={`group relative p-4 rounded-xl border cursor-pointer transition-all hover:shadow-lg ${
                             isSelected("folder", folder.id)
-                              ? "bg-indigo-600/20 border-indigo-500/50"
-                              : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                              ? "bg-indigo-50 border-indigo-500/50"
+                              : "bg-white border-slate-200 hover:bg-slate-100 hover:border-slate-200"
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <Folder className="w-10 h-10 text-yellow-500 flex-shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <p className="text-white text-sm font-medium truncate">{folder.name}</p>
-                              <p className="text-white/40 text-xs">
+                              <p className="text-slate-900 text-sm font-medium truncate">{folder.name}</p>
+                              <p className="text-slate-400 text-xs">
                                 {folder.file_count || 0} fichiers
                               </p>
                             </div>
@@ -768,21 +768,21 @@ const DocumentsPage = () => {
                             <DropdownMenuTrigger asChild>
                               <button
                                 onClick={(e) => e.stopPropagation()}
-                                className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="absolute top-2 right-2 p-1.5 rounded-lg bg-slate-50 opacity-0 group-hover:opacity-100 transition-opacity"
                               >
-                                <MoreVertical className="w-4 h-4 text-white/60" />
+                                <MoreVertical className="w-4 h-4 text-slate-500" />
                               </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="bg-[#1a1a2e] border-white/10 z-50">
-                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigateToFolder(folder.id, folder.name); }} className="text-white/80 focus:bg-white/10 focus:text-white">
+                            <DropdownMenuContent className="bg-slate-50 border-slate-200 z-50">
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigateToFolder(folder.id, folder.name); }} className="text-slate-700 focus:bg-slate-100 focus:text-slate-900">
                                 <FolderOpen className="w-4 h-4 mr-2" />
                                 Ouvrir
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openRenameModal("folder", folder); }} className="text-white/80 focus:bg-white/10 focus:text-white">
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openRenameModal("folder", folder); }} className="text-slate-700 focus:bg-slate-100 focus:text-slate-900">
                                 <Pencil className="w-4 h-4 mr-2" />
                                 Renommer
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator className="bg-white/10" />
+                              <DropdownMenuSeparator className="bg-slate-100" />
                               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete("folder", folder.id); }} className="text-red-400 focus:bg-red-500/20 focus:text-red-400">
                                 <Trash2 className="w-4 h-4 mr-2" />
                                 Supprimer
@@ -798,7 +798,7 @@ const DocumentsPage = () => {
                 {/* Files section */}
                 {documents.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-medium text-white/60 mb-3 px-1">Fichiers</h3>
+                    <h3 className="text-sm font-medium text-slate-500 mb-3 px-1">Fichiers</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                       {documents.map(doc => {
                         const FileIcon = getFileIcon(doc.file_type);
@@ -817,49 +817,49 @@ const DocumentsPage = () => {
                             onDoubleClick={() => setPreviewDoc(doc)}
                             className={`group relative p-4 rounded-xl border cursor-pointer transition-all hover:shadow-lg ${
                               isSelected("document", doc.id)
-                                ? "bg-indigo-600/20 border-indigo-500/50"
-                                : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                                ? "bg-indigo-50 border-indigo-500/50"
+                                : "bg-white border-slate-200 hover:bg-slate-100 hover:border-slate-200"
                             }`}
                           >
                             <div className="flex flex-col items-center text-center">
                               {doc.file_type === "image" && doc.url ? (
-                                <div className="w-16 h-16 rounded-lg overflow-hidden mb-2 bg-white/10">
+                                <div className="w-16 h-16 rounded-lg overflow-hidden mb-2 bg-slate-100">
                                   <img src={doc.url} alt={doc.name} className="w-full h-full object-cover" />
                                 </div>
                               ) : (
                                 <FileIcon className={`w-12 h-12 mb-2 ${getFileColor(doc.file_type)}`} />
                               )}
-                              <p className="text-white text-sm font-medium truncate w-full" title={doc.name}>
+                              <p className="text-slate-900 text-sm font-medium truncate w-full" title={doc.name}>
                                 {doc.name}
                               </p>
-                              <p className="text-white/40 text-xs mt-1">{doc.size_formatted}</p>
+                              <p className="text-slate-400 text-xs mt-1">{doc.size_formatted}</p>
                             </div>
                             
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <button
                                   onClick={(e) => e.stopPropagation()}
-                                  className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="absolute top-2 right-2 p-1.5 rounded-lg bg-slate-50 opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
-                                  <MoreVertical className="w-4 h-4 text-white/60" />
+                                  <MoreVertical className="w-4 h-4 text-slate-500" />
                                 </button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent className="bg-[#1a1a2e] border-white/10 z-50">
-                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setPreviewDoc(doc); }} className="text-white/80 focus:bg-white/10 focus:text-white">
+                              <DropdownMenuContent className="bg-slate-50 border-slate-200 z-50">
+                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setPreviewDoc(doc); }} className="text-slate-700 focus:bg-slate-100 focus:text-slate-900">
                                   <Eye className="w-4 h-4 mr-2" />
                                   Aperçu
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild className="text-white/80 focus:bg-white/10 focus:text-white">
+                                <DropdownMenuItem asChild className="text-slate-700 focus:bg-slate-100 focus:text-slate-900">
                                   <a href={doc.url} download={doc.name} target="_blank" rel="noopener noreferrer">
                                     <Download className="w-4 h-4 mr-2" />
                                     Télécharger
                                   </a>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openRenameModal("document", doc); }} className="text-white/80 focus:bg-white/10 focus:text-white">
+                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openRenameModal("document", doc); }} className="text-slate-700 focus:bg-slate-100 focus:text-slate-900">
                                   <Pencil className="w-4 h-4 mr-2" />
                                   Renommer
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-white/10" />
+                                <DropdownMenuSeparator className="bg-slate-100" />
                                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete("document", doc.id); }} className="text-red-400 focus:bg-red-500/20 focus:text-red-400">
                                   <Trash2 className="w-4 h-4 mr-2" />
                                   Supprimer
@@ -875,14 +875,14 @@ const DocumentsPage = () => {
               </div>
             ) : (
               /* List View */
-              <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 overflow-hidden">
+              <div className="bg-white backdrop-blur-xl rounded-xl border border-slate-200 overflow-hidden">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left p-4 text-white/60 text-sm font-medium">Nom</th>
-                      <th className="text-left p-4 text-white/60 text-sm font-medium hidden md:table-cell">Propriétaire</th>
-                      <th className="text-left p-4 text-white/60 text-sm font-medium hidden sm:table-cell">Dernière modification</th>
-                      <th className="text-left p-4 text-white/60 text-sm font-medium hidden lg:table-cell">Taille</th>
+                    <tr className="border-b border-slate-200">
+                      <th className="text-left p-4 text-slate-500 text-sm font-medium">Nom</th>
+                      <th className="text-left p-4 text-slate-500 text-sm font-medium hidden md:table-cell">Propriétaire</th>
+                      <th className="text-left p-4 text-slate-500 text-sm font-medium hidden sm:table-cell">Dernière modification</th>
+                      <th className="text-left p-4 text-slate-500 text-sm font-medium hidden lg:table-cell">Taille</th>
                       <th className="w-12"></th>
                     </tr>
                   </thead>
@@ -891,34 +891,34 @@ const DocumentsPage = () => {
                       <tr
                         key={folder.id}
                         onClick={() => navigateToFolder(folder.id, folder.name)}
-                        className={`border-b border-white/5 cursor-pointer transition-colors ${
-                          isSelected("folder", folder.id) ? "bg-indigo-600/20" : "hover:bg-white/5"
+                        className={`border-b border-slate-200 cursor-pointer transition-colors ${
+                          isSelected("folder", folder.id) ? "bg-indigo-50" : "hover:bg-slate-50"
                         }`}
                       >
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             <Folder className="w-5 h-5 text-yellow-500" />
-                            <span className="text-white font-medium">{folder.name}</span>
+                            <span className="text-slate-900 font-medium">{folder.name}</span>
                           </div>
                         </td>
-                        <td className="p-4 text-white/60 text-sm hidden md:table-cell">moi</td>
-                        <td className="p-4 text-white/60 text-sm hidden sm:table-cell">
+                        <td className="p-4 text-slate-500 text-sm hidden md:table-cell">moi</td>
+                        <td className="p-4 text-slate-500 text-sm hidden sm:table-cell">
                           {new Date(folder.updated_at || folder.created_at).toLocaleDateString('fr-FR')}
                         </td>
-                        <td className="p-4 text-white/60 text-sm hidden lg:table-cell">—</td>
+                        <td className="p-4 text-slate-500 text-sm hidden lg:table-cell">—</td>
                         <td className="p-4">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <button onClick={(e) => e.stopPropagation()} className="p-1.5 rounded-lg hover:bg-white/10">
-                                <MoreVertical className="w-4 h-4 text-white/40" />
+                              <button onClick={(e) => e.stopPropagation()} className="p-1.5 rounded-lg hover:bg-slate-100">
+                                <MoreVertical className="w-4 h-4 text-slate-400" />
                               </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="bg-[#1a1a2e] border-white/10 z-50">
-                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openRenameModal("folder", folder); }} className="text-white/80 focus:bg-white/10 focus:text-white">
+                            <DropdownMenuContent className="bg-slate-50 border-slate-200 z-50">
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openRenameModal("folder", folder); }} className="text-slate-700 focus:bg-slate-100 focus:text-slate-900">
                                 <Pencil className="w-4 h-4 mr-2" />
                                 Renommer
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator className="bg-white/10" />
+                              <DropdownMenuSeparator className="bg-slate-100" />
                               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete("folder", folder.id); }} className="text-red-400 focus:bg-red-500/20 focus:text-red-400">
                                 <Trash2 className="w-4 h-4 mr-2" />
                                 Supprimer
@@ -935,44 +935,44 @@ const DocumentsPage = () => {
                           key={doc.id}
                           onClick={() => { setSelectedForDetails({ type: "document", ...doc }); setDetailsPanel(true); }}
                           onDoubleClick={() => setPreviewDoc(doc)}
-                          className={`border-b border-white/5 cursor-pointer transition-colors ${
-                            isSelected("document", doc.id) ? "bg-indigo-600/20" : "hover:bg-white/5"
+                          className={`border-b border-slate-200 cursor-pointer transition-colors ${
+                            isSelected("document", doc.id) ? "bg-indigo-50" : "hover:bg-slate-50"
                           }`}
                         >
                           <td className="p-4">
                             <div className="flex items-center gap-3">
                               <FileIcon className={`w-5 h-5 ${getFileColor(doc.file_type)}`} />
-                              <span className="text-white">{doc.name}</span>
+                              <span className="text-slate-900">{doc.name}</span>
                             </div>
                           </td>
-                          <td className="p-4 text-white/60 text-sm hidden md:table-cell">moi</td>
-                          <td className="p-4 text-white/60 text-sm hidden sm:table-cell">
+                          <td className="p-4 text-slate-500 text-sm hidden md:table-cell">moi</td>
+                          <td className="p-4 text-slate-500 text-sm hidden sm:table-cell">
                             {new Date(doc.updated_at || doc.created_at).toLocaleDateString('fr-FR')}
                           </td>
-                          <td className="p-4 text-white/60 text-sm hidden lg:table-cell">{doc.size_formatted}</td>
+                          <td className="p-4 text-slate-500 text-sm hidden lg:table-cell">{doc.size_formatted}</td>
                           <td className="p-4">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <button onClick={(e) => e.stopPropagation()} className="p-1.5 rounded-lg hover:bg-white/10">
-                                  <MoreVertical className="w-4 h-4 text-white/40" />
+                                <button onClick={(e) => e.stopPropagation()} className="p-1.5 rounded-lg hover:bg-slate-100">
+                                  <MoreVertical className="w-4 h-4 text-slate-400" />
                                 </button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent className="bg-[#1a1a2e] border-white/10 z-50">
-                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setPreviewDoc(doc); }} className="text-white/80 focus:bg-white/10 focus:text-white">
+                              <DropdownMenuContent className="bg-slate-50 border-slate-200 z-50">
+                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setPreviewDoc(doc); }} className="text-slate-700 focus:bg-slate-100 focus:text-slate-900">
                                   <Eye className="w-4 h-4 mr-2" />
                                   Aperçu
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild className="text-white/80 focus:bg-white/10 focus:text-white">
+                                <DropdownMenuItem asChild className="text-slate-700 focus:bg-slate-100 focus:text-slate-900">
                                   <a href={doc.url} download={doc.name} target="_blank" rel="noopener noreferrer">
                                     <Download className="w-4 h-4 mr-2" />
                                     Télécharger
                                   </a>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openRenameModal("document", doc); }} className="text-white/80 focus:bg-white/10 focus:text-white">
+                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openRenameModal("document", doc); }} className="text-slate-700 focus:bg-slate-100 focus:text-slate-900">
                                   <Pencil className="w-4 h-4 mr-2" />
                                   Renommer
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-white/10" />
+                                <DropdownMenuSeparator className="bg-slate-100" />
                                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete("document", doc.id); }} className="text-red-400 focus:bg-red-500/20 focus:text-red-400">
                                   <Trash2 className="w-4 h-4 mr-2" />
                                   Supprimer
@@ -991,11 +991,11 @@ const DocumentsPage = () => {
 
           {/* Details panel */}
           {detailsPanel && (
-            <aside className="w-80 border-l border-white/10 bg-black/20 flex-shrink-0 overflow-auto">
+            <aside className="w-80 border-l border-slate-200 bg-black/20 flex-shrink-0 overflow-auto">
               {selectedForDetails ? (
                 <div className="p-4">
                   {/* Preview thumbnail */}
-                  <div className="aspect-video bg-white/5 rounded-xl flex items-center justify-center mb-4 overflow-hidden">
+                  <div className="aspect-video bg-white rounded-xl flex items-center justify-center mb-4 overflow-hidden">
                     {selectedForDetails.type === "folder" ? (
                       <Folder className="w-16 h-16 text-yellow-500" />
                     ) : selectedForDetails.file_type === "image" && selectedForDetails.url ? (
@@ -1005,24 +1005,24 @@ const DocumentsPage = () => {
                     )}
                   </div>
 
-                  <h3 className="text-white font-medium mb-4 break-words">{selectedForDetails.name}</h3>
+                  <h3 className="text-slate-900 font-medium mb-4 break-words">{selectedForDetails.name}</h3>
 
                   <div className="space-y-4">
                     {selectedForDetails.type === "document" && (
                       <>
                         <div>
-                          <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Type</p>
-                          <p className="text-white text-sm capitalize">{selectedForDetails.file_type}</p>
+                          <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Type</p>
+                          <p className="text-slate-900 text-sm capitalize">{selectedForDetails.file_type}</p>
                         </div>
                         <div>
-                          <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Taille</p>
-                          <p className="text-white text-sm">{selectedForDetails.size_formatted}</p>
+                          <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Taille</p>
+                          <p className="text-slate-900 text-sm">{selectedForDetails.size_formatted}</p>
                         </div>
                       </>
                     )}
                     <div>
-                      <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Créé le</p>
-                      <p className="text-white text-sm">
+                      <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Créé le</p>
+                      <p className="text-slate-900 text-sm">
                         {new Date(selectedForDetails.created_at).toLocaleDateString('fr-FR', {
                           day: 'numeric',
                           month: 'long',
@@ -1032,8 +1032,8 @@ const DocumentsPage = () => {
                     </div>
                     {selectedForDetails.type === "folder" && (
                       <div>
-                        <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Contenu</p>
-                        <p className="text-white text-sm">{selectedForDetails.file_count || 0} fichiers</p>
+                        <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Contenu</p>
+                        <p className="text-slate-900 text-sm">{selectedForDetails.file_count || 0} fichiers</p>
                       </div>
                     )}
                   </div>
@@ -1071,32 +1071,32 @@ const DocumentsPage = () => {
                             
                             <div className="space-y-2 text-sm">
                               <div>
-                                <span className="text-white/50">Type :</span>
-                                <span className="text-white ml-2 capitalize">{aiAnalysis.document_type}</span>
+                                <span className="text-slate-500">Type :</span>
+                                <span className="text-slate-900 ml-2 capitalize">{aiAnalysis.document_type}</span>
                               </div>
                               <div>
-                                <span className="text-white/50">Nom suggéré :</span>
-                                <p className="text-white text-xs break-words">{aiAnalysis.suggested_name}</p>
+                                <span className="text-slate-500">Nom suggéré :</span>
+                                <p className="text-slate-900 text-xs break-words">{aiAnalysis.suggested_name}</p>
                               </div>
                               <div>
-                                <span className="text-white/50">Dossier :</span>
-                                <span className="text-white ml-2">{aiAnalysis.suggested_folder}</span>
+                                <span className="text-slate-500">Dossier :</span>
+                                <span className="text-slate-900 ml-2">{aiAnalysis.suggested_folder}</span>
                               </div>
                               {aiAnalysis.summary && (
                                 <div>
-                                  <span className="text-white/50">Résumé :</span>
-                                  <p className="text-white/80 text-xs mt-1">{aiAnalysis.summary}</p>
+                                  <span className="text-slate-500">Résumé :</span>
+                                  <p className="text-slate-700 text-xs mt-1">{aiAnalysis.summary}</p>
                                 </div>
                               )}
                               <div className="flex items-center gap-2">
-                                <span className="text-white/50">Confiance :</span>
-                                <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                                <span className="text-slate-500">Confiance :</span>
+                                <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
                                   <div 
                                     className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
                                     style={{ width: `${(aiAnalysis.confidence || 0) * 100}%` }}
                                   />
                                 </div>
-                                <span className="text-white/60 text-xs">{Math.round((aiAnalysis.confidence || 0) * 100)}%</span>
+                                <span className="text-slate-500 text-xs">{Math.round((aiAnalysis.confidence || 0) * 100)}%</span>
                               </div>
                             </div>
                             
@@ -1118,7 +1118,7 @@ const DocumentsPage = () => {
                           <Eye className="w-4 h-4 mr-2" />
                           Aperçu
                         </Button>
-                        <Button asChild variant="outline" className="w-full border-white/20 text-white">
+                        <Button asChild variant="outline" className="w-full border-slate-200 text-slate-900">
                           <a href={selectedForDetails.url} download={selectedForDetails.name}>
                             <Download className="w-4 h-4 mr-2" />
                             Télécharger
@@ -1129,7 +1129,7 @@ const DocumentsPage = () => {
                     <Button
                       onClick={() => openRenameModal(selectedForDetails.type, selectedForDetails)}
                       variant="outline"
-                      className="w-full border-white/20 text-white"
+                      className="w-full border-slate-200 text-slate-900"
                     >
                       <Pencil className="w-4 h-4 mr-2" />
                       Renommer
@@ -1147,8 +1147,8 @@ const DocumentsPage = () => {
               ) : (
                 <div className="flex items-center justify-center h-full text-center p-4">
                   <div>
-                    <Info className="w-12 h-12 mx-auto text-white/20 mb-4" />
-                    <p className="text-white/60 text-sm">Sélectionnez un fichier ou un dossier pour voir ses détails</p>
+                    <Info className="w-12 h-12 mx-auto text-slate-900/20 mb-4" />
+                    <p className="text-slate-500 text-sm">Sélectionnez un fichier ou un dossier pour voir ses détails</p>
                   </div>
                 </div>
               )}
@@ -1157,21 +1157,21 @@ const DocumentsPage = () => {
           
           {/* MoltBot AI Panel */}
           {showAiPanel && (
-            <aside className="w-80 border-l border-white/10 bg-gradient-to-b from-purple-900/20 to-black/20 flex-shrink-0 overflow-auto">
+            <aside className="w-80 border-l border-slate-200 bg-gradient-to-b from-purple-900/20 to-black/20 flex-shrink-0 overflow-auto">
               <div className="p-4">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg">
-                    <Bot className="w-5 h-5 text-white" />
+                    <Bot className="w-5 h-5 text-slate-900" />
                   </div>
                   <div>
-                    <h3 className="text-white font-medium">MoltBot AI</h3>
-                    <p className="text-white/50 text-xs">Classification intelligente</p>
+                    <h3 className="text-slate-900 font-medium">MoltBot AI</h3>
+                    <p className="text-slate-500 text-xs">Classification intelligente</p>
                   </div>
                 </div>
                 
                 {aiSuggestions.length > 0 ? (
                   <div className="space-y-3">
-                    <p className="text-white/60 text-sm">
+                    <p className="text-slate-500 text-sm">
                       {aiSuggestions.filter(s => s.needs_analysis).length} fichier(s) à analyser
                     </p>
                     
@@ -1180,9 +1180,9 @@ const DocumentsPage = () => {
                         {aiSuggestions.map((suggestion) => (
                           <div 
                             key={suggestion.document_id}
-                            className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-purple-500/50 transition-colors"
+                            className="p-3 bg-white rounded-lg border border-slate-200 hover:border-purple-500/50 transition-colors"
                           >
-                            <p className="text-white text-sm truncate mb-2">{suggestion.original_name || 'Sans nom'}</p>
+                            <p className="text-slate-900 text-sm truncate mb-2">{suggestion.original_name || 'Sans nom'}</p>
                             
                             {suggestion.needs_analysis ? (
                               <Button
@@ -1198,12 +1198,12 @@ const DocumentsPage = () => {
                             ) : (
                               <div className="space-y-1 text-xs">
                                 <div className="flex justify-between">
-                                  <span className="text-white/50">Suggéré :</span>
+                                  <span className="text-slate-500">Suggéré :</span>
                                   <span className="text-purple-400">{suggestion.document_type}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-white/50">Dossier :</span>
-                                  <span className="text-white/80">{suggestion.suggested_folder}</span>
+                                  <span className="text-slate-500">Dossier :</span>
+                                  <span className="text-slate-700">{suggestion.suggested_folder}</span>
                                 </div>
                                 <Button
                                   onClick={() => applyAiClassification(suggestion.document_id)}
@@ -1222,7 +1222,7 @@ const DocumentsPage = () => {
                 ) : (
                   <div className="text-center py-8">
                     <Sparkles className="w-12 h-12 mx-auto text-purple-400/50 mb-4" />
-                    <p className="text-white/60 text-sm">Tous vos fichiers sont classés !</p>
+                    <p className="text-slate-500 text-sm">Tous vos fichiers sont classés !</p>
                   </div>
                 )}
               </div>
@@ -1233,7 +1233,7 @@ const DocumentsPage = () => {
 
       {/* New Folder Modal */}
       <Dialog open={newFolderModal} onOpenChange={setNewFolderModal}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white">
+        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900">
           <DialogHeader>
             <DialogTitle>Nouveau dossier</DialogTitle>
           </DialogHeader>
@@ -1241,13 +1241,13 @@ const DocumentsPage = () => {
             placeholder="Dossier sans titre"
             value={newFolderName}
             onChange={(e) => setNewFolderName(e.target.value)}
-            className="bg-white/5 border-white/10 text-white"
+            className="bg-white border-slate-200 text-slate-900"
             onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()}
             autoFocus
           />
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline" className="border-white/20 text-white">Annuler</Button>
+              <Button variant="outline" className="border-slate-200 text-slate-900">Annuler</Button>
             </DialogClose>
             <Button onClick={handleCreateFolder} className="bg-indigo-600">Créer</Button>
           </DialogFooter>
@@ -1256,13 +1256,13 @@ const DocumentsPage = () => {
 
       {/* Upload Modal */}
       <Dialog open={uploadModal} onOpenChange={setUploadModal}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-xl">
+        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-xl">
           <DialogHeader>
             <DialogTitle>Importer des fichiers</DialogTitle>
           </DialogHeader>
           
           <div
-            className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:border-indigo-500/50 transition-colors"
+            className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-indigo-500/50 transition-colors"
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => {
               e.preventDefault();
@@ -1270,13 +1270,13 @@ const DocumentsPage = () => {
               if (files.length) handleUpload(files);
             }}
           >
-            <Upload className="w-12 h-12 mx-auto text-white/30 mb-4" />
-            <p className="text-white/60 mb-2">Glissez-déposez vos fichiers ici</p>
-            <p className="text-white/40 text-sm mb-4">ou</p>
+            <Upload className="w-12 h-12 mx-auto text-slate-400 mb-4" />
+            <p className="text-slate-500 mb-2">Glissez-déposez vos fichiers ici</p>
+            <p className="text-slate-400 text-sm mb-4">ou</p>
             <Button
               onClick={() => document.getElementById('modal-file-input').click()}
               variant="outline"
-              className="border-white/20 text-white"
+              className="border-slate-200 text-slate-900"
               disabled={uploading}
             >
               Parcourir
@@ -1296,9 +1296,9 @@ const DocumentsPage = () => {
           {uploadProgress.length > 0 && (
             <div className="mt-4 space-y-2">
               {uploadProgress.map((file, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
-                  <File className="w-4 h-4 text-white/60" />
-                  <span className="flex-1 text-sm text-white truncate">{file.name}</span>
+                <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                  <File className="w-4 h-4 text-slate-500" />
+                  <span className="flex-1 text-sm text-slate-900 truncate">{file.name}</span>
                   {file.status === "uploading" && (
                     <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
                   )}
@@ -1313,7 +1313,7 @@ const DocumentsPage = () => {
 
       {/* Move Modal */}
       <Dialog open={moveModal} onOpenChange={setMoveModal}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white">
+        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900">
           <DialogHeader>
             <DialogTitle>Déplacer vers</DialogTitle>
           </DialogHeader>
@@ -1323,11 +1323,11 @@ const DocumentsPage = () => {
               <button
                 onClick={() => setMoveTarget(null)}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                  moveTarget === null ? "bg-indigo-600/30 border border-indigo-500/50" : "hover:bg-white/5"
+                  moveTarget === null ? "bg-indigo-600/30 border border-indigo-500/50" : "hover:bg-slate-50"
                 }`}
               >
-                <HardDrive className="w-5 h-5 text-white/60" />
-                <span className="text-white">Mon Drive</span>
+                <HardDrive className="w-5 h-5 text-slate-500" />
+                <span className="text-slate-900">Mon Drive</span>
               </button>
               {renderMoveTree(folderTree)}
             </div>
@@ -1335,7 +1335,7 @@ const DocumentsPage = () => {
           
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline" className="border-white/20 text-white">Annuler</Button>
+              <Button variant="outline" className="border-slate-200 text-slate-900">Annuler</Button>
             </DialogClose>
             <Button onClick={handleMove} className="bg-indigo-600">Déplacer</Button>
           </DialogFooter>
@@ -1344,17 +1344,17 @@ const DocumentsPage = () => {
 
       {/* Preview Modal */}
       <Dialog open={!!previewDoc} onOpenChange={() => setPreviewDoc(null)}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-indigo-400" />
+              <Eye className="w-5 h-5 text-indigo-600" />
               {previewDoc?.name}
             </DialogTitle>
           </DialogHeader>
           
           {previewDoc && (
             <div className="space-y-4">
-              <div className="bg-white/5 rounded-xl overflow-hidden min-h-[200px] flex items-center justify-center">
+              <div className="bg-white rounded-xl overflow-hidden min-h-[200px] flex items-center justify-center">
                 {previewDoc.file_type === "image" && previewDoc.url && (
                   <img src={previewDoc.url} alt={previewDoc.name} className="max-h-[60vh] max-w-full object-contain" />
                 )}
@@ -1374,8 +1374,8 @@ const DocumentsPage = () => {
                 )}
                 {!['image', 'video', 'audio', 'document'].includes(previewDoc.file_type) && !previewDoc.content_type?.includes('pdf') && (
                   <div className="text-center p-8">
-                    <File className="w-16 h-16 mx-auto text-white/30 mb-4" />
-                    <p className="text-white/60">Aperçu non disponible</p>
+                    <File className="w-16 h-16 mx-auto text-slate-400 mb-4" />
+                    <p className="text-slate-500">Aperçu non disponible</p>
                   </div>
                 )}
               </div>
@@ -1387,7 +1387,7 @@ const DocumentsPage = () => {
                     Télécharger
                   </a>
                 </Button>
-                <Button onClick={() => { openRenameModal("document", previewDoc); setPreviewDoc(null); }} variant="outline" className="border-white/20 text-white">
+                <Button onClick={() => { openRenameModal("document", previewDoc); setPreviewDoc(null); }} variant="outline" className="border-slate-200 text-slate-900">
                   <Pencil className="w-4 h-4 mr-2" />
                   Renommer
                 </Button>
@@ -1399,7 +1399,7 @@ const DocumentsPage = () => {
 
       {/* Rename Modal */}
       <Dialog open={renameModal} onOpenChange={(open) => { if (!open) { setRenameModal(false); setRenameItem(null); setNewName(""); } }}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white">
+        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900">
           <DialogHeader>
             <DialogTitle>Renommer</DialogTitle>
           </DialogHeader>
@@ -1407,13 +1407,13 @@ const DocumentsPage = () => {
             placeholder="Nouveau nom"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            className="bg-white/5 border-white/10 text-white"
+            className="bg-white border-slate-200 text-slate-900"
             onKeyDown={(e) => e.key === "Enter" && handleRename()}
             autoFocus
           />
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline" className="border-white/20 text-white" disabled={renaming}>Annuler</Button>
+              <Button variant="outline" className="border-slate-200 text-slate-900" disabled={renaming}>Annuler</Button>
             </DialogClose>
             <Button onClick={handleRename} className="bg-indigo-600" disabled={renaming || !newName.trim()}>
               {renaming ? "..." : "Renommer"}

@@ -106,7 +106,7 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
       if (variance > 0) return "text-green-600"; // Above target
       if (variance < 0) return "text-red-600"; // Below target
     }
-    return "text-white/60";
+    return "text-slate-500";
   };
 
   const allCategories = [...getAllCategories("expense"), ...getAllCategories("income")];
@@ -114,7 +114,7 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
       </div>
     );
   }
@@ -124,8 +124,8 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
       {/* Header with actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-white">Budget prévisionnel</h3>
-          <p className="text-sm text-white/60 hidden sm:block">Comparez vos prévisions avec le réel</p>
+          <h3 className="text-lg font-semibold text-slate-900">Budget prévisionnel</h3>
+          <p className="text-sm text-slate-500 hidden sm:block">Comparez vos prévisions avec le réel</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <Button 
@@ -157,16 +157,16 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
       {/* Summary Cards */}
       {comparison && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <Card className="bg-white backdrop-blur-xl border-slate-200">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-white/60">Revenus prévus</p>
+                  <p className="text-sm text-slate-500">Revenus prévus</p>
                   <p className="text-2xl font-bold text-green-600">{formatCurrency(comparison.totals.planned_income)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-white/60">Réel</p>
-                  <p className="text-lg font-semibold text-white">{formatCurrency(comparison.totals.actual_income)}</p>
+                  <p className="text-sm text-slate-500">Réel</p>
+                  <p className="text-lg font-semibold text-slate-900">{formatCurrency(comparison.totals.actual_income)}</p>
                 </div>
               </div>
               <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -178,16 +178,16 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
             </CardContent>
           </Card>
           
-          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <Card className="bg-white backdrop-blur-xl border-slate-200">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-white/60">Dépenses prévues</p>
+                  <p className="text-sm text-slate-500">Dépenses prévues</p>
                   <p className="text-2xl font-bold text-red-600">{formatCurrency(comparison.totals.planned_expense)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-white/60">Réel</p>
-                  <p className="text-lg font-semibold text-white">{formatCurrency(comparison.totals.actual_expense)}</p>
+                  <p className="text-sm text-slate-500">Réel</p>
+                  <p className="text-lg font-semibold text-slate-900">{formatCurrency(comparison.totals.actual_expense)}</p>
                 </div>
               </div>
               <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -199,17 +199,17 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
             </CardContent>
           </Card>
           
-          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <Card className="bg-white backdrop-blur-xl border-slate-200">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-white/60">Solde prévu</p>
+                  <p className="text-sm text-slate-500">Solde prévu</p>
                   <p className={`text-2xl font-bold ${comparison.totals.planned_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {formatCurrency(comparison.totals.planned_balance)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-white/60">Solde réel</p>
+                  <p className="text-sm text-slate-500">Solde réel</p>
                   <p className={`text-lg font-semibold ${comparison.totals.actual_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {formatCurrency(comparison.totals.actual_balance)}
                   </p>
@@ -246,13 +246,13 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
       )}
 
       {/* Comparison Table */}
-      <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+      <Card className="bg-white backdrop-blur-xl border-slate-200">
         <CardHeader>
-          <CardTitle className="text-white text-lg">Prévu vs Réel par catégorie</CardTitle>
+          <CardTitle className="text-slate-900 text-lg">Prévu vs Réel par catégorie</CardTitle>
         </CardHeader>
         <CardContent>
           {forecasts.length === 0 ? (
-            <div className="text-center py-8 text-white/60">
+            <div className="text-center py-8 text-slate-500">
               <Target className="w-12 h-12 mx-auto mb-2 opacity-30" />
               <p>Aucune prévision pour ce mois</p>
               <p className="text-sm mt-1">Ajoutez des prévisions budgétaires pour suivre vos objectifs</p>
@@ -261,13 +261,13 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-left py-3 px-2 text-white/60 font-medium text-sm">Catégorie</th>
-                    <th className="text-left py-3 px-2 text-white/60 font-medium text-sm">Type</th>
-                    <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Prévu</th>
-                    <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Réel</th>
-                    <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Écart</th>
-                    <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">%</th>
+                  <tr className="border-b border-slate-200">
+                    <th className="text-left py-3 px-2 text-slate-500 font-medium text-sm">Catégorie</th>
+                    <th className="text-left py-3 px-2 text-slate-500 font-medium text-sm">Type</th>
+                    <th className="text-right py-3 px-2 text-slate-500 font-medium text-sm">Prévu</th>
+                    <th className="text-right py-3 px-2 text-slate-500 font-medium text-sm">Réel</th>
+                    <th className="text-right py-3 px-2 text-slate-500 font-medium text-sm">Écart</th>
+                    <th className="text-right py-3 px-2 text-slate-500 font-medium text-sm">%</th>
                     <th className="w-10"></th>
                   </tr>
                 </thead>
@@ -275,11 +275,11 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
                   {comparison?.comparison?.map((item, idx) => {
                     const cat = getCategoryById(item.category_id);
                     return (
-                      <tr key={idx} className="border-b border-white/10 hover:bg-white/5">
+                      <tr key={idx} className="border-b border-slate-200 hover:bg-slate-50">
                         <td className="py-3 px-2">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat?.color || "#666" }} />
-                            <span className="text-white">{cat?.name || item.category_id}</span>
+                            <span className="text-slate-900">{cat?.name || item.category_id}</span>
                           </div>
                         </td>
                         <td className="py-3 px-2">
@@ -287,8 +287,8 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
                             {item.type === "income" ? "Revenu" : "Dépense"}
                           </Badge>
                         </td>
-                        <td className="py-3 px-2 text-right font-mono text-white">{formatCurrency(item.planned)}</td>
-                        <td className="py-3 px-2 text-right font-mono text-white">{formatCurrency(item.actual)}</td>
+                        <td className="py-3 px-2 text-right font-mono text-slate-900">{formatCurrency(item.planned)}</td>
+                        <td className="py-3 px-2 text-right font-mono text-slate-900">{formatCurrency(item.actual)}</td>
                         <td className={`py-3 px-2 text-right font-mono ${getVarianceColor(item.variance, item.type)}`}>
                           {item.variance > 0 ? "+" : ""}{formatCurrency(item.variance)}
                         </td>
@@ -320,19 +320,19 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
 
       {/* Add Forecast Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-white">Nouvelle prévision</DialogTitle>
+            <DialogTitle className="text-slate-900">Nouvelle prévision</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Type</Label>
               <Select value={form.type} onValueChange={(v) => setForm({...form, type: v, category_id: ""})}>
-                <SelectTrigger className="bg-white/5 border-white/10">
+                <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e]">
+                <SelectContent className="bg-slate-50">
                   <SelectItem value="expense">Dépense</SelectItem>
                   <SelectItem value="income">Revenu</SelectItem>
                 </SelectContent>
@@ -342,10 +342,10 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
             <div className="space-y-2">
               <Label>Catégorie *</Label>
               <Select value={form.category_id} onValueChange={(v) => setForm({...form, category_id: v})}>
-                <SelectTrigger className="bg-white/5 border-white/10">
+                <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue placeholder="Sélectionner une catégorie" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e]">
+                <SelectContent className="bg-slate-50">
                   {getAllCategories(form.type).map(cat => (
                     <SelectItem key={cat.id} value={cat.id}>
                       <div className="flex items-center gap-2">
@@ -365,7 +365,7 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
                 value={form.planned_amount}
                 onChange={(e) => setForm({...form, planned_amount: e.target.value})}
                 placeholder="0.00"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
 
@@ -375,7 +375,7 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
                 value={form.description}
                 onChange={(e) => setForm({...form, description: e.target.value})}
                 placeholder="Ex: Budget marketing mensuel"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
           </div>
@@ -391,20 +391,20 @@ const ForecastTab = ({ selectedMonth, categories, getCategoryById, getAllCategor
 
       {/* Copy Dialog */}
       <Dialog open={copyDialogOpen} onOpenChange={setCopyDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-sm">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-white">Copier les prévisions</DialogTitle>
+            <DialogTitle className="text-slate-900">Copier les prévisions</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
-            <p className="text-sm text-white/60">
+            <p className="text-sm text-slate-500">
               Copier les prévisions de {selectedMonth} vers :
             </p>
             <Input
               type="month"
               value={targetMonth}
               onChange={(e) => setTargetMonth(e.target.value)}
-              className="bg-white/5 border-white/10"
+              className="bg-white border-slate-200"
             />
           </div>
 
@@ -447,7 +447,7 @@ const CashflowTab = ({ formatCurrency }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
       </div>
     );
   }
@@ -459,21 +459,21 @@ const CashflowTab = ({ formatCurrency }) => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-white">Projection de trésorerie</h3>
-          <p className="text-sm text-white/60">Visualisez l'évolution de votre cashflow sur plusieurs mois</p>
+          <h3 className="text-lg font-semibold text-slate-900">Projection de trésorerie</h3>
+          <p className="text-sm text-slate-500">Visualisez l'évolution de votre cashflow sur plusieurs mois</p>
         </div>
         <div className="flex gap-2">
           <Input
             type="month"
             value={startMonth}
             onChange={(e) => setStartMonth(e.target.value)}
-            className="bg-white/5 border-white/10 w-40"
+            className="bg-white border-slate-200 w-40"
           />
           <Select value={monthsToShow.toString()} onValueChange={(v) => setMonthsToShow(parseInt(v))}>
-            <SelectTrigger className="bg-white/5 border-white/10 w-32">
+            <SelectTrigger className="bg-white border-slate-200 w-32">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#1a1a2e]">
+            <SelectContent className="bg-slate-50">
               <SelectItem value="3">3 mois</SelectItem>
               <SelectItem value="6">6 mois</SelectItem>
               <SelectItem value="12">12 mois</SelectItem>
@@ -485,29 +485,29 @@ const CashflowTab = ({ formatCurrency }) => {
       {/* Summary Cards */}
       {cashflowData?.summary && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <Card className="bg-white backdrop-blur-xl border-slate-200">
             <CardContent className="pt-6">
-              <p className="text-sm text-white/60">Revenus totaux</p>
+              <p className="text-sm text-slate-500">Revenus totaux</p>
               <p className="text-2xl font-bold text-green-600">{formatCurrency(cashflowData.summary.total_income)}</p>
             </CardContent>
           </Card>
-          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <Card className="bg-white backdrop-blur-xl border-slate-200">
             <CardContent className="pt-6">
-              <p className="text-sm text-white/60">Dépenses totales</p>
+              <p className="text-sm text-slate-500">Dépenses totales</p>
               <p className="text-2xl font-bold text-red-600">{formatCurrency(cashflowData.summary.total_expense)}</p>
             </CardContent>
           </Card>
-          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <Card className="bg-white backdrop-blur-xl border-slate-200">
             <CardContent className="pt-6">
-              <p className="text-sm text-white/60">Flux net moyen/mois</p>
+              <p className="text-sm text-slate-500">Flux net moyen/mois</p>
               <p className={`text-2xl font-bold ${cashflowData.summary.avg_monthly_flow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {formatCurrency(cashflowData.summary.avg_monthly_flow)}
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <Card className="bg-white backdrop-blur-xl border-slate-200">
             <CardContent className="pt-6">
-              <p className="text-sm text-white/60">Solde final projeté</p>
+              <p className="text-sm text-slate-500">Solde final projeté</p>
               <p className={`text-2xl font-bold ${cashflowData.summary.ending_balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {formatCurrency(cashflowData.summary.ending_balance)}
               </p>
@@ -536,10 +536,10 @@ const CashflowTab = ({ formatCurrency }) => {
       )}
 
       {/* Cashflow Chart */}
-      <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+      <Card className="bg-white backdrop-blur-xl border-slate-200">
         <CardHeader>
-          <CardTitle className="text-white text-lg flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-indigo-400" />
+          <CardTitle className="text-slate-900 text-lg flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-indigo-600" />
             Évolution du cashflow
           </CardTitle>
         </CardHeader>
@@ -582,27 +582,27 @@ const CashflowTab = ({ formatCurrency }) => {
       </Card>
 
       {/* Monthly Details Table */}
-      <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+      <Card className="bg-white backdrop-blur-xl border-slate-200">
         <CardHeader>
-          <CardTitle className="text-white text-lg">Détails mensuels</CardTitle>
+          <CardTitle className="text-slate-900 text-lg">Détails mensuels</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-2 text-white/60 font-medium text-sm">Mois</th>
-                  <th className="text-center py-3 px-2 text-white/60 font-medium text-sm">Type</th>
-                  <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Revenus</th>
-                  <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Dépenses</th>
-                  <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Flux net</th>
-                  <th className="text-right py-3 px-2 text-white/60 font-medium text-sm">Solde cumulé</th>
+                <tr className="border-b border-slate-200">
+                  <th className="text-left py-3 px-2 text-slate-500 font-medium text-sm">Mois</th>
+                  <th className="text-center py-3 px-2 text-slate-500 font-medium text-sm">Type</th>
+                  <th className="text-right py-3 px-2 text-slate-500 font-medium text-sm">Revenus</th>
+                  <th className="text-right py-3 px-2 text-slate-500 font-medium text-sm">Dépenses</th>
+                  <th className="text-right py-3 px-2 text-slate-500 font-medium text-sm">Flux net</th>
+                  <th className="text-right py-3 px-2 text-slate-500 font-medium text-sm">Solde cumulé</th>
                 </tr>
               </thead>
               <tbody>
                 {chartData.map((row, idx) => (
-                  <tr key={idx} className="border-b border-white/10 hover:bg-white/5">
-                    <td className="py-3 px-2 text-white font-medium">{row.label}</td>
+                  <tr key={idx} className="border-b border-slate-200 hover:bg-slate-50">
+                    <td className="py-3 px-2 text-slate-900 font-medium">{row.label}</td>
                     <td className="py-3 px-2 text-center">
                       <Badge variant="outline" className={row.data_type === "forecast" ? "text-blue-600 border-blue-200" : "text-green-600 border-green-200"}>
                         {row.data_type === "forecast" ? "Prévu" : "Réel"}
@@ -613,7 +613,7 @@ const CashflowTab = ({ formatCurrency }) => {
                     <td className={`py-3 px-2 text-right font-mono ${row.net_flow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {row.net_flow >= 0 ? "+" : ""}{formatCurrency(row.net_flow)}
                     </td>
-                    <td className={`py-3 px-2 text-right font-mono font-bold ${row.cumulative_balance >= 0 ? 'text-white' : 'text-red-600'}`}>
+                    <td className={`py-3 px-2 text-right font-mono font-bold ${row.cumulative_balance >= 0 ? 'text-slate-900' : 'text-red-600'}`}>
                       {formatCurrency(row.cumulative_balance)}
                     </td>
                   </tr>
@@ -736,8 +736,8 @@ const QontoTab = ({ formatCurrency }) => {
   if (loading || connecting) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
-        <span className="text-white/60">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        <span className="text-slate-500">
           {connecting ? "Connexion à Qonto en cours..." : "Chargement..."}
         </span>
       </div>
@@ -748,32 +748,32 @@ const QontoTab = ({ formatCurrency }) => {
   if (!status?.connected) {
     return (
       <div className="space-y-6">
-        <Card className="bg-gradient-to-br from-[#1a1a2e]/80 to-[#16213e]/80 backdrop-blur-xl border-white/10">
+        <Card className="bg-gradient-to-br from-[#1a1a2e]/80 to-[#16213e]/80 backdrop-blur-xl border-slate-200">
           <CardContent className="pt-8 pb-8">
             <div className="flex flex-col items-center text-center space-y-6">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                <Building2 className="w-10 h-10 text-white" />
+                <Building2 className="w-10 h-10 text-slate-900" />
               </div>
               
               <div className="space-y-2">
-                <h3 className="text-2xl font-bold text-white">Connectez votre compte Qonto</h3>
-                <p className="text-white/60 max-w-md">
+                <h3 className="text-2xl font-bold text-slate-900">Connectez votre compte Qonto</h3>
+                <p className="text-slate-500 max-w-md">
                   Synchronisez automatiquement vos transactions bancaires et suivez votre trésorerie en temps réel.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl mt-4">
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-200">
                   <RefreshCw className="w-5 h-5 text-green-400" />
-                  <span className="text-white/80 text-sm">Sync automatique</span>
+                  <span className="text-slate-700 text-sm">Sync automatique</span>
                 </div>
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-200">
                   <TrendingUp className="w-5 h-5 text-blue-400" />
-                  <span className="text-white/80 text-sm">Analyse des flux</span>
+                  <span className="text-slate-700 text-sm">Analyse des flux</span>
                 </div>
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-200">
                   <Shield className="w-5 h-5 text-purple-400" />
-                  <span className="text-white/80 text-sm">Connexion sécurisée</span>
+                  <span className="text-slate-700 text-sm">Connexion sécurisée</span>
                 </div>
               </div>
 
@@ -795,7 +795,7 @@ const QontoTab = ({ formatCurrency }) => {
                 )}
               </Button>
 
-              <p className="text-white/40 text-xs">
+              <p className="text-slate-400 text-xs">
                 Vous serez redirigé vers Qonto pour autoriser l'accès
               </p>
             </div>
@@ -823,7 +823,7 @@ const QontoTab = ({ formatCurrency }) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-white">
+          <span className="text-slate-900">
             Connecté à <span className="font-semibold">{status.organization}</span>
           </span>
         </div>
@@ -832,7 +832,7 @@ const QontoTab = ({ formatCurrency }) => {
             onClick={handleSync} 
             disabled={syncing}
             variant="outline"
-            className="border-white/20 text-white"
+            className="border-slate-200 text-slate-900"
           >
             {syncing ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -865,38 +865,38 @@ const QontoTab = ({ formatCurrency }) => {
 
       {/* Balance Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-indigo-600/20 to-purple-600/20 backdrop-blur-xl border-white/10">
+        <Card className="bg-gradient-to-br from-indigo-600/20 to-purple-600/20 backdrop-blur-xl border-slate-200">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/60 text-sm">Solde total</p>
-                <p className="text-3xl font-bold text-white">{formatCurrency(totalBalance)}</p>
+                <p className="text-slate-500 text-sm">Solde total</p>
+                <p className="text-3xl font-bold text-slate-900">{formatCurrency(totalBalance)}</p>
               </div>
-              <Wallet className="w-10 h-10 text-indigo-400" />
+              <Wallet className="w-10 h-10 text-indigo-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/60 text-sm">Revenus (30j)</p>
+                <p className="text-slate-500 text-sm">Revenus (30j)</p>
                 <p className="text-2xl font-bold text-green-400">+{formatCurrency(stats?.income?.total || 0)}</p>
-                <p className="text-white/40 text-xs">{stats?.income?.count || 0} transactions</p>
+                <p className="text-slate-400 text-xs">{stats?.income?.count || 0} transactions</p>
               </div>
               <ArrowUpRight className="w-8 h-8 text-green-400" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/60 text-sm">Dépenses (30j)</p>
+                <p className="text-slate-500 text-sm">Dépenses (30j)</p>
                 <p className="text-2xl font-bold text-red-400">-{formatCurrency(stats?.expenses?.total || 0)}</p>
-                <p className="text-white/40 text-xs">{stats?.expenses?.count || 0} transactions</p>
+                <p className="text-slate-400 text-xs">{stats?.expenses?.count || 0} transactions</p>
               </div>
               <ArrowDownRight className="w-8 h-8 text-red-400" />
             </div>
@@ -906,24 +906,24 @@ const QontoTab = ({ formatCurrency }) => {
 
       {/* Bank Accounts */}
       {accounts.length > 0 && (
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardHeader>
-            <CardTitle className="text-white text-lg flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-indigo-400" />
+            <CardTitle className="text-slate-900 text-lg flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-indigo-600" />
               Comptes bancaires
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {accounts.map((account, idx) => (
-                <div key={idx} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                <div key={idx} className="flex items-center justify-between p-4 bg-white rounded-lg">
                   <div>
-                    <p className="text-white font-medium">{account.name || account.slug}</p>
-                    <p className="text-white/40 text-sm font-mono">{account.iban}</p>
+                    <p className="text-slate-900 font-medium">{account.name || account.slug}</p>
+                    <p className="text-slate-400 text-sm font-mono">{account.iban}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-bold text-white">{formatCurrency(account.balance)}</p>
-                    <p className="text-white/40 text-xs">{account.currency}</p>
+                    <p className="text-xl font-bold text-slate-900">{formatCurrency(account.balance)}</p>
+                    <p className="text-slate-400 text-xs">{account.currency}</p>
                   </div>
                 </div>
               ))}
@@ -933,16 +933,16 @@ const QontoTab = ({ formatCurrency }) => {
       )}
 
       {/* Recent Transactions */}
-      <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+      <Card className="bg-white backdrop-blur-xl border-slate-200">
         <CardHeader>
-          <CardTitle className="text-white text-lg flex items-center gap-2">
-            <Receipt className="w-5 h-5 text-indigo-400" />
+          <CardTitle className="text-slate-900 text-lg flex items-center gap-2">
+            <Receipt className="w-5 h-5 text-indigo-600" />
             Dernières transactions
           </CardTitle>
         </CardHeader>
         <CardContent>
           {transactions.length === 0 ? (
-            <div className="text-center py-8 text-white/40">
+            <div className="text-center py-8 text-slate-400">
               <Receipt className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p>Aucune transaction synchronisée</p>
               <p className="text-sm mt-1">Cliquez sur "Synchroniser" pour récupérer vos transactions</p>
@@ -952,7 +952,7 @@ const QontoTab = ({ formatCurrency }) => {
               {transactions.map((tx, idx) => (
                 <div 
                   key={idx}
-                  className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                  className="flex items-center justify-between p-3 bg-white rounded-lg hover:bg-slate-100 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -965,8 +965,8 @@ const QontoTab = ({ formatCurrency }) => {
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-white font-medium truncate">{tx.label}</p>
-                      <p className="text-white/40 text-xs">
+                      <p className="text-slate-900 font-medium truncate">{tx.label}</p>
+                      <p className="text-slate-400 text-xs">
                         {tx.emitted_at ? new Date(tx.emitted_at).toLocaleDateString('fr-FR') : '-'}
                         {tx.operation_type && ` • ${tx.operation_type}`}
                       </p>
@@ -979,7 +979,7 @@ const QontoTab = ({ formatCurrency }) => {
                     <Badge variant="outline" className={`text-xs ${
                       tx.status === "completed" ? "text-green-400 border-green-400/30" :
                       tx.status === "pending" ? "text-amber-400 border-amber-400/30" :
-                      "text-white/40 border-white/20"
+                      "text-slate-400 border-slate-200"
                     }`}>
                       {tx.status === "completed" ? "Complété" : 
                        tx.status === "pending" ? "En attente" : tx.status}
@@ -1341,33 +1341,33 @@ const BudgetPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <div data-testid="budget-page" className="p-3 sm:p-4 md:p-6 bg-white/5 min-h-screen overflow-x-hidden">
+    <div data-testid="budget-page" className="p-3 sm:p-4 md:p-6 bg-white min-h-screen overflow-x-hidden">
       {/* Header */}
       <div className="flex flex-col gap-3 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Budget & Trésorerie</h1>
-          <p className="text-xs sm:text-sm text-white/60">Pilotage financier</p>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900">Budget & Trésorerie</h1>
+          <p className="text-xs sm:text-sm text-slate-500">Pilotage financier</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[120px] sm:w-[160px] bg-white/5 backdrop-blur-xl border-white/10 text-xs sm:text-sm h-8 sm:h-9">
+            <SelectTrigger className="w-[120px] sm:w-[160px] bg-white backdrop-blur-xl border-slate-200 text-xs sm:text-sm h-8 sm:h-9">
               <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#1a1a2e] max-h-60">
+            <SelectContent className="bg-slate-50 max-h-60">
               {months.map(m => (
                 <SelectItem key={m.value} value={m.value} className="text-xs sm:text-sm">{m.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           
-          <Button onClick={() => setImportDialogOpen(true)} variant="outline" size="sm" className="border-indigo-500/50 text-indigo-400 h-8 sm:h-9 px-2 sm:px-3">
+          <Button onClick={() => setImportDialogOpen(true)} variant="outline" size="sm" className="border-indigo-500/50 text-indigo-600 h-8 sm:h-9 px-2 sm:px-3">
             <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
           
@@ -1379,42 +1379,42 @@ const BudgetPage = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-4 sm:mb-6">
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="p-2 sm:p-3">
             <div className="flex items-center gap-2">
               <div className="p-1.5 sm:p-2 rounded-lg bg-green-500/20 flex-shrink-0">
                 <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] sm:text-xs text-white/60">Revenus</p>
+                <p className="text-[10px] sm:text-xs text-slate-500">Revenus</p>
                 <p className="text-sm sm:text-lg font-bold text-green-400 truncate">{formatCurrency(summary.total_credit || 0)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="p-2 sm:p-3">
             <div className="flex items-center gap-2">
               <div className="p-1.5 sm:p-2 rounded-lg bg-red-500/20 flex-shrink-0">
                 <ArrowDownRight className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] sm:text-xs text-white/60">Dépenses</p>
+                <p className="text-[10px] sm:text-xs text-slate-500">Dépenses</p>
                 <p className="text-sm sm:text-lg font-bold text-red-400 truncate">{formatCurrency(summary.total_debit || 0)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="p-2 sm:p-3">
             <div className="flex items-center gap-2">
               <div className={`p-1.5 sm:p-2 rounded-lg flex-shrink-0 ${(summary.balance || 0) >= 0 ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
                 <Wallet className={`w-3 h-3 sm:w-4 sm:h-4 ${(summary.balance || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] sm:text-xs text-white/60">Résultat</p>
+                <p className="text-[10px] sm:text-xs text-slate-500">Résultat</p>
                 <p className={`text-sm sm:text-lg font-bold truncate ${(summary.balance || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   {formatCurrency(summary.balance || 0)}
                 </p>
@@ -1423,14 +1423,14 @@ const BudgetPage = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+        <Card className="bg-white backdrop-blur-xl border-slate-200">
           <CardContent className="p-2 sm:p-3">
             <div className="flex items-center gap-2">
               <div className="p-1.5 sm:p-2 rounded-lg bg-orange-500/20 flex-shrink-0">
                 <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 text-orange-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] sm:text-xs text-white/60">Non catég.</p>
+                <p className="text-[10px] sm:text-xs text-slate-500">Non catég.</p>
                 <p className="text-sm sm:text-lg font-bold text-orange-400">{summary.uncategorized_count || 0}</p>
               </div>
             </div>
@@ -1441,7 +1441,7 @@ const BudgetPage = () => {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6 pb-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-0.5 sm:p-1 inline-flex min-w-max h-auto gap-0.5 whitespace-nowrap">
+          <TabsList className="bg-white backdrop-blur-xl border border-slate-200 p-0.5 sm:p-1 inline-flex min-w-max h-auto gap-0.5 whitespace-nowrap">
             <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
               <TrendingUp className="w-3 h-3 mr-1" /> Vue
             </TabsTrigger>
@@ -1470,10 +1470,10 @@ const BudgetPage = () => {
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Monthly Evolution Chart */}
-            <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+            <Card className="bg-white backdrop-blur-xl border-slate-200">
               <CardHeader className="p-4">
-                <CardTitle className="text-white text-base sm:text-lg flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
+                <CardTitle className="text-slate-900 text-base sm:text-lg flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                   Évolution {selectedYear}
                 </CardTitle>
               </CardHeader>
@@ -1491,10 +1491,10 @@ const BudgetPage = () => {
                           <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                       <XAxis dataKey="name" tick={{ fill: '#ffffff80', fontSize: 10 }} />
                       <YAxis tick={{ fill: '#ffffff80', fontSize: 10 }} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
-                      <Tooltip formatter={(value) => formatCurrency(value)} contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }} />
+                      <Tooltip formatter={(value) => formatCurrency(value)} contentStyle={{ backgroundColor: '#1a1a2e', border: '1px solid #E2E8F0', borderRadius: '8px', color: '#fff' }} />
                       <Legend wrapperStyle={{ fontSize: '12px' }} />
                     <Area type="monotone" dataKey="income" name="Revenus" stroke="#10B981" fillOpacity={1} fill="url(#colorIncome)" />
                     <Area type="monotone" dataKey="expense" name="Dépenses" stroke="#EF4444" fillOpacity={1} fill="url(#colorExpense)" />
@@ -1505,10 +1505,10 @@ const BudgetPage = () => {
             </Card>
 
             {/* Expense Breakdown Pie */}
-            <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+            <Card className="bg-white backdrop-blur-xl border-slate-200">
               <CardHeader>
-                <CardTitle className="text-white text-lg flex items-center gap-2">
-                  <PiggyBank className="w-5 h-5 text-indigo-400" />
+                <CardTitle className="text-slate-900 text-lg flex items-center gap-2">
+                  <PiggyBank className="w-5 h-5 text-indigo-600" />
                   Répartition des dépenses
                 </CardTitle>
               </CardHeader>
@@ -1535,7 +1535,7 @@ const BudgetPage = () => {
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex items-center justify-center h-[280px] text-white/60">
+                  <div className="flex items-center justify-center h-[280px] text-slate-500">
                     <div className="text-center">
                       <PiggyBank className="w-12 h-12 mx-auto mb-2 opacity-30" />
                       <p>Aucune dépense ce mois</p>
@@ -1547,9 +1547,9 @@ const BudgetPage = () => {
           </div>
 
           {/* Top Expense Categories */}
-          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <Card className="bg-white backdrop-blur-xl border-slate-200">
             <CardHeader>
-              <CardTitle className="text-white text-lg">Top dépenses par catégorie</CardTitle>
+              <CardTitle className="text-slate-900 text-lg">Top dépenses par catégorie</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -1557,7 +1557,7 @@ const BudgetPage = () => {
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-4 h-4 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="text-white">{item.name}</span>
+                      <span className="text-slate-900">{item.name}</span>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="w-32 h-2 bg-[#E5E5E5] rounded-full overflow-hidden">
@@ -1569,12 +1569,12 @@ const BudgetPage = () => {
                           }}
                         />
                       </div>
-                      <span className="font-mono font-bold text-white w-24 text-right">{formatCurrency(item.value)}</span>
+                      <span className="font-mono font-bold text-slate-900 w-24 text-right">{formatCurrency(item.value)}</span>
                     </div>
                   </div>
                 ))}
                 {expensePieData.length === 0 && (
-                  <p className="text-center text-white/60 py-4">Aucune donnée disponible</p>
+                  <p className="text-center text-slate-500 py-4">Aucune donnée disponible</p>
                 )}
               </div>
             </CardContent>
@@ -1586,31 +1586,31 @@ const BudgetPage = () => {
           {/* Filters */}
           <div className="flex flex-wrap gap-3">
             <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <Input
                 placeholder="Rechercher..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/5 backdrop-blur-xl border-white/10"
+                className="pl-10 bg-white backdrop-blur-xl border-slate-200"
               />
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-[140px] bg-white/5 backdrop-blur-xl border-white/10">
+              <SelectTrigger className="w-[140px] bg-white backdrop-blur-xl border-slate-200">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#1a1a2e]">
+              <SelectContent className="bg-slate-50">
                 <SelectItem value="all">Tout</SelectItem>
                 <SelectItem value="credit">Revenus</SelectItem>
                 <SelectItem value="debit">Dépenses</SelectItem>
               </SelectContent>
             </Select>
             <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-[160px] bg-white/5 backdrop-blur-xl border-white/10">
+              <SelectTrigger className="w-[160px] bg-white backdrop-blur-xl border-slate-200">
                 <Tag className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Catégorie" />
               </SelectTrigger>
-              <SelectContent className="bg-[#1a1a2e]">
+              <SelectContent className="bg-slate-50">
                 <SelectItem value="all">Toutes</SelectItem>
                 <SelectItem value="uncategorized">Non catégorisé</SelectItem>
                 {getAllCategories().map(cat => (
@@ -1626,10 +1626,10 @@ const BudgetPage = () => {
           </div>
 
           {/* Transactions List */}
-          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <Card className="bg-white backdrop-blur-xl border-slate-200">
             <CardContent className="p-0">
               {filteredTransactions.length === 0 ? (
-                <div className="text-center py-12 text-white/60">
+                <div className="text-center py-12 text-slate-500">
                   <Receipt className="w-12 h-12 mx-auto mb-2 opacity-30" />
                   <p>Aucune transaction</p>
                   <Button onClick={() => setImportDialogOpen(true)} variant="outline" className="mt-4">
@@ -1643,7 +1643,7 @@ const BudgetPage = () => {
                     const isCredit = transaction.type === "credit";
                     
                     return (
-                      <div key={transaction.id} className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
+                      <div key={transaction.id} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${isCredit ? 'bg-green-100' : 'bg-red-100'}`}>
                             {isCredit ? (
@@ -1653,7 +1653,7 @@ const BudgetPage = () => {
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="font-medium text-white truncate">{transaction.label}</p>
+                            <p className="font-medium text-slate-900 truncate">{transaction.label}</p>
                             <div className="flex items-center gap-2 flex-wrap">
                               {category ? (
                                 <Badge variant="outline" className="text-xs" style={{ borderColor: category.color, color: category.color }}>
@@ -1665,7 +1665,7 @@ const BudgetPage = () => {
                                     <AlertCircle className="w-3 h-3 mr-1" />
                                     <span>Catégoriser</span>
                                   </SelectTrigger>
-                                  <SelectContent className="bg-[#1a1a2e]">
+                                  <SelectContent className="bg-slate-50">
                                     {getAllCategories(isCredit ? "income" : "expense").map(cat => (
                                       <SelectItem key={cat.id} value={cat.id}>
                                         <div className="flex items-center gap-2">
@@ -1677,7 +1677,7 @@ const BudgetPage = () => {
                                   </SelectContent>
                                 </Select>
                               )}
-                              <span className="text-xs text-white/60">{formatDate(transaction.date)}</span>
+                              <span className="text-xs text-slate-500">{formatDate(transaction.date)}</span>
                             </div>
                           </div>
                         </div>
@@ -1691,7 +1691,7 @@ const BudgetPage = () => {
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
+                            <DropdownMenuContent className="bg-slate-50 border-slate-200">
                               <DropdownMenuItem onClick={() => openEditTransaction(transaction)}>
                                 <Edit className="w-4 h-4 mr-2" /> Modifier
                               </DropdownMenuItem>
@@ -1721,9 +1721,9 @@ const BudgetPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Income Categories */}
-            <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+            <Card className="bg-white backdrop-blur-xl border-slate-200">
               <CardHeader className="pb-2">
-                <CardTitle className="text-white text-lg flex items-center gap-2">
+                <CardTitle className="text-slate-900 text-lg flex items-center gap-2">
                   <ArrowUpRight className="w-5 h-5 text-green-600" />
                   Revenus
                 </CardTitle>
@@ -1731,10 +1731,10 @@ const BudgetPage = () => {
               <CardContent>
                 <div className="space-y-2">
                   {getAllCategories("income").map(cat => (
-                    <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
+                    <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200">
                       <div className="flex items-center gap-3">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cat.color }} />
-                        <span className="text-white">{cat.name}</span>
+                        <span className="text-slate-900">{cat.name}</span>
                       </div>
                       {!cat.id.startsWith("default_") && (
                         <div className="flex gap-1">
@@ -1753,9 +1753,9 @@ const BudgetPage = () => {
             </Card>
 
             {/* Expense Categories */}
-            <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+            <Card className="bg-white backdrop-blur-xl border-slate-200">
               <CardHeader className="pb-2">
-                <CardTitle className="text-white text-lg flex items-center gap-2">
+                <CardTitle className="text-slate-900 text-lg flex items-center gap-2">
                   <ArrowDownRight className="w-5 h-5 text-red-600" />
                   Dépenses
                 </CardTitle>
@@ -1763,10 +1763,10 @@ const BudgetPage = () => {
               <CardContent>
                 <div className="space-y-2">
                   {getAllCategories("expense").map(cat => (
-                    <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
+                    <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200">
                       <div className="flex items-center gap-3">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cat.color }} />
-                        <span className="text-white">{cat.name}</span>
+                        <span className="text-slate-900">{cat.name}</span>
                       </div>
                       {!cat.id.startsWith("default_") && (
                         <div className="flex gap-1">
@@ -1788,17 +1788,17 @@ const BudgetPage = () => {
 
         {/* Rules Tab */}
         <TabsContent value="rules" className="space-y-4">
-          <Card className="bg-white/5 backdrop-blur-xl border-white/10">
+          <Card className="bg-white backdrop-blur-xl border-slate-200">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-white text-lg">Règles d'auto-catégorisation</CardTitle>
-                <p className="text-sm text-white/60">Catégorisez automatiquement vos transactions importées</p>
+                <CardTitle className="text-slate-900 text-lg">Règles d'auto-catégorisation</CardTitle>
+                <p className="text-sm text-slate-500">Catégorisez automatiquement vos transactions importées</p>
               </div>
               <div className="flex gap-2">
                 <Button 
                   variant="outline"
                   onClick={handleApplyRules}
-                  className="border-indigo-500/50 text-indigo-400"
+                  className="border-indigo-500/50 text-indigo-600"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" /> Appliquer les règles
                 </Button>
@@ -1809,7 +1809,7 @@ const BudgetPage = () => {
             </CardHeader>
             <CardContent>
               {rules.length === 0 ? (
-                <div className="text-center py-8 text-white/60">
+                <div className="text-center py-8 text-slate-500">
                   <Settings2 className="w-12 h-12 mx-auto mb-2 opacity-30" />
                   <p>Aucune règle configurée</p>
                   <p className="text-sm mt-1">Les règles permettent de catégoriser automatiquement vos transactions bancaires</p>
@@ -1826,16 +1826,16 @@ const BudgetPage = () => {
                       regex: "correspond au pattern"
                     };
                     return (
-                      <div key={rule.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
+                      <div key={rule.id} className="flex items-center justify-between p-3 rounded-lg bg-white border border-slate-200">
                         <div className="flex items-center gap-3 flex-wrap">
-                          <div className="text-sm text-white/60">Si libellé {matchTypeLabels[rule.match_type] || "contient"}</div>
+                          <div className="text-sm text-slate-500">Si libellé {matchTypeLabels[rule.match_type] || "contient"}</div>
                           <Badge variant="outline" className="font-mono">&quot;{rule.pattern}&quot;</Badge>
                           {rule.apply_to_type && (
                             <Badge variant="secondary" className="text-xs">
                               {rule.apply_to_type === "credit" ? "Revenus" : "Dépenses"} uniquement
                             </Badge>
                           )}
-                          <ChevronRight className="w-4 h-4 text-white/60" />
+                          <ChevronRight className="w-4 h-4 text-slate-500" />
                           {category && (
                             <Badge style={{ backgroundColor: category.color + "20", color: category.color, borderColor: category.color }}>
                               {category.name}
@@ -1877,10 +1877,10 @@ const BudgetPage = () => {
 
       {/* Import Dialog */}
       <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-lg">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <FileSpreadsheet className="w-5 h-5 text-indigo-400" />
+            <DialogTitle className="text-slate-900 flex items-center gap-2">
+              <FileSpreadsheet className="w-5 h-5 text-indigo-600" />
               Importer des transactions
             </DialogTitle>
           </DialogHeader>
@@ -1889,20 +1889,20 @@ const BudgetPage = () => {
             <div
               {...getRootProps()}
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                isDragActive ? 'border-indigo-500/50 bg-indigo-600/5' : 'border-white/10 hover:border-indigo-500/50'
+                isDragActive ? 'border-indigo-500/50 bg-indigo-600/5' : 'border-slate-200 hover:border-indigo-500/50'
               }`}
             >
               <input {...getInputProps()} />
-              <Upload className="w-12 h-12 mx-auto mb-4 text-white/60" />
+              <Upload className="w-12 h-12 mx-auto mb-4 text-slate-500" />
               {importFile ? (
                 <div>
-                  <p className="text-white font-medium">{importFile.name}</p>
-                  <p className="text-sm text-white/60">{(importFile.size / 1024).toFixed(1)} Ko</p>
+                  <p className="text-slate-900 font-medium">{importFile.name}</p>
+                  <p className="text-sm text-slate-500">{(importFile.size / 1024).toFixed(1)} Ko</p>
                 </div>
               ) : (
                 <div>
-                  <p className="text-white">Glissez votre fichier CSV ici</p>
-                  <p className="text-sm text-white/60">ou cliquez pour sélectionner</p>
+                  <p className="text-slate-900">Glissez votre fichier CSV ici</p>
+                  <p className="text-sm text-slate-500">ou cliquez pour sélectionner</p>
                 </div>
               )}
             </div>
@@ -1922,10 +1922,10 @@ const BudgetPage = () => {
               </div>
             )}
 
-            <div className="bg-white/5 rounded-lg p-4">
-              <p className="text-sm font-medium text-white mb-2">Format attendu</p>
-              <p className="text-xs text-white/60">Fichier CSV avec les colonnes: Date, Libellé, Montant (ou Crédit/Débit séparés)</p>
-              <p className="text-xs text-white/60 mt-1">Formats de date acceptés: JJ/MM/AAAA, AAAA-MM-JJ</p>
+            <div className="bg-white rounded-lg p-4">
+              <p className="text-sm font-medium text-slate-900 mb-2">Format attendu</p>
+              <p className="text-xs text-slate-500">Fichier CSV avec les colonnes: Date, Libellé, Montant (ou Crédit/Débit séparés)</p>
+              <p className="text-xs text-slate-500 mt-1">Formats de date acceptés: JJ/MM/AAAA, AAAA-MM-JJ</p>
             </div>
           </div>
 
@@ -1947,9 +1947,9 @@ const BudgetPage = () => {
 
       {/* Category Dialog */}
       <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-white">
+            <DialogTitle className="text-slate-900">
               {editingCategory ? "Modifier la catégorie" : "Nouvelle catégorie"}
             </DialogTitle>
           </DialogHeader>
@@ -1961,17 +1961,17 @@ const BudgetPage = () => {
                 value={categoryForm.name}
                 onChange={(e) => setCategoryForm({...categoryForm, name: e.target.value})}
                 placeholder="Ex: Marketing digital"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             
             <div className="space-y-2">
               <Label>Type</Label>
               <Select value={categoryForm.type} onValueChange={(v) => setCategoryForm({...categoryForm, type: v})}>
-                <SelectTrigger className="bg-white/5 border-white/10">
+                <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e]">
+                <SelectContent className="bg-slate-50">
                   <SelectItem value="income">Revenu</SelectItem>
                   <SelectItem value="expense">Dépense</SelectItem>
                 </SelectContent>
@@ -2005,19 +2005,19 @@ const BudgetPage = () => {
 
       {/* Rule Dialog */}
       <Dialog open={ruleDialogOpen} onOpenChange={setRuleDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-white">Nouvelle règle d'auto-catégorisation</DialogTitle>
+            <DialogTitle className="text-slate-900">Nouvelle règle d'auto-catégorisation</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Type de correspondance</Label>
               <Select value={ruleForm.match_type || "contains"} onValueChange={(v) => setRuleForm({...ruleForm, match_type: v})}>
-                <SelectTrigger className="bg-white/5 border-white/10">
+                <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e]">
+                <SelectContent className="bg-slate-50">
                   <SelectItem value="contains">Contient</SelectItem>
                   <SelectItem value="starts_with">Commence par</SelectItem>
                   <SelectItem value="ends_with">Finit par</SelectItem>
@@ -2033,18 +2033,18 @@ const BudgetPage = () => {
                 value={ruleForm.pattern}
                 onChange={(e) => setRuleForm({...ruleForm, pattern: e.target.value})}
                 placeholder="Ex: META, OVH, AMAZON..."
-                className="bg-white/5 border-white/10 font-mono"
+                className="bg-white border-slate-200 font-mono"
               />
-              <p className="text-xs text-white/60">La recherche n'est pas sensible à la casse</p>
+              <p className="text-xs text-slate-500">La recherche n'est pas sensible à la casse</p>
             </div>
 
             <div className="space-y-2">
               <Label>Appliquer aux</Label>
               <Select value={ruleForm.apply_to_type || "all"} onValueChange={(v) => setRuleForm({...ruleForm, apply_to_type: v === "all" ? "" : v})}>
-                <SelectTrigger className="bg-white/5 border-white/10">
+                <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue placeholder="Toutes les transactions" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e]">
+                <SelectContent className="bg-slate-50">
                   <SelectItem value="all">Toutes les transactions</SelectItem>
                   <SelectItem value="credit">Revenus uniquement</SelectItem>
                   <SelectItem value="debit">Dépenses uniquement</SelectItem>
@@ -2055,10 +2055,10 @@ const BudgetPage = () => {
             <div className="space-y-2">
               <Label>Assigner à la catégorie *</Label>
               <Select value={ruleForm.category_id} onValueChange={(v) => setRuleForm({...ruleForm, category_id: v})}>
-                <SelectTrigger className="bg-white/5 border-white/10">
+                <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue placeholder="Sélectionner..." />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e]">
+                <SelectContent className="bg-slate-50">
                   {getAllCategories().map(cat => (
                     <SelectItem key={cat.id} value={cat.id}>
                       <div className="flex items-center gap-2">
@@ -2083,9 +2083,9 @@ const BudgetPage = () => {
 
       {/* Transaction Dialog */}
       <Dialog open={transactionDialogOpen} onOpenChange={setTransactionDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-white">
+            <DialogTitle className="text-slate-900">
               {editingTransaction ? "Modifier la transaction" : "Nouvelle transaction"}
             </DialogTitle>
           </DialogHeader>
@@ -2116,7 +2116,7 @@ const BudgetPage = () => {
                 value={transactionForm.label}
                 onChange={(e) => setTransactionForm({...transactionForm, label: e.target.value})}
                 placeholder="Description de la transaction"
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             
@@ -2128,17 +2128,17 @@ const BudgetPage = () => {
                 value={transactionForm.amount}
                 onChange={(e) => setTransactionForm({...transactionForm, amount: e.target.value})}
                 placeholder="0.00"
-                className="bg-white/5 border-white/10 font-mono"
+                className="bg-white border-slate-200 font-mono"
               />
             </div>
             
             <div className="space-y-2">
               <Label>Catégorie</Label>
               <Select value={transactionForm.category_id} onValueChange={(v) => setTransactionForm({...transactionForm, category_id: v})}>
-                <SelectTrigger className="bg-white/5 border-white/10">
+                <SelectTrigger className="bg-white border-slate-200">
                   <SelectValue placeholder="Sélectionner..." />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e]">
+                <SelectContent className="bg-slate-50">
                   {getAllCategories(transactionForm.type === "credit" ? "income" : "expense").map(cat => (
                     <SelectItem key={cat.id} value={cat.id}>
                       <div className="flex items-center gap-2">
@@ -2157,7 +2157,7 @@ const BudgetPage = () => {
                 type="date"
                 value={transactionForm.date}
                 onChange={(e) => setTransactionForm({...transactionForm, date: e.target.value})}
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
               />
             </div>
             
@@ -2167,7 +2167,7 @@ const BudgetPage = () => {
                 value={transactionForm.notes}
                 onChange={(e) => setTransactionForm({...transactionForm, notes: e.target.value})}
                 placeholder="Notes optionnelles..."
-                className="bg-white/5 border-white/10"
+                className="bg-white border-slate-200"
                 rows={2}
               />
             </div>

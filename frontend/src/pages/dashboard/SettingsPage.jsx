@@ -431,12 +431,12 @@ Banque: Votre Banque`,
     <div data-testid="settings-page" className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white">Paramètres</h1>
-        <p className="text-white/60">Configuration du dashboard et de l'entreprise</p>
+        <h1 className="text-3xl font-bold text-slate-900">Paramètres</h1>
+        <p className="text-slate-500">Configuration du dashboard et de l'entreprise</p>
       </div>
 
       <Tabs defaultValue="company" className="space-y-6">
-        <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 flex-wrap">
+        <TabsList className="bg-white backdrop-blur-xl border border-slate-200 flex-wrap">
           <TabsTrigger value="company" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             Entreprise
           </TabsTrigger>
@@ -469,12 +469,12 @@ Banque: Votre Banque`,
 
         {/* Email Templates Tab */}
         <TabsContent value="email-templates">
-          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
+          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
             <CardHeader>
               <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
                 <div>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Mail className="w-5 h-5 text-indigo-400" />
+                  <CardTitle className="text-slate-900 flex items-center gap-2">
+                    <Mail className="w-5 h-5 text-indigo-600" />
                     Templates d&apos;e-mail
                   </CardTitle>
                   <CardDescription>
@@ -490,40 +490,40 @@ Banque: Votre Banque`,
             <CardContent>
               {loadingTemplates ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+                  <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
                 </div>
               ) : (
                 <div className="space-y-8">
                   {/* Paramètres généraux */}
-                  <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-                    <h4 className="font-medium text-white mb-4 flex items-center gap-2">
+                  <div className="bg-white border border-slate-200 rounded-lg p-4">
+                    <h4 className="font-medium text-slate-900 mb-4 flex items-center gap-2">
                       <Settings className="w-4 h-4" />
                       Paramètres généraux
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Email de test */}
                       <div>
-                        <Label className="text-white">Adresse email de test</Label>
+                        <Label className="text-slate-900">Adresse email de test</Label>
                         <Input
                           type="email"
                           value={testEmailAddress}
                           onChange={(e) => setTestEmailAddress(e.target.value)}
                           placeholder="test@exemple.com"
-                          className="bg-white/5 border-white/10 text-white mt-1"
+                          className="bg-white border-slate-200 text-slate-900 mt-1"
                         />
-                        <p className="text-xs text-white/40 mt-1">
+                        <p className="text-xs text-slate-400 mt-1">
                           Les emails de test seront envoyés à cette adresse
                         </p>
                       </div>
                       {/* Logo */}
                       <div>
-                        <Label className="text-white">Logo pour les emails</Label>
+                        <Label className="text-slate-900">Logo pour les emails</Label>
                         <div className="flex gap-2 mt-1">
                           <Input
                             value={emailLogo}
                             onChange={(e) => setEmailLogo(e.target.value)}
                             placeholder="URL du logo ou glissez un fichier"
-                            className="bg-white/5 border-white/10 text-white flex-1"
+                            className="bg-white border-slate-200 text-slate-900 flex-1"
                           />
                           <label className="cursor-pointer">
                             <input
@@ -564,11 +564,11 @@ Banque: Votre Banque`,
                   </div>
 
                   {/* Template Devis */}
-                  <div className="border border-white/10 rounded-lg p-4 sm:p-6">
+                  <div className="border border-slate-200 rounded-lg p-4 sm:p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                       <div className="flex items-center gap-2">
-                        <Badge className="bg-blue-500/20 text-blue-400 border-0">DEVIS</Badge>
-                        <h3 className="font-medium text-white">Template e-mail Devis</h3>
+                        <Badge className="bg-blue-100 text-blue-700 border-0">DEVIS</Badge>
+                        <h3 className="font-medium text-slate-900">Template e-mail Devis</h3>
                       </div>
                       <div className="flex gap-2">
                         <Button 
@@ -634,7 +634,7 @@ Banque: Votre Banque`,
                     
                     <div className="space-y-4">
                       <div>
-                        <Label className="text-white">Objet de l&apos;email</Label>
+                        <Label className="text-slate-900">Objet de l&apos;email</Label>
                         <Input
                           value={emailTemplates.devis.subject}
                           onChange={(e) => setEmailTemplates(prev => ({
@@ -642,11 +642,11 @@ Banque: Votre Banque`,
                             devis: { ...prev.devis, subject: e.target.value }
                           }))}
                           placeholder="Votre devis {{numero}} - {{company_name}}"
-                          className="bg-white/5 border-white/10 text-white mt-1"
+                          className="bg-white border-slate-200 text-slate-900 mt-1"
                         />
                       </div>
                       <div>
-                        <Label className="text-white">Corps du message</Label>
+                        <Label className="text-slate-900">Corps du message</Label>
                         <Textarea
                           value={emailTemplates.devis.body}
                           onChange={(e) => setEmailTemplates(prev => ({
@@ -663,18 +663,18 @@ Cordialement,
 {{company_name}}
 {{company_phone}} - {{company_email}}`}
                           rows={8}
-                          className="bg-white/5 border-white/10 text-white mt-1 font-mono text-sm"
+                          className="bg-white border-slate-200 text-slate-900 mt-1 font-mono text-sm"
                         />
                       </div>
                     </div>
                   </div>
 
                   {/* Template Facture */}
-                  <div className="border border-white/10 rounded-lg p-4 sm:p-6">
+                  <div className="border border-slate-200 rounded-lg p-4 sm:p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                       <div className="flex items-center gap-2">
-                        <Badge className="bg-green-500/20 text-green-400 border-0">FACTURE</Badge>
-                        <h3 className="font-medium text-white">Template e-mail Facture</h3>
+                        <Badge className="bg-green-100 text-green-700 border-0">FACTURE</Badge>
+                        <h3 className="font-medium text-slate-900">Template e-mail Facture</h3>
                       </div>
                       <div className="flex gap-2">
                         <Button 
@@ -740,7 +740,7 @@ Cordialement,
 
                     <div className="space-y-4">
                       <div>
-                        <Label className="text-white">Objet de l&apos;email</Label>
+                        <Label className="text-slate-900">Objet de l&apos;email</Label>
                         <Input
                           value={emailTemplates.facture.subject}
                           onChange={(e) => setEmailTemplates(prev => ({
@@ -748,11 +748,11 @@ Cordialement,
                             facture: { ...prev.facture, subject: e.target.value }
                           }))}
                           placeholder="Votre facture {{numero}} - {{company_name}}"
-                          className="bg-white/5 border-white/10 text-white mt-1"
+                          className="bg-white border-slate-200 text-slate-900 mt-1"
                         />
                       </div>
                       <div>
-                        <Label className="text-white">Corps du message</Label>
+                        <Label className="text-slate-900">Corps du message</Label>
                         <Textarea
                           value={emailTemplates.facture.body}
                           onChange={(e) => setEmailTemplates(prev => ({
@@ -769,7 +769,7 @@ Cordialement,
 {{company_name}}
 {{company_phone}} - {{company_email}}`}
                           rows={8}
-                          className="bg-white/5 border-white/10 text-white mt-1 font-mono text-sm"
+                          className="bg-white border-slate-200 text-slate-900 mt-1 font-mono text-sm"
                         />
                       </div>
                     </div>
@@ -782,12 +782,12 @@ Cordialement,
 
         {/* API Keys Tab */}
         <TabsContent value="api-keys">
-          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
+          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Key className="w-5 h-5 text-indigo-400" />
+                  <CardTitle className="text-slate-900 flex items-center gap-2">
+                    <Key className="w-5 h-5 text-indigo-600" />
                     Clés API connectées
                   </CardTitle>
                   <CardDescription>
@@ -803,15 +803,15 @@ Cordialement,
             <CardContent>
               {loadingApiKeys ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+                  <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
                 </div>
               ) : apiKeys ? (
                 <div className="space-y-4">
                   {/* Summary */}
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-indigo-400">{apiKeys.total_configured}</p>
-                      <p className="text-sm text-white/60">sur {apiKeys.total_available} configurées</p>
+                      <p className="text-3xl font-bold text-indigo-600">{apiKeys.total_configured}</p>
+                      <p className="text-sm text-slate-500">sur {apiKeys.total_available} configurées</p>
                     </div>
                     <div className="flex-1">
                       <div className="w-full bg-gray-200 rounded-full h-2">
@@ -826,7 +826,7 @@ Cordialement,
                   {/* API Keys List */}
                   <div className="space-y-3">
                     {Object.entries(apiKeys.api_keys).map(([key, config]) => (
-                      <div key={key} className="flex items-center justify-between p-4 border rounded-lg hover:bg-white/5 transition-colors">
+                      <div key={key} className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 transition-colors">
                         <div className="flex items-center gap-4">
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${config.configured ? "bg-green-100" : "bg-gray-100"}`}>
                             {config.configured ? (
@@ -836,15 +836,15 @@ Cordialement,
                             )}
                           </div>
                           <div>
-                            <p className="font-medium text-white">{config.name}</p>
-                            <p className="text-sm text-white/60">{config.description}</p>
+                            <p className="font-medium text-slate-900">{config.name}</p>
+                            <p className="text-sm text-slate-500">{config.description}</p>
                             {config.configured && config.masked && (
                               <code className="text-xs bg-gray-100 px-2 py-0.5 rounded mt-1 inline-block">
                                 {config.masked}
                               </code>
                             )}
                             {key === "newsapi" && config.count && (
-                              <Badge className="ml-2 bg-blue-500/20 text-blue-400">{config.count} clés</Badge>
+                              <Badge className="ml-2 bg-blue-100 text-blue-700">{config.count} clés</Badge>
                             )}
                           </div>
                         </div>
@@ -867,7 +867,7 @@ Cordialement,
                             href={config.doc_url} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-indigo-400 hover:underline text-sm flex items-center gap-1"
+                            className="text-indigo-600 hover:underline text-sm flex items-center gap-1"
                           >
                             <ExternalLink className="w-3 h-3" />
                             Docs
@@ -886,7 +886,7 @@ Cordialement,
                   </div>
                 </div>
               ) : (
-                <p className="text-center text-white/60 py-8">Impossible de charger les informations</p>
+                <p className="text-center text-slate-500 py-8">Impossible de charger les informations</p>
               )}
             </CardContent>
           </Card>
@@ -894,10 +894,10 @@ Cordialement,
 
         {/* Notifications Tab */}
         <TabsContent value="notifications">
-          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
+          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Bell className="w-5 h-5 text-indigo-400" />
+              <CardTitle className="text-slate-900 flex items-center gap-2">
+                <Bell className="w-5 h-5 text-indigo-600" />
                 Notifications par email
               </CardTitle>
               <CardDescription>
@@ -906,16 +906,16 @@ Cordialement,
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Test Email */}
-              <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-white rounded-lg">
                 <div>
-                  <p className="font-medium text-white">Tester la configuration</p>
-                  <p className="text-sm text-white/60">Envoyer un email de test à votre adresse</p>
+                  <p className="font-medium text-slate-900">Tester la configuration</p>
+                  <p className="text-sm text-slate-500">Envoyer un email de test à votre adresse</p>
                 </div>
                 <Button
                   onClick={handleTestEmail}
                   disabled={sendingTest}
                   variant="outline"
-                  className="border-indigo-500/50 text-indigo-400 hover:bg-indigo-600 hover:text-white"
+                  className="border-indigo-500/50 text-indigo-600 hover:bg-indigo-600 hover:text-slate-900"
                 >
                   {sendingTest ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -926,12 +926,12 @@ Cordialement,
                 </Button>
               </div>
 
-              <div className="border-t border-white/10 pt-6 space-y-4">
+              <div className="border-t border-slate-200 pt-6 space-y-4">
                 {/* Task Reminders */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-white">Rappels de tâches</p>
-                    <p className="text-sm text-white/60">Recevoir un email pour les tâches à échéance proche</p>
+                    <p className="font-medium text-slate-900">Rappels de tâches</p>
+                    <p className="text-sm text-slate-500">Recevoir un email pour les tâches à échéance proche</p>
                   </div>
                   <Switch
                     checked={notifSettings.task_reminders}
@@ -941,24 +941,24 @@ Cordialement,
 
                 {notifSettings.task_reminders && (
                   <div className="ml-4 flex items-center gap-2">
-                    <Label className="text-sm text-white/60">Rappeler</Label>
+                    <Label className="text-sm text-slate-500">Rappeler</Label>
                     <Input
                       type="number"
                       min="1"
                       max="7"
                       value={notifSettings.task_reminder_days}
                       onChange={(e) => setNotifSettings(prev => ({ ...prev, task_reminder_days: parseInt(e.target.value) || 1 }))}
-                      className="w-16 bg-white/5 backdrop-blur-xl border-white/10"
+                      className="w-16 bg-white backdrop-blur-xl border-slate-200"
                     />
-                    <Label className="text-sm text-white/60">jour(s) avant l'échéance</Label>
+                    <Label className="text-sm text-slate-500">jour(s) avant l'échéance</Label>
                   </div>
                 )}
 
                 {/* Invoice Reminders */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-white">Rappels de factures impayées</p>
-                    <p className="text-sm text-white/60">Envoyer des rappels aux clients pour les factures en retard</p>
+                    <p className="font-medium text-slate-900">Rappels de factures impayées</p>
+                    <p className="text-sm text-slate-500">Envoyer des rappels aux clients pour les factures en retard</p>
                   </div>
                   <Switch
                     checked={notifSettings.invoice_reminders}
@@ -968,7 +968,7 @@ Cordialement,
 
                 {notifSettings.invoice_reminders && (
                   <div className="ml-4">
-                    <p className="text-sm text-white/60 mb-2">Envoyer un rappel après :</p>
+                    <p className="text-sm text-slate-500 mb-2">Envoyer un rappel après :</p>
                     <div className="flex gap-2">
                       {[7, 14, 30, 60].map((days) => (
                         <Button
@@ -985,7 +985,7 @@ Cordialement,
                           }}
                           className={notifSettings.invoice_reminder_days.includes(days) 
                             ? "bg-indigo-600 text-white" 
-                            : "border-white/10"}
+                            : "border-slate-200"}
                         >
                           {days} jours
                         </Button>
@@ -997,8 +997,8 @@ Cordialement,
                 {/* New Lead Notifications */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-white">Nouveaux leads</p>
-                    <p className="text-sm text-white/60">Recevoir un email pour chaque nouvelle demande de contact</p>
+                    <p className="font-medium text-slate-900">Nouveaux leads</p>
+                    <p className="text-sm text-slate-500">Recevoir un email pour chaque nouvelle demande de contact</p>
                   </div>
                   <Switch
                     checked={notifSettings.new_lead_notifications}
@@ -1008,7 +1008,7 @@ Cordialement,
               </div>
 
               {/* Save Button */}
-              <div className="flex justify-between items-center pt-4 border-t border-white/10">
+              <div className="flex justify-between items-center pt-4 border-t border-slate-200">
                 <div className="flex gap-2">
                   <Button
                     onClick={handleSendTaskReminders}
@@ -1048,10 +1048,10 @@ Cordialement,
 
         {/* Company Tab */}
         <TabsContent value="company">
-          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
+          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Building className="w-5 h-5 text-indigo-400" />
+              <CardTitle className="text-slate-900 flex items-center gap-2">
+                <Building className="w-5 h-5 text-indigo-600" />
                 Informations légales
               </CardTitle>
               <CardDescription>
@@ -1061,78 +1061,78 @@ Cordialement,
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-white">Raison sociale</Label>
+                  <Label className="text-slate-900">Raison sociale</Label>
                   <Input
                     value={companyInfo.name}
                     onChange={(e) => setCompanyInfo({...companyInfo, name: e.target.value})}
-                    className="bg-white/5 backdrop-blur-xl border-white/10"
+                    className="bg-white backdrop-blur-xl border-slate-200"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white">Nom commercial</Label>
+                  <Label className="text-slate-900">Nom commercial</Label>
                   <Input
                     value={companyInfo.commercial_name}
                     onChange={(e) => setCompanyInfo({...companyInfo, commercial_name: e.target.value})}
-                    className="bg-white/5 backdrop-blur-xl border-white/10"
+                    className="bg-white backdrop-blur-xl border-slate-200"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-white">Adresse</Label>
+                <Label className="text-slate-900">Adresse</Label>
                 <Input
                   value={companyInfo.address}
                   onChange={(e) => setCompanyInfo({...companyInfo, address: e.target.value})}
-                  className="bg-white/5 backdrop-blur-xl border-white/10"
+                  className="bg-white backdrop-blur-xl border-slate-200"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-white">Téléphone</Label>
+                  <Label className="text-slate-900">Téléphone</Label>
                   <Input
                     value={companyInfo.phone}
                     onChange={(e) => setCompanyInfo({...companyInfo, phone: e.target.value})}
-                    className="bg-white/5 backdrop-blur-xl border-white/10"
+                    className="bg-white backdrop-blur-xl border-slate-200"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white">Email</Label>
+                  <Label className="text-slate-900">Email</Label>
                   <Input
                     type="email"
                     value={companyInfo.email}
                     onChange={(e) => setCompanyInfo({...companyInfo, email: e.target.value})}
-                    className="bg-white/5 backdrop-blur-xl border-white/10"
+                    className="bg-white backdrop-blur-xl border-slate-200"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-white">SIREN</Label>
+                  <Label className="text-slate-900">SIREN</Label>
                   <Input
                     value={companyInfo.siren}
                     onChange={(e) => setCompanyInfo({...companyInfo, siren: e.target.value})}
                     placeholder="123 456 789"
-                    className="bg-white/5 backdrop-blur-xl border-white/10"
+                    className="bg-white backdrop-blur-xl border-slate-200"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white">SIRET</Label>
+                  <Label className="text-slate-900">SIRET</Label>
                   <Input
                     value={companyInfo.siret}
                     onChange={(e) => setCompanyInfo({...companyInfo, siret: e.target.value})}
                     placeholder="123 456 789 00012"
-                    className="bg-white/5 backdrop-blur-xl border-white/10"
+                    className="bg-white backdrop-blur-xl border-slate-200"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white">Capital social</Label>
+                  <Label className="text-slate-900">Capital social</Label>
                   <Input
                     value={companyInfo.capital}
                     onChange={(e) => setCompanyInfo({...companyInfo, capital: e.target.value})}
                     placeholder="1 000 €"
-                    className="bg-white/5 backdrop-blur-xl border-white/10"
+                    className="bg-white backdrop-blur-xl border-slate-200"
                   />
                 </div>
               </div>
@@ -1141,7 +1141,7 @@ Cordialement,
                 <Button 
                   onClick={handleSaveCompany}
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-white"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-slate-900"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -1153,10 +1153,10 @@ Cordialement,
 
         {/* Social Links Tab */}
         <TabsContent value="social">
-          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
+          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Share2 className="w-5 h-5 text-indigo-400" />
+              <CardTitle className="text-slate-900 flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-indigo-600" />
                 Réseaux sociaux
               </CardTitle>
               <CardDescription>
@@ -1166,53 +1166,53 @@ Cordialement,
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-white">LinkedIn</Label>
+                  <Label className="text-slate-900">LinkedIn</Label>
                   <Input
                     value={socialLinks.linkedin}
                     onChange={(e) => setSocialLinks({...socialLinks, linkedin: e.target.value})}
                     placeholder="https://linkedin.com/company/..."
-                    className="bg-white/5 backdrop-blur-xl border-white/10"
+                    className="bg-white backdrop-blur-xl border-slate-200"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white">Instagram</Label>
+                  <Label className="text-slate-900">Instagram</Label>
                   <Input
                     value={socialLinks.instagram}
                     onChange={(e) => setSocialLinks({...socialLinks, instagram: e.target.value})}
                     placeholder="https://instagram.com/..."
-                    className="bg-white/5 backdrop-blur-xl border-white/10"
+                    className="bg-white backdrop-blur-xl border-slate-200"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-white">Facebook</Label>
+                  <Label className="text-slate-900">Facebook</Label>
                   <Input
                     value={socialLinks.facebook}
                     onChange={(e) => setSocialLinks({...socialLinks, facebook: e.target.value})}
                     placeholder="https://facebook.com/..."
-                    className="bg-white/5 backdrop-blur-xl border-white/10"
+                    className="bg-white backdrop-blur-xl border-slate-200"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white">Twitter / X</Label>
+                  <Label className="text-slate-900">Twitter / X</Label>
                   <Input
                     value={socialLinks.twitter}
                     onChange={(e) => setSocialLinks({...socialLinks, twitter: e.target.value})}
                     placeholder="https://twitter.com/..."
-                    className="bg-white/5 backdrop-blur-xl border-white/10"
+                    className="bg-white backdrop-blur-xl border-slate-200"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-white">YouTube</Label>
+                <Label className="text-slate-900">YouTube</Label>
                 <Input
                   value={socialLinks.youtube}
                   onChange={(e) => setSocialLinks({...socialLinks, youtube: e.target.value})}
                   placeholder="https://youtube.com/@..."
-                  className="bg-white/5 backdrop-blur-xl border-white/10"
+                  className="bg-white backdrop-blur-xl border-slate-200"
                 />
               </div>
 
@@ -1220,7 +1220,7 @@ Cordialement,
                 <Button 
                   onClick={handleSaveSocial}
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-white"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-slate-900"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -1232,10 +1232,10 @@ Cordialement,
 
         {/* Legal Texts Tab */}
         <TabsContent value="legal">
-          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
+          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-indigo-400" />
+              <CardTitle className="text-slate-900 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
                 Textes des pages légales
               </CardTitle>
               <CardDescription>
@@ -1244,32 +1244,32 @@ Cordialement,
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-white">Mentions légales (texte complémentaire)</Label>
+                <Label className="text-slate-900">Mentions légales (texte complémentaire)</Label>
                 <Textarea
                   value={legalTexts.mentions_legales}
                   onChange={(e) => setLegalTexts({...legalTexts, mentions_legales: e.target.value})}
                   placeholder="Ajoutez des informations complémentaires pour vos mentions légales..."
-                  className="bg-white/5 backdrop-blur-xl border-white/10 min-h-[150px]"
+                  className="bg-white backdrop-blur-xl border-slate-200 min-h-[150px]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-white">Politique de confidentialité (texte complémentaire)</Label>
+                <Label className="text-slate-900">Politique de confidentialité (texte complémentaire)</Label>
                 <Textarea
                   value={legalTexts.politique_confidentialite}
                   onChange={(e) => setLegalTexts({...legalTexts, politique_confidentialite: e.target.value})}
                   placeholder="Ajoutez des informations complémentaires pour votre politique de confidentialité..."
-                  className="bg-white/5 backdrop-blur-xl border-white/10 min-h-[150px]"
+                  className="bg-white backdrop-blur-xl border-slate-200 min-h-[150px]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-white">Politique de cookies (texte complémentaire)</Label>
+                <Label className="text-slate-900">Politique de cookies (texte complémentaire)</Label>
                 <Textarea
                   value={legalTexts.politique_cookies}
                   onChange={(e) => setLegalTexts({...legalTexts, politique_cookies: e.target.value})}
                   placeholder="Ajoutez des informations complémentaires pour votre politique de cookies..."
-                  className="bg-white/5 backdrop-blur-xl border-white/10 min-h-[150px]"
+                  className="bg-white backdrop-blur-xl border-slate-200 min-h-[150px]"
                 />
               </div>
 
@@ -1277,7 +1277,7 @@ Cordialement,
                 <Button 
                   onClick={handleSaveLegal}
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-white"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-slate-900"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -1289,10 +1289,10 @@ Cordialement,
 
         {/* Integrations Tab */}
         <TabsContent value="integrations">
-          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
+          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Key className="w-5 h-5 text-indigo-400" />
+              <CardTitle className="text-slate-900 flex items-center gap-2">
+                <Key className="w-5 h-5 text-indigo-600" />
                 Intégrations
               </CardTitle>
               <CardDescription>
@@ -1301,97 +1301,97 @@ Cordialement,
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-white">Google Analytics 4 - ID de propriété</Label>
+                <Label className="text-slate-900">Google Analytics 4 - ID de propriété</Label>
                 <Input
                   value={integrations.ga4_id}
                   onChange={(e) => setIntegrations({...integrations, ga4_id: e.target.value})}
                   placeholder="G-XXXXXXXXXX"
-                  className="bg-white/5 backdrop-blur-xl border-white/10"
+                  className="bg-white backdrop-blur-xl border-slate-200"
                 />
-                <p className="text-xs text-white/60">
+                <p className="text-xs text-slate-500">
                   Ajoutez votre ID GA4 pour suivre les visites du site
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-white">Resend - Clé API</Label>
+                <Label className="text-slate-900">Resend - Clé API</Label>
                 <Input
                   type="password"
                   value={integrations.resend_api_key}
                   onChange={(e) => setIntegrations({...integrations, resend_api_key: e.target.value})}
                   placeholder="re_xxxxxxxxxxxx"
-                  className="bg-white/5 backdrop-blur-xl border-white/10"
+                  className="bg-white backdrop-blur-xl border-slate-200"
                 />
-                <p className="text-xs text-white/60">
+                <p className="text-xs text-slate-500">
                   Pour l'envoi automatique des emails de notification
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-white">Stripe - Clé API secrète</Label>
+                <Label className="text-slate-900">Stripe - Clé API secrète</Label>
                 <Input
                   type="password"
                   value={integrations.stripe_api_key}
                   onChange={(e) => setIntegrations({...integrations, stripe_api_key: e.target.value})}
                   placeholder="sk_xxxxxxxxxxxx"
-                  className="bg-white/5 backdrop-blur-xl border-white/10"
+                  className="bg-white backdrop-blur-xl border-slate-200"
                 />
-                <p className="text-xs text-white/60">
+                <p className="text-xs text-slate-500">
                   Pour la gestion des paiements en ligne
                 </p>
               </div>
 
               {/* Google Calendar Section */}
-              <div className="border-t border-white/10 pt-6 mt-6">
-                <h3 className="text-white font-medium mb-4 flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-indigo-400" />
+              <div className="border-t border-slate-200 pt-6 mt-6">
+                <h3 className="text-slate-900 font-medium mb-4 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-indigo-600" />
                   Google Calendar / Agenda
                 </h3>
                 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-white">Google Client ID</Label>
+                    <Label className="text-slate-900">Google Client ID</Label>
                     <Input
                       value={integrations.google_client_id || ""}
                       onChange={(e) => setIntegrations({...integrations, google_client_id: e.target.value})}
                       placeholder="xxxxxxxxxxxx.apps.googleusercontent.com"
-                      className="bg-white/5 backdrop-blur-xl border-white/10"
+                      className="bg-white backdrop-blur-xl border-slate-200"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="text-white">Google Client Secret</Label>
+                    <Label className="text-slate-900">Google Client Secret</Label>
                     <Input
                       type="password"
                       value={integrations.google_client_secret || ""}
                       onChange={(e) => setIntegrations({...integrations, google_client_secret: e.target.value})}
                       placeholder="GOCSPX-xxxxxxxxxxxx"
-                      className="bg-white/5 backdrop-blur-xl border-white/10"
+                      className="bg-white backdrop-blur-xl border-slate-200"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="text-white">Google Redirect URI</Label>
+                    <Label className="text-slate-900">Google Redirect URI</Label>
                     <Input
                       value={integrations.google_redirect_uri || ""}
                       onChange={(e) => setIntegrations({...integrations, google_redirect_uri: e.target.value})}
                       placeholder="https://votre-domaine.fr/api/appointments/auth/callback"
-                      className="bg-white/5 backdrop-blur-xl border-white/10"
+                      className="bg-white backdrop-blur-xl border-slate-200"
                     />
-                    <p className="text-xs text-white/60">
+                    <p className="text-xs text-slate-500">
                       L'URL de callback OAuth. Doit correspondre exactement à celle configurée dans Google Cloud Console.
                     </p>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="text-white">URL Frontend (redirection après connexion)</Label>
+                    <Label className="text-slate-900">URL Frontend (redirection après connexion)</Label>
                     <Input
                       value={integrations.frontend_url || ""}
                       onChange={(e) => setIntegrations({...integrations, frontend_url: e.target.value})}
                       placeholder="https://votre-domaine.fr"
-                      className="bg-white/5 backdrop-blur-xl border-white/10"
+                      className="bg-white backdrop-blur-xl border-slate-200"
                     />
-                    <p className="text-xs text-white/60">
+                    <p className="text-xs text-slate-500">
                       L'URL de votre site où l'utilisateur sera redirigé après connexion Google.
                     </p>
                   </div>
@@ -1402,7 +1402,7 @@ Cordialement,
                 <Button 
                   onClick={handleSaveIntegrations}
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-white"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-slate-900"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -1414,10 +1414,10 @@ Cordialement,
 
         {/* Data Management Tab */}
         <TabsContent value="data">
-          <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-sm">
+          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Database className="w-5 h-5 text-indigo-400" />
+              <CardTitle className="text-slate-900 flex items-center gap-2">
+                <Database className="w-5 h-5 text-indigo-600" />
                 Gestion des données
               </CardTitle>
               <CardDescription>

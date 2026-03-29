@@ -149,21 +149,21 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
   };
 
   const quoteStatusColors = {
-    brouillon: "bg-white/10 text-white/80",
+    brouillon: "bg-slate-100 text-slate-700",
     envoyé: "bg-blue-500/20 text-blue-400",
     accepté: "bg-green-500/20 text-green-400",
     refusé: "bg-red-500/20 text-red-400"
   };
 
   const invoiceStatusColors = {
-    brouillon: "bg-white/10 text-white/80",
+    brouillon: "bg-slate-100 text-slate-700",
     en_attente: "bg-blue-500/20 text-blue-400",
     envoyee: "bg-purple-500/20 text-purple-400",
     "partiellement_payée": "bg-orange-500/20 text-orange-400",
     "payée": "bg-green-500/20 text-green-400",
     payee: "bg-green-500/20 text-green-400",
     en_retard: "bg-red-500/20 text-red-400",
-    annulee: "bg-white/10 text-white/50"
+    annulee: "bg-slate-100 text-slate-500"
   };
 
   const handleDownloadQuotePDF = async (quote) => {
@@ -260,7 +260,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent 
         side="right" 
-        className="w-full sm:max-w-[500px] md:max-w-[600px] p-0 bg-[#0a0a14] border-l border-white/10 overflow-hidden"
+        className="w-full sm:max-w-[500px] md:max-w-[600px] p-0 bg-[#0a0a14] border-l border-slate-200 overflow-hidden"
       >
         {loading ? (
           <div className="flex items-center justify-center h-full">
@@ -275,14 +275,14 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 <Button 
                   size="sm" 
                   variant="ghost" 
-                  className="text-white/80 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
+                  className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 h-8 w-8 p-0"
                 >
                   <Star className="w-4 h-4" />
                 </Button>
                 <Button 
                   size="sm" 
                   variant="ghost" 
-                  className="text-white/80 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
+                  className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 h-8 w-8 p-0"
                   onClick={() => navigate(`/admin/contacts?edit=${contact.id}`)}
                 >
                   <Pencil className="w-4 h-4" />
@@ -298,7 +298,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                     {contact.first_name} {contact.last_name}
                   </h2>
                   {contact.company && (
-                    <p className="text-white/80 flex items-center gap-1.5 mt-0.5 text-sm">
+                    <p className="text-slate-700 flex items-center gap-1.5 mt-0.5 text-sm">
                       <Building className="w-3.5 h-3.5 flex-shrink-0" />
                       <span className="truncate">{contact.company}</span>
                     </p>
@@ -319,7 +319,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 {contact.email && (
                   <a 
                     href={`mailto:${contact.email}`}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/5/10 hover:bg-white/5/20 rounded-lg transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/10 hover:bg-slate-50/20 rounded-lg transition-colors text-sm"
                   >
                     <Mail className="w-4 h-4" />
                     <span className="hidden sm:inline">Email</span>
@@ -328,7 +328,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 {contact.phone && (
                   <a 
                     href={`tel:${contact.phone}`}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/5/10 hover:bg-white/5/20 rounded-lg transition-colors text-sm"
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white/10 hover:bg-slate-50/20 rounded-lg transition-colors text-sm"
                   >
                     <Phone className="w-4 h-4" />
                     <span className="hidden sm:inline">Appeler</span>
@@ -336,7 +336,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 )}
                 <Button
                   size="sm"
-                  className="flex-1 bg-white/5 text-[#CE0202] hover:bg-white/5/90 text-sm"
+                  className="flex-1 bg-white text-[#CE0202] hover:bg-slate-50/90 text-sm"
                   onClick={() => navigate(`/admin/factures?action=new&type=devis&contact=${contact.id}`)}
                 >
                   <Plus className="w-4 h-4 mr-1" />
@@ -348,52 +348,52 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
 
             {/* Summary Stats */}
             {history?.summary && (
-              <div className="grid grid-cols-4 gap-2 p-3 sm:p-4 bg-white/5 border-b border-white/10">
+              <div className="grid grid-cols-4 gap-2 p-3 sm:p-4 bg-white border-b border-slate-200">
                 <div className="text-center">
-                  <p className="text-lg sm:text-xl font-bold text-white">{history.summary.quotes || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-white/60">Devis</p>
+                  <p className="text-lg sm:text-xl font-bold text-slate-900">{history.summary.quotes || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-500">Devis</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg sm:text-xl font-bold text-white">{history.summary.invoices || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-white/60">Factures</p>
+                  <p className="text-lg sm:text-xl font-bold text-slate-900">{history.summary.invoices || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-500">Factures</p>
                 </div>
                 <div className="text-center">
                   <p className="text-lg sm:text-xl font-bold text-[#CE0202]">{formatCurrency(history.summary.total_revenue || 0).replace('€', '')}</p>
-                  <p className="text-[10px] sm:text-xs text-white/60">CA</p>
+                  <p className="text-[10px] sm:text-xs text-slate-500">CA</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-lg sm:text-xl font-bold text-white">{history.summary.tasks || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-white/60">Tâches</p>
+                  <p className="text-lg sm:text-xl font-bold text-slate-900">{history.summary.tasks || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-500">Tâches</p>
                 </div>
               </div>
             )}
 
             {/* Tabs - Pipedrive Style */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-              <TabsList className="grid grid-cols-5 mx-3 sm:mx-4 mt-3 bg-white/5 h-9">
-                <TabsTrigger value="overview" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
+              <TabsList className="grid grid-cols-5 mx-3 sm:mx-4 mt-3 bg-white h-9">
+                <TabsTrigger value="overview" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
                   <User className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Profil</span>
                 </TabsTrigger>
-                <TabsTrigger value="timeline" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
+                <TabsTrigger value="timeline" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
                   <History className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Activité</span>
                 </TabsTrigger>
-                <TabsTrigger value="deals" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
+                <TabsTrigger value="deals" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
                   <DollarSign className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Affaires</span>
                 </TabsTrigger>
-                <TabsTrigger value="docs" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
+                <TabsTrigger value="docs" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
                   <FileText className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Docs</span>
                 </TabsTrigger>
                 {contact?.siret && (
-                  <TabsTrigger value="finances" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
+                  <TabsTrigger value="finances" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
                     <BarChart3 className="w-3.5 h-3.5 sm:mr-1" />
                     <span className="hidden sm:inline">Finances</span>
                   </TabsTrigger>
                 )}
-                <TabsTrigger value="editorial" className="data-[state=active]:bg-white/5 text-xs sm:text-sm px-1 sm:px-2">
+                <TabsTrigger value="editorial" className="data-[state=active]:bg-white text-xs sm:text-sm px-1 sm:px-2">
                   <CalendarDays className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Éditorial</span>
                 </TabsTrigger>
@@ -404,40 +404,40 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 <ScrollArea className="h-full">
                   <div className="space-y-4 pt-3">
                     {/* Contact Details Card */}
-                    <Card className="border-white/10">
+                    <Card className="border-slate-200">
                       <CardContent className="p-3 sm:p-4 space-y-3">
-                        <h3 className="font-semibold text-sm text-white flex items-center gap-2">
+                        <h3 className="font-semibold text-sm text-slate-900 flex items-center gap-2">
                           <User className="w-4 h-4 text-[#CE0202]" />
                           Informations
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {contact.email && (
                             <div className="flex items-center gap-2 text-sm">
-                              <Mail className="w-4 h-4 text-white/60 flex-shrink-0" />
-                              <span className="text-white truncate">{contact.email}</span>
+                              <Mail className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                              <span className="text-slate-900 truncate">{contact.email}</span>
                             </div>
                           )}
                           {contact.phone && (
                             <div className="flex items-center gap-2 text-sm">
-                              <Phone className="w-4 h-4 text-white/60 flex-shrink-0" />
-                              <span className="text-white">{contact.phone}</span>
+                              <Phone className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                              <span className="text-slate-900">{contact.phone}</span>
                             </div>
                           )}
                           {contact.city && (
                             <div className="flex items-center gap-2 text-sm">
-                              <MapPin className="w-4 h-4 text-white/60 flex-shrink-0" />
-                              <span className="text-white">{contact.city}</span>
+                              <MapPin className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                              <span className="text-slate-900">{contact.city}</span>
                             </div>
                           )}
                           {contact.poste && (
                             <div className="flex items-center gap-2 text-sm">
-                              <Briefcase className="w-4 h-4 text-white/60 flex-shrink-0" />
-                              <span className="text-white">{contact.poste}</span>
+                              <Briefcase className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                              <span className="text-slate-900">{contact.poste}</span>
                             </div>
                           )}
                           <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="w-4 h-4 text-white/60 flex-shrink-0" />
-                            <span className="text-white/60">Créé le {formatDate(contact.created_at)}</span>
+                            <Calendar className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                            <span className="text-slate-500">Créé le {formatDate(contact.created_at)}</span>
                           </div>
                         </div>
                       </CardContent>
@@ -445,28 +445,28 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
 
                     {/* Notes Card */}
                     {contact.note && (
-                      <Card className="border-white/10">
+                      <Card className="border-slate-200">
                         <CardContent className="p-3 sm:p-4">
-                          <h3 className="font-semibold text-sm text-white flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-sm text-slate-900 flex items-center gap-2 mb-2">
                             <StickyNote className="w-4 h-4 text-[#CE0202]" />
                             Notes
                           </h3>
-                          <p className="text-sm text-white/60 whitespace-pre-wrap">{contact.note}</p>
+                          <p className="text-sm text-slate-500 whitespace-pre-wrap">{contact.note}</p>
                         </CardContent>
                       </Card>
                     )}
 
                     {/* Project Type Card */}
                     {contact.project_type && (
-                      <Card className="border-white/10">
+                      <Card className="border-slate-200">
                         <CardContent className="p-3 sm:p-4">
-                          <h3 className="font-semibold text-sm text-white flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-sm text-slate-900 flex items-center gap-2 mb-2">
                             <Target className="w-4 h-4 text-[#CE0202]" />
                             Projet
                           </h3>
                           <Badge variant="outline">{contact.project_type}</Badge>
                           {contact.budget && (
-                            <p className="text-sm text-white/60 mt-2">
+                            <p className="text-sm text-slate-500 mt-2">
                               Budget: <span className="font-semibold text-[#CE0202]">{contact.budget}</span>
                             </p>
                           )}
@@ -484,7 +484,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                     {timeline.length === 0 ? (
                       <div className="text-center py-8">
                         <Activity className="w-10 h-10 mx-auto text-[#E5E5E5] mb-3" />
-                        <p className="text-white/60 text-sm">Aucune activité</p>
+                        <p className="text-slate-500 text-sm">Aucune activité</p>
                       </div>
                     ) : (
                       <div className="relative">
@@ -503,11 +503,11 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                                 
                                 {/* Content */}
                                 <div className="flex-1 min-w-0 pb-2">
-                                  <div className="bg-white/5 rounded-lg border border-white/10 p-3 hover:shadow-sm transition-shadow">
+                                  <div className="bg-white rounded-lg border border-slate-200 p-3 hover:shadow-sm transition-shadow">
                                     <div className="flex items-start justify-between gap-2">
                                       <div className="min-w-0">
-                                        <p className="font-medium text-sm text-white truncate">{item.title}</p>
-                                        <p className="text-xs text-white/60">{item.subtitle}</p>
+                                        <p className="font-medium text-sm text-slate-900 truncate">{item.title}</p>
+                                        <p className="text-xs text-slate-500">{item.subtitle}</p>
                                       </div>
                                       {item.status && (
                                         <Badge className="text-[10px] flex-shrink-0">
@@ -536,29 +536,29 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                   <div className="space-y-4 pt-3">
                     {/* Opportunities */}
                     <div>
-                      <h3 className="font-semibold text-sm text-white flex items-center gap-2 mb-3">
+                      <h3 className="font-semibold text-sm text-slate-900 flex items-center gap-2 mb-3">
                         <Target className="w-4 h-4 text-[#CE0202]" />
                         Opportunités
                       </h3>
                       {history?.opportunities?.length > 0 ? (
                         <div className="space-y-2">
                           {history.opportunities.map((opp) => (
-                            <Card key={opp.id} className="border-white/10 cursor-pointer hover:border-[#CE0202]/30 transition-colors">
+                            <Card key={opp.id} className="border-slate-200 cursor-pointer hover:border-[#CE0202]/30 transition-colors">
                               <CardContent className="p-3 flex items-center justify-between">
                                 <div className="min-w-0">
-                                  <p className="font-medium text-sm text-white truncate">{opp.title}</p>
-                                  <p className="text-xs text-white/60">{opp.stage}</p>
+                                  <p className="font-medium text-sm text-slate-900 truncate">{opp.title}</p>
+                                  <p className="text-xs text-slate-500">{opp.stage}</p>
                                 </div>
                                 <div className="text-right flex-shrink-0">
                                   <p className="font-bold text-[#CE0202]">{formatCurrency(opp.amount)}</p>
-                                  <p className="text-[10px] text-white/60">{opp.probability}%</p>
+                                  <p className="text-[10px] text-slate-500">{opp.probability}%</p>
                                 </div>
                               </CardContent>
                             </Card>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-white/60 text-center py-4">Aucune opportunité</p>
+                        <p className="text-sm text-slate-500 text-center py-4">Aucune opportunité</p>
                       )}
                     </div>
                   </div>
@@ -571,25 +571,25 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                   <div className="space-y-4 pt-3">
                     {/* Quotes */}
                     <div>
-                      <h3 className="font-semibold text-sm text-white flex items-center gap-2 mb-3">
+                      <h3 className="font-semibold text-sm text-slate-900 flex items-center gap-2 mb-3">
                         <FileText className="w-4 h-4 text-blue-600" />
                         Devis ({history?.quotes?.length || 0})
                       </h3>
                       {history?.quotes?.length > 0 ? (
                         <div className="space-y-2">
                           {history.quotes.map((quote) => (
-                            <Card key={quote.id} className="border-white/10">
+                            <Card key={quote.id} className="border-slate-200">
                               <CardContent className="p-3">
                                 <div className="flex items-center justify-between">
                                   <div className="min-w-0">
-                                    <p className="font-medium text-sm text-white">{quote.quote_number}</p>
-                                    <p className="text-xs text-white/60">{formatDate(quote.created_at)}</p>
+                                    <p className="font-medium text-sm text-slate-900">{quote.quote_number}</p>
+                                    <p className="text-xs text-slate-500">{formatDate(quote.created_at)}</p>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <Badge className={quoteStatusColors[quote.status] || "bg-white/10 text-white/80"}>
+                                    <Badge className={quoteStatusColors[quote.status] || "bg-slate-100 text-slate-700"}>
                                       {quote.status}
                                     </Badge>
-                                    <span className="font-bold text-sm text-white">{formatCurrency(quote.total_ttc)}</span>
+                                    <span className="font-bold text-sm text-slate-900">{formatCurrency(quote.total_ttc)}</span>
                                     <Button
                                       size="sm"
                                       variant="ghost"
@@ -605,31 +605,31 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-white/60 text-center py-4">Aucun devis</p>
+                        <p className="text-sm text-slate-500 text-center py-4">Aucun devis</p>
                       )}
                     </div>
 
                     {/* Invoices */}
                     <div>
-                      <h3 className="font-semibold text-sm text-white flex items-center gap-2 mb-3">
+                      <h3 className="font-semibold text-sm text-slate-900 flex items-center gap-2 mb-3">
                         <Receipt className="w-4 h-4 text-purple-600" />
                         Factures ({history?.invoices?.length || 0})
                       </h3>
                       {history?.invoices?.length > 0 ? (
                         <div className="space-y-2">
                           {history.invoices.map((invoice) => (
-                            <Card key={invoice.id} className="border-white/10">
+                            <Card key={invoice.id} className="border-slate-200">
                               <CardContent className="p-3">
                                 <div className="flex items-center justify-between">
                                   <div className="min-w-0">
-                                    <p className="font-medium text-sm text-white">{invoice.invoice_number}</p>
-                                    <p className="text-xs text-white/60">{formatDate(invoice.created_at)}</p>
+                                    <p className="font-medium text-sm text-slate-900">{invoice.invoice_number}</p>
+                                    <p className="text-xs text-slate-500">{formatDate(invoice.created_at)}</p>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <Badge className={invoiceStatusColors[invoice.status] || "bg-white/10 text-white/80"}>
+                                    <Badge className={invoiceStatusColors[invoice.status] || "bg-slate-100 text-slate-700"}>
                                       {invoice.status}
                                     </Badge>
-                                    <span className="font-bold text-sm text-white">{formatCurrency(invoice.total_ttc)}</span>
+                                    <span className="font-bold text-sm text-slate-900">{formatCurrency(invoice.total_ttc)}</span>
                                     <Button
                                       size="sm"
                                       variant="ghost"
@@ -645,7 +645,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-white/60 text-center py-4">Aucune facture</p>
+                        <p className="text-sm text-slate-500 text-center py-4">Aucune facture</p>
                       )}
                     </div>
                   </div>
@@ -664,15 +664,15 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                       ) : financialData ? (
                         <>
                           {/* Company Info */}
-                          <Card className="border-white/10 bg-gradient-to-br from-indigo-600/20 to-purple-600/20">
+                          <Card className="border-slate-200 bg-gradient-to-br from-indigo-600/20 to-purple-600/20">
                             <CardContent className="p-4">
                               <div className="flex items-start gap-3">
-                                <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
-                                  <Building className="w-6 h-6 text-indigo-400" />
+                                <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
+                                  <Building className="w-6 h-6 text-indigo-600" />
                                 </div>
                                 <div className="flex-1">
-                                  <h3 className="font-bold text-white text-lg">{financialData.nom}</h3>
-                                  <p className="text-white/60 text-sm">{financialData.forme_juridique}</p>
+                                  <h3 className="font-bold text-slate-900 text-lg">{financialData.nom}</h3>
+                                  <p className="text-slate-500 text-sm">{financialData.forme_juridique}</p>
                                   <div className="flex flex-wrap gap-2 mt-2">
                                     <Badge variant="outline" className="border-indigo-500/50 text-indigo-300">
                                       SIREN: {financialData.siren}
@@ -689,25 +689,25 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                               {/* Company Details */}
                               <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
                                 {financialData.ville && (
-                                  <div className="flex items-center gap-2 text-white/70">
+                                  <div className="flex items-center gap-2 text-slate-600">
                                     <MapPin className="w-4 h-4" />
                                     <span>{financialData.code_postal} {financialData.ville}</span>
                                   </div>
                                 )}
                                 {financialData.activite && (
-                                  <div className="flex items-center gap-2 text-white/70">
+                                  <div className="flex items-center gap-2 text-slate-600">
                                     <Briefcase className="w-4 h-4" />
                                     <span className="truncate">{financialData.activite}</span>
                                   </div>
                                 )}
                                 {financialData.tranche_effectif && (
-                                  <div className="flex items-center gap-2 text-white/70">
+                                  <div className="flex items-center gap-2 text-slate-600">
                                     <Users className="w-4 h-4" />
                                     <span>{financialData.tranche_effectif}</span>
                                   </div>
                                 )}
                                 {financialData.capital_social > 0 && (
-                                  <div className="flex items-center gap-2 text-white/70">
+                                  <div className="flex items-center gap-2 text-slate-600">
                                     <Euro className="w-4 h-4" />
                                     <span>Capital: {formatCurrency(financialData.capital_social)}</span>
                                   </div>
@@ -718,16 +718,16 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
 
                           {/* Directors */}
                           {financialData.dirigeants && financialData.dirigeants.length > 0 && (
-                            <Card className="border-white/10">
+                            <Card className="border-slate-200">
                               <CardContent className="p-4">
-                                <h3 className="font-semibold text-white flex items-center gap-2 mb-3">
-                                  <User className="w-4 h-4 text-indigo-400" />
+                                <h3 className="font-semibold text-slate-900 flex items-center gap-2 mb-3">
+                                  <User className="w-4 h-4 text-indigo-600" />
                                   Dirigeants
                                 </h3>
                                 <div className="space-y-2">
                                   {financialData.dirigeants.map((d, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
-                                      <span className="text-white font-medium">{d.nom}</span>
+                                    <div key={idx} className="flex items-center justify-between p-2 bg-white rounded-lg">
+                                      <span className="text-slate-900 font-medium">{d.nom}</span>
                                       <Badge variant="outline" className="text-xs">{d.fonction}</Badge>
                                     </div>
                                   ))}
@@ -738,15 +738,15 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
 
                           {/* Financial Statements - Bilans */}
                           {financialData.bilans && financialData.bilans.length > 0 && (
-                            <Card className="border-white/10">
+                            <Card className="border-slate-200">
                               <CardContent className="p-4">
-                                <h3 className="font-semibold text-white flex items-center gap-2 mb-3">
+                                <h3 className="font-semibold text-slate-900 flex items-center gap-2 mb-3">
                                   <BarChart3 className="w-4 h-4 text-green-400" />
                                   Bilans Publics
                                 </h3>
                                 <div className="space-y-3">
                                   {financialData.bilans.map((bilan, idx) => (
-                                    <div key={idx} className="bg-white/5 rounded-lg p-3">
+                                    <div key={idx} className="bg-white rounded-lg p-3">
                                       <div className="flex items-center justify-between mb-2">
                                         <Badge className="bg-indigo-600/30 text-indigo-300">{bilan.annee}</Badge>
                                         {idx > 0 && financialData.bilans[idx-1] && bilan.chiffre_affaires && financialData.bilans[idx-1].chiffre_affaires && (
@@ -772,13 +772,13 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                                       <div className="grid grid-cols-2 gap-2 text-sm">
                                         {bilan.chiffre_affaires !== null && bilan.chiffre_affaires !== undefined && (
                                           <div>
-                                            <p className="text-white/50 text-xs">Chiffre d'affaires</p>
-                                            <p className="text-white font-semibold">{formatCurrency(bilan.chiffre_affaires)}</p>
+                                            <p className="text-slate-500 text-xs">Chiffre d'affaires</p>
+                                            <p className="text-slate-900 font-semibold">{formatCurrency(bilan.chiffre_affaires)}</p>
                                           </div>
                                         )}
                                         {bilan.resultat_net !== null && bilan.resultat_net !== undefined && (
                                           <div>
-                                            <p className="text-white/50 text-xs">Résultat net</p>
+                                            <p className="text-slate-500 text-xs">Résultat net</p>
                                             <p className={`font-semibold ${bilan.resultat_net >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                               {formatCurrency(bilan.resultat_net)}
                                             </p>
@@ -786,13 +786,13 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                                         )}
                                         {bilan.effectif && (
                                           <div>
-                                            <p className="text-white/50 text-xs">Effectif</p>
-                                            <p className="text-white">{bilan.effectif} salariés</p>
+                                            <p className="text-slate-500 text-xs">Effectif</p>
+                                            <p className="text-slate-900">{bilan.effectif} salariés</p>
                                           </div>
                                         )}
                                         {bilan.ebitda !== null && bilan.ebitda !== undefined && (
                                           <div>
-                                            <p className="text-white/50 text-xs">EBITDA</p>
+                                            <p className="text-slate-500 text-xs">EBITDA</p>
                                             <p className={`font-semibold ${bilan.ebitda >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                               {formatCurrency(bilan.ebitda)}
                                             </p>
@@ -811,7 +811,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                             href={`https://www.societe.com/societe/${financialData.siren || contact.siret}.html`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-white/70 hover:text-white"
+                            className="flex items-center justify-center gap-2 p-3 bg-white hover:bg-slate-100 rounded-lg transition-colors text-slate-600 hover:text-slate-900"
                           >
                             <ExternalLink className="w-4 h-4" />
                             <span className="text-sm">Voir sur Societe.com</span>
@@ -819,9 +819,9 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                         </>
                       ) : (
                         <div className="text-center py-8">
-                          <BarChart3 className="w-10 h-10 mx-auto text-white/20 mb-3" />
-                          <p className="text-white/60 text-sm">Aucune donnée financière disponible</p>
-                          <p className="text-white/40 text-xs mt-1">SIRET: {contact.siret}</p>
+                          <BarChart3 className="w-10 h-10 mx-auto text-slate-900/20 mb-3" />
+                          <p className="text-slate-500 text-sm">Aucune donnée financière disponible</p>
+                          <p className="text-slate-400 text-xs mt-1">SIRET: {contact.siret}</p>
                         </div>
                       )}
                     </div>
@@ -834,7 +834,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 <ScrollArea className="h-full">
                   <div className="space-y-4 pt-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-white font-medium">Calendriers Éditoriaux</h3>
+                      <h3 className="text-slate-900 font-medium">Calendriers Éditoriaux</h3>
                       <Button
                         size="sm"
                         onClick={() => navigate('/admin/editorial')}
@@ -848,7 +848,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                     {editorialCalendars.length > 0 ? (
                       <div className="space-y-3">
                         {editorialCalendars.map((calendar) => (
-                          <Card key={calendar.id} className="border-white/10 hover:border-white/20 transition-colors cursor-pointer" onClick={() => navigate('/admin/editorial')}>
+                          <Card key={calendar.id} className="border-slate-200 hover:border-slate-200 transition-colors cursor-pointer" onClick={() => navigate('/admin/editorial')}>
                             <CardContent className="p-4">
                               <div className="flex items-center gap-3">
                                 <div 
@@ -856,25 +856,25 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                                   style={{ backgroundColor: calendar.color || '#6366f1' }}
                                 />
                                 <div className="flex-1 min-w-0">
-                                  <h4 className="text-white font-medium truncate">{calendar.title}</h4>
+                                  <h4 className="text-slate-900 font-medium truncate">{calendar.title}</h4>
                                   {calendar.description && (
-                                    <p className="text-white/60 text-sm truncate">{calendar.description}</p>
+                                    <p className="text-slate-500 text-sm truncate">{calendar.description}</p>
                                   )}
                                 </div>
-                                <Badge variant="outline" className="border-white/20 text-white/60">
+                                <Badge variant="outline" className="border-slate-200 text-slate-500">
                                   {calendar.post_count || 0} posts
                                 </Badge>
-                                <ChevronRight className="w-4 h-4 text-white/40" />
+                                <ChevronRight className="w-4 h-4 text-slate-400" />
                               </div>
                             </CardContent>
                           </Card>
                         ))}
                       </div>
                     ) : (
-                      <Card className="border-white/10 border-dashed">
+                      <Card className="border-slate-200 border-dashed">
                         <CardContent className="p-8 text-center">
-                          <CalendarDays className="w-12 h-12 mx-auto text-white/20 mb-3" />
-                          <p className="text-white/60 mb-4">Aucun calendrier éditorial pour ce contact</p>
+                          <CalendarDays className="w-12 h-12 mx-auto text-slate-900/20 mb-3" />
+                          <p className="text-slate-500 mb-4">Aucun calendrier éditorial pour ce contact</p>
                           <Button
                             size="sm"
                             onClick={() => navigate('/admin/editorial')}
@@ -893,7 +893,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
           </div>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <p className="text-white/60">Contact non trouvé</p>
+            <p className="text-slate-500">Contact non trouvé</p>
           </div>
         )}
       </SheetContent>

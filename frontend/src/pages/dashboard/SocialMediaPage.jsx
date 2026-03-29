@@ -44,9 +44,9 @@ const PlatformIcon = ({ platform, className = "w-4 h-4" }) => {
 // Status badge component
 const StatusBadge = ({ status }) => {
   const config = {
-    scheduled: { label: "Programmé", color: "bg-blue-500/20 text-blue-400" },
-    published: { label: "Publié", color: "bg-green-500/20 text-green-400" },
-    failed: { label: "Échec", color: "bg-red-500/20 text-red-400" },
+    scheduled: { label: "Programmé", color: "bg-blue-100 text-blue-700" },
+    published: { label: "Publié", color: "bg-green-100 text-green-700" },
+    failed: { label: "Échec", color: "bg-red-100 text-red-700" },
     draft: { label: "Brouillon", color: "bg-white/10 text-white/80" },
   };
   const { label, color } = config[status] || config.draft;
@@ -57,9 +57,9 @@ const StatusBadge = ({ status }) => {
 const PriorityBadge = ({ priority }) => {
   const config = {
     low: { label: "Basse", color: "bg-white/10 text-white/60" },
-    normal: { label: "Normal", color: "bg-blue-500/20 text-blue-400" },
+    normal: { label: "Normal", color: "bg-blue-100 text-blue-700" },
     high: { label: "Haute", color: "bg-orange-100 text-orange-700" },
-    urgent: { label: "Urgent", color: "bg-red-500/20 text-red-400" },
+    urgent: { label: "Urgent", color: "bg-red-100 text-red-700" },
   };
   const { label, color } = config[priority] || config.normal;
   return <Badge className={`${color} border-none text-xs`}>{label}</Badge>;
@@ -1606,7 +1606,7 @@ const SocialMediaPage = () => {
                     Connexion Meta (Facebook & Instagram)
                   </CardTitle>
                   {metaConnected && (
-                    <Badge className="bg-green-500/20 text-green-400 border-0">
+                    <Badge className="bg-green-100 text-green-700 border-0">
                       <CheckCircle className="w-3 h-3 mr-1" />
                       Connecté
                     </Badge>
@@ -1766,7 +1766,7 @@ const SocialMediaPage = () => {
                             <span>{new Date(post.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
                         </div>
-                        <Badge className="bg-green-500/20 text-green-400 border-0 text-xs">Publié</Badge>
+                        <Badge className="bg-green-100 text-green-700 border-0 text-xs">Publié</Badge>
                       </div>
                     ))}
                   </div>
@@ -1815,7 +1815,7 @@ const SocialMediaPage = () => {
                 <div>
                   <p className="font-medium text-white">{selectedPage.page_name}</p>
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-blue-500/20 text-blue-400 border-0 text-xs">
+                    <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">
                       <Facebook className="w-3 h-3 mr-1" />
                       Facebook
                     </Badge>

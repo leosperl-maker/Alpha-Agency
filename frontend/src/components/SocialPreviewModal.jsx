@@ -21,15 +21,15 @@ const InstagramPreview = ({ post, mediaUrl }) => {
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 p-[2px]">
             <div className="w-full h-full rounded-full bg-black flex items-center justify-center">
-              <span className="text-white text-xs font-bold">A</span>
+              <span className="text-slate-900 text-xs font-bold">A</span>
             </div>
           </div>
           <div>
-            <p className="text-white text-sm font-semibold">alphagency.gp</p>
-            <p className="text-white/50 text-xs">Guadeloupe</p>
+            <p className="text-slate-900 text-sm font-semibold">alphagency.gp</p>
+            <p className="text-slate-900/50 text-xs">Guadeloupe</p>
           </div>
         </div>
-        <MoreHorizontal className="w-5 h-5 text-white" />
+        <MoreHorizontal className="w-5 h-5 text-slate-900" />
       </div>
       
       {/* Image */}
@@ -37,13 +37,13 @@ const InstagramPreview = ({ post, mediaUrl }) => {
         {mediaUrl ? (
           <img src={mediaUrl} alt="" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-white/30">
+          <div className="w-full h-full flex items-center justify-center text-slate-900/30">
             <span className="text-4xl">📷</span>
           </div>
         )}
         {/* Carousel indicator */}
         {post.format_type === 'carrousel' && (
-          <div className="absolute top-3 right-3 bg-black/60 px-2 py-1 rounded text-white text-xs">
+          <div className="absolute top-3 right-3 bg-black/60 px-2 py-1 rounded text-slate-900 text-xs">
             1/5
           </div>
         )}
@@ -53,27 +53,27 @@ const InstagramPreview = ({ post, mediaUrl }) => {
       <div className="p-3">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
-            <Heart className="w-6 h-6 text-white cursor-pointer hover:text-white/70" />
-            <MessageCircle className="w-6 h-6 text-white cursor-pointer hover:text-white/70" />
-            <Send className="w-6 h-6 text-white cursor-pointer hover:text-white/70" />
+            <Heart className="w-6 h-6 text-slate-900 cursor-pointer hover:text-slate-900/70" />
+            <MessageCircle className="w-6 h-6 text-slate-900 cursor-pointer hover:text-slate-900/70" />
+            <Send className="w-6 h-6 text-slate-900 cursor-pointer hover:text-slate-900/70" />
           </div>
-          <Bookmark className="w-6 h-6 text-white cursor-pointer hover:text-white/70" />
+          <Bookmark className="w-6 h-6 text-slate-900 cursor-pointer hover:text-slate-900/70" />
         </div>
         
         {/* Likes */}
-        <p className="text-white text-sm font-semibold mb-2">1 234 J'aime</p>
+        <p className="text-slate-900 text-sm font-semibold mb-2">1 234 J'aime</p>
         
         {/* Caption */}
         <div className="text-sm">
-          <span className="text-white font-semibold">alphagency.gp </span>
-          <span className="text-white/90">{truncatedCaption}</span>
+          <span className="text-slate-900 font-semibold">alphagency.gp </span>
+          <span className="text-slate-900/90">{truncatedCaption}</span>
         </div>
         
         {/* Comments link */}
-        <p className="text-white/50 text-sm mt-2">Voir les 42 commentaires</p>
+        <p className="text-slate-900/50 text-sm mt-2">Voir les 42 commentaires</p>
         
         {/* Time */}
-        <p className="text-white/40 text-xs mt-1">Il y a 2 heures</p>
+        <p className="text-slate-900/40 text-xs mt-1">Il y a 2 heures</p>
       </div>
     </div>
   );
@@ -89,21 +89,21 @@ const FacebookPreview = ({ post, mediaUrl }) => {
       <div className="p-4">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center">
-            <span className="text-white font-bold">A</span>
+            <span className="text-slate-900 font-bold">A</span>
           </div>
           <div className="flex-1">
-            <p className="text-white font-semibold text-sm">Alpha Agency</p>
-            <div className="flex items-center gap-1 text-white/50 text-xs">
+            <p className="text-slate-900 font-semibold text-sm">Alpha Agency</p>
+            <div className="flex items-center gap-1 text-slate-900/50 text-xs">
               <span>Il y a 2h</span>
               <span>·</span>
               <Globe className="w-3 h-3" />
             </div>
           </div>
-          <MoreHorizontal className="w-5 h-5 text-white/50" />
+          <MoreHorizontal className="w-5 h-5 text-slate-900/50" />
         </div>
         
         {/* Caption */}
-        <p className="text-white/90 text-sm mt-3 whitespace-pre-wrap">{caption}</p>
+        <p className="text-slate-900/90 text-sm mt-3 whitespace-pre-wrap">{caption}</p>
       </div>
       
       {/* Image */}
@@ -111,7 +111,7 @@ const FacebookPreview = ({ post, mediaUrl }) => {
         {mediaUrl ? (
           <img src={mediaUrl} alt="" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-white/30">
+          <div className="w-full h-full flex items-center justify-center text-slate-900/30">
             <span className="text-4xl">📷</span>
           </div>
         )}
@@ -119,7 +119,7 @@ const FacebookPreview = ({ post, mediaUrl }) => {
       
       {/* Reactions */}
       <div className="p-4">
-        <div className="flex items-center justify-between text-white/50 text-sm pb-3 border-b border-white/10">
+        <div className="flex items-center justify-between text-slate-900/50 text-sm pb-3 border-b border-white/10">
           <div className="flex items-center gap-1">
             <div className="flex -space-x-1">
               <span className="text-base">👍</span>
@@ -133,15 +133,15 @@ const FacebookPreview = ({ post, mediaUrl }) => {
         
         {/* Actions */}
         <div className="flex items-center justify-around pt-2">
-          <button className="flex items-center gap-2 text-white/70 hover:bg-white/5 px-4 py-2 rounded-lg">
+          <button className="flex items-center gap-2 text-slate-900/70 hover:bg-white/5 px-4 py-2 rounded-lg">
             <ThumbsUp className="w-5 h-5" />
             <span className="text-sm">J'aime</span>
           </button>
-          <button className="flex items-center gap-2 text-white/70 hover:bg-white/5 px-4 py-2 rounded-lg">
+          <button className="flex items-center gap-2 text-slate-900/70 hover:bg-white/5 px-4 py-2 rounded-lg">
             <MessageSquare className="w-5 h-5" />
             <span className="text-sm">Commenter</span>
           </button>
-          <button className="flex items-center gap-2 text-white/70 hover:bg-white/5 px-4 py-2 rounded-lg">
+          <button className="flex items-center gap-2 text-slate-900/70 hover:bg-white/5 px-4 py-2 rounded-lg">
             <Share2 className="w-5 h-5" />
             <span className="text-sm">Partager</span>
           </button>
@@ -162,7 +162,7 @@ const LinkedInPreview = ({ post, mediaUrl }) => {
       <div className="p-4">
         <div className="flex items-start gap-3">
           <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">A</span>
+            <span className="text-slate-900 font-bold text-lg">A</span>
           </div>
           <div className="flex-1">
             <p className="text-gray-900 font-semibold text-sm">Alpha Agency</p>
@@ -239,7 +239,7 @@ const TikTokPreview = ({ post, mediaUrl }) => {
           <img src={mediaUrl} alt="" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-900">
-            <Play className="w-16 h-16 text-white/30" />
+            <Play className="w-16 h-16 text-slate-900/30" />
           </div>
         )}
       </div>
@@ -249,32 +249,32 @@ const TikTokPreview = ({ post, mediaUrl }) => {
         <div className="flex flex-col items-center">
           <div className="w-10 h-10 rounded-full bg-white border-2 border-white overflow-hidden">
             <div className="w-full h-full bg-indigo-600 flex items-center justify-center">
-              <span className="text-white text-xs font-bold">A</span>
+              <span className="text-slate-900 text-xs font-bold">A</span>
             </div>
           </div>
           <div className="w-5 h-5 -mt-2 bg-red-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-xs">+</span>
+            <span className="text-slate-900 text-xs">+</span>
           </div>
         </div>
         
         <div className="flex flex-col items-center">
-          <Heart className="w-8 h-8 text-white" fill="white" />
-          <span className="text-white text-xs mt-1">24.5K</span>
+          <Heart className="w-8 h-8 text-slate-900" fill="white" />
+          <span className="text-slate-900 text-xs mt-1">24.5K</span>
         </div>
         
         <div className="flex flex-col items-center">
-          <MessageCircle className="w-8 h-8 text-white" />
-          <span className="text-white text-xs mt-1">892</span>
+          <MessageCircle className="w-8 h-8 text-slate-900" />
+          <span className="text-slate-900 text-xs mt-1">892</span>
         </div>
         
         <div className="flex flex-col items-center">
-          <Bookmark className="w-8 h-8 text-white" />
-          <span className="text-white text-xs mt-1">1.2K</span>
+          <Bookmark className="w-8 h-8 text-slate-900" />
+          <span className="text-slate-900 text-xs mt-1">1.2K</span>
         </div>
         
         <div className="flex flex-col items-center">
-          <Share2 className="w-8 h-8 text-white" />
-          <span className="text-white text-xs mt-1">456</span>
+          <Share2 className="w-8 h-8 text-slate-900" />
+          <span className="text-slate-900 text-xs mt-1">456</span>
         </div>
         
         <div className="w-10 h-10 rounded-full bg-gray-800 border-2 border-gray-600 animate-spin-slow overflow-hidden">
@@ -284,12 +284,12 @@ const TikTokPreview = ({ post, mediaUrl }) => {
       
       {/* Bottom info */}
       <div className="absolute bottom-4 left-3 right-16">
-        <p className="text-white font-bold text-sm">@alphagency.gp</p>
-        <p className="text-white text-xs mt-1 leading-relaxed">{truncatedCaption}</p>
+        <p className="text-slate-900 font-bold text-sm">@alphagency.gp</p>
+        <p className="text-slate-900 text-xs mt-1 leading-relaxed">{truncatedCaption}</p>
         <div className="flex items-center gap-2 mt-2">
-          <Music className="w-3 h-3 text-white" />
+          <Music className="w-3 h-3 text-slate-900" />
           <div className="overflow-hidden">
-            <p className="text-white text-xs whitespace-nowrap animate-marquee">
+            <p className="text-slate-900 text-xs whitespace-nowrap animate-marquee">
               Son original - Alpha Agency 🎵
             </p>
           </div>
@@ -298,11 +298,11 @@ const TikTokPreview = ({ post, mediaUrl }) => {
       
       {/* Bottom nav */}
       <div className="absolute bottom-0 left-0 right-0 h-12 bg-black flex items-center justify-around px-4">
-        <Home className="w-6 h-6 text-white" />
-        <Search className="w-6 h-6 text-white/50" />
-        <PlusSquare className="w-8 h-8 text-white" />
-        <MessageSquare className="w-6 h-6 text-white/50" />
-        <User className="w-6 h-6 text-white/50" />
+        <Home className="w-6 h-6 text-slate-900" />
+        <Search className="w-6 h-6 text-slate-900/50" />
+        <PlusSquare className="w-8 h-8 text-slate-900" />
+        <MessageSquare className="w-6 h-6 text-slate-900/50" />
+        <User className="w-6 h-6 text-slate-900/50" />
       </div>
     </div>
   );
@@ -321,17 +321,17 @@ const YouTubePreview = ({ post, mediaUrl }) => {
           <img src={mediaUrl} alt="" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Play className="w-16 h-16 text-white/30" />
+            <Play className="w-16 h-16 text-slate-900/30" />
           </div>
         )}
         {/* Duration */}
-        <div className="absolute bottom-2 right-2 bg-black/80 px-1.5 py-0.5 rounded text-white text-xs font-medium">
+        <div className="absolute bottom-2 right-2 bg-black/80 px-1.5 py-0.5 rounded text-slate-900 text-xs font-medium">
           3:24
         </div>
         {/* Play overlay */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/30">
           <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center">
-            <Play className="w-8 h-8 text-white fill-white ml-1" />
+            <Play className="w-8 h-8 text-slate-900 fill-white ml-1" />
           </div>
         </div>
       </div>
@@ -339,17 +339,17 @@ const YouTubePreview = ({ post, mediaUrl }) => {
       {/* Info */}
       <div className="p-3 flex gap-3">
         <div className="w-9 h-9 rounded-full bg-indigo-600 flex-shrink-0 flex items-center justify-center">
-          <span className="text-white text-sm font-bold">A</span>
+          <span className="text-slate-900 text-sm font-bold">A</span>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-white font-medium text-sm leading-tight line-clamp-2">
+          <h3 className="text-slate-900 font-medium text-sm leading-tight line-clamp-2">
             {post.title || 'Titre de la vidéo'}
           </h3>
-          <p className="text-white/50 text-xs mt-1">
+          <p className="text-slate-900/50 text-xs mt-1">
             Alpha Agency · 12K vues · il y a 2 heures
           </p>
         </div>
-        <MoreHorizontal className="w-5 h-5 text-white/50 flex-shrink-0" />
+        <MoreHorizontal className="w-5 h-5 text-slate-900/50 flex-shrink-0" />
       </div>
     </div>
   );
@@ -403,7 +403,7 @@ const SocialPreviewModal = ({ open, onOpenChange, post }) => {
           </ScrollArea>
         </Tabs>
         
-        <div className="text-center text-white/40 text-xs mt-2">
+        <div className="text-center text-slate-900/40 text-xs mt-2">
           Aperçu simulé - Le rendu réel peut varier légèrement
         </div>
       </DialogContent>

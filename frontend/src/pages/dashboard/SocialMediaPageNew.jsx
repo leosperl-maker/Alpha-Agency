@@ -67,10 +67,10 @@ const PLATFORMS = {
 
 const POST_STATUSES = {
   draft: { label: 'Brouillon', color: 'bg-slate-500/20 text-slate-400', icon: FileText },
-  scheduled: { label: 'Programmé', color: 'bg-blue-500/20 text-blue-400', icon: Clock },
-  publishing: { label: 'Publication...', color: 'bg-yellow-500/20 text-yellow-400', icon: Loader2 },
-  published: { label: 'Publié', color: 'bg-green-500/20 text-green-400', icon: CheckCircle },
-  failed: { label: 'Échec', color: 'bg-red-500/20 text-red-400', icon: AlertCircle },
+  scheduled: { label: 'Programmé', color: 'bg-blue-100 text-blue-700', icon: Clock },
+  publishing: { label: 'Publication...', color: 'bg-yellow-100 text-yellow-700', icon: Loader2 },
+  published: { label: 'Publié', color: 'bg-green-100 text-green-700', icon: CheckCircle },
+  failed: { label: 'Échec', color: 'bg-red-100 text-red-700', icon: AlertCircle },
 };
 
 const POST_TYPES = {
@@ -91,7 +91,7 @@ const PlatformIcon = ({ platform, className = "w-4 h-4", showBg = false }) => {
   if (showBg) {
     return (
       <div className={`${config.bgColor} p-1.5 rounded-lg`}>
-        <Icon className={`${className} text-white`} />
+        <Icon className={`${className} text-slate-900`} />
       </div>
     );
   }
@@ -120,7 +120,7 @@ const EntityBadge = ({ entity, size = "sm" }) => {
         className={`${size === 'sm' ? 'w-2 h-2' : 'w-3 h-3'} rounded-full`}
         style={{ backgroundColor: entity.color }}
       />
-      <span className="text-white/80">{entity.name}</span>
+      <span className="text-slate-700">{entity.name}</span>
     </div>
   );
 };
@@ -131,7 +131,7 @@ const CapabilityIndicator = ({ capability, label, available }) => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className={`flex items-center gap-1 text-xs ${available ? 'text-green-400' : 'text-white/30'}`}>
+          <div className={`flex items-center gap-1 text-xs ${available ? 'text-green-400' : 'text-slate-400'}`}>
             {available ? <CheckCircle className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
             <span>{label}</span>
           </div>
@@ -153,7 +153,7 @@ const AccountCard = ({ account, selected, onToggle, onDisconnect }) => {
       className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer
         ${selected 
           ? 'border-indigo-500 bg-indigo-500/10' 
-          : 'border-white/10 bg-white/5 hover:bg-white/10'
+          : 'border-slate-200 bg-white hover:bg-slate-100'
         }`}
       onClick={() => onToggle(account.id)}
     >
@@ -165,28 +165,28 @@ const AccountCard = ({ account, selected, onToggle, onDisconnect }) => {
             className="w-10 h-10 rounded-full object-cover"
           />
         ) : (
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${platform?.bgColor || 'bg-white/10'}`}>
-            <PlatformIcon platform={account.platform} className="w-5 h-5 text-white" />
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${platform?.bgColor || 'bg-slate-100'}`}>
+            <PlatformIcon platform={account.platform} className="w-5 h-5 text-slate-900" />
           </div>
         )}
         <div 
           className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
           style={{ backgroundColor: platform?.color }}
         >
-          <PlatformIcon platform={account.platform} className="w-2.5 h-2.5 text-white" />
+          <PlatformIcon platform={account.platform} className="w-2.5 h-2.5 text-slate-900" />
         </div>
       </div>
       
       <div className="flex-1 min-w-0">
-        <p className="text-white text-sm font-medium truncate">{account.display_name}</p>
-        <p className="text-white/50 text-xs truncate">@{account.username || account.external_id}</p>
+        <p className="text-slate-900 text-sm font-medium truncate">{account.display_name}</p>
+        <p className="text-slate-500 text-xs truncate">@{account.username || account.external_id}</p>
       </div>
       
       <div className="flex items-center gap-2">
         {account.status === 'active' ? (
-          <Badge className="bg-green-500/20 text-green-400 border-none text-xs">Actif</Badge>
+          <Badge className="bg-green-100 text-green-700 border-none text-xs">Actif</Badge>
         ) : (
-          <Badge className="bg-red-500/20 text-red-400 border-none text-xs">Erreur</Badge>
+          <Badge className="bg-red-100 text-red-700 border-none text-xs">Erreur</Badge>
         )}
         
         <Checkbox 
@@ -220,13 +220,13 @@ const EntitySelector = ({ entities, selectedEntity, onSelect, accounts, selected
   };
   
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-3">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white backdrop-blur-xl rounded-xl border border-slate-200 p-3">
       {/* Entity Dropdown */}
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button 
             variant="ghost" 
-            className="flex items-center gap-2 text-white hover:bg-white/10 h-auto py-2 w-full sm:w-auto justify-start"
+            className="flex items-center gap-2 text-slate-900 hover:bg-slate-100 h-auto py-2 w-full sm:w-auto justify-start"
           >
             {selectedEntity ? (
               <>
@@ -242,10 +242,10 @@ const EntitySelector = ({ entities, selectedEntity, onSelect, accounts, selected
                 <span className="truncate">Sélectionner une entité</span>
               </>
             )}
-            <ChevronDown className="w-4 h-4 text-white/50 ml-auto sm:ml-0" />
+            <ChevronDown className="w-4 h-4 text-slate-500 ml-auto sm:ml-0" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-64 p-2 bg-slate-900 border-white/10">
+        <PopoverContent className="w-64 p-2 bg-slate-900 border-slate-200">
           <div className="space-y-1">
             {entities.map(entity => (
               <button
@@ -253,7 +253,7 @@ const EntitySelector = ({ entities, selectedEntity, onSelect, accounts, selected
                 className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors
                   ${selectedEntity?.id === entity.id 
                     ? 'bg-indigo-500/20 text-white' 
-                    : 'text-white/80 hover:bg-white/10'
+                    : 'text-slate-700 hover:bg-slate-100'
                   }`}
                 onClick={() => {
                   onSelect(entity);
@@ -265,15 +265,15 @@ const EntitySelector = ({ entities, selectedEntity, onSelect, accounts, selected
                   style={{ backgroundColor: entity.color }}
                 />
                 <span className="flex-1 truncate">{entity.name}</span>
-                <span className="text-xs text-white/40">{entity.account_count}</span>
+                <span className="text-xs text-slate-400">{entity.account_count}</span>
               </button>
             ))}
           </div>
         </PopoverContent>
       </Popover>
       
-      <Separator orientation="vertical" className="hidden sm:block h-8 bg-white/10" />
-      <Separator orientation="horizontal" className="sm:hidden bg-white/10" />
+      <Separator orientation="vertical" className="hidden sm:block h-8 bg-slate-100" />
+      <Separator orientation="horizontal" className="sm:hidden bg-slate-100" />
       
       {/* Accounts Multi-Select */}
       {selectedEntity && (
@@ -305,7 +305,7 @@ const EntitySelector = ({ entities, selectedEntity, onSelect, accounts, selected
                         />
                       ) : (
                         <div className={`w-7 h-7 rounded-full flex items-center justify-center ${PLATFORMS[account.platform]?.bgColor || 'bg-white/20'}`}>
-                          <PlatformIcon platform={account.platform} className="w-4 h-4 text-white" />
+                          <PlatformIcon platform={account.platform} className="w-4 h-4 text-slate-900" />
                         </div>
                       )}
                     </button>
@@ -317,7 +317,7 @@ const EntitySelector = ({ entities, selectedEntity, onSelect, accounts, selected
               </TooltipProvider>
             ))}
             {entityAccounts.length > 4 && (
-              <span className="text-xs text-white/50 ml-1">+{entityAccounts.length - 4}</span>
+              <span className="text-xs text-slate-500 ml-1">+{entityAccounts.length - 4}</span>
             )}
           </div>
           
@@ -325,19 +325,19 @@ const EntitySelector = ({ entities, selectedEntity, onSelect, accounts, selected
             variant="ghost"
             size="sm"
             onClick={toggleAll}
-            className="text-xs text-white/60 hover:text-white h-7 hidden sm:inline-flex"
+            className="text-xs text-slate-500 hover:text-slate-900 h-7 hidden sm:inline-flex"
           >
             {allSelected ? 'Désélectionner' : 'Tout'}
           </Button>
           
-          <Badge className="bg-indigo-500/20 text-indigo-400 border-none text-xs">
+          <Badge className="bg-indigo-500/20 text-indigo-600 border-none text-xs">
             {selectedAccountIds.length} actif{selectedAccountIds.length > 1 ? 's' : ''}
           </Badge>
         </div>
       )}
       
       {!selectedEntity && (
-        <p className="text-white/40 text-sm">
+        <p className="text-slate-400 text-sm">
           Sélectionnez une entité pour voir les comptes
         </p>
       )}
@@ -1038,7 +1038,7 @@ const SocialMediaPage = () => {
   const renderPublishing = () => (
     <div className="space-y-4">
       {/* Sub-navigation - Scrollable on mobile */}
-      <div className="flex items-center gap-1 sm:gap-2 bg-white/5 rounded-lg p-1 overflow-x-auto scrollbar-hide">
+      <div className="flex items-center gap-1 sm:gap-2 bg-white rounded-lg p-1 overflow-x-auto scrollbar-hide">
         {[
           { id: 'calendar', label: 'Calendrier', icon: CalendarDays },
           { id: 'queue', label: 'File d\'attente', icon: LayoutList },
@@ -1050,7 +1050,7 @@ const SocialMediaPage = () => {
             variant={activeSubSection === item.id ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveSubSection(item.id)}
-            className={`whitespace-nowrap flex-shrink-0 ${activeSubSection === item.id ? 'bg-indigo-600' : 'text-white/60'}`}
+            className={`whitespace-nowrap flex-shrink-0 ${activeSubSection === item.id ? 'bg-indigo-600' : 'text-slate-500'}`}
           >
             <item.icon className="w-4 h-4 sm:mr-1" />
             <span className="hidden sm:inline">{item.label}</span>
@@ -1098,26 +1098,26 @@ const SocialMediaPage = () => {
     }
     
     return (
-      <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10">
+      <div className="bg-white backdrop-blur-xl rounded-xl border border-slate-200">
         {/* Calendar Header */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 sm:p-4 border-b border-white/10">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 sm:p-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCurrentDate(new Date(year, month - 1))}
-              className="text-white/60 hover:text-white h-8 w-8"
+              className="text-slate-500 hover:text-slate-900 h-8 w-8"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <h3 className="text-white font-medium min-w-[140px] sm:min-w-[150px] text-center text-sm sm:text-base capitalize">
+            <h3 className="text-slate-900 font-medium min-w-[140px] sm:min-w-[150px] text-center text-sm sm:text-base capitalize">
               {currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
             </h3>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCurrentDate(new Date(year, month + 1))}
-              className="text-white/60 hover:text-white h-8 w-8"
+              className="text-slate-500 hover:text-slate-900 h-8 w-8"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
@@ -1137,7 +1137,7 @@ const SocialMediaPage = () => {
         <div className="grid grid-cols-7 overflow-x-auto">
           {/* Weekday headers */}
           {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => (
-            <div key={idx} className="p-1 sm:p-2 text-center text-[10px] sm:text-xs font-medium text-white/50 border-b border-white/10">
+            <div key={idx} className="p-1 sm:p-2 text-center text-[10px] sm:text-xs font-medium text-slate-500 border-b border-slate-200">
               <span className="sm:hidden">{day}</span>
               <span className="hidden sm:inline">{['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'][idx]}</span>
             </div>
@@ -1152,10 +1152,10 @@ const SocialMediaPage = () => {
             return (
               <div
                 key={idx}
-                className={`min-h-[60px] sm:min-h-[100px] p-0.5 sm:p-1 border-b border-r border-white/5 
-                  ${day.isCurrentMonth ? '' : 'bg-white/[0.02]'}
+                className={`min-h-[60px] sm:min-h-[100px] p-0.5 sm:p-1 border-b border-r border-slate-200 
+                  ${day.isCurrentMonth ? '' : 'bg-slate-50'}
                   ${isToday ? 'bg-indigo-500/10' : ''}
-                  hover:bg-white/10 transition-colors cursor-pointer`}
+                  hover:bg-slate-100 transition-colors cursor-pointer`}
                 onClick={() => {
                   if (dayPosts.length > 0) {
                     // Show posts for this day
@@ -1169,7 +1169,7 @@ const SocialMediaPage = () => {
                   }
                 }}
               >
-                <div className={`text-[10px] sm:text-xs p-0.5 sm:p-1 ${day.isCurrentMonth ? 'text-white/80' : 'text-white/30'}
+                <div className={`text-[10px] sm:text-xs p-0.5 sm:p-1 ${day.isCurrentMonth ? 'text-slate-700' : 'text-slate-400'}
                   ${isToday ? 'bg-indigo-500 text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center mx-auto sm:mx-0' : ''}`}
                 >
                   {day.date.getDate()}
@@ -1186,7 +1186,7 @@ const SocialMediaPage = () => {
                     </div>
                   ))}
                   {dayPosts.length > 2 && (
-                    <div className="text-[10px] text-white/40 px-1">
+                    <div className="text-[10px] text-slate-400 px-1">
                       +{dayPosts.length - 2}
                     </div>
                   )}
@@ -1201,7 +1201,7 @@ const SocialMediaPage = () => {
                     />
                   ))}
                   {dayPosts.length > 3 && (
-                    <span className="text-[8px] text-white/40">+{dayPosts.length - 3}</span>
+                    <span className="text-[8px] text-slate-400">+{dayPosts.length - 3}</span>
                   )}
                 </div>
               </div>
@@ -1225,7 +1225,7 @@ const SocialMediaPage = () => {
     return (
       <div className="space-y-3">
         {filteredPosts.length === 0 ? (
-          <div className="text-center py-8 sm:py-12 text-white/40">
+          <div className="text-center py-8 sm:py-12 text-slate-400">
             <FileText className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 opacity-50" />
             <p className="text-sm sm:text-base">Aucun post {emptyLabel}</p>
             <Button 
@@ -1241,7 +1241,7 @@ const SocialMediaPage = () => {
           filteredPosts.map(post => (
             <div 
               key={post.id}
-              className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+              className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-white rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors"
             >
               {/* Media preview */}
               <div className="flex items-start gap-3 w-full sm:w-auto">
@@ -1252,8 +1252,8 @@ const SocialMediaPage = () => {
                     className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-white/30" />
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400" />
                   </div>
                 )}
                 
@@ -1268,7 +1268,7 @@ const SocialMediaPage = () => {
                       ) : null;
                     })}
                   </div>
-                  <p className="text-white text-xs line-clamp-2">{post.content}</p>
+                  <p className="text-slate-900 text-xs line-clamp-2">{post.content}</p>
                   {post.error_message && (
                     <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3" />
@@ -1290,7 +1290,7 @@ const SocialMediaPage = () => {
                   })}
                 </div>
                 
-                <p className="text-white text-sm line-clamp-2 mb-2">{post.content}</p>
+                <p className="text-slate-900 text-sm line-clamp-2 mb-2">{post.content}</p>
                 
                 {/* Error message if any */}
                 {post.error_message && (
@@ -1302,7 +1302,7 @@ const SocialMediaPage = () => {
                   </div>
                 )}
                 
-                <div className="flex items-center gap-4 text-xs text-white/50">
+                <div className="flex items-center gap-4 text-xs text-slate-500">
                   {post.scheduled_at && (
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
@@ -1318,9 +1318,9 @@ const SocialMediaPage = () => {
               </div>
               
               {/* Mobile footer */}
-              <div className="flex items-center justify-between w-full sm:hidden pt-2 border-t border-white/5">
+              <div className="flex items-center justify-between w-full sm:hidden pt-2 border-t border-slate-200">
                 {post.scheduled_at && (
-                  <span className="flex items-center gap-1 text-[10px] text-white/50">
+                  <span className="flex items-center gap-1 text-[10px] text-slate-500">
                     <Clock className="w-3 h-3" />
                     {new Date(post.scheduled_at).toLocaleDateString('fr-FR', {
                       day: 'numeric',
@@ -1332,13 +1332,13 @@ const SocialMediaPage = () => {
                 )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-white/40 hover:text-white h-7 w-7">
+                    <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-900 h-7 w-7">
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-slate-900 border-white/10">
+                  <DropdownMenuContent className="bg-slate-900 border-slate-200">
                     <DropdownMenuItem 
-                      className="text-white/80 cursor-pointer"
+                      className="text-slate-700 cursor-pointer"
                       onClick={() => {
                         setEditingPost(post);
                         setShowComposer(true);
@@ -1347,11 +1347,11 @@ const SocialMediaPage = () => {
                       <Edit className="w-4 h-4 mr-2" />
                       Modifier
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-white/80 cursor-pointer">
+                    <DropdownMenuItem className="text-slate-700 cursor-pointer">
                       <Copy className="w-4 h-4 mr-2" />
                       Dupliquer
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuSeparator className="bg-slate-100" />
                     <DropdownMenuItem 
                       className="text-red-400 cursor-pointer"
                       onClick={async () => {
@@ -1376,13 +1376,13 @@ const SocialMediaPage = () => {
               {/* Actions - Desktop */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="hidden sm:flex text-white/40 hover:text-white">
+                  <Button variant="ghost" size="icon" className="hidden sm:flex text-slate-400 hover:text-slate-900">
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-slate-900 border-white/10">
+                <DropdownMenuContent className="bg-slate-900 border-slate-200">
                   <DropdownMenuItem 
-                    className="text-white/80 cursor-pointer"
+                    className="text-slate-700 cursor-pointer"
                     onClick={() => {
                       setEditingPost(post);
                       setShowComposer(true);
@@ -1391,11 +1391,11 @@ const SocialMediaPage = () => {
                     <Edit className="w-4 h-4 mr-2" />
                     Modifier
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="text-white/80 cursor-pointer">
+                  <DropdownMenuItem className="text-slate-700 cursor-pointer">
                     <Copy className="w-4 h-4 mr-2" />
                     Dupliquer
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuSeparator className="bg-slate-100" />
                   <DropdownMenuItem 
                     className="text-red-400 cursor-pointer"
                     onClick={async () => {
@@ -1435,16 +1435,16 @@ const SocialMediaPage = () => {
     };
     
     return (
-      <div className="flex flex-col md:flex-row h-[calc(100vh-280px)] min-h-[400px] bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+      <div className="flex flex-col md:flex-row h-[calc(100vh-280px)] min-h-[400px] bg-white rounded-xl border border-slate-200 overflow-hidden">
         {/* Thread list - full width on mobile, fixed width on desktop */}
-        <div className={`${showMobileDetail ? 'hidden md:flex' : 'flex'} w-full md:w-80 lg:w-96 md:border-r border-white/10 flex-col`}>
+        <div className={`${showMobileDetail ? 'hidden md:flex' : 'flex'} w-full md:w-80 lg:w-96 md:border-r border-slate-200 flex-col`}>
           {/* Header */}
-          <div className="p-2 sm:p-3 border-b border-white/10 space-y-2 sm:space-y-3">
+          <div className="p-2 sm:p-3 border-b border-slate-200 space-y-2 sm:space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <h3 className="text-white font-medium text-sm sm:text-base">Inbox</h3>
+                <h3 className="text-slate-900 font-medium text-sm sm:text-base">Inbox</h3>
                 {inboxStats.unread > 0 && (
-                  <Badge className="bg-red-500/20 text-red-400 border-none text-xs">
+                  <Badge className="bg-red-100 text-red-700 border-none text-xs">
                     {inboxStats.unread}
                   </Badge>
                 )}
@@ -1453,7 +1453,7 @@ const SocialMediaPage = () => {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="text-white/50 hover:text-white h-7 w-7 sm:h-8 sm:w-8"
+                  className="text-slate-500 hover:text-slate-900 h-7 w-7 sm:h-8 sm:w-8"
                   onClick={handleSyncInbox}
                   disabled={inboxLoading}
                 >
@@ -1462,7 +1462,7 @@ const SocialMediaPage = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="hidden sm:inline-flex text-white/50 hover:text-white text-xs"
+                  className="hidden sm:inline-flex text-slate-500 hover:text-slate-900 text-xs"
                   onClick={handleMarkAllAsRead}
                 >
                   Tout lire
@@ -1471,10 +1471,10 @@ const SocialMediaPage = () => {
             </div>
             
             <div className="relative">
-              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/40" />
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
               <Input 
                 placeholder="Rechercher..." 
-                className="pl-8 sm:pl-9 bg-white/5 border-white/10 h-7 sm:h-8 text-xs sm:text-sm"
+                className="pl-8 sm:pl-9 bg-white border-slate-200 h-7 sm:h-8 text-xs sm:text-sm"
               />
             </div>
             
@@ -1490,7 +1490,7 @@ const SocialMediaPage = () => {
                   key={filter.key}
                   variant="ghost"
                   size="sm"
-                  className={`text-[10px] sm:text-xs h-6 sm:h-7 px-2 flex-shrink-0 ${inboxFilter === filter.key ? 'bg-white/10 text-white' : 'text-white/50'}`}
+                  className={`text-[10px] sm:text-xs h-6 sm:h-7 px-2 flex-shrink-0 ${inboxFilter === filter.key ? 'bg-slate-100 text-slate-900' : 'text-slate-500'}`}
                   onClick={() => {
                     setInboxFilter(filter.key);
                     loadInbox();
@@ -1506,10 +1506,10 @@ const SocialMediaPage = () => {
           <ScrollArea className="flex-1">
             {inboxLoading ? (
               <div className="p-4 text-center">
-                <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin mx-auto text-white/40" />
+                <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin mx-auto text-slate-400" />
               </div>
             ) : inboxMessages.length === 0 ? (
-              <div className="p-4 text-center text-white/40">
+              <div className="p-4 text-center text-slate-400">
                 <MessageSquare className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 opacity-50" />
                 <p className="text-xs sm:text-sm">Aucun message</p>
                 <p className="text-[10px] sm:text-xs mt-1">Les commentaires et messages apparaîtront ici</p>
@@ -1531,8 +1531,8 @@ const SocialMediaPage = () => {
                       selectedMessage?.id === message.id 
                         ? 'bg-indigo-500/20' 
                         : message.status === 'unread' 
-                          ? 'bg-white/5 hover:bg-white/10' 
-                          : 'hover:bg-white/5'
+                          ? 'bg-white hover:bg-slate-100' 
+                          : 'hover:bg-slate-50'
                     }`}
                     onClick={() => handleSelectMessage(message)}
                   >
@@ -1545,36 +1545,36 @@ const SocialMediaPage = () => {
                             className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center">
-                            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white/50" />
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500" />
                           </div>
                         )}
                         <div 
                           className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center"
                           style={{ backgroundColor: PLATFORMS[message.platform]?.color || '#666' }}
                         >
-                          <PlatformIcon platform={message.platform} className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" />
+                          <PlatformIcon platform={message.platform} className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-slate-900" />
                         </div>
                       </div>
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-1">
-                          <span className={`text-xs sm:text-sm truncate ${message.status === 'unread' ? 'text-white font-medium' : 'text-white/80'}`}>
+                          <span className={`text-xs sm:text-sm truncate ${message.status === 'unread' ? 'text-slate-900 font-medium' : 'text-slate-700'}`}>
                             {message.sender_name}
                           </span>
-                          <span className="text-[10px] sm:text-xs text-white/40 flex-shrink-0">
+                          <span className="text-[10px] sm:text-xs text-slate-400 flex-shrink-0">
                             {new Date(message.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                           </span>
                         </div>
-                        <p className="text-[10px] sm:text-xs text-white/50 truncate mt-0.5">
+                        <p className="text-[10px] sm:text-xs text-slate-500 truncate mt-0.5">
                           {message.content}
                         </p>
                         <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
-                          <Badge className="text-[8px] sm:text-[10px] h-3.5 sm:h-4 px-1 sm:px-1.5 bg-white/10 text-white/60 border-none">
+                          <Badge className="text-[8px] sm:text-[10px] h-3.5 sm:h-4 px-1 sm:px-1.5 bg-slate-100 text-slate-500 border-none">
                             {message.message_type === 'comment' ? 'Comm.' : 'DM'}
                           </Badge>
                           {message.status === 'replied' && (
-                            <Badge className="text-[8px] sm:text-[10px] h-3.5 sm:h-4 px-1 sm:px-1.5 bg-green-500/20 text-green-400 border-none">
+                            <Badge className="text-[8px] sm:text-[10px] h-3.5 sm:h-4 px-1 sm:px-1.5 bg-green-100 text-green-700 border-none">
                               ✓
                             </Badge>
                           )}
@@ -1597,14 +1597,14 @@ const SocialMediaPage = () => {
           {selectedMessage ? (
             <>
               {/* Message header */}
-              <div className="p-3 sm:p-4 border-b border-white/10">
+              <div className="p-3 sm:p-4 border-b border-slate-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 sm:gap-3">
                     {/* Back button for mobile */}
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="md:hidden text-white/50 hover:text-white h-8 w-8"
+                      className="md:hidden text-slate-500 hover:text-slate-900 h-8 w-8"
                       onClick={() => setShowMobileDetail(false)}
                     >
                       <ChevronLeft className="w-5 h-5" />
@@ -1617,22 +1617,22 @@ const SocialMediaPage = () => {
                         className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center">
-                        <Users className="w-4 h-4 sm:w-5 sm:h-5 text-white/50" />
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                        <Users className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500" />
                       </div>
                     )}
                     <div>
-                      <h4 className="text-white font-medium text-sm sm:text-base">{selectedMessage.sender_name}</h4>
-                      <p className="text-[10px] sm:text-xs text-white/50">
+                      <h4 className="text-slate-900 font-medium text-sm sm:text-base">{selectedMessage.sender_name}</h4>
+                      <p className="text-[10px] sm:text-xs text-slate-500">
                         via {PLATFORMS[selectedMessage.platform]?.name}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 sm:gap-2">
-                    <Button variant="ghost" size="icon" className="text-white/50 hover:text-white h-7 w-7 sm:h-8 sm:w-8">
+                    <Button variant="ghost" size="icon" className="text-slate-500 hover:text-slate-900 h-7 w-7 sm:h-8 sm:w-8">
                       <Archive className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-white/50 hover:text-white h-7 w-7 sm:h-8 sm:w-8">
+                    <Button variant="ghost" size="icon" className="text-slate-500 hover:text-slate-900 h-7 w-7 sm:h-8 sm:w-8">
                       <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Button>
                   </div>
@@ -1642,21 +1642,21 @@ const SocialMediaPage = () => {
               {/* Message content */}
               <div className="flex-1 p-3 sm:p-4 overflow-auto">
                 {selectedMessage.post_content && (
-                  <div className="mb-3 sm:mb-4 p-2 sm:p-3 rounded-lg bg-white/5 border border-white/10">
-                    <p className="text-[10px] sm:text-xs text-white/50 mb-1">En réponse à :</p>
-                    <p className="text-xs sm:text-sm text-white/70">{selectedMessage.post_content}</p>
+                  <div className="mb-3 sm:mb-4 p-2 sm:p-3 rounded-lg bg-white border border-slate-200">
+                    <p className="text-[10px] sm:text-xs text-slate-500 mb-1">En réponse à :</p>
+                    <p className="text-xs sm:text-sm text-slate-600">{selectedMessage.post_content}</p>
                   </div>
                 )}
                 
                 <div className="flex gap-2 sm:gap-3">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                    <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/50" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                    <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500" />
                   </div>
                   <div className="flex-1">
-                    <div className="bg-white/5 rounded-lg p-2 sm:p-3 inline-block max-w-[85%] sm:max-w-[80%]">
-                      <p className="text-white text-xs sm:text-sm">{selectedMessage.content}</p>
+                    <div className="bg-white rounded-lg p-2 sm:p-3 inline-block max-w-[85%] sm:max-w-[80%]">
+                      <p className="text-slate-900 text-xs sm:text-sm">{selectedMessage.content}</p>
                     </div>
-                    <p className="text-[10px] sm:text-xs text-white/40 mt-1">
+                    <p className="text-[10px] sm:text-xs text-slate-400 mt-1">
                       {new Date(selectedMessage.created_at).toLocaleString('fr-FR')}
                     </p>
                   </div>
@@ -1666,9 +1666,9 @@ const SocialMediaPage = () => {
                   <div className="flex gap-2 sm:gap-3 mt-3 sm:mt-4 justify-end">
                     <div className="flex-1 text-right">
                       <div className="bg-indigo-500/20 rounded-lg p-2 sm:p-3 inline-block max-w-[85%] sm:max-w-[80%]">
-                        <p className="text-white text-xs sm:text-sm">{selectedMessage.reply_content}</p>
+                        <p className="text-slate-900 text-xs sm:text-sm">{selectedMessage.reply_content}</p>
                       </div>
-                      <p className="text-[10px] sm:text-xs text-white/40 mt-1">
+                      <p className="text-[10px] sm:text-xs text-slate-400 mt-1">
                         Vous • {selectedMessage.replied_at ? new Date(selectedMessage.replied_at).toLocaleString('fr-FR') : 'Répondu'}
                       </p>
                     </div>
@@ -1677,11 +1677,11 @@ const SocialMediaPage = () => {
               </div>
               
               {/* Reply input */}
-              <div className="p-2 sm:p-4 border-t border-white/10">
+              <div className="p-2 sm:p-4 border-t border-slate-200">
                 <div className="flex gap-2">
                   <Textarea
                     placeholder="Écrire une réponse..."
-                    className="bg-white/5 border-white/10 text-white resize-none text-xs sm:text-sm"
+                    className="bg-white border-slate-200 text-slate-900 resize-none text-xs sm:text-sm"
                     rows={2}
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
@@ -1701,7 +1701,7 @@ const SocialMediaPage = () => {
               </div>
             </>
           ) : (
-            <div className="hidden md:flex flex-1 items-center justify-center text-white/40">
+            <div className="hidden md:flex flex-1 items-center justify-center text-slate-400">
               <div className="text-center">
                 <Mail className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 opacity-30" />
                 <p className="text-sm sm:text-base">Sélectionnez une conversation</p>
@@ -1718,25 +1718,25 @@ const SocialMediaPage = () => {
     <div className="space-y-4 sm:space-y-6">
       {/* Overview Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-        <Card className="bg-white/5 border-white/10">
+        <Card className="bg-white border-slate-200">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/50 text-[10px] sm:text-xs">Posts totaux</p>
-                <p className="text-xl sm:text-2xl font-bold text-white">{stats?.total_posts || 0}</p>
+                <p className="text-slate-500 text-[10px] sm:text-xs">Posts totaux</p>
+                <p className="text-xl sm:text-2xl font-bold text-slate-900">{stats?.total_posts || 0}</p>
               </div>
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-white/5 border-white/10">
+        <Card className="bg-white border-slate-200">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/50 text-[10px] sm:text-xs">Publiés</p>
+                <p className="text-slate-500 text-[10px] sm:text-xs">Publiés</p>
                 <p className="text-xl sm:text-2xl font-bold text-green-400">{stats?.published || 0}</p>
               </div>
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
@@ -1746,11 +1746,11 @@ const SocialMediaPage = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white/5 border-white/10">
+        <Card className="bg-white border-slate-200">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/50 text-[10px] sm:text-xs">Programmés</p>
+                <p className="text-slate-500 text-[10px] sm:text-xs">Programmés</p>
                 <p className="text-xl sm:text-2xl font-bold text-blue-400">{stats?.scheduled || 0}</p>
               </div>
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
@@ -1760,11 +1760,11 @@ const SocialMediaPage = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white/5 border-white/10">
+        <Card className="bg-white border-slate-200">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/50 text-[10px] sm:text-xs">Entités</p>
+                <p className="text-slate-500 text-[10px] sm:text-xs">Entités</p>
                 <p className="text-xl sm:text-2xl font-bold text-purple-400">{stats?.entities_count || 0}</p>
               </div>
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
@@ -1776,12 +1776,12 @@ const SocialMediaPage = () => {
       </div>
       
       {/* Charts placeholder */}
-      <Card className="bg-white/5 border-white/10">
+      <Card className="bg-white border-slate-200">
         <CardHeader className="p-3 sm:p-6">
-          <CardTitle className="text-white text-sm sm:text-lg">Performance par entité</CardTitle>
+          <CardTitle className="text-slate-900 text-sm sm:text-lg">Performance par entité</CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-6 pt-0">
-          <div className="h-40 sm:h-64 flex items-center justify-center text-white/40">
+          <div className="h-40 sm:h-64 flex items-center justify-center text-slate-400">
             <div className="text-center">
               <BarChart3 className="w-10 h-10 sm:w-16 sm:h-16 mx-auto mb-2 sm:mb-4 opacity-30" />
               <p className="text-xs sm:text-base">Les statistiques détaillées seront disponibles après les premières publications</p>
@@ -1795,11 +1795,11 @@ const SocialMediaPage = () => {
   const renderAccounts = () => (
     <div className="space-y-4 sm:space-y-6">
       {/* Entities Management */}
-      <Card className="bg-white/5 border-white/10">
+      <Card className="bg-white border-slate-200">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-6">
           <div>
-            <CardTitle className="text-white text-base sm:text-lg">Entités</CardTitle>
-            <CardDescription className="text-white/50 text-xs sm:text-sm">
+            <CardTitle className="text-slate-900 text-base sm:text-lg">Entités</CardTitle>
+            <CardDescription className="text-slate-500 text-xs sm:text-sm">
               Gérez vos marques et clients
             </CardDescription>
           </div>
@@ -1814,7 +1814,7 @@ const SocialMediaPage = () => {
         </CardHeader>
         <CardContent className="p-3 sm:p-6 pt-0">
           {entities.length === 0 ? (
-            <div className="text-center py-6 sm:py-8 text-white/40">
+            <div className="text-center py-6 sm:py-8 text-slate-400">
               <Building2 className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 opacity-50" />
               <p className="text-sm sm:text-base">Aucune entité créée</p>
               <p className="text-xs sm:text-sm mt-1">Créez des entités pour organiser vos comptes</p>
@@ -1832,7 +1832,7 @@ const SocialMediaPage = () => {
               {entities.map(entity => (
                 <div 
                   key={entity.id}
-                  className="p-3 sm:p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors group"
+                  className="p-3 sm:p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 transition-colors group"
                 >
                   <div className="flex items-center justify-between mb-2 sm:mb-3">
                     <div className="flex items-center gap-2 sm:gap-3">
@@ -1843,8 +1843,8 @@ const SocialMediaPage = () => {
                         <Building2 className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: entity.color }} />
                       </div>
                       <div>
-                        <h4 className="text-white font-medium text-sm sm:text-base">{entity.name}</h4>
-                        <p className="text-white/50 text-[10px] sm:text-xs">{entity.account_count} comptes</p>
+                        <h4 className="text-slate-900 font-medium text-sm sm:text-base">{entity.name}</h4>
+                        <p className="text-slate-500 text-[10px] sm:text-xs">{entity.account_count} comptes</p>
                       </div>
                     </div>
                     <Button
@@ -1874,11 +1874,11 @@ const SocialMediaPage = () => {
       </Card>
       
       {/* Connected Accounts */}
-      <Card className="bg-white/5 border-white/10">
+      <Card className="bg-white border-slate-200">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-6">
           <div>
-            <CardTitle className="text-white text-base sm:text-lg">Comptes connectés</CardTitle>
-            <CardDescription className="text-white/50 text-xs sm:text-sm">
+            <CardTitle className="text-slate-900 text-base sm:text-lg">Comptes connectés</CardTitle>
+            <CardDescription className="text-slate-500 text-xs sm:text-sm">
               {accounts.length} compte{accounts.length > 1 ? 's' : ''} connecté{accounts.length > 1 ? 's' : ''}
             </CardDescription>
           </div>
@@ -1886,7 +1886,7 @@ const SocialMediaPage = () => {
             <Button
               variant="outline"
               size="sm"
-              className="border-white/20 text-white/70 hover:text-white hover:bg-white/10 flex-1 sm:flex-none"
+              className="border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex-1 sm:flex-none"
               onClick={async () => {
                 try {
                   setLoading(true);
@@ -1913,19 +1913,19 @@ const SocialMediaPage = () => {
                   Connecter
                 </Button>
               </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-slate-900 border-white/10">
-              <DropdownMenuLabel className="text-white/50">Plateformes</DropdownMenuLabel>
-              <DropdownMenuItem onClick={handleConnectMeta} className="text-white/80 cursor-pointer">
+            <DropdownMenuContent className="bg-slate-900 border-slate-200">
+              <DropdownMenuLabel className="text-slate-500">Plateformes</DropdownMenuLabel>
+              <DropdownMenuItem onClick={handleConnectMeta} className="text-slate-700 cursor-pointer">
                 <Facebook className="w-4 h-4 mr-2 text-[#1877F2]" />
                 Facebook / Instagram
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleConnectLinkedIn} className="text-white/80 cursor-pointer">
+              <DropdownMenuItem onClick={handleConnectLinkedIn} className="text-slate-700 cursor-pointer">
                 <Linkedin className="w-4 h-4 mr-2 text-[#0A66C2]" />
                 LinkedIn
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleConnectTikTok} className="text-white/80 cursor-pointer">
+              <DropdownMenuItem onClick={handleConnectTikTok} className="text-slate-700 cursor-pointer">
                 <Play className="w-4 h-4 mr-2" />
-                TikTok {tiktokSandboxMode && <Badge className="ml-2 bg-cyan-500/20 text-cyan-400 text-[10px] border-none">Sandbox</Badge>}
+                TikTok {tiktokSandboxMode && <Badge className="ml-2 bg-cyan-100 text-cyan-700 text-[10px] border-none">Sandbox</Badge>}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -1946,15 +1946,15 @@ const SocialMediaPage = () => {
                 <ChevronDown className="w-3 h-3 ml-1" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-slate-900 border-white/10 min-w-[220px]">
-              <DropdownMenuLabel className="text-white/50 text-xs">Mode démonstration</DropdownMenuLabel>
+            <DropdownMenuContent className="bg-slate-900 border-slate-200 min-w-[220px]">
+              <DropdownMenuLabel className="text-slate-500 text-xs">Mode démonstration</DropdownMenuLabel>
               
               {/* TikTok Sandbox */}
               <div className="px-2 py-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Play className="w-4 h-4" />
-                    <span className="text-white/80 text-sm">TikTok Sandbox</span>
+                    <span className="text-slate-700 text-sm">TikTok Sandbox</span>
                   </div>
                   <Switch
                     checked={tiktokSandboxMode}
@@ -1962,17 +1962,17 @@ const SocialMediaPage = () => {
                     className="data-[state=checked]:bg-cyan-500"
                   />
                 </div>
-                <p className="text-white/40 text-xs mt-1 pl-6">Publication test TikTok</p>
+                <p className="text-slate-400 text-xs mt-1 pl-6">Publication test TikTok</p>
               </div>
               
-              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuSeparator className="bg-slate-100" />
               
               {/* Meta Sandbox */}
               <div className="px-2 py-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Facebook className="w-4 h-4 text-[#1877F2]" />
-                    <span className="text-white/80 text-sm">Meta Sandbox</span>
+                    <span className="text-slate-700 text-sm">Meta Sandbox</span>
                   </div>
                   <Switch
                     checked={metaSandboxMode}
@@ -1980,12 +1980,12 @@ const SocialMediaPage = () => {
                     className="data-[state=checked]:bg-cyan-500"
                   />
                 </div>
-                <p className="text-white/40 text-xs mt-1 pl-6">Messages & commentaires test</p>
+                <p className="text-slate-400 text-xs mt-1 pl-6">Messages & commentaires test</p>
               </div>
               
               {(tiktokSandboxMode || metaSandboxMode) && (
                 <>
-                  <DropdownMenuSeparator className="bg-white/10" />
+                  <DropdownMenuSeparator className="bg-slate-100" />
                   <div className="px-2 py-2 bg-cyan-500/10 rounded-b-md">
                     <p className="text-cyan-400 text-xs flex items-center gap-1">
                       <Info className="w-3 h-3" />
@@ -2013,7 +2013,7 @@ const SocialMediaPage = () => {
         </CardHeader>
         <CardContent className="p-3 sm:p-6 pt-0">
           {accounts.length === 0 ? (
-            <div className="text-center py-6 sm:py-8 text-white/40">
+            <div className="text-center py-6 sm:py-8 text-slate-400">
               <Link2 className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 opacity-50" />
               <p className="text-sm sm:text-base">Aucun compte connecté</p>
               <p className="text-xs sm:text-sm mt-1">Connectez vos réseaux sociaux pour commencer</p>
@@ -2021,15 +2021,15 @@ const SocialMediaPage = () => {
           ) : (
             <>
               {/* Bulk actions bar */}
-              <div className="flex items-center justify-between mb-4 p-3 bg-white/5 rounded-lg">
+              <div className="flex items-center justify-between mb-4 p-3 bg-white rounded-lg">
                 <div className="flex items-center gap-3">
                   <input 
                     type="checkbox"
                     checked={selectedAccounts.length === accounts.length && accounts.length > 0}
                     onChange={selectAllAccounts}
-                    className="w-4 h-4 rounded border-white/30 bg-white/10"
+                    className="w-4 h-4 rounded border-white/30 bg-slate-100"
                   />
-                  <span className="text-white/60 text-sm">
+                  <span className="text-slate-500 text-sm">
                     {selectedAccounts.length > 0 
                       ? `${selectedAccounts.length} sélectionné(s)` 
                       : 'Tout sélectionner'}
@@ -2051,7 +2051,7 @@ const SocialMediaPage = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => setShowBulkEntityModal(true)}
-                      className="text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/10"
+                      className="text-indigo-600 border-indigo-500/30 hover:bg-indigo-500/10"
                     >
                       <Building2 className="w-4 h-4 mr-1" />
                       Ajouter à entité
@@ -2073,14 +2073,14 @@ const SocialMediaPage = () => {
               {accounts.map(account => (
                 <div 
                   key={account.id}
-                  className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border ${selectedAccounts.includes(account.id) ? 'border-indigo-500/50 bg-indigo-500/10' : 'border-white/10 bg-white/5'}`}
+                  className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border ${selectedAccounts.includes(account.id) ? 'border-indigo-500/50 bg-indigo-500/10' : 'border-slate-200 bg-white'}`}
                 >
                   {/* Checkbox */}
                   <input 
                     type="checkbox"
                     checked={selectedAccounts.includes(account.id)}
                     onChange={() => toggleAccountSelection(account.id)}
-                    className="w-4 h-4 rounded border-white/30 bg-white/10 flex-shrink-0"
+                    className="w-4 h-4 rounded border-white/30 bg-slate-100 flex-shrink-0"
                   />
                   
                   {/* Avatar et info */}
@@ -2093,29 +2093,29 @@ const SocialMediaPage = () => {
                           className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
                         />
                       ) : (
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${PLATFORMS[account.platform]?.bgColor || 'bg-white/10'}`}>
-                          <PlatformIcon platform={account.platform} className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${PLATFORMS[account.platform]?.bgColor || 'bg-slate-100'}`}>
+                          <PlatformIcon platform={account.platform} className="w-5 h-5 sm:w-6 sm:h-6 text-slate-900" />
                         </div>
                       )}
                       <div 
                         className="absolute -bottom-0.5 -right-0.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border-2 border-slate-900"
                         style={{ backgroundColor: PLATFORMS[account.platform]?.color }}
                       >
-                        <PlatformIcon platform={account.platform} className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
+                        <PlatformIcon platform={account.platform} className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-900" />
                       </div>
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-white font-medium text-sm sm:text-base truncate">{account.display_name}</h4>
-                      <p className="text-white/50 text-xs sm:text-sm truncate">@{account.username || account.external_id}</p>
+                      <h4 className="text-slate-900 font-medium text-sm sm:text-base truncate">{account.display_name}</h4>
+                      <p className="text-slate-500 text-xs sm:text-sm truncate">@{account.username || account.external_id}</p>
                     </div>
                     
                     {/* Status badge - visible on mobile inline */}
                     <div className="sm:hidden">
                       {account.status === 'active' ? (
-                        <Badge className="bg-green-500/20 text-green-400 border-none text-[10px]">Actif</Badge>
+                        <Badge className="bg-green-100 text-green-700 border-none text-[10px]">Actif</Badge>
                       ) : (
-                        <Badge className="bg-red-500/20 text-red-400 border-none text-[10px]">Erreur</Badge>
+                        <Badge className="bg-red-100 text-red-700 border-none text-[10px]">Erreur</Badge>
                       )}
                     </div>
                   </div>
@@ -2125,9 +2125,9 @@ const SocialMediaPage = () => {
                     {/* Status badge - hidden on mobile */}
                     <div className="hidden sm:block">
                       {account.status === 'active' ? (
-                        <Badge className="bg-green-500/20 text-green-400 border-none">Actif</Badge>
+                        <Badge className="bg-green-100 text-green-700 border-none">Actif</Badge>
                       ) : (
-                        <Badge className="bg-red-500/20 text-red-400 border-none">Erreur</Badge>
+                        <Badge className="bg-red-100 text-red-700 border-none">Erreur</Badge>
                       )}
                     </div>
                     
@@ -2136,12 +2136,12 @@ const SocialMediaPage = () => {
                       value={account.entity_ids?.[0] || ''} 
                       onValueChange={(entityId) => handleLinkAccountToEntity(entityId, account.id)}
                     >
-                      <SelectTrigger className="w-28 sm:w-40 bg-white/5 border-white/10 text-white text-xs sm:text-sm h-8 sm:h-10">
+                      <SelectTrigger className="w-28 sm:w-40 bg-white border-slate-200 text-slate-900 text-xs sm:text-sm h-8 sm:h-10">
                         <SelectValue placeholder="Entité..." />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-900 border-white/10">
+                      <SelectContent className="bg-slate-900 border-slate-200">
                         <SelectItem value="none">
-                          <span className="text-white/50">Aucune</span>
+                          <span className="text-slate-500">Aucune</span>
                         </SelectItem>
                         {entities.map(entity => (
                           <SelectItem key={entity.id} value={entity.id}>
@@ -2173,19 +2173,19 @@ const SocialMediaPage = () => {
       
       {/* Bulk Add to Entity Modal */}
       <Dialog open={showBulkEntityModal} onOpenChange={setShowBulkEntityModal}>
-        <DialogContent className="bg-slate-900 border-white/10 text-white">
+        <DialogContent className="bg-slate-900 border-slate-200 text-slate-900">
           <DialogHeader>
-            <DialogTitle className="text-white">Ajouter à une entité</DialogTitle>
+            <DialogTitle className="text-slate-900">Ajouter à une entité</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-white/60 text-sm">
+            <p className="text-slate-500 text-sm">
               Ajouter {selectedAccounts.length} compte(s) à :
             </p>
             <Select value={bulkEntityId} onValueChange={setBulkEntityId}>
-              <SelectTrigger className="w-full bg-white/5 border-white/10 text-white">
+              <SelectTrigger className="w-full bg-white border-slate-200 text-slate-900">
                 <SelectValue placeholder="Sélectionner une entité..." />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-white/10">
+              <SelectContent className="bg-slate-900 border-slate-200">
                 {entities.map(entity => (
                   <SelectItem key={entity.id} value={entity.id}>
                     <div className="flex items-center gap-2">
@@ -2201,7 +2201,7 @@ const SocialMediaPage = () => {
             <Button 
               variant="outline" 
               onClick={() => setShowBulkEntityModal(false)}
-              className="text-white/60 border-white/20"
+              className="text-slate-500 border-slate-200"
             >
               Annuler
             </Button>
@@ -2233,8 +2233,8 @@ const SocialMediaPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Social Media</h1>
-          <p className="text-white/50 text-xs sm:text-sm">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Social Media</h1>
+          <p className="text-slate-500 text-xs sm:text-sm">
             Gérez vos publications sur tous vos réseaux
           </p>
         </div>
@@ -2251,7 +2251,7 @@ const SocialMediaPage = () => {
       />
       
       {/* Main Navigation - Mobile optimized */}
-      <div className="flex items-center gap-1 bg-white/5 rounded-xl p-1 sm:p-1.5 overflow-x-auto scrollbar-hide">
+      <div className="flex items-center gap-1 bg-white rounded-xl p-1 sm:p-1.5 overflow-x-auto scrollbar-hide">
         {[
           { id: 'publishing', label: 'Publishing', icon: Send },
           { id: 'inbox', label: 'Inbox', icon: Inbox, badge: inboxStats?.unread || 0 },
@@ -2262,7 +2262,7 @@ const SocialMediaPage = () => {
             key={item.id}
             variant={activeSection === item.id ? 'default' : 'ghost'}
             onClick={() => setActiveSection(item.id)}
-            className={`flex-1 min-w-fit px-2 sm:px-4 ${activeSection === item.id ? 'bg-indigo-600' : 'text-white/60 hover:text-white'}`}
+            className={`flex-1 min-w-fit px-2 sm:px-4 ${activeSection === item.id ? 'bg-indigo-600' : 'text-slate-500 hover:text-slate-900'}`}
           >
             <item.icon className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">{item.label}</span>
@@ -2287,11 +2287,11 @@ const SocialMediaPage = () => {
                 <Facebook className="w-5 h-5 text-[#1877F2]" />
               </div>
               <div>
-                <h3 className="text-white font-medium flex items-center gap-2">
+                <h3 className="text-slate-900 font-medium flex items-center gap-2">
                   Mode Sandbox Meta Activé
                   <Badge className="bg-[#1877F2]/20 text-[#1877F2] text-xs">DEMO</Badge>
                 </h3>
-                <p className="text-white/60 text-sm">
+                <p className="text-slate-500 text-sm">
                   Messages et commentaires Facebook/Instagram en mode test - Aucune donnée réelle
                 </p>
               </div>
@@ -2333,27 +2333,27 @@ const SocialMediaPage = () => {
       
       {/* Entity Creation Modal */}
       <Dialog open={showEntityModal} onOpenChange={setShowEntityModal}>
-        <DialogContent className="bg-slate-900 border-white/10 text-white max-w-md">
+        <DialogContent className="bg-slate-900 border-slate-200 text-slate-900 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl">Nouvelle Entité</DialogTitle>
-            <DialogDescription className="text-white/60">
+            <DialogDescription className="text-slate-500">
               Créez une entité pour regrouper vos comptes par marque ou client
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label className="text-white/80">Nom de l&apos;entité *</Label>
+              <Label className="text-slate-700">Nom de l&apos;entité *</Label>
               <Input
                 placeholder="Ex: Mon Client, Ma Marque..."
                 value={newEntity.name}
                 onChange={(e) => setNewEntity({...newEntity, name: e.target.value})}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-white border-slate-200 text-slate-900"
               />
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white/80">Couleur</Label>
+              <Label className="text-slate-700">Couleur</Label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"
@@ -2375,19 +2375,19 @@ const SocialMediaPage = () => {
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white/80">Description (optionnel)</Label>
+              <Label className="text-slate-700">Description (optionnel)</Label>
               <Textarea
                 placeholder="Une brève description..."
                 value={newEntity.description}
                 onChange={(e) => setNewEntity({...newEntity, description: e.target.value})}
-                className="bg-white/5 border-white/10 text-white resize-none"
+                className="bg-white border-slate-200 text-slate-900 resize-none"
                 rows={2}
               />
             </div>
             
             {/* Preview */}
-            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-              <p className="text-xs text-white/50 mb-2">Aperçu</p>
+            <div className="p-3 rounded-lg bg-white border border-slate-200">
+              <p className="text-xs text-slate-500 mb-2">Aperçu</p>
               <div className="flex items-center gap-3">
                 <div 
                   className="w-10 h-10 rounded-lg flex items-center justify-center"
@@ -2396,8 +2396,8 @@ const SocialMediaPage = () => {
                   <Building2 className="w-5 h-5" style={{ color: newEntity.color }} />
                 </div>
                 <div>
-                  <h4 className="text-white font-medium">{newEntity.name || 'Nom de l\'entité'}</h4>
-                  <p className="text-white/50 text-xs">0 comptes liés</p>
+                  <h4 className="text-slate-900 font-medium">{newEntity.name || 'Nom de l\'entité'}</h4>
+                  <p className="text-slate-500 text-xs">0 comptes liés</p>
                 </div>
               </div>
             </div>
@@ -2410,7 +2410,7 @@ const SocialMediaPage = () => {
                 setShowEntityModal(false);
                 setNewEntity({ name: '', color: '#6366f1', description: '' });
               }}
-              className="text-white/60 hover:text-white"
+              className="text-slate-500 hover:text-slate-900"
             >
               Annuler
             </Button>
@@ -2437,30 +2437,30 @@ const SocialMediaPage = () => {
       
       {/* Day Posts Modal - Show posts for a specific day */}
       <Dialog open={showDayPostsModal} onOpenChange={setShowDayPostsModal}>
-        <DialogContent className="bg-slate-900 border-white/10 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-slate-900 border-slate-200 text-slate-900 max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-indigo-400" />
+            <DialogTitle className="text-slate-900 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-indigo-600" />
               Posts du {selectedDayDate?.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-3 mt-4">
             {selectedDayPosts.length === 0 ? (
-              <p className="text-white/60 text-center py-4">Aucun post ce jour</p>
+              <p className="text-slate-500 text-center py-4">Aucun post ce jour</p>
             ) : (
               selectedDayPosts.map((post) => (
                 <div 
                   key={post.id} 
-                  className="bg-white/5 rounded-lg p-4 border border-white/10 hover:border-white/20 transition-colors"
+                  className="bg-white rounded-lg p-4 border border-slate-200 hover:border-slate-200 transition-colors"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className={`px-2 py-0.5 rounded text-xs ${
-                        post.status === 'published' ? 'bg-green-500/20 text-green-400' :
-                        post.status === 'scheduled' ? 'bg-blue-500/20 text-blue-400' :
-                        post.status === 'failed' ? 'bg-red-500/20 text-red-400' :
-                        post.status === 'publishing' ? 'bg-yellow-500/20 text-yellow-400' :
+                        post.status === 'published' ? 'bg-green-100 text-green-700' :
+                        post.status === 'scheduled' ? 'bg-blue-100 text-blue-700' :
+                        post.status === 'failed' ? 'bg-red-100 text-red-700' :
+                        post.status === 'publishing' ? 'bg-yellow-100 text-yellow-700' :
                         'bg-slate-500/20 text-slate-400'
                       }`}>
                         {post.status === 'published' ? 'Publié' :
@@ -2469,7 +2469,7 @@ const SocialMediaPage = () => {
                          post.status === 'publishing' ? 'En cours...' :
                          'Brouillon'}
                       </span>
-                      <span className="text-white/40 text-xs">
+                      <span className="text-slate-400 text-xs">
                         {new Date(post.scheduled_at || post.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -2477,7 +2477,7 @@ const SocialMediaPage = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-white/60 hover:text-white h-7 w-7 p-0"
+                        className="text-slate-500 hover:text-slate-900 h-7 w-7 p-0"
                         onClick={() => {
                           setEditingPost(post);
                           setShowDayPostsModal(false);
@@ -2489,7 +2489,7 @@ const SocialMediaPage = () => {
                     </div>
                   </div>
                   
-                  <p className="text-white/80 text-sm mb-2">{post.content}</p>
+                  <p className="text-slate-700 text-sm mb-2">{post.content}</p>
                   
                   {post.media_urls?.length > 0 && (
                     <div className="flex gap-2 mb-2">
@@ -2526,7 +2526,7 @@ const SocialMediaPage = () => {
             <Button
               variant="outline"
               onClick={() => setShowDayPostsModal(false)}
-              className="text-white/60 border-white/20"
+              className="text-slate-500 border-slate-200"
             >
               Fermer
             </Button>

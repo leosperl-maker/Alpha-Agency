@@ -148,7 +148,7 @@ const NotificationCenter = () => {
       case "voice_crm": return <Mic className="w-4 h-4 text-purple-400" />;
       case "churn_alert": return <AlertTriangle className="w-4 h-4 text-amber-400" />;
       case "task_due": return <Clock className="w-4 h-4 text-orange-400" />;
-      default: return <Bell className="w-4 h-4 text-white/60" />;
+      default: return <Bell className="w-4 h-4 text-slate-500" />;
     }
   };
 
@@ -161,10 +161,10 @@ const NotificationCenter = () => {
       {/* Bell Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-lg hover:bg-white/10 transition-colors"
+        className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors"
         data-testid="notification-bell"
       >
-        <Bell className="w-5 h-5 text-white/70" />
+        <Bell className="w-5 h-5 text-slate-600" />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
             {unreadCount > 9 ? "9+" : unreadCount}
@@ -182,10 +182,10 @@ const NotificationCenter = () => {
           />
           
           {/* Panel */}
-          <div className="absolute right-0 top-full mt-2 w-80 max-h-[70vh] bg-[#1a1a2e] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden">
+          <div className="absolute right-0 top-full mt-2 w-80 max-h-[70vh] bg-[#1a1a2e] border border-slate-200 rounded-xl shadow-2xl z-50 overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between p-3 border-b border-white/10">
-              <h3 className="text-white font-semibold text-sm">Notifications</h3>
+            <div className="flex items-center justify-between p-3 border-b border-slate-200">
+              <h3 className="text-slate-900 font-semibold text-sm">Notifications</h3>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <button
@@ -197,9 +197,9 @@ const NotificationCenter = () => {
                 )}
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1 hover:bg-white/10 rounded"
+                  className="p-1 hover:bg-slate-100 rounded"
                 >
-                  <X className="w-4 h-4 text-white/50" />
+                  <X className="w-4 h-4 text-slate-500" />
                 </button>
               </div>
             </div>
@@ -208,14 +208,14 @@ const NotificationCenter = () => {
             <div className="max-h-[50vh] overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="p-6 text-center">
-                  <Bell className="w-10 h-10 text-white/20 mx-auto mb-2" />
-                  <p className="text-white/50 text-sm">Aucune notification</p>
+                  <Bell className="w-10 h-10 text-slate-900/20 mx-auto mb-2" />
+                  <p className="text-slate-500 text-sm">Aucune notification</p>
                 </div>
               ) : (
                 notifications.map(notif => (
                   <div
                     key={notif.id}
-                    className={`p-3 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${
+                    className={`p-3 border-b border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer ${
                       isUnread(notif) ? "bg-violet-500/5" : ""
                     }`}
                     onClick={() => markAsRead(notif.id)}
@@ -226,7 +226,7 @@ const NotificationCenter = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <p className={`text-sm font-medium truncate ${isUnread(notif) ? "text-white" : "text-white/70"}`}>
+                          <p className={`text-sm font-medium truncate ${isUnread(notif) ? "text-slate-900" : "text-slate-600"}`}>
                             {notif.title}
                           </p>
                           <button
@@ -234,13 +234,13 @@ const NotificationCenter = () => {
                               e.stopPropagation();
                               deleteNotification(notif.id);
                             }}
-                            className="p-1 hover:bg-white/10 rounded opacity-0 group-hover:opacity-100"
+                            className="p-1 hover:bg-slate-100 rounded opacity-0 group-hover:opacity-100"
                           >
-                            <Trash2 className="w-3 h-3 text-white/40" />
+                            <Trash2 className="w-3 h-3 text-slate-400" />
                           </button>
                         </div>
-                        <p className="text-xs text-white/50 truncate">{notif.message}</p>
-                        <p className="text-[10px] text-white/30 mt-1">
+                        <p className="text-xs text-slate-500 truncate">{notif.message}</p>
+                        <p className="text-[10px] text-slate-400 mt-1">
                           {new Date(notif.created_at).toLocaleString("fr-FR", {
                             day: "numeric",
                             month: "short",
@@ -259,10 +259,10 @@ const NotificationCenter = () => {
             </div>
 
             {/* Footer */}
-            <div className="p-2 border-t border-white/10 flex items-center justify-between">
+            <div className="p-2 border-t border-slate-200 flex items-center justify-between">
               <button
                 onClick={() => setSoundEnabled(!soundEnabled)}
-                className={`text-xs px-2 py-1 rounded ${soundEnabled ? "text-green-400" : "text-white/40"}`}
+                className={`text-xs px-2 py-1 rounded ${soundEnabled ? "text-green-400" : "text-slate-400"}`}
               >
                 {soundEnabled ? "🔔 Son activé" : "🔕 Son désactivé"}
               </button>

@@ -20,7 +20,6 @@ import {
   Calendar,
   Plus,
   ArrowRight,
-  Sparkles,
   Link2,
   Share2,
   Instagram,
@@ -30,7 +29,6 @@ import {
   Eye,
   MousePointerClick,
   Zap,
-  Bot,
   Hash,
   Timer,
   Flame,
@@ -219,7 +217,7 @@ const DashboardOverview = () => {
       subValue: "Abonnements actifs",
       icon: CreditCard,
       color: "#8B5CF6",
-      link: "/admin/abonnements"
+      link: "/admin/facturation"
     }
   ];
 
@@ -256,16 +254,15 @@ const DashboardOverview = () => {
     { icon: Receipt, label: 'Facture', color: 'from-green-500 to-emerald-500', action: () => navigate('/admin/facturation') },
     { icon: Share2, label: 'Publier', color: 'from-pink-500 to-rose-500', action: () => navigate('/admin/editorial') },
     { icon: Link2, label: 'Multilink', color: 'from-indigo-500 to-violet-500', action: () => navigate('/admin/multilink') },
-    { icon: Bot, label: 'MoltBot', color: 'from-violet-500 to-purple-500', action: () => navigate('/admin/moltbot') },
   ];
 
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-20 bg-white/5 animate-pulse rounded-2xl" />
+        <div className="h-20 bg-white animate-pulse rounded-2xl" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-28 bg-white/5 animate-pulse rounded-2xl border border-white/10" />
+            <div key={i} className="h-28 bg-white animate-pulse rounded-2xl border border-slate-200" />
           ))}
         </div>
       </div>
@@ -275,24 +272,16 @@ const DashboardOverview = () => {
   return (
     <div data-testid="dashboard-overview" className="space-y-4 sm:space-y-6 pb-20">
       {/* Welcome Header - Mobile Optimized */}
-      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20 border border-white/10 p-4 sm:p-6">
+      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-r from-indigo-600/20 via-purple-600/20 to-pink-600/20 border border-slate-200 p-4 sm:p-6">
         <div className="flex flex-row items-center justify-between gap-2">
           <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 flex items-center gap-2">
               {greeting} 👋
             </h1>
-            <p className="text-white/60 text-sm sm:text-base mt-0.5 sm:mt-1">
+            <p className="text-slate-500 text-sm sm:text-base mt-0.5 sm:mt-1">
               {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
           </div>
-          <Button 
-            onClick={() => navigate('/admin/moltbot')}
-            className="bg-gradient-to-r from-violet-600/80 to-purple-600/80 hover:from-violet-600 hover:to-purple-600 text-white border-0 text-xs sm:text-sm px-2 sm:px-4"
-            size="sm"
-          >
-            <Sparkles className="w-4 h-4 sm:mr-2" />
-            <span className="hidden sm:inline">MoltBot</span>
-          </Button>
         </div>
 
         {/* Quick Stats Strip - Horizontal scroll on mobile */}
@@ -303,12 +292,12 @@ const DashboardOverview = () => {
             { label: 'Tâches', value: taskStats?.in_progress || 0, icon: Clock, color: 'text-blue-400' },
             { label: 'Contacts', value: stats?.contacts?.total || 0, icon: Users, color: 'text-pink-400' },
           ].map((stat, i) => (
-            <div key={i} className="bg-white/5 rounded-lg sm:rounded-xl p-2.5 sm:p-3 backdrop-blur-sm flex-shrink-0 min-w-[100px] sm:min-w-0">
+            <div key={i} className="bg-white rounded-lg sm:rounded-xl p-2.5 sm:p-3 backdrop-blur-sm flex-shrink-0 min-w-[100px] sm:min-w-0">
               <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
                 <stat.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${stat.color}`} />
-                <span className="text-white/50 text-[10px] sm:text-xs">{stat.label}</span>
+                <span className="text-slate-500 text-[10px] sm:text-xs">{stat.label}</span>
               </div>
-              <p className="text-white font-bold text-base sm:text-lg">{stat.value}</p>
+              <p className="text-slate-900 font-bold text-base sm:text-lg">{stat.value}</p>
             </div>
           ))}
         </div>
@@ -316,17 +305,17 @@ const DashboardOverview = () => {
 
       {/* Quick Actions - Mobile Optimized */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
-        <span className="text-white/40 text-xs sm:text-sm whitespace-nowrap mr-1 sm:mr-2 hidden sm:inline">Accès rapide:</span>
+        <span className="text-slate-400 text-xs sm:text-sm whitespace-nowrap mr-1 sm:mr-2 hidden sm:inline">Accès rapide:</span>
         {quickActions.map((action, i) => (
           <button
             key={i}
             onClick={action.action}
-            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg sm:rounded-xl transition-all whitespace-nowrap group flex-shrink-0"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-white hover:bg-slate-100 border border-slate-200 hover:border-slate-200 rounded-lg sm:rounded-xl transition-all whitespace-nowrap group flex-shrink-0"
           >
             <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center`}>
-              <action.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
+              <action.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-900" />
             </div>
-            <span className="text-white/70 text-xs sm:text-sm group-hover:text-white">{action.label}</span>
+            <span className="text-slate-600 text-xs sm:text-sm group-hover:text-slate-900">{action.label}</span>
           </button>
         ))}
       </div>
@@ -336,13 +325,13 @@ const DashboardOverview = () => {
         {mainKPIs.map((kpi, index) => (
           <div key={kpi.title}>
             <Link to={kpi.link}>
-              <Card className="bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/20 shadow-lg hover:shadow-xl hover:shadow-indigo-500/10 transition-all cursor-pointer h-full rounded-xl sm:rounded-2xl group">
+              <Card className="bg-white backdrop-blur-xl border border-slate-200 hover:border-slate-200 shadow-lg hover:shadow-xl hover:shadow-indigo-500/10 transition-all cursor-pointer h-full rounded-xl sm:rounded-2xl group">
                 <CardContent className="p-2.5 sm:p-5">
                   <div className="flex items-start justify-between gap-1.5 sm:gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="text-white/50 text-[10px] sm:text-sm mb-0.5 sm:mb-1 truncate">{kpi.title}</p>
-                      <p className="text-base sm:text-2xl font-bold text-white font-mono">{kpi.value}</p>
-                      <p className="text-[9px] sm:text-xs text-white/40 mt-0.5 sm:mt-1 truncate">{kpi.subValue}</p>
+                      <p className="text-slate-500 text-[10px] sm:text-sm mb-0.5 sm:mb-1 truncate">{kpi.title}</p>
+                      <p className="text-base sm:text-2xl font-bold text-slate-900 font-mono">{kpi.value}</p>
+                      <p className="text-[9px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1 truncate">{kpi.subValue}</p>
                     </div>
                     <div 
                       className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
@@ -363,13 +352,13 @@ const DashboardOverview = () => {
         {secondaryKPIs.map((kpi, index) => (
           <div key={kpi.title}>
             <Link to={kpi.link}>
-              <Card className="bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/20 shadow-lg hover:shadow-xl transition-all cursor-pointer h-full rounded-xl sm:rounded-2xl group">
+              <Card className="bg-white backdrop-blur-xl border border-slate-200 hover:border-slate-200 shadow-lg hover:shadow-xl transition-all cursor-pointer h-full rounded-xl sm:rounded-2xl group">
                 <CardContent className="p-2.5 sm:p-5">
                   <div className="flex items-start justify-between gap-1.5 sm:gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="text-white/50 text-[10px] sm:text-sm mb-0.5 sm:mb-1 truncate">{kpi.title}</p>
-                      <p className="text-base sm:text-2xl font-bold text-white font-mono">{kpi.value}</p>
-                      <p className="text-[9px] sm:text-xs text-white/40 mt-0.5 sm:mt-1 truncate">{kpi.subValue}</p>
+                      <p className="text-slate-500 text-[10px] sm:text-sm mb-0.5 sm:mb-1 truncate">{kpi.title}</p>
+                      <p className="text-base sm:text-2xl font-bold text-slate-900 font-mono">{kpi.value}</p>
+                      <p className="text-[9px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1 truncate">{kpi.subValue}</p>
                     </div>
                     <div 
                       className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
@@ -388,21 +377,21 @@ const DashboardOverview = () => {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Leads Trend Chart */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-xl sm:rounded-2xl">
+        <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-lg rounded-xl sm:rounded-2xl">
           <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-white text-base sm:text-lg flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />
+            <CardTitle className="text-slate-900 text-base sm:text-lg flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
               Évolution des leads
             </CardTitle>
           </CardHeader>
           <CardContent className="p-2 sm:p-6 pt-0 sm:pt-0">
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={leadsTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" fontSize={10} tickMargin={5} />
-                <YAxis stroke="rgba(255,255,255,0.5)" fontSize={10} width={30} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: 'white', fontSize: '12px' }}
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                <XAxis dataKey="name" stroke="#94A3B8" fontSize={10} tickMargin={5} />
+                <YAxis stroke="#94A3B8" fontSize={10} width={30} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', color: '#1E293B', fontSize: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
                   formatter={(value) => [value, 'Leads']}
                 />
                 <Bar dataKey="leads" fill="#6366f1" radius={[4, 4, 0, 0]} />
@@ -412,9 +401,9 @@ const DashboardOverview = () => {
         </Card>
 
         {/* Pipeline Distribution */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-xl sm:rounded-2xl">
+        <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-lg rounded-xl sm:rounded-2xl">
           <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-white text-base sm:text-lg flex items-center gap-2">
+            <CardTitle className="text-slate-900 text-base sm:text-lg flex items-center gap-2">
               <PieChartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
               Répartition Pipeline
             </CardTitle>
@@ -437,7 +426,7 @@ const DashboardOverview = () => {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ backgroundColor: 'rgba(0,0,0,0.9)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: 'white', fontSize: '12px' }}
+                    contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', color: '#1E293B', fontSize: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
                     formatter={(value, name) => [value, name]}
                   />
                 </PieChart>
@@ -447,9 +436,9 @@ const DashboardOverview = () => {
                   <div key={item.name} className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 sm:gap-2">
                       <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="text-xs sm:text-sm text-white/60">{item.name}</span>
+                      <span className="text-xs sm:text-sm text-slate-500">{item.name}</span>
                     </div>
-                    <span className="font-bold text-white text-xs sm:text-sm">{item.value}</span>
+                    <span className="font-bold text-slate-900 text-xs sm:text-sm">{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -461,9 +450,9 @@ const DashboardOverview = () => {
       {/* Third Row - Invoice Status & Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Invoice Status */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-xl sm:rounded-2xl">
+        <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-lg rounded-xl sm:rounded-2xl">
           <CardHeader className="pb-2 p-3 sm:p-6 sm:pb-2">
-            <CardTitle className="text-white text-base sm:text-lg flex items-center gap-2">
+            <CardTitle className="text-slate-900 text-base sm:text-lg flex items-center gap-2">
               <Receipt className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
               Statut Factures
             </CardTitle>
@@ -474,15 +463,15 @@ const DashboardOverview = () => {
                 <div key={item.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                    <span className="text-sm text-white/60">{item.name}</span>
+                    <span className="text-sm text-slate-500">{item.name}</span>
                   </div>
-                  <span className="font-bold text-white">{item.value}</span>
+                  <span className="font-bold text-slate-900">{item.value}</span>
                 </div>
               ))}
-              <div className="pt-3 mt-3 border-t border-white/10">
+              <div className="pt-3 mt-3 border-t border-slate-200">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-white/80">Total facturé</span>
-                  <span className="font-bold text-indigo-400">{formatCurrency(stats?.invoices?.total_invoiced || 0)}</span>
+                  <span className="text-sm font-medium text-slate-700">Total facturé</span>
+                  <span className="font-bold text-indigo-600">{formatCurrency(stats?.invoices?.total_invoiced || 0)}</span>
                 </div>
               </div>
             </div>
@@ -490,37 +479,37 @@ const DashboardOverview = () => {
         </Card>
 
         {/* Recent Tasks */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl lg:col-span-2">
+        <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-lg rounded-2xl lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-white text-lg flex items-center gap-2">
+            <CardTitle className="text-slate-900 text-lg flex items-center gap-2">
               <CheckSquare className="w-5 h-5 text-blue-400" />
               Tâches récentes
             </CardTitle>
-            <Link to="/admin/taches" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
+            <Link to="/admin/taches" className="text-sm text-indigo-600 hover:text-indigo-300 transition-colors">
               Voir tout →
             </Link>
           </CardHeader>
           <CardContent>
             {recentTasks.length === 0 ? (
-              <p className="text-white/50 text-center py-6">Aucune tâche</p>
+              <p className="text-slate-500 text-center py-6">Aucune tâche</p>
             ) : (
               <div className="space-y-2">
                 {recentTasks.map(task => (
-                  <div key={task.id} className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors">
+                  <div key={task.id} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${
                         task.status === 'done' ? 'bg-green-500' : 
                         task.status === 'in_progress' ? 'bg-blue-500' : 'bg-gray-500'
                       }`} />
-                      <span className={`text-sm ${task.status === 'done' ? 'line-through text-white/40' : 'text-white/90'}`}>
+                      <span className={`text-sm ${task.status === 'done' ? 'line-through text-slate-400' : 'text-slate-900'}`}>
                         {task.title}
                       </span>
                     </div>
                     <Badge className={`text-xs border ${
-                      task.priority === 'urgent' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
-                      task.priority === 'high' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' :
-                      task.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
-                      'bg-white/10 text-white/60 border-white/20'
+                      task.priority === 'urgent' ? 'bg-red-100 text-red-700 border-red-500/30' :
+                      task.priority === 'high' ? 'bg-orange-100 text-orange-700 border-orange-500/30' :
+                      task.priority === 'medium' ? 'bg-yellow-100 text-yellow-700 border-yellow-500/30' :
+                      'bg-slate-100 text-slate-500 border-slate-200'
                     }`}>
                       {task.priority === 'urgent' ? 'Urgent' : 
                        task.priority === 'high' ? 'Haute' :
@@ -537,9 +526,9 @@ const DashboardOverview = () => {
       {/* Fourth Row - Task Stats & Budget */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Task Progression */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
+        <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-lg rounded-2xl">
           <CardHeader className="pb-2">
-            <CardTitle className="text-white text-lg flex items-center gap-2">
+            <CardTitle className="text-slate-900 text-lg flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-green-400" />
               Progression des tâches
             </CardTitle>
@@ -547,26 +536,26 @@ const DashboardOverview = () => {
           <CardContent>
             <div className="flex items-center gap-6">
               <div className="text-center">
-                <div className="text-4xl font-bold text-white font-mono">
+                <div className="text-4xl font-bold text-slate-900 font-mono">
                   {taskStats?.completion_rate || 0}%
                 </div>
-                <p className="text-white/50 text-sm">Complétion</p>
+                <p className="text-slate-500 text-sm">Complétion</p>
               </div>
               <div className="flex-1 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/60 flex items-center gap-1">
+                  <span className="text-slate-500 flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-gray-500" /> À faire
                   </span>
-                  <span className="font-bold text-white">{taskStats?.todo || 0}</span>
+                  <span className="font-bold text-slate-900">{taskStats?.todo || 0}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/60 flex items-center gap-1">
+                  <span className="text-slate-500 flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-blue-500" /> En cours
                   </span>
-                  <span className="font-bold text-white">{taskStats?.in_progress || 0}</span>
+                  <span className="font-bold text-slate-900">{taskStats?.in_progress || 0}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/60 flex items-center gap-1">
+                  <span className="text-slate-500 flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-green-500" /> Terminées
                   </span>
                   <span className="font-bold text-green-400">{taskStats?.done || 0}</span>
@@ -585,9 +574,9 @@ const DashboardOverview = () => {
         </Card>
 
         {/* Budget Summary */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
+        <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-lg rounded-2xl">
           <CardHeader className="pb-2">
-            <CardTitle className="text-white text-lg flex items-center gap-2">
+            <CardTitle className="text-slate-900 text-lg flex items-center gap-2">
               <Wallet className="w-5 h-5 text-purple-400" />
               Budget du mois
             </CardTitle>
@@ -625,26 +614,26 @@ const DashboardOverview = () => {
       {/* Fifth Row - Upcoming Events, Scheduled Posts, Multilink Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Upcoming Events */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
+        <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-lg rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-white text-base flex items-center gap-2">
+            <CardTitle className="text-slate-900 text-base flex items-center gap-2">
               <Calendar className="w-4 h-4 text-amber-400" />
               Prochains RDV
             </CardTitle>
-            <Link to="/admin/agenda" className="text-xs text-indigo-400 hover:text-indigo-300">
+            <Link to="/admin/agenda" className="text-xs text-indigo-600 hover:text-indigo-300">
               Voir tout →
             </Link>
           </CardHeader>
           <CardContent>
             {upcomingEvents.length === 0 ? (
               <div className="text-center py-6">
-                <Calendar className="w-8 h-8 text-white/20 mx-auto mb-2" />
-                <p className="text-white/40 text-sm">Aucun événement à venir</p>
+                <Calendar className="w-8 h-8 text-slate-900/20 mx-auto mb-2" />
+                <p className="text-slate-400 text-sm">Aucun événement à venir</p>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => navigate('/admin/agenda')}
-                  className="mt-2 text-indigo-400 hover:text-indigo-300"
+                  className="mt-2 text-indigo-600 hover:text-indigo-300"
                 >
                   <Plus className="w-3 h-3 mr-1" /> Ajouter un RDV
                 </Button>
@@ -652,14 +641,14 @@ const DashboardOverview = () => {
             ) : (
               <div className="space-y-2">
                 {upcomingEvents.map((event, i) => (
-                  <div key={event.id || i} className="flex items-start gap-3 p-2 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                  <div key={event.id || i} className="flex items-start gap-3 p-2 bg-white rounded-xl hover:bg-slate-100 transition-colors">
                     <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex flex-col items-center justify-center text-amber-400">
                       <span className="text-xs font-bold">{new Date(event.start_date || event.date).getDate()}</span>
                       <span className="text-[10px] uppercase">{new Date(event.start_date || event.date).toLocaleDateString('fr-FR', { month: 'short' })}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium truncate">{event.title}</p>
-                      <p className="text-white/40 text-xs truncate">
+                      <p className="text-slate-900 text-sm font-medium truncate">{event.title}</p>
+                      <p className="text-slate-400 text-xs truncate">
                         {event.start_time || '09:00'} {event.location && `• ${event.location}`}
                       </p>
                     </div>
@@ -671,26 +660,26 @@ const DashboardOverview = () => {
         </Card>
 
         {/* Scheduled Posts */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
+        <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-lg rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-white text-base flex items-center gap-2">
+            <CardTitle className="text-slate-900 text-base flex items-center gap-2">
               <Share2 className="w-4 h-4 text-pink-400" />
               Posts programmés
             </CardTitle>
-            <Link to="/admin/editorial" className="text-xs text-indigo-400 hover:text-indigo-300">
+            <Link to="/admin/editorial" className="text-xs text-indigo-600 hover:text-indigo-300">
               Voir tout →
             </Link>
           </CardHeader>
           <CardContent>
             {scheduledPosts.length === 0 ? (
               <div className="text-center py-6">
-                <Share2 className="w-8 h-8 text-white/20 mx-auto mb-2" />
-                <p className="text-white/40 text-sm">Aucun post programmé</p>
+                <Share2 className="w-8 h-8 text-slate-900/20 mx-auto mb-2" />
+                <p className="text-slate-400 text-sm">Aucun post programmé</p>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => navigate('/admin/editorial')}
-                  className="mt-2 text-indigo-400 hover:text-indigo-300"
+                  className="mt-2 text-indigo-600 hover:text-indigo-300"
                 >
                   <Plus className="w-3 h-3 mr-1" /> Programmer un post
                 </Button>
@@ -698,7 +687,7 @@ const DashboardOverview = () => {
             ) : (
               <div className="space-y-2">
                 {scheduledPosts.map((post, i) => (
-                  <div key={post.id || i} className="flex items-start gap-3 p-2 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                  <div key={post.id || i} className="flex items-start gap-3 p-2 bg-white rounded-xl hover:bg-slate-100 transition-colors">
                     <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center">
                       {post.networks?.includes('instagram') ? <Instagram className="w-4 h-4 text-pink-400" /> :
                        post.networks?.includes('facebook') ? <Facebook className="w-4 h-4 text-blue-400" /> :
@@ -706,8 +695,8 @@ const DashboardOverview = () => {
                        <Share2 className="w-4 h-4 text-pink-400" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium truncate">{post.title || 'Post sans titre'}</p>
-                      <p className="text-white/40 text-xs">
+                      <p className="text-slate-900 text-sm font-medium truncate">{post.title || 'Post sans titre'}</p>
+                      <p className="text-slate-400 text-xs">
                         {post.scheduled_date && new Date(post.scheduled_date).toLocaleDateString('fr-FR')} {post.scheduled_time || ''}
                       </p>
                     </div>
@@ -719,26 +708,26 @@ const DashboardOverview = () => {
         </Card>
 
         {/* Multilink Stats */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
+        <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-lg rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-white text-base flex items-center gap-2">
-              <Link2 className="w-4 h-4 text-indigo-400" />
+            <CardTitle className="text-slate-900 text-base flex items-center gap-2">
+              <Link2 className="w-4 h-4 text-indigo-600" />
               Multilink
             </CardTitle>
-            <Link to="/admin/multilink" className="text-xs text-indigo-400 hover:text-indigo-300">
+            <Link to="/admin/multilink" className="text-xs text-indigo-600 hover:text-indigo-300">
               Gérer →
             </Link>
           </CardHeader>
           <CardContent>
             {!multilinkStats ? (
               <div className="text-center py-6">
-                <Link2 className="w-8 h-8 text-white/20 mx-auto mb-2" />
-                <p className="text-white/40 text-sm">Aucune page créée</p>
+                <Link2 className="w-8 h-8 text-slate-900/20 mx-auto mb-2" />
+                <p className="text-slate-400 text-sm">Aucune page créée</p>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => navigate('/admin/multilink')}
-                  className="mt-2 text-indigo-400 hover:text-indigo-300"
+                  className="mt-2 text-indigo-600 hover:text-indigo-300"
                 >
                   <Plus className="w-3 h-3 mr-1" /> Créer une page
                 </Button>
@@ -747,24 +736,24 @@ const DashboardOverview = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-3 gap-2">
                   <div className="text-center p-3 bg-indigo-500/10 rounded-xl">
-                    <p className="text-2xl font-bold text-indigo-400">{multilinkStats.pages}</p>
-                    <p className="text-white/40 text-xs">Pages</p>
+                    <p className="text-2xl font-bold text-indigo-600">{multilinkStats.pages}</p>
+                    <p className="text-slate-400 text-xs">Pages</p>
                   </div>
                   <div className="text-center p-3 bg-green-500/10 rounded-xl">
                     <Eye className="w-4 h-4 text-green-400 mx-auto mb-1" />
                     <p className="text-lg font-bold text-green-400">{multilinkStats.views}</p>
-                    <p className="text-white/40 text-xs">Vues</p>
+                    <p className="text-slate-400 text-xs">Vues</p>
                   </div>
                   <div className="text-center p-3 bg-amber-500/10 rounded-xl">
                     <MousePointerClick className="w-4 h-4 text-amber-400 mx-auto mb-1" />
                     <p className="text-lg font-bold text-amber-400">{multilinkStats.clicks}</p>
-                    <p className="text-white/40 text-xs">Clics</p>
+                    <p className="text-slate-400 text-xs">Clics</p>
                   </div>
                 </div>
                 <div className="p-3 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-xl">
                   <div className="flex items-center justify-between">
-                    <span className="text-white/60 text-xs">Taux de clic</span>
-                    <span className="text-indigo-400 font-bold">
+                    <span className="text-slate-500 text-xs">Taux de clic</span>
+                    <span className="text-indigo-600 font-bold">
                       {multilinkStats.views > 0 ? ((multilinkStats.clicks / multilinkStats.views) * 100).toFixed(1) : 0}%
                     </span>
                   </div>
@@ -778,9 +767,9 @@ const DashboardOverview = () => {
       {/* Hot Leads & Churn Alerts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Hot Leads */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
+        <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-lg rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-white text-base flex items-center gap-2">
+            <CardTitle className="text-slate-900 text-base flex items-center gap-2">
               <Flame className="w-4 h-4 text-orange-400" />
               Leads Chauds
             </CardTitle>
@@ -791,9 +780,9 @@ const DashboardOverview = () => {
           <CardContent>
             {hotLeads.length === 0 ? (
               <div className="text-center py-6">
-                <Target className="w-8 h-8 text-white/20 mx-auto mb-2" />
-                <p className="text-white/40 text-sm">Aucun lead chaud détecté</p>
-                <p className="text-white/30 text-xs mt-1">Les leads avec un score ≥ 60 apparaîtront ici</p>
+                <Target className="w-8 h-8 text-slate-900/20 mx-auto mb-2" />
+                <p className="text-slate-400 text-sm">Aucun lead chaud détecté</p>
+                <p className="text-slate-400 text-xs mt-1">Les leads avec un score ≥ 60 apparaîtront ici</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -803,7 +792,7 @@ const DashboardOverview = () => {
                     className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-xl hover:from-orange-500/20 hover:to-red-500/20 transition-colors cursor-pointer"
                     onClick={() => navigate(`/admin/contacts/${lead.contact_id}`)}
                   >
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white ${
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-slate-900 ${
                       lead.grade === 'A' ? 'bg-green-500' :
                       lead.grade === 'B' ? 'bg-blue-500' :
                       'bg-orange-500'
@@ -811,18 +800,18 @@ const DashboardOverview = () => {
                       {lead.grade}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium truncate">{lead.contact_name || 'Sans nom'}</p>
-                      <p className="text-white/40 text-xs truncate">{lead.company || lead.email || 'Aucune info'}</p>
+                      <p className="text-slate-900 text-sm font-medium truncate">{lead.contact_name || 'Sans nom'}</p>
+                      <p className="text-slate-400 text-xs truncate">{lead.company || lead.email || 'Aucune info'}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-orange-400 font-bold text-lg">{lead.score}</p>
-                      <p className="text-white/40 text-xs">points</p>
+                      <p className="text-slate-400 text-xs">points</p>
                     </div>
                   </div>
                 ))}
                 {hotLeads.length > 0 && (
-                  <div className="pt-2 border-t border-white/10">
-                    <p className="text-white/50 text-xs text-center">
+                  <div className="pt-2 border-t border-slate-200">
+                    <p className="text-slate-500 text-xs text-center">
                       💡 {hotLeads.filter(l => l.grade === 'A').length} leads Grade A prêts à convertir
                     </p>
                   </div>
@@ -833,9 +822,9 @@ const DashboardOverview = () => {
         </Card>
 
         {/* Churn Alerts */}
-        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg rounded-2xl">
+        <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-lg rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-white text-base flex items-center gap-2">
+            <CardTitle className="text-slate-900 text-base flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-red-400" />
               Alertes Churn
             </CardTitle>
@@ -848,14 +837,14 @@ const DashboardOverview = () => {
               <div className="text-center py-6">
                 <UserCheck className="w-8 h-8 text-green-400/30 mx-auto mb-2" />
                 <p className="text-green-400/60 text-sm">Aucun client à risque</p>
-                <p className="text-white/30 text-xs mt-1">Tous vos clients sont actifs 🎉</p>
+                <p className="text-slate-400 text-xs mt-1">Tous vos clients sont actifs 🎉</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {churnAlerts.map((alert, i) => (
                   <div 
                     key={alert.contact_id || i} 
-                    className={`flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer ${
+                    className={`flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer ${
                       alert.risk_level === 'critical' ? 'bg-red-500/20 border border-red-500/30' :
                       alert.risk_level === 'high' ? 'bg-orange-500/15' :
                       'bg-yellow-500/10'
@@ -867,11 +856,11 @@ const DashboardOverview = () => {
                       alert.risk_level === 'high' ? 'bg-orange-500' :
                       'bg-yellow-500'
                     }`}>
-                      <TrendingDown className="w-5 h-5 text-white" />
+                      <TrendingDown className="w-5 h-5 text-slate-900" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium truncate">{alert.contact_name || 'Client'}</p>
-                      <p className="text-white/40 text-xs truncate">
+                      <p className="text-slate-900 text-sm font-medium truncate">{alert.contact_name || 'Client'}</p>
+                      <p className="text-slate-400 text-xs truncate">
                         {alert.warning_signs?.[0] || `${alert.days_since_contact}j sans contact`}
                       </p>
                     </div>
@@ -887,7 +876,7 @@ const DashboardOverview = () => {
                   </div>
                 ))}
                 {churnAlerts.filter(a => a.risk_level === 'critical').length > 0 && (
-                  <div className="pt-2 border-t border-white/10">
+                  <div className="pt-2 border-t border-slate-200">
                     <p className="text-red-400 text-xs text-center font-medium">
                       🚨 {churnAlerts.filter(a => a.risk_level === 'critical').length} client(s) nécessitent une action urgente
                     </p>
@@ -899,36 +888,6 @@ const DashboardOverview = () => {
         </Card>
       </div>
 
-      {/* AI Assistant Promo */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600/20 via-purple-600/20 to-pink-600/20 border border-white/10 p-6">
-        <div className="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-violet-500/20 to-purple-500/20 rounded-full blur-3xl" />
-        <div className="relative flex flex-col sm:flex-row items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-            <Bot className="w-7 h-7 text-white" />
-          </div>
-          <div className="flex-1 text-center sm:text-left">
-            <h3 className="text-white font-semibold text-lg">MoltBot disponible</h3>
-            <p className="text-white/60 text-sm">Gérez votre CRM par commandes: créez des devis, planifiez des RDV, suivez vos tâches et bien plus</p>
-          </div>
-          <div className="flex gap-2">
-            <Button 
-              onClick={() => navigate('/admin/editorial')}
-              variant="outline"
-              className="border-white/20 text-white hover:bg-white/10"
-            >
-              <Hash className="w-4 h-4 mr-2" />
-              Hashtags
-            </Button>
-            <Button 
-              onClick={() => navigate('/admin/moltbot')}
-              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500"
-            >
-              <Bot className="w-4 h-4 mr-2" />
-              Ouvrir
-            </Button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

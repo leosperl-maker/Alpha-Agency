@@ -173,29 +173,29 @@ const FloatingAIChat = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-48px)] h-[500px] max-h-[calc(100vh-120px)] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 flex flex-col bg-[#0a0a12] border border-white/10">
+        <div className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-48px)] h-[500px] max-h-[calc(100vh-120px)] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 flex flex-col bg-white border border-slate-200">
           {/* Header */}
           <div className="px-4 py-3 bg-gradient-to-r from-indigo-600/90 to-purple-600/90 backdrop-blur-xl flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-white" />
+                <Sparkles className="w-4 h-4 text-slate-900" />
               </div>
               <div>
-                <h3 className="text-white font-semibold text-sm">Assistant Alpha</h3>
-                <p className="text-white/70 text-xs">{status?.remaining || 0} requêtes restantes</p>
+                <h3 className="text-slate-900 font-semibold text-sm">Assistant Alpha</h3>
+                <p className="text-slate-600 text-xs">{status?.remaining || 0} requêtes restantes</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
               <button
                 onClick={clearChat}
-                className="p-2 rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
                 title="Effacer"
               >
                 <MessageSquare className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
               >
                 <ChevronDown className="w-4 h-4" />
               </button>
@@ -208,9 +208,9 @@ const FloatingAIChat = () => {
               {messages.length === 0 ? (
                 <div className="text-center py-8">
                   <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-600/20 border border-indigo-500/30 flex items-center justify-center mb-3">
-                    <Bot className="w-6 h-6 text-indigo-400" />
+                    <Bot className="w-6 h-6 text-indigo-600" />
                   </div>
-                  <p className="text-white/50 text-sm">
+                  <p className="text-slate-500 text-sm">
                     Comment puis-je vous aider ?
                   </p>
                 </div>
@@ -222,21 +222,21 @@ const FloatingAIChat = () => {
                   >
                     {msg.role === "assistant" && (
                       <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                        <Sparkles className="w-3 h-3 text-white" />
+                        <Sparkles className="w-3 h-3 text-slate-900" />
                       </div>
                     )}
                     <div className={`max-w-[80%] ${msg.role === "user" ? "order-first" : ""}`}>
                       <div className={`rounded-xl px-3 py-2 text-sm ${
                         msg.role === "user" 
                           ? "bg-indigo-600 text-white" 
-                          : "bg-white/5 border border-white/10 text-white/90"
+                          : "bg-white border border-slate-200 text-slate-900"
                       }`}>
                         <p className="whitespace-pre-wrap">{msg.content}</p>
                       </div>
                     </div>
                     {msg.role === "user" && (
                       <div className="w-6 h-6 rounded-md bg-cyan-600 flex items-center justify-center flex-shrink-0">
-                        <User className="w-3 h-3 text-white" />
+                        <User className="w-3 h-3 text-slate-900" />
                       </div>
                     )}
                   </div>
@@ -245,10 +245,10 @@ const FloatingAIChat = () => {
               {loading && (
                 <div className="flex gap-2">
                   <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center animate-pulse">
-                    <Sparkles className="w-3 h-3 text-white" />
+                    <Sparkles className="w-3 h-3 text-slate-900" />
                   </div>
-                  <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-white/50" />
+                  <div className="bg-white border border-slate-200 rounded-xl px-3 py-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
                   </div>
                 </div>
               )}
@@ -257,14 +257,14 @@ const FloatingAIChat = () => {
           </ScrollArea>
 
           {/* Input */}
-          <div className="p-3 border-t border-white/10 bg-black/40">
+          <div className="p-3 border-t border-slate-200 bg-slate-50">
             <div className="flex gap-2">
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSend()}
                 placeholder="Votre message..."
-                className="flex-1 bg-white/5 border-white/10 text-white placeholder-white/30 text-sm focus:border-indigo-500/50"
+                className="flex-1 bg-white border-slate-200 text-slate-900 placeholder-white/30 text-sm focus:border-indigo-500/50"
                 disabled={loading}
               />
               <Button

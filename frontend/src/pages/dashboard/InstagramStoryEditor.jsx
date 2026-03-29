@@ -591,7 +591,7 @@ const InstagramStoryEditor = () => {
         <div className="flex-1 flex items-center justify-center p-8 bg-[#0d0d12]">
           <div className="relative">
             {/* Phone Frame */}
-            <div className="relative w-[300px] h-[600px] bg-black rounded-[40px] p-2 shadow-2xl">
+            <div className="relative w-[300px] h-[600px] bg-white rounded-[40px] p-2 shadow-2xl">
               {/* Screen */}
               <div
                 ref={canvasRef}
@@ -1010,8 +1010,8 @@ const InstagramStoryEditor = () => {
 
       {/* Add Account Modal */}
       {showAddAccount && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1a1a2e] rounded-xl p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-white flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-50 rounded-xl p-6 w-full max-w-md">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
               <Instagram className="w-6 h-6 text-pink-500" />
               Ajouter un compte Instagram

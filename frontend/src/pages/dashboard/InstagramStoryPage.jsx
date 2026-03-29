@@ -39,11 +39,11 @@ const STICKER_COLORS = {
     { headerBg: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCB045)', circle: '#D93B7A' },
   ],
   question: [
-    { gradient: 'linear-gradient(135deg, #D93B7A, #833AB4)', circle: '#D93B7A', inputBg: 'rgba(255,255,255,0.2)', textColor: '#FFFFFF' },
-    { gradient: 'linear-gradient(135deg, #0095F6, #00D4FF)', circle: '#0095F6', inputBg: 'rgba(255,255,255,0.2)', textColor: '#FFFFFF' },
-    { gradient: 'linear-gradient(135deg, #00C853, #64DD17)', circle: '#00C853', inputBg: 'rgba(255,255,255,0.2)', textColor: '#FFFFFF' },
+    { gradient: 'linear-gradient(135deg, #D93B7A, #833AB4)', circle: '#D93B7A', inputBg: '#E2E8F0', textColor: '#FFFFFF' },
+    { gradient: 'linear-gradient(135deg, #0095F6, #00D4FF)', circle: '#0095F6', inputBg: '#E2E8F0', textColor: '#FFFFFF' },
+    { gradient: 'linear-gradient(135deg, #00C853, #64DD17)', circle: '#00C853', inputBg: '#E2E8F0', textColor: '#FFFFFF' },
     { gradient: 'linear-gradient(135deg, #1a1a2e, #333366)', circle: '#1a1a2e', inputBg: 'rgba(255,255,255,0.15)', textColor: '#FFFFFF' },
-    { gradient: 'linear-gradient(135deg, #FF6F00, #FFD600)', circle: '#FF6F00', inputBg: 'rgba(255,255,255,0.2)', textColor: '#FFFFFF' },
+    { gradient: 'linear-gradient(135deg, #FF6F00, #FFD600)', circle: '#FF6F00', inputBg: '#E2E8F0', textColor: '#FFFFFF' },
   ],
   countdown: [
     { gradient: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCB045)', circle: '#D93B7A' },
@@ -456,7 +456,7 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Comptes enregistrés</h2>
             <div className="flex gap-4">
-              <Button onClick={onViewAllStories} variant="outline" className="border-white/20 text-white hover:bg-white/10 gap-2">
+              <Button onClick={onViewAllStories} variant="outline" className="border-slate-200 text-slate-900 hover:bg-slate-100 gap-2">
                 <Eye size={18} /> Toutes les stories
               </Button>
               <Button onClick={onAddAccount} className="bg-pink-600 hover:bg-pink-700 text-white gap-2">
@@ -466,13 +466,13 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
           </div>
 
           {accounts.length === 0 ? (
-            <div className="bg-white/5 border border-white/10 rounded-lg p-12 text-center">
+            <div className="bg-white border border-slate-200 rounded-lg p-12 text-center">
               <p className="text-gray-400">Aucun compte enregistré. Ajoutez-en un pour commencer.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {accounts.map(account => (
-                <div key={account.id} className="bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/8 transition">
+                <div key={account.id} className="bg-white border border-slate-200 rounded-xl p-6 hover:bg-white/8 transition">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
                       {account.username?.charAt(0)?.toUpperCase() || '?'}
@@ -486,7 +486,7 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
                     <Button onClick={() => onCreateStory(account)} className="flex-1 bg-gradient-to-r from-pink-500 to-pink-700 hover:from-pink-600 hover:to-pink-800 text-white text-sm gap-1">
                       <Plus size={16} /> Créer
                     </Button>
-                    <Button onClick={() => onViewStories(account)} variant="outline" className="flex-1 border-white/20 text-white hover:bg-white/10 text-sm gap-1">
+                    <Button onClick={() => onViewStories(account)} variant="outline" className="flex-1 border-slate-200 text-slate-900 hover:bg-slate-100 text-sm gap-1">
                       <Eye size={16} /> Stories
                     </Button>
                     <Button onClick={() => onDeleteAccount(account.id)} variant="ghost" className="text-red-400 hover:bg-red-500/10 px-2" title="Supprimer">
@@ -501,22 +501,22 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => onAddModalChange(false)}>
-          <div className="bg-[#1a1a2e] border border-white/10 rounded-xl p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-white flex items-center justify-center z-50" onClick={() => onAddModalChange(false)}>
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 max-w-sm w-full mx-4" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-xl font-bold mb-4">Ajouter un compte</h3>
             <Input
               placeholder="Nom du compte (ex: moncompte)"
               value={username}
               onChange={(e) => onUsernameChange(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && onAddSubmit()}
-              className="mb-2 bg-white/5 border-white/10 text-white placeholder-gray-500"
+              className="mb-2 bg-white border-slate-200 text-slate-900 placeholder-gray-500"
             />
             <p className="text-xs text-gray-400 mb-4">Le compte doit être déjà connecté sur Instagram dans BlueStacks.</p>
             <div className="flex gap-2">
               <Button onClick={onAddSubmit} className="flex-1 bg-pink-600 hover:bg-pink-700 text-white" disabled={isLoading}>
                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Ajouter'}
               </Button>
-              <Button onClick={() => onAddModalChange(false)} variant="outline" className="flex-1 border-white/20 text-white hover:bg-white/10">
+              <Button onClick={() => onAddModalChange(false)} variant="outline" className="flex-1 border-slate-200 text-slate-900 hover:bg-slate-100">
                 Annuler
               </Button>
             </div>
@@ -615,9 +615,9 @@ function EditorView({
     <div className="min-h-screen bg-[#0a0a0f] text-white p-4">
       <div className="max-w-7xl mx-auto">
         {/* Top Bar */}
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
           <div className="flex items-center gap-3">
-            <button onClick={onGoBack} className="p-2 hover:bg-white/10 rounded-lg transition">
+            <button onClick={onGoBack} className="p-2 hover:bg-slate-100 rounded-lg transition">
               <ArrowLeft size={20} />
             </button>
 
@@ -625,7 +625,7 @@ function EditorView({
             <div className="relative">
               <button
                 onClick={() => setShowAccountDropdown(!showAccountDropdown)}
-                className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-4 py-2 hover:bg-white/10 transition"
+                className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-4 py-2 hover:bg-slate-100 transition"
               >
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-pink-600 flex items-center justify-center text-xs font-bold">
                   {selectedAccount?.username?.charAt(0)?.toUpperCase() || '?'}
@@ -635,12 +635,12 @@ function EditorView({
               </button>
 
               {showAccountDropdown && (
-                <div className="absolute top-full left-0 mt-1 bg-[#1a1a2e] border border-white/10 rounded-lg shadow-xl z-50 min-w-48 overflow-hidden">
+                <div className="absolute top-full left-0 mt-1 bg-slate-50 border border-slate-200 rounded-lg shadow-xl z-50 min-w-48 overflow-hidden">
                   {accounts.map(acc => (
                     <button
                       key={acc.id}
                       onClick={() => { onChangeAccount(acc); setShowAccountDropdown(false); }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition text-left ${selectedAccount?.id === acc.id ? 'bg-pink-600/20' : ''}`}
+                      className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-100 transition text-left ${selectedAccount?.id === acc.id ? 'bg-pink-600/20' : ''}`}
                     >
                       <div className="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-400 to-pink-600 flex items-center justify-center text-xs font-bold">
                         {acc.username?.charAt(0)?.toUpperCase()}
@@ -656,23 +656,23 @@ function EditorView({
 
           <div className="flex items-center gap-3">
             {/* Schedule */}
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
+            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-1.5">
               <Clock size={16} className="text-gray-400" />
               <input
                 type="datetime-local"
                 value={scheduleTime}
                 onChange={(e) => onScheduleTimeChange(e.target.value)}
-                className="bg-transparent text-white text-sm outline-none"
+                className="bg-transparent text-slate-900 text-sm outline-none"
                 style={{ colorScheme: 'dark' }}
               />
               {scheduleTime && (
-                <button onClick={() => onScheduleTimeChange('')} className="text-gray-400 hover:text-white">
+                <button onClick={() => onScheduleTimeChange('')} className="text-gray-400 hover:text-slate-900">
                   <X size={14} />
                 </button>
               )}
             </div>
 
-            <Button onClick={onSaveDraft} variant="outline" className="border-white/20 text-white hover:bg-white/10 text-sm">
+            <Button onClick={onSaveDraft} variant="outline" className="border-slate-200 text-slate-900 hover:bg-slate-100 text-sm">
               Brouillon
             </Button>
 
@@ -692,7 +692,7 @@ function EditorView({
               onClick={handleMediaClick}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) onMediaUpload(f); }}
-              className="border-2 border-dashed border-white/20 rounded-xl p-4 text-center cursor-pointer hover:border-pink-400/50 hover:bg-white/5 transition"
+              className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center cursor-pointer hover:border-pink-400/50 hover:bg-slate-50 transition"
             >
               {mediaUrl ? (
                 <div>
@@ -734,7 +734,7 @@ function EditorView({
                   placeholder="Votre texte..."
                   value={tempText}
                   onChange={(e) => onTempTextChange(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white placeholder-gray-500 text-sm h-9"
+                  className="bg-white border-slate-200 text-slate-900 placeholder-gray-500 text-sm h-9"
                 />
 
                 {/* Text background toggle (framed A) */}
@@ -743,7 +743,7 @@ function EditorView({
                     onClick={onCycleTextBg}
                     className="flex items-center justify-center w-9 h-9 rounded-lg border-2 transition font-bold text-sm"
                     style={{
-                      borderColor: textBgMode === 'none' ? 'rgba(255,255,255,0.3)' : textBgMode === 'dark' ? '#000' : textBgMode === 'light' ? '#FFF' : selectedColor,
+                      borderColor: textBgMode === 'none' ? '#CBD5E1' : textBgMode === 'dark' ? '#000' : textBgMode === 'light' ? '#FFF' : selectedColor,
                       backgroundColor: textBgMode === 'dark' ? '#000' : textBgMode === 'light' ? '#FFF' : textBgMode === 'colored' ? selectedColor : 'transparent',
                       color: textBgMode === 'none' ? '#FFF' : textBgMode === 'dark' ? '#FFF' : textBgMode === 'light' ? '#000' : '#FFF'
                     }}
@@ -761,7 +761,7 @@ function EditorView({
                     <button
                       key={font.name}
                       onClick={() => onFontChange(font.name)}
-                      className={`text-left px-2.5 py-1.5 rounded text-xs transition ${selectedFont === font.name ? 'bg-pink-600/40 border border-pink-400/50' : 'bg-white/5 border border-transparent hover:bg-white/10'}`}
+                      className={`text-left px-2.5 py-1.5 rounded text-xs transition ${selectedFont === font.name ? 'bg-pink-600/40 border border-pink-400/50' : 'bg-white border border-transparent hover:bg-slate-100'}`}
                       style={{ fontFamily: font.family, fontWeight: font.weight }}
                     >
                       {font.name}
@@ -780,7 +780,7 @@ function EditorView({
                   ))}
                 </div>
 
-                <Button onClick={onAddText} className="w-full bg-white/10 hover:bg-white/20 text-white gap-1 text-xs h-8">
+                <Button onClick={onAddText} className="w-full bg-slate-100 hover:bg-white/20 text-slate-900 gap-1 text-xs h-8">
                   <Plus size={14} /> Ajouter texte
                 </Button>
               </div>
@@ -856,7 +856,7 @@ function EditorView({
                 </div>
 
                 {/* Status bar */}
-                <div className="relative z-20 flex items-center justify-between px-8 text-white" style={{ height: '52px', paddingTop: '14px' }}>
+                <div className="relative z-20 flex items-center justify-between px-8 text-slate-900" style={{ height: '52px', paddingTop: '14px' }}>
                   <span className="text-xs font-semibold" style={{ fontSize: '13px' }}>9:41</span>
                   <div className="flex items-center gap-[5px]">
                     {/* Signal bars */}
@@ -895,9 +895,9 @@ function EditorView({
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center text-[11px] font-bold text-white border-2 border-black/30">
                     {selectedAccount?.username?.charAt(0)?.toUpperCase() || '?'}
                   </div>
-                  <span className="text-white text-[13px] font-semibold flex-1 drop-shadow-lg">{selectedAccount?.username || 'compte'}</span>
+                  <span className="text-slate-900 text-[13px] font-semibold flex-1 drop-shadow-lg">{selectedAccount?.username || 'compte'}</span>
                   <span className="text-gray-300 text-[11px] drop-shadow">Il y a 2h</span>
-                  <X size={18} className="text-white/80 ml-1 drop-shadow" />
+                  <X size={18} className="text-slate-700 ml-1 drop-shadow" />
                 </div>
 
                 {/* Sticker Layer — full screen, same as Instagram */}
@@ -951,9 +951,9 @@ function EditorView({
                 <div className="absolute bottom-0 left-0 right-0 z-20 px-3 pb-3">
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-white/20 rounded-full px-4 py-2 flex items-center backdrop-blur-sm" style={{ border: '1px solid rgba(255,255,255,0.15)' }}>
-                      <span className="text-white/60 text-[11px]">Envoyer un message</span>
+                      <span className="text-slate-500 text-[11px]">Envoyer un message</span>
                     </div>
-                    <Send size={18} className="text-white drop-shadow" />
+                    <Send size={18} className="text-slate-900 drop-shadow" />
                   </div>
                   {/* Home indicator bar */}
                   <div className="flex justify-center mt-2">
@@ -967,7 +967,7 @@ function EditorView({
           {/* Right: Config Panel */}
           <div className="w-72 flex-shrink-0 overflow-y-auto pl-2">
             {selectedSticker ? (
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="bg-white border border-slate-200 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold text-sm uppercase tracking-wider">
                     {selectedSticker.type === 'text' ? 'Texte' : `Sticker ${selectedSticker.type}`}
@@ -975,8 +975,8 @@ function EditorView({
                   <div className="flex gap-1">
                     {selectedSticker.type !== 'text' && (
                       <>
-                        <button onClick={() => onMoveSticker('up')} className="p-1.5 hover:bg-white/10 rounded"><ChevronUp size={14} /></button>
-                        <button onClick={() => onMoveSticker('down')} className="p-1.5 hover:bg-white/10 rounded"><ChevronDown size={14} /></button>
+                        <button onClick={() => onMoveSticker('up')} className="p-1.5 hover:bg-slate-100 rounded"><ChevronUp size={14} /></button>
+                        <button onClick={() => onMoveSticker('down')} className="p-1.5 hover:bg-slate-100 rounded"><ChevronDown size={14} /></button>
                         <button onClick={onDeleteSticker} className="p-1.5 hover:bg-red-500/20 rounded text-red-400"><Trash2 size={14} /></button>
                       </>
                     )}
@@ -1000,7 +1000,7 @@ function EditorView({
                       step="0.05"
                       value={selectedSticker.data?.scale || 1}
                       onChange={(e) => onUpdateStickerData({ ...selectedSticker.data, scale: parseFloat(e.target.value) })}
-                      className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-pink-500"
+                      className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-pink-500"
                     />
                   </div>
                 )}
@@ -1066,7 +1066,7 @@ function EditorView({
                 )}
               </div>
             ) : (
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center">
+              <div className="bg-white border border-slate-200 rounded-xl p-6 text-center">
                 <p className="text-gray-400 text-sm">Cliquez sur un sticker dans l'aperçu pour le configurer, ou ajoutez-en un depuis le panneau de gauche.</p>
               </div>
             )}
@@ -1134,7 +1134,7 @@ function PollConfig({ data, onChange }) {
               value={typeof opt === 'string' ? opt : opt.text || ''}
               onChange={(e) => updateOption(idx, e.target.value)}
               placeholder={idx === 0 ? 'Oui' : idx === 1 ? 'Non' : `Option ${idx + 1}`}
-              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+              className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-sm"
             />
             {options.length > 2 && (
               <button onClick={() => removeOption(idx)} className="p-1 text-red-400 hover:bg-red-500/10 rounded"><X size={14} /></button>
@@ -1156,7 +1156,7 @@ function PollConfig({ data, onChange }) {
             <button
               key={idx}
               onClick={() => onChange({ ...data, colorIndex: idx })}
-              className={`w-8 h-8 rounded-full border-2 transition ${colorIndex === idx ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110 border-white/50' : 'border-white/20 opacity-80 hover:opacity-100'}`}
+              className={`w-8 h-8 rounded-full border-2 transition ${colorIndex === idx ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110 border-slate-2000' : 'border-slate-200 opacity-80 hover:opacity-100'}`}
               style={{ background: c.headerBg }}
             />
           ))}
@@ -1227,7 +1227,7 @@ function CountdownConfig({ data, onChange }) {
       <FieldInput label="Titre" value={data.title || ''} onChange={(v) => onChange({ ...data, title: v })} />
       <div>
         <label className="block text-xs text-gray-400 mb-1">Date/Heure</label>
-        <input type="datetime-local" value={data.endTime || ''} onChange={(e) => onChange({ ...data, endTime: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm" style={{ colorScheme: 'dark' }} />
+        <input type="datetime-local" value={data.endTime || ''} onChange={(e) => onChange({ ...data, endTime: e.target.value })} className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-sm" style={{ colorScheme: 'dark' }} />
       </div>
       <div>
         <label className="block text-xs text-gray-400 mb-2">Couleur du sticker</label>
@@ -1308,7 +1308,7 @@ function FieldInput({ label, value, onChange, placeholder, type = 'text' }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+        className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-sm"
       />
     </div>
   );
@@ -1318,7 +1318,7 @@ function StickerBtn({ icon, label, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-2 w-full px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition text-white text-sm"
+      className="flex items-center gap-2 w-full px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 transition text-slate-900 text-sm"
     >
       {icon}
       <span>{label}</span>
@@ -1357,7 +1357,7 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
             className="px-4 pt-5 pb-3 text-center"
             style={{ background: isGradient ? scheme.headerBg : scheme.headerBg }}
           >
-            <p className="text-white text-sm font-bold" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+            <p className="text-slate-900 text-sm font-bold" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
               {sticker.data.question || 'Posez une question...'}
             </p>
           </div>
@@ -1389,12 +1389,12 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
         <div className="rounded-2xl overflow-hidden shadow-xl" style={{ background: scheme.gradient }}>
           <div className="px-4 pt-5 pb-3">
             {/* Title */}
-            <p className="text-center text-sm font-bold text-white mb-3" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+            <p className="text-center text-sm font-bold text-slate-900 mb-3" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
               {sticker.data.question || 'Posez-moi une question'}
             </p>
             {/* Input field */}
             <div className="rounded-xl px-3 py-3" style={{ backgroundColor: scheme.inputBg }}>
-              <p className="text-white/50 text-xs text-center">Écrivez quelque chose...</p>
+              <p className="text-slate-500 text-xs text-center">Écrivez quelque chose...</p>
             </div>
           </div>
         </div>
@@ -1439,11 +1439,11 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
         <div className="rounded-2xl overflow-hidden shadow-xl" style={{ background: scheme.gradient }}>
           <div className="px-3 pt-5 pb-3 text-center">
             {/* Title */}
-            <p className="text-white text-xs font-bold uppercase tracking-widest mb-2" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+            <p className="text-slate-900 text-xs font-bold uppercase tracking-widest mb-2" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
               {sticker.data.title || 'Événement'}
             </p>
             {/* Timer display */}
-            <div className="flex justify-center items-end gap-1 text-white">
+            <div className="flex justify-center items-end gap-1 text-slate-900">
               <div className="text-center">
                 <div className="text-2xl font-mono font-black leading-none">00</div>
                 <div className="text-[9px] font-semibold opacity-70 mt-0.5">JOURS</div>
@@ -1466,8 +1466,8 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
             </div>
             {/* Rappel button */}
             <div className="mt-2 bg-white/20 rounded-full px-4 py-1.5 inline-flex items-center gap-1.5">
-              <Bell size={12} className="text-white" />
-              <span className="text-white text-[10px] font-semibold">Rappel</span>
+              <Bell size={12} className="text-slate-900" />
+              <span className="text-slate-900 text-[10px] font-semibold">Rappel</span>
             </div>
           </div>
         </div>
@@ -1509,10 +1509,10 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
         <ColorCircle colorIndex={colorIdx} colors={STICKER_COLORS.notification} onChange={(idx) => onUpdateData({ ...sticker.data, colorIndex: idx })} />
         <div className="rounded-2xl overflow-hidden shadow-xl" style={{ background: scheme.gradient }}>
           <div className="px-4 pt-5 pb-3 text-center">
-            <Bell size={20} className="mx-auto mb-2 text-white" />
-            <p className="text-white text-xs font-bold mb-1">{sticker.data.title || 'Mon événement'}</p>
+            <Bell size={20} className="mx-auto mb-2 text-slate-900" />
+            <p className="text-slate-900 text-xs font-bold mb-1">{sticker.data.title || 'Mon événement'}</p>
             <div className="bg-white/20 rounded-full px-4 py-2 mt-2">
-              <span className="text-white text-xs font-semibold">Activer les notifications</span>
+              <span className="text-slate-900 text-xs font-semibold">Activer les notifications</span>
             </div>
           </div>
         </div>
@@ -1551,7 +1551,7 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
   /* ---- MENTION STICKER ---- */
   else if (sticker.type === 'mention') {
     content = (
-      <div className="bg-white/30 backdrop-blur-md text-white rounded-full px-4 py-2 text-sm font-bold shadow-lg border border-white/20">
+      <div className="bg-white/30 backdrop-blur-md text-slate-900 rounded-full px-4 py-2 text-sm font-bold shadow-lg border border-slate-200">
         @{sticker.data.username || 'username'}
       </div>
     );
@@ -1560,7 +1560,7 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
   /* ---- HASHTAG STICKER ---- */
   else if (sticker.type === 'hashtag') {
     content = (
-      <div className="bg-white/30 backdrop-blur-md text-white rounded-full px-4 py-2 text-sm font-bold shadow-lg border border-white/20">
+      <div className="bg-white/30 backdrop-blur-md text-slate-900 rounded-full px-4 py-2 text-sm font-bold shadow-lg border border-slate-200">
         #{sticker.data.hashtag || 'hashtag'}
       </div>
     );
@@ -1612,7 +1612,7 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
     <div className="min-h-screen bg-[#0a0a0f] text-white p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <button onClick={onGoBack} className="flex items-center gap-2 text-gray-400 hover:text-white mb-4 transition">
+          <button onClick={onGoBack} className="flex items-center gap-2 text-gray-400 hover:text-slate-900 mb-4 transition">
             <ArrowLeft size={20} /> Retour
           </button>
           <h1 className="text-3xl font-bold">Mes stories</h1>
@@ -1620,11 +1620,11 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
 
         {/* Filters */}
         <div className="flex gap-4 mb-8 flex-wrap items-center">
-          <div className="flex gap-1 bg-white/5 rounded-lg p-1">
-            <button onClick={() => onFilterChange('pending')} className={`px-4 py-2 rounded-md text-sm transition ${filter === 'pending' ? 'bg-pink-600 text-white' : 'text-gray-300 hover:text-white'}`}>
+          <div className="flex gap-1 bg-white rounded-lg p-1">
+            <button onClick={() => onFilterChange('pending')} className={`px-4 py-2 rounded-md text-sm transition ${filter === 'pending' ? 'bg-pink-600 text-white' : 'text-gray-300 hover:text-slate-900'}`}>
               En attente
             </button>
-            <button onClick={() => onFilterChange('published')} className={`px-4 py-2 rounded-md text-sm transition ${filter === 'published' ? 'bg-pink-600 text-white' : 'text-gray-300 hover:text-white'}`}>
+            <button onClick={() => onFilterChange('published')} className={`px-4 py-2 rounded-md text-sm transition ${filter === 'published' ? 'bg-pink-600 text-white' : 'text-gray-300 hover:text-slate-900'}`}>
               Publiées
             </button>
           </div>
@@ -1632,7 +1632,7 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
           <select
             value={accountFilter}
             onChange={(e) => onAccountFilterChange(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm"
+            className="bg-white border border-slate-200 rounded-lg px-4 py-2 text-slate-900 text-sm"
             style={{ colorScheme: 'dark' }}
           >
             <option value="all">Tous les comptes</option>
@@ -1642,17 +1642,17 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
 
         {/* Grid */}
         {filtered.length === 0 ? (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
+          <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
             <p className="text-gray-400">Aucune story trouvée.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map(story => (
-              <div key={story.id} className="bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:bg-white/8 transition">
-                <div className="aspect-[9/16] max-h-48 bg-black relative overflow-hidden">
+              <div key={story.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:bg-white/8 transition">
+                <div className="aspect-[9/16] max-h-48 bg-white relative overflow-hidden">
                   {story.media_url && <img src={story.media_url} alt="" className="w-full h-full object-cover" />}
                   <div className="absolute top-2 right-2">
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold text-white ${statusMap[story.status]?.color || 'bg-gray-600'}`}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold text-slate-900 ${statusMap[story.status]?.color || 'bg-gray-600'}`}>
                       {statusMap[story.status]?.label || story.status}
                     </span>
                   </div>

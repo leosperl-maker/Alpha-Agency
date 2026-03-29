@@ -6,9 +6,9 @@ export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     // Get from localStorage or default to 'dark'
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('alpha-theme') || 'dark';
+      return localStorage.getItem('alpha-theme') || 'light';
     }
-    return 'dark';
+    return 'light';
   });
 
   // Apply theme to DOM
@@ -31,12 +31,12 @@ export const ThemeProvider = ({ children }) => {
     // Update CSS custom properties directly for immediate effect
     if (newTheme === 'light') {
       root.style.setProperty('--bg-primary', '#FFFFFF');
-      root.style.setProperty('--bg-secondary', '#F5F5F5');
+      root.style.setProperty('--bg-secondary', '#F8FAFC');
       root.style.setProperty('--bg-card', '#FFFFFF');
       root.style.setProperty('--text-primary', '#1A1A1A');
       root.style.setProperty('--text-secondary', '#4A4A4A');
       root.style.setProperty('--border-color', 'rgba(0, 0, 0, 0.1)');
-      body.style.backgroundColor = '#F5F5F5';
+      body.style.backgroundColor = '#F8FAFC';
       body.style.color = '#1A1A1A';
     } else {
       root.style.setProperty('--bg-primary', '#02040A');

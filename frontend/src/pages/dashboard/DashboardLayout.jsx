@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
-import { 
-  LayoutDashboard, Users, Kanban, FileText, Receipt, CreditCard, Settings,
+import {
+  LayoutDashboard, Users, Kanban, FileText, Receipt, Settings,
   LogOut, Menu, X, Image, Inbox, FileCheck, CheckSquare, Wallet, Database,
-  UserCog, Bot, Newspaper, Share2, Tag, Mail, ChevronLeft, Bell, Search,
+  UserCog, Newspaper, Share2, ChevronLeft, Bell, Search,
   User, ChevronDown, AlertCircle, Clock, FileWarning, UserPlus, Sun, Moon,
-  ListTodo, GitBranch, Send, Calendar, CalendarDays, Link2, Command, 
+  ListTodo, Calendar, CalendarDays, Link2, Command,
   FileSearch, Contact, Briefcase, DollarSign, Keyboard, HelpCircle,
-  Wifi, WifiOff, Instagram, Zap, Mic, BarChart3
+  Wifi, WifiOff, Instagram, Zap
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -30,7 +30,7 @@ const DashboardLayout = () => {
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
   // Topbar states
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,7 +38,7 @@ const DashboardLayout = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
-  
+
   // Refs for click outside
   const searchRef = useRef(null);
   const notifRef = useRef(null);
@@ -51,7 +51,7 @@ const DashboardLayout = () => {
   const [commandResults, setCommandResults] = useState([]);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   // Keyboard shortcut state - MUST be declared before useEffect that uses them
   const [lastKeyPressed, setLastKeyPressed] = useState(null);
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
@@ -59,16 +59,16 @@ const DashboardLayout = () => {
   useEffect(() => {
     const token = localStorage.getItem("alpha_token");
     const userData = localStorage.getItem("alpha_user");
-    
+
     if (!token) {
       navigate("/admin/login");
       return;
     }
-    
+
     if (userData) {
       setUser(JSON.parse(userData));
     }
-    
+
     // Fetch notifications
     fetchNotifications();
   }, [navigate]);
@@ -98,17 +98,17 @@ const DashboardLayout = () => {
         if (!t.due_date) return false;
         return new Date(t.due_date) < new Date();
       }).slice(0, 3);
-      
+
       // Fetch overdue invoices
       const invoicesRes = await invoicesAPI.getAll({ status: 'pending,overdue' });
       const overdueInvoices = (invoicesRes.data || []).filter(i => i.status === 'overdue').slice(0, 3);
-      
+
       // Fetch new leads (recent contacts)
       const contactsRes = await contactsAPI.getAll({ type: 'lead' });
       const recentLeads = (contactsRes.data || []).slice(0, 3);
-      
+
       const notifs = [];
-      
+
       overdueTasks.forEach(t => {
         notifs.push({
           id: `task-${t.id}`,
@@ -120,7 +120,7 @@ const DashboardLayout = () => {
           link: '/admin/taches'
         });
       });
-      
+
       overdueInvoices.forEach(i => {
         notifs.push({
           id: `invoice-${i.id}`,
@@ -132,7 +132,7 @@ const DashboardLayout = () => {
           link: '/admin/facturation'
         });
       });
-      
+
       recentLeads.slice(0, 2).forEach(c => {
         notifs.push({
           id: `contact-${c.id}`,
@@ -144,7 +144,7 @@ const DashboardLayout = () => {
           link: '/admin/contacts'
         });
       });
-      
+
       setNotifications(notifs.slice(0, 5));
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -157,13 +157,13 @@ const DashboardLayout = () => {
       setSearchResults([]);
       return;
     }
-    
+
     try {
       const [contactsRes, tasksRes] = await Promise.all([
         contactsAPI.getAll({ search: query }),
         tasksAPI.getAll({ search: query })
       ]);
-      
+
       const results = [];
       (contactsRes.data || []).slice(0, 3).forEach(c => {
         results.push({
@@ -185,7 +185,7 @@ const DashboardLayout = () => {
           link: '/admin/taches'
         });
       });
-      
+
       setSearchResults(results);
     } catch (error) {
       console.error("Search error:", error);
@@ -193,7 +193,7 @@ const DashboardLayout = () => {
   };
 
   // ================== COMMAND PALETTE (⌘K) ==================
-  
+
   // All searchable items
   const allNavigationItems = [
     { id: 'nav-dashboard', type: 'Navigation', title: "Vue d'ensemble", icon: LayoutDashboard, action: () => navigate('/admin'), keywords: 'dashboard accueil home' },
@@ -206,7 +206,6 @@ const DashboardLayout = () => {
     { id: 'nav-invoices', type: 'Navigation', title: "Facturation", icon: Receipt, action: () => navigate('/admin/facturation'), keywords: 'factures devis' },
     { id: 'nav-budget', type: 'Navigation', title: "Budget", icon: Wallet, action: () => navigate('/admin/budget'), keywords: 'finances argent' },
     { id: 'nav-social', type: 'Navigation', title: "Social Media", icon: Share2, action: () => navigate('/admin/social-media'), keywords: 'réseaux sociaux instagram facebook' },
-    { id: 'nav-moltbot', type: 'Navigation', title: "MoltBot", icon: Bot, action: () => navigate('/admin/moltbot'), keywords: 'ai chat gpt assistant ia' },
     { id: 'nav-settings', type: 'Navigation', title: "Paramètres", icon: Settings, action: () => navigate('/admin/parametres'), keywords: 'config configuration' },
   ];
 
@@ -226,10 +225,10 @@ const DashboardLayout = () => {
 
     setIsSearching(true);
     const lowerQuery = query.toLowerCase();
-    
+
     // Filter navigation items
-    const navResults = allNavigationItems.filter(item => 
-      item.title.toLowerCase().includes(lowerQuery) || 
+    const navResults = allNavigationItems.filter(item =>
+      item.title.toLowerCase().includes(lowerQuery) ||
       item.keywords.toLowerCase().includes(lowerQuery)
     );
 
@@ -311,7 +310,7 @@ const DashboardLayout = () => {
         setCommandQuery("");
         performGlobalSearch("");
       }
-      
+
       // Escape - Close palette
       if (e.key === 'Escape' && commandPaletteOpen) {
         setCommandPaletteOpen(false);
@@ -321,13 +320,13 @@ const DashboardLayout = () => {
       if (commandPaletteOpen) {
         if (e.key === 'ArrowDown') {
           e.preventDefault();
-          setSelectedCommandIndex(prev => 
+          setSelectedCommandIndex(prev =>
             prev < commandResults.length - 1 ? prev + 1 : 0
           );
         }
         if (e.key === 'ArrowUp') {
           e.preventDefault();
-          setSelectedCommandIndex(prev => 
+          setSelectedCommandIndex(prev =>
             prev > 0 ? prev - 1 : commandResults.length - 1
           );
         }
@@ -345,7 +344,7 @@ const DashboardLayout = () => {
           e.preventDefault();
           setShowShortcutsHelp(prev => !prev);
         }
-        
+
         // G + key sequences for navigation
         if (lastKeyPressed === 'g') {
           e.preventDefault();
@@ -361,14 +360,14 @@ const DashboardLayout = () => {
             'm': '/admin/multilink', // Go Multilink
             'b': '/admin/budget',    // Go Budget
           };
-          
+
           if (gShortcuts[e.key.toLowerCase()]) {
             navigate(gShortcuts[e.key.toLowerCase()]);
             setLastKeyPressed(null);
             return;
           }
         }
-        
+
         // Store last key for sequences
         if (e.key === 'g') {
           setLastKeyPressed('g');
@@ -401,70 +400,64 @@ const DashboardLayout = () => {
     navigate("/admin/login");
   };
 
-  // Navigation items
-  const baseNavItems = [
-    { path: "/admin", icon: LayoutDashboard, label: "Vue d'ensemble", end: true },
-    { path: "/admin/demandes", icon: Inbox, label: "Demandes" },
-    { path: "/admin/contacts", icon: Users, label: "Contacts" },
-    { path: "/admin/pipeline", icon: Kanban, label: "Pipeline" },
-    { path: "/admin/taches", icon: CheckSquare, label: "Tâches" },
-    { path: "/admin/things", icon: ListTodo, label: "Things" },
-    { path: "/admin/agenda", icon: Calendar, label: "Agenda / RDV" },
-    { path: "/admin/editorial", icon: CalendarDays, label: "Calendrier Éditorial" },
-    { path: "/admin/multilink", icon: Link2, label: "Multilink" },
-    { path: "/admin/facturation", icon: Receipt, label: "Facturation" },
-    { path: "/admin/budget", icon: Wallet, label: "Budget" },
-    { path: "/admin/abonnements", icon: CreditCard, label: "Abonnements" },
-    { path: "/admin/analytics-dashboard", icon: BarChart3, label: "Analytics" },
-    { path: "/admin/realisations", icon: Image, label: "Réalisations" },
-    { path: "/admin/mindmap", icon: GitBranch, label: "MindMap" },
-    { path: "/admin/tags", icon: Tag, label: "Tags" },
-    { path: "/admin/documents", icon: FileCheck, label: "Documents" },
-    { path: "/admin/transfer", icon: Send, label: "Transfert" },
-    { path: "/admin/sauvegardes", icon: Database, label: "Sauvegardes" },
-    { path: "/admin/actualites", icon: Newspaper, label: "Actualités" },
-    { path: "/admin/blog", icon: FileText, label: "Blog" },
-    { path: "/admin/social-media", icon: Share2, label: "Social Media" },
-    { path: "/admin/instagram-stories", icon: Instagram, label: "Stories" },
-    { path: "/admin/nurturing", icon: Zap, label: "Nurturing" },
-    { path: "/admin/voice-crm", icon: Mic, label: "Voice CRM" },
-    { path: "/admin/moltbot", icon: Bot, label: "MoltBot" },
-    { path: "/admin/whatsapp", icon: Wifi, label: "WhatsApp" },
-    { path: "/admin/campagnes", icon: Mail, label: "Campagnes" },
+  // Navigation groups
+  const navGroups = [
+    { label: "CRM", items: [
+      { path: "/admin", icon: LayoutDashboard, label: "Vue d'ensemble", end: true },
+      { path: "/admin/demandes", icon: Inbox, label: "Demandes" },
+      { path: "/admin/contacts", icon: Users, label: "Contacts" },
+      { path: "/admin/pipeline", icon: Kanban, label: "Pipeline" },
+      { path: "/admin/taches", icon: CheckSquare, label: "Tâches" },
+      { path: "/admin/things", icon: ListTodo, label: "Things" },
+      { path: "/admin/agenda", icon: Calendar, label: "Agenda / RDV" },
+    ]},
+    { label: "Finances", items: [
+      { path: "/admin/facturation", icon: Receipt, label: "Facturation" },
+      { path: "/admin/budget", icon: Wallet, label: "Budget" },
+    ]},
+    { label: "Contenu", items: [
+      { path: "/admin/actualites", icon: Newspaper, label: "Actualités" },
+      { path: "/admin/blog", icon: FileText, label: "Blog" },
+      { path: "/admin/social-media", icon: Share2, label: "Social Media" },
+      { path: "/admin/editorial", icon: CalendarDays, label: "Calendrier Éditorial" },
+      { path: "/admin/multilink", icon: Link2, label: "Multilink" },
+      { path: "/admin/instagram-stories", icon: Instagram, label: "Stories" },
+      { path: "/admin/nurturing", icon: Zap, label: "Nurturing" },
+    ]},
+    { label: "Administration", items: [
+      { path: "/admin/realisations", icon: Image, label: "Réalisations" },
+      { path: "/admin/documents", icon: FileCheck, label: "Documents" },
+      { path: "/admin/sauvegardes", icon: Database, label: "Sauvegardes" },
+      ...(user?.role === 'super_admin' ? [{ path: "/admin/utilisateurs", icon: UserCog, label: "Utilisateurs" }] : []),
+      { path: "/admin/parametres", icon: Settings, label: "Paramètres" },
+    ]},
   ];
 
-  const navItems = user?.role === 'super_admin' 
-    ? [...baseNavItems, { path: "/admin/utilisateurs", icon: UserCog, label: "Utilisateurs" }, { path: "/admin/parametres", icon: Settings, label: "Paramètres" }]
-    : [...baseNavItems, { path: "/admin/parametres", icon: Settings, label: "Paramètres" }];
+  // Flatten navGroups for navItems (used for currentPage detection etc.)
+  const navItems = navGroups.flatMap(group => group.items);
 
   // Get current page title
-  const currentPage = navItems.find(item => 
+  const currentPage = navItems.find(item =>
     item.end ? location.pathname === item.path : location.pathname.startsWith(item.path)
   );
 
   return (
-    <div data-testid="dashboard-layout" className="min-h-screen bg-[#02040A] flex overflow-hidden">
-      {/* Background Effects */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-64 h-64 bg-cyan-600/10 rounded-full blur-3xl" />
-      </div>
+    <div data-testid="dashboard-layout" className="min-h-screen bg-slate-50 flex overflow-hidden">
 
       {/* Sidebar - Desktop */}
       <aside className={`
         hidden lg:flex flex-col fixed inset-y-0 left-0 z-40
-        bg-black/60 backdrop-blur-2xl border-r border-white/10
+        bg-white border-r border-slate-200 shadow-sm
         transition-all duration-300
         ${sidebarOpen ? 'w-64' : 'w-20'}
       `}>
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 flex-shrink-0">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 flex-shrink-0">
           {sidebarOpen ? (
-            <img 
+            <img
               src={process.env.PUBLIC_URL + "/logo-header-white.png"}
               alt="Alpha Agency"
-              className="h-9 w-auto brightness-0 invert"
+              className="h-9 w-auto"
             />
           ) : (
             <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
@@ -473,47 +466,56 @@ const DashboardLayout = () => {
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+            className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors"
           >
             <ChevronLeft className={`w-5 h-5 transition-transform ${!sidebarOpen ? 'rotate-180' : ''}`} />
           </button>
         </div>
 
         {/* Nav Items - Scrollable */}
-        <nav className="flex-1 p-3 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-          <div className="space-y-1">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.end}
-                className={({ isActive }) => `
-                  flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all
-                  ${isActive 
-                    ? 'bg-indigo-600/20 text-indigo-400' 
-                    : 'text-white/60 hover:bg-white/5 hover:text-white'
-                  }
-                `}
-              >
-                <item.icon className={`w-5 h-5 flex-shrink-0`} />
-                {sidebarOpen && (
-                  <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
-                )}
-              </NavLink>
-            ))}
-          </div>
+        <nav className="flex-1 p-3 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+          {navGroups.map((group) => (
+            <div key={group.label} className="mb-4">
+              {sidebarOpen && (
+                <p className="px-3 mb-1 text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+                  {group.label}
+                </p>
+              )}
+              <div className="space-y-0.5">
+                {group.items.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.end}
+                    className={({ isActive }) => `
+                      flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all
+                      ${isActive
+                        ? 'bg-indigo-50 text-indigo-700 font-semibold'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      }
+                    `}
+                  >
+                    <item.icon className={`w-5 h-5 flex-shrink-0`} />
+                    {sidebarOpen && (
+                      <span className="text-sm whitespace-nowrap">{item.label}</span>
+                    )}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
+          ))}
         </nav>
 
         {/* User Section - Fixed at bottom */}
-        <div className="p-3 border-t border-white/10 flex-shrink-0">
-          <div className={`flex items-center gap-3 p-2 rounded-xl bg-white/5 ${!sidebarOpen ? 'justify-center' : ''}`}>
+        <div className="p-3 border-t border-slate-200 flex-shrink-0">
+          <div className={`flex items-center gap-3 p-2 rounded-xl bg-slate-50 ${!sidebarOpen ? 'justify-center' : ''}`}>
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
               {user?.name?.charAt(0) || 'A'}
             </div>
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">{user?.name || 'Admin'}</p>
-                <p className="text-white/50 text-xs truncate">{user?.role || 'Utilisateur'}</p>
+                <p className="text-slate-900 text-sm font-medium truncate">{user?.name || 'Admin'}</p>
+                <p className="text-slate-500 text-xs truncate">{user?.role || 'Utilisateur'}</p>
               </div>
             )}
           </div>
@@ -522,8 +524,8 @@ const DashboardLayout = () => {
 
       {/* Mobile Sidebar Overlay */}
       {mobileMenuOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+        <div
+          className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
@@ -531,55 +533,64 @@ const DashboardLayout = () => {
       {/* Mobile Sidebar */}
       <aside className={`
         lg:hidden fixed inset-y-0 left-0 z-50 w-72 flex flex-col
-        bg-black/90 backdrop-blur-2xl border-r border-white/10
+        bg-white border-r border-slate-200 shadow-lg
         transform transition-transform duration-300
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 flex-shrink-0">
-          <img 
+        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 flex-shrink-0">
+          <img
             src={process.env.PUBLIC_URL + "/logo-header-white.png"}
             alt="Alpha Agency"
-            className="h-8 w-auto brightness-0 invert"
+            className="h-8 w-auto"
           />
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="p-2 rounded-lg hover:bg-white/10 text-white"
+            className="p-2 rounded-lg hover:bg-slate-100 text-slate-700"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1 min-h-0" style={{
+        <nav className="flex-1 overflow-y-auto py-4 px-3 min-h-0" style={{
           WebkitOverflowScrolling: 'touch',
           scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+          scrollbarColor: 'rgba(148,163,184,0.5) transparent'
         }}>
           <style>{`
             nav::-webkit-scrollbar { width: 6px; }
             nav::-webkit-scrollbar-track { background: transparent; }
-            nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+            nav::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.5); border-radius: 3px; }
           `}</style>
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.end}
-              onClick={() => setMobileMenuOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-3 py-3 rounded-xl transition-all
-                ${isActive 
-                  ? 'bg-gradient-to-r from-indigo-600/20 to-purple-600/20 text-white border border-indigo-500/30' 
-                  : 'text-white/60 hover:text-white hover:bg-white/5'}
-              `}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="text-sm font-medium">{item.label}</span>
-            </NavLink>
+          {navGroups.map((group) => (
+            <div key={group.label} className="mb-4">
+              <p className="px-3 mb-1 text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+                {group.label}
+              </p>
+              <div className="space-y-0.5">
+                {group.items.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.end}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) => `
+                      flex items-center gap-3 px-3 py-3 rounded-xl transition-all
+                      ${isActive
+                        ? 'bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}
+                    `}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </NavLink>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-slate-200">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
           >
             <LogOut className="w-5 h-5" />
             <span className="font-medium">Déconnexion</span>
@@ -590,40 +601,40 @@ const DashboardLayout = () => {
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'}`}>
         {/* Top Bar - with safe area for iOS */}
-        <header className="sticky top-0 z-30 bg-black/40 backdrop-blur-2xl border-b border-white/10 flex items-center justify-between px-4 lg:px-6" style={{ paddingTop: 'max(env(safe-area-inset-top), 0.5rem)', minHeight: '4rem' }}>
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-lg border-b border-slate-200 flex items-center justify-between px-4 lg:px-6" style={{ paddingTop: 'max(env(safe-area-inset-top), 0.5rem)', minHeight: '4rem' }}>
           {/* Left: Mobile menu + Page title */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-white/10 text-white"
+              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 text-slate-700"
               data-testid="mobile-menu-btn"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-white font-semibold text-lg">{currentPage?.label || 'Dashboard'}</h1>
-              <p className="text-white/40 text-xs hidden sm:block">Alpha Agency CRM</p>
+              <h1 className="text-slate-900 font-semibold text-lg">{currentPage?.label || 'Dashboard'}</h1>
+              <p className="text-slate-500 text-xs hidden sm:block">Alpha Agency CRM</p>
             </div>
           </div>
 
           {/* Right: Search + Actions */}
           <div className="flex items-center gap-3">
             {/* Search - Opens Command Palette */}
-            <button 
+            <button
               onClick={() => { setCommandPaletteOpen(true); setCommandQuery(""); performGlobalSearch(""); }}
-              className="hidden sm:flex items-center gap-2 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white/60 hover:bg-white/10 hover:border-white/20 transition-all w-48 lg:w-64"
+              className="hidden sm:flex items-center gap-2 px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 hover:border-slate-300 transition-all w-48 lg:w-64"
             >
               <Search className="w-4 h-4" />
               <span className="text-sm flex-1 text-left">Rechercher...</span>
-              <kbd className="hidden lg:flex items-center gap-0.5 px-1.5 py-0.5 bg-white/5 rounded text-[10px]">
+              <kbd className="hidden lg:flex items-center gap-0.5 px-1.5 py-0.5 bg-slate-100 rounded text-[10px] text-slate-400">
                 <Command className="w-3 h-3" />K
               </kbd>
             </button>
-            
+
             {/* Mobile Search Button */}
-            <button 
+            <button
               onClick={() => { setCommandPaletteOpen(true); setCommandQuery(""); performGlobalSearch(""); }}
-              className="sm:hidden p-2 rounded-xl hover:bg-white/10 text-white/60"
+              className="sm:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-500"
             >
               <Search className="w-5 h-5" />
             </button>
@@ -633,23 +644,23 @@ const DashboardLayout = () => {
 
             {/* User Profile */}
             <div ref={profileRef} className="relative hidden sm:block">
-              <button 
+              <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2 pl-3 border-l border-white/10 hover:bg-white/5 rounded-r-xl pr-2 py-1 transition-colors"
+                className="flex items-center gap-2 pl-3 border-l border-slate-200 hover:bg-slate-50 rounded-r-xl pr-2 py-1 transition-colors"
               >
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
                   {user?.name?.charAt(0) || 'A'}
                 </div>
-                <span className="text-white/80 text-sm font-medium hidden lg:block">{user?.name?.split(' ')[0]}</span>
-                <ChevronDown className="w-4 h-4 text-white/40" />
+                <span className="text-slate-700 text-sm font-medium hidden lg:block">{user?.name?.split(' ')[0]}</span>
+                <ChevronDown className="w-4 h-4 text-slate-400" />
               </button>
-              
+
               {/* Profile Dropdown */}
               {profileOpen && (
-                <div className="absolute top-full right-0 mt-2 w-56 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-xl z-50">
-                  <div className="p-3 border-b border-white/10">
-                    <p className="text-white font-medium text-sm">{user?.name || 'Admin'}</p>
-                    <p className="text-white/50 text-xs">{user?.email}</p>
+                <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xl z-50">
+                  <div className="p-3 border-b border-slate-200">
+                    <p className="text-slate-900 font-medium text-sm">{user?.name || 'Admin'}</p>
+                    <p className="text-slate-500 text-xs">{user?.email}</p>
                   </div>
                   <div className="p-1">
                     <button
@@ -657,41 +668,31 @@ const DashboardLayout = () => {
                         navigate('/admin/parametres');
                         setProfileOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 p-2 hover:bg-white/10 rounded-lg transition-colors text-white/80 text-sm"
+                      className="w-full flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-700 text-sm"
                     >
                       <Settings className="w-4 h-4" />
                       Paramètres
                     </button>
-                    <button
-                      onClick={() => {
-                        navigate('/admin/moltbot');
-                        setProfileOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 p-2 hover:bg-white/10 rounded-lg transition-colors text-white/80 text-sm"
-                    >
-                      <Bot className="w-4 h-4" />
-                      MoltBot
-                    </button>
-                    
+
                     {/* Theme Toggle */}
-                    <div className="border-t border-white/10 mt-1 pt-1">
+                    <div className="border-t border-slate-200 mt-1 pt-1">
                       <button
                         onClick={toggleTheme}
-                        className="w-full flex items-center justify-between p-2 hover:bg-white/10 rounded-lg transition-colors text-white/80 text-sm"
+                        className="w-full flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-700 text-sm"
                       >
                         <div className="flex items-center gap-3">
                           {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                           <span>Thème {theme === 'dark' ? 'clair' : 'sombre'}</span>
                         </div>
-                        <div className={`w-8 h-4 rounded-full relative transition-colors ${theme === 'dark' ? 'bg-indigo-600' : 'bg-white/20'}`}>
+                        <div className={`w-8 h-4 rounded-full relative transition-colors ${theme === 'dark' ? 'bg-indigo-600' : 'bg-slate-300'}`}>
                           <div className={`absolute w-3 h-3 rounded-full bg-white top-0.5 transition-all ${theme === 'dark' ? 'left-4' : 'left-0.5'}`} />
                         </div>
                       </button>
                     </div>
-                    
+
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 p-2 hover:bg-red-500/20 rounded-lg transition-colors text-red-400 text-sm mt-1"
+                      className="w-full flex items-center gap-3 p-2 hover:bg-red-50 rounded-lg transition-colors text-red-500 text-sm mt-1"
                     >
                       <LogOut className="w-4 h-4" />
                       Déconnexion
@@ -710,7 +711,7 @@ const DashboardLayout = () => {
             Mode hors ligne - Certaines fonctionnalités peuvent être limitées
           </div>
         )}
-        
+
         {/* Back Online Indicator */}
         {isOnline && wasOffline && (
           <div className="bg-green-500/90 text-black px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium animate-in slide-in-from-top duration-300">
@@ -727,16 +728,16 @@ const DashboardLayout = () => {
 
       {/* Floating AI Chat */}
       <FloatingAIChat />
-      
+
       {/* Quick Actions Button */}
       <QuickActions />
 
       {/* Command Palette (⌘K) */}
       <Dialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
-        <DialogContent className="bg-[#0a0a12]/95 backdrop-blur-2xl border-white/10 p-0 max-w-xl overflow-hidden shadow-2xl">
+        <DialogContent className="bg-white/95 backdrop-blur-xl border-slate-200 p-0 max-w-xl overflow-hidden shadow-2xl">
           {/* Search Input */}
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
-            <Search className="w-5 h-5 text-white/40" />
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200">
+            <Search className="w-5 h-5 text-slate-400" />
             <input
               ref={commandInputRef}
               value={commandQuery}
@@ -745,10 +746,10 @@ const DashboardLayout = () => {
                 performGlobalSearch(e.target.value);
               }}
               placeholder="Rechercher ou taper une commande..."
-              className="flex-1 bg-transparent text-white placeholder-white/40 outline-none text-base"
+              className="flex-1 bg-transparent text-slate-900 placeholder-slate-400 outline-none text-base"
               autoFocus
             />
-            <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 bg-white/5 rounded text-white/30 text-xs">
+            <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 bg-slate-100 rounded text-slate-400 text-xs">
               <Command className="w-3 h-3" />K
             </kbd>
           </div>
@@ -756,12 +757,12 @@ const DashboardLayout = () => {
           {/* Results */}
           <div className="max-h-[60vh] overflow-y-auto p-2">
             {isSearching ? (
-              <div className="flex items-center justify-center py-8 text-white/40">
+              <div className="flex items-center justify-center py-8 text-slate-400">
                 <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mr-2" />
                 Recherche...
               </div>
             ) : commandResults.length === 0 ? (
-              <div className="text-center py-8 text-white/40">
+              <div className="text-center py-8 text-slate-400">
                 <FileSearch className="w-8 h-8 mx-auto mb-2 opacity-40" />
                 <p>Aucun résultat pour "{commandQuery}"</p>
               </div>
@@ -773,7 +774,7 @@ const DashboardLayout = () => {
                   if (items.length === 0) return null;
                   return (
                     <div key={type}>
-                      <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-white/30 font-medium">
+                      <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-slate-400 font-medium">
                         {type}
                       </p>
                       {items.map((result, idx) => {
@@ -788,24 +789,24 @@ const DashboardLayout = () => {
                             }}
                             onMouseEnter={() => setSelectedCommandIndex(globalIndex)}
                             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                              selectedCommandIndex === globalIndex 
-                                ? 'bg-indigo-600/20 text-white' 
-                                : 'text-white/70 hover:bg-white/5 hover:text-white'
+                              selectedCommandIndex === globalIndex
+                                ? 'bg-indigo-50 text-indigo-700'
+                                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                             }`}
                           >
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                              selectedCommandIndex === globalIndex ? 'bg-indigo-600/30' : 'bg-white/5'
+                              selectedCommandIndex === globalIndex ? 'bg-indigo-100' : 'bg-slate-100'
                             }`}>
                               <Icon className="w-4 h-4" />
                             </div>
                             <div className="flex-1 text-left">
                               <p className="text-sm font-medium">{result.title}</p>
                               {result.subtitle && (
-                                <p className="text-xs text-white/40">{result.subtitle}</p>
+                                <p className="text-xs text-slate-400">{result.subtitle}</p>
                               )}
                             </div>
                             {selectedCommandIndex === globalIndex && (
-                              <kbd className="px-2 py-0.5 bg-white/5 rounded text-white/30 text-xs">
+                              <kbd className="px-2 py-0.5 bg-slate-100 rounded text-slate-400 text-xs">
                                 Entrée
                               </kbd>
                             )}
@@ -820,15 +821,15 @@ const DashboardLayout = () => {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-2 border-t border-white/10 bg-white/[0.02] flex items-center justify-between text-xs text-white/30">
+          <div className="px-4 py-2 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-400">
             <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/5 rounded">↑↓</kbd> Naviguer</span>
-              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/5 rounded">Entrée</kbd> Sélectionner</span>
-              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/5 rounded">Échap</kbd> Fermer</span>
+              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-slate-100 rounded">↑↓</kbd> Naviguer</span>
+              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-slate-100 rounded">Entrée</kbd> Sélectionner</span>
+              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-slate-100 rounded">Échap</kbd> Fermer</span>
             </div>
-            <button 
+            <button
               onClick={() => { setCommandPaletteOpen(false); setShowShortcutsHelp(true); }}
-              className="flex items-center gap-1 hover:text-white transition-colors"
+              className="flex items-center gap-1 hover:text-slate-700 transition-colors"
             >
               <Keyboard className="w-3 h-3" />
               <span className="hidden sm:inline">Raccourcis</span>
@@ -839,32 +840,32 @@ const DashboardLayout = () => {
 
       {/* Keyboard Shortcuts Help Dialog */}
       <Dialog open={showShortcutsHelp} onOpenChange={setShowShortcutsHelp}>
-        <DialogContent className="bg-[#0a0a12]/95 backdrop-blur-2xl border-white/10 max-w-lg">
+        <DialogContent className="bg-white/95 backdrop-blur-xl border-slate-200 shadow-2xl max-w-lg">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
               <Keyboard className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">Raccourcis clavier</h2>
-              <p className="text-xs text-white/50">Naviguez plus rapidement dans l&apos;application</p>
+              <h2 className="text-lg font-semibold text-slate-900">Raccourcis clavier</h2>
+              <p className="text-xs text-slate-500">Naviguez plus rapidement dans l&apos;application</p>
             </div>
           </div>
 
           <div className="space-y-4">
             {/* Global shortcuts */}
             <div>
-              <p className="text-xs uppercase tracking-wider text-white/30 mb-2">Global</p>
+              <p className="text-xs uppercase tracking-wider text-slate-400 mb-2">Global</p>
               <div className="space-y-1.5">
                 {[
                   { keys: ['⌘', 'K'], label: 'Recherche globale' },
                   { keys: ['?'], label: 'Afficher cette aide' },
                   { keys: ['Échap'], label: 'Fermer les modals' },
                 ].map((shortcut, i) => (
-                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/5">
-                    <span className="text-sm text-white/70">{shortcut.label}</span>
+                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-50">
+                    <span className="text-sm text-slate-600">{shortcut.label}</span>
                     <div className="flex items-center gap-1">
                       {shortcut.keys.map((key, j) => (
-                        <kbd key={j} className="px-2 py-0.5 bg-white/10 rounded text-white/60 text-xs min-w-[24px] text-center">
+                        <kbd key={j} className="px-2 py-0.5 bg-slate-100 rounded text-slate-500 text-xs min-w-[24px] text-center">
                           {key}
                         </kbd>
                       ))}
@@ -876,7 +877,7 @@ const DashboardLayout = () => {
 
             {/* Navigation shortcuts */}
             <div>
-              <p className="text-xs uppercase tracking-wider text-white/30 mb-2">Navigation (G puis...)</p>
+              <p className="text-xs uppercase tracking-wider text-slate-400 mb-2">Navigation (G puis...)</p>
               <div className="grid grid-cols-2 gap-1.5">
                 {[
                   { key: 'D', label: 'Dashboard' },
@@ -887,14 +888,14 @@ const DashboardLayout = () => {
                   { key: 'S', label: 'Social Media' },
                   { key: 'E', label: 'Éditorial' },
                   { key: 'M', label: 'Multilink' },
-                  { key: 'A', label: 'MoltBot' },
+                  { key: 'A', label: 'Assistant' },
                   { key: 'B', label: 'Budget' },
                 ].map((shortcut, i) => (
-                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/5">
-                    <span className="text-xs text-white/70">{shortcut.label}</span>
+                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-50">
+                    <span className="text-xs text-slate-600">{shortcut.label}</span>
                     <div className="flex items-center gap-1">
-                      <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-white/60 text-[10px]">G</kbd>
-                      <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-white/60 text-[10px]">{shortcut.key}</kbd>
+                      <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 text-[10px]">G</kbd>
+                      <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 text-[10px]">{shortcut.key}</kbd>
                     </div>
                   </div>
                 ))}
@@ -902,8 +903,8 @@ const DashboardLayout = () => {
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-white/10 text-center">
-            <p className="text-xs text-white/30">
+          <div className="mt-4 pt-3 border-t border-slate-200 text-center">
+            <p className="text-xs text-slate-400">
               Les raccourcis fonctionnent quand vous n&apos;êtes pas dans un champ de texte
             </p>
           </div>

@@ -173,7 +173,7 @@ const ThingsPage = () => {
     { id: "anytime", label: "À tout moment", icon: Sparkles, count: todos.filter(t => !t.dueDate && !t.completed && !t.archived).length, color: "text-cyan-400" },
     { id: "starred", label: "Favoris", icon: Star, count: todos.filter(t => t.starred && !t.completed).length, color: "text-yellow-400" },
     { id: "completed", label: "Terminées", icon: CheckCircle2, count: todos.filter(t => t.completed && !t.archived).length, color: "text-green-400" },
-    { id: "logbook", label: "Archives", icon: Archive, count: todos.filter(t => t.archived).length, color: "text-white/40" },
+    { id: "logbook", label: "Archives", icon: Archive, count: todos.filter(t => t.archived).length, color: "text-slate-400" },
   ];
 
   const getFilterConfig = () => filterOptions.find(f => f.id === filter) || filterOptions[0];
@@ -182,7 +182,7 @@ const ThingsPage = () => {
   return (
     <div data-testid="things-page" className="h-full flex">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-white/10 p-4 hidden md:block">
+      <aside className="w-64 border-r border-slate-200 p-4 hidden md:block">
         <div className="space-y-1">
           {filterOptions.map(opt => (
             <button
@@ -190,8 +190,8 @@ const ThingsPage = () => {
               onClick={() => setFilter(opt.id)}
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
                 filter === opt.id 
-                  ? "bg-white/10 text-white" 
-                  : "text-white/60 hover:text-white hover:bg-white/5"
+                  ? "bg-slate-100 text-slate-900" 
+                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
               }`}
             >
               <div className="flex items-center gap-3">
@@ -199,7 +199,7 @@ const ThingsPage = () => {
                 <span className="font-medium">{opt.label}</span>
               </div>
               {opt.count > 0 && (
-                <span className={`text-sm ${filter === opt.id ? "text-white" : "text-white/40"}`}>
+                <span className={`text-sm ${filter === opt.id ? "text-slate-900" : "text-slate-400"}`}>
                   {opt.count}
                 </span>
               )}
@@ -208,13 +208,13 @@ const ThingsPage = () => {
         </div>
 
         {/* Today's Progress */}
-        <div className="mt-8 p-4 bg-white/5 rounded-xl border border-white/10">
-          <h3 className="text-white/60 text-xs uppercase tracking-wider mb-2">Progression du jour</h3>
+        <div className="mt-8 p-4 bg-white rounded-xl border border-slate-200">
+          <h3 className="text-slate-500 text-xs uppercase tracking-wider mb-2">Progression du jour</h3>
           <div className="flex items-end gap-2">
-            <span className="text-3xl font-bold text-white">{completedToday}</span>
-            <span className="text-white/40 text-sm mb-1">terminées</span>
+            <span className="text-3xl font-bold text-slate-900">{completedToday}</span>
+            <span className="text-slate-400 text-sm mb-1">terminées</span>
           </div>
-          <div className="mt-2 h-1.5 bg-white/10 rounded-full overflow-hidden">
+          <div className="mt-2 h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all"
               style={{ width: `${todayCount + completedToday > 0 ? (completedToday / (todayCount + completedToday)) * 100 : 0}%` }}
@@ -226,31 +226,31 @@ const ThingsPage = () => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="p-4 md:p-6 border-b border-white/10">
+        <header className="p-4 md:p-6 border-b border-slate-200">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <FilterIcon className={`w-6 h-6 ${getFilterConfig().color}`} />
-              <h1 className="text-2xl font-bold text-white">{getFilterConfig().label}</h1>
+              <h1 className="text-2xl font-bold text-slate-900">{getFilterConfig().label}</h1>
             </div>
             
             {/* Mobile filter dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild className="md:hidden">
-                <Button variant="outline" size="sm" className="border-white/20 text-white">
+                <Button variant="outline" size="sm" className="border-slate-200 text-slate-900">
                   <Filter className="w-4 h-4 mr-2" />
                   Filtrer
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
+              <DropdownMenuContent className="bg-slate-50 border-slate-200">
                 {filterOptions.map(opt => (
                   <DropdownMenuItem 
                     key={opt.id}
                     onClick={() => setFilter(opt.id)}
-                    className="text-white/80 focus:bg-white/10"
+                    className="text-slate-700 focus:bg-slate-100"
                   >
                     <opt.icon className={`w-4 h-4 mr-2 ${opt.color}`} />
                     {opt.label}
-                    {opt.count > 0 && <span className="ml-auto text-white/40">{opt.count}</span>}
+                    {opt.count > 0 && <span className="ml-auto text-slate-400">{opt.count}</span>}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -261,13 +261,13 @@ const ThingsPage = () => {
           {filter !== "logbook" && filter !== "completed" && (
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Plus className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                <Plus className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <Input
                   value={newTodo}
                   onChange={(e) => setNewTodo(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addTodo()}
                   placeholder={filter === "today" ? "Nouvelle tâche pour aujourd'hui..." : "Nouvelle tâche..."}
-                  className="pl-12 h-12 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-xl"
+                  className="pl-12 h-12 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-xl"
                 />
               </div>
               <Button 
@@ -282,22 +282,22 @@ const ThingsPage = () => {
 
           {/* Search */}
           <div className="relative mt-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher..."
-              className="pl-10 h-10 bg-white/5 border-white/10 text-white placeholder:text-white/40 rounded-lg"
+              className="pl-10 h-10 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-lg"
             />
           </div>
 
           {/* Mobile Progress */}
-          <div className="md:hidden mt-3 p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
+          <div className="md:hidden mt-3 p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-green-400" />
-              <span className="text-white/60 text-sm">{completedToday} terminées aujourd'hui</span>
+              <span className="text-slate-500 text-sm">{completedToday} terminées aujourd'hui</span>
             </div>
-            <div className="h-2 w-24 bg-white/10 rounded-full overflow-hidden">
+            <div className="h-2 w-24 bg-slate-100 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
                 style={{ width: `${todayCount + completedToday > 0 ? (completedToday / (todayCount + completedToday)) * 100 : 0}%` }}
@@ -315,11 +315,11 @@ const ThingsPage = () => {
                 animate={{ opacity: 1 }}
                 className="flex flex-col items-center justify-center py-16 text-center"
               >
-                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mb-4">
                   <FilterIcon className={`w-8 h-8 ${getFilterConfig().color} opacity-50`} />
                 </div>
-                <h3 className="text-white font-medium mb-1">Aucune tâche</h3>
-                <p className="text-white/50 text-sm">
+                <h3 className="text-slate-900 font-medium mb-1">Aucune tâche</h3>
+                <p className="text-slate-500 text-sm">
                   {filter === "logbook" ? "Les tâches archivées apparaîtront ici" : "Ajoutez une nouvelle tâche pour commencer"}
                 </p>
               </motion.div>
@@ -334,8 +334,8 @@ const ThingsPage = () => {
                     exit={{ opacity: 0, x: -100 }}
                     className={`group flex items-center gap-3 p-4 rounded-xl border transition-all ${
                       todo.completed 
-                        ? "bg-white/5 border-white/5" 
-                        : "bg-white/5 border-white/10 hover:border-white/20"
+                        ? "bg-white border-slate-200" 
+                        : "bg-white border-slate-200 hover:border-slate-200"
                     }`}
                   >
                     {/* Checkbox */}
@@ -347,7 +347,7 @@ const ThingsPage = () => {
                           : "border-white/30 hover:border-indigo-500"
                       }`}
                     >
-                      {todo.completed && <Check className="w-3.5 h-3.5 text-white" />}
+                      {todo.completed && <Check className="w-3.5 h-3.5 text-slate-900" />}
                     </button>
 
                     {/* Content */}
@@ -362,10 +362,10 @@ const ThingsPage = () => {
                           }}
                           onBlur={saveEdit}
                           autoFocus
-                          className="bg-white/10 border-indigo-500/50 h-8"
+                          className="bg-slate-100 border-indigo-500/50 h-8"
                         />
                       ) : (
-                        <p className={`text-white ${todo.completed ? "line-through text-white/40" : ""}`}>
+                        <p className={`text-slate-900 ${todo.completed ? "line-through text-slate-400" : ""}`}>
                           {todo.text}
                         </p>
                       )}
@@ -374,7 +374,7 @@ const ThingsPage = () => {
                       <div className="flex items-center gap-2 mt-1">
                         {todo.dueDate && (
                           <span className={`text-xs flex items-center gap-1 ${
-                            todo.dueDate < today && !todo.completed ? "text-red-400" : "text-white/40"
+                            todo.dueDate < today && !todo.completed ? "text-red-400" : "text-slate-400"
                           }`}>
                             <Calendar className="w-3 h-3" />
                             {new Date(todo.dueDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
@@ -394,7 +394,7 @@ const ThingsPage = () => {
                       <button
                         onClick={() => toggleStar(todo.id)}
                         className={`p-1.5 rounded-lg transition-colors ${
-                          todo.starred ? "text-yellow-400" : "text-white/30 hover:text-yellow-400"
+                          todo.starred ? "text-yellow-400" : "text-slate-400 hover:text-yellow-400"
                         }`}
                       >
                         <Star className="w-4 h-4" fill={todo.starred ? "currentColor" : "none"} />
@@ -402,31 +402,31 @@ const ThingsPage = () => {
                       
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/10">
+                          <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100">
                             <MoreHorizontal className="w-4 h-4" />
                           </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
-                          <DropdownMenuItem onClick={() => startEdit(todo)} className="text-white/80">
+                        <DropdownMenuContent className="bg-slate-50 border-slate-200">
+                          <DropdownMenuItem onClick={() => startEdit(todo)} className="text-slate-700">
                             <Edit2 className="w-4 h-4 mr-2" />
                             Modifier
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setDueDate(todo.id, today)} className="text-white/80">
+                          <DropdownMenuItem onClick={() => setDueDate(todo.id, today)} className="text-slate-700">
                             <Sun className="w-4 h-4 mr-2" />
                             Aujourd'hui
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setDueDate(todo.id, null)} className="text-white/80">
+                          <DropdownMenuItem onClick={() => setDueDate(todo.id, null)} className="text-slate-700">
                             <Sparkles className="w-4 h-4 mr-2" />
                             À tout moment
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-white/10" />
+                          <DropdownMenuSeparator className="bg-slate-100" />
                           {todo.archived ? (
                             <DropdownMenuItem onClick={() => restoreTodo(todo.id)} className="text-blue-400">
                               <RotateCcw className="w-4 h-4 mr-2" />
                               Restaurer
                             </DropdownMenuItem>
                           ) : (
-                            <DropdownMenuItem onClick={() => archiveTodo(todo.id)} className="text-white/60">
+                            <DropdownMenuItem onClick={() => archiveTodo(todo.id)} className="text-slate-500">
                               <Archive className="w-4 h-4 mr-2" />
                               Archiver
                             </DropdownMenuItem>

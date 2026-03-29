@@ -26,7 +26,7 @@ const formatMessage = (text) => {
   if (!text) return "";
   
   // Convert **bold** to <strong>
-  let formatted = text.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-white">$1</strong>');
+  let formatted = text.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-slate-900">$1</strong>');
   
   // Convert *italic* to <em> (single asterisks)
   formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
@@ -36,7 +36,7 @@ const formatMessage = (text) => {
   formatted = formatted.replace(/^\* /gm, '• ');
   
   // Convert numbered lists
-  formatted = formatted.replace(/^(\d+)\. /gm, '<span class="text-indigo-400">$1.</span> ');
+  formatted = formatted.replace(/^(\d+)\. /gm, '<span class="text-indigo-600">$1.</span> ');
   
   // Convert line breaks
   formatted = formatted.replace(/\n/g, '<br/>');
@@ -280,24 +280,24 @@ const AIAssistantPageNew = () => {
         
         {/* History Panel */}
         {showHistory && (
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={() => setShowHistory(false)}>
+          <div className="fixed inset-0 z-50 bg-white backdrop-blur-sm" onClick={() => setShowHistory(false)}>
             <div 
-              className="absolute inset-y-0 left-0 w-80 max-w-[90vw] bg-gradient-to-b from-[#12121f] to-[#0a0a12] border-r border-white/10 flex flex-col shadow-2xl"
+              className="absolute inset-y-0 left-0 w-80 max-w-[90vw] bg-gradient-to-b from-[#12121f] to-[#0a0a12] border-r border-slate-200 flex flex-col shadow-2xl"
               onClick={e => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-white/10">
-                <h2 className="text-base font-semibold text-white">Conversations</h2>
+              <div className="flex items-center justify-between p-4 border-b border-slate-200">
+                <h2 className="text-base font-semibold text-slate-900">Conversations</h2>
                 <button 
                   onClick={() => setShowHistory(false)} 
-                  className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                  className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors"
                 >
-                  <X className="w-4 h-4 text-white/60" />
+                  <X className="w-4 h-4 text-slate-500" />
                 </button>
               </div>
               
               {/* New conversation button */}
-              <div className="p-3 border-b border-white/5">
+              <div className="p-3 border-b border-slate-200">
                 <Button 
                   onClick={startNewConversation}
                   className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 h-9 text-sm"
@@ -311,7 +311,7 @@ const AIAssistantPageNew = () => {
               <ScrollArea className="flex-1 p-3">
                 <div className="space-y-1.5">
                   {conversations.length === 0 ? (
-                    <p className="text-center text-white/40 text-sm py-8">Aucune conversation</p>
+                    <p className="text-center text-slate-400 text-sm py-8">Aucune conversation</p>
                   ) : (
                     conversations.map(conv => (
                       <div
@@ -319,19 +319,19 @@ const AIAssistantPageNew = () => {
                         onClick={() => loadConversation(conv.id)}
                         className={`group relative p-3 rounded-lg cursor-pointer transition-all ${
                           currentConversationId === conv.id 
-                            ? 'bg-indigo-600/20 border border-indigo-500/30' 
-                            : 'bg-white/5 hover:bg-white/10 border border-transparent'
+                            ? 'bg-indigo-50 border border-indigo-500/30' 
+                            : 'bg-white hover:bg-slate-100 border border-transparent'
                         }`}
                       >
-                        <p className="text-sm text-white/90 line-clamp-2 pr-6">{conv.title || "Conversation"}</p>
-                        <p className="text-[10px] text-white/40 mt-1">
+                        <p className="text-sm text-slate-900 line-clamp-2 pr-6">{conv.title || "Conversation"}</p>
+                        <p className="text-[10px] text-slate-400 mt-1">
                           {new Date(conv.updated_at || conv.created_at).toLocaleDateString('fr-FR', { 
                             day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                           })}
                         </p>
                         <button
                           onClick={(e) => handleDeleteConversation(conv.id, e)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded opacity-0 group-hover:opacity-100 hover:bg-red-500/20 text-red-400 transition-all"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded opacity-0 group-hover:opacity-100 hover:bg-red-100 text-red-700 transition-all"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -348,15 +348,15 @@ const AIAssistantPageNew = () => {
         <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full">
           
           {/* Header */}
-          <header className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+          <header className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
             <div className="flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button 
                     onClick={() => setShowHistory(true)}
-                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
                   >
-                    <History className="w-5 h-5 text-white/60" />
+                    <History className="w-5 h-5 text-slate-500" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
@@ -368,9 +368,9 @@ const AIAssistantPageNew = () => {
                 <TooltipTrigger asChild>
                   <button
                     onClick={startNewConversation}
-                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
                   >
-                    <RefreshCw className="w-5 h-5 text-white/60" />
+                    <RefreshCw className="w-5 h-5 text-slate-500" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
@@ -389,7 +389,7 @@ const AIAssistantPageNew = () => {
               
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="text-xs text-white/40 bg-white/5 px-2 py-1 rounded-full">
+                  <div className="text-xs text-slate-400 bg-white px-2 py-1 rounded-full">
                     {status?.remaining || 0}/{status?.daily_limit || 200}
                   </div>
                 </TooltipTrigger>
@@ -405,12 +405,12 @@ const AIAssistantPageNew = () => {
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-12">
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/20 flex items-center justify-center mb-6">
-                  <Sparkles className="w-8 h-8 text-indigo-400" />
+                  <Sparkles className="w-8 h-8 text-indigo-600" />
                 </div>
-                <h1 className="text-xl sm:text-2xl font-light text-white mb-2">
+                <h1 className="text-xl sm:text-2xl font-light text-slate-900 mb-2">
                   Comment puis-je vous aider ?
                 </h1>
-                <p className="text-sm text-white/50 mb-8 max-w-sm">
+                <p className="text-sm text-slate-500 mb-8 max-w-sm">
                   Je peux accéder à vos contacts, tâches, factures, budget et bien plus.
                 </p>
                 
@@ -420,7 +420,7 @@ const AIAssistantPageNew = () => {
                     <button
                       key={i}
                       onClick={() => setInput(suggestion)}
-                      className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/70 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all"
+                      className="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-200 transition-all"
                     >
                       {suggestion}
                     </button>
@@ -437,16 +437,16 @@ const AIAssistantPageNew = () => {
                         : "bg-gradient-to-br from-indigo-500 to-purple-600"
                     }`}>
                       {msg.role === "user" ? (
-                        <User className="w-4 h-4 text-white" />
+                        <User className="w-4 h-4 text-slate-900" />
                       ) : (
-                        <Sparkles className="w-4 h-4 text-white" />
+                        <Sparkles className="w-4 h-4 text-slate-900" />
                       )}
                     </div>
                     <div className={`max-w-[80%] ${msg.role === "user" ? "text-right" : ""}`}>
                       <div className={`inline-block rounded-2xl px-4 py-2.5 ${
                         msg.role === "user" 
                           ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white" 
-                          : "bg-white/5 border border-white/10 text-white/90"
+                          : "bg-white border border-slate-200 text-slate-900"
                       }`}>
                         {msg.image_url && (
                           <img src={msg.image_url} alt="Attached" className="max-w-full max-h-40 rounded-lg mb-2" />
@@ -460,8 +460,8 @@ const AIAssistantPageNew = () => {
                           <div className={`mt-2 pt-2 border-t ${msg.action_executed.success ? 'border-emerald-500/30' : 'border-red-500/30'}`}>
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] ${
                               msg.action_executed.success 
-                                ? 'bg-emerald-500/20 text-emerald-400' 
-                                : 'bg-red-500/20 text-red-400'
+                                ? 'bg-emerald-100 text-emerald-700' 
+                                : 'bg-red-100 text-red-700'
                             }`}>
                               {msg.action_executed.success ? <CheckCircle2 className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
                               Action exécutée
@@ -476,9 +476,9 @@ const AIAssistantPageNew = () => {
                 {loading && (
                   <div className="flex gap-3">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center animate-pulse">
-                      <Sparkles className="w-4 h-4 text-white" />
+                      <Sparkles className="w-4 h-4 text-slate-900" />
                     </div>
-                    <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+                    <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3">
                       <div className="flex gap-1">
                         <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                         <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -496,12 +496,12 @@ const AIAssistantPageNew = () => {
           {imagePreview && (
             <div className="px-4 pb-2">
               <div className="relative inline-block">
-                <img src={imagePreview} alt="Preview" className="h-16 rounded-lg border border-white/10" />
+                <img src={imagePreview} alt="Preview" className="h-16 rounded-lg border border-slate-200" />
                 <button
                   onClick={removeAttachedImage}
                   className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shadow-lg"
                 >
-                  <X className="w-3 h-3 text-white" />
+                  <X className="w-3 h-3 text-slate-900" />
                 </button>
               </div>
             </div>
@@ -509,7 +509,7 @@ const AIAssistantPageNew = () => {
 
           {/* Generated Image */}
           {generatedImage && (
-            <div className="mx-4 mb-3 p-3 bg-white/5 rounded-xl border border-white/10">
+            <div className="mx-4 mb-3 p-3 bg-white rounded-xl border border-slate-200">
               <img src={generatedImage} alt="Generated" className="max-h-48 rounded-lg mx-auto" />
               <Button onClick={downloadGeneratedImage} size="sm" className="mt-2 w-full h-8 text-xs">
                 <Download className="w-3 h-3 mr-1" /> Télécharger
@@ -518,8 +518,8 @@ const AIAssistantPageNew = () => {
           )}
 
           {/* Input Area */}
-          <div className="p-4 border-t border-white/5">
-            <div className="relative bg-white/5 border border-white/10 rounded-xl overflow-hidden focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/20 transition-all">
+          <div className="p-4 border-t border-slate-200">
+            <div className="relative bg-white border border-slate-200 rounded-xl overflow-hidden focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/20 transition-all">
               <textarea
                 ref={inputRef}
                 value={input}
@@ -532,19 +532,19 @@ const AIAssistantPageNew = () => {
                 }}
                 placeholder={mode === "chat" ? "Posez une question..." : "Décrivez l'image à générer..."}
                 rows={1}
-                className="w-full bg-transparent text-white placeholder-white/40 px-4 py-3 resize-none focus:outline-none text-sm"
+                className="w-full bg-transparent text-slate-900 placeholder-slate-400 px-4 py-3 resize-none focus:outline-none text-sm"
                 style={{ minHeight: '44px', maxHeight: '120px' }}
               />
               
               {/* Bottom toolbar */}
-              <div className="flex items-center justify-between px-2 py-1.5 border-t border-white/5 bg-white/[0.02]">
+              <div className="flex items-center justify-between px-2 py-1.5 border-t border-slate-200 bg-slate-50">
                 <div className="flex items-center gap-0.5">
                   {/* Model selector - Opens Dialog on mobile, dropdown on desktop */}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => setShowModelDialog(true)}
-                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
                       >
                         <span>{currentModel.icon}</span>
                         <span className="hidden sm:inline">{currentModel.label}</span>
@@ -568,7 +568,7 @@ const AIAssistantPageNew = () => {
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="p-2 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+                        className="p-2 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                       >
                         <Camera className="w-4 h-4" />
                       </button>
@@ -584,7 +584,7 @@ const AIAssistantPageNew = () => {
                       <button
                         onClick={() => setMode(mode === "chat" ? "generate" : "chat")}
                         className={`p-2 rounded-lg transition-colors ${
-                          mode === "generate" ? "text-purple-400 bg-purple-500/20" : "text-white/40 hover:text-white hover:bg-white/10"
+                          mode === "generate" ? "text-purple-400 bg-purple-500/20" : "text-slate-400 hover:text-slate-900 hover:bg-slate-100"
                         }`}
                       >
                         <Wand2 className="w-4 h-4" />
@@ -601,7 +601,7 @@ const AIAssistantPageNew = () => {
                       <button
                         onClick={() => setActionsEnabled(!actionsEnabled)}
                         className={`p-2 rounded-lg transition-colors ${
-                          actionsEnabled ? "text-amber-400 bg-amber-500/20" : "text-white/40 hover:text-white hover:bg-white/10"
+                          actionsEnabled ? "text-amber-400 bg-amber-500/20" : "text-slate-400 hover:text-slate-900 hover:bg-slate-100"
                         }`}
                       >
                         <Zap className="w-4 h-4" />
@@ -633,10 +633,10 @@ const AIAssistantPageNew = () => {
 
       {/* Model Selection Dialog */}
       <Dialog open={showModelDialog} onOpenChange={setShowModelDialog}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-sm">
+        <DialogContent className="bg-slate-50 border-slate-200 text-white max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-white">
-              <Bot className="w-5 h-5 text-indigo-400" />
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
+              <Bot className="w-5 h-5 text-indigo-600" />
               Choisir un modèle IA
             </DialogTitle>
           </DialogHeader>
@@ -648,30 +648,30 @@ const AIAssistantPageNew = () => {
                 onClick={() => { setSelectedModel(model.value); setShowModelDialog(false); }}
                 className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                   selectedModel === model.value 
-                    ? 'bg-indigo-600/20 border-2 border-indigo-500/50' 
-                    : 'bg-white/5 border-2 border-transparent hover:bg-white/10 hover:border-white/10'
+                    ? 'bg-indigo-50 border-2 border-indigo-500/50' 
+                    : 'bg-white border-2 border-transparent hover:bg-slate-100 hover:border-slate-200'
                 }`}
               >
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl ${
-                  selectedModel === model.value ? 'bg-indigo-600/30' : 'bg-white/5'
+                  selectedModel === model.value ? 'bg-indigo-600/30' : 'bg-white'
                 }`}>
                   {model.icon}
                 </div>
                 <div className="flex-1 text-left">
-                  <p className={`font-medium ${selectedModel === model.value ? 'text-indigo-400' : 'text-white'}`}>
+                  <p className={`font-medium ${selectedModel === model.value ? 'text-indigo-600' : 'text-slate-900'}`}>
                     {model.label}
                   </p>
-                  <p className="text-xs text-white/40">{model.description}</p>
+                  <p className="text-xs text-slate-400">{model.description}</p>
                 </div>
                 {selectedModel === model.value && (
-                  <Check className="w-5 h-5 text-indigo-400" />
+                  <Check className="w-5 h-5 text-indigo-600" />
                 )}
               </button>
             ))}
           </div>
           
-          <div className="pt-2 border-t border-white/10">
-            <p className="text-xs text-white/40 text-center">
+          <div className="pt-2 border-t border-slate-200">
+            <p className="text-xs text-slate-400 text-center">
               Sélectionnez le modèle adapté à votre besoin
             </p>
           </div>

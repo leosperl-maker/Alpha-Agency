@@ -202,15 +202,15 @@ const InvoicesPage = () => {
   }, [searchParams, setSearchParams]);
 
   const statusConfig = {
-    brouillon: { label: "Brouillon", color: "bg-white/10 text-white/60", icon: FileText },
-    en_attente: { label: "En attente", color: "bg-blue-500/20 text-blue-400", icon: Clock },
-    envoyee: { label: "Envoyée", color: "bg-purple-500/20 text-purple-400", icon: Mail },
-    "partiellement_payée": { label: "Partiel", color: "bg-orange-500/20 text-orange-400", icon: PiggyBank },
-    "payée": { label: "Payée", color: "bg-green-500/20 text-green-400", icon: CheckCircle },
-    en_retard: { label: "En retard", color: "bg-red-500/20 text-red-400", icon: AlertTriangle },
-    annulee: { label: "Annulée", color: "bg-gray-100 text-gray-500", icon: XCircle },
+    brouillon: { label: "Brouillon", color: "bg-slate-100 text-slate-700", icon: FileText },
+    en_attente: { label: "En attente", color: "bg-amber-100 text-amber-700", icon: Clock },
+    envoyee: { label: "Envoyée", color: "bg-blue-100 text-blue-700", icon: Mail },
+    "partiellement_payée": { label: "Partiel", color: "bg-orange-100 text-orange-700", icon: PiggyBank },
+    "payée": { label: "Payée", color: "bg-green-100 text-green-700", icon: CheckCircle },
+    en_retard: { label: "En retard", color: "bg-red-100 text-red-700", icon: AlertTriangle },
+    annulee: { label: "Annulée", color: "bg-slate-100 text-slate-500", icon: XCircle },
     // Aliases for backward compatibility
-    payee: { label: "Payée", color: "bg-green-500/20 text-green-400", icon: CheckCircle },
+    payee: { label: "Payée", color: "bg-green-100 text-green-700", icon: CheckCircle },
   };
 
   const paymentMethods = {
@@ -926,9 +926,9 @@ const InvoicesPage = () => {
     const companyVat = settings?.company_vat || COMPANY_INFO.tva;
     
     return (
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg shadow-lg overflow-hidden h-full">
-        <div className="bg-white/5 px-4 py-2 border-b border-white/10 flex items-center justify-between">
-          <span className="text-sm font-medium text-white/60">Aperçu</span>
+      <div className="bg-white backdrop-blur-xl border border-slate-200 rounded-lg shadow-lg overflow-hidden h-full">
+        <div className="bg-white px-4 py-2 border-b border-slate-200 flex items-center justify-between">
+          <span className="text-sm font-medium text-slate-500">Aperçu</span>
           <Badge variant="outline" className="text-xs">
             {documentType === 'devis' ? 'DEVIS' : 'FACTURE'}
           </Badge>
@@ -938,38 +938,38 @@ const InvoicesPage = () => {
           <div className="flex justify-between items-start mb-6">
             <div>
               <img src={COMPANY_INFO.logo} alt="Alpha Agency" className="h-12 mb-2" />
-              <p className="text-[8px] text-white/60">{COMPANY_INFO.tagline}</p>
+              <p className="text-[8px] text-slate-500">{COMPANY_INFO.tagline}</p>
             </div>
             <div className="text-right">
-              <h2 className="text-lg font-bold text-indigo-400 mb-1">
+              <h2 className="text-lg font-bold text-indigo-600 mb-1">
                 {documentType === 'devis' ? 'DEVIS' : 'FACTURE'}
               </h2>
-              <p className="text-white/60">N° {editingInvoice?.invoice_number || 'NOUVEAU'}</p>
-              <p className="text-white/60">Date: {today}</p>
+              <p className="text-slate-500">N° {editingInvoice?.invoice_number || 'NOUVEAU'}</p>
+              <p className="text-slate-500">Date: {today}</p>
             </div>
           </div>
 
           {/* Company & Client Info */}
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-white/5 p-3 rounded">
-              <p className="font-bold text-white mb-1">{companyName}</p>
-              <p className="text-white/60">{companyAddress}</p>
-              <p className="text-white/60">Tél: {companyPhone}</p>
-              <p className="text-white/60">{companyEmail}</p>
-              <p className="text-white/60 mt-1">SIRET: {companySiret}</p>
-              {companyVat && <p className="text-white/60">TVA: {companyVat}</p>}
+            <div className="bg-white p-3 rounded">
+              <p className="font-bold text-slate-900 mb-1">{companyName}</p>
+              <p className="text-slate-500">{companyAddress}</p>
+              <p className="text-slate-500">Tél: {companyPhone}</p>
+              <p className="text-slate-500">{companyEmail}</p>
+              <p className="text-slate-500 mt-1">SIRET: {companySiret}</p>
+              {companyVat && <p className="text-slate-500">TVA: {companyVat}</p>}
             </div>
-            <div className="bg-white/5 p-3 rounded">
-              <p className="font-bold text-white/60 mb-1">DESTINATAIRE</p>
+            <div className="bg-white p-3 rounded">
+              <p className="font-bold text-slate-500 mb-1">DESTINATAIRE</p>
               {contact ? (
                 <>
-                  <p className="font-bold text-white">{contact.first_name} {contact.last_name}</p>
-                  {contact.company && <p className="text-white/60">{contact.company}</p>}
-                  {contact.email && <p className="text-white/60">{contact.email}</p>}
-                  {contact.phone && <p className="text-white/60">Tél: {contact.phone}</p>}
+                  <p className="font-bold text-slate-900">{contact.first_name} {contact.last_name}</p>
+                  {contact.company && <p className="text-slate-500">{contact.company}</p>}
+                  {contact.email && <p className="text-slate-500">{contact.email}</p>}
+                  {contact.phone && <p className="text-slate-500">Tél: {contact.phone}</p>}
                 </>
               ) : (
-                <p className="text-white/40 italic">Sélectionnez un client</p>
+                <p className="text-slate-400 italic">Sélectionnez un client</p>
               )}
             </div>
           </div>
@@ -977,17 +977,17 @@ const InvoicesPage = () => {
           {/* Dates */}
           <div className="flex gap-4 mb-4 text-[10px]">
             <div className="bg-indigo-600/10 px-3 py-1 rounded">
-              <span className="text-indigo-400 font-medium">Date d&apos;émission:</span> {today}
+              <span className="text-indigo-600 font-medium">Date d&apos;émission:</span> {today}
             </div>
             <div className="bg-indigo-600/10 px-3 py-1 rounded">
-              <span className="text-indigo-400 font-medium">Échéance:</span> {dueDate}
+              <span className="text-indigo-600 font-medium">Échéance:</span> {dueDate}
             </div>
           </div>
 
           {/* Items Table */}
           <table className="w-full mb-4">
             <thead>
-              <tr className="bg-[#1A1A1A] text-white">
+              <tr className="bg-slate-100 text-slate-700">
                 <th className="text-left p-2 text-[10px]">Désignation</th>
                 <th className="text-center p-2 text-[10px] w-12">Qté</th>
                 <th className="text-right p-2 text-[10px] w-16">P.U. HT</th>
@@ -997,14 +997,14 @@ const InvoicesPage = () => {
             </thead>
             <tbody>
               {items.filter(i => i.title || i.description).map((item, index) => (
-                <tr key={index} className="border-b border-white/10">
+                <tr key={index} className="border-b border-slate-200">
                   <td className="p-2 text-[10px]">
                     {item.title && <div className="font-semibold">{item.title}</div>}
-                    {item.description && <div className="text-white/60 whitespace-pre-wrap">{item.description}</div>}
+                    {item.description && <div className="text-slate-500 whitespace-pre-wrap">{item.description}</div>}
                   </td>
                   <td className="p-2 text-[10px] text-center">{item.quantity}</td>
                   <td className="p-2 text-[10px] text-right">{formatCurrency(item.unit_price)}</td>
-                  <td className="p-2 text-[10px] text-center text-indigo-400">
+                  <td className="p-2 text-[10px] text-center text-indigo-600">
                     {item.discount > 0 
                       ? (item.discountType === "fixed" 
                           ? `-${formatCurrency(item.discount)}` 
@@ -1016,7 +1016,7 @@ const InvoicesPage = () => {
               ))}
               {items.filter(i => i.title || i.description).length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-4 text-center text-white/40 italic">
+                  <td colSpan={5} className="p-4 text-center text-slate-400 italic">
                     Ajoutez des lignes à votre {documentType}
                   </td>
                 </tr>
@@ -1028,68 +1028,68 @@ const InvoicesPage = () => {
           <div className="flex justify-end mb-4">
             <div className="w-56">
               <div className="flex justify-between py-1 text-[10px]">
-                <span className="text-white/60">Sous-total HT</span>
+                <span className="text-slate-500">Sous-total HT</span>
                 <span>{formatCurrency(calculateSubtotal())}</span>
               </div>
               {globalDiscount.value > 0 && (
                 <>
-                  <div className="flex justify-between py-1 text-[10px] text-indigo-400">
+                  <div className="flex justify-between py-1 text-[10px] text-indigo-600">
                     <span>Remise globale {globalDiscount.type === "percent" ? `(${globalDiscount.value}%)` : ''}</span>
                     <span>-{formatCurrency(calculateGlobalDiscountAmount())}</span>
                   </div>
                   <div className="flex justify-between py-1 text-[10px]">
-                    <span className="text-white/60">Sous-total après remise</span>
+                    <span className="text-slate-500">Sous-total après remise</span>
                     <span>{formatCurrency(calculateSubtotalAfterDiscount())}</span>
                   </div>
                 </>
               )}
               <div className="flex justify-between py-1 text-[10px]">
-                <span className="text-white/60">TVA (8.5%)</span>
+                <span className="text-slate-500">TVA (8.5%)</span>
                 <span>{formatCurrency(calculateTVA())}</span>
               </div>
-              <div className="flex justify-between py-2 text-sm font-bold border-t-2 border-green-500/50 mt-1">
-                <span className="text-green-500 text-[10px] leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
-                <span className="text-green-500">{formatCurrency(calculateTotal())}</span>
+              <div className="flex justify-between py-2 text-sm font-bold border-t-2 border-green-600/50 mt-1">
+                <span className="text-green-700 text-[10px] leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
+                <span className="text-green-700">{formatCurrency(calculateTotal())}</span>
               </div>
             </div>
           </div>
 
           {/* Conditions */}
           {(settings?.default_conditions || formData.conditions) && (
-            <div className="bg-white/5 p-3 rounded mb-4">
+            <div className="bg-white p-3 rounded mb-4">
               <p className="font-bold text-[10px] mb-1">Conditions de règlement:</p>
-              <p className="text-[10px] text-white/60 whitespace-pre-wrap">{settings?.default_conditions || formData.conditions}</p>
+              <p className="text-[10px] text-slate-500 whitespace-pre-wrap">{settings?.default_conditions || formData.conditions}</p>
             </div>
           )}
           
           {/* Bank Details */}
           {(settings?.bank_details || formData.bank_details) && (
-            <div className="bg-white/5 p-3 rounded mb-4">
+            <div className="bg-white p-3 rounded mb-4">
               <p className="font-bold text-[10px] mb-1">Détails du paiement:</p>
-              <p className="text-[10px] text-white/60">Bénéficiaire: {companyName}</p>
-              <p className="text-[10px] text-white/60 whitespace-pre-wrap font-mono">{settings?.bank_details || formData.bank_details}</p>
+              <p className="text-[10px] text-slate-500">Bénéficiaire: {companyName}</p>
+              <p className="text-[10px] text-slate-500 whitespace-pre-wrap font-mono">{settings?.bank_details || formData.bank_details}</p>
             </div>
           )}
 
           {/* Notes */}
           {formData.notes && (
-            <div className="bg-white/5 p-3 rounded mb-4">
+            <div className="bg-white p-3 rounded mb-4">
               <p className="font-bold text-[10px] mb-1">Notes:</p>
-              <p className="text-[10px] text-white/60 whitespace-pre-wrap">{formData.notes}</p>
+              <p className="text-[10px] text-slate-500 whitespace-pre-wrap">{formData.notes}</p>
             </div>
           )}
           
           {/* Signature for devis - simplified */}
           {documentType === 'devis' && (
-            <div className="border-t border-white/10 pt-4 mt-4">
+            <div className="border-t border-slate-200 pt-4 mt-4">
               <p className="font-bold text-[10px] mb-2">Bon pour accord &amp; signature :</p>
-              <div className="h-8 border-b border-white/30 w-64"></div>
+              <div className="h-8 border-b border-slate-300 w-64"></div>
             </div>
           )}
 
           {/* Footer */}
-          <div className="border-t border-white/10 pt-4 mt-4">
-            <div className="text-[7px] text-white/40 text-center">
+          <div className="border-t border-slate-200 pt-4 mt-4">
+            <div className="text-[7px] text-slate-400 text-center">
               <p>{companyName} - {companyAddress}</p>
               <p>SIRET: {companySiret} | TVA: {companyVat}</p>
               <p className="mt-1">En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement.</p>
@@ -1105,15 +1105,15 @@ const InvoicesPage = () => {
       {/* Header */}
       <div className="flex flex-col gap-3">
         <div>
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Facturation</h1>
-          <p className="text-white/60 text-xs sm:text-sm">{invoices.length} documents</p>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900">Facturation</h1>
+          <p className="text-slate-500 text-xs sm:text-sm">{invoices.length} documents</p>
         </div>
         <div className="flex gap-2">
           <Button 
             variant="outline"
             size="sm"
             onClick={() => setServicesDialogOpen(true)}
-            className="border-white/10 h-8 px-2 sm:px-3"
+            className="border-slate-200 h-8 px-2 sm:px-3"
           >
             <Package className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
@@ -1121,7 +1121,7 @@ const InvoicesPage = () => {
             variant="outline"
             size="sm"
             onClick={() => setSettingsDialogOpen(true)}
-            className="border-white/10 h-8 px-2 sm:px-3"
+            className="border-slate-200 h-8 px-2 sm:px-3"
             title="Paramètres facturation"
           >
             <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -1133,7 +1133,7 @@ const InvoicesPage = () => {
                 <span className="hidden sm:inline text-xs">Nouveau</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-[#1a1a2e] border-white/10">
+            <DropdownMenuContent className="bg-slate-50 border-slate-200">
               <DropdownMenuItem onClick={() => openCreateSheet('facture')} className="cursor-pointer text-xs">
                 <Receipt className="w-3 h-3 mr-2" />
                 Facture
@@ -1149,47 +1149,47 @@ const InvoicesPage = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-2">
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-2 sm:p-3">
+        <div className="bg-white backdrop-blur-xl rounded-lg border border-slate-200 p-2 sm:p-3">
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-blue-500/20 rounded-lg flex-shrink-0">
               <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-white/60 text-[10px]">Attente</p>
-              <p className="text-xs sm:text-sm font-bold text-white truncate">{formatCurrency(totalPending)}</p>
+              <p className="text-slate-500 text-[10px]">Attente</p>
+              <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">{formatCurrency(totalPending)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-2 sm:p-3">
+        <div className="bg-white backdrop-blur-xl rounded-lg border border-slate-200 p-2 sm:p-3">
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-green-500/20 rounded-lg flex-shrink-0">
               <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-white/60 text-[10px]">Payées</p>
-              <p className="text-xs sm:text-sm font-bold text-white truncate">{formatCurrency(totalPaid)}</p>
+              <p className="text-slate-500 text-[10px]">Payées</p>
+              <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">{formatCurrency(totalPaid)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-2 sm:p-3">
+        <div className="bg-white backdrop-blur-xl rounded-lg border border-slate-200 p-2 sm:p-3">
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-red-500/20 rounded-lg flex-shrink-0">
               <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-white/60 text-[10px]">Retard</p>
-              <p className="text-xs sm:text-sm font-bold text-white truncate">{formatCurrency(totalOverdue)}</p>
+              <p className="text-slate-500 text-[10px]">Retard</p>
+              <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">{formatCurrency(totalOverdue)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-indigo-500/20 p-2 sm:p-3">
+        <div className="bg-white backdrop-blur-xl rounded-lg border border-indigo-500/20 p-2 sm:p-3">
           <div className="flex items-center gap-2">
             <div className="p-1.5 bg-indigo-500/20 rounded-lg flex-shrink-0">
-              <Euro className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-400" />
+              <Euro className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-600" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-white/60 text-[10px]">Total</p>
-              <p className="text-xs sm:text-sm font-bold text-white truncate">
+              <p className="text-slate-500 text-[10px]">Total</p>
+              <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">
                 {formatCurrency(invoices.reduce((sum, i) => sum + (i.total || 0), 0))}
               </p>
             </div>
@@ -1199,20 +1199,20 @@ const InvoicesPage = () => {
       {/* Filters */}
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-white/60" />
+          <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-slate-500" />
           <Input
             placeholder="Rechercher..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-7 sm:pl-10 bg-white/5 backdrop-blur-xl border-white/10 text-white h-8 sm:h-9 text-xs sm:text-sm"
+            className="pl-7 sm:pl-10 bg-white backdrop-blur-xl border-slate-200 text-slate-900 h-8 sm:h-9 text-xs sm:text-sm"
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-24 sm:w-36 bg-white/5 backdrop-blur-xl border-white/10 text-white h-8 sm:h-9 text-xs sm:text-sm">
+          <SelectTrigger className="w-24 sm:w-36 bg-white backdrop-blur-xl border-slate-200 text-slate-900 h-8 sm:h-9 text-xs sm:text-sm">
             <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
-          <SelectContent className="bg-[#1a1a2e] border-white/10">
+          <SelectContent className="bg-slate-50 border-slate-200">
             <SelectItem value="all" className="text-xs">Tous</SelectItem>
             {Object.entries(statusConfig).map(([key, config]) => (
               <SelectItem key={key} value={key} className="text-xs">{config.label}</SelectItem>
@@ -1225,13 +1225,13 @@ const InvoicesPage = () => {
       {loading ? (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-white/5 animate-pulse rounded-lg" />
+            <div key={i} className="h-20 bg-white animate-pulse rounded-lg" />
           ))}
         </div>
       ) : filteredInvoices.length === 0 ? (
-        <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-8 text-center">
-          <Receipt className="w-10 h-10 text-white/60 mx-auto mb-3" />
-          <p className="text-white/60 text-sm">
+        <div className="bg-white backdrop-blur-xl rounded-lg border border-slate-200 p-8 text-center">
+          <Receipt className="w-10 h-10 text-slate-500 mx-auto mb-3" />
+          <p className="text-slate-500 text-sm">
             {searchQuery || filterStatus !== "all" ? "Aucun document" : "Aucun document créé"}
           </p>
         </div>
@@ -1241,15 +1241,15 @@ const InvoicesPage = () => {
           <div className="sm:hidden space-y-2">
             {/* Mobile Bulk actions bar */}
             {selectedIds.length > 0 && (
-              <div className="bg-indigo-600/20 border border-indigo-500/30 rounded-lg px-3 py-2 flex items-center gap-2 sticky top-0 z-10">
-                <span className="text-xs text-white">{selectedIds.length} sélectionné(s)</span>
-                <Button size="sm" variant="ghost" onClick={handleBulkDownload} disabled={isDownloading} className="text-white hover:bg-white/10 h-7 px-2">
+              <div className="bg-indigo-50 border border-indigo-500/30 rounded-lg px-3 py-2 flex items-center gap-2 sticky top-0 z-10">
+                <span className="text-xs text-slate-900">{selectedIds.length} sélectionné(s)</span>
+                <Button size="sm" variant="ghost" onClick={handleBulkDownload} disabled={isDownloading} className="text-slate-900 hover:bg-slate-100 h-7 px-2">
                   <Download className="w-3 h-3" />
                 </Button>
                 <Button size="sm" variant="ghost" onClick={handleBulkDelete} className="text-red-400 hover:bg-red-500/10 h-7 px-2">
                   <Trash2 className="w-3 h-3" />
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="text-white/60 hover:bg-white/10 h-7 px-2 ml-auto">
+                <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="text-slate-500 hover:bg-slate-100 h-7 px-2 ml-auto">
                   <X className="w-3 h-3" />
                 </Button>
               </div>
@@ -1261,20 +1261,20 @@ const InvoicesPage = () => {
               const isDevis = invoice.invoice_number?.startsWith('DEV-') || invoice.document_type === 'devis';
               const isSelected = selectedIds.includes(invoice.id);
               return (
-                <div key={invoice.id} className={`bg-white/5 backdrop-blur-xl rounded-lg border ${isSelected ? 'border-indigo-500' : 'border-white/10'} p-4`}>
+                <div key={invoice.id} className={`bg-white backdrop-blur-xl rounded-lg border ${isSelected ? 'border-indigo-500' : 'border-slate-200'} p-4`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start gap-3">
-                      <button onClick={() => toggleSelect(invoice.id)} className="mt-0.5 text-white/60 hover:text-white">
-                        {isSelected ? <CheckSquare className="w-4 h-4 text-indigo-400" /> : <Square className="w-4 h-4" />}
+                      <button onClick={() => toggleSelect(invoice.id)} className="mt-0.5 text-slate-500 hover:text-slate-900">
+                        {isSelected ? <CheckSquare className="w-4 h-4 text-indigo-600" /> : <Square className="w-4 h-4" />}
                       </button>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${invoice.invoice_number?.startsWith('DEV-') ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${invoice.invoice_number?.startsWith('DEV-') ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
                             {invoice.invoice_number?.startsWith('DEV-') ? 'DEVIS' : 'FACTURE'}
                           </span>
-                          <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
+                          <span className="font-mono font-medium text-slate-900 text-sm">{invoice.invoice_number}</span>
                         </div>
-                        <p className="text-xs text-white/60 mt-0.5">{formatDate(invoice.created_at)}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{formatDate(invoice.created_at)}</p>
                       </div>
                     </div>
                     <Badge className={`${status.color} text-xs`}>
@@ -1282,46 +1282,46 @@ const InvoicesPage = () => {
                       {status.label}
                     </Badge>
                   </div>
-                  <p className="font-medium text-white text-sm ml-7">{getContactName(invoice.contact_id)}</p>
+                  <p className="font-medium text-slate-900 text-sm ml-7">{getContactName(invoice.contact_id)}</p>
                   {getContactCompany(invoice.contact_id) && (
-                    <p className="text-xs text-white/50 ml-7">{getContactCompany(invoice.contact_id)}</p>
+                    <p className="text-xs text-slate-500 ml-7">{getContactCompany(invoice.contact_id)}</p>
                   )}
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-200">
                     <div>
-                      <p className="text-xs text-white/50">Total</p>
-                      <p className="font-mono font-bold text-white">{formatCurrency(invoice.total)}</p>
+                      <p className="text-xs text-slate-500">Total</p>
+                      <p className="font-mono font-bold text-slate-900">{formatCurrency(invoice.total)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-white/50">Payé</p>
-                      <p className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-green-400' : 'text-white/60'}`}>
+                      <p className="text-xs text-slate-500">Payé</p>
+                      <p className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-green-600' : 'text-slate-500'}`}>
                         {formatCurrency(totalPaid)}
                       </p>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10" onClick={() => handleDownloadPDF(invoice)} title="Télécharger">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-600 hover:text-indigo-500 hover:bg-indigo-50" onClick={() => handleDownloadPDF(invoice)} title="Télécharger">
                         <Download className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10" onClick={() => openEmailDialog(invoice)} title="Envoyer par email">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:text-emerald-500 hover:bg-emerald-50" onClick={() => openEmailDialog(invoice)} title="Envoyer par email">
                         <Mail className="w-4 h-4" />
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="w-4 h-4 text-white/60" />
+                            <MoreVertical className="w-4 h-4 text-slate-500" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-[#1a1a2e] border-white/10">
-                          <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-white">
+                        <DropdownMenuContent align="end" className="bg-slate-50 border-slate-200">
+                          <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-slate-900">
                             <Eye className="w-4 h-4 mr-2" /> Voir
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleChangeStatus(invoice)} className="text-white">
+                          <DropdownMenuItem onClick={() => handleChangeStatus(invoice)} className="text-slate-900">
                             <Clock className="w-4 h-4 mr-2" /> Changer statut
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-green-400">
+                          <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-green-600">
                             <CreditCard className="w-4 h-4 mr-2" /> Paiement
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-white/10" />
-                          <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-red-400">
+                          <DropdownMenuSeparator className="bg-slate-100" />
+                          <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-red-600">
                             <Trash2 className="w-4 h-4 mr-2" /> Supprimer
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -1334,42 +1334,42 @@ const InvoicesPage = () => {
           </div>
 
           {/* Desktop Table View */}
-          <div className="hidden sm:block bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 overflow-hidden overflow-x-auto">
+          <div className="hidden sm:block bg-white backdrop-blur-xl rounded-lg border border-slate-200 overflow-hidden overflow-x-auto">
             {/* Bulk actions bar */}
             {selectedIds.length > 0 && (
-              <div className="bg-indigo-600/20 border-b border-indigo-500/30 px-4 py-2 flex items-center gap-3">
-                <span className="text-sm text-white">{selectedIds.length} sélectionné(s)</span>
-                <Button size="sm" variant="ghost" onClick={handleBulkDownload} disabled={isDownloading} className="text-white hover:bg-white/10">
+              <div className="bg-indigo-50 border-b border-indigo-500/30 px-4 py-2 flex items-center gap-3">
+                <span className="text-sm text-slate-900">{selectedIds.length} sélectionné(s)</span>
+                <Button size="sm" variant="ghost" onClick={handleBulkDownload} disabled={isDownloading} className="text-slate-900 hover:bg-slate-100">
                   <Download className="w-4 h-4 mr-1" /> Télécharger
                 </Button>
                 <Button size="sm" variant="ghost" onClick={handleBulkDelete} className="text-red-400 hover:bg-red-500/10">
                   <Trash2 className="w-4 h-4 mr-1" /> Supprimer
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="text-white/60 hover:bg-white/10 ml-auto">
+                <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="text-slate-500 hover:bg-slate-100 ml-auto">
                   Annuler
                 </Button>
               </div>
             )}
             <table className="w-full">
-              <thead className="bg-white/5 border-b border-white/10">
+              <thead className="bg-white border-b border-slate-200">
                 <tr>
                   <th className="w-10 px-3 py-3">
-                    <button onClick={toggleSelectAll} className="text-white/60 hover:text-white">
+                    <button onClick={toggleSelectAll} className="text-slate-500 hover:text-slate-900">
                       {selectedIds.length === filteredInvoices.length && filteredInvoices.length > 0 ? 
                         <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
                     </button>
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Numéro</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase">Client</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase hidden md:table-cell">Date</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-white/60 uppercase hidden lg:table-cell">Échéance</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Montant</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Payé</th>
-                  <th className="text-center px-4 py-3 text-xs font-medium text-white/60 uppercase">Statut</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-white/60 uppercase">Actions</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase">Numéro</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase">Client</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase hidden md:table-cell">Date</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase hidden lg:table-cell">Échéance</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase">Montant</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase">Payé</th>
+                  <th className="text-center px-4 py-3 text-xs font-medium text-slate-500 uppercase">Statut</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-100">
                 {filteredInvoices.map((invoice) => {
                   const status = statusConfig[invoice.status] || statusConfig.brouillon;
                   const StatusIcon = status.icon;
@@ -1380,45 +1380,45 @@ const InvoicesPage = () => {
                   const isDevis = invoice.invoice_number?.startsWith('DEV-');
                   const isSelected = selectedIds.includes(invoice.id);
                   return (
-                    <tr key={invoice.id} className={`hover:bg-white/5 transition-colors ${isSelected ? 'bg-indigo-600/10' : ''}`}>
+                    <tr key={invoice.id} className={`hover:bg-slate-50 transition-colors ${isSelected ? 'bg-indigo-600/10' : ''}`}>
                       <td className="w-10 px-3 py-4">
-                        <button onClick={() => toggleSelect(invoice.id)} className="text-white/60 hover:text-white">
-                          {isSelected ? <CheckSquare className="w-4 h-4 text-indigo-400" /> : <Square className="w-4 h-4" />}
+                        <button onClick={() => toggleSelect(invoice.id)} className="text-slate-500 hover:text-slate-900">
+                          {isSelected ? <CheckSquare className="w-4 h-4 text-indigo-600" /> : <Square className="w-4 h-4" />}
                         </button>
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-2">
-                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap ${isDevis ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap ${isDevis ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
                             {isDevis ? 'DEVIS' : 'FACTURE'}
                           </span>
-                          <span className="font-mono font-medium text-white text-sm">{invoice.invoice_number}</span>
+                          <span className="font-mono font-medium text-slate-900 text-sm">{invoice.invoice_number}</span>
                           {getInvoiceTypeBadge(invoice)}
                         </div>
                       </td>
                       <td className="px-4 py-4">
                         <div>
-                          <p className="font-medium text-white text-sm">{getContactName(invoice.contact_id)}</p>
+                          <p className="font-medium text-slate-900 text-sm">{getContactName(invoice.contact_id)}</p>
                           {getContactCompany(invoice.contact_id) && (
-                            <p className="text-xs text-white/60">{getContactCompany(invoice.contact_id)}</p>
+                            <p className="text-xs text-slate-500">{getContactCompany(invoice.contact_id)}</p>
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-sm text-white/60 hidden md:table-cell">
+                      <td className="px-4 py-4 text-sm text-slate-500 hidden md:table-cell">
                         {formatDate(invoice.created_at)}
                       </td>
-                      <td className="px-4 py-4 text-sm text-white/60 hidden lg:table-cell">
+                      <td className="px-4 py-4 text-sm text-slate-500 hidden lg:table-cell">
                         {formatDate(invoice.due_date)}
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <span className="font-mono font-bold text-white text-sm">{formatCurrency(invoice.total)}</span>
+                        <span className="font-mono font-bold text-slate-900 text-sm">{formatCurrency(invoice.total)}</span>
                       </td>
                       <td className="px-4 py-4 text-right">
                         <div className="flex flex-col items-end gap-1">
-                          <span className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-green-400 font-bold' : 'text-white/60'}`}>
+                          <span className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-green-600 font-bold' : 'text-slate-500'}`}>
                             {formatCurrency(totalPaid)}
                           </span>
                           {invoice.total > 0 && totalPaid > 0 && totalPaid < invoice.total && (
-                            <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                               <div 
                                 className="h-full bg-orange-500 rounded-full transition-all"
                                 style={{ width: `${Math.min(paymentProgress, 100)}%` }}
@@ -1435,26 +1435,26 @@ const InvoicesPage = () => {
                       </td>
                       <td className="px-4 py-4 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10" onClick={() => handleDownloadPDF(invoice)} title="Télécharger PDF">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-600 hover:text-indigo-500 hover:bg-indigo-50" onClick={() => handleDownloadPDF(invoice)} title="Télécharger PDF">
                             <Download className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10" onClick={() => openEmailDialog(invoice)} title="Envoyer par email">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:text-emerald-500 hover:bg-emerald-50" onClick={() => openEmailDialog(invoice)} title="Envoyer par email">
                             <Mail className="w-4 h-4" />
                           </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="w-4 h-4 text-white/60" />
+                                <MoreVertical className="w-4 h-4 text-slate-500" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-[#1a1a2e] border-white/10 w-48">
-                              <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-white">
+                            <DropdownMenuContent align="end" className="bg-slate-50 border-slate-200 w-48">
+                              <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-slate-900">
                                 <Eye className="w-4 h-4 mr-2" /> Voir le document
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleChangeStatus(invoice)} className="text-white">
+                              <DropdownMenuItem onClick={() => handleChangeStatus(invoice)} className="text-slate-900">
                                 <Clock className="w-4 h-4 mr-2" /> Changer statut
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDuplicate(invoice)} className="text-white">
+                              <DropdownMenuItem onClick={() => handleDuplicate(invoice)} className="text-slate-900">
                                 <Copy className="w-4 h-4 mr-2" /> Dupliquer
                               </DropdownMenuItem>
                               {invoice.document_type === 'devis' && invoice.status !== 'payée' && (
@@ -1465,14 +1465,14 @@ const InvoicesPage = () => {
                               {/* Deposit & Balance options - only for factures, not deposit/balance themselves */}
                               {invoice.document_type === 'facture' && (!invoice.invoice_type || invoice.invoice_type === 'standard') && (
                                 <>
-                                  <DropdownMenuSeparator className="bg-white/10" />
+                                  <DropdownMenuSeparator className="bg-slate-100" />
                                   <DropdownMenuItem onClick={() => openDepositDialog(invoice)} className="text-blue-400">
                                     <PiggyBank className="w-4 h-4 mr-2" /> Créer facture d&apos;acompte
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => openBalanceDialog(invoice)} className="text-purple-400">
                                     <Banknote className="w-4 h-4 mr-2" /> Créer facture de solde
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => openRelatedDialog(invoice)} className="text-white/70">
+                                  <DropdownMenuItem onClick={() => openRelatedDialog(invoice)} className="text-slate-600">
                                     <FileText className="w-4 h-4 mr-2" /> Voir factures liées
                                   </DropdownMenuItem>
                                 </>
@@ -1482,16 +1482,16 @@ const InvoicesPage = () => {
                                 <DropdownMenuItem onClick={() => {
                                   const parent = invoices.find(i => i.invoice_number === invoice.parent_invoice_number);
                                   if (parent) openRelatedDialog(parent);
-                                }} className="text-white/70">
+                                }} className="text-slate-600">
                                   <FileText className="w-4 h-4 mr-2" /> Voir facture principale ({invoice.parent_invoice_number})
                                 </DropdownMenuItem>
                               )}
-                              <DropdownMenuSeparator className="bg-white/10" />
+                              <DropdownMenuSeparator className="bg-slate-100" />
                               <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-green-400">
                                 <CreditCard className="w-4 h-4 mr-2" /> Enregistrer paiement
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator className="bg-white/10" />
-                              <DropdownMenuItem onClick={() => openEditSheet(invoice)} className="text-white">
+                              <DropdownMenuSeparator className="bg-slate-100" />
+                              <DropdownMenuItem onClick={() => openEditSheet(invoice)} className="text-slate-900">
                                 <Edit className="w-4 h-4 mr-2" /> Modifier
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-red-400">
@@ -1512,13 +1512,13 @@ const InvoicesPage = () => {
 
       {/* Create/Edit Sheet with Preview */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-[1400px] p-0 bg-white/5 overflow-hidden">
+        <SheetContent side="right" className="w-full sm:max-w-[1400px] p-0 bg-white overflow-hidden">
           <div className="flex h-full">
             {/* Form Side - Full width on mobile, 50% on desktop */}
-            <div className="w-full lg:w-1/2 p-4 sm:p-6 overflow-y-auto bg-white/5 backdrop-blur-xl border-r border-white/10">
+            <div className="w-full lg:w-1/2 p-4 sm:p-6 overflow-y-auto bg-white backdrop-blur-xl border-r border-slate-200">
               <SheetHeader className="mb-4 sm:mb-6">
                 <div className="flex items-center justify-between">
-                  <SheetTitle className="text-white flex items-center gap-2">
+                  <SheetTitle className="text-slate-900 flex items-center gap-2">
                     {documentType === 'devis' ? <FileText className="w-5 h-5" /> : <Receipt className="w-5 h-5" />}
                     {editingInvoice ? `Modifier ${documentType === 'devis' ? 'le devis' : 'la facture'}` : `Nouvelle ${documentType === 'devis' ? 'devis' : 'facture'}`}
                   </SheetTitle>
@@ -1527,7 +1527,7 @@ const InvoicesPage = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() => setSettingsDialogOpen(true)}
-                    className="text-white/60 hover:text-white hover:bg-white/10"
+                    className="text-slate-500 hover:text-slate-900 hover:bg-slate-100"
                     title="Paramètres du document"
                   >
                     <Settings className="w-5 h-5" />
@@ -1539,7 +1539,7 @@ const InvoicesPage = () => {
                 {/* Client & Dates */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-white">Client *</Label>
+                    <Label className="text-slate-900">Client *</Label>
                     <div className="flex gap-2">
                       <Select
                         value={formData.contact_id}
@@ -1552,21 +1552,21 @@ const InvoicesPage = () => {
                         }}
                         required
                       >
-                        <SelectTrigger className="bg-white/5 border-white/10 text-white flex-1">
+                        <SelectTrigger className="bg-white border-slate-200 text-slate-900 flex-1">
                           <SelectValue placeholder="Sélectionner un client" />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#1a1a2e] border-white/10 max-h-60">
-                          <SelectItem value="new" className="text-indigo-400 font-medium">
+                        <SelectContent className="bg-slate-50 border-slate-200 max-h-60">
+                          <SelectItem value="new" className="text-indigo-600 font-medium">
                             <div className="flex items-center gap-2">
                               <Plus className="w-4 h-4" />
                               Créer un nouveau client
                             </div>
                           </SelectItem>
-                          <div className="border-t border-white/10 my-1"></div>
+                          <div className="border-t border-slate-200 my-1"></div>
                           {contacts.map((contact) => (
                             <SelectItem key={contact.id} value={contact.id}>
                               {contact.first_name} {contact.last_name}
-                              {contact.company && <span className="text-white/60 ml-1">({contact.company})</span>}
+                              {contact.company && <span className="text-slate-500 ml-1">({contact.company})</span>}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -1574,22 +1574,22 @@ const InvoicesPage = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-white">Échéance</Label>
+                    <Label className="text-slate-900">Échéance</Label>
                     <Input
                       type="date"
                       value={formData.due_date}
                       onChange={(e) => setFormData({...formData, due_date: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white"
+                      className="bg-white border-slate-200 text-slate-900"
                     />
                   </div>
                 </div>
 
                 {/* Saved Services */}
                 {savedServices.length > 0 && (
-                  <div className="bg-white/5 rounded-lg p-4">
+                  <div className="bg-white rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <Package className="w-4 h-4 text-indigo-400" />
-                      <span className="text-sm font-medium text-white">Services enregistrés</span>
+                      <Package className="w-4 h-4 text-indigo-600" />
+                      <span className="text-sm font-medium text-slate-900">Services enregistrés</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {savedServices.map((service) => (
@@ -1605,7 +1605,7 @@ const InvoicesPage = () => {
                           <Plus className="w-3 h-3 mr-1 flex-shrink-0" />
                           <span>
                             <span className="font-bold">{service.title}</span>
-                            <span className="ml-1 text-white/60">({formatCurrency(service.price)})</span>
+                            <span className="ml-1 text-slate-500">({formatCurrency(service.price)})</span>
                           </span>
                         </Button>
                       ))}
@@ -1616,16 +1616,16 @@ const InvoicesPage = () => {
                 {/* Items */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label className="text-white font-semibold">Lignes de facturation</Label>
-                    <Button type="button" variant="ghost" onClick={addItem} className="text-indigo-400">
+                    <Label className="text-slate-900 font-semibold">Lignes de facturation</Label>
+                    <Button type="button" variant="ghost" onClick={addItem} className="text-indigo-600">
                       <Plus className="w-4 h-4 mr-1" /> Ajouter une ligne
                     </Button>
                   </div>
                   
                   {items.map((item, index) => (
-                    <div key={index} className="bg-white/5 rounded-lg p-3 space-y-2">
+                    <div key={index} className="bg-white rounded-lg p-3 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-white/60">Ligne {index + 1}</span>
+                        <span className="text-xs text-slate-500">Ligne {index + 1}</span>
                         <Button
                           type="button"
                           variant="ghost"
@@ -1641,29 +1641,29 @@ const InvoicesPage = () => {
                         placeholder="Titre du service (ex: Création site web)"
                         value={item.title || ""}
                         onChange={(e) => updateItem(index, "title", e.target.value)}
-                        className="bg-white/5 backdrop-blur-xl border-white/10 text-white font-semibold"
+                        className="bg-white backdrop-blur-xl border-slate-200 text-slate-900 font-semibold"
                       />
                       <Textarea
                         placeholder="Description détaillée (optionnel)"
                         value={item.description || ""}
                         onChange={(e) => updateItem(index, "description", e.target.value)}
-                        className="bg-white/5 backdrop-blur-xl border-white/10 text-white text-sm"
+                        className="bg-white backdrop-blur-xl border-slate-200 text-slate-900 text-sm"
                         rows={2}
                       />
                       <div className="grid grid-cols-3 gap-2">
                         <div>
-                          <Label className="text-xs text-white/60">Quantité</Label>
+                          <Label className="text-xs text-slate-500">Quantité</Label>
                           <Input
                             type="number"
                             min="1"
                             placeholder="1"
                             value={item.quantity}
                             onChange={(e) => updateItem(index, "quantity", e.target.value)}
-                            className="bg-white/5 backdrop-blur-xl border-white/10 text-white"
+                            className="bg-white backdrop-blur-xl border-slate-200 text-slate-900"
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-white/60">Prix HT (€)</Label>
+                          <Label className="text-xs text-slate-500">Prix HT (€)</Label>
                           <Input
                             type="number"
                             min="0"
@@ -1671,20 +1671,20 @@ const InvoicesPage = () => {
                             placeholder="0.00"
                             value={item.unit_price}
                             onChange={(e) => updateItem(index, "unit_price", e.target.value)}
-                            className="bg-white/5 backdrop-blur-xl border-white/10 text-white"
+                            className="bg-white backdrop-blur-xl border-slate-200 text-slate-900"
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-white/60">Remise</Label>
+                          <Label className="text-xs text-slate-500">Remise</Label>
                           <div className="flex gap-1">
                             <Select
                               value={item.discountType || "percent"}
                               onValueChange={(v) => updateItem(index, "discountType", v)}
                             >
-                              <SelectTrigger className="w-16 bg-white/5 backdrop-blur-xl border-white/10 px-2">
+                              <SelectTrigger className="w-16 bg-white backdrop-blur-xl border-slate-200 px-2">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-[#1a1a2e]">
+                              <SelectContent className="bg-slate-50">
                                 <SelectItem value="percent">%</SelectItem>
                                 <SelectItem value="fixed">€</SelectItem>
                               </SelectContent>
@@ -1696,19 +1696,19 @@ const InvoicesPage = () => {
                               placeholder="0"
                               value={item.discount || 0}
                               onChange={(e) => updateItem(index, "discount", e.target.value)}
-                              className="flex-1 bg-white/5 backdrop-blur-xl border-white/10 text-white"
+                              className="flex-1 bg-white backdrop-blur-xl border-slate-200 text-slate-900"
                             />
                           </div>
                         </div>
                       </div>
                       {(item.title || item.description) && item.unit_price > 0 && (
                         <div className="flex justify-between items-center text-sm">
-                          <span className="text-indigo-400">
+                          <span className="text-indigo-600">
                             {item.discount > 0 && (
                               <>Remise: -{formatCurrency(calculateLineDiscount(item))} {item.discountType === "percent" ? `(${item.discount}%)` : ''}</>
                             )}
                           </span>
-                          <span className="font-medium text-white">
+                          <span className="font-medium text-slate-900">
                             Total ligne: {formatCurrency(calculateLineTotal(item))}
                           </span>
                         </div>
@@ -1720,8 +1720,8 @@ const InvoicesPage = () => {
                 {/* Global Discount */}
                 <div className="bg-gradient-to-r from-[#CE0202]/10 to-[#CE0202]/5 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <Label className="text-white font-semibold flex items-center gap-2">
-                      <Percent className="w-4 h-4 text-indigo-400" />
+                    <Label className="text-slate-900 font-semibold flex items-center gap-2">
+                      <Percent className="w-4 h-4 text-indigo-600" />
                       Remise globale
                     </Label>
                   </div>
@@ -1730,10 +1730,10 @@ const InvoicesPage = () => {
                       value={globalDiscount.type}
                       onValueChange={(v) => setGlobalDiscount({ ...globalDiscount, type: v })}
                     >
-                      <SelectTrigger className="w-32 bg-white/5 backdrop-blur-xl border-white/10">
+                      <SelectTrigger className="w-32 bg-white backdrop-blur-xl border-slate-200">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#1a1a2e]">
+                      <SelectContent className="bg-slate-50">
                         <SelectItem value="percent">%</SelectItem>
                         <SelectItem value="fixed">€ fixe</SelectItem>
                       </SelectContent>
@@ -1745,11 +1745,11 @@ const InvoicesPage = () => {
                       placeholder="0"
                       value={globalDiscount.value || ""}
                       onChange={(e) => setGlobalDiscount({ ...globalDiscount, value: parseFloat(e.target.value) || 0 })}
-                      className="flex-1 bg-white/5 backdrop-blur-xl border-white/10 text-white"
+                      className="flex-1 bg-white backdrop-blur-xl border-slate-200 text-slate-900"
                     />
                   </div>
                   {globalDiscount.value > 0 && (
-                    <div className="mt-2 text-sm text-indigo-400 font-medium">
+                    <div className="mt-2 text-sm text-indigo-600 font-medium">
                       Remise appliquée: -{formatCurrency(calculateGlobalDiscountAmount())}
                     </div>
                   )}
@@ -1757,11 +1757,11 @@ const InvoicesPage = () => {
 
                 {/* Notes */}
                 <div className="space-y-2">
-                  <Label className="text-white">Notes</Label>
+                  <Label className="text-slate-900">Notes</Label>
                   <Textarea
                     value={formData.notes}
                     onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-white border-slate-200 text-slate-900"
                     rows={2}
                     placeholder="Notes visibles sur le document..."
                   />
@@ -1770,23 +1770,23 @@ const InvoicesPage = () => {
                 {/* Totals */}
                 <div className="bg-[#1A1A1A] text-white rounded-lg p-4">
                   <div className="flex justify-between py-1">
-                    <span className="text-white/70">Sous-total HT</span>
+                    <span className="text-slate-600">Sous-total HT</span>
                     <span className="font-mono">{formatCurrency(calculateSubtotal())}</span>
                   </div>
                   {globalDiscount.value > 0 && (
-                    <div className="flex justify-between py-1 text-indigo-400">
+                    <div className="flex justify-between py-1 text-indigo-600">
                       <span>Remise globale ({globalDiscount.type === "percent" ? `${globalDiscount.value}%` : "fixe"})</span>
                       <span className="font-mono">-{formatCurrency(calculateGlobalDiscountAmount())}</span>
                     </div>
                   )}
                   {globalDiscount.value > 0 && (
                     <div className="flex justify-between py-1">
-                      <span className="text-white/70">Sous-total après remise</span>
+                      <span className="text-slate-600">Sous-total après remise</span>
                       <span className="font-mono">{formatCurrency(calculateSubtotalAfterDiscount())}</span>
                     </div>
                   )}
                   <div className="flex justify-between py-1">
-                    <span className="text-white/70">TVA (8.5%)</span>
+                    <span className="text-slate-600">TVA (8.5%)</span>
                     <span className="font-mono">{formatCurrency(calculateTVA())}</span>
                   </div>
                   <div className="flex justify-between py-2 text-xl font-bold border-t border-green-500/50 mt-2">
@@ -1822,16 +1822,16 @@ const InvoicesPage = () => {
 
       {/* Settings Dialog - Full Page Style like Qonto */}
       <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
-        <DialogContent className="bg-[#0f0f1a] border-white/10 max-w-6xl h-[90vh] p-0 flex flex-col">
+        <DialogContent className="bg-[#0f0f1a] border-slate-200 max-w-6xl h-[90vh] p-0 flex flex-col">
           <div className="flex flex-1 min-h-0">
             {/* Left Panel - Settings with SCROLL */}
             <div className="w-full lg:w-1/2 flex flex-col min-h-0">
-              <DialogHeader className="p-6 pb-4 border-b border-white/10 flex-shrink-0">
-                <DialogTitle className="text-white flex items-center gap-2 text-xl">
-                  <Settings className="w-6 h-6 text-indigo-400" />
+              <DialogHeader className="p-6 pb-4 border-b border-slate-200 flex-shrink-0">
+                <DialogTitle className="text-slate-900 flex items-center gap-2 text-xl">
+                  <Settings className="w-6 h-6 text-indigo-600" />
                   Paramètres de facturation
                 </DialogTitle>
-                <p className="text-white/50 text-sm">Configurez les valeurs par défaut pour vos documents</p>
+                <p className="text-slate-500 text-sm">Configurez les valeurs par défaut pour vos documents</p>
               </DialogHeader>
               
               {/* Scrollable content area */}
@@ -1839,123 +1839,123 @@ const InvoicesPage = () => {
               
               {/* Numbering Section */}
               <div className="space-y-4">
-                <h3 className="text-white font-semibold flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-indigo-400" />
+                <h3 className="text-slate-900 font-semibold flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-indigo-600" />
                   Numérotation automatique
                 </h3>
-                <p className="text-white/50 text-xs">Assurez-vous que vos documents portent un numéro unique et séquentiel.</p>
+                <p className="text-slate-500 text-xs">Assurez-vous que vos documents portent un numéro unique et séquentiel.</p>
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-3 p-4 bg-white/5 rounded-lg">
-                    <Label className="text-white text-sm font-medium">Factures</Label>
+                  <div className="space-y-3 p-4 bg-white rounded-lg">
+                    <Label className="text-slate-900 text-sm font-medium">Factures</Label>
                     <div className="space-y-2">
-                      <Label className="text-white/60 text-xs">Préfixe</Label>
+                      <Label className="text-slate-500 text-xs">Préfixe</Label>
                       <Input
                         value={invoiceSettings?.invoice_prefix || "FAC-(AAAA)-"}
                         onChange={(e) => setInvoiceSettings({...invoiceSettings, invoice_prefix: e.target.value})}
-                        className="bg-white/5 border-white/10 text-white text-sm"
+                        className="bg-white border-slate-200 text-slate-900 text-sm"
                         placeholder="FAC-(AAAA)-"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-white/60 text-xs">Prochain numéro</Label>
+                      <Label className="text-slate-500 text-xs">Prochain numéro</Label>
                       <Input
                         type="number"
                         value={invoiceSettings?.invoice_next_number || "1"}
                         onChange={(e) => setInvoiceSettings({...invoiceSettings, invoice_next_number: e.target.value})}
-                        className="bg-white/5 border-white/10 text-white text-sm"
+                        className="bg-white border-slate-200 text-slate-900 text-sm"
                       />
                     </div>
-                    <p className="text-xs text-indigo-400">Aperçu: FAC-2026-001</p>
+                    <p className="text-xs text-indigo-600">Aperçu: FAC-2026-001</p>
                   </div>
                   
-                  <div className="space-y-3 p-4 bg-white/5 rounded-lg">
-                    <Label className="text-white text-sm font-medium">Devis</Label>
+                  <div className="space-y-3 p-4 bg-white rounded-lg">
+                    <Label className="text-slate-900 text-sm font-medium">Devis</Label>
                     <div className="space-y-2">
-                      <Label className="text-white/60 text-xs">Préfixe</Label>
+                      <Label className="text-slate-500 text-xs">Préfixe</Label>
                       <Input
                         value={invoiceSettings?.quote_prefix || "DEV-(AAAA)-"}
                         onChange={(e) => setInvoiceSettings({...invoiceSettings, quote_prefix: e.target.value})}
-                        className="bg-white/5 border-white/10 text-white text-sm"
+                        className="bg-white border-slate-200 text-slate-900 text-sm"
                         placeholder="DEV-(AAAA)-"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-white/60 text-xs">Prochain numéro</Label>
+                      <Label className="text-slate-500 text-xs">Prochain numéro</Label>
                       <Input
                         type="number"
                         value={invoiceSettings?.quote_next_number || "1"}
                         onChange={(e) => setInvoiceSettings({...invoiceSettings, quote_next_number: e.target.value})}
-                        className="bg-white/5 border-white/10 text-white text-sm"
+                        className="bg-white border-slate-200 text-slate-900 text-sm"
                       />
                     </div>
-                    <p className="text-xs text-indigo-400">Aperçu: DEV-2026-001</p>
+                    <p className="text-xs text-indigo-600">Aperçu: DEV-2026-001</p>
                   </div>
                 </div>
               </div>
               
               {/* Company Info Section */}
               <div className="space-y-4">
-                <h3 className="text-white font-semibold flex items-center gap-2">
-                  <Receipt className="w-4 h-4 text-indigo-400" />
+                <h3 className="text-slate-900 font-semibold flex items-center gap-2">
+                  <Receipt className="w-4 h-4 text-indigo-600" />
                   Informations entreprise
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Nom de l'entreprise</Label>
+                    <Label className="text-slate-500 text-xs">Nom de l'entreprise</Label>
                     <Input
                       value={invoiceSettings?.company_name || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, company_name: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
+                      className="bg-white border-slate-200 text-slate-900 text-sm"
                       placeholder="Alpha Agency"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Email</Label>
+                    <Label className="text-slate-500 text-xs">Email</Label>
                     <Input
                       value={invoiceSettings?.company_email || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, company_email: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
+                      className="bg-white border-slate-200 text-slate-900 text-sm"
                       placeholder="contact@alphagency.fr"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Adresse complète</Label>
+                    <Label className="text-slate-500 text-xs">Adresse complète</Label>
                     <Input
                       value={invoiceSettings?.company_address || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, company_address: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
+                      className="bg-white border-slate-200 text-slate-900 text-sm"
                       placeholder="Immeuble Carat, Jarry, 97122 Baie-Mahault"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">Téléphone</Label>
+                    <Label className="text-slate-500 text-xs">Téléphone</Label>
                     <Input
                       value={invoiceSettings?.company_phone || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, company_phone: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
+                      className="bg-white border-slate-200 text-slate-900 text-sm"
                       placeholder="06 90 55 30 18"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">SIRET</Label>
+                    <Label className="text-slate-500 text-xs">SIRET</Label>
                     <Input
                       value={invoiceSettings?.company_siret || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, company_siret: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
+                      className="bg-white border-slate-200 text-slate-900 text-sm"
                       placeholder="91255383100013"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-white/60 text-xs">N° TVA Intracommunautaire</Label>
+                    <Label className="text-slate-500 text-xs">N° TVA Intracommunautaire</Label>
                     <Input
                       value={invoiceSettings?.company_vat || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, company_vat: e.target.value})}
-                      className="bg-white/5 border-white/10 text-white text-sm"
+                      className="bg-white border-slate-200 text-slate-900 text-sm"
                       placeholder="FR47912553831"
                     />
                   </div>
@@ -1964,13 +1964,13 @@ const InvoicesPage = () => {
               
               {/* Conditions Section - 4 types différents */}
               <div className="space-y-4">
-                <h3 className="text-white font-semibold flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-indigo-400" />
+                <h3 className="text-slate-900 font-semibold flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-indigo-600" />
                   Conditions de règlement par type de document
                 </h3>
                 
                 {/* Devis */}
-                <div className="bg-white/5 rounded-lg p-4 space-y-2">
+                <div className="bg-white rounded-lg p-4 space-y-2">
                   <Label className="text-blue-400 font-medium flex items-center gap-2">
                     <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
                     Devis
@@ -1980,12 +1980,12 @@ const InvoicesPage = () => {
                     onChange={(e) => setInvoiceSettings({...invoiceSettings, conditions_devis: e.target.value})}
                     placeholder="• Ce devis est valable 30 jours...
 • Un acompte de 50% est exigé..."
-                    className="bg-white/5 border-white/10 text-white min-h-[100px] text-sm"
+                    className="bg-white border-slate-200 text-slate-900 min-h-[100px] text-sm"
                   />
                 </div>
                 
                 {/* Facture standard */}
-                <div className="bg-white/5 rounded-lg p-4 space-y-2">
+                <div className="bg-white rounded-lg p-4 space-y-2">
                   <Label className="text-emerald-400 font-medium flex items-center gap-2">
                     <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>
                     Facture standard
@@ -1995,12 +1995,12 @@ const InvoicesPage = () => {
                     onChange={(e) => setInvoiceSettings({...invoiceSettings, conditions_facture: e.target.value})}
                     placeholder="• Paiement par virement bancaire...
 • Le règlement doit intervenir sous 30 jours..."
-                    className="bg-white/5 border-white/10 text-white min-h-[100px] text-sm"
+                    className="bg-white border-slate-200 text-slate-900 min-h-[100px] text-sm"
                   />
                 </div>
                 
                 {/* Facture d'acompte */}
-                <div className="bg-white/5 rounded-lg p-4 space-y-2">
+                <div className="bg-white rounded-lg p-4 space-y-2">
                   <Label className="text-blue-300 font-medium flex items-center gap-2">
                     <span className="w-2 h-2 bg-blue-300 rounded-full"></span>
                     Facture d&apos;acompte
@@ -2010,13 +2010,13 @@ const InvoicesPage = () => {
                     onChange={(e) => setInvoiceSettings({...invoiceSettings, conditions_acompte: e.target.value})}
                     placeholder="• Cette facture correspond à un acompte...
 • Paiement exigible à réception..."
-                    className="bg-white/5 border-white/10 text-white min-h-[100px] text-sm"
+                    className="bg-white border-slate-200 text-slate-900 min-h-[100px] text-sm"
                   />
-                  <p className="text-xs text-white/40">Ne jamais mentionner &quot;un acompte est exigé&quot; ici car cette facture EST l&apos;acompte.</p>
+                  <p className="text-xs text-slate-400">Ne jamais mentionner &quot;un acompte est exigé&quot; ici car cette facture EST l&apos;acompte.</p>
                 </div>
                 
                 {/* Facture de solde */}
-                <div className="bg-white/5 rounded-lg p-4 space-y-2">
+                <div className="bg-white rounded-lg p-4 space-y-2">
                   <Label className="text-purple-400 font-medium flex items-center gap-2">
                     <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
                     Facture de solde
@@ -2026,39 +2026,39 @@ const InvoicesPage = () => {
                     onChange={(e) => setInvoiceSettings({...invoiceSettings, conditions_solde: e.target.value})}
                     placeholder="• Cette facture correspond au solde...
 • Paiement exigible à réception..."
-                    className="bg-white/5 border-white/10 text-white min-h-[100px] text-sm"
+                    className="bg-white border-slate-200 text-slate-900 min-h-[100px] text-sm"
                   />
-                  <p className="text-xs text-white/40">Le récapitulatif des acomptes versés sera ajouté automatiquement.</p>
+                  <p className="text-xs text-slate-400">Le récapitulatif des acomptes versés sera ajouté automatiquement.</p>
                 </div>
               </div>
               
               {/* Bank Details Section */}
               <div className="space-y-4">
-                <h3 className="text-white font-semibold">Coordonnées bancaires</h3>
+                <h3 className="text-slate-900 font-semibold">Coordonnées bancaires</h3>
                 <Textarea
                   value={invoiceSettings?.bank_details || formData.bank_details || ""}
                   onChange={(e) => setInvoiceSettings({...invoiceSettings, bank_details: e.target.value})}
                   placeholder="IBAN : FR76 ...
 BIC/SWIFT : ...
 BANQUE : ..."
-                  className="bg-white/5 border-white/10 text-white min-h-[80px] text-sm"
+                  className="bg-white border-slate-200 text-slate-900 min-h-[80px] text-sm"
                 />
               </div>
               
               {/* Signature Text */}
               <div className="space-y-2">
-                <h3 className="text-white font-semibold">Texte avant signature (devis)</h3>
+                <h3 className="text-slate-900 font-semibold">Texte avant signature (devis)</h3>
                 <Input
                   value={invoiceSettings?.signature_text || "Bon pour accord"}
                   onChange={(e) => setInvoiceSettings({...invoiceSettings, signature_text: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white text-sm"
+                  className="bg-white border-slate-200 text-slate-900 text-sm"
                 />
               </div>
               </div>
               
               {/* Action Buttons - Fixed at bottom */}
-              <div className="flex gap-3 p-6 border-t border-white/10 flex-shrink-0 bg-[#0f0f1a]">
-                <Button variant="outline" onClick={() => setSettingsDialogOpen(false)} className="flex-1 border-white/10 text-white hover:bg-white/5">
+              <div className="flex gap-3 p-6 border-t border-slate-200 flex-shrink-0 bg-[#0f0f1a]">
+                <Button variant="outline" onClick={() => setSettingsDialogOpen(false)} className="flex-1 border-slate-200 text-slate-900 hover:bg-slate-50">
                   Annuler
                 </Button>
                 <Button onClick={saveSettings} className="flex-1 bg-indigo-600 hover:bg-indigo-700">
@@ -2068,15 +2068,15 @@ BANQUE : ..."
             </div>
             
             {/* Right Panel - Preview */}
-            <div className="hidden lg:block lg:w-1/2 bg-white/5 border-l border-white/10 overflow-y-auto p-6">
+            <div className="hidden lg:block lg:w-1/2 bg-white border-l border-slate-200 overflow-y-auto p-6">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-white font-semibold">Aperçu du document</h3>
+                <h3 className="text-slate-900 font-semibold">Aperçu du document</h3>
                 <div className="flex gap-2">
                   <Button 
                     variant={documentType === 'devis' ? 'default' : 'outline'} 
                     size="sm"
                     onClick={() => setDocumentType('devis')}
-                    className={documentType === 'devis' ? 'bg-indigo-600' : 'border-white/10 text-white hover:bg-white/5'}
+                    className={documentType === 'devis' ? 'bg-indigo-600' : 'border-slate-200 text-white hover:bg-slate-50'}
                   >
                     Devis
                   </Button>
@@ -2084,7 +2084,7 @@ BANQUE : ..."
                     variant={documentType === 'facture' ? 'default' : 'outline'} 
                     size="sm"
                     onClick={() => setDocumentType('facture')}
-                    className={documentType === 'facture' ? 'bg-indigo-600' : 'border-white/10 text-white hover:bg-white/5'}
+                    className={documentType === 'facture' ? 'bg-indigo-600' : 'border-slate-200 text-white hover:bg-slate-50'}
                   >
                     Facture
                   </Button>
@@ -2127,7 +2127,7 @@ BANQUE : ..."
                 {/* Items Table */}
                 <table className="w-full mb-4 text-[9px]">
                   <thead>
-                    <tr className="bg-gray-800 text-white">
+                    <tr className="bg-gray-800 text-slate-900">
                       <th className="p-2 text-left">Désignation</th>
                       <th className="p-2 text-center w-10">Qté</th>
                       <th className="p-2 text-right w-16">P.U. HT</th>
@@ -2222,47 +2222,47 @@ BANQUE : ..."
 
       {/* Services Management Dialog */}
       <Dialog open={servicesDialogOpen} onOpenChange={setServicesDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-2xl">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <Package className="w-5 h-5 text-indigo-400" />
+            <DialogTitle className="text-slate-900 flex items-center gap-2">
+              <Package className="w-5 h-5 text-indigo-600" />
               Services enregistrés
             </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             {/* Add New Service */}
-            <div className="bg-white/5 rounded-lg p-4 space-y-3">
-              <p className="text-sm font-medium text-white">Ajouter un nouveau service</p>
+            <div className="bg-white rounded-lg p-4 space-y-3">
+              <p className="text-sm font-medium text-slate-900">Ajouter un nouveau service</p>
               <div className="space-y-3">
                 <div>
-                  <Label className="text-xs text-white/60">Titre du service *</Label>
+                  <Label className="text-xs text-slate-500">Titre du service *</Label>
                   <Input
                     placeholder="Ex: Site web vitrine, Logo professionnel, Community Management..."
                     value={newService.title}
                     onChange={(e) => setNewService({...newService, title: e.target.value})}
-                    className="bg-white/5 backdrop-blur-xl border-white/10 font-bold"
+                    className="bg-white backdrop-blur-xl border-slate-200 font-bold"
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-white/60">Description détaillée</Label>
+                  <Label className="text-xs text-slate-500">Description détaillée</Label>
                   <Textarea
                     placeholder="Décrivez en détail ce que comprend ce service : fonctionnalités incluses, livrables, délais, etc."
                     value={newService.description}
                     onChange={(e) => setNewService({...newService, description: e.target.value})}
-                    className="bg-white/5 backdrop-blur-xl border-white/10 min-h-[100px]"
+                    className="bg-white backdrop-blur-xl border-slate-200 min-h-[100px]"
                     rows={4}
                   />
                 </div>
                 <div className="flex gap-3 items-end">
                   <div className="flex-1">
-                    <Label className="text-xs text-white/60">Prix HT (€) *</Label>
+                    <Label className="text-xs text-slate-500">Prix HT (€) *</Label>
                     <Input
                       type="number"
                       placeholder="0.00"
                       value={newService.price || ""}
                       onChange={(e) => setNewService({...newService, price: parseFloat(e.target.value) || 0})}
-                      className="bg-white/5 backdrop-blur-xl border-white/10"
+                      className="bg-white backdrop-blur-xl border-slate-200"
                     />
                   </div>
                   <Button 
@@ -2280,37 +2280,37 @@ BANQUE : ..."
             {/* Services List */}
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {savedServices.length === 0 ? (
-                <p className="text-center text-white/60 py-4">Aucun service enregistré</p>
+                <p className="text-center text-slate-500 py-4">Aucun service enregistré</p>
               ) : (
                 savedServices.map((service) => (
-                  <div key={service.id} className="p-4 bg-white/5 rounded-lg">
+                  <div key={service.id} className="p-4 bg-white rounded-lg">
                     {editingService?.id === service.id ? (
                       <div className="space-y-3">
                         <div>
-                          <Label className="text-xs text-white/60">Titre</Label>
+                          <Label className="text-xs text-slate-500">Titre</Label>
                           <Input
                             value={editingService.title}
                             onChange={(e) => setEditingService({...editingService, title: e.target.value})}
-                            className="bg-white/5 backdrop-blur-xl border-white/10 font-bold"
+                            className="bg-white backdrop-blur-xl border-slate-200 font-bold"
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-white/60">Description</Label>
+                          <Label className="text-xs text-slate-500">Description</Label>
                           <Textarea
                             value={editingService.description || ""}
                             onChange={(e) => setEditingService({...editingService, description: e.target.value})}
-                            className="bg-white/5 backdrop-blur-xl border-white/10"
+                            className="bg-white backdrop-blur-xl border-slate-200"
                             rows={3}
                           />
                         </div>
                         <div className="flex gap-3 items-end">
                           <div className="flex-1">
-                            <Label className="text-xs text-white/60">Prix HT (€)</Label>
+                            <Label className="text-xs text-slate-500">Prix HT (€)</Label>
                             <Input
                               type="number"
                               value={editingService.price}
                               onChange={(e) => setEditingService({...editingService, price: parseFloat(e.target.value) || 0})}
-                              className="bg-white/5 backdrop-blur-xl border-white/10"
+                              className="bg-white backdrop-blur-xl border-slate-200"
                             />
                           </div>
                           <Button size="sm" onClick={handleUpdateService} className="bg-green-600 hover:bg-green-700 text-white">
@@ -2324,11 +2324,11 @@ BANQUE : ..."
                     ) : (
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <p className="font-bold text-white">{service.title}</p>
+                          <p className="font-bold text-slate-900">{service.title}</p>
                           {service.description && (
-                            <p className="text-sm text-white/60 mt-1 whitespace-pre-wrap">{service.description}</p>
+                            <p className="text-sm text-slate-500 mt-1 whitespace-pre-wrap">{service.description}</p>
                           )}
-                          <p className="text-lg text-indigo-400 font-mono mt-2">{formatCurrency(service.price)}</p>
+                          <p className="text-lg text-indigo-600 font-mono mt-2">{formatCurrency(service.price)}</p>
                         </div>
                         <div className="flex gap-1 flex-shrink-0">
                           <Button size="sm" variant="ghost" onClick={() => setEditingService(service)}>
@@ -2350,12 +2350,12 @@ BANQUE : ..."
 
       {/* View Invoice Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-3xl max-h-[90vh] overflow-y-auto">
           {selectedInvoice && (
             <>
               <DialogHeader>
                 <div className="flex items-center justify-between">
-                  <DialogTitle className="text-white">
+                  <DialogTitle className="text-slate-900">
                     {selectedInvoice.invoice_number}
                   </DialogTitle>
                   <Badge className={statusConfig[selectedInvoice.status]?.color}>
@@ -2368,38 +2368,38 @@ BANQUE : ..."
                 {/* Header Info */}
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <p className="text-sm text-white/60">Client</p>
-                    <p className="font-medium text-white">{getContactName(selectedInvoice.contact_id)}</p>
+                    <p className="text-sm text-slate-500">Client</p>
+                    <p className="font-medium text-slate-900">{getContactName(selectedInvoice.contact_id)}</p>
                     {getContactCompany(selectedInvoice.contact_id) && (
-                      <p className="text-sm text-white/60">{getContactCompany(selectedInvoice.contact_id)}</p>
+                      <p className="text-sm text-slate-500">{getContactCompany(selectedInvoice.contact_id)}</p>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-white/60">Date d'émission</p>
-                    <p className="font-medium text-white">{formatDate(selectedInvoice.created_at)}</p>
-                    <p className="text-sm text-white/60 mt-2">Échéance</p>
-                    <p className="font-medium text-white">{formatDate(selectedInvoice.due_date)}</p>
+                    <p className="text-sm text-slate-500">Date d'émission</p>
+                    <p className="font-medium text-slate-900">{formatDate(selectedInvoice.created_at)}</p>
+                    <p className="text-sm text-slate-500 mt-2">Échéance</p>
+                    <p className="font-medium text-slate-900">{formatDate(selectedInvoice.due_date)}</p>
                   </div>
                 </div>
 
                 {/* Items Table */}
-                <div className="border border-white/10 rounded-lg overflow-hidden">
+                <div className="border border-slate-200 rounded-lg overflow-hidden">
                   <table className="w-full">
-                    <thead className="bg-white/5">
+                    <thead className="bg-white">
                       <tr>
-                        <th className="text-left px-4 py-2 text-xs font-medium text-white/60">Description</th>
-                        <th className="text-center px-4 py-2 text-xs font-medium text-white/60">Qté</th>
-                        <th className="text-right px-4 py-2 text-xs font-medium text-white/60">Prix unitaire</th>
-                        <th className="text-right px-4 py-2 text-xs font-medium text-white/60">Total HT</th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-slate-500">Description</th>
+                        <th className="text-center px-4 py-2 text-xs font-medium text-slate-500">Qté</th>
+                        <th className="text-right px-4 py-2 text-xs font-medium text-slate-500">Prix unitaire</th>
+                        <th className="text-right px-4 py-2 text-xs font-medium text-slate-500">Total HT</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E5E5E5]">
                       {selectedInvoice.items?.map((item, index) => (
                         <tr key={index}>
-                          <td className="px-4 py-3 text-white">{item.description}</td>
-                          <td className="px-4 py-3 text-center text-white/60">{item.quantity}</td>
-                          <td className="px-4 py-3 text-right font-mono text-white/60">{formatCurrency(item.unit_price)}</td>
-                          <td className="px-4 py-3 text-right font-mono text-white">{formatCurrency(item.quantity * item.unit_price)}</td>
+                          <td className="px-4 py-3 text-slate-900">{item.description}</td>
+                          <td className="px-4 py-3 text-center text-slate-500">{item.quantity}</td>
+                          <td className="px-4 py-3 text-right font-mono text-slate-500">{formatCurrency(item.unit_price)}</td>
+                          <td className="px-4 py-3 text-right font-mono text-slate-900">{formatCurrency(item.quantity * item.unit_price)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -2410,11 +2410,11 @@ BANQUE : ..."
                 <div className="flex justify-end">
                   <div className="w-64 space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-white/60">Sous-total HT</span>
+                      <span className="text-slate-500">Sous-total HT</span>
                       <span className="font-mono">{formatCurrency(selectedInvoice.subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-white/60">TVA (8.5%)</span>
+                      <span className="text-slate-500">TVA (8.5%)</span>
                       <span className="font-mono">{formatCurrency(selectedInvoice.tax)}</span>
                     </div>
                     <div className="flex justify-between text-lg font-bold border-t border-green-500/50 pt-2">
@@ -2428,8 +2428,8 @@ BANQUE : ..."
                 {selectedInvoice.status !== 'brouillon' && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-indigo-400" />
+                      <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-indigo-600" />
                         Paiements
                       </h3>
                       {selectedInvoice.status !== 'payée' && selectedInvoice.status !== 'payee' && selectedInvoice.status !== 'annulee' && (
@@ -2440,7 +2440,7 @@ BANQUE : ..."
                             setViewDialogOpen(false);
                             openPaymentDialog(selectedInvoice);
                           }}
-                          className="text-indigo-400 border-indigo-500/50"
+                          className="text-indigo-600 border-indigo-500/50"
                         >
                           <Plus className="w-3 h-3 mr-1" />
                           Ajouter
@@ -2450,9 +2450,9 @@ BANQUE : ..."
 
                     {/* Payment Summary */}
                     <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-white/5 rounded-lg p-3 text-center">
-                        <p className="text-xs text-white/60">Total facture</p>
-                        <p className="font-mono font-bold text-white">{formatCurrency(selectedInvoice.total)}</p>
+                      <div className="bg-white rounded-lg p-3 text-center">
+                        <p className="text-xs text-slate-500">Total facture</p>
+                        <p className="font-mono font-bold text-slate-900">{formatCurrency(selectedInvoice.total)}</p>
                       </div>
                       <div className="bg-green-50 rounded-lg p-3 text-center">
                         <p className="text-xs text-green-600">Payé</p>
@@ -2468,14 +2468,14 @@ BANQUE : ..."
 
                     {/* Payments List */}
                     {selectedInvoice.payments && selectedInvoice.payments.length > 0 ? (
-                      <div className="border border-white/10 rounded-lg overflow-hidden">
+                      <div className="border border-slate-200 rounded-lg overflow-hidden">
                         <table className="w-full">
-                          <thead className="bg-white/5">
+                          <thead className="bg-white">
                             <tr>
-                              <th className="text-left px-4 py-2 text-xs font-medium text-white/60">Date</th>
-                              <th className="text-left px-4 py-2 text-xs font-medium text-white/60">Méthode</th>
-                              <th className="text-right px-4 py-2 text-xs font-medium text-white/60">Montant</th>
-                              <th className="text-right px-4 py-2 text-xs font-medium text-white/60">Actions</th>
+                              <th className="text-left px-4 py-2 text-xs font-medium text-slate-500">Date</th>
+                              <th className="text-left px-4 py-2 text-xs font-medium text-slate-500">Méthode</th>
+                              <th className="text-right px-4 py-2 text-xs font-medium text-slate-500">Montant</th>
+                              <th className="text-right px-4 py-2 text-xs font-medium text-slate-500">Actions</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-[#E5E5E5]">
@@ -2483,12 +2483,12 @@ BANQUE : ..."
                               const method = paymentMethods[payment.payment_method] || paymentMethods.virement;
                               const MethodIcon = method.icon;
                               return (
-                                <tr key={payment.id} className="hover:bg-white/5">
-                                  <td className="px-4 py-3 text-sm text-white">
+                                <tr key={payment.id} className="hover:bg-slate-50">
+                                  <td className="px-4 py-3 text-sm text-slate-900">
                                     {formatDate(payment.payment_date)}
                                   </td>
                                   <td className="px-4 py-3">
-                                    <div className="flex items-center gap-2 text-sm text-white/60">
+                                    <div className="flex items-center gap-2 text-sm text-slate-500">
                                       <MethodIcon className="w-4 h-4" />
                                       {method.label}
                                     </div>
@@ -2513,7 +2513,7 @@ BANQUE : ..."
                         </table>
                       </div>
                     ) : (
-                      <div className="text-center py-6 text-white/60 bg-white/5 rounded-lg">
+                      <div className="text-center py-6 text-slate-500 bg-white rounded-lg">
                         <Banknote className="w-8 h-8 mx-auto mb-2 opacity-50" />
                         <p className="text-sm">Aucun paiement enregistré</p>
                       </div>
@@ -2541,10 +2541,10 @@ BANQUE : ..."
 
       {/* Add Payment Dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-indigo-400" />
+            <DialogTitle className="text-slate-900 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-indigo-600" />
               Enregistrer un paiement
             </DialogTitle>
           </DialogHeader>
@@ -2552,9 +2552,9 @@ BANQUE : ..."
           {selectedInvoiceForPayment && (
             <div className="space-y-4">
               {/* Invoice Summary */}
-              <div className="bg-white/5 rounded-lg p-4 space-y-2">
+              <div className="bg-white rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/60">Facture</span>
+                  <span className="text-slate-500">Facture</span>
                   <span className="font-mono font-medium">{selectedInvoiceForPayment.invoice_number}</span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -2562,12 +2562,12 @@ BANQUE : ..."
                   <span className="font-mono text-green-500">{formatCurrency(selectedInvoiceForPayment.total)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/60">Déjà payé</span>
+                  <span className="text-slate-500">Déjà payé</span>
                   <span className="font-mono text-green-600">{formatCurrency(selectedInvoiceForPayment.total_paid || 0)}</span>
                 </div>
-                <div className="flex justify-between text-sm font-bold border-t border-white/10 pt-2">
-                  <span className="text-white">Reste à payer</span>
-                  <span className="font-mono text-indigo-400">
+                <div className="flex justify-between text-sm font-bold border-t border-slate-200 pt-2">
+                  <span className="text-slate-900">Reste à payer</span>
+                  <span className="font-mono text-indigo-600">
                     {formatCurrency((selectedInvoiceForPayment.total || 0) - (selectedInvoiceForPayment.total_paid || 0))}
                   </span>
                 </div>
@@ -2576,9 +2576,9 @@ BANQUE : ..."
               {/* Payment Form */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-white">Montant *</Label>
+                  <Label className="text-slate-900">Montant *</Label>
                   <div className="relative">
-                    <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+                    <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <Input
                       type="number"
                       step="0.01"
@@ -2586,34 +2586,34 @@ BANQUE : ..."
                       placeholder="0.00"
                       value={paymentForm.amount}
                       onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-                      className="pl-10 bg-white/5 border-white/10 text-white font-mono"
+                      className="pl-10 bg-white border-slate-200 text-slate-900 font-mono"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white">Date du paiement *</Label>
+                  <Label className="text-slate-900">Date du paiement *</Label>
                   <div className="relative">
-                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <Input
                       type="date"
                       value={paymentForm.payment_date}
                       onChange={(e) => setPaymentForm({ ...paymentForm, payment_date: e.target.value })}
-                      className="pl-10 bg-white/5 border-white/10 text-white"
+                      className="pl-10 bg-white border-slate-200 text-slate-900"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white">Méthode de paiement</Label>
+                  <Label className="text-slate-900">Méthode de paiement</Label>
                   <Select
                     value={paymentForm.payment_method}
                     onValueChange={(value) => setPaymentForm({ ...paymentForm, payment_method: value })}
                   >
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                    <SelectTrigger className="bg-white border-slate-200 text-slate-900">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1a1a2e] border-white/10">
+                    <SelectContent className="bg-slate-50 border-slate-200">
                       {Object.entries(paymentMethods).map(([key, method]) => {
                         const Icon = method.icon;
                         return (
@@ -2630,12 +2630,12 @@ BANQUE : ..."
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white">Notes (optionnel)</Label>
+                  <Label className="text-slate-900">Notes (optionnel)</Label>
                   <Textarea
                     placeholder="Référence de virement, numéro de chèque..."
                     value={paymentForm.notes}
                     onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-white border-slate-200 text-slate-900"
                     rows={2}
                   />
                 </div>
@@ -2661,33 +2661,33 @@ BANQUE : ..."
 
       {/* Email Confirmation Dialog */}
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-md">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
+            <DialogTitle className="text-slate-900 flex items-center gap-2">
               <Mail className="w-5 h-5 text-emerald-400" />
               Envoyer par email
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-white/70 text-sm">
+            <p className="text-slate-600 text-sm">
               {emailInvoice?.document_type === 'devis' ? 'Devis' : 'Facture'} {emailInvoice?.invoice_number}
             </p>
             <div className="space-y-2">
-              <Label className="text-white">Adresse email du destinataire</Label>
+              <Label className="text-slate-900">Adresse email du destinataire</Label>
               <Input
                 type="email"
                 value={emailRecipient}
                 onChange={(e) => setEmailRecipient(e.target.value)}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-white border-slate-200 text-slate-900"
                 placeholder="client@email.com"
               />
             </div>
-            <p className="text-xs text-white/50">
+            <p className="text-xs text-slate-500">
               Une copie sera envoyée à leo.sperl@alphagency.com
             </p>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setEmailDialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+            <Button variant="outline" onClick={() => setEmailDialogOpen(false)} className="border-slate-200 text-slate-900 hover:bg-slate-50">
               Annuler
             </Button>
             <Button onClick={handleSendEmail} disabled={sendingEmail || !emailRecipient} className="bg-emerald-600 hover:bg-emerald-700">
@@ -2700,22 +2700,22 @@ BANQUE : ..."
 
       {/* Phase 2: After Creation Dialog */}
       <Dialog open={phase2DialogOpen} onOpenChange={setPhase2DialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-lg">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
+            <DialogTitle className="text-slate-900 flex items-center gap-2">
               <CheckCircle className="w-6 h-6 text-emerald-400" />
               {createdInvoice?.document_type === 'devis' ? 'Devis' : 'Facture'} créé{createdInvoice?.document_type === 'devis' ? '' : 'e'} !
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="bg-white/5 rounded-lg p-4">
-              <p className="text-white font-mono text-lg">{createdInvoice?.invoice_number}</p>
-              <p className="text-white/60 text-sm mt-1">
+            <div className="bg-white rounded-lg p-4">
+              <p className="text-slate-900 font-mono text-lg">{createdInvoice?.invoice_number}</p>
+              <p className="text-slate-500 text-sm mt-1">
                 {getContactName(createdInvoice?.contact_id)} • {formatCurrency(createdInvoice?.total || 0)}
               </p>
             </div>
             
-            <p className="text-white/70 text-sm">Que souhaitez-vous faire ?</p>
+            <p className="text-slate-600 text-sm">Que souhaitez-vous faire ?</p>
             
             <div className="space-y-2">
               <Button 
@@ -2743,12 +2743,12 @@ BANQUE : ..."
                     toast.success("PDF téléchargé");
                   }
                 }}
-                className="w-full justify-start bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-600/30"
+                className="w-full justify-start bg-indigo-50 hover:bg-indigo-600/30 text-indigo-600 border border-indigo-600/30"
               >
                 <Download className="w-5 h-5 mr-3" />
                 <div className="text-left">
                   <p className="font-medium">Télécharger le PDF</p>
-                  <p className="text-xs text-indigo-400/70">Sauvegarder sur votre appareil</p>
+                  <p className="text-xs text-indigo-600/70">Sauvegarder sur votre appareil</p>
                 </div>
               </Button>
               
@@ -2760,18 +2760,18 @@ BANQUE : ..."
                     setViewDialogOpen(true);
                   }
                 }}
-                className="w-full justify-start bg-white/5 hover:bg-white/10 text-white border border-white/10"
+                className="w-full justify-start bg-white hover:bg-slate-100 text-slate-900 border border-slate-200"
               >
                 <Eye className="w-5 h-5 mr-3" />
                 <div className="text-left">
                   <p className="font-medium">Voir l'aperçu</p>
-                  <p className="text-xs text-white/50">Prévisualiser le document</p>
+                  <p className="text-xs text-slate-500">Prévisualiser le document</p>
                 </div>
               </Button>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPhase2DialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+            <Button variant="outline" onClick={() => setPhase2DialogOpen(false)} className="border-slate-200 text-slate-900 hover:bg-slate-50">
               Fermer
             </Button>
           </DialogFooter>
@@ -2780,100 +2780,100 @@ BANQUE : ..."
 
       {/* New Contact Dialog */}
       <Dialog open={newContactDialogOpen} onOpenChange={setNewContactDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-slate-50 border-slate-200 max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <Plus className="w-5 h-5 text-indigo-400" />
+            <DialogTitle className="text-slate-900 flex items-center gap-2">
+              <Plus className="w-5 h-5 text-indigo-600" />
               Nouveau client
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white">Prénom</Label>
+                <Label className="text-slate-900">Prénom</Label>
                 <Input
                   value={newContactData.first_name}
                   onChange={(e) => setNewContactData({...newContactData, first_name: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-white border-slate-200 text-slate-900"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-white">Nom</Label>
+                <Label className="text-slate-900">Nom</Label>
                 <Input
                   value={newContactData.last_name}
                   onChange={(e) => setNewContactData({...newContactData, last_name: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-white border-slate-200 text-slate-900"
                 />
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white">Entreprise</Label>
+              <Label className="text-slate-900">Entreprise</Label>
               <Input
                 value={newContactData.company}
                 onChange={(e) => setNewContactData({...newContactData, company: e.target.value})}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-white border-slate-200 text-slate-900"
               />
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white">Email</Label>
+                <Label className="text-slate-900">Email</Label>
                 <Input
                   type="email"
                   value={newContactData.email}
                   onChange={(e) => setNewContactData({...newContactData, email: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-white border-slate-200 text-slate-900"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-white">Téléphone</Label>
+                <Label className="text-slate-900">Téléphone</Label>
                 <Input
                   value={newContactData.phone}
                   onChange={(e) => setNewContactData({...newContactData, phone: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-white border-slate-200 text-slate-900"
                 />
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white">Adresse</Label>
+              <Label className="text-slate-900">Adresse</Label>
               <Input
                 value={newContactData.address}
                 onChange={(e) => setNewContactData({...newContactData, address: e.target.value})}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-white border-slate-200 text-slate-900"
               />
             </div>
             
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label className="text-white">Code postal</Label>
+                <Label className="text-slate-900">Code postal</Label>
                 <Input
                   value={newContactData.postal_code}
                   onChange={(e) => setNewContactData({...newContactData, postal_code: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-white border-slate-200 text-slate-900"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-white">Ville</Label>
+                <Label className="text-slate-900">Ville</Label>
                 <Input
                   value={newContactData.city}
                   onChange={(e) => setNewContactData({...newContactData, city: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-white border-slate-200 text-slate-900"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-white">Pays</Label>
+                <Label className="text-slate-900">Pays</Label>
                 <Input
                   value={newContactData.country}
                   onChange={(e) => setNewContactData({...newContactData, country: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-white border-slate-200 text-slate-900"
                 />
               </div>
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setNewContactDialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+            <Button variant="outline" onClick={() => setNewContactDialogOpen(false)} className="border-slate-200 text-slate-900 hover:bg-slate-50">
               Annuler
             </Button>
             <Button onClick={handleCreateNewContact} disabled={savingContact} className="bg-indigo-600 hover:bg-indigo-700">
@@ -2886,41 +2886,41 @@ BANQUE : ..."
 
       {/* Deposit Invoice Dialog */}
       <Dialog open={depositDialogOpen} onOpenChange={setDepositDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-md">
+        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-white">
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
               <PiggyBank className="w-5 h-5 text-blue-400" />
               Créer une facture d&apos;acompte
             </DialogTitle>
           </DialogHeader>
           
           {selectedParentInvoice && (
-            <div className="bg-white/5 rounded-lg p-3 mb-4">
-              <p className="text-sm text-white/60">Facture principale</p>
-              <p className="font-mono font-bold text-white">{selectedParentInvoice.invoice_number}</p>
-              <p className="text-lg font-bold text-white">{formatCurrency(selectedParentInvoice.total)}</p>
+            <div className="bg-white rounded-lg p-3 mb-4">
+              <p className="text-sm text-slate-500">Facture principale</p>
+              <p className="font-mono font-bold text-slate-900">{selectedParentInvoice.invoice_number}</p>
+              <p className="text-lg font-bold text-slate-900">{formatCurrency(selectedParentInvoice.total)}</p>
             </div>
           )}
           
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-white">Type de calcul</Label>
+              <Label className="text-slate-900">Type de calcul</Label>
               <Select
                 value={depositForm.deposit_type}
                 onValueChange={(value) => setDepositForm({...depositForm, deposit_type: value})}
               >
-                <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                <SelectTrigger className="bg-white border-slate-200 text-slate-900">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1a1a2e] border-white/10">
-                  <SelectItem value="percent" className="text-white">Pourcentage (%)</SelectItem>
-                  <SelectItem value="amount" className="text-white">Montant fixe (€)</SelectItem>
+                <SelectContent className="bg-slate-50 border-slate-200">
+                  <SelectItem value="percent" className="text-slate-900">Pourcentage (%)</SelectItem>
+                  <SelectItem value="amount" className="text-slate-900">Montant fixe (€)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white">
+              <Label className="text-slate-900">
                 {depositForm.deposit_type === 'percent' ? 'Pourcentage' : 'Montant'}
               </Label>
               <div className="flex items-center gap-2">
@@ -2931,12 +2931,12 @@ BANQUE : ..."
                   step={depositForm.deposit_type === 'percent' ? 5 : 0.01}
                   value={depositForm.deposit_value}
                   onChange={(e) => setDepositForm({...depositForm, deposit_value: parseFloat(e.target.value) || 0})}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-white border-slate-200 text-slate-900"
                 />
-                <span className="text-white/60">{depositForm.deposit_type === 'percent' ? '%' : '€'}</span>
+                <span className="text-slate-500">{depositForm.deposit_type === 'percent' ? '%' : '€'}</span>
               </div>
               {depositForm.deposit_type === 'percent' && selectedParentInvoice && (
-                <p className="text-sm text-white/60">
+                <p className="text-sm text-slate-500">
                   = {formatCurrency((selectedParentInvoice.total * depositForm.deposit_value / 100))}
                 </p>
               )}
@@ -2952,7 +2952,7 @@ BANQUE : ..."
                     variant={depositForm.deposit_value === pct ? "default" : "outline"}
                     size="sm"
                     onClick={() => setDepositForm({...depositForm, deposit_value: pct})}
-                    className={depositForm.deposit_value === pct ? "bg-blue-600" : "border-white/20 text-white hover:bg-white/10"}
+                    className={depositForm.deposit_value === pct ? "bg-blue-600" : "border-slate-200 text-white hover:bg-slate-100"}
                   >
                     {pct}%
                   </Button>
@@ -2961,39 +2961,39 @@ BANQUE : ..."
             )}
             
             <div className="space-y-2">
-              <Label className="text-white">Date du contrat (optionnel)</Label>
+              <Label className="text-slate-900">Date du contrat (optionnel)</Label>
               <Input
                 type="text"
                 placeholder="Ex: 15/01/2026"
                 value={depositForm.contract_date}
                 onChange={(e) => setDepositForm({...depositForm, contract_date: e.target.value})}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-white border-slate-200 text-slate-900"
               />
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white">Libellé personnalisé (optionnel)</Label>
+              <Label className="text-slate-900">Libellé personnalisé (optionnel)</Label>
               <Textarea
                 placeholder="Laissez vide pour utiliser le libellé par défaut"
                 value={depositForm.label}
                 onChange={(e) => setDepositForm({...depositForm, label: e.target.value})}
-                className="bg-white/5 border-white/10 text-white min-h-[80px]"
+                className="bg-white border-slate-200 text-slate-900 min-h-[80px]"
               />
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white">Date d&apos;échéance (optionnel)</Label>
+              <Label className="text-slate-900">Date d&apos;échéance (optionnel)</Label>
               <Input
                 type="date"
                 value={depositForm.due_date}
                 onChange={(e) => setDepositForm({...depositForm, due_date: e.target.value})}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-white border-slate-200 text-slate-900"
               />
             </div>
           </div>
           
           <DialogFooter className="gap-2 mt-4">
-            <Button variant="outline" onClick={() => setDepositDialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+            <Button variant="outline" onClick={() => setDepositDialogOpen(false)} className="border-slate-200 text-slate-900 hover:bg-slate-50">
               Annuler
             </Button>
             <Button onClick={handleCreateDeposit} disabled={savingDeposit} className="bg-blue-600 hover:bg-blue-700">
@@ -3006,44 +3006,44 @@ BANQUE : ..."
 
       {/* Balance Invoice Dialog */}
       <Dialog open={balanceDialogOpen} onOpenChange={setBalanceDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-md">
+        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-white">
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
               <Banknote className="w-5 h-5 text-purple-400" />
               Créer une facture de solde
             </DialogTitle>
           </DialogHeader>
           
           {selectedParentInvoice && (
-            <div className="bg-white/5 rounded-lg p-3 mb-4">
-              <p className="text-sm text-white/60">Facture principale</p>
-              <p className="font-mono font-bold text-white">{selectedParentInvoice.invoice_number}</p>
-              <p className="text-lg font-bold text-white">{formatCurrency(selectedParentInvoice.total)}</p>
-              <div className="mt-2 pt-2 border-t border-white/10">
-                <p className="text-sm text-white/60">Déjà payé: <span className="text-green-400">{formatCurrency(selectedParentInvoice.total_paid || 0)}</span></p>
-                <p className="text-sm text-white/60">Reste à facturer: <span className="text-orange-400">{formatCurrency((selectedParentInvoice.total || 0) - (selectedParentInvoice.total_paid || 0))}</span></p>
+            <div className="bg-white rounded-lg p-3 mb-4">
+              <p className="text-sm text-slate-500">Facture principale</p>
+              <p className="font-mono font-bold text-slate-900">{selectedParentInvoice.invoice_number}</p>
+              <p className="text-lg font-bold text-slate-900">{formatCurrency(selectedParentInvoice.total)}</p>
+              <div className="mt-2 pt-2 border-t border-slate-200">
+                <p className="text-sm text-slate-500">Déjà payé: <span className="text-green-400">{formatCurrency(selectedParentInvoice.total_paid || 0)}</span></p>
+                <p className="text-sm text-slate-500">Reste à facturer: <span className="text-orange-400">{formatCurrency((selectedParentInvoice.total || 0) - (selectedParentInvoice.total_paid || 0))}</span></p>
               </div>
             </div>
           )}
           
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-white">Libellé personnalisé (optionnel)</Label>
+              <Label className="text-slate-900">Libellé personnalisé (optionnel)</Label>
               <Textarea
                 placeholder="Laissez vide pour utiliser le libellé par défaut"
                 value={balanceForm.label}
                 onChange={(e) => setBalanceForm({...balanceForm, label: e.target.value})}
-                className="bg-white/5 border-white/10 text-white min-h-[80px]"
+                className="bg-white border-slate-200 text-slate-900 min-h-[80px]"
               />
             </div>
             
             <div className="space-y-2">
-              <Label className="text-white">Date d&apos;échéance (optionnel)</Label>
+              <Label className="text-slate-900">Date d&apos;échéance (optionnel)</Label>
               <Input
                 type="date"
                 value={balanceForm.due_date}
                 onChange={(e) => setBalanceForm({...balanceForm, due_date: e.target.value})}
-                className="bg-white/5 border-white/10 text-white"
+                className="bg-white border-slate-200 text-slate-900"
               />
             </div>
             
@@ -3053,16 +3053,16 @@ BANQUE : ..."
                 id="force_without_deposits"
                 checked={balanceForm.force_without_deposits}
                 onChange={(e) => setBalanceForm({...balanceForm, force_without_deposits: e.target.checked})}
-                className="w-4 h-4 rounded border-white/20 bg-white/5"
+                className="w-4 h-4 rounded border-slate-200 bg-white"
               />
-              <Label htmlFor="force_without_deposits" className="text-white/60 text-sm cursor-pointer">
+              <Label htmlFor="force_without_deposits" className="text-slate-500 text-sm cursor-pointer">
                 Créer sans acompte préalable
               </Label>
             </div>
           </div>
           
           <DialogFooter className="gap-2 mt-4">
-            <Button variant="outline" onClick={() => setBalanceDialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+            <Button variant="outline" onClick={() => setBalanceDialogOpen(false)} className="border-slate-200 text-slate-900 hover:bg-slate-50">
               Annuler
             </Button>
             <Button onClick={handleCreateBalance} disabled={savingDeposit} className="bg-purple-600 hover:bg-purple-700">
@@ -3075,9 +3075,9 @@ BANQUE : ..."
 
       {/* Related Invoices Dialog */}
       <Dialog open={relatedDialogOpen} onOpenChange={setRelatedDialogOpen}>
-        <DialogContent className="bg-[#1a1a2e] border-white/10 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-white">
+            <DialogTitle className="flex items-center gap-2 text-slate-900">
               <FileText className="w-5 h-5" />
               Factures liées
             </DialogTitle>
@@ -3086,16 +3086,16 @@ BANQUE : ..."
           {relatedInvoices && (
             <div className="space-y-4">
               {/* Parent Invoice */}
-              <div className="bg-white/5 rounded-lg p-4">
-                <h3 className="text-sm font-bold text-white/60 mb-2">FACTURE PRINCIPALE</h3>
+              <div className="bg-white rounded-lg p-4">
+                <h3 className="text-sm font-bold text-slate-500 mb-2">FACTURE PRINCIPALE</h3>
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-mono font-bold text-white text-lg">{relatedInvoices.parent?.invoice_number}</p>
-                    <p className="text-white/60">{getContactName(selectedParentInvoice?.contact_id)}</p>
+                    <p className="font-mono font-bold text-slate-900 text-lg">{relatedInvoices.parent?.invoice_number}</p>
+                    <p className="text-slate-500">{getContactName(selectedParentInvoice?.contact_id)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-mono font-bold text-white text-lg">{formatCurrency(relatedInvoices.parent?.total)}</p>
-                    <Badge className={`${relatedInvoices.parent?.status === 'soldée' ? 'bg-green-500/20 text-green-400' : relatedInvoices.parent?.status === 'partiellement_payée' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/10 text-white/60'}`}>
+                    <p className="font-mono font-bold text-slate-900 text-lg">{formatCurrency(relatedInvoices.parent?.total)}</p>
+                    <Badge className={`${relatedInvoices.parent?.status === 'soldée' ? 'bg-green-100 text-green-700' : relatedInvoices.parent?.status === 'partiellement_payée' ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-500'}`}>
                       {relatedInvoices.parent?.status}
                     </Badge>
                   </div>
@@ -3106,17 +3106,17 @@ BANQUE : ..."
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-blue-500/10 rounded-lg p-3 text-center">
                   <p className="text-xs text-blue-400 mb-1">Acomptes ({relatedInvoices.summary?.deposits_count || 0})</p>
-                  <p className="font-mono font-bold text-white">{formatCurrency(relatedInvoices.summary?.total_deposits_paid || 0)}</p>
-                  <p className="text-xs text-white/40">payés sur {formatCurrency(relatedInvoices.summary?.total_deposits_amount || 0)}</p>
+                  <p className="font-mono font-bold text-slate-900">{formatCurrency(relatedInvoices.summary?.total_deposits_paid || 0)}</p>
+                  <p className="text-xs text-slate-400">payés sur {formatCurrency(relatedInvoices.summary?.total_deposits_amount || 0)}</p>
                 </div>
                 <div className="bg-purple-500/10 rounded-lg p-3 text-center">
                   <p className="text-xs text-purple-400 mb-1">Solde</p>
-                  <p className="font-mono font-bold text-white">{formatCurrency(relatedInvoices.summary?.balance_paid || 0)}</p>
-                  <p className="text-xs text-white/40">payés sur {formatCurrency(relatedInvoices.summary?.balance_amount || 0)}</p>
+                  <p className="font-mono font-bold text-slate-900">{formatCurrency(relatedInvoices.summary?.balance_paid || 0)}</p>
+                  <p className="text-xs text-slate-400">payés sur {formatCurrency(relatedInvoices.summary?.balance_amount || 0)}</p>
                 </div>
                 <div className="bg-green-500/10 rounded-lg p-3 text-center">
                   <p className="text-xs text-green-400 mb-1">Reste à payer</p>
-                  <p className="font-mono font-bold text-white">{formatCurrency(relatedInvoices.summary?.remaining || 0)}</p>
+                  <p className="font-mono font-bold text-slate-900">{formatCurrency(relatedInvoices.summary?.remaining || 0)}</p>
                 </div>
               </div>
               
@@ -3129,14 +3129,14 @@ BANQUE : ..."
                   </h3>
                   <div className="space-y-2">
                     {relatedInvoices.deposits.map((deposit) => (
-                      <div key={deposit.id} className="bg-white/5 rounded-lg p-3 flex justify-between items-center">
+                      <div key={deposit.id} className="bg-white rounded-lg p-3 flex justify-between items-center">
                         <div>
-                          <p className="font-mono font-medium text-white">{deposit.invoice_number}</p>
-                          <p className="text-xs text-white/60">{deposit.deposit_percent}% - {formatDate(deposit.created_at)}</p>
+                          <p className="font-mono font-medium text-slate-900">{deposit.invoice_number}</p>
+                          <p className="text-xs text-slate-500">{deposit.deposit_percent}% - {formatDate(deposit.created_at)}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-mono font-bold text-white">{formatCurrency(deposit.total)}</p>
-                          <Badge className={`${deposit.status === 'payée' ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/60'}`}>
+                          <p className="font-mono font-bold text-slate-900">{formatCurrency(deposit.total)}</p>
+                          <Badge className={`${deposit.status === 'payée' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
                             {deposit.status}
                           </Badge>
                         </div>
@@ -3153,14 +3153,14 @@ BANQUE : ..."
                     <Banknote className="w-4 h-4" />
                     FACTURE DE SOLDE
                   </h3>
-                  <div className="bg-white/5 rounded-lg p-3 flex justify-between items-center">
+                  <div className="bg-white rounded-lg p-3 flex justify-between items-center">
                     <div>
-                      <p className="font-mono font-medium text-white">{relatedInvoices.balance.invoice_number}</p>
-                      <p className="text-xs text-white/60">{formatDate(relatedInvoices.balance.created_at)}</p>
+                      <p className="font-mono font-medium text-slate-900">{relatedInvoices.balance.invoice_number}</p>
+                      <p className="text-xs text-slate-500">{formatDate(relatedInvoices.balance.created_at)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-mono font-bold text-white">{formatCurrency(relatedInvoices.balance.total)}</p>
-                      <Badge className={`${relatedInvoices.balance.status === 'payée' ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/60'}`}>
+                      <p className="font-mono font-bold text-slate-900">{formatCurrency(relatedInvoices.balance.total)}</p>
+                      <Badge className={`${relatedInvoices.balance.status === 'payée' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
                         {relatedInvoices.balance.status}
                       </Badge>
                     </div>
@@ -3170,7 +3170,7 @@ BANQUE : ..."
               
               {/* No deposits or balance yet */}
               {(!relatedInvoices.deposits || relatedInvoices.deposits.length === 0) && !relatedInvoices.balance && (
-                <div className="text-center py-8 text-white/40">
+                <div className="text-center py-8 text-slate-400">
                   <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
                   <p>Aucune facture d&apos;acompte ou de solde créée</p>
                   <p className="text-sm mt-2">Utilisez le menu d&apos;actions pour créer des factures liées</p>
@@ -3180,7 +3180,7 @@ BANQUE : ..."
           )}
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRelatedDialogOpen(false)} className="border-white/10 text-white hover:bg-white/5">
+            <Button variant="outline" onClick={() => setRelatedDialogOpen(false)} className="border-slate-200 text-slate-900 hover:bg-slate-50">
               Fermer
             </Button>
           </DialogFooter>

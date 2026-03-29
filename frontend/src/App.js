@@ -25,7 +25,6 @@ import DashboardOverview from "./pages/dashboard/DashboardOverview";
 import ContactsPage from "./pages/dashboard/ContactsPage";
 import PipelinePage from "./pages/dashboard/PipelinePage";
 import InvoicesPage from "./pages/dashboard/InvoicesPage";
-import SubscriptionsPage from "./pages/dashboard/SubscriptionsPage";
 import PortfolioManagePage from "./pages/dashboard/PortfolioManagePageNew";
 import DemandesPage from "./pages/dashboard/DemandesPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
@@ -38,21 +37,13 @@ import AIAssistantPage from "./pages/dashboard/AIAssistantPageNew";
 import NewsPage from "./pages/dashboard/NewsPage";
 import SocialMediaPage from "./pages/dashboard/SocialMediaPageNew";
 import BlogAdminPage from "./pages/dashboard/BlogAdminPage";
-import TagsManagePage from "./pages/dashboard/TagsManagePage";
-import CampaignsPage from "./pages/dashboard/CampaignsPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ThingsPage from "./pages/dashboard/ThingsPage";
-import MindMapPage from "./pages/dashboard/MindMapPage";
-import TransfersPage from "./pages/dashboard/TransfersPage";
 import AgendaPage from "./pages/dashboard/AgendaPage";
 import EditorialCalendarPage from "./pages/dashboard/EditorialCalendarPage";
 import MultilinkPage from "./pages/dashboard/MultilinkPage";
-import MoltBotPage from "./pages/dashboard/MoltBotPage";
 import InstagramStoryPage from "./pages/dashboard/InstagramStoryPage";
-import WhatsAppConfigPage from "./pages/dashboard/WhatsAppConfigPage";
 import NurturingPage from "./pages/dashboard/NurturingPage";
-import VoiceCRMPage from "./pages/dashboard/VoiceCRMPage";
-import AnalyticsDashboardPage from "./pages/dashboard/AnalyticsDashboardPage";
 
 // Public pages
 import TransferDownloadPage from "./pages/TransferDownloadPage";
@@ -66,13 +57,14 @@ function App() {
   return (
     <ThemeProvider>
       <div className="App">
-        <Toaster 
-          position="top-right" 
+        <Toaster
+          position="top-right"
           toastOptions={{
             style: {
-              background: '#0A0A0A',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#E1E1E1',
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              color: '#1E293B',
+              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
             },
           }}
         />
@@ -109,7 +101,6 @@ function App() {
             <Route path="facturation" element={<InvoicesPage />} />
             <Route path="devis" element={<Navigate to="/admin/facturation?tab=devis" replace />} />
             <Route path="factures" element={<Navigate to="/admin/facturation?tab=facture" replace />} />
-            <Route path="abonnements" element={<SubscriptionsPage />} />
             <Route path="realisations" element={<PortfolioManagePage />} />
             <Route path="documents" element={<DocumentsPage />} />
             <Route path="taches" element={<TasksPage />} />
@@ -120,22 +111,13 @@ function App() {
             <Route path="actualites" element={<NewsPage />} />
             <Route path="blog" element={<BlogAdminPage />} />
             <Route path="social-media" element={<SocialMediaPage />} />
-            <Route path="campagnes" element={<CampaignsPage />} />
-            <Route path="campaigns" element={<CampaignsPage />} />
-            <Route path="tags" element={<TagsManagePage />} />
             <Route path="parametres" element={<SettingsPage />} />
             <Route path="things" element={<ThingsPage />} />
-            <Route path="mindmap" element={<MindMapPage />} />
-            <Route path="transfer" element={<TransfersPage />} />
             <Route path="agenda" element={<AgendaPage />} />
             <Route path="editorial" element={<EditorialCalendarPage />} />
             <Route path="multilink" element={<MultilinkPage />} />
-            <Route path="moltbot" element={<MoltBotPage />} />
-            <Route path="whatsapp" element={<WhatsAppConfigPage />} />
             <Route path="instagram-stories" element={<InstagramStoryPage />} />
             <Route path="nurturing" element={<NurturingPage />} />
-            <Route path="voice-crm" element={<VoiceCRMPage />} />
-            <Route path="analytics-dashboard" element={<AnalyticsDashboardPage />} />
           </Route>
           
           {/* PWA Widget Page for iPhone */}
