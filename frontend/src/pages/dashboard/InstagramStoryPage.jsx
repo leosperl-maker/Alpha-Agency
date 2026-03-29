@@ -1083,7 +1083,7 @@ function PollConfig({ data, onChange }) {
             <button
               key={idx}
               onClick={() => onChange({ ...data, colorIndex: idx })}
-              className={`w-8 h-8 rounded-full transition ${colorIndex === idx ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110' : 'opacity-70 hover:opacity-100'}`}
+              className={`w-8 h-8 rounded-full border-2 transition ${colorIndex === idx ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110 border-white/50' : 'border-white/20 opacity-80 hover:opacity-100'}`}
               style={{ background: c.headerBg }}
             />
           ))}
