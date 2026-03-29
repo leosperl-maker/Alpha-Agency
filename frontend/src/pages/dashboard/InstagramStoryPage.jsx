@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   ArrowLeft, Upload, Link as LinkIcon, Hash, AtSign, BarChart2,
   HelpCircle, Timer, Plus, Trash2, ChevronUp, ChevronDown,
-  X, Loader2, Check, Clock, Send, Edit3, Eye
+  X, Loader2, Check, Clock, Send, Edit3, Eye, MapPin, Bell, Camera, Type
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -20,22 +20,59 @@ const getMultipartHeaders = () => ({
 const FONTS = [
   { name: 'Classique', family: 'Georgia, serif', weight: 'normal' },
   { name: 'Moderne', family: 'Segoe UI, sans-serif', weight: 'normal' },
-  { name: 'Néon', family: 'Impact, sans-serif', weight: 'bold' },
-  { name: 'Machine à écrire', family: 'Courier New, monospace', weight: 'normal' },
+  { name: 'N\u00e9on', family: 'Impact, sans-serif', weight: 'bold' },
+  { name: 'Machine \u00e0 \u00e9crire', family: 'Courier New, monospace', weight: 'normal' },
   { name: 'Strong', family: 'Arial Black, sans-serif', weight: '900' }
 ];
 
 const COLORS = ['#FFFFFF', '#000000', '#FF0000', '#FFD700', '#FF1493', '#800080', '#0000FF', '#00AA00', '#FFA500'];
 
-// Instagram poll frame colors (the gradient around the entire sticker)
-const POLL_FRAME_COLORS = [
-  { id: 'gradient1', name: 'Rose-Violet', gradient: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCB045)', bg: '#833AB4' },
-  { id: 'gradient2', name: 'Bleu', gradient: 'linear-gradient(135deg, #0095F6, #00D4FF)', bg: '#0095F6' },
-  { id: 'gradient3', name: 'Vert', gradient: 'linear-gradient(135deg, #00C853, #64DD17)', bg: '#00C853' },
-  { id: 'gradient4', name: 'Orange', gradient: 'linear-gradient(135deg, #FF6F00, #FF9100)', bg: '#FF6F00' },
-  { id: 'gradient5', name: 'Violet', gradient: 'linear-gradient(135deg, #7C4DFF, #B388FF)', bg: '#7C4DFF' },
-  { id: 'gradient6', name: 'Rouge', gradient: 'linear-gradient(135deg, #FF1744, #FF5252)', bg: '#FF1744' },
-];
+// Instagram sticker color schemes — the small circle at top cycles through these
+const STICKER_COLORS = {
+  poll: [
+    { gradient: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCB045)', circle: '#D93B7A' },
+    { gradient: 'linear-gradient(135deg, #0095F6, #00D4FF)', circle: '#0095F6' },
+    { gradient: 'linear-gradient(135deg, #00C853, #64DD17)', circle: '#00C853' },
+    { gradient: 'linear-gradient(135deg, #FF6F00, #FF9100)', circle: '#FF6F00' },
+    { gradient: 'linear-gradient(135deg, #7C4DFF, #B388FF)', circle: '#7C4DFF' },
+    { gradient: 'linear-gradient(135deg, #FF1744, #FF5252)', circle: '#FF1744' },
+  ],
+  question: [
+    { gradient: 'linear-gradient(135deg, #D93B7A, #833AB4)', circle: '#D93B7A', inputBg: 'rgba(255,255,255,0.2)', textColor: '#FFFFFF' },
+    { gradient: 'linear-gradient(135deg, #0095F6, #00D4FF)', circle: '#0095F6', inputBg: 'rgba(255,255,255,0.2)', textColor: '#FFFFFF' },
+    { gradient: 'linear-gradient(135deg, #00C853, #64DD17)', circle: '#00C853', inputBg: 'rgba(255,255,255,0.2)', textColor: '#FFFFFF' },
+    { gradient: 'linear-gradient(135deg, #1a1a2e, #333366)', circle: '#1a1a2e', inputBg: 'rgba(255,255,255,0.15)', textColor: '#FFFFFF' },
+    { gradient: 'linear-gradient(135deg, #FF6F00, #FFD600)', circle: '#FF6F00', inputBg: 'rgba(255,255,255,0.2)', textColor: '#FFFFFF' },
+  ],
+  countdown: [
+    { gradient: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCB045)', circle: '#D93B7A' },
+    { gradient: 'linear-gradient(135deg, #0095F6, #00D4FF)', circle: '#0095F6' },
+    { gradient: 'linear-gradient(135deg, #00C853, #64DD17)', circle: '#00C853' },
+    { gradient: 'linear-gradient(135deg, #1a1a2e, #333366)', circle: '#1a1a2e' },
+    { gradient: 'linear-gradient(135deg, #FF6F00, #FF9100)', circle: '#FF6F00' },
+  ],
+  slider: [
+    { trackGradient: 'linear-gradient(to right, #833AB4, #FD1D1D, #FCB045)', bg: '#FFFFFF', circle: '#D93B7A', textColor: '#262626' },
+    { trackGradient: 'linear-gradient(to right, #0095F6, #00D4FF)', bg: '#FFFFFF', circle: '#0095F6', textColor: '#262626' },
+    { trackGradient: 'linear-gradient(to right, #00C853, #64DD17)', bg: '#FFFFFF', circle: '#00C853', textColor: '#262626' },
+    { trackGradient: 'linear-gradient(to right, #FF6F00, #FF9100)', bg: '#FFFFFF', circle: '#FF6F00', textColor: '#262626' },
+  ],
+  location: [
+    { bg: '#FFFFFF', text: '#262626', icon: '#262626' },
+    { bg: 'rgba(0,0,0,0.6)', text: '#FFFFFF', icon: '#FFFFFF' },
+    { bg: '#833AB4', text: '#FFFFFF', icon: '#FFFFFF' },
+    { bg: '#0095F6', text: '#FFFFFF', icon: '#FFFFFF' },
+    { bg: '#FF1744', text: '#FFFFFF', icon: '#FFFFFF' },
+  ],
+  notification: [
+    { gradient: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCB045)', circle: '#D93B7A' },
+    { gradient: 'linear-gradient(135deg, #0095F6, #00D4FF)', circle: '#0095F6' },
+    { gradient: 'linear-gradient(135deg, #1a1a2e, #333366)', circle: '#1a1a2e' },
+  ],
+};
+
+// Text background modes: none -> dark -> light -> colored
+const TEXT_BG_MODES = ['none', 'dark', 'light', 'colored'];
 
 // Main component
 export default function InstagramStoryPage() {
@@ -62,6 +99,7 @@ export default function InstagramStoryPage() {
   const [tempText, setTempText] = useState('');
   const [selectedFont, setSelectedFont] = useState('Classique');
   const [selectedColor, setSelectedColor] = useState('#FFFFFF');
+  const [textBgMode, setTextBgMode] = useState('none'); // none | dark | light | colored
 
   useEffect(() => {
     if (view === 'accounts' || view === 'stories') loadAccounts();
@@ -98,17 +136,17 @@ export default function InstagramStoryPage() {
       setNewAccountUsername('');
       setShowAddAccountModal(false);
       await loadAccounts();
-      toast.success('Compte ajouté');
+      toast.success('Compte ajout\u00e9');
     } catch { toast.error("Erreur lors de l'ajout du compte"); }
     finally { setLoading(false); }
   };
 
   const deleteAccount = async (id) => {
-    if (!window.confirm('Êtes-vous sûr ?')) return;
+    if (!window.confirm('\u00cates-vous s\u00fbr ?')) return;
     try {
       await fetch(`${API}/api/instagram-story/accounts/${id}`, { method: 'DELETE', headers: getHeaders() });
       await loadAccounts();
-      toast.success('Compte supprimé');
+      toast.success('Compte supprim\u00e9');
     } catch { toast.error('Erreur lors de la suppression'); }
   };
 
@@ -149,6 +187,7 @@ export default function InstagramStoryPage() {
     setTempText('');
     setSelectedFont('Classique');
     setSelectedColor('#FFFFFF');
+    setTextBgMode('none');
   };
 
   const handleMediaUpload = async (file) => {
@@ -163,20 +202,23 @@ export default function InstagramStoryPage() {
       setMediaUrl(data.url);
       setMediaLocalPath(data.local_path);
       setMediaType(data.media_type);
-      toast.success('Média chargé');
-    } catch { toast.error("Erreur lors de l'upload du média"); }
+      toast.success('M\u00e9dia charg\u00e9');
+    } catch { toast.error("Erreur lors de l'upload du m\u00e9dia"); }
     finally { setLoading(false); }
   };
 
   const addSticker = (type) => {
     const defaults = {
-      poll: { question: '', options: ['Oui', 'Non'], frameColor: 'gradient1' },
-      question: { question: '' },
+      poll: { question: '', options: ['Oui', 'Non'], colorIndex: 0 },
+      question: { question: '', colorIndex: 0 },
       link: { url: '', text: 'Lien' },
       mention: { username: '' },
       hashtag: { hashtag: '' },
-      countdown: { title: '', endTime: '' },
-      slider: { question: '', emoji: '😍' }
+      countdown: { title: '', endTime: '', colorIndex: 0 },
+      slider: { question: '', emoji: '\ud83d\ude0d', colorIndex: 0 },
+      location: { location: '', colorIndex: 0 },
+      notification: { title: '', colorIndex: 0 },
+      polaroid: { caption: '' }
     };
     const newSticker = {
       id: Math.random().toString(36).slice(2),
@@ -219,16 +261,49 @@ export default function InstagramStoryPage() {
     }
   };
 
+  // Cycle text background mode: none -> dark -> light -> colored
+  const cycleTextBgMode = () => {
+    const idx = TEXT_BG_MODES.indexOf(textBgMode);
+    setTextBgMode(TEXT_BG_MODES[(idx + 1) % TEXT_BG_MODES.length]);
+  };
+
+  // Get text styles based on bgMode
+  const getTextStyles = () => {
+    switch (textBgMode) {
+      case 'dark': return { bg: '#000000', textColor: '#FFFFFF' };
+      case 'light': return { bg: '#FFFFFF', textColor: '#000000' };
+      case 'colored': {
+        // bg is the selected color, text is a lighter version
+        const lighten = (hex) => {
+          const r = parseInt(hex.slice(1, 3), 16);
+          const g = parseInt(hex.slice(3, 5), 16);
+          const b = parseInt(hex.slice(5, 7), 16);
+          return `rgb(${Math.min(255, r + 140)}, ${Math.min(255, g + 140)}, ${Math.min(255, b + 140)})`;
+        };
+        return { bg: selectedColor, textColor: lighten(selectedColor === '#FFFFFF' ? '#0095F6' : selectedColor) };
+      }
+      default: return { bg: 'transparent', textColor: selectedColor };
+    }
+  };
+
   const addTextOverlay = () => {
     if (!tempText.trim()) { toast.error('Veuillez entrer du texte'); return; }
-    setTextOverlay({ text: tempText, position: { x: 0.5, y: 0.3 }, color: selectedColor, font: selectedFont });
+    const styles = getTextStyles();
+    setTextOverlay({
+      text: tempText,
+      position: { x: 0.5, y: 0.3 },
+      color: styles.textColor,
+      font: selectedFont,
+      bgColor: styles.bg,
+      bgMode: textBgMode
+    });
     setTempText('');
-    toast.success('Texte ajouté');
+    toast.success('Texte ajout\u00e9');
   };
 
   const publishStory = async (publish = true) => {
-    if (!mediaUrl) { toast.error('Veuillez ajouter une image ou vidéo'); return; }
-    if (!selectedAccount) { toast.error('Veuillez sélectionner un compte'); return; }
+    if (!mediaUrl) { toast.error('Veuillez ajouter une image ou vid\u00e9o'); return; }
+    if (!selectedAccount) { toast.error('Veuillez s\u00e9lectionner un compte'); return; }
 
     setLoading(true);
     try {
@@ -261,16 +336,16 @@ export default function InstagramStoryPage() {
         const pubRes = await fetch(`${API}/api/instagram-story/drafts/${draftId}/publish`, { method: 'POST', headers: getHeaders() });
         const pubData = await pubRes.json().catch(() => ({}));
         if (!pubRes.ok || pubData.success === false) {
-          const errMsg = pubData.error || pubData.detail || pubData.message || 'Échec de la publication';
-          toast.error(`Publication échouée : ${errMsg}`);
+          const errMsg = pubData.error || pubData.detail || pubData.message || '\u00c9chec de la publication';
+          toast.error(`Publication \u00e9chou\u00e9e : ${errMsg}`);
           setLoading(false);
           return;
         }
-        toast.success('Story publiée !');
+        toast.success('Story publi\u00e9e !');
       } else if (scheduleTime) {
-        toast.success('Story programmée !');
+        toast.success('Story programm\u00e9e !');
       } else {
-        toast.success('Brouillon enregistré');
+        toast.success('Brouillon enregistr\u00e9');
       }
 
       resetEditor();
@@ -323,6 +398,9 @@ export default function InstagramStoryPage() {
         onFontChange={setSelectedFont}
         selectedColor={selectedColor}
         onColorChange={setSelectedColor}
+        textBgMode={textBgMode}
+        onCycleTextBg={cycleTextBgMode}
+        getTextStyles={getTextStyles}
         onAddText={addTextOverlay}
         scheduleTime={scheduleTime}
         onScheduleTimeChange={setScheduleTime}
@@ -343,7 +421,7 @@ export default function InstagramStoryPage() {
         onDelete={async (id) => {
           await fetch(`${API}/api/instagram-story/drafts/${id}`, { method: 'DELETE', headers: getHeaders() });
           await loadStories();
-          toast.success('Supprimée');
+          toast.success('Supprim\u00e9e');
         }}
         onGoBack={() => setView('accounts')}
         filter={storiesFilter}
@@ -364,17 +442,17 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Instagram Stories</h1>
-          <p className="text-gray-400">Gérez vos comptes et créez vos stories</p>
+          <p className="text-gray-400">G\u00e9rez vos comptes et cr\u00e9ez vos stories</p>
         </div>
 
         <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4 mb-8 flex items-center gap-3">
           <Check size={20} className="text-green-400" />
-          <span className="text-green-400">BlueStacks connecté — publication automatique prête</span>
+          <span className="text-green-400">BlueStacks connect\u00e9 — publication automatique pr\u00eate</span>
         </div>
 
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Comptes enregistrés</h2>
+            <h2 className="text-2xl font-bold">Comptes enregistr\u00e9s</h2>
             <div className="flex gap-4">
               <Button onClick={onViewAllStories} variant="outline" className="border-white/20 text-white hover:bg-white/10 gap-2">
                 <Eye size={18} /> Toutes les stories
@@ -387,7 +465,7 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
 
           {accounts.length === 0 ? (
             <div className="bg-white/5 border border-white/10 rounded-lg p-12 text-center">
-              <p className="text-gray-400">Aucun compte enregistré. Ajoutez-en un pour commencer.</p>
+              <p className="text-gray-400">Aucun compte enregistr\u00e9. Ajoutez-en un pour commencer.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -404,7 +482,7 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
                   </div>
                   <div className="flex gap-2">
                     <Button onClick={() => onCreateStory(account)} className="flex-1 bg-gradient-to-r from-pink-500 to-pink-700 hover:from-pink-600 hover:to-pink-800 text-white text-sm gap-1">
-                      <Plus size={16} /> Créer
+                      <Plus size={16} /> Cr\u00e9er
                     </Button>
                     <Button onClick={() => onViewStories(account)} variant="outline" className="flex-1 border-white/20 text-white hover:bg-white/10 text-sm gap-1">
                       <Eye size={16} /> Stories
@@ -431,7 +509,7 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
               onKeyDown={(e) => e.key === 'Enter' && onAddSubmit()}
               className="mb-2 bg-white/5 border-white/10 text-white placeholder-gray-500"
             />
-            <p className="text-xs text-gray-400 mb-4">Le compte doit être déjà connecté sur Instagram dans BlueStacks.</p>
+            <p className="text-xs text-gray-400 mb-4">Le compte doit \u00eatre d\u00e9j\u00e0 connect\u00e9 sur Instagram dans BlueStacks.</p>
             <div className="flex gap-2">
               <Button onClick={onAddSubmit} className="flex-1 bg-pink-600 hover:bg-pink-700 text-white" disabled={isLoading}>
                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Ajouter'}
@@ -455,7 +533,8 @@ function EditorView({
   mediaUrl, mediaType, onMediaUpload,
   stickers, selectedSticker, onSelectSticker, onAddSticker, onUpdateStickerData, onUpdateStickerPosition, onDeleteSticker, onMoveSticker,
   textOverlay, onTextOverlayChange,
-  tempText, onTempTextChange, selectedFont, onFontChange, selectedColor, onColorChange, onAddText,
+  tempText, onTempTextChange, selectedFont, onFontChange, selectedColor, onColorChange,
+  textBgMode, onCycleTextBg, getTextStyles, onAddText,
   scheduleTime, onScheduleTimeChange,
   onPublish, onSaveDraft, onGoBack, isLoading
 }) {
@@ -526,6 +605,9 @@ function EditorView({
       document.removeEventListener('mouseup', onUp);
     };
   }, [onUpdateStickerPosition, onTextOverlayChange]);
+
+  // Text background style label
+  const bgModeLabels = { none: 'Aa', dark: 'Aa', light: 'Aa', colored: 'Aa' };
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white p-4">
@@ -618,7 +700,7 @@ function EditorView({
               ) : (
                 <div className="py-4">
                   <Upload size={28} className="mx-auto mb-2 text-gray-400" />
-                  <p className="text-sm font-medium">Image ou vidéo</p>
+                  <p className="text-sm font-medium">Image ou vid\u00e9o</p>
                   <p className="text-xs text-gray-500 mt-1">Cliquez ou glissez</p>
                 </div>
               )}
@@ -631,11 +713,14 @@ function EditorView({
               <div className="flex flex-col gap-1.5">
                 <StickerBtn icon={<BarChart2 size={16} />} label="Sondage" onClick={() => onAddSticker('poll')} />
                 <StickerBtn icon={<HelpCircle size={16} />} label="Question" onClick={() => onAddSticker('question')} />
-                <StickerBtn icon={<span className="text-sm">😍</span>} label="Curseur" onClick={() => onAddSticker('slider')} />
-                <StickerBtn icon={<Timer size={16} />} label="Compte à rebours" onClick={() => onAddSticker('countdown')} />
+                <StickerBtn icon={<span className="text-sm">\ud83d\ude0d</span>} label="Curseur" onClick={() => onAddSticker('slider')} />
+                <StickerBtn icon={<Timer size={16} />} label="Compte \u00e0 rebours" onClick={() => onAddSticker('countdown')} />
+                <StickerBtn icon={<MapPin size={16} />} label="Localisation" onClick={() => onAddSticker('location')} />
                 <StickerBtn icon={<LinkIcon size={16} />} label="Lien" onClick={() => onAddSticker('link')} />
                 <StickerBtn icon={<AtSign size={16} />} label="Mention" onClick={() => onAddSticker('mention')} />
                 <StickerBtn icon={<Hash size={16} />} label="Hashtag" onClick={() => onAddSticker('hashtag')} />
+                <StickerBtn icon={<Bell size={16} />} label="Notification" onClick={() => onAddSticker('notification')} />
+                <StickerBtn icon={<Camera size={16} />} label="Polaro\u00efd" onClick={() => onAddSticker('polaroid')} />
               </div>
             </div>
 
@@ -649,6 +734,25 @@ function EditorView({
                   onChange={(e) => onTempTextChange(e.target.value)}
                   className="bg-white/5 border-white/10 text-white placeholder-gray-500 text-sm h-9"
                 />
+
+                {/* Text background toggle (framed A) */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={onCycleTextBg}
+                    className="flex items-center justify-center w-9 h-9 rounded-lg border-2 transition font-bold text-sm"
+                    style={{
+                      borderColor: textBgMode === 'none' ? 'rgba(255,255,255,0.3)' : textBgMode === 'dark' ? '#000' : textBgMode === 'light' ? '#FFF' : selectedColor,
+                      backgroundColor: textBgMode === 'dark' ? '#000' : textBgMode === 'light' ? '#FFF' : textBgMode === 'colored' ? selectedColor : 'transparent',
+                      color: textBgMode === 'none' ? '#FFF' : textBgMode === 'dark' ? '#FFF' : textBgMode === 'light' ? '#000' : '#FFF'
+                    }}
+                    title="Fond du texte"
+                  >
+                    A
+                  </button>
+                  <span className="text-xs text-gray-400">
+                    {textBgMode === 'none' ? 'Sans fond' : textBgMode === 'dark' ? 'Fond noir' : textBgMode === 'light' ? 'Fond blanc' : 'Fond couleur'}
+                  </span>
+                </div>
 
                 <div className="flex flex-col gap-1">
                   {FONTS.map(font => (
@@ -705,7 +809,7 @@ function EditorView({
                 <span className="text-gray-300 text-xs">Il y a 2h</span>
               </div>
 
-              {/* Media Background — fills entire phone area */}
+              {/* Media Background */}
               {mediaUrl ? (
                 <div className="absolute inset-0 z-0">
                   {mediaType === 'video' ? (
@@ -718,12 +822,12 @@ function EditorView({
                 <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
                   <div className="text-center text-gray-600">
                     <Upload size={48} className="mx-auto mb-2" />
-                    <p className="text-sm">Ajoutez un média</p>
+                    <p className="text-sm">Ajoutez un m\u00e9dia</p>
                   </div>
                 </div>
               )}
 
-              {/* Sticker Layer — absolutely positioned, receives pointer events */}
+              {/* Sticker Layer */}
               <div className="absolute inset-0 z-10" style={{ top: '48px', bottom: '48px' }}>
                 {stickers.map(sticker => (
                   <StickerRenderer
@@ -732,6 +836,11 @@ function EditorView({
                     isSelected={selectedSticker?.id === sticker.id}
                     onSelect={() => onSelectSticker(sticker)}
                     onDragStart={(e) => handleDragStart(e, sticker.id)}
+                    onUpdateData={(newData) => {
+                      const updated = { ...sticker, data: newData };
+                      onSelectSticker(updated);
+                      onUpdateStickerData(newData);
+                    }}
                   />
                 ))}
 
@@ -746,7 +855,10 @@ function EditorView({
                       fontFamily: FONTS.find(f => f.name === textOverlay.font)?.family || 'serif',
                       fontWeight: FONTS.find(f => f.name === textOverlay.font)?.weight || 'normal',
                       color: textOverlay.color,
-                      textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5)',
+                      backgroundColor: textOverlay.bgColor && textOverlay.bgColor !== 'transparent' ? textOverlay.bgColor : undefined,
+                      padding: textOverlay.bgColor && textOverlay.bgColor !== 'transparent' ? '6px 14px' : undefined,
+                      borderRadius: textOverlay.bgColor && textOverlay.bgColor !== 'transparent' ? '8px' : undefined,
+                      textShadow: !textOverlay.bgColor || textOverlay.bgColor === 'transparent' ? '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5)' : 'none',
                       fontSize: '18px',
                       maxWidth: '80%',
                       textAlign: 'center',
@@ -806,27 +918,33 @@ function EditorView({
 
                 {/* Question Config */}
                 {selectedSticker.type === 'question' && (
-                  <div className="space-y-3">
-                    <FieldInput label="Question" value={selectedSticker.data.question || ''} onChange={(v) => onUpdateStickerData({ ...selectedSticker.data, question: v })} />
-                  </div>
+                  <QuestionConfig data={selectedSticker.data} onChange={onUpdateStickerData} />
                 )}
 
                 {/* Slider Config */}
                 {selectedSticker.type === 'slider' && (
-                  <div className="space-y-3">
-                    <FieldInput label="Question" value={selectedSticker.data.question || ''} onChange={(v) => onUpdateStickerData({ ...selectedSticker.data, question: v })} />
-                    <FieldInput label="Emoji" value={selectedSticker.data.emoji || '😍'} onChange={(v) => onUpdateStickerData({ ...selectedSticker.data, emoji: v })} />
-                  </div>
+                  <SliderConfig data={selectedSticker.data} onChange={onUpdateStickerData} />
                 )}
 
                 {/* Countdown Config */}
                 {selectedSticker.type === 'countdown' && (
+                  <CountdownConfig data={selectedSticker.data} onChange={onUpdateStickerData} />
+                )}
+
+                {/* Location Config */}
+                {selectedSticker.type === 'location' && (
+                  <LocationConfig data={selectedSticker.data} onChange={onUpdateStickerData} />
+                )}
+
+                {/* Notification Config */}
+                {selectedSticker.type === 'notification' && (
+                  <NotificationConfig data={selectedSticker.data} onChange={onUpdateStickerData} />
+                )}
+
+                {/* Polaroid Config */}
+                {selectedSticker.type === 'polaroid' && (
                   <div className="space-y-3">
-                    <FieldInput label="Titre" value={selectedSticker.data.title || ''} onChange={(v) => onUpdateStickerData({ ...selectedSticker.data, title: v })} />
-                    <div>
-                      <label className="block text-xs text-gray-400 mb-1">Date/Heure</label>
-                      <input type="datetime-local" value={selectedSticker.data.endTime || ''} onChange={(e) => onUpdateStickerData({ ...selectedSticker.data, endTime: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm" style={{ colorScheme: 'dark' }} />
-                    </div>
+                    <FieldInput label="L\u00e9gende" value={selectedSticker.data.caption || ''} onChange={(v) => onUpdateStickerData({ ...selectedSticker.data, caption: v })} placeholder="Ajouter une l\u00e9gende..." />
                   </div>
                 )}
 
@@ -850,12 +968,12 @@ function EditorView({
 
                 {/* Text info */}
                 {selectedSticker.type === 'text' && (
-                  <p className="text-gray-400 text-sm">Glissez le texte sur l'aperçu pour le déplacer.</p>
+                  <p className="text-gray-400 text-sm">Glissez le texte sur l'aper\u00e7u pour le d\u00e9placer.</p>
                 )}
               </div>
             ) : (
               <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center">
-                <p className="text-gray-400 text-sm">Cliquez sur un sticker dans l'aperçu pour le configurer, ou ajoutez-en un depuis le panneau de gauche.</p>
+                <p className="text-gray-400 text-sm">Cliquez sur un sticker dans l'aper\u00e7u pour le configurer, ou ajoutez-en un depuis le panneau de gauche.</p>
               </div>
             )}
           </div>
@@ -866,11 +984,30 @@ function EditorView({
 }
 
 /* ============================================
-   POLL CONFIG — Instagram-style: question, 2 options, frame color
+   STICKER COLOR CIRCLE — small circle at top that cycles colors
+   ============================================ */
+function ColorCircle({ colorIndex, colors, onChange }) {
+  const idx = colorIndex || 0;
+  const nextIdx = (idx + 1) % colors.length;
+  const currentColor = colors[idx];
+  const displayColor = currentColor.circle || currentColor.bg || '#833AB4';
+
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); onChange(nextIdx); }}
+      className="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full border-2 border-white shadow-lg z-10 transition-transform hover:scale-110"
+      style={{ background: displayColor }}
+      title="Changer la couleur"
+    />
+  );
+}
+
+/* ============================================
+   POLL CONFIG
    ============================================ */
 function PollConfig({ data, onChange }) {
   const options = data.options || ['Oui', 'Non'];
-  const frameColor = data.frameColor || 'gradient1';
+  const colorIndex = data.colorIndex || 0;
 
   const updateOption = (idx, value) => {
     const newOptions = [...options];
@@ -878,35 +1015,185 @@ function PollConfig({ data, onChange }) {
     onChange({ ...data, options: newOptions });
   };
 
+  const addOption = () => {
+    if (options.length < 4) {
+      onChange({ ...data, options: [...options, ''] });
+    }
+  };
+
+  const removeOption = (idx) => {
+    if (options.length > 2) {
+      const newOptions = options.filter((_, i) => i !== idx);
+      onChange({ ...data, options: newOptions });
+    }
+  };
+
   return (
     <div className="space-y-3">
-      <FieldInput label="Question" value={data.question || ''} onChange={(v) => onChange({ ...data, question: v })} />
+      <FieldInput label="Question" value={data.question || ''} onChange={(v) => onChange({ ...data, question: v })} placeholder="Posez une question..." />
       <div>
         <label className="block text-xs text-gray-400 mb-2">Options</label>
         {options.map((opt, idx) => (
-          <div key={idx} className="mb-2">
+          <div key={idx} className="flex items-center gap-1 mb-2">
             <input
               type="text"
               value={typeof opt === 'string' ? opt : opt.text || ''}
               onChange={(e) => updateOption(idx, e.target.value)}
-              placeholder={idx === 0 ? 'Oui' : 'Non'}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+              placeholder={idx === 0 ? 'Oui' : idx === 1 ? 'Non' : `Option ${idx + 1}`}
+              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
             />
+            {options.length > 2 && (
+              <button onClick={() => removeOption(idx)} className="p-1 text-red-400 hover:bg-red-500/10 rounded"><X size={14} /></button>
+            )}
           </div>
         ))}
+        {options.length < 4 && (
+          <button onClick={addOption} className="text-xs text-pink-400 hover:text-pink-300 flex items-center gap-1 mt-1">
+            <Plus size={12} /> Ajouter une option
+          </button>
+        )}
       </div>
 
-      {/* Frame Color — this is what Instagram actually lets you change */}
+      {/* Color picker */}
       <div>
         <label className="block text-xs text-gray-400 mb-2">Couleur du sticker</label>
-        <div className="grid grid-cols-3 gap-2">
-          {POLL_FRAME_COLORS.map((c) => (
+        <div className="flex gap-2 flex-wrap">
+          {STICKER_COLORS.poll.map((c, idx) => (
             <button
-              key={c.id}
-              onClick={() => onChange({ ...data, frameColor: c.id })}
-              className={`h-8 rounded-lg transition ${frameColor === c.id ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent' : 'opacity-70 hover:opacity-100'}`}
+              key={idx}
+              onClick={() => onChange({ ...data, colorIndex: idx })}
+              className={`w-8 h-8 rounded-full transition ${colorIndex === idx ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110' : 'opacity-70 hover:opacity-100'}`}
               style={{ background: c.gradient }}
-              title={c.name}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================
+   QUESTION CONFIG
+   ============================================ */
+function QuestionConfig({ data, onChange }) {
+  const colorIndex = data.colorIndex || 0;
+  return (
+    <div className="space-y-3">
+      <FieldInput label="Question" value={data.question || ''} onChange={(v) => onChange({ ...data, question: v })} placeholder="Posez-moi une question" />
+      <div>
+        <label className="block text-xs text-gray-400 mb-2">Couleur du sticker</label>
+        <div className="flex gap-2 flex-wrap">
+          {STICKER_COLORS.question.map((c, idx) => (
+            <button
+              key={idx}
+              onClick={() => onChange({ ...data, colorIndex: idx })}
+              className={`w-8 h-8 rounded-full transition ${colorIndex === idx ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110' : 'opacity-70 hover:opacity-100'}`}
+              style={{ background: c.gradient }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================
+   SLIDER CONFIG
+   ============================================ */
+function SliderConfig({ data, onChange }) {
+  const colorIndex = data.colorIndex || 0;
+  return (
+    <div className="space-y-3">
+      <FieldInput label="Question" value={data.question || ''} onChange={(v) => onChange({ ...data, question: v })} />
+      <FieldInput label="Emoji" value={data.emoji || '\ud83d\ude0d'} onChange={(v) => onChange({ ...data, emoji: v })} />
+      <div>
+        <label className="block text-xs text-gray-400 mb-2">Couleur du curseur</label>
+        <div className="flex gap-2 flex-wrap">
+          {STICKER_COLORS.slider.map((c, idx) => (
+            <button
+              key={idx}
+              onClick={() => onChange({ ...data, colorIndex: idx })}
+              className={`w-8 h-8 rounded-full transition ${colorIndex === idx ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110' : 'opacity-70 hover:opacity-100'}`}
+              style={{ background: c.trackGradient }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================
+   COUNTDOWN CONFIG
+   ============================================ */
+function CountdownConfig({ data, onChange }) {
+  const colorIndex = data.colorIndex || 0;
+  return (
+    <div className="space-y-3">
+      <FieldInput label="Titre" value={data.title || ''} onChange={(v) => onChange({ ...data, title: v })} />
+      <div>
+        <label className="block text-xs text-gray-400 mb-1">Date/Heure</label>
+        <input type="datetime-local" value={data.endTime || ''} onChange={(e) => onChange({ ...data, endTime: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm" style={{ colorScheme: 'dark' }} />
+      </div>
+      <div>
+        <label className="block text-xs text-gray-400 mb-2">Couleur du sticker</label>
+        <div className="flex gap-2 flex-wrap">
+          {STICKER_COLORS.countdown.map((c, idx) => (
+            <button
+              key={idx}
+              onClick={() => onChange({ ...data, colorIndex: idx })}
+              className={`w-8 h-8 rounded-full transition ${colorIndex === idx ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110' : 'opacity-70 hover:opacity-100'}`}
+              style={{ background: c.gradient }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================
+   LOCATION CONFIG
+   ============================================ */
+function LocationConfig({ data, onChange }) {
+  const colorIndex = data.colorIndex || 0;
+  return (
+    <div className="space-y-3">
+      <FieldInput label="Lieu" value={data.location || ''} onChange={(v) => onChange({ ...data, location: v })} placeholder="Paris, France" />
+      <div>
+        <label className="block text-xs text-gray-400 mb-2">Style (cliquez pour changer)</label>
+        <div className="flex gap-2 flex-wrap">
+          {STICKER_COLORS.location.map((c, idx) => (
+            <button
+              key={idx}
+              onClick={() => onChange({ ...data, colorIndex: idx })}
+              className={`w-8 h-8 rounded-full border transition ${colorIndex === idx ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110' : 'opacity-70 hover:opacity-100'}`}
+              style={{ backgroundColor: c.bg === 'transparent' ? '#333' : c.bg, borderColor: c.bg === 'transparent' ? '#FFF' : 'transparent' }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================
+   NOTIFICATION CONFIG
+   ============================================ */
+function NotificationConfig({ data, onChange }) {
+  const colorIndex = data.colorIndex || 0;
+  return (
+    <div className="space-y-3">
+      <FieldInput label="Titre" value={data.title || ''} onChange={(v) => onChange({ ...data, title: v })} placeholder="Mon \u00e9v\u00e9nement" />
+      <div>
+        <label className="block text-xs text-gray-400 mb-2">Couleur du sticker</label>
+        <div className="flex gap-2 flex-wrap">
+          {STICKER_COLORS.notification.map((c, idx) => (
+            <button
+              key={idx}
+              onClick={() => onChange({ ...data, colorIndex: idx })}
+              className={`w-8 h-8 rounded-full transition ${colorIndex === idx ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110' : 'opacity-70 hover:opacity-100'}`}
+              style={{ background: c.gradient }}
             />
           ))}
         </div>
@@ -946,83 +1233,236 @@ function StickerBtn({ icon, label, onClick }) {
 }
 
 /* ============================================
-   STICKER RENDERER — Instagram-style stickers
+   STICKER RENDERER — Instagram-identical stickers
    ============================================ */
-function StickerRenderer({ sticker, isSelected, onSelect, onDragStart }) {
+function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateData }) {
   let content = null;
 
+  // Helper: cycle color on click of the small circle
+  const cycleColor = (colorType) => {
+    const colors = STICKER_COLORS[colorType] || [];
+    const currentIdx = sticker.data.colorIndex || 0;
+    const nextIdx = (currentIdx + 1) % colors.length;
+    onUpdateData({ ...sticker.data, colorIndex: nextIdx });
+  };
+
+  /* ---- POLL STICKER ---- */
   if (sticker.type === 'poll') {
     const options = sticker.data.options || ['Oui', 'Non'];
-    const frameId = sticker.data.frameColor || 'gradient1';
-    const frame = POLL_FRAME_COLORS.find(c => c.id === frameId) || POLL_FRAME_COLORS[0];
+    const colorIdx = sticker.data.colorIndex || 0;
+    const scheme = STICKER_COLORS.poll[colorIdx] || STICKER_COLORS.poll[0];
+
     content = (
-      <div className="rounded-2xl overflow-hidden shadow-xl" style={{ width: '180px', background: frame.gradient }}>
-        <div className="p-3">
-          <p className="text-center text-sm font-bold text-white mb-2" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>{sticker.data.question || 'Question ?'}</p>
-          <div className="flex gap-1.5">
+      <div className="relative" style={{ width: '200px' }}>
+        {/* Color cycle circle */}
+        <ColorCircle colorIndex={colorIdx} colors={STICKER_COLORS.poll} onChange={(idx) => onUpdateData({ ...sticker.data, colorIndex: idx })} />
+        <div className="rounded-2xl overflow-hidden shadow-xl" style={{ background: scheme.gradient }}>
+          {/* Question area */}
+          <div className="px-4 pt-5 pb-2">
+            <div className="bg-white/20 rounded-xl px-3 py-2.5 text-center">
+              <p className="text-white text-xs font-semibold uppercase tracking-wide opacity-80">
+                {sticker.data.question || 'POSEZ UNE QUESTION...'}
+              </p>
+            </div>
+          </div>
+          {/* Options */}
+          <div className="px-3 pb-3 flex flex-col gap-1.5">
             {options.map((opt, idx) => (
-              <div key={idx} className="flex-1 bg-white text-center text-xs font-bold py-2.5 rounded-xl cursor-default text-gray-800">
-                {typeof opt === 'string' ? opt : opt.text || `Option ${idx + 1}`}
+              <div
+                key={idx}
+                className="bg-white text-center text-sm font-bold py-2.5 rounded-xl cursor-default"
+                style={{ color: '#262626' }}
+              >
+                {typeof opt === 'string' ? (opt || (idx === 0 ? 'Oui' : 'Non')) : opt.text || `Option ${idx + 1}`}
               </div>
             ))}
           </div>
         </div>
       </div>
     );
-  } else if (sticker.type === 'question') {
+  }
+
+  /* ---- QUESTION (FAQ) STICKER ---- */
+  else if (sticker.type === 'question') {
+    const colorIdx = sticker.data.colorIndex || 0;
+    const scheme = STICKER_COLORS.question[colorIdx] || STICKER_COLORS.question[0];
+
     content = (
-      <div className="rounded-2xl overflow-hidden shadow-xl" style={{ width: '180px' }}>
-        <div className="bg-gradient-to-br from-purple-600 to-pink-500 p-3">
-          <p className="text-center text-sm font-bold text-white mb-2">{sticker.data.question || 'Posez-moi une question'}</p>
-          <div className="bg-white/20 rounded-xl px-3 py-2">
-            <span className="text-white/60 text-xs">Écrivez quelque chose...</span>
-          </div>
-        </div>
-      </div>
-    );
-  } else if (sticker.type === 'slider') {
-    content = (
-      <div className="rounded-2xl overflow-hidden shadow-xl" style={{ width: '180px' }}>
-        <div className="bg-white/95 p-3">
-          <p className="text-center text-sm font-bold text-gray-800 mb-3">{sticker.data.question || 'Question ?'}</p>
-          <div className="relative h-2 bg-gradient-to-r from-gray-200 to-gray-200 rounded-full mb-1">
-            <div className="absolute h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full" style={{ width: '55%' }} />
-            <div className="absolute text-lg" style={{ left: '55%', top: '-12px', transform: 'translateX(-50%)' }}>
-              {sticker.data.emoji || '😍'}
+      <div className="relative" style={{ width: '200px' }}>
+        <ColorCircle colorIndex={colorIdx} colors={STICKER_COLORS.question} onChange={(idx) => onUpdateData({ ...sticker.data, colorIndex: idx })} />
+        <div className="rounded-2xl overflow-hidden shadow-xl" style={{ background: scheme.gradient }}>
+          <div className="px-4 pt-5 pb-3">
+            {/* Title */}
+            <p className="text-center text-sm font-bold text-white mb-3" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+              {sticker.data.question || 'Posez-moi une question'}
+            </p>
+            {/* Input field */}
+            <div className="rounded-xl px-3 py-3" style={{ backgroundColor: scheme.inputBg }}>
+              <p className="text-white/50 text-xs text-center">\u00c9crivez quelque chose...</p>
             </div>
           </div>
         </div>
       </div>
     );
-  } else if (sticker.type === 'countdown') {
+  }
+
+  /* ---- SLIDER STICKER ---- */
+  else if (sticker.type === 'slider') {
+    const colorIdx = sticker.data.colorIndex || 0;
+    const scheme = STICKER_COLORS.slider[colorIdx] || STICKER_COLORS.slider[0];
+
     content = (
-      <div className="rounded-2xl overflow-hidden shadow-xl" style={{ width: '180px' }}>
-        <div className="bg-gradient-to-br from-purple-600 via-pink-500 to-red-400 p-3 text-center">
-          <p className="text-white text-xs font-bold uppercase tracking-wider mb-1">{sticker.data.title || 'Événement'}</p>
-          <div className="flex justify-center gap-2 text-white">
-            <div className="text-center"><div className="text-2xl font-mono font-bold">00</div><div className="text-[10px] opacity-70">JOURS</div></div>
-            <span className="text-2xl font-bold">:</span>
-            <div className="text-center"><div className="text-2xl font-mono font-bold">00</div><div className="text-[10px] opacity-70">HEURES</div></div>
-            <span className="text-2xl font-bold">:</span>
-            <div className="text-center"><div className="text-2xl font-mono font-bold">00</div><div className="text-[10px] opacity-70">MIN</div></div>
+      <div className="relative" style={{ width: '200px' }}>
+        <ColorCircle colorIndex={colorIdx} colors={STICKER_COLORS.slider} onChange={(idx) => onUpdateData({ ...sticker.data, colorIndex: idx })} />
+        <div className="rounded-2xl overflow-hidden shadow-xl" style={{ backgroundColor: scheme.bg }}>
+          <div className="px-4 pt-5 pb-4">
+            <p className="text-center text-sm font-bold mb-4" style={{ color: scheme.textColor }}>
+              {sticker.data.question || 'Question ?'}
+            </p>
+            {/* Slider track */}
+            <div className="relative h-2 bg-gray-200 rounded-full">
+              <div className="absolute h-2 rounded-full" style={{ width: '55%', background: scheme.trackGradient }} />
+              <div className="absolute text-xl" style={{ left: '55%', top: '-14px', transform: 'translateX(-50%)' }}>
+                {sticker.data.emoji || '\ud83d\ude0d'}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     );
-  } else if (sticker.type === 'link') {
+  }
+
+  /* ---- COUNTDOWN STICKER ---- */
+  else if (sticker.type === 'countdown') {
+    const colorIdx = sticker.data.colorIndex || 0;
+    const scheme = STICKER_COLORS.countdown[colorIdx] || STICKER_COLORS.countdown[0];
+
+    content = (
+      <div className="relative" style={{ width: '210px' }}>
+        <ColorCircle colorIndex={colorIdx} colors={STICKER_COLORS.countdown} onChange={(idx) => onUpdateData({ ...sticker.data, colorIndex: idx })} />
+        <div className="rounded-2xl overflow-hidden shadow-xl" style={{ background: scheme.gradient }}>
+          <div className="px-3 pt-5 pb-3 text-center">
+            {/* Title */}
+            <p className="text-white text-xs font-bold uppercase tracking-widest mb-2" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+              {sticker.data.title || '\u00c9v\u00e9nement'}
+            </p>
+            {/* Timer display */}
+            <div className="flex justify-center items-end gap-1 text-white">
+              <div className="text-center">
+                <div className="text-2xl font-mono font-black leading-none">00</div>
+                <div className="text-[9px] font-semibold opacity-70 mt-0.5">JOURS</div>
+              </div>
+              <span className="text-xl font-bold pb-3 opacity-70">:</span>
+              <div className="text-center">
+                <div className="text-2xl font-mono font-black leading-none">00</div>
+                <div className="text-[9px] font-semibold opacity-70 mt-0.5">HEURES</div>
+              </div>
+              <span className="text-xl font-bold pb-3 opacity-70">:</span>
+              <div className="text-center">
+                <div className="text-2xl font-mono font-black leading-none">00</div>
+                <div className="text-[9px] font-semibold opacity-70 mt-0.5">MIN</div>
+              </div>
+              <span className="text-xl font-bold pb-3 opacity-70">:</span>
+              <div className="text-center">
+                <div className="text-2xl font-mono font-black leading-none">00</div>
+                <div className="text-[9px] font-semibold opacity-70 mt-0.5">SEC</div>
+              </div>
+            </div>
+            {/* Rappel button */}
+            <div className="mt-2 bg-white/20 rounded-full px-4 py-1.5 inline-flex items-center gap-1.5">
+              <Bell size={12} className="text-white" />
+              <span className="text-white text-[10px] font-semibold">Rappel</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ---- LOCATION STICKER ---- */
+  else if (sticker.type === 'location') {
+    const colorIdx = sticker.data.colorIndex || 0;
+    const scheme = STICKER_COLORS.location[colorIdx] || STICKER_COLORS.location[0];
+    const isTransparent = scheme.bg === 'transparent';
+
+    content = (
+      <div
+        className="rounded-full px-4 py-2 flex items-center gap-2 shadow-xl cursor-pointer"
+        style={{
+          backgroundColor: isTransparent ? 'transparent' : scheme.bg,
+          border: isTransparent ? '2px solid #FFFFFF' : 'none',
+          backdropFilter: scheme.bg.includes('rgba') ? 'blur(8px)' : undefined
+        }}
+        onClick={(e) => { e.stopPropagation(); cycleColor('location'); }}
+      >
+        <MapPin size={14} style={{ color: scheme.icon }} />
+        <span className="text-sm font-bold" style={{ color: scheme.text }}>
+          {sticker.data.location || 'Paris, France'}
+        </span>
+      </div>
+    );
+  }
+
+  /* ---- NOTIFICATION STICKER ---- */
+  else if (sticker.type === 'notification') {
+    const colorIdx = sticker.data.colorIndex || 0;
+    const scheme = STICKER_COLORS.notification[colorIdx] || STICKER_COLORS.notification[0];
+
+    content = (
+      <div className="relative" style={{ width: '200px' }}>
+        <ColorCircle colorIndex={colorIdx} colors={STICKER_COLORS.notification} onChange={(idx) => onUpdateData({ ...sticker.data, colorIndex: idx })} />
+        <div className="rounded-2xl overflow-hidden shadow-xl" style={{ background: scheme.gradient }}>
+          <div className="px-4 pt-5 pb-3 text-center">
+            <Bell size={20} className="mx-auto mb-2 text-white" />
+            <p className="text-white text-xs font-bold mb-1">{sticker.data.title || 'Mon \u00e9v\u00e9nement'}</p>
+            <div className="bg-white/20 rounded-full px-4 py-2 mt-2">
+              <span className="text-white text-xs font-semibold">Activer les notifications</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ---- POLAROID STICKER ---- */
+  else if (sticker.type === 'polaroid') {
+    content = (
+      <div className="shadow-xl" style={{ width: '140px' }}>
+        <div className="bg-white rounded-sm p-1.5 pb-8" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+          {/* Photo area */}
+          <div className="bg-gray-200 aspect-square rounded-sm flex items-center justify-center">
+            <Camera size={24} className="text-gray-400" />
+          </div>
+          {/* Caption */}
+          <p className="text-center text-xs text-gray-600 mt-2 font-medium" style={{ fontFamily: "'Segoe UI', sans-serif" }}>
+            {sticker.data.caption || ''}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ---- LINK STICKER ---- */
+  else if (sticker.type === 'link') {
     content = (
       <div className="bg-white/95 text-gray-800 rounded-full px-5 py-2.5 text-sm font-bold flex items-center gap-2 shadow-xl">
         <LinkIcon size={16} className="text-gray-600" />
         {sticker.data.text || 'Lien'}
       </div>
     );
-  } else if (sticker.type === 'mention') {
+  }
+
+  /* ---- MENTION STICKER ---- */
+  else if (sticker.type === 'mention') {
     content = (
       <div className="bg-white/30 backdrop-blur-md text-white rounded-full px-4 py-2 text-sm font-bold shadow-lg border border-white/20">
         @{sticker.data.username || 'username'}
       </div>
     );
-  } else if (sticker.type === 'hashtag') {
+  }
+
+  /* ---- HASHTAG STICKER ---- */
+  else if (sticker.type === 'hashtag') {
     content = (
       <div className="bg-white/30 backdrop-blur-md text-white rounded-full px-4 py-2 text-sm font-bold shadow-lg border border-white/20">
         #{sticker.data.hashtag || 'hashtag'}
@@ -1059,10 +1499,10 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
 
   const statusMap = {
     draft: { label: 'Brouillon', color: 'bg-gray-600' },
-    scheduled: { label: 'Programmé', color: 'bg-blue-600' },
+    scheduled: { label: 'Programm\u00e9', color: 'bg-blue-600' },
     publishing: { label: 'Publication...', color: 'bg-yellow-600' },
-    published: { label: 'Publié', color: 'bg-green-600' },
-    failed: { label: 'Échoué', color: 'bg-red-600' }
+    published: { label: 'Publi\u00e9', color: 'bg-green-600' },
+    failed: { label: '\u00c9chou\u00e9', color: 'bg-red-600' }
   };
 
   return (
@@ -1082,7 +1522,7 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
               En attente
             </button>
             <button onClick={() => onFilterChange('published')} className={`px-4 py-2 rounded-md text-sm transition ${filter === 'published' ? 'bg-pink-600 text-white' : 'text-gray-300 hover:text-white'}`}>
-              Publiées
+              Publi\u00e9es
             </button>
           </div>
 
@@ -1100,7 +1540,7 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
         {/* Grid */}
         {filtered.length === 0 ? (
           <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
-            <p className="text-gray-400">Aucune story trouvée.</p>
+            <p className="text-gray-400">Aucune story trouv\u00e9e.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
