@@ -79,6 +79,16 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
         elif stype == "slider":
             sticker_type = "slider"
             sticker_params = {"question": sdata.get("question", "")}
+        elif stype == "location":
+            sticker_type = "location"
+            sticker_params = {"location": sdata.get("location", "")}
+        elif stype == "notification":
+            # Notification sticker doesn't exist natively in Instagram automation
+            # We skip it for now — it's a visual-only sticker in the CRM
+            sticker_type = None
+        elif stype == "polaroid":
+            # Polaroid is visual-only in CRM, no Instagram equivalent
+            sticker_type = None
     elif isinstance(elements, dict):
         # Old format — backwards compatibility
         if elements.get("poll"):
@@ -132,17 +142,15 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
             payload["image_url"] = media_url
     
     # Ajouter le texte natif Instagram si configuré
-    text_overlay = elements.get("text_overlay_config")
-    if text_overlay:
-        payload["text_overlay"] = text_overlay
-    elif elements.get("text_overlay"):
-        # Format simple : juste le texte, police par défaut
+    # Text overlay info comes from the draft dict, not from elements (which may be a list)
+    text_overlay_text = draft.get("text_overlay")
+    if text_overlay_text:
         payload["text_overlay"] = {
-            "text": elements["text_overlay"],
-            "font": elements.get("text_font", "classique"),
-            "color": elements.get("text_color", "#FFFFFF"),
-            "x": elements.get("text_position", {}).get("x", 0.5),
-            "y": elements.get("text_position", {}).get("y", 0.3),
+            "text": text_overlay_text,
+            "font": draft.get("text_font", "classique"),
+            "color": draft.get("text_color", "#FFFFFF"),
+            "x": draft.get("text_position", {}).get("x", 0.5),
+            "y": draft.get("text_position", {}).get("y", 0.3),
         }
     
     try:

@@ -20,8 +20,8 @@ const getMultipartHeaders = () => ({
 const FONTS = [
   { name: 'Classique', family: 'Georgia, serif', weight: 'normal' },
   { name: 'Moderne', family: 'Segoe UI, sans-serif', weight: 'normal' },
-  { name: 'N\u00e9on', family: 'Impact, sans-serif', weight: 'bold' },
-  { name: 'Machine \u00e0 \u00e9crire', family: 'Courier New, monospace', weight: 'normal' },
+  { name: 'Néon', family: 'Impact, sans-serif', weight: 'bold' },
+  { name: 'Machine à écrire', family: 'Courier New, monospace', weight: 'normal' },
   { name: 'Strong', family: 'Arial Black, sans-serif', weight: '900' }
 ];
 
@@ -136,17 +136,17 @@ export default function InstagramStoryPage() {
       setNewAccountUsername('');
       setShowAddAccountModal(false);
       await loadAccounts();
-      toast.success('Compte ajout\u00e9');
+      toast.success('Compte ajouté');
     } catch { toast.error("Erreur lors de l'ajout du compte"); }
     finally { setLoading(false); }
   };
 
   const deleteAccount = async (id) => {
-    if (!window.confirm('\u00cates-vous s\u00fbr ?')) return;
+    if (!window.confirm('Êtes-vous sûr ?')) return;
     try {
       await fetch(`${API}/api/instagram-story/accounts/${id}`, { method: 'DELETE', headers: getHeaders() });
       await loadAccounts();
-      toast.success('Compte supprim\u00e9');
+      toast.success('Compte supprimé');
     } catch { toast.error('Erreur lors de la suppression'); }
   };
 
@@ -202,8 +202,8 @@ export default function InstagramStoryPage() {
       setMediaUrl(data.url);
       setMediaLocalPath(data.local_path);
       setMediaType(data.media_type);
-      toast.success('M\u00e9dia charg\u00e9');
-    } catch { toast.error("Erreur lors de l'upload du m\u00e9dia"); }
+      toast.success('Média chargé');
+    } catch { toast.error("Erreur lors de l'upload du média"); }
     finally { setLoading(false); }
   };
 
@@ -215,7 +215,7 @@ export default function InstagramStoryPage() {
       mention: { username: '' },
       hashtag: { hashtag: '' },
       countdown: { title: '', endTime: '', colorIndex: 0 },
-      slider: { question: '', emoji: '\ud83d\ude0d', colorIndex: 0 },
+      slider: { question: '', emoji: '😍', colorIndex: 0 },
       location: { location: '', colorIndex: 0 },
       notification: { title: '', colorIndex: 0 },
       polaroid: { caption: '' }
@@ -298,12 +298,12 @@ export default function InstagramStoryPage() {
       bgMode: textBgMode
     });
     setTempText('');
-    toast.success('Texte ajout\u00e9');
+    toast.success('Texte ajouté');
   };
 
   const publishStory = async (publish = true) => {
-    if (!mediaUrl) { toast.error('Veuillez ajouter une image ou vid\u00e9o'); return; }
-    if (!selectedAccount) { toast.error('Veuillez s\u00e9lectionner un compte'); return; }
+    if (!mediaUrl) { toast.error('Veuillez ajouter une image ou vidéo'); return; }
+    if (!selectedAccount) { toast.error('Veuillez sélectionner un compte'); return; }
 
     setLoading(true);
     try {
@@ -336,16 +336,16 @@ export default function InstagramStoryPage() {
         const pubRes = await fetch(`${API}/api/instagram-story/drafts/${draftId}/publish`, { method: 'POST', headers: getHeaders() });
         const pubData = await pubRes.json().catch(() => ({}));
         if (!pubRes.ok || pubData.success === false) {
-          const errMsg = pubData.error || pubData.detail || pubData.message || '\u00c9chec de la publication';
-          toast.error(`Publication \u00e9chou\u00e9e : ${errMsg}`);
+          const errMsg = pubData.error || pubData.detail || pubData.message || 'Échec de la publication';
+          toast.error(`Publication échouée : ${errMsg}`);
           setLoading(false);
           return;
         }
-        toast.success('Story publi\u00e9e !');
+        toast.success('Story publiée !');
       } else if (scheduleTime) {
-        toast.success('Story programm\u00e9e !');
+        toast.success('Story programmée !');
       } else {
-        toast.success('Brouillon enregistr\u00e9');
+        toast.success('Brouillon enregistré');
       }
 
       resetEditor();
@@ -421,7 +421,7 @@ export default function InstagramStoryPage() {
         onDelete={async (id) => {
           await fetch(`${API}/api/instagram-story/drafts/${id}`, { method: 'DELETE', headers: getHeaders() });
           await loadStories();
-          toast.success('Supprim\u00e9e');
+          toast.success('Supprimée');
         }}
         onGoBack={() => setView('accounts')}
         filter={storiesFilter}
@@ -442,17 +442,17 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Instagram Stories</h1>
-          <p className="text-gray-400">G\u00e9rez vos comptes et cr\u00e9ez vos stories</p>
+          <p className="text-gray-400">Gérez vos comptes et créez vos stories</p>
         </div>
 
         <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4 mb-8 flex items-center gap-3">
           <Check size={20} className="text-green-400" />
-          <span className="text-green-400">BlueStacks connect\u00e9 — publication automatique pr\u00eate</span>
+          <span className="text-green-400">BlueStacks connecté — publication automatique prête</span>
         </div>
 
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Comptes enregistr\u00e9s</h2>
+            <h2 className="text-2xl font-bold">Comptes enregistrés</h2>
             <div className="flex gap-4">
               <Button onClick={onViewAllStories} variant="outline" className="border-white/20 text-white hover:bg-white/10 gap-2">
                 <Eye size={18} /> Toutes les stories
@@ -465,7 +465,7 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
 
           {accounts.length === 0 ? (
             <div className="bg-white/5 border border-white/10 rounded-lg p-12 text-center">
-              <p className="text-gray-400">Aucun compte enregistr\u00e9. Ajoutez-en un pour commencer.</p>
+              <p className="text-gray-400">Aucun compte enregistré. Ajoutez-en un pour commencer.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -482,7 +482,7 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
                   </div>
                   <div className="flex gap-2">
                     <Button onClick={() => onCreateStory(account)} className="flex-1 bg-gradient-to-r from-pink-500 to-pink-700 hover:from-pink-600 hover:to-pink-800 text-white text-sm gap-1">
-                      <Plus size={16} /> Cr\u00e9er
+                      <Plus size={16} /> Créer
                     </Button>
                     <Button onClick={() => onViewStories(account)} variant="outline" className="flex-1 border-white/20 text-white hover:bg-white/10 text-sm gap-1">
                       <Eye size={16} /> Stories
@@ -509,7 +509,7 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
               onKeyDown={(e) => e.key === 'Enter' && onAddSubmit()}
               className="mb-2 bg-white/5 border-white/10 text-white placeholder-gray-500"
             />
-            <p className="text-xs text-gray-400 mb-4">Le compte doit \u00eatre d\u00e9j\u00e0 connect\u00e9 sur Instagram dans BlueStacks.</p>
+            <p className="text-xs text-gray-400 mb-4">Le compte doit être déjà connecté sur Instagram dans BlueStacks.</p>
             <div className="flex gap-2">
               <Button onClick={onAddSubmit} className="flex-1 bg-pink-600 hover:bg-pink-700 text-white" disabled={isLoading}>
                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Ajouter'}
@@ -700,7 +700,7 @@ function EditorView({
               ) : (
                 <div className="py-4">
                   <Upload size={28} className="mx-auto mb-2 text-gray-400" />
-                  <p className="text-sm font-medium">Image ou vid\u00e9o</p>
+                  <p className="text-sm font-medium">Image ou vidéo</p>
                   <p className="text-xs text-gray-500 mt-1">Cliquez ou glissez</p>
                 </div>
               )}
@@ -713,14 +713,14 @@ function EditorView({
               <div className="flex flex-col gap-1.5">
                 <StickerBtn icon={<BarChart2 size={16} />} label="Sondage" onClick={() => onAddSticker('poll')} />
                 <StickerBtn icon={<HelpCircle size={16} />} label="Question" onClick={() => onAddSticker('question')} />
-                <StickerBtn icon={<span className="text-sm">\ud83d\ude0d</span>} label="Curseur" onClick={() => onAddSticker('slider')} />
-                <StickerBtn icon={<Timer size={16} />} label="Compte \u00e0 rebours" onClick={() => onAddSticker('countdown')} />
+                <StickerBtn icon={<span className="text-sm">😍</span>} label="Curseur" onClick={() => onAddSticker('slider')} />
+                <StickerBtn icon={<Timer size={16} />} label="Compte à rebours" onClick={() => onAddSticker('countdown')} />
                 <StickerBtn icon={<MapPin size={16} />} label="Localisation" onClick={() => onAddSticker('location')} />
                 <StickerBtn icon={<LinkIcon size={16} />} label="Lien" onClick={() => onAddSticker('link')} />
                 <StickerBtn icon={<AtSign size={16} />} label="Mention" onClick={() => onAddSticker('mention')} />
                 <StickerBtn icon={<Hash size={16} />} label="Hashtag" onClick={() => onAddSticker('hashtag')} />
                 <StickerBtn icon={<Bell size={16} />} label="Notification" onClick={() => onAddSticker('notification')} />
-                <StickerBtn icon={<Camera size={16} />} label="Polaro\u00efd" onClick={() => onAddSticker('polaroid')} />
+                <StickerBtn icon={<Camera size={16} />} label="Polaroïd" onClick={() => onAddSticker('polaroid')} />
               </div>
             </div>
 
@@ -822,7 +822,7 @@ function EditorView({
                 <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
                   <div className="text-center text-gray-600">
                     <Upload size={48} className="mx-auto mb-2" />
-                    <p className="text-sm">Ajoutez un m\u00e9dia</p>
+                    <p className="text-sm">Ajoutez un média</p>
                   </div>
                 </div>
               )}
@@ -944,7 +944,7 @@ function EditorView({
                 {/* Polaroid Config */}
                 {selectedSticker.type === 'polaroid' && (
                   <div className="space-y-3">
-                    <FieldInput label="L\u00e9gende" value={selectedSticker.data.caption || ''} onChange={(v) => onUpdateStickerData({ ...selectedSticker.data, caption: v })} placeholder="Ajouter une l\u00e9gende..." />
+                    <FieldInput label="Légende" value={selectedSticker.data.caption || ''} onChange={(v) => onUpdateStickerData({ ...selectedSticker.data, caption: v })} placeholder="Ajouter une légende..." />
                   </div>
                 )}
 
@@ -968,12 +968,12 @@ function EditorView({
 
                 {/* Text info */}
                 {selectedSticker.type === 'text' && (
-                  <p className="text-gray-400 text-sm">Glissez le texte sur l'aper\u00e7u pour le d\u00e9placer.</p>
+                  <p className="text-gray-400 text-sm">Glissez le texte sur l'aperçu pour le déplacer.</p>
                 )}
               </div>
             ) : (
               <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center">
-                <p className="text-gray-400 text-sm">Cliquez sur un sticker dans l'aper\u00e7u pour le configurer, ou ajoutez-en un depuis le panneau de gauche.</p>
+                <p className="text-gray-400 text-sm">Cliquez sur un sticker dans l'aperçu pour le configurer, ou ajoutez-en un depuis le panneau de gauche.</p>
               </div>
             )}
           </div>
@@ -1105,7 +1105,7 @@ function SliderConfig({ data, onChange }) {
   return (
     <div className="space-y-3">
       <FieldInput label="Question" value={data.question || ''} onChange={(v) => onChange({ ...data, question: v })} />
-      <FieldInput label="Emoji" value={data.emoji || '\ud83d\ude0d'} onChange={(v) => onChange({ ...data, emoji: v })} />
+      <FieldInput label="Emoji" value={data.emoji || '😍'} onChange={(v) => onChange({ ...data, emoji: v })} />
       <div>
         <label className="block text-xs text-gray-400 mb-2">Couleur du curseur</label>
         <div className="flex gap-2 flex-wrap">
@@ -1184,7 +1184,7 @@ function NotificationConfig({ data, onChange }) {
   const colorIndex = data.colorIndex || 0;
   return (
     <div className="space-y-3">
-      <FieldInput label="Titre" value={data.title || ''} onChange={(v) => onChange({ ...data, title: v })} placeholder="Mon \u00e9v\u00e9nement" />
+      <FieldInput label="Titre" value={data.title || ''} onChange={(v) => onChange({ ...data, title: v })} placeholder="Mon événement" />
       <div>
         <label className="block text-xs text-gray-400 mb-2">Couleur du sticker</label>
         <div className="flex gap-2 flex-wrap">
@@ -1298,7 +1298,7 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
             </p>
             {/* Input field */}
             <div className="rounded-xl px-3 py-3" style={{ backgroundColor: scheme.inputBg }}>
-              <p className="text-white/50 text-xs text-center">\u00c9crivez quelque chose...</p>
+              <p className="text-white/50 text-xs text-center">Écrivez quelque chose...</p>
             </div>
           </div>
         </div>
@@ -1323,7 +1323,7 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
             <div className="relative h-2 bg-gray-200 rounded-full">
               <div className="absolute h-2 rounded-full" style={{ width: '55%', background: scheme.trackGradient }} />
               <div className="absolute text-xl" style={{ left: '55%', top: '-14px', transform: 'translateX(-50%)' }}>
-                {sticker.data.emoji || '\ud83d\ude0d'}
+                {sticker.data.emoji || '😍'}
               </div>
             </div>
           </div>
@@ -1344,7 +1344,7 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
           <div className="px-3 pt-5 pb-3 text-center">
             {/* Title */}
             <p className="text-white text-xs font-bold uppercase tracking-widest mb-2" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
-              {sticker.data.title || '\u00c9v\u00e9nement'}
+              {sticker.data.title || 'Événement'}
             </p>
             {/* Timer display */}
             <div className="flex justify-center items-end gap-1 text-white">
@@ -1414,7 +1414,7 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
         <div className="rounded-2xl overflow-hidden shadow-xl" style={{ background: scheme.gradient }}>
           <div className="px-4 pt-5 pb-3 text-center">
             <Bell size={20} className="mx-auto mb-2 text-white" />
-            <p className="text-white text-xs font-bold mb-1">{sticker.data.title || 'Mon \u00e9v\u00e9nement'}</p>
+            <p className="text-white text-xs font-bold mb-1">{sticker.data.title || 'Mon événement'}</p>
             <div className="bg-white/20 rounded-full px-4 py-2 mt-2">
               <span className="text-white text-xs font-semibold">Activer les notifications</span>
             </div>
@@ -1499,10 +1499,10 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
 
   const statusMap = {
     draft: { label: 'Brouillon', color: 'bg-gray-600' },
-    scheduled: { label: 'Programm\u00e9', color: 'bg-blue-600' },
+    scheduled: { label: 'Programmé', color: 'bg-blue-600' },
     publishing: { label: 'Publication...', color: 'bg-yellow-600' },
-    published: { label: 'Publi\u00e9', color: 'bg-green-600' },
-    failed: { label: '\u00c9chou\u00e9', color: 'bg-red-600' }
+    published: { label: 'Publié', color: 'bg-green-600' },
+    failed: { label: 'Échoué', color: 'bg-red-600' }
   };
 
   return (
@@ -1522,7 +1522,7 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
               En attente
             </button>
             <button onClick={() => onFilterChange('published')} className={`px-4 py-2 rounded-md text-sm transition ${filter === 'published' ? 'bg-pink-600 text-white' : 'text-gray-300 hover:text-white'}`}>
-              Publi\u00e9es
+              Publiées
             </button>
           </div>
 
@@ -1540,7 +1540,7 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
         {/* Grid */}
         {filtered.length === 0 ? (
           <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
-            <p className="text-gray-400">Aucune story trouv\u00e9e.</p>
+            <p className="text-gray-400">Aucune story trouvée.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
