@@ -30,12 +30,13 @@ const COLORS = ['#FFFFFF', '#000000', '#FF0000', '#FFD700', '#FF1493', '#800080'
 // Instagram sticker color schemes — the small circle at top cycles through these
 const STICKER_COLORS = {
   poll: [
-    { gradient: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCB045)', circle: '#D93B7A' },
-    { gradient: 'linear-gradient(135deg, #0095F6, #00D4FF)', circle: '#0095F6' },
-    { gradient: 'linear-gradient(135deg, #00C853, #64DD17)', circle: '#00C853' },
-    { gradient: 'linear-gradient(135deg, #FF6F00, #FF9100)', circle: '#FF6F00' },
-    { gradient: 'linear-gradient(135deg, #7C4DFF, #B388FF)', circle: '#7C4DFF' },
-    { gradient: 'linear-gradient(135deg, #FF1744, #FF5252)', circle: '#FF1744' },
+    { headerBg: '#262626', circle: '#262626' },
+    { headerBg: '#0095F6', circle: '#0095F6' },
+    { headerBg: '#00C853', circle: '#00C853' },
+    { headerBg: '#FF6F00', circle: '#FF6F00' },
+    { headerBg: '#833AB4', circle: '#833AB4' },
+    { headerBg: '#FF1744', circle: '#FF1744' },
+    { headerBg: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCB045)', circle: '#D93B7A' },
   ],
   question: [
     { gradient: 'linear-gradient(135deg, #D93B7A, #833AB4)', circle: '#D93B7A', inputBg: 'rgba(255,255,255,0.2)', textColor: '#FFFFFF' },
@@ -123,7 +124,7 @@ export default function InstagramStoryPage() {
       const res = await fetch(`${API}/api/instagram-story/drafts`, { headers: getHeaders() });
       if (!res.ok) throw new Error('Failed');
       const data = await res.json();
-      setStories(data.stories || []);
+      setStories(data.drafts || data.stories || []);
     } catch { toast.error('Erreur lors du chargement des stories'); }
   };
 
@@ -911,6 +912,25 @@ function EditorView({
                   </div>
                 </div>
 
+                {/* Scale control */}
+                {selectedSticker.type !== 'text' && (
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs text-gray-400">Taille</label>
+                      <span className="text-xs text-gray-500">{Math.round((selectedSticker.data?.scale || 1) * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.4"
+                      max="2.5"
+                      step="0.05"
+                      value={selectedSticker.data?.scale || 1}
+                      onChange={(e) => onUpdateStickerData({ ...selectedSticker.data, scale: parseFloat(e.target.value) })}
+                      className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-pink-500"
+                    />
+                  </div>
+                )}
+
                 {/* Poll Config */}
                 {selectedSticker.type === 'poll' && (
                   <PollConfig data={selectedSticker.data} onChange={onUpdateStickerData} />
@@ -1056,14 +1076,14 @@ function PollConfig({ data, onChange }) {
 
       {/* Color picker */}
       <div>
-        <label className="block text-xs text-gray-400 mb-2">Couleur du sticker</label>
+        <label className="block text-xs text-gray-400 mb-2">Couleur de la bannière</label>
         <div className="flex gap-2 flex-wrap">
           {STICKER_COLORS.poll.map((c, idx) => (
             <button
               key={idx}
               onClick={() => onChange({ ...data, colorIndex: idx })}
               className={`w-8 h-8 rounded-full transition ${colorIndex === idx ? 'ring-2 ring-white ring-offset-1 ring-offset-transparent scale-110' : 'opacity-70 hover:opacity-100'}`}
-              style={{ background: c.gradient }}
+              style={{ background: c.headerBg }}
             />
           ))}
         </div>
@@ -1252,26 +1272,28 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
     const colorIdx = sticker.data.colorIndex || 0;
     const scheme = STICKER_COLORS.poll[colorIdx] || STICKER_COLORS.poll[0];
 
+    const isGradient = scheme.headerBg.includes('gradient');
     content = (
       <div className="relative" style={{ width: '200px' }}>
         {/* Color cycle circle */}
         <ColorCircle colorIndex={colorIdx} colors={STICKER_COLORS.poll} onChange={(idx) => onUpdateData({ ...sticker.data, colorIndex: idx })} />
-        <div className="rounded-2xl overflow-hidden shadow-xl" style={{ background: scheme.gradient }}>
-          {/* Question area */}
-          <div className="px-4 pt-5 pb-2">
-            <div className="bg-white/20 rounded-xl px-3 py-2.5 text-center">
-              <p className="text-white text-xs font-semibold uppercase tracking-wide opacity-80">
-                {sticker.data.question || 'POSEZ UNE QUESTION...'}
-              </p>
-            </div>
+        <div className="rounded-2xl overflow-hidden shadow-xl">
+          {/* Header/Question area — colored part (default: black) */}
+          <div
+            className="px-4 pt-5 pb-3 text-center"
+            style={{ background: isGradient ? scheme.headerBg : scheme.headerBg }}
+          >
+            <p className="text-white text-sm font-bold" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+              {sticker.data.question || 'Posez une question...'}
+            </p>
           </div>
-          {/* Options */}
-          <div className="px-3 pb-3 flex flex-col gap-1.5">
+          {/* Options area — always white */}
+          <div className="bg-white px-3 py-3 flex flex-col gap-1.5">
             {options.map((opt, idx) => (
               <div
                 key={idx}
-                className="bg-white text-center text-sm font-bold py-2.5 rounded-xl cursor-default"
-                style={{ color: '#262626' }}
+                className="text-center text-sm font-bold py-2.5 rounded-xl cursor-default border border-gray-200"
+                style={{ color: '#262626', backgroundColor: '#F5F5F5' }}
               >
                 {typeof opt === 'string' ? (opt || (idx === 0 ? 'Oui' : 'Non')) : opt.text || `Option ${idx + 1}`}
               </div>
@@ -1476,11 +1498,18 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
       style={{
         left: `${sticker.position.x * 100}%`,
         top: `${sticker.position.y * 100}%`,
-        transform: 'translate(-50%, -50%)',
+        transform: `translate(-50%, -50%) scale(${sticker.data.scale || 1})`,
         zIndex: isSelected ? 50 : 10
       }}
       onClick={(e) => { e.stopPropagation(); onSelect(); }}
       onMouseDown={onDragStart}
+      onWheel={(e) => {
+        e.stopPropagation();
+        const currentScale = sticker.data.scale || 1;
+        const delta = e.deltaY > 0 ? -0.05 : 0.05;
+        const newScale = Math.max(0.4, Math.min(2.5, currentScale + delta));
+        onUpdateData({ ...sticker.data, scale: newScale });
+      }}
     >
       {content}
     </div>
