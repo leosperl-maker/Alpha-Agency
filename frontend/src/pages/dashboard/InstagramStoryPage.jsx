@@ -787,12 +787,12 @@ function EditorView({
             </div>
           </div>
 
-          {/* Center: Phone Preview */}
+          {/* Center: Phone Preview — 9:16 Instagram Story ratio */}
           <div className="flex-1 flex justify-center items-start overflow-hidden">
             <div
               ref={previewRef}
-              className="relative bg-black rounded-[2.5rem] border-[6px] border-gray-700 shadow-2xl overflow-hidden flex-shrink-0"
-              style={{ width: '340px', height: '604px' }}
+              className="relative bg-black rounded-[2rem] border-[5px] border-gray-700 shadow-2xl overflow-hidden flex-shrink-0"
+              style={{ width: 'min(400px, calc((100vh - 120px) * 9 / 16))', height: 'min(711px, calc(100vh - 120px))', aspectRatio: '9/16' }}
             >
               {/* Status bar */}
               <div className="h-8 bg-black flex items-center justify-between px-6 text-white text-xs relative z-20">
@@ -829,8 +829,8 @@ function EditorView({
                 </div>
               )}
 
-              {/* Sticker Layer */}
-              <div className="absolute inset-0 z-10" style={{ top: '48px', bottom: '48px' }}>
+              {/* Sticker Layer — full screen, same as Instagram */}
+              <div className="absolute inset-0 z-10">
                 {stickers.map(sticker => (
                   <StickerRenderer
                     key={sticker.id}
