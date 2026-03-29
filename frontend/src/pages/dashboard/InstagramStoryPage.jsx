@@ -787,106 +787,179 @@ function EditorView({
             </div>
           </div>
 
-          {/* Center: Phone Preview — 9:16 Instagram Story ratio */}
-          <div className="flex-1 flex justify-center items-start overflow-hidden">
+          {/* Center: Realistic iPhone Preview */}
+          <div className="flex-1 flex justify-center items-start overflow-hidden py-2">
+            {/* iPhone outer shell */}
             <div
-              ref={previewRef}
-              className="relative bg-black rounded-[2rem] border-[5px] border-gray-700 shadow-2xl overflow-hidden flex-shrink-0"
-              style={{ width: 'min(400px, calc((100vh - 120px) * 9 / 16))', height: 'min(711px, calc(100vh - 120px))', aspectRatio: '9/16' }}
+              className="relative flex-shrink-0"
+              style={{
+                width: 'min(340px, calc((100vh - 100px) * 9 / 19.5 + 24px))',
+                height: 'min(694px, calc(100vh - 100px))',
+              }}
             >
-              {/* Status bar */}
-              <div className="h-8 bg-black flex items-center justify-between px-6 text-white text-xs relative z-20">
-                <span>9:41</span>
-                <div className="flex items-center gap-1">
-                  <div className="w-4 h-2 border border-white rounded-sm relative"><div className="absolute inset-0.5 bg-white rounded-sm" style={{ width: '70%' }} /></div>
-                </div>
-              </div>
+              {/* iPhone frame — titanium look */}
+              <div
+                className="absolute inset-0 rounded-[3rem]"
+                style={{
+                  background: 'linear-gradient(145deg, #2a2a2e 0%, #1a1a1e 30%, #0f0f12 50%, #1a1a1e 70%, #2a2a2e 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08), 0 25px 60px rgba(0,0,0,0.6), 0 8px 20px rgba(0,0,0,0.4), -4px 0 15px rgba(0,0,0,0.3), 4px 0 15px rgba(0,0,0,0.3)',
+                }}
+              />
 
-              {/* Instagram Header */}
-              <div className="h-10 bg-gradient-to-b from-black/40 to-transparent flex items-center px-4 gap-2 relative z-20">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center text-xs font-bold">
-                  {selectedAccount?.username?.charAt(0)?.toUpperCase() || '?'}
-                </div>
-                <span className="text-white text-sm font-semibold flex-1">{selectedAccount?.username || 'compte'}</span>
-                <span className="text-gray-300 text-xs">Il y a 2h</span>
-              </div>
+              {/* Side buttons — left: silent switch + volume */}
+              <div className="absolute -left-[2.5px] top-[15%] w-[3px] h-[8px] rounded-l-sm" style={{ background: 'linear-gradient(180deg, #3a3a3e, #1a1a1e)' }} />
+              <div className="absolute -left-[2.5px] top-[20%] w-[3px] h-[28px] rounded-l-sm" style={{ background: 'linear-gradient(180deg, #3a3a3e, #1a1a1e)' }} />
+              <div className="absolute -left-[2.5px] top-[27%] w-[3px] h-[28px] rounded-l-sm" style={{ background: 'linear-gradient(180deg, #3a3a3e, #1a1a1e)' }} />
+              {/* Side button — right: power */}
+              <div className="absolute -right-[2.5px] top-[23%] w-[3px] h-[36px] rounded-r-sm" style={{ background: 'linear-gradient(180deg, #3a3a3e, #1a1a1e)' }} />
 
-              {/* Media Background */}
-              {mediaUrl ? (
-                <div className="absolute inset-0 z-0">
-                  {mediaType === 'video' ? (
-                    <video src={mediaUrl} className="w-full h-full object-cover" muted />
-                  ) : (
-                    <img src={mediaUrl} alt="" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
-                  )}
-                </div>
-              ) : (
-                <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-                  <div className="text-center text-gray-600">
-                    <Upload size={48} className="mx-auto mb-2" />
-                    <p className="text-sm">Ajoutez un média</p>
+              {/* Screen area — inside the frame */}
+              <div
+                ref={previewRef}
+                className="absolute overflow-hidden"
+                style={{
+                  top: '12px',
+                  left: '12px',
+                  right: '12px',
+                  bottom: '12px',
+                  borderRadius: 'calc(3rem - 12px)',
+                }}
+              >
+                {/* Media Background */}
+                {mediaUrl ? (
+                  <div className="absolute inset-0 z-0">
+                    {mediaType === 'video' ? (
+                      <video src={mediaUrl} className="w-full h-full object-cover" muted />
+                    ) : (
+                      <img src={mediaUrl} alt="" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                    )}
                   </div>
-                </div>
-              )}
-
-              {/* Sticker Layer — full screen, same as Instagram */}
-              <div className="absolute inset-0 z-10">
-                {stickers.map(sticker => (
-                  <StickerRenderer
-                    key={sticker.id}
-                    sticker={sticker}
-                    isSelected={selectedSticker?.id === sticker.id}
-                    onSelect={() => onSelectSticker(sticker)}
-                    onDragStart={(e) => handleDragStart(e, sticker.id)}
-                    onUpdateData={(newData) => {
-                      const updated = { ...sticker, data: newData };
-                      onSelectSticker(updated);
-                      onUpdateStickerData(newData);
-                    }}
-                  />
-                ))}
-
-                {/* Text Overlay */}
-                {textOverlay && (
-                  <div
-                    className={`absolute cursor-move select-none ${selectedSticker?.id === '__text__' ? 'ring-2 ring-pink-400 ring-offset-2 ring-offset-transparent' : ''}`}
-                    style={{
-                      left: `${textOverlay.position.x * 100}%`,
-                      top: `${textOverlay.position.y * 100}%`,
-                      transform: 'translate(-50%, -50%)',
-                      fontFamily: FONTS.find(f => f.name === textOverlay.font)?.family || 'serif',
-                      fontWeight: FONTS.find(f => f.name === textOverlay.font)?.weight || 'normal',
-                      color: textOverlay.color,
-                      backgroundColor: textOverlay.bgColor && textOverlay.bgColor !== 'transparent' ? textOverlay.bgColor : undefined,
-                      padding: textOverlay.bgColor && textOverlay.bgColor !== 'transparent' ? '6px 14px' : undefined,
-                      borderRadius: textOverlay.bgColor && textOverlay.bgColor !== 'transparent' ? '8px' : undefined,
-                      textShadow: !textOverlay.bgColor || textOverlay.bgColor === 'transparent' ? '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5)' : 'none',
-                      fontSize: '18px',
-                      maxWidth: '80%',
-                      textAlign: 'center',
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-word',
-                      lineHeight: 1.3
-                    }}
-                    onClick={() => onSelectSticker({ id: '__text__', type: 'text' })}
-                    onMouseDown={handleTextDragStart}
-                  >
-                    {textOverlay.text}
+                ) : (
+                  <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+                    <div className="text-center text-gray-600">
+                      <Upload size={40} className="mx-auto mb-2" />
+                      <p className="text-xs">Ajoutez un média</p>
+                    </div>
                   </div>
                 )}
-              </div>
 
-              {/* Instagram Footer */}
-              <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-black/70 to-transparent flex items-center px-4 z-20">
-                <div className="flex-1 bg-white/20 rounded-full px-4 py-1.5 flex items-center">
-                  <span className="text-white/60 text-xs">Envoyer un message</span>
+                {/* Dynamic Island */}
+                <div className="absolute top-[10px] left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+                  <div
+                    className="rounded-full bg-black"
+                    style={{
+                      width: '120px',
+                      height: '34px',
+                      boxShadow: '0 0 0 1px rgba(255,255,255,0.04)',
+                    }}
+                  />
                 </div>
-                <Send size={20} className="text-white ml-3" />
-              </div>
 
-              {/* Story progress bar */}
-              <div className="absolute top-7 left-3 right-3 h-0.5 bg-white/30 rounded-full z-20 overflow-hidden">
-                <div className="h-full bg-white rounded-full" style={{ width: '40%' }} />
+                {/* Status bar */}
+                <div className="relative z-20 flex items-center justify-between px-8 text-white" style={{ height: '52px', paddingTop: '14px' }}>
+                  <span className="text-xs font-semibold" style={{ fontSize: '13px' }}>9:41</span>
+                  <div className="flex items-center gap-[5px]">
+                    {/* Signal bars */}
+                    <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
+                      <rect x="0" y="9" width="3" height="3" rx="0.5" fill="white"/>
+                      <rect x="4.5" y="6" width="3" height="6" rx="0.5" fill="white"/>
+                      <rect x="9" y="3" width="3" height="9" rx="0.5" fill="white"/>
+                      <rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="white"/>
+                    </svg>
+                    {/* WiFi */}
+                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+                      <path d="M8 11.5a1.2 1.2 0 100-2.4 1.2 1.2 0 000 2.4z" fill="white"/>
+                      <path d="M4.7 8.1a4.7 4.7 0 016.6 0" stroke="white" strokeWidth="1.3" strokeLinecap="round"/>
+                      <path d="M2.3 5.5a8 8 0 0111.4 0" stroke="white" strokeWidth="1.3" strokeLinecap="round"/>
+                      <path d="M0 3a11.2 11.2 0 0116 0" stroke="white" strokeWidth="1.3" strokeLinecap="round"/>
+                    </svg>
+                    {/* Battery */}
+                    <div className="flex items-center gap-[2px]">
+                      <div className="relative" style={{ width: '25px', height: '12px', border: '1.2px solid rgba(255,255,255,0.9)', borderRadius: '3px' }}>
+                        <div className="absolute top-[2px] left-[2px] bottom-[2px] rounded-[1.5px] bg-white" style={{ width: '65%' }} />
+                      </div>
+                      <div className="rounded-r-sm bg-white/90" style={{ width: '1.5px', height: '5px' }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Story progress bar */}
+                <div className="absolute z-20" style={{ top: '54px', left: '10px', right: '10px', height: '2px' }}>
+                  <div className="w-full h-full bg-white/30 rounded-full overflow-hidden">
+                    <div className="h-full bg-white rounded-full" style={{ width: '40%' }} />
+                  </div>
+                </div>
+
+                {/* Instagram Header */}
+                <div className="relative z-20 flex items-center px-3 gap-2" style={{ height: '40px', marginTop: '4px' }}>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center text-[11px] font-bold text-white border-2 border-black/30">
+                    {selectedAccount?.username?.charAt(0)?.toUpperCase() || '?'}
+                  </div>
+                  <span className="text-white text-[13px] font-semibold flex-1 drop-shadow-lg">{selectedAccount?.username || 'compte'}</span>
+                  <span className="text-gray-300 text-[11px] drop-shadow">Il y a 2h</span>
+                  <X size={18} className="text-white/80 ml-1 drop-shadow" />
+                </div>
+
+                {/* Sticker Layer — full screen, same as Instagram */}
+                <div className="absolute inset-0 z-10">
+                  {stickers.map(sticker => (
+                    <StickerRenderer
+                      key={sticker.id}
+                      sticker={sticker}
+                      isSelected={selectedSticker?.id === sticker.id}
+                      onSelect={() => onSelectSticker(sticker)}
+                      onDragStart={(e) => handleDragStart(e, sticker.id)}
+                      onUpdateData={(newData) => {
+                        const updated = { ...sticker, data: newData };
+                        onSelectSticker(updated);
+                        onUpdateStickerData(newData);
+                      }}
+                    />
+                  ))}
+
+                  {/* Text Overlay */}
+                  {textOverlay && (
+                    <div
+                      className={`absolute cursor-move select-none ${selectedSticker?.id === '__text__' ? 'ring-2 ring-pink-400 ring-offset-2 ring-offset-transparent' : ''}`}
+                      style={{
+                        left: `${textOverlay.position.x * 100}%`,
+                        top: `${textOverlay.position.y * 100}%`,
+                        transform: 'translate(-50%, -50%)',
+                        fontFamily: FONTS.find(f => f.name === textOverlay.font)?.family || 'serif',
+                        fontWeight: FONTS.find(f => f.name === textOverlay.font)?.weight || 'normal',
+                        color: textOverlay.color,
+                        backgroundColor: textOverlay.bgColor && textOverlay.bgColor !== 'transparent' ? textOverlay.bgColor : undefined,
+                        padding: textOverlay.bgColor && textOverlay.bgColor !== 'transparent' ? '6px 14px' : undefined,
+                        borderRadius: textOverlay.bgColor && textOverlay.bgColor !== 'transparent' ? '8px' : undefined,
+                        textShadow: !textOverlay.bgColor || textOverlay.bgColor === 'transparent' ? '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5)' : 'none',
+                        fontSize: '16px',
+                        maxWidth: '80%',
+                        textAlign: 'center',
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-word',
+                        lineHeight: 1.3
+                      }}
+                      onClick={() => onSelectSticker({ id: '__text__', type: 'text' })}
+                      onMouseDown={handleTextDragStart}
+                    >
+                      {textOverlay.text}
+                    </div>
+                  )}
+                </div>
+
+                {/* Instagram Footer */}
+                <div className="absolute bottom-0 left-0 right-0 z-20 px-3 pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-white/20 rounded-full px-4 py-2 flex items-center backdrop-blur-sm" style={{ border: '1px solid rgba(255,255,255,0.15)' }}>
+                      <span className="text-white/60 text-[11px]">Envoyer un message</span>
+                    </div>
+                    <Send size={18} className="text-white drop-shadow" />
+                  </div>
+                  {/* Home indicator bar */}
+                  <div className="flex justify-center mt-2">
+                    <div className="w-[100px] h-[4px] bg-white/40 rounded-full" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
