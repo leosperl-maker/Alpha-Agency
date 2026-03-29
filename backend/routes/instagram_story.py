@@ -151,6 +151,7 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
             "color": draft.get("text_color", "#FFFFFF"),
             "x": draft.get("text_position", {}).get("x", 0.5),
             "y": draft.get("text_position", {}).get("y", 0.3),
+            "bgMode": draft.get("text_bg_mode", "none"),
         }
     
     try:

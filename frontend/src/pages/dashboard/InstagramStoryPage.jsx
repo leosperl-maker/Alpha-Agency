@@ -318,6 +318,7 @@ export default function InstagramStoryPage() {
         text_position: textOverlay?.position || { x: 0.5, y: 0.3 },
         text_color: textOverlay?.color || '#FFFFFF',
         text_font: textOverlay?.font || 'Classique',
+        text_bg_mode: textOverlay?.bgMode || 'none',
         elements: stickers.map(s => ({ type: s.type, position: s.position, data: s.data }))
       };
 
