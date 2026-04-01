@@ -101,6 +101,7 @@ export default function InstagramStoryPage() {
   const [selectedFont, setSelectedFont] = useState('Classique');
   const [selectedColor, setSelectedColor] = useState('#FFFFFF');
   const [textBgMode, setTextBgMode] = useState('none'); // none | dark | light | colored
+  const [textSize, setTextSize] = useState(100); // 10-200, 100 = normal
 
   useEffect(() => {
     if (view === 'accounts' || view === 'stories') loadAccounts();
@@ -189,6 +190,7 @@ export default function InstagramStoryPage() {
     setSelectedFont('Classique');
     setSelectedColor('#FFFFFF');
     setTextBgMode('none');
+    setTextSize(100);
   };
 
   const handleMediaUpload = async (file) => {
@@ -296,7 +298,8 @@ export default function InstagramStoryPage() {
       color: styles.textColor,
       font: selectedFont,
       bgColor: styles.bg,
-      bgMode: textBgMode
+      bgMode: textBgMode,
+      size: textSize
     });
     setTempText('');
     toast.success('Texte ajouté');
@@ -319,6 +322,7 @@ export default function InstagramStoryPage() {
         text_color: textOverlay?.color || '#FFFFFF',
         text_font: textOverlay?.font || 'Classique',
         text_bg_mode: textOverlay?.bgMode || 'none',
+        text_size: textOverlay?.size || 100,
         elements: stickers.map(s => ({ type: s.type, position: s.position, data: s.data }))
       };
 
@@ -403,6 +407,8 @@ export default function InstagramStoryPage() {
         textBgMode={textBgMode}
         onCycleTextBg={cycleTextBgMode}
         getTextStyles={getTextStyles}
+        textSize={textSize}
+        onTextSizeChange={setTextSize}
         onAddText={addTextOverlay}
         scheduleTime={scheduleTime}
         onScheduleTimeChange={setScheduleTime}
@@ -536,7 +542,7 @@ function EditorView({
   stickers, selectedSticker, onSelectSticker, onAddSticker, onUpdateStickerData, onUpdateStickerPosition, onDeleteSticker, onMoveSticker,
   textOverlay, onTextOverlayChange,
   tempText, onTempTextChange, selectedFont, onFontChange, selectedColor, onColorChange,
-  textBgMode, onCycleTextBg, getTextStyles, onAddText,
+  textBgMode, onCycleTextBg, getTextStyles, textSize, onTextSizeChange, onAddText,
   scheduleTime, onScheduleTimeChange,
   onPublish, onSaveDraft, onGoBack, isLoading
 }) {
@@ -756,6 +762,23 @@ function EditorView({
                   </span>
                 </div>
 
+                {/* Text Size Slider */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs text-slate-500">Taille</label>
+                    <span className="text-xs text-slate-400">{textSize}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="30"
+                    max="200"
+                    step="5"
+                    value={textSize}
+                    onChange={(e) => onTextSizeChange(Number(e.target.value))}
+                    className="w-full h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-pink-500"
+                  />
+                </div>
+
                 <div className="flex flex-col gap-1">
                   {FONTS.map(font => (
                     <button
@@ -932,7 +955,7 @@ function EditorView({
                         padding: textOverlay.bgColor && textOverlay.bgColor !== 'transparent' ? '6px 14px' : undefined,
                         borderRadius: textOverlay.bgColor && textOverlay.bgColor !== 'transparent' ? '8px' : undefined,
                         textShadow: !textOverlay.bgColor || textOverlay.bgColor === 'transparent' ? '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5)' : 'none',
-                        fontSize: '16px',
+                        fontSize: `${Math.max(10, Math.round(16 * (textOverlay.size || 100) / 100))}px`,
                         maxWidth: '80%',
                         textAlign: 'center',
                         whiteSpace: 'pre-wrap',

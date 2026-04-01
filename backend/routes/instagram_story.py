@@ -83,12 +83,11 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
             sticker_type = "location"
             sticker_params = {"location": sdata.get("location", "")}
         elif stype == "notification":
-            # Notification sticker doesn't exist natively in Instagram automation
-            # We skip it for now — it's a visual-only sticker in the CRM
-            sticker_type = None
+            sticker_type = "notification"
+            sticker_params = {"title": sdata.get("title", "Rappel")}
         elif stype == "polaroid":
-            # Polaroid is visual-only in CRM, no Instagram equivalent
-            sticker_type = None
+            sticker_type = "polaroid"
+            sticker_params = {"caption": sdata.get("caption", "")}
     elif isinstance(elements, dict):
         # Old format — backwards compatibility
         if elements.get("poll"):
@@ -152,6 +151,7 @@ async def publish_via_bridge(draft: dict, account: dict) -> dict:
             "x": draft.get("text_position", {}).get("x", 0.5),
             "y": draft.get("text_position", {}).get("y", 0.3),
             "bgMode": draft.get("text_bg_mode", "none"),
+            "size": draft.get("text_size", 100),
         }
     
     try:
@@ -269,6 +269,8 @@ class CreateStoryRequest(BaseModel):
     text_position: Dict[str, float] = {"x": 0.5, "y": 0.3}
     text_color: Optional[str] = "#FFFFFF"
     text_font: Optional[str] = "Classique"
+    text_bg_mode: Optional[str] = "none"
+    text_size: Optional[int] = 100
     # New format: array of sticker elements [{type, position, data}, ...]
     elements: Optional[List[Dict]] = None
     # Legacy individual sticker fields (backward compat)
@@ -358,6 +360,8 @@ async def create_story_draft(
         "text_position": request.text_position,
         "text_color": request.text_color,
         "text_font": request.text_font,
+        "text_bg_mode": request.text_bg_mode,
+        "text_size": request.text_size,
         "status": "scheduled" if request.schedule_time else "draft",
         "schedule_time": request.schedule_time,
         "created_at": datetime.now(timezone.utc).isoformat(),
