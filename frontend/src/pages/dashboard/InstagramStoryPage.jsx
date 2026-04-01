@@ -440,7 +440,7 @@ export default function InstagramStoryPage() {
    ============================================ */
 function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount, onAddAccount, onViewAllStories, showAddModal, onAddModalChange, onUsernameChange, onAddSubmit, username, isLoading }) {
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white p-8">
+    <div className="min-h-screen bg-slate-50 text-white p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Instagram Stories</h1>
@@ -612,7 +612,7 @@ function EditorView({
   const bgModeLabels = { none: 'Aa', dark: 'Aa', light: 'Aa', colored: 'Aa' };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white p-4">
+    <div className="min-h-screen bg-slate-50 text-white p-4">
       <div className="max-w-7xl mx-auto">
         {/* Top Bar */}
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
@@ -1609,7 +1609,7 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white p-8">
+    <div className="min-h-screen bg-slate-50 text-white p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <button onClick={onGoBack} className="flex items-center gap-2 text-gray-400 hover:text-slate-900 mb-4 transition">

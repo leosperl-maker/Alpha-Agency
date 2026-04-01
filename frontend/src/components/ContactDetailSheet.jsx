@@ -260,7 +260,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent 
         side="right" 
-        className="w-full sm:max-w-[500px] md:max-w-[600px] p-0 bg-[#0a0a14] border-l border-slate-200 overflow-hidden"
+        className="w-full sm:max-w-[500px] md:max-w-[600px] p-0 bg-white border-l border-slate-200 overflow-hidden"
       >
         {loading ? (
           <div className="flex items-center justify-center h-full">

@@ -795,7 +795,7 @@ const BlogAdminPage = () => {
             
             {/* Tabs for moderation view */}
             {!selectedPostForComments && (
-              <div className="flex gap-2 p-4 border-b border-slate-200 bg-black/20">
+              <div className="flex gap-2 p-4 border-b border-slate-200 bg-slate-100">
                 {[
                   { key: "pending", label: "En attente", color: "amber" },
                   { key: "approved", label: "Approuvés", color: "green" },
@@ -961,7 +961,7 @@ const BlogAdminPage = () => {
             </div>
             
             {/* Modal Footer */}
-            <div className="p-4 border-t border-slate-200 bg-black/20">
+            <div className="p-4 border-t border-slate-200 bg-slate-100">
               <p className="text-slate-400 text-sm text-center">
                 {(selectedPostForComments ? selectedPostComments : allComments).length} commentaire{(selectedPostForComments ? selectedPostComments : allComments).length > 1 ? 's' : ''}
               </p>

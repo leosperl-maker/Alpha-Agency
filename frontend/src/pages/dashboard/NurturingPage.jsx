@@ -232,14 +232,14 @@ const NurturingPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] p-4 md:p-6">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
@@ -427,7 +427,7 @@ const NurturingPage = () => {
                 </div>
                 <p className="text-slate-500 text-sm mb-2">Sujet: {template.subject}</p>
                 <div 
-                  className="text-slate-400 text-xs line-clamp-3 p-2 bg-black/20 rounded"
+                  className="text-slate-400 text-xs line-clamp-3 p-2 bg-slate-100 rounded"
                   dangerouslySetInnerHTML={{ __html: template.body_html }}
                 />
               </div>

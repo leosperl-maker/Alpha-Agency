@@ -2030,7 +2030,7 @@ const MultilinkPage = () => {
                             
                             {/* DNS Instructions */}
                             {domainStatus.instructions && !domainStatus.dns_configured && (
-                              <div className="mt-3 p-3 bg-black/20 rounded-lg">
+                              <div className="mt-3 p-3 bg-slate-100 rounded-lg">
                                 <p className="text-slate-700 text-sm font-medium mb-2">Instructions de configuration:</p>
                                 <ol className="text-slate-500 text-sm space-y-2">
                                   <li>1. Accédez à votre panneau de gestion DNS</li>
@@ -2996,7 +2996,7 @@ const MultilinkPage = () => {
                   <div className="bg-white rounded-xl p-4 border border-slate-200">
                     {blockForm.thumbnail ? (
                       <div className="relative">
-                        <img src={blockForm.thumbnail} alt="" className="w-full h-48 rounded-xl object-contain bg-black/20" />
+                        <img src={blockForm.thumbnail} alt="" className="w-full h-48 rounded-xl object-contain bg-slate-100" />
                         <button
                           type="button"
                           onClick={() => setBlockForm({ ...blockForm, thumbnail: '' })}
@@ -3177,9 +3177,9 @@ const MultilinkPage = () => {
                   {blockForm.media_url ? (
                     <div className="relative w-full">
                       {blockForm.media_type === 'image' || blockForm.block_type === 'image' ? (
-                        <img src={blockForm.media_url} alt="" className="w-full h-48 rounded-lg object-contain bg-black/20" />
+                        <img src={blockForm.media_url} alt="" className="w-full h-48 rounded-lg object-contain bg-slate-100" />
                       ) : (
-                        <video src={blockForm.media_url} className="w-full h-48 rounded-lg object-contain bg-black/20" controls />
+                        <video src={blockForm.media_url} className="w-full h-48 rounded-lg object-contain bg-slate-100" controls />
                       )}
                       <button
                         onClick={() => setBlockForm({ ...blockForm, media_url: '', media_type: '' })}
@@ -3348,7 +3348,7 @@ const MultilinkPage = () => {
                               {item.media_type === 'video' || item.type === 'video' ? (
                                 <video 
                                   src={item.media_url} 
-                                  className="w-full h-32 rounded-lg object-cover bg-black/20" 
+                                  className="w-full h-32 rounded-lg object-cover bg-slate-100" 
                                   controls 
                                 />
                               ) : (

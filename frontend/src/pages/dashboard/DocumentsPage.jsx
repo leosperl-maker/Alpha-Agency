@@ -627,7 +627,7 @@ const DocumentsPage = () => {
         </header>
 
         {/* Toolbar for actions */}
-        <div className="flex items-center gap-3 px-4 py-2 border-b border-slate-200 bg-black/20">
+        <div className="flex items-center gap-3 px-4 py-2 border-b border-slate-200 bg-slate-100">
           <Button
             onClick={() => setNewFolderModal(true)}
             variant="ghost"
@@ -991,7 +991,7 @@ const DocumentsPage = () => {
 
           {/* Details panel */}
           {detailsPanel && (
-            <aside className="w-80 border-l border-slate-200 bg-black/20 flex-shrink-0 overflow-auto">
+            <aside className="w-80 border-l border-slate-200 bg-slate-100 flex-shrink-0 overflow-auto">
               {selectedForDetails ? (
                 <div className="p-4">
                   {/* Preview thumbnail */}

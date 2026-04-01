@@ -1822,7 +1822,7 @@ const InvoicesPage = () => {
 
       {/* Settings Dialog - Full Page Style like Qonto */}
       <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
-        <DialogContent className="bg-[#0f0f1a] border-slate-200 max-w-6xl h-[90vh] p-0 flex flex-col">
+        <DialogContent className="bg-white border-slate-200 max-w-6xl h-[90vh] p-0 flex flex-col">
           <div className="flex flex-1 min-h-0">
             {/* Left Panel - Settings with SCROLL */}
             <div className="w-full lg:w-1/2 flex flex-col min-h-0">
@@ -2057,7 +2057,7 @@ BANQUE : ..."
               </div>
               
               {/* Action Buttons - Fixed at bottom */}
-              <div className="flex gap-3 p-6 border-t border-slate-200 flex-shrink-0 bg-[#0f0f1a]">
+              <div className="flex gap-3 p-6 border-t border-slate-200 flex-shrink-0 bg-white">
                 <Button variant="outline" onClick={() => setSettingsDialogOpen(false)} className="flex-1 border-slate-200 text-slate-900 hover:bg-slate-50">
                   Annuler
                 </Button>

@@ -444,7 +444,7 @@ const CodeBlock = ({ block }) => (
     <div className="bg-[#1A1A1A] px-4 py-2 text-xs text-[#999999] uppercase">
       {block.language || 'code'}
     </div>
-    <pre className="bg-[#0D0D0D] p-4 overflow-x-auto">
+    <pre className="bg-slate-800 p-4 overflow-x-auto">
       <code className="text-sm text-green-400 font-mono">{block.code}</code>
     </pre>
   </div>

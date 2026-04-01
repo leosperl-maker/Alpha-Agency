@@ -410,14 +410,14 @@ const InstagramStoryEditor = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="border-b border-white/10 p-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -588,7 +588,7 @@ const InstagramStoryEditor = () => {
         </div>
 
         {/* Center - Story Preview Canvas */}
-        <div className="flex-1 flex items-center justify-center p-8 bg-[#0d0d12]">
+        <div className="flex-1 flex items-center justify-center p-8 bg-slate-100">
           <div className="relative">
             {/* Phone Frame */}
             <div className="relative w-[300px] h-[600px] bg-white rounded-[40px] p-2 shadow-2xl">

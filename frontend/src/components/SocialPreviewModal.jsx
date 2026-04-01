@@ -314,7 +314,7 @@ const YouTubePreview = ({ post, mediaUrl }) => {
   const description = caption.length > 150 ? caption.substring(0, 150) + '...' : caption;
   
   return (
-    <div className="bg-[#0f0f0f] rounded-xl overflow-hidden max-w-[400px] mx-auto">
+    <div className="bg-white rounded-xl overflow-hidden max-w-[400px] mx-auto">
       {/* Video thumbnail */}
       <div className="aspect-video bg-gray-800 relative">
         {mediaUrl ? (
