@@ -6,7 +6,8 @@ export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     // Get from localStorage or default to 'dark'
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('alpha-theme') || 'light';
+      // Always use light theme
+      return 'light';
     }
     return 'light';
   });

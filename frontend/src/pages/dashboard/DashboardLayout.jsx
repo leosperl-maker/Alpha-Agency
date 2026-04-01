@@ -7,7 +7,7 @@ import {
   User, ChevronDown, AlertCircle, Clock, FileWarning, UserPlus, Sun, Moon,
   ListTodo, Calendar, CalendarDays, Link2, Command,
   FileSearch, Contact, Briefcase, DollarSign, Keyboard, HelpCircle,
-  Wifi, WifiOff, Instagram, Zap
+  Wifi, WifiOff, Instagram
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -422,7 +422,6 @@ const DashboardLayout = () => {
       { path: "/admin/editorial", icon: CalendarDays, label: "Calendrier Éditorial" },
       { path: "/admin/multilink", icon: Link2, label: "Multilink" },
       { path: "/admin/instagram-stories", icon: Instagram, label: "Stories" },
-      { path: "/admin/nurturing", icon: Zap, label: "Nurturing" },
     ]},
     { label: "Administration", items: [
       { path: "/admin/realisations", icon: Image, label: "Réalisations" },
@@ -455,7 +454,7 @@ const DashboardLayout = () => {
         <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 flex-shrink-0">
           {sidebarOpen ? (
             <img
-              src={process.env.PUBLIC_URL + "/logo-header-white.png"}
+              src={process.env.PUBLIC_URL + "/logo-header-black.png"}
               alt="Alpha Agency"
               className="h-9 w-auto"
             />
@@ -539,7 +538,7 @@ const DashboardLayout = () => {
       `}>
         <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 flex-shrink-0">
           <img
-            src={process.env.PUBLIC_URL + "/logo-header-white.png"}
+            src={process.env.PUBLIC_URL + "/logo-header-black.png"}
             alt="Alpha Agency"
             className="h-8 w-auto"
           />

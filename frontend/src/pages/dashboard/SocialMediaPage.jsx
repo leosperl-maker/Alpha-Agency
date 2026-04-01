@@ -47,7 +47,7 @@ const StatusBadge = ({ status }) => {
     scheduled: { label: "Programmé", color: "bg-blue-100 text-blue-700" },
     published: { label: "Publié", color: "bg-green-100 text-green-700" },
     failed: { label: "Échec", color: "bg-red-100 text-red-700" },
-    draft: { label: "Brouillon", color: "bg-white/10 text-white/80" },
+    draft: { label: "Brouillon", color: "bg-white/10 text-slate-900/80" },
   };
   const { label, color } = config[status] || config.draft;
   return <Badge className={`${color} border-none text-xs`}>{label}</Badge>;
@@ -56,7 +56,7 @@ const StatusBadge = ({ status }) => {
 // Priority badge component
 const PriorityBadge = ({ priority }) => {
   const config = {
-    low: { label: "Basse", color: "bg-white/10 text-white/60" },
+    low: { label: "Basse", color: "bg-white/10 text-slate-900/60" },
     normal: { label: "Normal", color: "bg-blue-100 text-blue-700" },
     high: { label: "Haute", color: "bg-orange-100 text-orange-700" },
     urgent: { label: "Urgent", color: "bg-red-100 text-red-700" },
@@ -226,7 +226,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
       {/* Facebook Header */}
       <div className="p-3 flex items-start gap-3">
         <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center flex-shrink-0">
-          <span className="text-white font-bold text-sm">A</span>
+          <span className="text-slate-900 font-bold text-sm">A</span>
         </div>
         <div className="flex-1">
           <p className="text-[15px] font-semibold text-[#050505]">Alpha Agency</p>
@@ -263,10 +263,10 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
         <div className="flex items-center gap-1">
           <div className="flex -space-x-1">
             <div className="w-[18px] h-[18px] rounded-full bg-[#1877F2] flex items-center justify-center">
-              <ThumbsUp className="w-2.5 h-2.5 text-white" />
+              <ThumbsUp className="w-2.5 h-2.5 text-slate-900" />
             </div>
             <div className="w-[18px] h-[18px] rounded-full bg-[#F33E58] flex items-center justify-center">
-              <Heart className="w-2.5 h-2.5 text-white" />
+              <Heart className="w-2.5 h-2.5 text-slate-900" />
             </div>
           </div>
           <span className="ml-1">24</span>
@@ -364,7 +364,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
           <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-white">
+            <h2 className="text-xl font-semibold text-slate-900">
               {editingPost ? "Modifier la publication" : "Créer une publication"}
             </h2>
             <Badge variant="outline" className="text-[#FF6B35] border-[#FF6B35]">
@@ -384,7 +384,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                 placeholder="Chercher un compte" 
                 className="bg-white/5 backdrop-blur-xl border-white/10 pl-9"
               />
-              <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-900/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
@@ -400,7 +400,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                   }
                 }}
               />
-              <span className="text-sm text-white/60">Sélectionner tout</span>
+              <span className="text-sm text-slate-900/60">Sélectionner tout</span>
             </label>
 
             <div className="space-y-2 flex-1">
@@ -415,11 +415,11 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center">
-                    <Facebook className="w-5 h-5 text-white" />
+                    <Facebook className="w-5 h-5 text-slate-900" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white">Alpha Agency</p>
-                    <p className="text-xs text-white/60">Facebook Page</p>
+                    <p className="text-sm font-medium text-slate-900">Alpha Agency</p>
+                    <p className="text-xs text-slate-900/60">Facebook Page</p>
                   </div>
                 </div>
                 {selectedAccounts.includes("facebook") && (
@@ -443,11 +443,11 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center">
-                    <Instagram className="w-5 h-5 text-white" />
+                    <Instagram className="w-5 h-5 text-slate-900" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white">Alpha Agency</p>
-                    <p className="text-xs text-white/60">Instagram Business</p>
+                    <p className="text-sm font-medium text-slate-900">Alpha Agency</p>
+                    <p className="text-xs text-slate-900/60">Instagram Business</p>
                   </div>
                 </div>
                 {selectedAccounts.includes("instagram") && (
@@ -492,13 +492,13 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                   {/* Toolbar */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" className="text-white/60 hover:text-[#FF6B35]">
+                      <Button variant="ghost" size="sm" className="text-slate-900/60 hover:text-[#FF6B35]">
                         <Smile className="w-5 h-5" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-white/60 hover:text-[#FF6B35]">
+                      <Button variant="ghost" size="sm" className="text-slate-900/60 hover:text-[#FF6B35]">
                         <MapPin className="w-5 h-5" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-white/60 hover:text-[#FF6B35]">
+                      <Button variant="ghost" size="sm" className="text-slate-900/60 hover:text-[#FF6B35]">
                         <Hash className="w-5 h-5" />
                       </Button>
                     </div>
@@ -511,7 +511,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                         checked={isDraft}
                         onCheckedChange={setIsDraft}
                       />
-                      <span className="text-sm text-white/60">Ceci est un brouillon</span>
+                      <span className="text-sm text-slate-900/60">Ceci est un brouillon</span>
                     </div>
                   </div>
                 </CardContent>
@@ -554,12 +554,12 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                     {uploading ? (
                       <div className="flex flex-col items-center">
                         <Loader2 className="w-10 h-10 text-[#FF6B35] animate-spin mb-3" />
-                        <p className="text-white/60">Upload en cours...</p>
+                        <p className="text-slate-900/60">Upload en cours...</p>
                       </div>
                     ) : (
                       <>
                         <Upload className="w-10 h-10 text-[#CCCCCC] mx-auto mb-3" />
-                        <p className="text-white/60 mb-4">Glissez et déposez les fichiers n'importe où</p>
+                        <p className="text-slate-900/60 mb-4">Glissez et déposez les fichiers n'importe où</p>
                         
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -665,13 +665,13 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
                   onClick={() => setPreviewDevice("desktop")}
                   className={`p-1.5 rounded ${previewDevice === "desktop" ? "bg-[#F0F2F5]" : ""}`}
                 >
-                  <Monitor className={`w-4 h-4 ${previewDevice === "desktop" ? "text-[#FF6B35]" : "text-white/60"}`} />
+                  <Monitor className={`w-4 h-4 ${previewDevice === "desktop" ? "text-[#FF6B35]" : "text-slate-900/60"}`} />
                 </button>
                 <button
                   onClick={() => setPreviewDevice("mobile")}
                   className={`p-1.5 rounded ${previewDevice === "mobile" ? "bg-[#F0F2F5]" : ""}`}
                 >
-                  <Smartphone className={`w-4 h-4 ${previewDevice === "mobile" ? "text-[#FF6B35]" : "text-white/60"}`} />
+                  <Smartphone className={`w-4 h-4 ${previewDevice === "mobile" ? "text-[#FF6B35]" : "text-slate-900/60"}`} />
                 </button>
               </div>
             </div>
@@ -680,7 +680,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
             <div className={previewDevice === "mobile" ? "max-w-[320px] mx-auto" : ""}>
               {selectedAccounts.length === 0 && !content ? (
                 <div className="bg-white/5 backdrop-blur-xl rounded-lg p-6 text-center shadow-sm">
-                  <p className="text-white/60 text-sm mb-4">
+                  <p className="text-slate-900/60 text-sm mb-4">
                     Sélectionnez un profil et ajoutez du contenu pour voir l'aperçu.
                   </p>
                   <div className="bg-white/5 rounded-lg p-6">
@@ -707,7 +707,7 @@ const CreatePostModal = ({ open, onOpenChange, accounts, editingPost, onSuccess 
           <Button 
             onClick={handleSubmit}
             disabled={saving || !content.trim() || selectedAccounts.length === 0}
-            className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white"
+            className="bg-[#FF6B35] hover:bg-[#E55A2B] text-slate-900"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -1055,7 +1055,7 @@ const SocialMediaPage = () => {
             isToday ? 'bg-orange-50 border-[#FF6B35]' : 'bg-white/5 backdrop-blur-xl'
           }`}
         >
-          <div className={`text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 ${isToday ? 'text-[#FF6B35]' : 'text-white/60'}`}>
+          <div className={`text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 ${isToday ? 'text-[#FF6B35]' : 'text-slate-900/60'}`}>
             {day}
           </div>
           {/* Desktop: show post details */}
@@ -1073,7 +1073,7 @@ const SocialMediaPage = () => {
               </div>
             ))}
             {dayPosts.length > 2 && (
-              <div className="text-xs text-white/60">+{dayPosts.length - 2} autre(s)</div>
+              <div className="text-xs text-slate-900/60">+{dayPosts.length - 2} autre(s)</div>
             )}
           </div>
           {/* Mobile: just show dot indicator */}
@@ -1091,7 +1091,7 @@ const SocialMediaPage = () => {
         {/* Days header - Desktop */}
         <div className="hidden sm:grid grid-cols-7 bg-[#FAFAFA] border-b border-white/10">
           {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => (
-            <div key={d} className="text-center py-3 text-sm font-medium text-white/60">
+            <div key={d} className="text-center py-3 text-sm font-medium text-slate-900/60">
               {d}
             </div>
           ))}
@@ -1099,7 +1099,7 @@ const SocialMediaPage = () => {
         {/* Days header - Mobile */}
         <div className="sm:hidden grid grid-cols-7 bg-[#FAFAFA] border-b border-white/10">
           {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
-            <div key={i} className="text-center py-2 text-xs font-medium text-white/60">
+            <div key={i} className="text-center py-2 text-xs font-medium text-slate-900/60">
               {d}
             </div>
           ))}
@@ -1129,9 +1129,9 @@ const SocialMediaPage = () => {
       return (
         <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-12 text-center">
           <Calendar className="w-12 h-12 mx-auto mb-4 text-[#E5E5E5]" />
-          <h3 className="text-lg font-medium text-white mb-2">Aucune publication programmée</h3>
-          <p className="text-white/60 mb-4">Commencez par créer votre premier post</p>
-          <Button onClick={openNewPost} className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white">
+          <h3 className="text-lg font-medium text-slate-900 mb-2">Aucune publication programmée</h3>
+          <p className="text-slate-900/60 mb-4">Commencez par créer votre premier post</p>
+          <Button onClick={openNewPost} className="bg-[#FF6B35] hover:bg-[#E55A2B] text-slate-900">
             <Plus className="w-4 h-4 mr-2" />
             Créer un post
           </Button>
@@ -1152,16 +1152,16 @@ const SocialMediaPage = () => {
                 isToday ? 'bg-orange-50' : 'bg-[#FAFAFA]'
               }`}>
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold ${
-                  isToday ? 'bg-[#FF6B35] text-white' : 'bg-white/5 backdrop-blur-xl text-white'
+                  isToday ? 'bg-[#FF6B35] text-slate-900' : 'bg-white/5 backdrop-blur-xl text-slate-900'
                 }`}>
                   {dateObj.getDate()}
                 </div>
                 <div>
-                  <p className="font-medium text-white capitalize">
+                  <p className="font-medium text-slate-900 capitalize">
                     {dateObj.toLocaleDateString('fr-FR', { weekday: 'long' })}
-                    {isToday && <Badge className="ml-2 bg-[#FF6B35] text-white text-xs">Aujourd'hui</Badge>}
+                    {isToday && <Badge className="ml-2 bg-[#FF6B35] text-slate-900 text-xs">Aujourd'hui</Badge>}
                   </p>
-                  <p className="text-xs text-white/60">
+                  <p className="text-xs text-slate-900/60">
                     {dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
                 </div>
@@ -1174,7 +1174,7 @@ const SocialMediaPage = () => {
                     <div className="flex items-start gap-4">
                       {/* Time & Platforms */}
                       <div className="text-center w-16 flex-shrink-0">
-                        <p className="text-lg font-bold text-white">
+                        <p className="text-lg font-bold text-slate-900">
                           {new Date(post.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                         <div className="flex gap-1 justify-center mt-1">
@@ -1186,7 +1186,7 @@ const SocialMediaPage = () => {
                       
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white line-clamp-2">{post.content}</p>
+                        <p className="text-sm text-slate-900 line-clamp-2">{post.content}</p>
                         <div className="flex items-center gap-2 mt-2">
                           <StatusBadge status={post.status} />
                           {post.media_urls?.length > 0 && (
@@ -1252,10 +1252,10 @@ const SocialMediaPage = () => {
       {/* Header - Agorapulse Style */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Social Media</h1>
-          <p className="text-white/60 text-xs sm:text-sm">Gérez vos réseaux sociaux</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Social Media</h1>
+          <p className="text-slate-900/60 text-xs sm:text-sm">Gérez vos réseaux sociaux</p>
         </div>
-        <Button onClick={openNewPost} className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white w-full sm:w-auto">
+        <Button onClick={openNewPost} className="bg-[#FF6B35] hover:bg-[#E55A2B] text-slate-900 w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
           Créer un post
         </Button>
@@ -1271,8 +1271,8 @@ const SocialMediaPage = () => {
                   <Clock className="w-4 h-4 text-blue-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg sm:text-2xl font-bold text-white">{stats.posts?.scheduled || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-white/60">Programmés</p>
+                  <p className="text-lg sm:text-2xl font-bold text-slate-900">{stats.posts?.scheduled || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-900/60">Programmés</p>
                 </div>
               </div>
             </CardContent>
@@ -1284,8 +1284,8 @@ const SocialMediaPage = () => {
                   <CheckCircle className="w-4 h-4 text-green-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg sm:text-2xl font-bold text-white">{stats.posts?.published || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-white/60">Publiés</p>
+                  <p className="text-lg sm:text-2xl font-bold text-slate-900">{stats.posts?.published || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-900/60">Publiés</p>
                 </div>
               </div>
             </CardContent>
@@ -1294,11 +1294,11 @@ const SocialMediaPage = () => {
             <CardContent className="p-3">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-white/10 flex-shrink-0">
-                  <FileText className="w-4 h-4 text-white/60" />
+                  <FileText className="w-4 h-4 text-slate-900/60" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg sm:text-2xl font-bold text-white">{stats.posts?.drafts || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-white/60">Brouillons</p>
+                  <p className="text-lg sm:text-2xl font-bold text-slate-900">{stats.posts?.drafts || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-900/60">Brouillons</p>
                 </div>
               </div>
             </CardContent>
@@ -1310,8 +1310,8 @@ const SocialMediaPage = () => {
                   <Inbox className="w-4 h-4 text-orange-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg sm:text-2xl font-bold text-white">{stats.inbox?.unread || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-white/60">Non lus</p>
+                  <p className="text-lg sm:text-2xl font-bold text-slate-900">{stats.inbox?.unread || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-900/60">Non lus</p>
                 </div>
               </div>
             </CardContent>
@@ -1323,8 +1323,8 @@ const SocialMediaPage = () => {
                   <MessageSquare className="w-4 h-4 text-purple-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg sm:text-2xl font-bold text-white">{stats.inbox?.pending_reply || 0}</p>
-                  <p className="text-[10px] sm:text-xs text-white/60">À répondre</p>
+                  <p className="text-lg sm:text-2xl font-bold text-slate-900">{stats.inbox?.pending_reply || 0}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-900/60">À répondre</p>
                 </div>
               </div>
             </CardContent>
@@ -1335,18 +1335,18 @@ const SocialMediaPage = () => {
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="bg-white/5 backdrop-blur-xl border border-white/10 p-1 rounded-xl w-full sm:w-auto grid grid-cols-3 sm:flex">
-          <TabsTrigger value="calendar" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg text-xs sm:text-sm">
+          <TabsTrigger value="calendar" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-slate-900 rounded-lg text-xs sm:text-sm">
             <Calendar className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
             <span className="hidden sm:inline">Calendrier</span>
           </TabsTrigger>
-          <TabsTrigger value="inbox" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg text-xs sm:text-sm">
+          <TabsTrigger value="inbox" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-slate-900 rounded-lg text-xs sm:text-sm">
             <Inbox className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
             <span className="hidden sm:inline">Boîte</span>
             {stats?.inbox?.unread > 0 && (
               <Badge className="ml-1 bg-red-500 text-white text-[10px] px-1">{stats.inbox.unread}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="accounts" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-white rounded-lg text-xs sm:text-sm">
+          <TabsTrigger value="accounts" className="data-[state=active]:bg-[#FF6B35] data-[state=active]:text-slate-900 rounded-lg text-xs sm:text-sm">
             <Settings className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
             <span className="hidden sm:inline">Comptes</span>
           </TabsTrigger>
@@ -1386,7 +1386,7 @@ const SocialMediaPage = () => {
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
-              <span className="text-lg font-semibold text-white ml-2">
+              <span className="text-lg font-semibold text-slate-900 ml-2">
                 {monthNames[currentMonth - 1]} {currentYear}
               </span>
             </div>
@@ -1399,7 +1399,7 @@ const SocialMediaPage = () => {
                 onClick={() => setCalendarViewMode("list")}
                 className={calendarViewMode === "list" 
                   ? "bg-white/5 backdrop-blur-xl shadow-sm text-[#FF6B35]" 
-                  : "text-white/60"}
+                  : "text-slate-900/60"}
               >
                 <LayoutList className="w-4 h-4 mr-1" />
                 Liste
@@ -1410,7 +1410,7 @@ const SocialMediaPage = () => {
                 onClick={() => setCalendarViewMode("month")}
                 className={calendarViewMode === "month" 
                   ? "bg-white/5 backdrop-blur-xl shadow-sm text-[#FF6B35]" 
-                  : "text-white/60"}
+                  : "text-slate-900/60"}
               >
                 <CalendarDays className="w-4 h-4 mr-1" />
                 Mois
@@ -1446,7 +1446,7 @@ const SocialMediaPage = () => {
               <ScrollArea className="h-[500px]">
                 <div className="p-2 space-y-2">
                   {filteredInbox.length === 0 ? (
-                    <div className="text-center py-8 text-white/60">
+                    <div className="text-center py-8 text-slate-900/60">
                       <Inbox className="w-10 h-10 mx-auto mb-2 opacity-30" />
                       <p className="text-sm">Aucun message</p>
                     </div>
@@ -1465,14 +1465,14 @@ const SocialMediaPage = () => {
                           <PlatformIcon platform={msg.platform} className="w-4 h-4 mt-0.5" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
-                              <p className="text-sm font-medium text-white truncate">
+                              <p className="text-sm font-medium text-slate-900 truncate">
                                 {msg.sender_name}
                               </p>
                               {msg.status === 'unread' && (
                                 <div className="w-2 h-2 bg-[#FF6B35] rounded-full" />
                               )}
                             </div>
-                            <p className="text-xs text-white/60 truncate mt-0.5">{msg.content}</p>
+                            <p className="text-xs text-slate-900/60 truncate mt-0.5">{msg.content}</p>
                             <div className="flex items-center gap-2 mt-1">
                               <Badge variant="outline" className="text-[10px]">{msg.message_type}</Badge>
                               <PriorityBadge priority={msg.priority} />
@@ -1496,7 +1496,7 @@ const SocialMediaPage = () => {
                         <PlatformIcon platform={selectedMessage.platform} className="w-5 h-5" />
                         <div>
                           <CardTitle className="text-base">{selectedMessage.sender_name}</CardTitle>
-                          <p className="text-xs text-white/60">{selectedMessage.message_type} • {selectedMessage.platform}</p>
+                          <p className="text-xs text-slate-900/60">{selectedMessage.message_type} • {selectedMessage.platform}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1513,8 +1513,8 @@ const SocialMediaPage = () => {
                   <CardContent className="p-4">
                     {/* Original Message */}
                     <div className="bg-white/5 rounded-lg p-4 mb-4">
-                      <p className="text-white">{selectedMessage.content}</p>
-                      <p className="text-xs text-white/60 mt-2">
+                      <p className="text-slate-900">{selectedMessage.content}</p>
+                      <p className="text-xs text-slate-900/60 mt-2">
                         {new Date(selectedMessage.created_at).toLocaleString('fr-FR')}
                       </p>
                     </div>
@@ -1523,7 +1523,7 @@ const SocialMediaPage = () => {
                     {selectedMessage.reply_content && (
                       <div className="bg-orange-50 rounded-lg p-4 mb-4 border-l-4 border-[#FF6B35]">
                         <p className="text-xs text-[#FF6B35] font-medium mb-1">Votre réponse</p>
-                        <p className="text-white">{selectedMessage.reply_content}</p>
+                        <p className="text-slate-900">{selectedMessage.reply_content}</p>
                       </div>
                     )}
 
@@ -1572,7 +1572,7 @@ const SocialMediaPage = () => {
                       <Button
                         onClick={handleReply}
                         disabled={!replyContent.trim()}
-                        className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white"
+                        className="bg-[#FF6B35] hover:bg-[#E55A2B] text-slate-900"
                       >
                         <Reply className="w-4 h-4 mr-2" />
                         Répondre
@@ -1582,7 +1582,7 @@ const SocialMediaPage = () => {
                 </>
               ) : (
                 <CardContent className="h-[500px] flex items-center justify-center">
-                  <div className="text-center text-white/60">
+                  <div className="text-center text-slate-900/60">
                     <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-30" />
                     <p>Sélectionnez un message pour le voir</p>
                   </div>
@@ -1601,7 +1601,7 @@ const SocialMediaPage = () => {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1877F2] to-[#E4405F] flex items-center justify-center">
-                      <Facebook className="w-4 h-4 text-white" />
+                      <Facebook className="w-4 h-4 text-slate-900" />
                     </div>
                     Connexion Meta (Facebook & Instagram)
                   </CardTitle>
@@ -1617,13 +1617,13 @@ const SocialMediaPage = () => {
                 {metaLoading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin text-[#1877F2]" />
-                    <span className="ml-3 text-white/60">Connexion en cours...</span>
+                    <span className="ml-3 text-slate-900/60">Connexion en cours...</span>
                   </div>
                 ) : metaConnected ? (
                   <div className="space-y-4">
                     {/* Connected Pages */}
                     <div>
-                      <h4 className="text-sm font-medium text-white mb-3">Pages connectées ({metaPages.length})</h4>
+                      <h4 className="text-sm font-medium text-slate-900 mb-3">Pages connectées ({metaPages.length})</h4>
                       <div className="grid gap-3">
                         {metaPages.map((page) => (
                           <div 
@@ -1634,12 +1634,12 @@ const SocialMediaPage = () => {
                               <img src={page.picture_url} alt={page.page_name} className="w-10 h-10 rounded-full" />
                             ) : (
                               <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center">
-                                <Facebook className="w-5 h-5 text-white" />
+                                <Facebook className="w-5 h-5 text-slate-900" />
                               </div>
                             )}
                             <div className="flex-1">
-                              <p className="font-medium text-white">{page.page_name}</p>
-                              <div className="flex items-center gap-2 text-xs text-white/60">
+                              <p className="font-medium text-slate-900">{page.page_name}</p>
+                              <div className="flex items-center gap-2 text-xs text-slate-900/60">
                                 <span>{page.category}</span>
                                 {page.has_instagram && (
                                   <Badge className="bg-pink-100 text-pink-700 border-0 text-xs">
@@ -1710,15 +1710,15 @@ const SocialMediaPage = () => {
                 ) : (
                   <div className="text-center py-8">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#1877F2] to-[#E4405F] flex items-center justify-center">
-                      <Facebook className="w-8 h-8 text-white" />
+                      <Facebook className="w-8 h-8 text-slate-900" />
                     </div>
-                    <h3 className="text-lg font-medium text-white mb-2">Connectez vos réseaux sociaux</h3>
-                    <p className="text-white/60 mb-6 max-w-md mx-auto">
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">Connectez vos réseaux sociaux</h3>
+                    <p className="text-slate-900/60 mb-6 max-w-md mx-auto">
                       Connectez vos pages Facebook et comptes Instagram Business pour publier directement depuis Alpha Agency CRM.
                     </p>
                     <Button
                       onClick={handleConnectMeta}
-                      className="bg-[#1877F2] hover:bg-[#166FE5] text-white"
+                      className="bg-[#1877F2] hover:bg-[#166FE5] text-slate-900"
                       disabled={metaLoading}
                     >
                       {metaLoading ? (
@@ -1753,14 +1753,14 @@ const SocialMediaPage = () => {
                           post.platform === 'facebook' ? 'bg-[#1877F2]' : 'bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737]'
                         }`}>
                           {post.platform === 'facebook' ? (
-                            <Facebook className="w-4 h-4 text-white" />
+                            <Facebook className="w-4 h-4 text-slate-900" />
                           ) : (
-                            <Instagram className="w-4 h-4 text-white" />
+                            <Instagram className="w-4 h-4 text-slate-900" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white line-clamp-2">{post.content || post.caption}</p>
-                          <div className="flex items-center gap-2 mt-1 text-xs text-white/60">
+                          <p className="text-sm text-slate-900 line-clamp-2">{post.content || post.caption}</p>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-slate-900/60">
                             <span>{post.page_name}</span>
                             <span>•</span>
                             <span>{new Date(post.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
@@ -1795,7 +1795,7 @@ const SocialMediaPage = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1877F2] to-[#E4405F] flex items-center justify-center">
-                <Send className="w-4 h-4 text-white" />
+                <Send className="w-4 h-4 text-slate-900" />
               </div>
               Publier maintenant
             </DialogTitle>
@@ -1809,11 +1809,11 @@ const SocialMediaPage = () => {
                   <img src={selectedPage.picture_url} alt={selectedPage.page_name} className="w-10 h-10 rounded-full" />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center">
-                    <Facebook className="w-5 h-5 text-white" />
+                    <Facebook className="w-5 h-5 text-slate-900" />
                   </div>
                 )}
                 <div>
-                  <p className="font-medium text-white">{selectedPage.page_name}</p>
+                  <p className="font-medium text-slate-900">{selectedPage.page_name}</p>
                   <div className="flex items-center gap-2">
                     <Badge className="bg-blue-100 text-blue-700 border-0 text-xs">
                       <Facebook className="w-3 h-3 mr-1" />
@@ -1886,7 +1886,7 @@ const SocialMediaPage = () => {
             <Button
               onClick={handlePublishToFacebook}
               disabled={publishing || !publishContent.trim()}
-              className="bg-[#1877F2] hover:bg-[#166FE5] text-white"
+              className="bg-[#1877F2] hover:bg-[#166FE5] text-slate-900"
             >
               {publishing ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

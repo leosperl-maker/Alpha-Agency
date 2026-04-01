@@ -440,16 +440,16 @@ export default function InstagramStoryPage() {
    ============================================ */
 function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount, onAddAccount, onViewAllStories, showAddModal, onAddModalChange, onUsernameChange, onAddSubmit, username, isLoading }) {
   return (
-    <div className="min-h-screen bg-slate-50 text-white p-8">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Instagram Stories</h1>
-          <p className="text-gray-400">Gérez vos comptes et créez vos stories</p>
+          <p className="text-slate-500">Gérez vos comptes et créez vos stories</p>
         </div>
 
-        <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4 mb-8 flex items-center gap-3">
-          <Check size={20} className="text-green-400" />
-          <span className="text-green-400">BlueStacks connecté — publication automatique prête</span>
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-8 flex items-center gap-3">
+          <Check size={20} className="text-green-600" />
+          <span className="text-green-700">BlueStacks connecté — publication automatique prête</span>
         </div>
 
         <div className="mb-8">
@@ -467,7 +467,7 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
 
           {accounts.length === 0 ? (
             <div className="bg-white border border-slate-200 rounded-lg p-12 text-center">
-              <p className="text-gray-400">Aucun compte enregistré. Ajoutez-en un pour commencer.</p>
+              <p className="text-slate-500">Aucun compte enregistré. Ajoutez-en un pour commencer.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -479,7 +479,7 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
                     </div>
                     <div>
                       <h3 className="text-lg font-bold">@{account.username}</h3>
-                      <p className="text-gray-400 text-sm">{account.stories_count || 0} stories</p>
+                      <p className="text-slate-500 text-sm">{account.stories_count || 0} stories</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -511,7 +511,7 @@ function AccountsView({ accounts, onCreateStory, onViewStories, onDeleteAccount,
               onKeyDown={(e) => e.key === 'Enter' && onAddSubmit()}
               className="mb-2 bg-white border-slate-200 text-slate-900 placeholder-gray-500"
             />
-            <p className="text-xs text-gray-400 mb-4">Le compte doit être déjà connecté sur Instagram dans BlueStacks.</p>
+            <p className="text-xs text-slate-500 mb-4">Le compte doit être déjà connecté sur Instagram dans BlueStacks.</p>
             <div className="flex gap-2">
               <Button onClick={onAddSubmit} className="flex-1 bg-pink-600 hover:bg-pink-700 text-white" disabled={isLoading}>
                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Ajouter'}
@@ -612,7 +612,7 @@ function EditorView({
   const bgModeLabels = { none: 'Aa', dark: 'Aa', light: 'Aa', colored: 'Aa' };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-white p-4">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-4">
       <div className="max-w-7xl mx-auto">
         {/* Top Bar */}
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
@@ -657,7 +657,7 @@ function EditorView({
           <div className="flex items-center gap-3">
             {/* Schedule */}
             <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-1.5">
-              <Clock size={16} className="text-gray-400" />
+              <Clock size={16} className="text-slate-500" />
               <input
                 type="datetime-local"
                 value={scheduleTime}
@@ -666,7 +666,7 @@ function EditorView({
                 style={{ colorScheme: 'dark' }}
               />
               {scheduleTime && (
-                <button onClick={() => onScheduleTimeChange('')} className="text-gray-400 hover:text-slate-900">
+                <button onClick={() => onScheduleTimeChange('')} className="text-slate-500 hover:text-slate-900">
                   <X size={14} />
                 </button>
               )}
@@ -697,11 +697,11 @@ function EditorView({
               {mediaUrl ? (
                 <div>
                   <img src={mediaUrl} alt="" className="w-full h-20 object-cover rounded-lg mb-2" onError={(e) => { e.target.style.display = 'none'; }} />
-                  <p className="text-xs text-gray-400">Cliquez pour changer</p>
+                  <p className="text-xs text-slate-500">Cliquez pour changer</p>
                 </div>
               ) : (
                 <div className="py-4">
-                  <Upload size={28} className="mx-auto mb-2 text-gray-400" />
+                  <Upload size={28} className="mx-auto mb-2 text-slate-500" />
                   <p className="text-sm font-medium">Image ou vidéo</p>
                   <p className="text-xs text-gray-500 mt-1">Cliquez ou glissez</p>
                 </div>
@@ -711,7 +711,7 @@ function EditorView({
 
             {/* Stickers */}
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Stickers</p>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Stickers</p>
               <div className="flex flex-col gap-1.5">
                 <StickerBtn icon={<BarChart2 size={16} />} label="Sondage" onClick={() => onAddSticker('poll')} />
                 <StickerBtn icon={<HelpCircle size={16} />} label="Question" onClick={() => onAddSticker('question')} />
@@ -728,7 +728,7 @@ function EditorView({
 
             {/* Text */}
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Texte</p>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Texte</p>
               <div className="flex flex-col gap-2">
                 <Input
                   placeholder="Votre texte..."
@@ -751,7 +751,7 @@ function EditorView({
                   >
                     A
                   </button>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-slate-500">
                     {textBgMode === 'none' ? 'Sans fond' : textBgMode === 'dark' ? 'Fond noir' : textBgMode === 'light' ? 'Fond blanc' : 'Fond couleur'}
                   </span>
                 </div>
@@ -802,7 +802,7 @@ function EditorView({
                 className="absolute inset-0 rounded-[3rem]"
                 style={{
                   background: 'linear-gradient(145deg, #2a2a2e 0%, #1a1a1e 30%, #0f0f12 50%, #1a1a1e 70%, #2a2a2e 100%)',
-                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08), 0 25px 60px rgba(0,0,0,0.6), 0 8px 20px rgba(0,0,0,0.4), -4px 0 15px rgba(0,0,0,0.3), 4px 0 15px rgba(0,0,0,0.3)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.15), 0 8px 16px rgba(0,0,0,0.1)',
                 }}
               />
 
@@ -896,7 +896,7 @@ function EditorView({
                     {selectedAccount?.username?.charAt(0)?.toUpperCase() || '?'}
                   </div>
                   <span className="text-slate-900 text-[13px] font-semibold flex-1 drop-shadow-lg">{selectedAccount?.username || 'compte'}</span>
-                  <span className="text-gray-300 text-[11px] drop-shadow">Il y a 2h</span>
+                  <span className="text-slate-400 text-[11px] drop-shadow">Il y a 2h</span>
                   <X size={18} className="text-slate-700 ml-1 drop-shadow" />
                 </div>
 
@@ -990,7 +990,7 @@ function EditorView({
                 {selectedSticker.type !== 'text' && (
                   <div className="mb-3">
                     <div className="flex items-center justify-between mb-1">
-                      <label className="text-xs text-gray-400">Taille</label>
+                      <label className="text-xs text-slate-500">Taille</label>
                       <span className="text-xs text-gray-500">{Math.round((selectedSticker.data?.scale || 1) * 100)}%</span>
                     </div>
                     <input
@@ -1062,12 +1062,12 @@ function EditorView({
 
                 {/* Text info */}
                 {selectedSticker.type === 'text' && (
-                  <p className="text-gray-400 text-sm">Glissez le texte sur l'aperçu pour le déplacer.</p>
+                  <p className="text-slate-500 text-sm">Glissez le texte sur l'aperçu pour le déplacer.</p>
                 )}
               </div>
             ) : (
               <div className="bg-white border border-slate-200 rounded-xl p-6 text-center">
-                <p className="text-gray-400 text-sm">Cliquez sur un sticker dans l'aperçu pour le configurer, ou ajoutez-en un depuis le panneau de gauche.</p>
+                <p className="text-slate-500 text-sm">Cliquez sur un sticker dans l'aperçu pour le configurer, ou ajoutez-en un depuis le panneau de gauche.</p>
               </div>
             )}
           </div>
@@ -1126,7 +1126,7 @@ function PollConfig({ data, onChange }) {
     <div className="space-y-3">
       <FieldInput label="Question" value={data.question || ''} onChange={(v) => onChange({ ...data, question: v })} placeholder="Posez une question..." />
       <div>
-        <label className="block text-xs text-gray-400 mb-2">Options</label>
+        <label className="block text-xs text-slate-500 mb-2">Options</label>
         {options.map((opt, idx) => (
           <div key={idx} className="flex items-center gap-1 mb-2">
             <input
@@ -1150,7 +1150,7 @@ function PollConfig({ data, onChange }) {
 
       {/* Color picker */}
       <div>
-        <label className="block text-xs text-gray-400 mb-2">Couleur de la bannière</label>
+        <label className="block text-xs text-slate-500 mb-2">Couleur de la bannière</label>
         <div className="flex gap-2 flex-wrap">
           {STICKER_COLORS.poll.map((c, idx) => (
             <button
@@ -1175,7 +1175,7 @@ function QuestionConfig({ data, onChange }) {
     <div className="space-y-3">
       <FieldInput label="Question" value={data.question || ''} onChange={(v) => onChange({ ...data, question: v })} placeholder="Posez-moi une question" />
       <div>
-        <label className="block text-xs text-gray-400 mb-2">Couleur du sticker</label>
+        <label className="block text-xs text-slate-500 mb-2">Couleur du sticker</label>
         <div className="flex gap-2 flex-wrap">
           {STICKER_COLORS.question.map((c, idx) => (
             <button
@@ -1201,7 +1201,7 @@ function SliderConfig({ data, onChange }) {
       <FieldInput label="Question" value={data.question || ''} onChange={(v) => onChange({ ...data, question: v })} />
       <FieldInput label="Emoji" value={data.emoji || '😍'} onChange={(v) => onChange({ ...data, emoji: v })} />
       <div>
-        <label className="block text-xs text-gray-400 mb-2">Couleur du curseur</label>
+        <label className="block text-xs text-slate-500 mb-2">Couleur du curseur</label>
         <div className="flex gap-2 flex-wrap">
           {STICKER_COLORS.slider.map((c, idx) => (
             <button
@@ -1226,11 +1226,11 @@ function CountdownConfig({ data, onChange }) {
     <div className="space-y-3">
       <FieldInput label="Titre" value={data.title || ''} onChange={(v) => onChange({ ...data, title: v })} />
       <div>
-        <label className="block text-xs text-gray-400 mb-1">Date/Heure</label>
+        <label className="block text-xs text-slate-500 mb-1">Date/Heure</label>
         <input type="datetime-local" value={data.endTime || ''} onChange={(e) => onChange({ ...data, endTime: e.target.value })} className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-sm" style={{ colorScheme: 'dark' }} />
       </div>
       <div>
-        <label className="block text-xs text-gray-400 mb-2">Couleur du sticker</label>
+        <label className="block text-xs text-slate-500 mb-2">Couleur du sticker</label>
         <div className="flex gap-2 flex-wrap">
           {STICKER_COLORS.countdown.map((c, idx) => (
             <button
@@ -1255,7 +1255,7 @@ function LocationConfig({ data, onChange }) {
     <div className="space-y-3">
       <FieldInput label="Lieu" value={data.location || ''} onChange={(v) => onChange({ ...data, location: v })} placeholder="Paris, France" />
       <div>
-        <label className="block text-xs text-gray-400 mb-2">Style (cliquez pour changer)</label>
+        <label className="block text-xs text-slate-500 mb-2">Style (cliquez pour changer)</label>
         <div className="flex gap-2 flex-wrap">
           {STICKER_COLORS.location.map((c, idx) => (
             <button
@@ -1280,7 +1280,7 @@ function NotificationConfig({ data, onChange }) {
     <div className="space-y-3">
       <FieldInput label="Titre" value={data.title || ''} onChange={(v) => onChange({ ...data, title: v })} placeholder="Mon événement" />
       <div>
-        <label className="block text-xs text-gray-400 mb-2">Couleur du sticker</label>
+        <label className="block text-xs text-slate-500 mb-2">Couleur du sticker</label>
         <div className="flex gap-2 flex-wrap">
           {STICKER_COLORS.notification.map((c, idx) => (
             <button
@@ -1302,7 +1302,7 @@ function NotificationConfig({ data, onChange }) {
 function FieldInput({ label, value, onChange, placeholder, type = 'text' }) {
   return (
     <div>
-      <label className="block text-xs text-gray-400 mb-1">{label}</label>
+      <label className="block text-xs text-slate-500 mb-1">{label}</label>
       <input
         type={type}
         value={value}
@@ -1527,7 +1527,7 @@ function StickerRenderer({ sticker, isSelected, onSelect, onDragStart, onUpdateD
         <div className="bg-white rounded-sm p-1.5 pb-8" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
           {/* Photo area */}
           <div className="bg-gray-200 aspect-square rounded-sm flex items-center justify-center">
-            <Camera size={24} className="text-gray-400" />
+            <Camera size={24} className="text-slate-500" />
           </div>
           {/* Caption */}
           <p className="text-center text-xs text-gray-600 mt-2 font-medium" style={{ fontFamily: "'Segoe UI', sans-serif" }}>
@@ -1609,10 +1609,10 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-white p-8">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <button onClick={onGoBack} className="flex items-center gap-2 text-gray-400 hover:text-slate-900 mb-4 transition">
+          <button onClick={onGoBack} className="flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-4 transition">
             <ArrowLeft size={20} /> Retour
           </button>
           <h1 className="text-3xl font-bold">Mes stories</h1>
@@ -1621,10 +1621,10 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
         {/* Filters */}
         <div className="flex gap-4 mb-8 flex-wrap items-center">
           <div className="flex gap-1 bg-white rounded-lg p-1">
-            <button onClick={() => onFilterChange('pending')} className={`px-4 py-2 rounded-md text-sm transition ${filter === 'pending' ? 'bg-pink-600 text-white' : 'text-gray-300 hover:text-slate-900'}`}>
+            <button onClick={() => onFilterChange('pending')} className={`px-4 py-2 rounded-md text-sm transition ${filter === 'pending' ? 'bg-pink-600 text-white' : 'text-slate-400 hover:text-slate-900'}`}>
               En attente
             </button>
-            <button onClick={() => onFilterChange('published')} className={`px-4 py-2 rounded-md text-sm transition ${filter === 'published' ? 'bg-pink-600 text-white' : 'text-gray-300 hover:text-slate-900'}`}>
+            <button onClick={() => onFilterChange('published')} className={`px-4 py-2 rounded-md text-sm transition ${filter === 'published' ? 'bg-pink-600 text-white' : 'text-slate-400 hover:text-slate-900'}`}>
               Publiées
             </button>
           </div>
@@ -1643,7 +1643,7 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
         {/* Grid */}
         {filtered.length === 0 ? (
           <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
-            <p className="text-gray-400">Aucune story trouvée.</p>
+            <p className="text-slate-500">Aucune story trouvée.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1660,7 +1660,7 @@ function StoriesListView({ stories, accounts, onEdit, onDelete, onGoBack, filter
                 <div className="p-4">
                   <p className="font-bold text-sm mb-1">@{accounts.find(a => a.id === story.account_id)?.username || '?'}</p>
                   {story.schedule_time && (
-                    <p className="text-xs text-gray-400 mb-3 flex items-center gap-1">
+                    <p className="text-xs text-slate-500 mb-3 flex items-center gap-1">
                       <Clock size={12} /> {new Date(story.schedule_time).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
                     </p>
                   )}

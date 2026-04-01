@@ -43,7 +43,6 @@ import AgendaPage from "./pages/dashboard/AgendaPage";
 import EditorialCalendarPage from "./pages/dashboard/EditorialCalendarPage";
 import MultilinkPage from "./pages/dashboard/MultilinkPage";
 import InstagramStoryPage from "./pages/dashboard/InstagramStoryPage";
-import NurturingPage from "./pages/dashboard/NurturingPage";
 
 // Public pages
 import TransferDownloadPage from "./pages/TransferDownloadPage";
@@ -117,7 +116,6 @@ function App() {
             <Route path="editorial" element={<EditorialCalendarPage />} />
             <Route path="multilink" element={<MultilinkPage />} />
             <Route path="instagram-stories" element={<InstagramStoryPage />} />
-            <Route path="nurturing" element={<NurturingPage />} />
           </Route>
           
           {/* PWA Widget Page for iPhone */}

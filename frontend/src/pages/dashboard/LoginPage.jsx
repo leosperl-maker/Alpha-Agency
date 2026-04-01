@@ -80,28 +80,28 @@ const LoginPage = () => {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <img 
-            src={process.env.PUBLIC_URL + "/logo-header-white.png"}
+          <img
+            src={process.env.PUBLIC_URL + "/logo-header-black.png"}
             alt="Alpha Agency"
-            className="h-12 mx-auto brightness-0 invert"
+            className="h-12 mx-auto"
           />
-          <p className="text-white/50 mt-4">Espace administration</p>
+          <p className="text-slate-500 mt-4">Espace administration</p>
         </div>
 
         {/* Form */}
-        <div className="bg-white/5 backdrop-blur-xl p-8 rounded-2xl border border-white/10 shadow-xl">
+        <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xl">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <Shield className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-2xl font-bold text-white text-center">
+            <Shield className="w-5 h-5 text-indigo-600" />
+            <h2 className="text-2xl font-bold text-slate-900 text-center">
               Connexion sécurisée
             </h2>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/80">Email</Label>
+              <Label htmlFor="email" className="text-slate-700">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <Input
                   id="email"
                   name="email"
@@ -110,16 +110,16 @@ const LoginPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="bg-white/5 border-white/10 text-white placeholder-white/40 focus:border-indigo-500/50 h-12 pl-10 rounded-xl"
+                  className="bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-indigo-500 h-12 pl-10 rounded-xl"
                   placeholder="admin@alphagency.fr"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white/80">Mot de passe</Label>
+              <Label htmlFor="password" className="text-slate-700">Mot de passe</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <Input
                   id="password"
                   name="password"
@@ -128,13 +128,13 @@ const LoginPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="bg-white/5 border-white/10 text-white placeholder-white/40 focus:border-indigo-500/50 h-12 pl-10 pr-10 rounded-xl"
+                  className="bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-indigo-500 h-12 pl-10 pr-10 rounded-xl"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -148,9 +148,9 @@ const LoginPage = () => {
                 id="remember-me"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-white/20 bg-white/5 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0"
+                className="w-4 h-4 rounded border-slate-300 bg-white text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0"
               />
-              <Label htmlFor="remember-me" className="text-white/60 text-sm cursor-pointer">
+              <Label htmlFor="remember-me" className="text-slate-500 text-sm cursor-pointer">
                 Rester connecté
               </Label>
             </div>
@@ -174,7 +174,7 @@ const LoginPage = () => {
             </div>
           </form>
 
-          <p className="mt-6 text-center text-xs text-white/40">
+          <p className="mt-6 text-center text-xs text-slate-400">
             Accès réservé aux administrateurs Alpha Agency
           </p>
         </div>
