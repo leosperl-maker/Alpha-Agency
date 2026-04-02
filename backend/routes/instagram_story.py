@@ -489,6 +489,43 @@ async def delete_story_draft(
 
 # ==================== PUBLISHING ====================
 
+async def _publish_story_background(draft_id: str, draft: dict, account: dict):
+    """
+    Tâche de fond : appelle le bridge BlueStacks et met à jour le statut du draft.
+    Exécutée via asyncio.create_task() pour ne pas bloquer la réponse HTTP.
+    """
+    try:
+        result = await publish_via_bridge(draft, account)
+
+        if result.get("success"):
+            await db.instagram_story_drafts.update_one(
+                {"id": draft_id},
+                {"$set": {
+                    "status": "published",
+                    "published_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            logger.info(f"✅ Story {draft_id} publiée sur @{account['username']}")
+        else:
+            await db.instagram_story_drafts.update_one(
+                {"id": draft_id},
+                {"$set": {
+                    "status": "failed",
+                    "error_message": result.get("error")
+                }}
+            )
+            logger.error(f"❌ Story {draft_id} échouée: {result.get('error')}")
+    except Exception as e:
+        logger.error(f"❌ Story {draft_id} erreur inattendue: {e}")
+        await db.instagram_story_drafts.update_one(
+            {"id": draft_id},
+            {"$set": {
+                "status": "failed",
+                "error_message": str(e)
+            }}
+        )
+
+
 @router.post("/drafts/{draft_id}/publish")
 async def publish_story(
     draft_id: str,
@@ -497,72 +534,64 @@ async def publish_story(
 ):
     """
     Publish a story immediately using browser automation.
-    Supports multi-account system.
-    
+    Returns immediately with status "publishing" — the actual work
+    happens in the background. Poll GET /drafts/{draft_id} for status updates.
+
     WARNING: This uses browser automation and is against Instagram's Terms of Service.
     """
+    import asyncio
+
     user_id = get_user_id(current_user)
-    
+
     draft = await db.instagram_story_drafts.find_one({
         "id": draft_id,
         "user_id": user_id
     })
-    
+
     if not draft:
         raise HTTPException(status_code=404, detail="Brouillon non trouvé")
-    
+
     if draft["status"] == "published":
         raise HTTPException(status_code=400, detail="Story déjà publiée")
-    
+
+    if draft["status"] == "publishing":
+        # Already being published — don't start a second one
+        return {
+            "success": True,
+            "message": "Publication déjà en cours. Consultez le statut via GET /drafts/{draft_id}.",
+            "draft_id": draft_id,
+            "status": "publishing"
+        }
+
     # Get account from multi-account system
     account_id = draft.get("account_id")
     account = await db.instagram_accounts.find_one({
         "id": account_id,
         "user_id": user_id
     })
-    
+
     if not account:
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail="Compte Instagram non trouvé. Recréez le brouillon avec un compte valide."
         )
-    
+
     # Update status to publishing
     await db.instagram_story_drafts.update_one(
         {"id": draft_id},
         {"$set": {"status": "publishing"}}
     )
-    
-    # === APPEL DU BRIDGE BLUESTACKS ===
-    result = await publish_via_bridge(draft, account)
-    
-    # Update draft status
-    if result.get("success"):
-        await db.instagram_story_drafts.update_one(
-            {"id": draft_id},
-            {"$set": {
-                "status": "published",
-                "published_at": datetime.now(timezone.utc).isoformat()
-            }}
-        )
-        return {
-            "success": True,
-            "message": f"Story publiée sur @{account['username']} !",
-            "draft_id": draft_id
-        }
-    else:
-        await db.instagram_story_drafts.update_one(
-            {"id": draft_id},
-            {"$set": {
-                "status": "failed",
-                "error_message": result.get("error")
-            }}
-        )
-        return {
-            "success": False,
-            "error": result.get("error"),
-            "draft_id": draft_id
-        }
+
+    # Launch bridge call in background — DON'T await it
+    asyncio.create_task(_publish_story_background(draft_id, draft, account))
+
+    # Return immediately
+    return {
+        "success": True,
+        "message": f"Publication lancée sur @{account['username']}. Suivez le statut en temps réel.",
+        "draft_id": draft_id,
+        "status": "publishing"
+    }
 
 # ==================== STORY ELEMENTS INFO ====================
 
