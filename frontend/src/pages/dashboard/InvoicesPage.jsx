@@ -470,7 +470,8 @@ const InvoicesPage = () => {
           discount: parseFloat(item.discount) || 0,
           discountType: item.discountType || "percent"
         })),
-        global_discount: globalDiscount
+        globalDiscount: parseFloat(globalDiscount.value) || 0,
+        globalDiscountType: globalDiscount.type === "percent" ? "%" : "€"
       };
 
       if (editingInvoice) {

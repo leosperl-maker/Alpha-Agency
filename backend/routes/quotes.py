@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 
 from .database import db, get_current_user
-from .invoices import generate_professional_pdf, get_next_invoice_number
+from .invoices import generate_professional_pdf, get_next_invoice_number, calculate_invoice_totals
 
 router = APIRouter(prefix="/quotes", tags=["Quotes"])
 
@@ -59,9 +59,7 @@ async def create_quote(quote: QuoteCreate, current_user: dict = Depends(get_curr
     quote_number = await get_next_quote_number()
     
     items_list = [item.model_dump() for item in quote.items]
-    subtotal = sum(item.quantity * item.unit_price for item in quote.items)
-    tva = subtotal * 0.085
-    total = subtotal + tva
+    subtotal, tva, total = calculate_invoice_totals(items_list)
     
     quote_doc = {
         "id": quote_id,
@@ -107,10 +105,10 @@ async def update_quote(quote_id: str, update: QuoteUpdate, current_user: dict = 
     update_data = {k: v for k, v in update.model_dump().items() if v is not None}
     if "items" in update_data:
         update_data["items"] = [item.model_dump() if hasattr(item, 'model_dump') else item for item in update_data["items"]]
-        # Recalculate totals
-        subtotal = sum(item.get('quantity', 1) * item.get('unit_price', 0) for item in update_data["items"])
-        tva = subtotal * 0.085
+        # Recalculate totals (with discounts)
+        subtotal, tva, total = calculate_invoice_totals(update_data["items"])
         update_data["subtotal"] = subtotal
+        update_data["total"] = total
         update_data["tva"] = tva
         update_data["total"] = subtotal + tva
     

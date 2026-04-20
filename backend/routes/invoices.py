@@ -159,17 +159,17 @@ def calculate_invoice_totals(items: list, global_discount: float = 0, global_dis
         
         line_total = qty * price
         if discount:
-            if discount_type == '%':
+            if discount_type in ('%', 'percent'):
                 line_total -= line_total * (discount / 100)
-            else:  # €
+            else:  # € or 'fixed'
                 line_total -= discount
         subtotal += line_total
     
     # Apply global discount
     if global_discount:
-        if global_discount_type == '%':
+        if global_discount_type in ('%', 'percent'):
             subtotal -= subtotal * (global_discount / 100)
-        else:  # €
+        else:  # € or 'fixed'
             subtotal -= global_discount
     
     tva = subtotal * 0.085  # 8.5% TVA Guadeloupe
@@ -372,7 +372,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     global_discount = doc_data.get('globalDiscount', 0)
     global_discount_type = doc_data.get('globalDiscountType', '%')
     if global_discount:
-        if global_discount_type == '%':
+        if global_discount_type in ('%', 'percent'):
             subtotal -= subtotal * (global_discount / 100)
         else:
             subtotal -= global_discount
@@ -669,7 +669,7 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
     # ===== TOTALS =====
     totals_data = []
     if global_discount:
-        if global_discount_type == '%':
+        if global_discount_type in ('%', 'percent'):
             totals_data.append(['', Paragraph(f"Remise globale ({global_discount:.0f}%):", totals_style), Paragraph("appliquée", totals_style)])
         else:
             totals_data.append(['', Paragraph(f"Remise globale ({global_discount:.2f} €):", totals_style), Paragraph("appliquée", totals_style)])
