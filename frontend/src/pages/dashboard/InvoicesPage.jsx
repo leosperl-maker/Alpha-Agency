@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { 
   Plus, 
@@ -23,6 +23,7 @@ import {
   Package,
   Settings,
   ChevronRight,
+  ChevronDown,
   Check,
   CreditCard,
   Banknote,
@@ -96,6 +97,7 @@ const InvoicesPage = () => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [expandedParents, setExpandedParents] = useState({});
   const [documentType, setDocumentType] = useState("facture"); // facture or devis
   const [newService, setNewService] = useState({ title: "", description: "", price: 0 });
   const [editingService, setEditingService] = useState(null);
@@ -211,6 +213,8 @@ const InvoicesPage = () => {
     annulee: { label: "Annulée", color: "bg-slate-100 text-slate-500", icon: XCircle },
     // Aliases for backward compatibility
     payee: { label: "Payée", color: "bg-green-100 text-green-700", icon: CheckCircle },
+    "soldée": { label: "Payée", color: "bg-green-100 text-green-700", icon: CheckCircle },
+    "partiel": { label: "Partiel", color: "bg-orange-100 text-orange-700", icon: PiggyBank },
   };
 
   const paymentMethods = {
@@ -887,16 +891,31 @@ const InvoicesPage = () => {
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount || 0);
   };
 
-  // Filter invoices
+  // Build children map: parentId -> [deposit, balance invoices]
+  const childrenMap = invoices.reduce((map, inv) => {
+    if ((inv.invoice_type === 'deposit' || inv.invoice_type === 'balance') && inv.parent_invoice_id) {
+      if (!map[inv.parent_invoice_id]) map[inv.parent_invoice_id] = [];
+      // Sort: deposits first, balance last
+      const isBalance = inv.invoice_type === 'balance';
+      if (isBalance) map[inv.parent_invoice_id].push(inv);
+      else map[inv.parent_invoice_id].unshift(inv);
+    }
+    return map;
+  }, {});
+
+  const toggleExpand = (id) => setExpandedParents(prev => ({ ...prev, [id]: !prev[id] }));
+
+  // Filter invoices — hide sub-invoices from main list unless searching
   const filteredInvoices = invoices.filter(invoice => {
+    const isSubInvoice = invoice.invoice_type === 'deposit' || invoice.invoice_type === 'balance';
     const matchesSearch = 
       invoice.invoice_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       getContactName(invoice.contact_id).toLowerCase().includes(searchQuery.toLowerCase()) ||
       getContactCompany(invoice.contact_id).toLowerCase().includes(searchQuery.toLowerCase());
-    
     const matchesStatus = filterStatus === "all" || invoice.status === filterStatus;
-    
-    return matchesSearch && matchesStatus;
+    // When searching, show everything; otherwise hide sub-invoices (they appear under parent)
+    if (searchQuery) return matchesSearch && matchesStatus;
+    return !isSubInvoice && matchesSearch && matchesStatus;
   });
 
   // Calculate totals
@@ -1380,8 +1399,11 @@ const InvoicesPage = () => {
                   // Use invoice_number prefix as source of truth
                   const isDevis = invoice.invoice_number?.startsWith('DEV-');
                   const isSelected = selectedIds.includes(invoice.id);
+                  const hasChildren = (childrenMap[invoice.id]?.length || 0) > 0;
+                  const isExpanded = !!expandedParents[invoice.id];
                   return (
-                    <tr key={invoice.id} className={`hover:bg-slate-50 transition-colors ${isSelected ? 'bg-indigo-600/10' : ''}`}>
+                    <React.Fragment key={invoice.id}>
+                    <tr className={`hover:bg-slate-50 transition-colors ${isSelected ? 'bg-indigo-600/10' : ''}`}>
                       <td className="w-10 px-3 py-4">
                         <button onClick={() => toggleSelect(invoice.id)} className="text-slate-500 hover:text-slate-900">
                           {isSelected ? <CheckSquare className="w-4 h-4 text-indigo-600" /> : <Square className="w-4 h-4" />}
@@ -1389,11 +1411,21 @@ const InvoicesPage = () => {
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-2">
+                          {hasChildren ? (
+                            <button onClick={() => toggleExpand(invoice.id)} className="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0" title={isExpanded ? "Masquer les sous-factures" : `Voir ${childrenMap[invoice.id].length} sous-facture(s)`}>
+                              <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                            </button>
+                          ) : <span className="w-4 flex-shrink-0" />}
                           <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap ${isDevis ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
                             {isDevis ? 'DEVIS' : 'FACTURE'}
                           </span>
                           <span className="font-mono font-medium text-slate-900 text-sm">{invoice.invoice_number}</span>
                           {getInvoiceTypeBadge(invoice)}
+                          {hasChildren && !isExpanded && (
+                            <span className="text-[9px] bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full font-medium">
+                              {childrenMap[invoice.id].length} doc
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="px-4 py-4">
@@ -1503,6 +1535,48 @@ const InvoicesPage = () => {
                         </div>
                       </td>
                     </tr>
+                    {/* ── Sous-factures (acomptes / solde) ── */}
+                    {hasChildren && isExpanded && childrenMap[invoice.id].map(child => {
+                      const cs = statusConfig[child.status] || statusConfig.brouillon;
+                      const CsIcon = cs.icon;
+                      const childPaid = child.total_paid || 0;
+                      const isBalance = child.invoice_type === 'balance';
+                      return (
+                        <tr key={child.id} className="bg-indigo-50/40 border-l-4 border-l-indigo-300 hover:bg-indigo-50/70 transition-colors">
+                          <td className="w-10 px-3 py-3"></td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2 pl-5">
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap ${isBalance ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                                {isBalance ? 'SOLDE' : 'ACOMPTE'}
+                              </span>
+                              <span className="font-mono text-xs text-slate-700">{child.invoice_number}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-slate-500">{getContactName(child.contact_id)}</td>
+                          <td className="px-4 py-3 text-xs text-slate-400 hidden md:table-cell">{formatDate(child.created_at)}</td>
+                          <td className="px-4 py-3 text-xs text-slate-400 hidden lg:table-cell">{formatDate(child.due_date)}</td>
+                          <td className="px-4 py-3 text-right">
+                            <span className="font-mono text-sm text-slate-700">{formatCurrency(child.total)}</span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <span className={`font-mono text-sm ${childPaid >= child.total ? 'text-green-600 font-bold' : 'text-slate-400'}`}>
+                              {formatCurrency(childPaid)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <Badge className={`text-xs ${cs.color}`}><CsIcon className="w-3 h-3 mr-1" />{cs.label}</Badge>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-indigo-500 hover:bg-indigo-50" onClick={() => handleDownloadPDF(child)} title="PDF"><Download className="w-3 h-3" /></Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-green-500 hover:bg-green-50" onClick={() => openPaymentDialog(child)} title="Paiement"><CreditCard className="w-3 h-3" /></Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-red-400 hover:bg-red-50" onClick={() => handleDelete(child.id)} title="Supprimer"><Trash2 className="w-3 h-3" /></Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    </React.Fragment>
                   );
                 })}
               </tbody>

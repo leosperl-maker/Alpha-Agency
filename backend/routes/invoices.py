@@ -1243,7 +1243,7 @@ async def add_payment(invoice_id: str, payment: PaymentCreate, current_user: dic
                 # Determine parent status
                 parent_status = parent.get("status", "brouillon")
                 if parent_total_paid >= parent_total:
-                    parent_status = "soldée"
+                    parent_status = "payée"  # auto-finalise la facture principale
                 elif parent_total_paid > 0:
                     parent_status = "partiellement_payée"
                 
