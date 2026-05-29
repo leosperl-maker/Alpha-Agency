@@ -5,21 +5,21 @@ import App from "@/App";
 
 // Register Service Worker for PWA offline support
 if ('serviceWorker' in navigator) {
+  // Quand un nouveau service worker prend le contrôle (nouveau déploiement),
+  // on recharge la page une seule fois pour appliquer la nouvelle version
+  // sans que l'utilisateur ait à vider son cache.
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
       .then((registration) => {
-        console.log('ServiceWorker registered:', registration.scope);
-        
-        // Check for updates
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // New version available
-              console.log('New version available! Refresh to update.');
-            }
-          });
-        });
+        // Vérifie périodiquement la présence d'une nouvelle version
+        setInterval(() => registration.update(), 60 * 60 * 1000);
       })
       .catch((error) => {
         console.log('ServiceWorker registration failed:', error);

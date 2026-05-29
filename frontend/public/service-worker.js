@@ -1,5 +1,6 @@
 // Service Worker for PWA offline support
-const CACHE_NAME = 'alphagency-crm-v1';
+// ⚠️ Incrémenter la version à chaque déploiement pour invalider l'ancien cache.
+const CACHE_NAME = 'alphagency-crm-v2';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to cache immediately
@@ -98,6 +99,24 @@ self.addEventListener('fetch', (event) => {
               headers: { 'Content-Type': 'application/json' }
             }
           );
+        })
+    );
+    return;
+  }
+
+  // Navigation requests (HTML pages) - Network first, so a new deploy is always
+  // picked up immediately. Falls back to cache, then to the offline page.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', responseToCache));
+          return response;
+        })
+        .catch(async () => {
+          const cached = await caches.match('/index.html');
+          return cached || caches.match(OFFLINE_URL);
         })
     );
     return;

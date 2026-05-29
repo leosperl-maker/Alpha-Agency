@@ -129,10 +129,10 @@ const InvoicesPage = () => {
   // New contact dialog
   const [newContactDialogOpen, setNewContactDialogOpen] = useState(false);
   const [newContactData, setNewContactData] = useState({
-    first_name: "", last_name: "", email: "", phone: "", company: "", 
-    position: "", address: "", city: "", postal_code: "", country: "France",
-    type: "client", status: "actif", notes: ""
+    first_name: "", last_name: "", email: "", phone: "", company: "",
+    poste: "", city: "", siret: "", company_address: "", company_activite: "", note: ""
   });
+  const [lookingUpSiret, setLookingUpSiret] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
   
   const [items, setItems] = useState([{ title: "", description: "", quantity: 1, unit_price: 0, discount: 0, discountType: "percent" }]);
@@ -577,6 +577,7 @@ const InvoicesPage = () => {
     try {
       const newInvoice = {
         contact_id: invoice.contact_id,
+        document_type: invoice.document_type || "facture",
         due_date: "",
         payment_terms: invoice.payment_terms || "30",
         notes: invoice.notes,
@@ -585,7 +586,7 @@ const InvoicesPage = () => {
         items: invoice.items
       };
       await invoicesAPI.create(newInvoice);
-      toast.success("Document dupliqué");
+      toast.success(invoice.document_type === "devis" ? "Devis dupliqué" : "Facture dupliquée");
       fetchData();
     } catch (error) {
       toast.error("Erreur lors de la duplication");
@@ -646,9 +647,8 @@ const InvoicesPage = () => {
       toast.success("Contact créé et sélectionné");
       setNewContactDialogOpen(false);
       setNewContactData({
-        first_name: "", last_name: "", email: "", phone: "", company: "", 
-        position: "", address: "", city: "", postal_code: "", country: "France",
-        type: "client", status: "actif", notes: ""
+        first_name: "", last_name: "", email: "", phone: "", company: "",
+        poste: "", city: "", siret: "", company_address: "", company_activite: "", note: ""
       });
     } catch (error) {
       toast.error("Erreur lors de la création du contact");
@@ -985,8 +985,10 @@ const InvoicesPage = () => {
                 <>
                   <p className="font-bold text-slate-900">{contact.first_name} {contact.last_name}</p>
                   {contact.company && <p className="text-slate-500">{contact.company}</p>}
+                  {contact.company_address && <p className="text-slate-500">{contact.company_address}</p>}
                   {contact.email && <p className="text-slate-500">{contact.email}</p>}
                   {contact.phone && <p className="text-slate-500">Tél: {contact.phone}</p>}
+                  {contact.siret && <p className="text-slate-500 mt-1">SIRET: {contact.siret}</p>}
                 </>
               ) : (
                 <p className="text-slate-400 italic">Sélectionnez un client</p>
@@ -2912,20 +2914,63 @@ BANQUE : ..."
             </div>
             
             <div className="space-y-2">
-              <Label className="text-slate-900">Adresse</Label>
-              <Input
-                value={newContactData.address}
-                onChange={(e) => setNewContactData({...newContactData, address: e.target.value})}
-                className="bg-white border-slate-200 text-slate-900"
-              />
-            </div>
-            
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label className="text-slate-900">Code postal</Label>
+              <Label className="text-slate-900">SIRET</Label>
+              <div className="flex gap-2">
                 <Input
-                  value={newContactData.postal_code}
-                  onChange={(e) => setNewContactData({...newContactData, postal_code: e.target.value})}
+                  value={newContactData.siret}
+                  onChange={(e) => setNewContactData({...newContactData, siret: e.target.value})}
+                  placeholder="N° SIRET (14 chiffres)"
+                  className="bg-white border-slate-200 text-slate-900"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={lookingUpSiret}
+                  className="border-slate-200 text-slate-900 hover:bg-slate-50 shrink-0"
+                  onClick={async () => {
+                    if (!newContactData.siret) {
+                      toast.error("Saisissez un SIRET");
+                      return;
+                    }
+                    setLookingUpSiret(true);
+                    try {
+                      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/societe/company/${newContactData.siret}`, {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('alpha_token')}` }
+                      });
+                      const data = await res.json();
+                      if (res.ok && data.company) {
+                        setNewContactData(prev => ({
+                          ...prev,
+                          company: prev.company || data.company.nom || data.company.denomination || "",
+                          city: data.company.ville || prev.city,
+                          company_address: `${data.company.adresse || ""} ${data.company.code_postal || ""} ${data.company.ville || ""}`.trim(),
+                          company_activite: data.company.activite || ""
+                        }));
+                        toast.success("Informations entreprise récupérées");
+                      } else {
+                        toast.error(data.detail || "Entreprise introuvable");
+                      }
+                    } catch (err) {
+                      toast.error("Erreur lors de la recherche SIRET");
+                    } finally {
+                      setLookingUpSiret(false);
+                    }
+                  }}
+                >
+                  {lookingUpSiret ? <Loader2 className="w-4 h-4 animate-spin" /> : "Rechercher"}
+                </Button>
+              </div>
+              {newContactData.company_address && (
+                <p className="text-xs text-slate-500 mt-1">📍 {newContactData.company_address}</p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-slate-900">Poste</Label>
+                <Input
+                  value={newContactData.poste}
+                  onChange={(e) => setNewContactData({...newContactData, poste: e.target.value})}
                   className="bg-white border-slate-200 text-slate-900"
                 />
               </div>
@@ -2934,14 +2979,6 @@ BANQUE : ..."
                 <Input
                   value={newContactData.city}
                   onChange={(e) => setNewContactData({...newContactData, city: e.target.value})}
-                  className="bg-white border-slate-200 text-slate-900"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-slate-900">Pays</Label>
-                <Input
-                  value={newContactData.country}
-                  onChange={(e) => setNewContactData({...newContactData, country: e.target.value})}
                   className="bg-white border-slate-200 text-slate-900"
                 />
               </div>

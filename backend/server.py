@@ -38,7 +38,14 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # JWT Config
-JWT_SECRET = os.environ.get('JWT_SECRET', 'alpha-agency-secret-key-2024')
+# Le secret DOIT venir de l'environnement. À défaut, on en génère un aléatoire
+# au démarrage (les sessions seront invalidées à chaque redémarrage) plutôt que
+# d'utiliser une valeur prévisible codée en dur.
+JWT_SECRET = os.environ.get('JWT_SECRET')
+if not JWT_SECRET:
+    import secrets as _secrets
+    JWT_SECRET = _secrets.token_urlsafe(48)
+    logging.warning("JWT_SECRET absent de l'environnement : secret aléatoire généré (sessions non persistantes entre redémarrages).")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
@@ -49,7 +56,7 @@ if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
 
 # Stripe Config
-STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', 'sk_test_emergent')
+STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', '')
 
 # Company Info - Updated with real information from PDF template
 COMPANY_INFO = {
@@ -139,6 +146,12 @@ class ContactCreate(BaseModel):
     note: Optional[str] = None
     infos_sup: Optional[str] = None
     city: Optional[str] = None
+    # Données entreprise (remplies via SIRET) — persistées pour la facturation
+    siret: Optional[str] = None
+    company_address: Optional[str] = None
+    company_activite: Optional[str] = None
+    status: Optional[str] = None
+    score: Optional[str] = None
 
 class ContactUpdate(BaseModel):
     first_name: Optional[str] = None
@@ -156,6 +169,10 @@ class ContactUpdate(BaseModel):
     budget: Optional[str] = None
     city: Optional[str] = None
     project_type: Optional[str] = None
+    # Données entreprise (remplies via SIRET) — persistées pour la facturation
+    siret: Optional[str] = None
+    company_address: Optional[str] = None
+    company_activite: Optional[str] = None
 
 class OpportunityCreate(BaseModel):
     contact_id: str
@@ -836,11 +853,15 @@ def generate_professional_pdf(doc_data: dict, contact: dict, doc_type: str = "fa
         elements.append(Paragraph(f"<b>{client_name}</b>", client_info_style))
     if contact.get('company'):
         elements.append(Paragraph(contact['company'], client_info_style))
+    if contact.get('company_address'):
+        elements.append(Paragraph(contact['company_address'], client_info_style))
     if contact.get('email'):
         elements.append(Paragraph(contact['email'], client_info_style))
     if contact.get('phone'):
         elements.append(Paragraph(contact['phone'], client_info_style))
-    
+    if contact.get('siret'):
+        elements.append(Paragraph(f"SIRET: {contact['siret']}", client_info_style))
+
     elements.append(Spacer(1, 0.8*cm))
     
     # ===== ITEMS TABLE =====
@@ -6001,16 +6022,22 @@ def generate_professional_invoice_pdf(invoice: dict, contact: dict) -> BytesIO:
     # Client info box
     client_name = f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip() or "Client"
     client_company = contact.get('company', '')
+    client_address = contact.get('company_address', '')
     client_email = contact.get('email', '')
     client_phone = contact.get('phone', '')
-    
+    client_siret = contact.get('siret', '')
+
     client_text = f"<b>{client_name}</b>"
     if client_company:
         client_text += f"<br/>{client_company}"
+    if client_address:
+        client_text += f"<br/>{client_address}"
     if client_email:
         client_text += f"<br/>{client_email}"
     if client_phone:
         client_text += f"<br/>Tél: {client_phone}"
+    if client_siret:
+        client_text += f"<br/>SIRET: {client_siret}"
     
     client_data = [
         [Paragraph("<b>FACTURER À:</b>", ParagraphStyle('Label', parent=styles['Normal'], fontSize=9, textColor=colors.HexColor('#666666')))],
@@ -6380,10 +6407,22 @@ async def get_backup_history(limit: int = 20, current_user: dict = Depends(get_c
 
 # Router will be included after all routes are defined
 
+# CORS : si CORS_ORIGINS est défini (liste de domaines séparés par des virgules),
+# on restreint et on autorise les credentials. Sinon, on autorise toutes les
+# origines MAIS sans credentials (combinaison valide et sans fuite de cookies ;
+# l'auth passe par un token Bearer dans l'en-tête Authorization, pas par cookie).
+_cors_env = os.environ.get('CORS_ORIGINS', '').strip()
+if _cors_env and _cors_env != '*':
+    _cors_origins = [o.strip() for o in _cors_env.split(',') if o.strip()]
+    _cors_allow_credentials = True
+else:
+    _cors_origins = ['*']
+    _cors_allow_credentials = False
+
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_credentials=_cors_allow_credentials,
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

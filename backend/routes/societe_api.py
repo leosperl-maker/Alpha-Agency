@@ -228,6 +228,37 @@ async def search_company_by_person(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+async def _company_details_from_gouv(clean_id: str):
+    """Repli gratuit via l'API publique recherche-entreprises.api.gouv.fr
+    (aucune clé requise). Renvoie le même format que l'API societe.com."""
+    from .business_search import search_by_siret, search_by_siren
+    result = await (search_by_siren(clean_id) if len(clean_id) == 9 else search_by_siret(clean_id))
+    if not result or not result.found:
+        raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+    dirigeants = []
+    for d in (result.dirigeants or []):
+        nom = (f"{d.get('prenoms', d.get('prenom', ''))} {d.get('nom', '')}").strip() or d.get("denomination", "")
+        if nom:
+            dirigeants.append({"nom": nom, "fonction": d.get("qualite", ""), "date_prise_poste": ""})
+    return {
+        "success": True,
+        "source": "recherche-entreprises.api.gouv.fr",
+        "company": {
+            "nom": result.company_name or "",
+            "siren": result.siren or "",
+            "siret": result.siret or clean_id,
+            "adresse": result.address or "",
+            "code_postal": result.postal_code or "",
+            "ville": result.city or "",
+            "activite": result.activity or "",
+            "forme_juridique": result.legal_form or "",
+            "dirigeants": dirigeants,
+            "bilans": [],
+            "etablissements": 1,
+        },
+    }
+
+
 @router.get("/company/{siret_or_siren}")
 async def get_company_details(
     siret_or_siren: str,
@@ -236,18 +267,23 @@ async def get_company_details(
     """Get detailed company information by SIRET or SIREN"""
     # Clean input
     clean_id = siret_or_siren.replace(" ", "").replace(".", "")
-    
+
+    # Pas de clé societe.com → on utilise directement l'API gouvernementale gratuite
+    if not SOCIETE_API_KEY:
+        return await _company_details_from_gouv(clean_id)
+
     # Determine if SIREN (9 digits) or SIRET (14 digits)
     if len(clean_id) == 9:
         params = {"siren": clean_id}
     else:
         params = {"siret": clean_id}
-    
+
     try:
         data = await societe_api_request("entreprise", params)
-        
+
         if not data or data.get("error"):
-            raise HTTPException(status_code=404, detail="Entreprise non trouvée")
+            # Repli sur l'API gratuite si societe.com ne renvoie rien
+            return await _company_details_from_gouv(clean_id)
         
         # The response might be a single company or list
         company_data = data.get("entreprise", data)
@@ -283,8 +319,8 @@ async def get_company_details(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Company details error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Company details error: {e} — repli API gouv")
+        return await _company_details_from_gouv(clean_id)
 
 
 @router.get("/company/{siret_or_siren}/financials")
