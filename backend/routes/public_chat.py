@@ -102,7 +102,13 @@ BLOCS TECHNIQUES (invisibles pour le prospect, retirés automatiquement, ne les 
 [QUOTE]{"items":[{"title":"","description":"","quantity":1,"unit_price":0}],"notes":""}[/QUOTE]
   (estimation pour l'équipe ; unit_price en euros HT ; montants réalistes d'agence, l'équipe ajustera)
 
-Commence par te présenter en une phrase et demander son prénom et son nom."""
+CONTINUITÉ (TRÈS IMPORTANT, lis bien) :
+- Dis bonjour et présente-toi UNIQUEMENT au tout premier message. Ensuite ne te re-présente JAMAIS et ne redis pas bonjour.
+- Ne redemande JAMAIS une information déjà donnée. Relis tout l'historique avant chaque réponse et tiens-toi à l'étape où tu en es.
+- Émets [RESEARCH] une seule fois (quand tu as l'entreprise). Émets [LEAD] une fois quand tu as prénom+nom+email, puis ré-émets-le COMPLET (budget + tous les détails de la découverte) seulement à la toute fin, juste avant [QUOTE].
+- Place chaque bloc technique SEUL sur sa propre ligne, à la TOUTE FIN du message, jamais au milieu d'une phrase. N'écris jamais une balise de fermeture toute seule.
+
+Si la conversation vient de commencer (l'historique ne contient que ton message d'accueil), présente-toi en une phrase et demande le prénom et le nom. Sinon, poursuis directement la découverte là où tu en étais, sans recommencer."""
 
 GREETING = ("Bonjour, je suis Alex, le conseiller d'Alpha Agency. Je vais vous poser quelques "
             "questions pour bien cerner votre projet. Pour commencer, quel est votre prénom et votre nom ?")
@@ -283,7 +289,17 @@ def _extract_block(text: str, tag: str):
 
 
 def _strip_all_blocks(text: str) -> str:
-    text = re.sub(r"\[(RESEARCH|LEAD|QUOTE)\].*?(\[/\1\]|\})", "", text or "", flags=re.DOTALL | re.IGNORECASE)
+    """Retire toutes les formes de balises techniques, même malformées/isolées."""
+    text = text or ""
+    # [TAG]{...}[/TAG] complet
+    text = re.sub(r"\[(RESEARCH|LEAD|QUOTE)\]\s*\{.*?\}\s*\[/\1\]", "", text, flags=re.DOTALL | re.IGNORECASE)
+    # [TAG]{...} (ouverture + json sans fermeture)
+    text = re.sub(r"\[(?:RESEARCH|LEAD|QUOTE)\]\s*\{.*?\}", "", text, flags=re.DOTALL | re.IGNORECASE)
+    # balises isolées [TAG] ou [/TAG]
+    text = re.sub(r"\[/?(?:RESEARCH|LEAD|QUOTE)\]", "", text, flags=re.IGNORECASE)
+    # nettoyage des espaces/lignes vides résiduels
+    text = re.sub(r"[ \t]+\n", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
 
 
