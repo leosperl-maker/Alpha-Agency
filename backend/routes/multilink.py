@@ -133,6 +133,8 @@ class PageCreate(BaseModel):
     social_links: Optional[List[dict]] = None  # [{platform, url, is_active}]
     custom_font: Optional[str] = None
     custom_domain: Optional[str] = None  # Domaine personnalisé (ex: bio.antilla-martinique.com)
+    linked_document_ids: Optional[List[str]] = []  # Documents CRM rattachés (logo, visuels) — aide l'agent IA
+    linked_contact_ids: Optional[List[str]] = []   # Fiches contact CRM rattachées (client)
     verified: bool = False
     is_active: bool = True
 
@@ -149,6 +151,8 @@ class PageUpdate(BaseModel):
     social_links: Optional[List[dict]] = None
     custom_font: Optional[str] = None
     custom_domain: Optional[str] = None  # Domaine personnalisé
+    linked_document_ids: Optional[List[str]] = None  # Documents CRM rattachés (logo, visuels)
+    linked_contact_ids: Optional[List[str]] = None   # Fiches contact CRM rattachées
     verified: Optional[bool] = None
     is_active: Optional[bool] = None
 
