@@ -260,15 +260,16 @@ async def get_documents(
     folder_id: Optional[str] = None,
     file_type: Optional[str] = None,
     search: Optional[str] = None,
+    flat: Optional[bool] = False,  # True = tous les documents (tous dossiers confondus), liste à plat
     current_user: dict = Depends(get_current_user)
 ):
     """Get all documents with optional filters"""
     query = {}
-    
+
     if folder_id:
         query["folder_id"] = folder_id
-    elif folder_id is None and not search:
-        # Only root documents if no folder specified and no search
+    elif folder_id is None and not search and not flat:
+        # Only root documents if no folder specified and no search (sauf flat=true)
         query["folder_id"] = None
     
     if file_type:
