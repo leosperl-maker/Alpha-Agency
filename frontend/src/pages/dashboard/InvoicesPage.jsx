@@ -80,7 +80,7 @@ const COMPANY_INFO = {
   website: "www.alphagency.fr",
   siret: "XXX XXX XXX XXXXX",
   tva: "FR XX XXX XXX XXX",
-  logo: process.env.PUBLIC_URL + "/logo-header-white.png"
+  logo: process.env.PUBLIC_URL + "/logo-header-black.png"
 };
 
 const InvoicesPage = () => {

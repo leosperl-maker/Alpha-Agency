@@ -178,8 +178,8 @@ const TransferDownloadPage = () => {
       <header className="py-6 px-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img 
-              src={process.env.PUBLIC_URL + "/logo-header-black.png"} 
+            <img
+              src={process.env.PUBLIC_URL + "/logo-header-white.png"}
               alt="Alphagency"
               className="h-10"
             />

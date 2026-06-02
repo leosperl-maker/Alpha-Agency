@@ -21,11 +21,11 @@ const Footer = () => {
               data-testid="footer-logo-clickable"
               className="inline-block mb-6 cursor-pointer select-none"
             >
-              <img 
-                src={process.env.PUBLIC_URL + "/logo-header-black.png"} 
+              <img
+                src={process.env.PUBLIC_URL + "/logo-header-white.png"}
                 alt="Alpha Agency - Agence de Communication 360°"
                 data-testid="footer-logo-img"
-                className="h-40 w-auto"
+                className="h-12 w-auto"
               />
             </div>
             <p className="text-[#A1A1AA] text-sm mb-6">

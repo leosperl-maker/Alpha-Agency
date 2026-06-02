@@ -40,10 +40,10 @@ const Navbar = () => {
             data-testid="logo-link"
             className="flex items-center gap-2 px-2 lg:px-3 flex-shrink-0"
           >
-            <img 
-              src={process.env.PUBLIC_URL + "/logo-header-white.png"} 
+            <img
+              src={process.env.PUBLIC_URL + "/logo-header-black.png"}
               alt="Alpha Agency"
-              className="h-8 sm:h-10 w-auto object-contain max-w-[120px] sm:max-w-none"
+              className="h-8 sm:h-10 w-auto object-contain max-w-[140px] sm:max-w-none"
             />
           </Link>
 
