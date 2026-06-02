@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Plus, Search, Filter, MoreVertical, Edit, Trash2, Eye,
   FileText, Calendar, Tag, CheckCircle, Archive, Image,
-  X, Loader2, Sparkles, Save, ExternalLink, Globe, Settings2
+  X, Loader2, Sparkles, Save, ExternalLink, Globe, Settings2, Video, Music
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -62,6 +62,9 @@ const PortfolioManagePage = () => {
     category: "",
     tags: [],
     featured_image: "",
+    gallery_images: [],
+    video_url: "",
+    audio_url: "",
     content_blocks: [],
     status: "draft",
     client_name: "",
@@ -100,6 +103,9 @@ const PortfolioManagePage = () => {
       category: "",
       tags: [],
       featured_image: "",
+      gallery_images: [],
+      video_url: "",
+      audio_url: "",
       content_blocks: [],
       status: "draft",
       client_name: "",
@@ -118,6 +124,9 @@ const PortfolioManagePage = () => {
         category: item.category || "",
         tags: item.tags || [],
         featured_image: item.featured_image || "",
+        gallery_images: item.gallery_images || [],
+        video_url: item.video_url || "",
+        audio_url: item.audio_url || "",
         content_blocks: item.content_blocks || [],
         status: item.status || "draft",
         client_name: item.client_name || "",
@@ -200,6 +209,40 @@ const PortfolioManagePage = () => {
       } finally {
         setUploadingImage(false);
       }
+    }
+  };
+
+  // Galerie multi-images (ex: un shooting = plusieurs photos)
+  const handleGalleryUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setUploadingImage(true);
+    try {
+      for (const f of files) {
+        const res = await uploadAPI.image(f);
+        setFormData((prev) => ({ ...prev, gallery_images: [...(prev.gallery_images || []), res.data.url] }));
+      }
+      toast.success(`${files.length} image(s) ajoutée(s)`);
+    } catch (error) {
+      toast.error("Erreur lors de l'upload de la galerie");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Vidéo / audio (lecture directe sur le site)
+  const handleMediaUpload = async (e, kind) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setUploadingImage(true);
+    try {
+      const res = kind === "video" ? await uploadAPI.video(f) : await uploadAPI.audio(f);
+      setFormData((prev) => ({ ...prev, [kind === "video" ? "video_url" : "audio_url"]: res.data.url }));
+      toast.success(kind === "video" ? "Vidéo uploadée" : "Audio uploadé");
+    } catch (error) {
+      toast.error("Erreur lors de l'upload");
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -592,6 +635,57 @@ const PortfolioManagePage = () => {
                       </Button>
                     </div>
                   )}
+                </div>
+
+                {/* Galerie multi-images (ex : un shooting) */}
+                <div className="space-y-2 pt-4 border-t border-border">
+                  <div className="flex items-center justify-between">
+                    <Label className="font-semibold">Galerie d'images <span className="text-muted-foreground font-normal">({(formData.gallery_images || []).length})</span></Label>
+                    <label className="cursor-pointer">
+                      <Button variant="outline" size="sm" disabled={uploadingImage} asChild>
+                        <span><Image className="w-4 h-4 mr-2" /> Ajouter des images</span>
+                      </Button>
+                      <input type="file" accept="image/*" multiple className="hidden" onChange={handleGalleryUpload} />
+                    </label>
+                  </div>
+                  <p className="text-muted-foreground text-xs">Pour un shooting : ajoute plusieurs photos, elles s'affichent toutes (entières) sur la page du projet.</p>
+                  {(formData.gallery_images || []).length > 0 && (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-2">
+                      {formData.gallery_images.map((url, i) => (
+                        <div key={i} className="relative group rounded-lg overflow-hidden border border-border aspect-square">
+                          <img src={url} alt="" className="w-full h-full object-cover" />
+                          <button type="button" onClick={() => setFormData({ ...formData, gallery_images: formData.gallery_images.filter((_, j) => j !== i) })} className="absolute top-1 right-1 bg-danger text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" title="Retirer"><X className="w-3 h-3" /></button>
+                          <button type="button" onClick={() => setFormData({ ...formData, featured_image: url })} title="Définir comme couverture" className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">Couverture</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Vidéo */}
+                <div className="space-y-2 pt-4 border-t border-border">
+                  <Label className="font-semibold">Vidéo</Label>
+                  <div className="flex gap-4">
+                    <Input value={formData.video_url} onChange={(e) => setFormData({ ...formData, video_url: e.target.value })} placeholder="URL vidéo (Cloudinary, YouTube, Vimeo…)" className="bg-card border-border flex-1" />
+                    <label className="cursor-pointer">
+                      <Button variant="outline" disabled={uploadingImage} asChild><span><Video className="w-4 h-4 mr-2" /> Upload</span></Button>
+                      <input type="file" accept="video/*" className="hidden" onChange={(e) => handleMediaUpload(e, "video")} />
+                    </label>
+                  </div>
+                  {formData.video_url && <video src={formData.video_url} controls className="w-full max-h-64 rounded-lg mt-2 bg-black" />}
+                </div>
+
+                {/* Audio */}
+                <div className="space-y-2 pt-4 border-t border-border">
+                  <Label className="font-semibold">Audio <span className="text-muted-foreground font-normal">(ex : spot radio)</span></Label>
+                  <div className="flex gap-4">
+                    <Input value={formData.audio_url} onChange={(e) => setFormData({ ...formData, audio_url: e.target.value })} placeholder="URL audio" className="bg-card border-border flex-1" />
+                    <label className="cursor-pointer">
+                      <Button variant="outline" disabled={uploadingImage} asChild><span><Music className="w-4 h-4 mr-2" /> Upload</span></Button>
+                      <input type="file" accept="audio/*" className="hidden" onChange={(e) => handleMediaUpload(e, "audio")} />
+                    </label>
+                  </div>
+                  {formData.audio_url && <audio src={formData.audio_url} controls className="w-full mt-2" />}
                 </div>
               </TabsContent>
 

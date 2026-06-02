@@ -322,6 +322,58 @@ const ProjectDetail = () => {
         </div>
       </section>
 
+      {/* Galerie */}
+      {project.gallery_images?.length > 0 && (
+        <section className="pb-8 md:pb-16">
+          <div className="max-w-6xl mx-auto px-6">
+            <h2 className="font-display text-2xl md:text-3xl font-bold mb-8">Galerie</h2>
+            <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
+              {project.gallery_images.map((src, i) => (
+                <img
+                  key={i}
+                  src={src}
+                  alt={`${project.title} — ${i + 1}`}
+                  loading="lazy"
+                  className="w-full mb-4 rounded-xl border border-white/10 break-inside-avoid"
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Vidéo */}
+      {project.video_url && (
+        <section className="pb-8 md:pb-16">
+          <div className="max-w-4xl mx-auto px-6">
+            <h2 className="font-display text-2xl md:text-3xl font-bold mb-8">Vidéo</h2>
+            {/(youtube\.com|youtu\.be|vimeo\.com)/.test(project.video_url) ? (
+              <div className="aspect-video rounded-xl overflow-hidden border border-white/10">
+                <iframe
+                  src={project.video_url.replace("watch?v=", "embed/").replace("youtu.be/", "youtube.com/embed/")}
+                  title="Vidéo"
+                  className="w-full h-full"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <video src={project.video_url} controls playsInline className="w-full rounded-xl border border-white/10 bg-black" />
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Audio */}
+      {project.audio_url && (
+        <section className="pb-16">
+          <div className="max-w-4xl mx-auto px-6">
+            <h2 className="font-display text-2xl md:text-3xl font-bold mb-8">Audio</h2>
+            <audio src={project.audio_url} controls className="w-full" />
+          </div>
+        </section>
+      )}
+
       {/* Related Projects */}
       {relatedProjects.length > 0 && (
         <section className="py-16 border-t border-white/10">
