@@ -3244,11 +3244,10 @@ async def upload_video(file: UploadFile = File(...), current_user: dict = Depend
         raise HTTPException(status_code=400, detail="Fichier trop volumineux. Maximum: 100MB")
     
     try:
-        result = cloudinary.uploader.upload_large(
+        result = cloudinary.uploader.upload(
             content,
             folder="alpha-agency/video",
-            resource_type="video",
-            chunk_size=6000000
+            resource_type="video"
         )
         return {
             "url": result['secure_url'],
