@@ -1,64 +1,32 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Users, Target, Heart, Zap, ArrowRight } from "lucide-react";
+import { Users, Target, Heart, Zap, ArrowRight, Image as ImageIcon } from "lucide-react";
 import { Button } from "../components/ui/button";
+
+const RED = "#E11D2E";
+const BG = "#0A0507";
 
 const AgencyPage = () => {
   const values = [
-    {
-      icon: Zap,
-      title: "Réactivité",
-      description: "Nous nous engageons sur des délais courts et tenons nos promesses."
-    },
-    {
-      icon: Target,
-      title: "Excellence",
-      description: "Chaque projet est traité avec le même niveau d'exigence et de qualité."
-    },
-    {
-      icon: Heart,
-      title: "Proximité",
-      description: "Une équipe locale qui comprend les enjeux du marché antillais."
-    },
-    {
-      icon: Users,
-      title: "Partenariat",
-      description: "Nous construisons des relations durables avec nos clients."
-    }
+    { icon: Zap, title: "Réactivité", description: "On s'engage sur des délais courts, et on les tient." },
+    { icon: Target, title: "Exigence", description: "Chaque projet est traité avec le même niveau de soin." },
+    { icon: Heart, title: "Proximité", description: "Une équipe locale qui connaît le marché antillais." },
+    { icon: Users, title: "Partenariat", description: "On construit des relations qui durent avec nos clients." }
   ];
 
   const methodology = [
-    {
-      step: "01",
-      title: "Découverte",
-      description: "Analyse approfondie de vos besoins, objectifs et contraintes. Audit de votre présence digitale actuelle."
-    },
-    {
-      step: "02",
-      title: "Stratégie",
-      description: "Définition d'une stratégie sur-mesure alignée avec vos objectifs business et votre budget."
-    },
-    {
-      step: "03",
-      title: "Création",
-      description: "Design et développement de vos supports digitaux avec des points de validation réguliers."
-    },
-    {
-      step: "04",
-      title: "Déploiement",
-      description: "Mise en ligne, tests et optimisations. Formation à l'utilisation de vos outils."
-    },
-    {
-      step: "05",
-      title: "Suivi",
-      description: "Accompagnement continu, maintenance, et optimisation basée sur les performances."
-    }
+    { step: "01", title: "Découverte", description: "On analyse vos besoins, vos objectifs et votre présence digitale actuelle." },
+    { step: "02", title: "Stratégie", description: "On définit une stratégie sur mesure, alignée avec vos objectifs et votre budget." },
+    { step: "03", title: "Création", description: "On conçoit et développe vos supports, avec des points de validation réguliers." },
+    { step: "04", title: "Déploiement", description: "Mise en ligne, tests, optimisations, et formation à vos nouveaux outils." },
+    { step: "05", title: "Suivi", description: "Accompagnement continu, maintenance et améliorations selon les performances." }
   ];
 
   return (
-    <div data-testid="agency-page" className="bg-white">
+    <div data-testid="agency-page" className="text-white" style={{ backgroundColor: BG }}>
       {/* Hero */}
-      <section className="relative pt-32 pb-24 px-6 overflow-hidden bg-[#F8F8F8]">
+      <section className="relative pt-36 pb-24 px-6 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(110% 80% at 30% 0%, #2A0712 0%, #0A0507 65%)" }} aria-hidden="true" />
         <div className="max-w-7xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -66,23 +34,23 @@ const AgencyPage = () => {
             transition={{ duration: 0.8 }}
             className="max-w-3xl"
           >
-            <h1 
+            <h1
               data-testid="agency-headline"
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#1A1A1A] mb-6"
+              className="font-display text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight mb-6"
             >
               L'agence digitale<br />
-              <span className="text-[#CE0202]">made in Guadeloupe</span>
+              <span style={{ color: RED }}>née en Guadeloupe</span>
             </h1>
-            <p className="text-lg lg:text-xl text-[#666666]">
-              ALPHA Agency est une agence de communication digitale 360° basée en Guadeloupe. 
-              Nous accompagnons les entreprises locales et nationales dans leur transformation digitale.
+            <p className="text-lg lg:text-xl text-white/60">
+              Alpha Agency, c'est une agence de communication 360° basée en Guadeloupe.
+              On aide les entreprises d'ici et d'ailleurs à exister vraiment en ligne.
             </p>
           </motion.div>
         </div>
       </section>
 
       {/* About Section */}
-      <section className="py-24 px-6 bg-white">
+      <section className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <motion.div
@@ -91,14 +59,13 @@ const AgencyPage = () => {
               viewport={{ once: true }}
               className="lg:col-span-6"
             >
-              <div 
-                className="aspect-[4/3] rounded-lg overflow-hidden"
-                style={{
-                  backgroundImage: `url('https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?crop=entropy&cs=srgb&fm=jpg&q=85')`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-              />
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10">
+                <div className="absolute inset-0 grain-overlay opacity-[0.15]" aria-hidden="true" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/30">
+                  <ImageIcon className="w-8 h-8" aria-hidden="true" />
+                  <span className="text-[10px] uppercase tracking-[0.25em]">L'équipe</span>
+                </div>
+              </div>
             </motion.div>
 
             <motion.div
@@ -107,20 +74,19 @@ const AgencyPage = () => {
               viewport={{ once: true }}
               className="lg:col-span-6"
             >
-              <h2 className="text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-6">
-                Notre <span className="text-[#CE0202]">vision</span>
+              <h2 className="font-display text-3xl lg:text-5xl font-extrabold tracking-tight mb-6">
+                Notre <span style={{ color: RED }}>vision</span>
               </h2>
-              <p className="text-[#666666] text-lg mb-6">
-                Fondée avec la conviction que chaque entreprise mérite une présence digitale professionnelle, 
-                ALPHA Agency s'est donné pour mission de démocratiser l'accès aux services web de qualité.
+              <p className="text-white/65 text-lg mb-6">
+                On est partis d'une conviction simple : chaque entreprise mérite une présence
+                digitale pro, sans avoir besoin du budget d'une grande marque.
               </p>
-              <p className="text-[#666666] text-lg mb-6">
-                Nous croyons que la performance digitale ne devrait pas être réservée aux grandes entreprises. 
-                C'est pourquoi nous avons créé une offre accessible : un site web professionnel à partir de 49€/mois, 
-                livré en seulement 7 jours.
+              <p className="text-white/65 text-lg mb-6">
+                C'est pour ça qu'on a créé une offre vraiment accessible : un site web pro
+                à partir de 49€/mois, livré en 7 jours.
               </p>
-              <p className="text-[#666666] text-lg">
-                Notre ancrage en Guadeloupe nous permet de comprendre les spécificités du marché antillais 
+              <p className="text-white/65 text-lg">
+                Être ancrés en Guadeloupe nous permet de comprendre le marché antillais,
                 tout en appliquant les standards internationaux du web.
               </p>
             </motion.div>
@@ -129,7 +95,7 @@ const AgencyPage = () => {
       </section>
 
       {/* Values Section */}
-      <section data-testid="values-section" className="py-24 px-6 bg-[#F8F8F8]">
+      <section data-testid="values-section" className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -137,11 +103,11 @@ const AgencyPage = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl lg:text-5xl font-bold text-[#1A1A1A] mb-4">
-              Nos <span className="text-[#CE0202]">valeurs</span>
+            <h2 className="font-display text-3xl lg:text-5xl font-extrabold tracking-tight mb-4">
+              Nos <span style={{ color: RED }}>valeurs</span>
             </h2>
-            <p className="text-[#666666] text-lg max-w-2xl mx-auto">
-              Les principes qui guident notre travail au quotidien
+            <p className="text-white/60 text-lg max-w-2xl mx-auto">
+              Les principes qui guident notre travail au quotidien.
             </p>
           </motion.div>
 
@@ -152,15 +118,15 @@ const AgencyPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: index * 0.08 }}
                 data-testid={`value-${index}`}
-                className="bg-white p-8 rounded-lg border border-[#E5E5E5] text-center"
+                className="bg-white/[0.03] p-8 rounded-2xl border border-white/10 text-center hover:border-white/30 transition-colors duration-300"
               >
-                <div className="w-16 h-16 bg-[#CE0202]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <value.icon className="w-8 h-8 text-[#CE0202]" />
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: "rgba(225,29,46,0.12)" }}>
+                  <value.icon className="w-8 h-8" style={{ color: RED }} aria-hidden="true" />
                 </div>
-                <h3 className="text-xl font-bold text-[#1A1A1A] mb-3">{value.title}</h3>
-                <p className="text-[#666666]">{value.description}</p>
+                <h3 className="font-display text-xl font-bold mb-3">{value.title}</h3>
+                <p className="text-white/55">{value.description}</p>
               </motion.div>
             ))}
           </div>
@@ -168,7 +134,7 @@ const AgencyPage = () => {
       </section>
 
       {/* Methodology Section */}
-      <section data-testid="methodology-section" className="py-24 px-6 bg-white">
+      <section data-testid="methodology-section" className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -176,15 +142,15 @@ const AgencyPage = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl lg:text-5xl font-bold text-[#1A1A1A] mb-4">
-              Notre <span className="text-[#CE0202]">méthodologie</span>
+            <h2 className="font-display text-3xl lg:text-5xl font-extrabold tracking-tight mb-4">
+              Notre <span style={{ color: RED }}>méthode</span>
             </h2>
-            <p className="text-[#666666] text-lg max-w-2xl mx-auto">
-              Un process éprouvé pour garantir le succès de votre projet
+            <p className="text-white/60 text-lg max-w-2xl mx-auto">
+              Un process éprouvé pour donner toutes ses chances à votre projet.
             </p>
           </motion.div>
 
-          <div className="space-y-8">
+          <div className="space-y-5">
             {methodology.map((item, index) => (
               <motion.div
                 key={item.step}
@@ -192,14 +158,14 @@ const AgencyPage = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 data-testid={`methodology-${index}`}
-                className="flex flex-col md:flex-row items-start gap-6 bg-[#F8F8F8] p-8 rounded-lg border border-[#E5E5E5]"
+                className="flex flex-col md:flex-row items-start gap-6 bg-white/[0.03] p-8 rounded-2xl border border-white/10"
               >
-                <div className="text-5xl font-bold text-[#CE0202]/30 font-mono">
+                <div className="font-display text-5xl font-extrabold font-mono" style={{ color: "rgba(225,29,46,0.35)" }}>
                   {item.step}
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-[#1A1A1A] mb-2">{item.title}</h3>
-                  <p className="text-[#666666] text-lg">{item.description}</p>
+                  <h3 className="font-display text-2xl font-bold mb-2">{item.title}</h3>
+                  <p className="text-white/60 text-lg">{item.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -208,27 +174,28 @@ const AgencyPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-6 bg-[#F8F8F8]">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="py-24 px-6 relative overflow-hidden border-t border-white/10">
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(120% 80% at 50% 120%, #C8102E 0%, #4A0C1B 38%, #0A0507 72%)" }} aria-hidden="true" />
+        <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl lg:text-5xl font-bold text-[#1A1A1A] mb-6">
+            <h2 className="font-display text-3xl lg:text-6xl font-extrabold tracking-tight mb-6">
               Prêt à travailler<br />
-              <span className="text-[#CE0202]">ensemble ?</span>
+              <span style={{ color: RED }}>ensemble ?</span>
             </h2>
-            <p className="text-[#666666] text-lg mb-8">
-              Discutons de votre projet et voyons comment nous pouvons vous aider.
+            <p className="text-white/70 text-lg mb-8">
+              Parlons de votre projet et voyons comment on peut vous aider.
             </p>
             <Link to="/contact">
-              <Button 
+              <Button
                 data-testid="agency-cta"
-                className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider"
+                className="bg-white hover:bg-white/90 text-[#0A0507] hover:text-[#0A0507] rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider transition-all duration-300"
               >
                 Nous contacter
-                <ArrowRight className="ml-2 w-4 h-4" />
+                <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
               </Button>
             </Link>
           </motion.div>
