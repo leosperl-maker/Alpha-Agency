@@ -16,11 +16,16 @@ import {
   MapPin,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
-import ShaderBackground from "../components/three/ShaderBackground";
 import LottieLoader from "../components/motion/LottieLoaderLazy";
 import Magnetic from "../components/motion/Magnetic";
+import RotatingWord from "../components/motion/RotatingWord";
 
-const RED = "#FF3D6E";
+// Palette bordeaux / rouge profond (aucun rose)
+const RED = "#E11D2E";        // rouge vif lisible sur fond sombre
+const BORDEAUX = "#5C0A1E";   // bordeaux profond
+const BG = "#0A0507";         // noir chaud
+const WORD_GRADIENT = "linear-gradient(100deg,#F2384A,#C8102E 45%,#6E0A1C)";
+const heroWords = ["marques", "sites web", "campagnes", "vidéos", "images"];
 
 const services = [
   { icon: Globe, title: "Site Web", description: "Sites vitrines & e-commerce livrés en 7 jours.", highlight: "Dès 90€/mois", big: true },
@@ -77,105 +82,138 @@ const HomePage = () => {
   };
 
   return (
-    <div data-testid="home-page" className="bg-[#05010A] text-white overflow-x-hidden">
-      {/* ===================== HERO — shader immersif ===================== */}
-      <ShaderBackground className="min-h-screen flex items-center">
-        <section
-          data-testid="hero-section"
-          className="relative min-h-screen w-full flex items-center px-6 pt-28 pb-20 md:pt-24"
-        >
-          {/* Voile sombre pour garantir la lisibilité du texte sur le shader */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#05010A] via-[#05010A]/45 to-[#05010A]/70" aria-hidden="true" />
-          <div className="absolute inset-0 grain-overlay opacity-[0.08] pointer-events-none" aria-hidden="true" />
+    <div data-testid="home-page" className="text-white overflow-x-hidden" style={{ backgroundColor: BG }}>
+      {/* ===================== HERO — ambiance bordeaux + titre cinétique ===================== */}
+      <section
+        data-testid="hero-section"
+        className="relative min-h-screen w-full flex items-center justify-center px-6 pt-28 pb-20 overflow-hidden"
+      >
+        {/* Orbes lumineux bordeaux (animation transform-only = fluide, pas de WebGL) */}
+        <motion.div
+          aria-hidden="true"
+          className="absolute rounded-full blur-[130px] pointer-events-none"
+          style={{ width: "44rem", height: "44rem", top: "-12%", left: "-8%", background: BORDEAUX, opacity: 0.6 }}
+          animate={rm ? {} : { x: [0, 70, 0], y: [0, 50, 0] }}
+          transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          aria-hidden="true"
+          className="absolute rounded-full blur-[130px] pointer-events-none"
+          style={{ width: "38rem", height: "38rem", bottom: "-15%", right: "-6%", background: "#7A0F22", opacity: 0.5 }}
+          animate={rm ? {} : { x: [0, -60, 0], y: [0, -40, 0] }}
+          transition={{ duration: 32, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          aria-hidden="true"
+          className="absolute rounded-full blur-[100px] pointer-events-none"
+          style={{ width: "22rem", height: "22rem", top: "30%", left: "55%", background: "#3A0712", opacity: 0.6 }}
+          animate={rm ? {} : { x: [0, -40, 0], y: [0, 30, 0] }}
+          transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
+        />
 
-          <div className="max-w-5xl mx-auto w-full relative z-10 flex flex-col items-center text-center">
-            <motion.div
-              className="flex flex-col items-center"
-              initial={{ opacity: 0, y: rm ? 0 : 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div
-                className="inline-flex items-center gap-2 mb-7 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-xs font-mono uppercase tracking-[0.25em] text-white/80"
-                style={{ filter: "url(#glass-effect)" }}
-              >
-                <MapPin className="w-3.5 h-3.5" style={{ color: RED }} aria-hidden="true" />
-                Agence créative 360° · Guadeloupe
-              </div>
+        {/* Vignette + grain pour la lisibilité et le grain ciné */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: `radial-gradient(70% 60% at 50% 42%, transparent 0%, ${BG} 80%)` }}
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 grain-overlay opacity-[0.10] pointer-events-none" aria-hidden="true" />
 
-              <h1
-                data-testid="hero-headline"
-                className="font-display font-extrabold leading-[1.02] tracking-tight text-[2.75rem] sm:text-6xl lg:text-8xl text-white"
-              >
-                <span className="block overflow-hidden pb-1">
-                  <motion.span
-                    className="block"
-                    initial={{ y: rm ? 0 : "110%" }}
-                    animate={{ y: 0 }}
-                    transition={{ delay: 0.15, duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    On crée des marques
-                  </motion.span>
-                </span>
-                <span className="block overflow-hidden pb-2">
-                  <motion.span
-                    className="block bg-clip-text text-transparent"
-                    style={{ backgroundImage: "linear-gradient(100deg,#FF3D6E,#CE0202 40%,#7A1FA2)" }}
-                    initial={{ y: rm ? 0 : "110%" }}
-                    animate={{ y: 0 }}
-                    transition={{ delay: 0.32, duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    qui marquent.
-                  </motion.span>
-                </span>
-              </h1>
-
-              <p className="mt-7 text-base sm:text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
-                Site web, réseaux sociaux, photo, vidéo et publicité digitale.
-                Une agence 360° en Guadeloupe qui transforme votre présence en ligne
-                en véritable moteur de croissance.
-              </p>
-
-              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-                <Magnetic>
-                  <Link to="/contact">
-                    <Button
-                      data-testid="hero-cta-devis"
-                      className="bg-white hover:bg-white/90 text-[#05010A] hover:text-[#05010A] rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider transition-all duration-300 w-full sm:w-auto"
-                    >
-                      Demander un devis
-                      <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
-                    </Button>
-                  </Link>
-                </Magnetic>
-                <Magnetic>
-                  <Link to="/realisations">
-                    <Button
-                      data-testid="hero-cta-offres"
-                      variant="outline"
-                      className="border-white/25 hover:border-white hover:bg-white/10 text-white rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider bg-white/5 backdrop-blur-sm transition-all duration-300 w-full sm:w-auto"
-                    >
-                      Voir nos réalisations
-                    </Button>
-                  </Link>
-                </Magnetic>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Indicateur de scroll */}
+        <div className="max-w-5xl mx-auto w-full relative z-10 flex flex-col items-center text-center">
           <motion.div
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block z-20"
-            animate={rm ? {} : { y: [0, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            aria-hidden="true"
+            className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full bg-white/[0.04] backdrop-blur-md border border-white/10 text-xs font-mono uppercase tracking-[0.25em] text-white/70"
+            initial={{ opacity: 0, y: rm ? 0 : 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
           >
-            <div className="w-6 h-10 border-2 border-white/25 rounded-full flex justify-center pt-2">
-              <div className="w-1.5 h-3 rounded-full" style={{ backgroundColor: RED }} />
-            </div>
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping" style={{ backgroundColor: RED }} />
+              <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: RED }} />
+            </span>
+            Agence créative 360° · Guadeloupe
           </motion.div>
-        </section>
-      </ShaderBackground>
+
+          <h1
+            data-testid="hero-headline"
+            className="font-display font-extrabold leading-[1.12] tracking-tight text-[2.6rem] sm:text-7xl lg:text-[7rem] text-white"
+          >
+            <motion.span
+              className="block"
+              initial={{ opacity: 0, y: rm ? 0 : 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            >
+              On crée des
+            </motion.span>
+            <RotatingWord
+              words={heroWords}
+              className="bg-clip-text text-transparent"
+              style={{ backgroundImage: WORD_GRADIENT }}
+            />
+            <motion.span
+              className="block"
+              initial={{ opacity: 0, y: rm ? 0 : 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            >
+              qui marquent.
+            </motion.span>
+          </h1>
+
+          <motion.p
+            className="mt-8 text-base sm:text-lg text-white/65 max-w-2xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: rm ? 0 : 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.7 }}
+          >
+            Site web, réseaux sociaux, photo, vidéo et publicité digitale.
+            Une agence 360° en Guadeloupe qui transforme votre présence en ligne
+            en véritable moteur de croissance.
+          </motion.p>
+
+          <motion.div
+            className="mt-10 flex flex-col sm:flex-row gap-4 justify-center"
+            initial={{ opacity: 0, y: rm ? 0 : 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55, duration: 0.7 }}
+          >
+            <Magnetic>
+              <Link to="/contact">
+                <Button
+                  data-testid="hero-cta-devis"
+                  className="bg-white hover:bg-white/90 text-[#0A0507] hover:text-[#0A0507] rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider transition-all duration-300 w-full sm:w-auto"
+                >
+                  Demander un devis
+                  <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
+                </Button>
+              </Link>
+            </Magnetic>
+            <Magnetic>
+              <Link to="/realisations">
+                <Button
+                  data-testid="hero-cta-offres"
+                  variant="outline"
+                  className="border-white/25 hover:border-white hover:bg-white/10 text-white rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider bg-white/[0.04] backdrop-blur-sm transition-all duration-300 w-full sm:w-auto"
+                >
+                  Voir nos réalisations
+                </Button>
+              </Link>
+            </Magnetic>
+          </motion.div>
+        </div>
+
+        {/* Indicateur de scroll */}
+        <motion.div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block z-20"
+          animate={rm ? {} : { y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          aria-hidden="true"
+        >
+          <div className="w-6 h-10 border-2 border-white/25 rounded-full flex justify-center pt-2">
+            <div className="w-1.5 h-3 rounded-full" style={{ backgroundColor: RED }} />
+          </div>
+        </motion.div>
+      </section>
 
       {/* ===================== MARQUEE ===================== */}
       <section className="py-5 overflow-hidden border-y border-white/10 bg-white/[0.02]" aria-hidden="true">
@@ -241,7 +279,7 @@ const HomePage = () => {
               <Button
                 data-testid="cta-voir-offres"
                 variant="outline"
-                className="border-white/20 hover:border-white hover:bg-white hover:text-[#05010A] text-white rounded-full px-8 py-5 text-sm font-bold uppercase tracking-wider bg-transparent transition-colors duration-300"
+                className="border-white/20 hover:border-white hover:bg-white hover:text-[#0A0507] text-white rounded-full px-8 py-5 text-sm font-bold uppercase tracking-wider bg-transparent transition-colors duration-300"
               >
                 Voir toutes nos offres
                 <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
@@ -375,7 +413,7 @@ const HomePage = () => {
         {/* Dégradé CSS (pas de WebGL ici, pour la fluidité) */}
         <div
           className="absolute inset-0"
-          style={{ background: "radial-gradient(120% 80% at 50% 120%, #CE0202 0%, #4A0A2E 35%, #05010A 70%)" }}
+          style={{ background: "radial-gradient(120% 80% at 50% 120%, #C8102E 0%, #4A0C1B 38%, #0A0507 72%)" }}
           aria-hidden="true"
         />
         <div className="absolute inset-0 grain-overlay opacity-[0.08] pointer-events-none" aria-hidden="true" />
@@ -391,7 +429,7 @@ const HomePage = () => {
               <Link to="/contact">
                 <Button
                   data-testid="final-cta-devis"
-                  className="bg-white hover:bg-white/90 text-[#05010A] hover:text-[#05010A] rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider transition-all duration-300 w-full sm:w-auto"
+                  className="bg-white hover:bg-white/90 text-[#0A0507] hover:text-[#0A0507] rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider transition-all duration-300 w-full sm:w-auto"
                 >
                   Demander un devis gratuit
                   <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />

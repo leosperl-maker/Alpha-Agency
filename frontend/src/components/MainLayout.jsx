@@ -2,8 +2,6 @@ import { useLocation, useOutlet } from "react-router-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import ChatWidget from "./ChatWidget";
-import CustomCursor from "./motion/CustomCursor";
 import { useSmoothScroll } from "../hooks/useSmoothScroll";
 
 const MainLayout = () => {
@@ -24,7 +22,6 @@ const MainLayout = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <CustomCursor />
       <Navbar />
       <main className="flex-1">
         <AnimatePresence mode="wait" initial={false}>
@@ -41,7 +38,6 @@ const MainLayout = () => {
         </AnimatePresence>
       </main>
       <Footer />
-      <ChatWidget />
     </div>
   );
 };
