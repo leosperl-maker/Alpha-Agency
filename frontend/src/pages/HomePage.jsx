@@ -1,5 +1,7 @@
+import { useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useParallax } from "../hooks/useParallax";
 import {
   Globe,
   Users,
@@ -66,6 +68,15 @@ const Placeholder = ({ label = "Visuel à venir", className = "", rounded = "rou
 
 const HomePage = () => {
   const rm = useReducedMotion();
+
+  // Parallax GSAP sur le hero (halo + bloc visuel) — n'entre pas en conflit avec
+  // framer-motion car appliqué sur des conteneurs distincts.
+  const heroRef = useRef(null);
+  const haloRef = useRef(null);
+  const bentoWrapRef = useRef(null);
+  useParallax(haloRef, { distance: -150, trigger: heroRef });
+  useParallax(bentoWrapRef, { distance: -60, trigger: heroRef });
+
   const fadeUp = {
     initial: { opacity: 0, y: rm ? 0 : 28 },
     whileInView: { opacity: 1, y: 0 },
@@ -77,12 +88,13 @@ const HomePage = () => {
     <div data-testid="home-page" className="bg-[#F7F5F2] text-[#0A0A0A] overflow-x-hidden">
       {/* ===================== HERO — éditorial ===================== */}
       <section
+        ref={heroRef}
         data-testid="hero-section"
         className="relative min-h-screen flex items-center px-6 pt-28 pb-16 md:pt-24"
       >
         <div className="absolute inset-0 grain-overlay opacity-[0.06] pointer-events-none" aria-hidden="true" />
-        {/* halo rouge décoratif */}
-        <div className="absolute -top-24 -right-24 w-[36rem] h-[36rem] rounded-full blur-3xl opacity-20 pointer-events-none"
+        {/* halo rouge décoratif (parallax) */}
+        <div ref={haloRef} className="absolute -top-24 -right-24 w-[36rem] h-[36rem] rounded-full blur-3xl opacity-20 pointer-events-none"
              style={{ background: `radial-gradient(circle, ${RED}, transparent 65%)` }} aria-hidden="true" />
 
         <div className="max-w-7xl mx-auto w-full relative z-10 grid lg:grid-cols-12 gap-10 items-center">
@@ -135,20 +147,22 @@ const HomePage = () => {
             </div>
           </motion.div>
 
-          {/* Colonne visuelle (bento) */}
-          <motion.div
-            className="lg:col-span-5 grid grid-cols-2 gap-4"
-            initial={{ opacity: 0, scale: rm ? 1 : 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <Placeholder label="Réalisation" className="col-span-2 aspect-[16/10]" />
-            <Placeholder label="Photo" className="aspect-square" />
-            <div className="aspect-square rounded-2xl text-white p-5 flex flex-col justify-between" style={{ backgroundColor: RED }}>
-              <span className="text-5xl font-extrabold font-display-syne leading-none">5+</span>
-              <span className="text-xs uppercase tracking-widest opacity-90">Années à faire briller les marques d'ici</span>
-            </div>
-          </motion.div>
+          {/* Colonne visuelle (bento) — wrapper statique pour le parallax GSAP */}
+          <div ref={bentoWrapRef} className="lg:col-span-5">
+            <motion.div
+              className="grid grid-cols-2 gap-4"
+              initial={{ opacity: 0, scale: rm ? 1 : 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Placeholder label="Réalisation" className="col-span-2 aspect-[16/10]" />
+              <Placeholder label="Photo" className="aspect-square" />
+              <div className="aspect-square rounded-2xl text-white p-5 flex flex-col justify-between" style={{ backgroundColor: RED }}>
+                <span className="text-5xl font-extrabold font-display-syne leading-none">5+</span>
+                <span className="text-xs uppercase tracking-widest opacity-90">Années à faire briller les marques d'ici</span>
+              </div>
+            </motion.div>
+          </div>
         </div>
 
         <motion.div
