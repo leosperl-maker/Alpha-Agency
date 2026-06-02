@@ -25,6 +25,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      const tok = localStorage.getItem('alpha_token');
+      // Demo / local-preview token: keep the UI shell, don't kick out
+      if (tok === 'dev' || tok === 'dev-preview-token') {
+        return Promise.reject(error);
+      }
       localStorage.removeItem('alpha_token');
       localStorage.removeItem('alpha_user');
       // Don't redirect from public pages

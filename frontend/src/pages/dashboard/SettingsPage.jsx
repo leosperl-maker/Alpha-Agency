@@ -431,37 +431,37 @@ Banque: Votre Banque`,
     <div data-testid="settings-page" className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">Paramètres</h1>
-        <p className="text-slate-500">Configuration du dashboard et de l'entreprise</p>
+        <h1 className="text-3xl font-bold text-foreground">Paramètres</h1>
+        <p className="text-muted-foreground">Configuration du dashboard et de l'entreprise</p>
       </div>
 
       <Tabs defaultValue="company" className="space-y-6">
-        <TabsList className="bg-white backdrop-blur-xl border border-slate-200 flex-wrap">
-          <TabsTrigger value="company" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+        <TabsList className="bg-card backdrop-blur-xl border border-border flex-wrap">
+          <TabsTrigger value="company" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             Entreprise
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             <Bell className="w-4 h-4 mr-2" />
             Notifications
           </TabsTrigger>
-          <TabsTrigger value="email-templates" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+          <TabsTrigger value="email-templates" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             <Mail className="w-4 h-4 mr-2" />
             Emails
           </TabsTrigger>
-          <TabsTrigger value="social" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+          <TabsTrigger value="social" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             Réseaux sociaux
           </TabsTrigger>
-          <TabsTrigger value="legal" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+          <TabsTrigger value="legal" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             Pages légales
           </TabsTrigger>
-          <TabsTrigger value="api-keys" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+          <TabsTrigger value="api-keys" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             <Key className="w-4 h-4 mr-2" />
             API
           </TabsTrigger>
-          <TabsTrigger value="integrations" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+          <TabsTrigger value="integrations" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             Intégrations
           </TabsTrigger>
-          <TabsTrigger value="data" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+          <TabsTrigger value="data" className="data-[state=active]:bg-primary data-[state=active]:text-white">
             <Database className="w-4 h-4 mr-2" />
             Données
           </TabsTrigger>
@@ -469,12 +469,12 @@ Banque: Votre Banque`,
 
         {/* Email Templates Tab */}
         <TabsContent value="email-templates">
-          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
+          <Card className="bg-card backdrop-blur-xl border border-border shadow-sm">
             <CardHeader>
               <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
                 <div>
-                  <CardTitle className="text-slate-900 flex items-center gap-2">
-                    <Mail className="w-5 h-5 text-indigo-600" />
+                  <CardTitle className="text-foreground flex items-center gap-2">
+                    <Mail className="w-5 h-5 text-primary" />
                     Templates d&apos;e-mail
                   </CardTitle>
                   <CardDescription>
@@ -490,40 +490,40 @@ Banque: Votre Banque`,
             <CardContent>
               {loadingTemplates ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
               ) : (
                 <div className="space-y-8">
                   {/* Paramètres généraux */}
-                  <div className="bg-white border border-slate-200 rounded-lg p-4">
-                    <h4 className="font-medium text-slate-900 mb-4 flex items-center gap-2">
+                  <div className="bg-card border border-border rounded-lg p-4">
+                    <h4 className="font-medium text-foreground mb-4 flex items-center gap-2">
                       <Settings className="w-4 h-4" />
                       Paramètres généraux
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Email de test */}
                       <div>
-                        <Label className="text-slate-900">Adresse email de test</Label>
+                        <Label className="text-foreground">Adresse email de test</Label>
                         <Input
                           type="email"
                           value={testEmailAddress}
                           onChange={(e) => setTestEmailAddress(e.target.value)}
                           placeholder="test@exemple.com"
-                          className="bg-white border-slate-200 text-slate-900 mt-1"
+                          className="bg-card border-border text-foreground mt-1"
                         />
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           Les emails de test seront envoyés à cette adresse
                         </p>
                       </div>
                       {/* Logo */}
                       <div>
-                        <Label className="text-slate-900">Logo pour les emails</Label>
+                        <Label className="text-foreground">Logo pour les emails</Label>
                         <div className="flex gap-2 mt-1">
                           <Input
                             value={emailLogo}
                             onChange={(e) => setEmailLogo(e.target.value)}
                             placeholder="URL du logo ou glissez un fichier"
-                            className="bg-white border-slate-200 text-slate-900 flex-1"
+                            className="bg-card border-border text-foreground flex-1"
                           />
                           <label className="cursor-pointer">
                             <input
@@ -540,7 +540,7 @@ Banque: Votre Banque`,
                           </label>
                         </div>
                         {emailLogo && (
-                          <div className="mt-2 p-2 bg-white rounded">
+                          <div className="mt-2 p-2 bg-card rounded">
                             <img src={emailLogo} alt="Logo email" className="max-h-12 object-contain" />
                           </div>
                         )}
@@ -549,14 +549,14 @@ Banque: Votre Banque`,
                   </div>
 
                   {/* Variables disponibles */}
-                  <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                  <div className="bg-brand-soft border border-primary/30 rounded-lg p-4">
                     <h4 className="font-medium text-indigo-900 mb-2">Variables disponibles</h4>
                     <p className="text-sm text-indigo-700 mb-2">
                       Utilisez ces variables dans vos templates. Elles seront remplacées automatiquement :
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {["{{numero}}", "{{client_name}}", "{{montant}}", "{{company_name}}", "{{company_phone}}", "{{company_email}}"].map(v => (
-                        <Badge key={v} variant="outline" className="bg-white text-indigo-700 border-indigo-300 font-mono text-xs">
+                        <Badge key={v} variant="outline" className="bg-card text-indigo-700 border-indigo-300 font-mono text-xs">
                           {v}
                         </Badge>
                       ))}
@@ -564,11 +564,11 @@ Banque: Votre Banque`,
                   </div>
 
                   {/* Template Devis */}
-                  <div className="border border-slate-200 rounded-lg p-4 sm:p-6">
+                  <div className="border border-border rounded-lg p-4 sm:p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                       <div className="flex items-center gap-2">
-                        <Badge className="bg-blue-100 text-blue-700 border-0">DEVIS</Badge>
-                        <h3 className="font-medium text-slate-900">Template e-mail Devis</h3>
+                        <Badge className="bg-info-soft text-info border-0">DEVIS</Badge>
+                        <h3 className="font-medium text-foreground">Template e-mail Devis</h3>
                       </div>
                       <div className="flex gap-2">
                         <Button 
@@ -596,7 +596,7 @@ Banque: Votre Banque`,
                           size="sm"
                           onClick={() => handleSaveEmailTemplate('devis')}
                           disabled={savingTemplate === 'devis'}
-                          className="bg-indigo-600 hover:bg-indigo-500"
+                          className="bg-primary hover:brightness-110"
                         >
                           {savingTemplate === 'devis' ? (
                             <Loader2 className="w-4 h-4 mr-1 animate-spin" />
@@ -611,21 +611,21 @@ Banque: Votre Banque`,
                     {/* Preview email devis */}
                     {previewTemplate === 'devis' && (
                       <div className="mb-4 border border-indigo-500/30 rounded-lg overflow-hidden">
-                        <div className="bg-indigo-500/20 px-4 py-2 text-sm text-indigo-300">
+                        <div className="bg-brand-soft px-4 py-2 text-sm text-indigo-300">
                           Aperçu de l&apos;email (avec données exemple)
                         </div>
-                        <div className="bg-white p-4">
+                        <div className="bg-card p-4">
                           {emailLogo && (
                             <img src={emailLogo} alt="Logo" className="max-h-12 mb-4" />
                           )}
-                          <p className="text-xs text-gray-500 mb-1">Objet:</p>
-                          <p className="font-medium text-gray-800 mb-4 pb-2 border-b">
+                          <p className="text-xs text-muted-foreground mb-1">Objet:</p>
+                          <p className="font-medium text-foreground mb-4 pb-2 border-b">
                             {generateEmailPreview('devis').subject}
                           </p>
-                          <div className="text-gray-700 whitespace-pre-wrap text-sm">
+                          <div className="text-foreground whitespace-pre-wrap text-sm">
                             {generateEmailPreview('devis').body}
                           </div>
-                          <div className="mt-4 pt-4 border-t text-xs text-gray-400">
+                          <div className="mt-4 pt-4 border-t text-xs text-muted-foreground">
                             <p>📎 Pièce jointe: devis_DEV-2026-0001.pdf</p>
                           </div>
                         </div>
@@ -634,7 +634,7 @@ Banque: Votre Banque`,
                     
                     <div className="space-y-4">
                       <div>
-                        <Label className="text-slate-900">Objet de l&apos;email</Label>
+                        <Label className="text-foreground">Objet de l&apos;email</Label>
                         <Input
                           value={emailTemplates.devis.subject}
                           onChange={(e) => setEmailTemplates(prev => ({
@@ -642,11 +642,11 @@ Banque: Votre Banque`,
                             devis: { ...prev.devis, subject: e.target.value }
                           }))}
                           placeholder="Votre devis {{numero}} - {{company_name}}"
-                          className="bg-white border-slate-200 text-slate-900 mt-1"
+                          className="bg-card border-border text-foreground mt-1"
                         />
                       </div>
                       <div>
-                        <Label className="text-slate-900">Corps du message</Label>
+                        <Label className="text-foreground">Corps du message</Label>
                         <Textarea
                           value={emailTemplates.devis.body}
                           onChange={(e) => setEmailTemplates(prev => ({
@@ -663,18 +663,18 @@ Cordialement,
 {{company_name}}
 {{company_phone}} - {{company_email}}`}
                           rows={8}
-                          className="bg-white border-slate-200 text-slate-900 mt-1 font-mono text-sm"
+                          className="bg-card border-border text-foreground mt-1 font-mono text-sm"
                         />
                       </div>
                     </div>
                   </div>
 
                   {/* Template Facture */}
-                  <div className="border border-slate-200 rounded-lg p-4 sm:p-6">
+                  <div className="border border-border rounded-lg p-4 sm:p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                       <div className="flex items-center gap-2">
-                        <Badge className="bg-green-100 text-green-700 border-0">FACTURE</Badge>
-                        <h3 className="font-medium text-slate-900">Template e-mail Facture</h3>
+                        <Badge className="bg-success-soft text-success border-0">FACTURE</Badge>
+                        <h3 className="font-medium text-foreground">Template e-mail Facture</h3>
                       </div>
                       <div className="flex gap-2">
                         <Button 
@@ -702,7 +702,7 @@ Cordialement,
                           size="sm"
                           onClick={() => handleSaveEmailTemplate('facture')}
                           disabled={savingTemplate === 'facture'}
-                          className="bg-indigo-600 hover:bg-indigo-500"
+                          className="bg-primary hover:brightness-110"
                         >
                           {savingTemplate === 'facture' ? (
                             <Loader2 className="w-4 h-4 mr-1 animate-spin" />
@@ -717,21 +717,21 @@ Cordialement,
                     {/* Preview email facture */}
                     {previewTemplate === 'facture' && (
                       <div className="mb-4 border border-green-500/30 rounded-lg overflow-hidden">
-                        <div className="bg-green-500/20 px-4 py-2 text-sm text-green-300">
+                        <div className="bg-success-soft px-4 py-2 text-sm text-green-300">
                           Aperçu de l&apos;email (avec données exemple)
                         </div>
-                        <div className="bg-white p-4">
+                        <div className="bg-card p-4">
                           {emailLogo && (
                             <img src={emailLogo} alt="Logo" className="max-h-12 mb-4" />
                           )}
-                          <p className="text-xs text-gray-500 mb-1">Objet:</p>
-                          <p className="font-medium text-gray-800 mb-4 pb-2 border-b">
+                          <p className="text-xs text-muted-foreground mb-1">Objet:</p>
+                          <p className="font-medium text-foreground mb-4 pb-2 border-b">
                             {generateEmailPreview('facture').subject}
                           </p>
-                          <div className="text-gray-700 whitespace-pre-wrap text-sm">
+                          <div className="text-foreground whitespace-pre-wrap text-sm">
                             {generateEmailPreview('facture').body}
                           </div>
-                          <div className="mt-4 pt-4 border-t text-xs text-gray-400">
+                          <div className="mt-4 pt-4 border-t text-xs text-muted-foreground">
                             <p>📎 Pièce jointe: facture_FAC-2026-0001.pdf</p>
                           </div>
                         </div>
@@ -740,7 +740,7 @@ Cordialement,
 
                     <div className="space-y-4">
                       <div>
-                        <Label className="text-slate-900">Objet de l&apos;email</Label>
+                        <Label className="text-foreground">Objet de l&apos;email</Label>
                         <Input
                           value={emailTemplates.facture.subject}
                           onChange={(e) => setEmailTemplates(prev => ({
@@ -748,11 +748,11 @@ Cordialement,
                             facture: { ...prev.facture, subject: e.target.value }
                           }))}
                           placeholder="Votre facture {{numero}} - {{company_name}}"
-                          className="bg-white border-slate-200 text-slate-900 mt-1"
+                          className="bg-card border-border text-foreground mt-1"
                         />
                       </div>
                       <div>
-                        <Label className="text-slate-900">Corps du message</Label>
+                        <Label className="text-foreground">Corps du message</Label>
                         <Textarea
                           value={emailTemplates.facture.body}
                           onChange={(e) => setEmailTemplates(prev => ({
@@ -769,7 +769,7 @@ Cordialement,
 {{company_name}}
 {{company_phone}} - {{company_email}}`}
                           rows={8}
-                          className="bg-white border-slate-200 text-slate-900 mt-1 font-mono text-sm"
+                          className="bg-card border-border text-foreground mt-1 font-mono text-sm"
                         />
                       </div>
                     </div>
@@ -782,12 +782,12 @@ Cordialement,
 
         {/* API Keys Tab */}
         <TabsContent value="api-keys">
-          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
+          <Card className="bg-card backdrop-blur-xl border border-border shadow-sm">
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-slate-900 flex items-center gap-2">
-                    <Key className="w-5 h-5 text-indigo-600" />
+                  <CardTitle className="text-foreground flex items-center gap-2">
+                    <Key className="w-5 h-5 text-primary" />
                     Clés API connectées
                   </CardTitle>
                   <CardDescription>
@@ -803,20 +803,20 @@ Cordialement,
             <CardContent>
               {loadingApiKeys ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
               ) : apiKeys ? (
                 <div className="space-y-4">
                   {/* Summary */}
-                  <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-4 p-4 bg-secondary rounded-lg">
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-indigo-600">{apiKeys.total_configured}</p>
-                      <p className="text-sm text-slate-500">sur {apiKeys.total_available} configurées</p>
+                      <p className="text-3xl font-bold text-primary">{apiKeys.total_configured}</p>
+                      <p className="text-sm text-muted-foreground">sur {apiKeys.total_available} configurées</p>
                     </div>
                     <div className="flex-1">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-secondary rounded-full h-2">
                         <div 
-                          className="bg-indigo-600 h-2 rounded-full" 
+                          className="bg-primary h-2 rounded-full" 
                           style={{ width: `${(apiKeys.total_configured / apiKeys.total_available) * 100}%` }}
                         />
                       </div>
@@ -826,25 +826,25 @@ Cordialement,
                   {/* API Keys List */}
                   <div className="space-y-3">
                     {Object.entries(apiKeys.api_keys).map(([key, config]) => (
-                      <div key={key} className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 transition-colors">
+                      <div key={key} className="flex items-center justify-between p-4 border rounded-lg hover:bg-secondary transition-colors">
                         <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${config.configured ? "bg-green-100" : "bg-gray-100"}`}>
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${config.configured ? "bg-success-soft" : "bg-secondary"}`}>
                             {config.configured ? (
-                              <CheckCircle className="w-5 h-5 text-green-600" />
+                              <CheckCircle className="w-5 h-5 text-success" />
                             ) : (
-                              <XCircle className="w-5 h-5 text-gray-400" />
+                              <XCircle className="w-5 h-5 text-muted-foreground" />
                             )}
                           </div>
                           <div>
-                            <p className="font-medium text-slate-900">{config.name}</p>
-                            <p className="text-sm text-slate-500">{config.description}</p>
+                            <p className="font-medium text-foreground">{config.name}</p>
+                            <p className="text-sm text-muted-foreground">{config.description}</p>
                             {config.configured && config.masked && (
-                              <code className="text-xs bg-gray-100 px-2 py-0.5 rounded mt-1 inline-block">
+                              <code className="text-xs bg-secondary px-2 py-0.5 rounded mt-1 inline-block">
                                 {config.masked}
                               </code>
                             )}
                             {key === "newsapi" && config.count && (
-                              <Badge className="ml-2 bg-blue-100 text-blue-700">{config.count} clés</Badge>
+                              <Badge className="ml-2 bg-info-soft text-info">{config.count} clés</Badge>
                             )}
                           </div>
                         </div>
@@ -867,7 +867,7 @@ Cordialement,
                             href={config.doc_url} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-indigo-600 hover:underline text-sm flex items-center gap-1"
+                            className="text-primary hover:underline text-sm flex items-center gap-1"
                           >
                             <ExternalLink className="w-3 h-3" />
                             Docs
@@ -878,15 +878,15 @@ Cordialement,
                   </div>
 
                   {/* Info */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                    <p className="text-sm text-blue-700">
+                  <div className="bg-info-soft border border-info/30 rounded-lg p-4 mt-4">
+                    <p className="text-sm text-info">
                       <strong>Note :</strong> Les clés API sont configurées dans les fichiers d'environnement du serveur. 
-                      Pour modifier une clé, contactez l'administrateur système ou mettez à jour le fichier <code className="bg-blue-100 px-1 rounded">.env</code>.
+                      Pour modifier une clé, contactez l'administrateur système ou mettez à jour le fichier <code className="bg-info-soft px-1 rounded">.env</code>.
                     </p>
                   </div>
                 </div>
               ) : (
-                <p className="text-center text-slate-500 py-8">Impossible de charger les informations</p>
+                <p className="text-center text-muted-foreground py-8">Impossible de charger les informations</p>
               )}
             </CardContent>
           </Card>
@@ -894,10 +894,10 @@ Cordialement,
 
         {/* Notifications Tab */}
         <TabsContent value="notifications">
-          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
+          <Card className="bg-card backdrop-blur-xl border border-border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-slate-900 flex items-center gap-2">
-                <Bell className="w-5 h-5 text-indigo-600" />
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <Bell className="w-5 h-5 text-primary" />
                 Notifications par email
               </CardTitle>
               <CardDescription>
@@ -906,16 +906,16 @@ Cordialement,
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Test Email */}
-              <div className="flex items-center justify-between p-4 bg-white rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-card rounded-lg">
                 <div>
-                  <p className="font-medium text-slate-900">Tester la configuration</p>
-                  <p className="text-sm text-slate-500">Envoyer un email de test à votre adresse</p>
+                  <p className="font-medium text-foreground">Tester la configuration</p>
+                  <p className="text-sm text-muted-foreground">Envoyer un email de test à votre adresse</p>
                 </div>
                 <Button
                   onClick={handleTestEmail}
                   disabled={sendingTest}
                   variant="outline"
-                  className="border-indigo-500/50 text-indigo-600 hover:bg-indigo-600 hover:text-slate-900"
+                  className="border-primary/40 text-primary hover:bg-primary hover:text-foreground"
                 >
                   {sendingTest ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -926,12 +926,12 @@ Cordialement,
                 </Button>
               </div>
 
-              <div className="border-t border-slate-200 pt-6 space-y-4">
+              <div className="border-t border-border pt-6 space-y-4">
                 {/* Task Reminders */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-slate-900">Rappels de tâches</p>
-                    <p className="text-sm text-slate-500">Recevoir un email pour les tâches à échéance proche</p>
+                    <p className="font-medium text-foreground">Rappels de tâches</p>
+                    <p className="text-sm text-muted-foreground">Recevoir un email pour les tâches à échéance proche</p>
                   </div>
                   <Switch
                     checked={notifSettings.task_reminders}
@@ -941,24 +941,24 @@ Cordialement,
 
                 {notifSettings.task_reminders && (
                   <div className="ml-4 flex items-center gap-2">
-                    <Label className="text-sm text-slate-500">Rappeler</Label>
+                    <Label className="text-sm text-muted-foreground">Rappeler</Label>
                     <Input
                       type="number"
                       min="1"
                       max="7"
                       value={notifSettings.task_reminder_days}
                       onChange={(e) => setNotifSettings(prev => ({ ...prev, task_reminder_days: parseInt(e.target.value) || 1 }))}
-                      className="w-16 bg-white backdrop-blur-xl border-slate-200"
+                      className="w-16 bg-card backdrop-blur-xl border-border"
                     />
-                    <Label className="text-sm text-slate-500">jour(s) avant l'échéance</Label>
+                    <Label className="text-sm text-muted-foreground">jour(s) avant l'échéance</Label>
                   </div>
                 )}
 
                 {/* Invoice Reminders */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-slate-900">Rappels de factures impayées</p>
-                    <p className="text-sm text-slate-500">Envoyer des rappels aux clients pour les factures en retard</p>
+                    <p className="font-medium text-foreground">Rappels de factures impayées</p>
+                    <p className="text-sm text-muted-foreground">Envoyer des rappels aux clients pour les factures en retard</p>
                   </div>
                   <Switch
                     checked={notifSettings.invoice_reminders}
@@ -968,7 +968,7 @@ Cordialement,
 
                 {notifSettings.invoice_reminders && (
                   <div className="ml-4">
-                    <p className="text-sm text-slate-500 mb-2">Envoyer un rappel après :</p>
+                    <p className="text-sm text-muted-foreground mb-2">Envoyer un rappel après :</p>
                     <div className="flex gap-2">
                       {[7, 14, 30, 60].map((days) => (
                         <Button
@@ -984,8 +984,8 @@ Cordialement,
                             }));
                           }}
                           className={notifSettings.invoice_reminder_days.includes(days) 
-                            ? "bg-indigo-600 text-white" 
-                            : "border-slate-200"}
+                            ? "bg-primary text-white" 
+                            : "border-border"}
                         >
                           {days} jours
                         </Button>
@@ -997,8 +997,8 @@ Cordialement,
                 {/* New Lead Notifications */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-slate-900">Nouveaux leads</p>
-                    <p className="text-sm text-slate-500">Recevoir un email pour chaque nouvelle demande de contact</p>
+                    <p className="font-medium text-foreground">Nouveaux leads</p>
+                    <p className="text-sm text-muted-foreground">Recevoir un email pour chaque nouvelle demande de contact</p>
                   </div>
                   <Switch
                     checked={notifSettings.new_lead_notifications}
@@ -1008,7 +1008,7 @@ Cordialement,
               </div>
 
               {/* Save Button */}
-              <div className="flex justify-between items-center pt-4 border-t border-slate-200">
+              <div className="flex justify-between items-center pt-4 border-t border-border">
                 <div className="flex gap-2">
                   <Button
                     onClick={handleSendTaskReminders}
@@ -1032,7 +1032,7 @@ Cordialement,
                 <Button
                   onClick={handleSaveNotifications}
                   disabled={savingNotif}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                  className="bg-primary hover:brightness-110 text-white"
                 >
                   {savingNotif ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -1048,10 +1048,10 @@ Cordialement,
 
         {/* Company Tab */}
         <TabsContent value="company">
-          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
+          <Card className="bg-card backdrop-blur-xl border border-border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-slate-900 flex items-center gap-2">
-                <Building className="w-5 h-5 text-indigo-600" />
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <Building className="w-5 h-5 text-primary" />
                 Informations légales
               </CardTitle>
               <CardDescription>
@@ -1061,78 +1061,78 @@ Cordialement,
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Raison sociale</Label>
+                  <Label className="text-foreground">Raison sociale</Label>
                   <Input
                     value={companyInfo.name}
                     onChange={(e) => setCompanyInfo({...companyInfo, name: e.target.value})}
-                    className="bg-white backdrop-blur-xl border-slate-200"
+                    className="bg-card backdrop-blur-xl border-border"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Nom commercial</Label>
+                  <Label className="text-foreground">Nom commercial</Label>
                   <Input
                     value={companyInfo.commercial_name}
                     onChange={(e) => setCompanyInfo({...companyInfo, commercial_name: e.target.value})}
-                    className="bg-white backdrop-blur-xl border-slate-200"
+                    className="bg-card backdrop-blur-xl border-border"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-900">Adresse</Label>
+                <Label className="text-foreground">Adresse</Label>
                 <Input
                   value={companyInfo.address}
                   onChange={(e) => setCompanyInfo({...companyInfo, address: e.target.value})}
-                  className="bg-white backdrop-blur-xl border-slate-200"
+                  className="bg-card backdrop-blur-xl border-border"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Téléphone</Label>
+                  <Label className="text-foreground">Téléphone</Label>
                   <Input
                     value={companyInfo.phone}
                     onChange={(e) => setCompanyInfo({...companyInfo, phone: e.target.value})}
-                    className="bg-white backdrop-blur-xl border-slate-200"
+                    className="bg-card backdrop-blur-xl border-border"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Email</Label>
+                  <Label className="text-foreground">Email</Label>
                   <Input
                     type="email"
                     value={companyInfo.email}
                     onChange={(e) => setCompanyInfo({...companyInfo, email: e.target.value})}
-                    className="bg-white backdrop-blur-xl border-slate-200"
+                    className="bg-card backdrop-blur-xl border-border"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-slate-900">SIREN</Label>
+                  <Label className="text-foreground">SIREN</Label>
                   <Input
                     value={companyInfo.siren}
                     onChange={(e) => setCompanyInfo({...companyInfo, siren: e.target.value})}
                     placeholder="123 456 789"
-                    className="bg-white backdrop-blur-xl border-slate-200"
+                    className="bg-card backdrop-blur-xl border-border"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-900">SIRET</Label>
+                  <Label className="text-foreground">SIRET</Label>
                   <Input
                     value={companyInfo.siret}
                     onChange={(e) => setCompanyInfo({...companyInfo, siret: e.target.value})}
                     placeholder="123 456 789 00012"
-                    className="bg-white backdrop-blur-xl border-slate-200"
+                    className="bg-card backdrop-blur-xl border-border"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Capital social</Label>
+                  <Label className="text-foreground">Capital social</Label>
                   <Input
                     value={companyInfo.capital}
                     onChange={(e) => setCompanyInfo({...companyInfo, capital: e.target.value})}
                     placeholder="1 000 €"
-                    className="bg-white backdrop-blur-xl border-slate-200"
+                    className="bg-card backdrop-blur-xl border-border"
                   />
                 </div>
               </div>
@@ -1141,7 +1141,7 @@ Cordialement,
                 <Button 
                   onClick={handleSaveCompany}
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-slate-900"
+                  className="bg-primary hover:brightness-110 text-white hover:text-foreground"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -1153,10 +1153,10 @@ Cordialement,
 
         {/* Social Links Tab */}
         <TabsContent value="social">
-          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
+          <Card className="bg-card backdrop-blur-xl border border-border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-slate-900 flex items-center gap-2">
-                <Share2 className="w-5 h-5 text-indigo-600" />
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-primary" />
                 Réseaux sociaux
               </CardTitle>
               <CardDescription>
@@ -1166,53 +1166,53 @@ Cordialement,
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-slate-900">LinkedIn</Label>
+                  <Label className="text-foreground">LinkedIn</Label>
                   <Input
                     value={socialLinks.linkedin}
                     onChange={(e) => setSocialLinks({...socialLinks, linkedin: e.target.value})}
                     placeholder="https://linkedin.com/company/..."
-                    className="bg-white backdrop-blur-xl border-slate-200"
+                    className="bg-card backdrop-blur-xl border-border"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Instagram</Label>
+                  <Label className="text-foreground">Instagram</Label>
                   <Input
                     value={socialLinks.instagram}
                     onChange={(e) => setSocialLinks({...socialLinks, instagram: e.target.value})}
                     placeholder="https://instagram.com/..."
-                    className="bg-white backdrop-blur-xl border-slate-200"
+                    className="bg-card backdrop-blur-xl border-border"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Facebook</Label>
+                  <Label className="text-foreground">Facebook</Label>
                   <Input
                     value={socialLinks.facebook}
                     onChange={(e) => setSocialLinks({...socialLinks, facebook: e.target.value})}
                     placeholder="https://facebook.com/..."
-                    className="bg-white backdrop-blur-xl border-slate-200"
+                    className="bg-card backdrop-blur-xl border-border"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Twitter / X</Label>
+                  <Label className="text-foreground">Twitter / X</Label>
                   <Input
                     value={socialLinks.twitter}
                     onChange={(e) => setSocialLinks({...socialLinks, twitter: e.target.value})}
                     placeholder="https://twitter.com/..."
-                    className="bg-white backdrop-blur-xl border-slate-200"
+                    className="bg-card backdrop-blur-xl border-border"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-900">YouTube</Label>
+                <Label className="text-foreground">YouTube</Label>
                 <Input
                   value={socialLinks.youtube}
                   onChange={(e) => setSocialLinks({...socialLinks, youtube: e.target.value})}
                   placeholder="https://youtube.com/@..."
-                  className="bg-white backdrop-blur-xl border-slate-200"
+                  className="bg-card backdrop-blur-xl border-border"
                 />
               </div>
 
@@ -1220,7 +1220,7 @@ Cordialement,
                 <Button 
                   onClick={handleSaveSocial}
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-slate-900"
+                  className="bg-primary hover:brightness-110 text-white hover:text-foreground"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -1232,10 +1232,10 @@ Cordialement,
 
         {/* Legal Texts Tab */}
         <TabsContent value="legal">
-          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
+          <Card className="bg-card backdrop-blur-xl border border-border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-slate-900 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-indigo-600" />
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
                 Textes des pages légales
               </CardTitle>
               <CardDescription>
@@ -1244,32 +1244,32 @@ Cordialement,
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-slate-900">Mentions légales (texte complémentaire)</Label>
+                <Label className="text-foreground">Mentions légales (texte complémentaire)</Label>
                 <Textarea
                   value={legalTexts.mentions_legales}
                   onChange={(e) => setLegalTexts({...legalTexts, mentions_legales: e.target.value})}
                   placeholder="Ajoutez des informations complémentaires pour vos mentions légales..."
-                  className="bg-white backdrop-blur-xl border-slate-200 min-h-[150px]"
+                  className="bg-card backdrop-blur-xl border-border min-h-[150px]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-900">Politique de confidentialité (texte complémentaire)</Label>
+                <Label className="text-foreground">Politique de confidentialité (texte complémentaire)</Label>
                 <Textarea
                   value={legalTexts.politique_confidentialite}
                   onChange={(e) => setLegalTexts({...legalTexts, politique_confidentialite: e.target.value})}
                   placeholder="Ajoutez des informations complémentaires pour votre politique de confidentialité..."
-                  className="bg-white backdrop-blur-xl border-slate-200 min-h-[150px]"
+                  className="bg-card backdrop-blur-xl border-border min-h-[150px]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-900">Politique de cookies (texte complémentaire)</Label>
+                <Label className="text-foreground">Politique de cookies (texte complémentaire)</Label>
                 <Textarea
                   value={legalTexts.politique_cookies}
                   onChange={(e) => setLegalTexts({...legalTexts, politique_cookies: e.target.value})}
                   placeholder="Ajoutez des informations complémentaires pour votre politique de cookies..."
-                  className="bg-white backdrop-blur-xl border-slate-200 min-h-[150px]"
+                  className="bg-card backdrop-blur-xl border-border min-h-[150px]"
                 />
               </div>
 
@@ -1277,7 +1277,7 @@ Cordialement,
                 <Button 
                   onClick={handleSaveLegal}
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-slate-900"
+                  className="bg-primary hover:brightness-110 text-white hover:text-foreground"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -1289,10 +1289,10 @@ Cordialement,
 
         {/* Integrations Tab */}
         <TabsContent value="integrations">
-          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
+          <Card className="bg-card backdrop-blur-xl border border-border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-slate-900 flex items-center gap-2">
-                <Key className="w-5 h-5 text-indigo-600" />
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <Key className="w-5 h-5 text-primary" />
                 Intégrations
               </CardTitle>
               <CardDescription>
@@ -1301,97 +1301,97 @@ Cordialement,
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-slate-900">Google Analytics 4 - ID de propriété</Label>
+                <Label className="text-foreground">Google Analytics 4 - ID de propriété</Label>
                 <Input
                   value={integrations.ga4_id}
                   onChange={(e) => setIntegrations({...integrations, ga4_id: e.target.value})}
                   placeholder="G-XXXXXXXXXX"
-                  className="bg-white backdrop-blur-xl border-slate-200"
+                  className="bg-card backdrop-blur-xl border-border"
                 />
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Ajoutez votre ID GA4 pour suivre les visites du site
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-900">Resend - Clé API</Label>
+                <Label className="text-foreground">Resend - Clé API</Label>
                 <Input
                   type="password"
                   value={integrations.resend_api_key}
                   onChange={(e) => setIntegrations({...integrations, resend_api_key: e.target.value})}
                   placeholder="re_xxxxxxxxxxxx"
-                  className="bg-white backdrop-blur-xl border-slate-200"
+                  className="bg-card backdrop-blur-xl border-border"
                 />
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Pour l'envoi automatique des emails de notification
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-900">Stripe - Clé API secrète</Label>
+                <Label className="text-foreground">Stripe - Clé API secrète</Label>
                 <Input
                   type="password"
                   value={integrations.stripe_api_key}
                   onChange={(e) => setIntegrations({...integrations, stripe_api_key: e.target.value})}
                   placeholder="sk_xxxxxxxxxxxx"
-                  className="bg-white backdrop-blur-xl border-slate-200"
+                  className="bg-card backdrop-blur-xl border-border"
                 />
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Pour la gestion des paiements en ligne
                 </p>
               </div>
 
               {/* Google Calendar Section */}
-              <div className="border-t border-slate-200 pt-6 mt-6">
-                <h3 className="text-slate-900 font-medium mb-4 flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-indigo-600" />
+              <div className="border-t border-border pt-6 mt-6">
+                <h3 className="text-foreground font-medium mb-4 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-primary" />
                   Google Calendar / Agenda
                 </h3>
                 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-slate-900">Google Client ID</Label>
+                    <Label className="text-foreground">Google Client ID</Label>
                     <Input
                       value={integrations.google_client_id || ""}
                       onChange={(e) => setIntegrations({...integrations, google_client_id: e.target.value})}
                       placeholder="xxxxxxxxxxxx.apps.googleusercontent.com"
-                      className="bg-white backdrop-blur-xl border-slate-200"
+                      className="bg-card backdrop-blur-xl border-border"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="text-slate-900">Google Client Secret</Label>
+                    <Label className="text-foreground">Google Client Secret</Label>
                     <Input
                       type="password"
                       value={integrations.google_client_secret || ""}
                       onChange={(e) => setIntegrations({...integrations, google_client_secret: e.target.value})}
                       placeholder="GOCSPX-xxxxxxxxxxxx"
-                      className="bg-white backdrop-blur-xl border-slate-200"
+                      className="bg-card backdrop-blur-xl border-border"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="text-slate-900">Google Redirect URI</Label>
+                    <Label className="text-foreground">Google Redirect URI</Label>
                     <Input
                       value={integrations.google_redirect_uri || ""}
                       onChange={(e) => setIntegrations({...integrations, google_redirect_uri: e.target.value})}
                       placeholder="https://votre-domaine.fr/api/appointments/auth/callback"
-                      className="bg-white backdrop-blur-xl border-slate-200"
+                      className="bg-card backdrop-blur-xl border-border"
                     />
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       L'URL de callback OAuth. Doit correspondre exactement à celle configurée dans Google Cloud Console.
                     </p>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="text-slate-900">URL Frontend (redirection après connexion)</Label>
+                    <Label className="text-foreground">URL Frontend (redirection après connexion)</Label>
                     <Input
                       value={integrations.frontend_url || ""}
                       onChange={(e) => setIntegrations({...integrations, frontend_url: e.target.value})}
                       placeholder="https://votre-domaine.fr"
-                      className="bg-white backdrop-blur-xl border-slate-200"
+                      className="bg-card backdrop-blur-xl border-border"
                     />
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       L'URL de votre site où l'utilisateur sera redirigé après connexion Google.
                     </p>
                   </div>
@@ -1402,7 +1402,7 @@ Cordialement,
                 <Button 
                   onClick={handleSaveIntegrations}
                   disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white hover:text-slate-900"
+                  className="bg-primary hover:brightness-110 text-white hover:text-foreground"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Enregistrer
@@ -1414,10 +1414,10 @@ Cordialement,
 
         {/* Data Management Tab */}
         <TabsContent value="data">
-          <Card className="bg-white backdrop-blur-xl border border-slate-200 shadow-sm">
+          <Card className="bg-card backdrop-blur-xl border border-border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-slate-900 flex items-center gap-2">
-                <Database className="w-5 h-5 text-indigo-600" />
+              <CardTitle className="text-foreground flex items-center gap-2">
+                <Database className="w-5 h-5 text-primary" />
                 Gestion des données
               </CardTitle>
               <CardDescription>
@@ -1427,62 +1427,62 @@ Cordialement,
             <CardContent className="space-y-6">
               {dataStats && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{dataStats.leads || 0}</div>
+                  <div className="bg-info-soft p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-info">{dataStats.leads || 0}</div>
                     <div className="text-sm text-blue-800">Leads</div>
                   </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{dataStats.projects || 0}</div>
+                  <div className="bg-success-soft p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-success">{dataStats.projects || 0}</div>
                     <div className="text-sm text-green-800">Projets</div>
                   </div>
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">{dataStats.invoices || 0}</div>
+                  <div className="bg-brand-soft p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{dataStats.invoices || 0}</div>
                     <div className="text-sm text-purple-800">Factures</div>
                   </div>
                 </div>
               )}
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border border-orange-200 rounded-lg bg-orange-50">
+                <div className="flex items-center justify-between p-4 border border-warning/30 rounded-lg bg-warning-soft">
                   <div>
-                    <h3 className="font-medium text-orange-800">Données de test - Leads</h3>
-                    <p className="text-sm text-orange-600">Supprimer tous les leads de démonstration</p>
+                    <h3 className="font-medium text-warning">Données de test - Leads</h3>
+                    <p className="text-sm text-warning">Supprimer tous les leads de démonstration</p>
                   </div>
                   <Button
                     onClick={() => handleDeleteTestData('leads')}
                     disabled={deletingData}
                     variant="outline"
-                    className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                    className="border-orange-300 text-warning hover:bg-warning-soft"
                   >
                     {deletingData ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                   </Button>
                 </div>
 
-                <div className="flex items-center justify-between p-4 border border-orange-200 rounded-lg bg-orange-50">
+                <div className="flex items-center justify-between p-4 border border-warning/30 rounded-lg bg-warning-soft">
                   <div>
-                    <h3 className="font-medium text-orange-800">Données de test - Projets</h3>
-                    <p className="text-sm text-orange-600">Supprimer tous les projets de démonstration</p>
+                    <h3 className="font-medium text-warning">Données de test - Projets</h3>
+                    <p className="text-sm text-warning">Supprimer tous les projets de démonstration</p>
                   </div>
                   <Button
                     onClick={() => handleDeleteTestData('projects')}
                     disabled={deletingData}
                     variant="outline"
-                    className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                    className="border-orange-300 text-warning hover:bg-warning-soft"
                   >
                     {deletingData ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                   </Button>
                 </div>
 
-                <div className="flex items-center justify-between p-4 border border-orange-200 rounded-lg bg-orange-50">
+                <div className="flex items-center justify-between p-4 border border-warning/30 rounded-lg bg-warning-soft">
                   <div>
-                    <h3 className="font-medium text-orange-800">Données de test - Factures</h3>
-                    <p className="text-sm text-orange-600">Supprimer toutes les factures de démonstration</p>
+                    <h3 className="font-medium text-warning">Données de test - Factures</h3>
+                    <p className="text-sm text-warning">Supprimer toutes les factures de démonstration</p>
                   </div>
                   <Button
                     onClick={() => handleDeleteTestData('invoices')}
                     disabled={deletingData}
                     variant="outline"
-                    className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                    className="border-orange-300 text-warning hover:bg-warning-soft"
                   >
                     {deletingData ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                   </Button>
@@ -1490,13 +1490,13 @@ Cordialement,
               </div>
 
               <div className="border-t pt-6">
-                <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
+                <div className="flex items-center justify-between p-4 border border-danger/30 rounded-lg bg-danger-soft">
                   <div>
                     <h3 className="font-medium text-red-800 flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4" />
                       Supprimer toutes les données de test
                     </h3>
-                    <p className="text-sm text-red-600">⚠️ Action irréversible - Supprime toutes les données de démonstration</p>
+                    <p className="text-sm text-danger">⚠️ Action irréversible - Supprime toutes les données de démonstration</p>
                   </div>
                   <Button
                     onClick={handleClearAllTestData}

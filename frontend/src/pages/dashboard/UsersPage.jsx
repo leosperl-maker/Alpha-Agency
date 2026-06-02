@@ -228,14 +228,14 @@ export default function UsersPage() {
   const getRoleBadge = (role) => {
     if (role === "super_admin") {
       return (
-        <Badge className="bg-indigo-600 text-white">
+        <Badge className="bg-primary text-white">
           <ShieldCheck className="w-3 h-3 mr-1" />
           Super Admin
         </Badge>
       );
     }
     return (
-      <Badge variant="secondary" className="bg-[#E5E5E5] text-slate-500">
+      <Badge variant="secondary" className="bg-[#E5E5E5] text-muted-foreground">
         <Shield className="w-3 h-3 mr-1" />
         Admin
       </Badge>
@@ -253,15 +253,15 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 bg-white">
+    <div className="p-4 sm:p-6 space-y-6 bg-card">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-2">
-            <UserCog className="w-7 h-7 text-indigo-600" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
+            <UserCog className="w-7 h-7 text-primary" />
             Gestion des utilisateurs
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-muted-foreground mt-1">
             Gérez les accès administrateurs de votre plateforme
           </p>
         </div>
@@ -269,14 +269,14 @@ export default function UsersPage() {
           <Button
             onClick={() => setShowPasswordDialog(true)}
             variant="outline"
-            className="border-[#CE0202] text-indigo-600 hover:bg-indigo-600/10"
+            className="border-[#CE0202] text-primary hover:bg-primary/10"
           >
             <Key className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Mon mot de passe</span>
           </Button>
           <Button
             onClick={() => setShowAddDialog(true)}
-            className="bg-indigo-600 hover:bg-indigo-600/90 text-white"
+            className="bg-primary hover:bg-primary/90 text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">Nouvel admin</span>
@@ -286,45 +286,45 @@ export default function UsersPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <Card className="bg-white backdrop-blur-xl border border-slate-200">
+        <Card className="bg-card backdrop-blur-xl border border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-indigo-600/10 rounded-lg flex items-center justify-center">
-                <Users className="w-5 h-5 text-indigo-600" />
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Users className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{users.length}</p>
-                <p className="text-sm text-slate-500">Total utilisateurs</p>
+                <p className="text-2xl font-bold text-foreground">{users.length}</p>
+                <p className="text-sm text-muted-foreground">Total utilisateurs</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white backdrop-blur-xl border border-slate-200">
+        <Card className="bg-card backdrop-blur-xl border border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 bg-success-soft rounded-lg flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-success" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-2xl font-bold text-foreground">
                   {users.filter((u) => u.role === "super_admin").length}
                 </p>
-                <p className="text-sm text-slate-500">Super admins</p>
+                <p className="text-sm text-muted-foreground">Super admins</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-white backdrop-blur-xl border border-slate-200 col-span-2 sm:col-span-1">
+        <Card className="bg-card backdrop-blur-xl border border-border col-span-2 sm:col-span-1">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Shield className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 bg-info-soft rounded-lg flex items-center justify-center">
+                <Shield className="w-5 h-5 text-info" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-2xl font-bold text-foreground">
                   {users.filter((u) => u.role === "admin").length}
                 </p>
-                <p className="text-sm text-slate-500">Admins</p>
+                <p className="text-sm text-muted-foreground">Admins</p>
               </div>
             </div>
           </CardContent>
@@ -332,29 +332,29 @@ export default function UsersPage() {
       </div>
 
       {/* Users Table */}
-      <Card className="bg-white backdrop-blur-xl border border-slate-200">
-        <CardHeader className="border-b border-slate-200">
-          <CardTitle className="text-slate-900">Liste des utilisateurs</CardTitle>
+      <Card className="bg-card backdrop-blur-xl border border-border">
+        <CardHeader className="border-b border-border">
+          <CardTitle className="text-foreground">Liste des utilisateurs</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center p-8">
-              <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
             </div>
           ) : users.length === 0 ? (
-            <div className="text-center p-8 text-slate-500">
+            <div className="text-center p-8 text-muted-foreground">
               Aucun utilisateur trouvé
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-white">
-                    <TableHead className="text-slate-500">Nom</TableHead>
-                    <TableHead className="text-slate-500">Email</TableHead>
-                    <TableHead className="text-slate-500">Rôle</TableHead>
-                    <TableHead className="text-slate-500 hidden sm:table-cell">Créé le</TableHead>
-                    <TableHead className="text-slate-500 text-right">Actions</TableHead>
+                  <TableRow className="bg-card">
+                    <TableHead className="text-muted-foreground">Nom</TableHead>
+                    <TableHead className="text-muted-foreground">Email</TableHead>
+                    <TableHead className="text-muted-foreground">Rôle</TableHead>
+                    <TableHead className="text-muted-foreground hidden sm:table-cell">Créé le</TableHead>
+                    <TableHead className="text-muted-foreground text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -363,12 +363,12 @@ export default function UsersPage() {
                       key={user.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="border-b border-slate-200 hover:bg-slate-50/50"
+                      className="border-b border-border hover:bg-secondary/50"
                     >
-                      <TableCell className="font-medium text-slate-900">
+                      <TableCell className="font-medium text-foreground">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-indigo-600/10 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-indigo-600 font-bold text-sm">
+                          <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-primary font-bold text-sm">
                               {user.full_name?.charAt(0) || "?"}
                             </span>
                           </div>
@@ -377,13 +377,13 @@ export default function UsersPage() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-slate-500">
+                      <TableCell className="text-muted-foreground">
                         <span className="truncate max-w-[120px] sm:max-w-none block">
                           {user.email}
                         </span>
                       </TableCell>
                       <TableCell>{getRoleBadge(user.role)}</TableCell>
-                      <TableCell className="text-slate-500 hidden sm:table-cell">
+                      <TableCell className="text-muted-foreground hidden sm:table-cell">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {formatDate(user.created_at)}
@@ -395,7 +395,7 @@ export default function UsersPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => openEditDialog(user)}
-                            className="text-slate-500 hover:text-slate-900"
+                            className="text-muted-foreground hover:text-foreground"
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -404,7 +404,7 @@ export default function UsersPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => openDeleteDialog(user)}
-                              className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                              className="text-danger hover:text-danger hover:bg-danger-soft"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -422,40 +422,40 @@ export default function UsersPage() {
 
       {/* Add User Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="bg-white backdrop-blur-xl sm:max-w-[425px]">
+        <DialogContent className="bg-card backdrop-blur-xl sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-slate-900 flex items-center gap-2">
-              <Plus className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <Plus className="w-5 h-5 text-primary" />
               Ajouter un administrateur
             </DialogTitle>
-            <DialogDescription className="text-slate-500">
+            <DialogDescription className="text-muted-foreground">
               Créez un nouveau compte administrateur pour accéder au dashboard.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAddUser} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-slate-900">Nom complet *</Label>
+              <Label className="text-foreground">Nom complet *</Label>
               <Input
                 value={newUser.full_name}
                 onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
                 placeholder="Jean Dupont"
                 required
-                className="bg-white border-slate-200"
+                className="bg-card border-border"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-900">Email *</Label>
+              <Label className="text-foreground">Email *</Label>
               <Input
                 type="email"
                 value={newUser.email}
                 onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                 placeholder="jean@example.com"
                 required
-                className="bg-white border-slate-200"
+                className="bg-card border-border"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-900">Mot de passe *</Label>
+              <Label className="text-foreground">Mot de passe *</Label>
               <Input
                 type="password"
                 value={newUser.password}
@@ -463,19 +463,19 @@ export default function UsersPage() {
                 placeholder="Minimum 8 caractères"
                 required
                 minLength={8}
-                className="bg-white border-slate-200"
+                className="bg-card border-border"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-900">Rôle</Label>
+              <Label className="text-foreground">Rôle</Label>
               <Select
                 value={newUser.role}
                 onValueChange={(value) => setNewUser({ ...newUser, role: value })}
               >
-                <SelectTrigger className="bg-white border-slate-200">
+                <SelectTrigger className="bg-card border-border">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white backdrop-blur-xl">
+                <SelectContent className="bg-card backdrop-blur-xl">
                   <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="super_admin">Super Admin</SelectItem>
                 </SelectContent>
@@ -486,14 +486,14 @@ export default function UsersPage() {
                 type="button"
                 variant="outline"
                 onClick={() => setShowAddDialog(false)}
-                className="border-slate-200"
+                className="border-border"
               >
                 Annuler
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-indigo-600 hover:bg-indigo-600/90"
+                className="bg-primary hover:bg-primary/90"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Créer
@@ -505,44 +505,44 @@ export default function UsersPage() {
 
       {/* Edit User Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="bg-white backdrop-blur-xl sm:max-w-[425px]">
+        <DialogContent className="bg-card backdrop-blur-xl sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-slate-900 flex items-center gap-2">
-              <Edit className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <Edit className="w-5 h-5 text-primary" />
               Modifier l'utilisateur
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEditUser} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-slate-900">Nom complet</Label>
+              <Label className="text-foreground">Nom complet</Label>
               <Input
                 value={editUser.full_name}
                 onChange={(e) => setEditUser({ ...editUser, full_name: e.target.value })}
                 placeholder="Jean Dupont"
-                className="bg-white border-slate-200"
+                className="bg-card border-border"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-900">Email</Label>
+              <Label className="text-foreground">Email</Label>
               <Input
                 type="email"
                 value={editUser.email}
                 onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
                 placeholder="jean@example.com"
-                className="bg-white border-slate-200"
+                className="bg-card border-border"
               />
             </div>
             {selectedUser?.role !== "super_admin" && (
               <div className="space-y-2">
-                <Label className="text-slate-900">Rôle</Label>
+                <Label className="text-foreground">Rôle</Label>
                 <Select
                   value={editUser.role}
                   onValueChange={(value) => setEditUser({ ...editUser, role: value })}
                 >
-                  <SelectTrigger className="bg-white border-slate-200">
+                  <SelectTrigger className="bg-card border-border">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white backdrop-blur-xl">
+                  <SelectContent className="bg-card backdrop-blur-xl">
                     <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="super_admin">Super Admin</SelectItem>
                   </SelectContent>
@@ -554,14 +554,14 @@ export default function UsersPage() {
                 type="button"
                 variant="outline"
                 onClick={() => setShowEditDialog(false)}
-                className="border-slate-200"
+                className="border-border"
               >
                 Annuler
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-indigo-600 hover:bg-indigo-600/90"
+                className="bg-primary hover:bg-primary/90"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Enregistrer
@@ -573,19 +573,19 @@ export default function UsersPage() {
 
       {/* Delete User Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-white backdrop-blur-xl">
+        <AlertDialogContent className="bg-card backdrop-blur-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-slate-900">
+            <AlertDialogTitle className="text-foreground">
               Supprimer cet utilisateur ?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-500">
+            <AlertDialogDescription className="text-muted-foreground">
               Cette action est irréversible. L'utilisateur{" "}
               <strong>{selectedUser?.full_name}</strong> ({selectedUser?.email}) ne pourra
               plus accéder au dashboard.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-slate-200">Annuler</AlertDialogCancel>
+            <AlertDialogCancel className="border-border">Annuler</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteUser}
               disabled={submitting}
@@ -600,19 +600,19 @@ export default function UsersPage() {
 
       {/* Change Password Dialog */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent className="bg-white backdrop-blur-xl sm:max-w-[425px]">
+        <DialogContent className="bg-card backdrop-blur-xl sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-slate-900 flex items-center gap-2">
-              <Key className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <Key className="w-5 h-5 text-primary" />
               Changer mon mot de passe
             </DialogTitle>
-            <DialogDescription className="text-slate-500">
+            <DialogDescription className="text-muted-foreground">
               Entrez votre mot de passe actuel et le nouveau mot de passe.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-slate-900">Mot de passe actuel *</Label>
+              <Label className="text-foreground">Mot de passe actuel *</Label>
               <Input
                 type="password"
                 value={passwordForm.current_password}
@@ -620,11 +620,11 @@ export default function UsersPage() {
                   setPasswordForm({ ...passwordForm, current_password: e.target.value })
                 }
                 required
-                className="bg-white border-slate-200"
+                className="bg-card border-border"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-900">Nouveau mot de passe *</Label>
+              <Label className="text-foreground">Nouveau mot de passe *</Label>
               <Input
                 type="password"
                 value={passwordForm.new_password}
@@ -634,11 +634,11 @@ export default function UsersPage() {
                 required
                 minLength={8}
                 placeholder="Minimum 8 caractères"
-                className="bg-white border-slate-200"
+                className="bg-card border-border"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-900">Confirmer le nouveau mot de passe *</Label>
+              <Label className="text-foreground">Confirmer le nouveau mot de passe *</Label>
               <Input
                 type="password"
                 value={passwordForm.confirm_password}
@@ -647,7 +647,7 @@ export default function UsersPage() {
                 }
                 required
                 minLength={8}
-                className="bg-white border-slate-200"
+                className="bg-card border-border"
               />
             </div>
             <DialogFooter>
@@ -655,14 +655,14 @@ export default function UsersPage() {
                 type="button"
                 variant="outline"
                 onClick={() => setShowPasswordDialog(false)}
-                className="border-slate-200"
+                className="border-border"
               >
                 Annuler
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-indigo-600 hover:bg-indigo-600/90"
+                className="bg-primary hover:bg-primary/90"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Modifier

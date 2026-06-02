@@ -265,7 +265,7 @@ const AgendaPage = () => {
     
     // Empty cells before first day
     for (let i = 1; i < startDay; i++) {
-      days.push(<div key={`empty-${i}`} className="h-24 bg-white border border-slate-200"></div>);
+      days.push(<div key={`empty-${i}`} className="h-24 bg-card border border-border"></div>);
     }
     
     // Days of month
@@ -278,9 +278,9 @@ const AgendaPage = () => {
       days.push(
         <div 
           key={day} 
-          className={`h-24 p-1 border border-slate-200 overflow-hidden ${isToday ? 'bg-indigo-50' : 'bg-white'} hover:bg-slate-100 transition-colors`}
+          className={`h-24 p-1 border border-border overflow-hidden ${isToday ? 'bg-brand-soft' : 'bg-card'} hover:bg-secondary transition-colors`}
         >
-          <div className={`text-xs font-medium mb-1 ${isToday ? 'text-indigo-600' : 'text-slate-600'}`}>
+          <div className={`text-xs font-medium mb-1 ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
             {day}
           </div>
           <div className="space-y-0.5">
@@ -288,13 +288,13 @@ const AgendaPage = () => {
               <div 
                 key={apt.id}
                 onClick={() => { setSelectedAppointment(apt); setShowDetailModal(true); }}
-                className="text-[10px] px-1 py-0.5 bg-indigo-100 text-indigo-700 rounded truncate cursor-pointer hover:bg-indigo-200"
+                className="text-[10px] px-1 py-0.5 bg-brand-soft text-indigo-700 rounded truncate cursor-pointer hover:bg-indigo-200"
               >
                 {new Date(apt.start_datetime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} {apt.title}
               </div>
             ))}
             {dayAppointments.length > 2 && (
-              <div className="text-[10px] text-slate-500">+{dayAppointments.length - 2} autres</div>
+              <div className="text-[10px] text-muted-foreground">+{dayAppointments.length - 2} autres</div>
             )}
           </div>
         </div>
@@ -315,7 +315,7 @@ const AgendaPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 animate-spin text-indigo-600" />
+        <RefreshCw className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -325,11 +325,11 @@ const AgendaPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Calendar className="w-7 h-7 text-indigo-600" />
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Calendar className="w-7 h-7 text-primary" />
             Agenda / RDV
           </h1>
-          <p className="text-slate-500 text-sm mt-1">
+          <p className="text-muted-foreground text-sm mt-1">
             Gérez vos rendez-vous avec Google Calendar et Meet
           </p>
         </div>
@@ -337,21 +337,21 @@ const AgendaPage = () => {
         <div className="flex items-center gap-2">
           {/* Google Calendar Status */}
           {googleConnected ? (
-            <div className="flex items-center gap-2 px-3 py-2 bg-green-100 rounded-lg border border-green-200">
-              <Check className="w-4 h-4 text-green-600" />
-              <span className="text-sm text-green-700">{googleEmail || 'Google connecté'}</span>
-              <button onClick={disconnectGoogle} className="text-slate-500 hover:text-red-500">
+            <div className="flex items-center gap-2 px-3 py-2 bg-success-soft rounded-lg border border-success/30">
+              <Check className="w-4 h-4 text-success" />
+              <span className="text-sm text-success">{googleEmail || 'Google connecté'}</span>
+              <button onClick={disconnectGoogle} className="text-muted-foreground hover:text-danger">
                 <X className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <Button onClick={connectGoogle} variant="outline" className="border-slate-200 text-slate-900 hover:bg-slate-100">
+            <Button onClick={connectGoogle} variant="outline" className="border-border text-foreground hover:bg-secondary">
               <Video className="w-4 h-4 mr-2" />
               Connecter Google Calendar
             </Button>
           )}
           
-          <Button onClick={() => setShowSettingsModal(true)} variant="outline" className="border-slate-200 text-slate-900 hover:bg-slate-100">
+          <Button onClick={() => setShowSettingsModal(true)} variant="outline" className="border-border text-foreground hover:bg-secondary">
             <Settings className="w-4 h-4" />
           </Button>
           
@@ -364,45 +364,45 @@ const AgendaPage = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white backdrop-blur-sm rounded-xl p-4 border border-slate-200">
-          <div className="text-2xl font-bold text-slate-900">{appointments.length}</div>
-          <div className="text-slate-500 text-sm">Total RDV</div>
+        <div className="bg-card backdrop-blur-sm rounded-xl p-4 border border-border">
+          <div className="text-2xl font-bold text-foreground">{appointments.length}</div>
+          <div className="text-muted-foreground text-sm">Total RDV</div>
         </div>
-        <div className="bg-white backdrop-blur-sm rounded-xl p-4 border border-slate-200">
-          <div className="text-2xl font-bold text-indigo-600">
+        <div className="bg-card backdrop-blur-sm rounded-xl p-4 border border-border">
+          <div className="text-2xl font-bold text-primary">
             {appointments.filter(a => new Date(a.start_datetime) > new Date()).length}
           </div>
-          <div className="text-slate-500 text-sm">À venir</div>
+          <div className="text-muted-foreground text-sm">À venir</div>
         </div>
-        <div className="bg-white backdrop-blur-sm rounded-xl p-4 border border-slate-200">
-          <div className="text-2xl font-bold text-green-400">
+        <div className="bg-card backdrop-blur-sm rounded-xl p-4 border border-border">
+          <div className="text-2xl font-bold text-success">
             {appointments.filter(a => a.google_meet_link).length}
           </div>
-          <div className="text-slate-500 text-sm">Avec Meet</div>
+          <div className="text-muted-foreground text-sm">Avec Meet</div>
         </div>
-        <div className="bg-white backdrop-blur-sm rounded-xl p-4 border border-slate-200">
-          <div className="text-2xl font-bold text-purple-400">
+        <div className="bg-card backdrop-blur-sm rounded-xl p-4 border border-border">
+          <div className="text-2xl font-bold text-primary">
             {appointments.filter(a => a.email_sent).length}
           </div>
-          <div className="text-slate-500 text-sm">Invitations envoyées</div>
+          <div className="text-muted-foreground text-sm">Invitations envoyées</div>
         </div>
       </div>
 
       {/* Calendar Navigation */}
-      <div className="flex items-center justify-between bg-white backdrop-blur-sm rounded-xl p-4 border border-slate-200">
+      <div className="flex items-center justify-between bg-card backdrop-blur-sm rounded-xl p-4 border border-border">
         <div className="flex items-center gap-2">
-          <Button onClick={goToPrevMonth} variant="ghost" size="sm" className="text-slate-900">
+          <Button onClick={goToPrevMonth} variant="ghost" size="sm" className="text-foreground">
             <ChevronLeft className="w-4 h-4" />
           </Button>
-          <Button onClick={goToToday} variant="ghost" size="sm" className="text-slate-900">
+          <Button onClick={goToToday} variant="ghost" size="sm" className="text-foreground">
             Aujourd'hui
           </Button>
-          <Button onClick={goToNextMonth} variant="ghost" size="sm" className="text-slate-900">
+          <Button onClick={goToNextMonth} variant="ghost" size="sm" className="text-foreground">
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
         
-        <h2 className="text-lg font-semibold text-slate-900">
+        <h2 className="text-lg font-semibold text-foreground">
           {currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
         </h2>
         
@@ -411,7 +411,7 @@ const AgendaPage = () => {
             onClick={() => setViewMode('month')} 
             variant={viewMode === 'month' ? 'default' : 'ghost'}
             size="sm"
-            className={viewMode === 'month' ? 'bg-indigo-500 text-white' : 'text-slate-700'}
+            className={viewMode === 'month' ? 'bg-brand text-white' : 'text-foreground'}
           >
             Mois
           </Button>
@@ -419,7 +419,7 @@ const AgendaPage = () => {
             onClick={() => setViewMode('list')}
             variant={viewMode === 'list' ? 'default' : 'ghost'}
             size="sm"
-            className={viewMode === 'list' ? 'bg-indigo-500 text-white' : 'text-slate-700'}
+            className={viewMode === 'list' ? 'bg-brand text-white' : 'text-foreground'}
           >
             Liste
           </Button>
@@ -428,11 +428,11 @@ const AgendaPage = () => {
 
       {/* Calendar Grid or List */}
       {viewMode === 'month' ? (
-        <div className="bg-white backdrop-blur-sm rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-card backdrop-blur-sm rounded-xl border border-border overflow-hidden">
           {/* Day headers */}
-          <div className="grid grid-cols-7 bg-slate-100">
+          <div className="grid grid-cols-7 bg-secondary">
             {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
-              <div key={day} className="p-2 text-center text-sm font-medium text-slate-600">
+              <div key={day} className="p-2 text-center text-sm font-medium text-muted-foreground">
                 {day}
               </div>
             ))}
@@ -451,12 +451,12 @@ const AgendaPage = () => {
               <div 
                 key={apt.id}
                 onClick={() => { setSelectedAppointment(apt); setShowDetailModal(true); }}
-                className="bg-white backdrop-blur-sm rounded-xl p-4 border border-slate-200 hover:bg-slate-100 cursor-pointer transition-colors"
+                className="bg-card backdrop-blur-sm rounded-xl p-4 border border-border hover:bg-secondary cursor-pointer transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold text-slate-900">{apt.title}</h3>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
+                    <h3 className="font-semibold text-foreground">{apt.title}</h3>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
                         {new Date(apt.start_datetime).toLocaleDateString('fr-FR')} à {new Date(apt.start_datetime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
@@ -470,18 +470,18 @@ const AgendaPage = () => {
                   <div className="flex items-center gap-2">
                     {apt.google_meet_link && (
                       <a href={apt.google_meet_link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
-                        <Video className="w-5 h-5 text-green-400" />
+                        <Video className="w-5 h-5 text-success" />
                       </a>
                     )}
-                    {apt.email_sent && <Mail className="w-5 h-5 text-indigo-600" />}
-                    {apt.invoice && <FileText className="w-5 h-5 text-purple-400" />}
+                    {apt.email_sent && <Mail className="w-5 h-5 text-primary" />}
+                    {apt.invoice && <FileText className="w-5 h-5 text-primary" />}
                   </div>
                 </div>
               </div>
             ))}
           
           {appointments.length === 0 && (
-            <div className="text-center py-12 text-slate-500">
+            <div className="text-center py-12 text-muted-foreground">
               Aucun rendez-vous. Créez-en un !
             </div>
           )}
@@ -490,10 +490,10 @@ const AgendaPage = () => {
 
       {/* Create Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-secondary border-border text-foreground max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Plus className="w-5 h-5 text-indigo-600" />
+              <Plus className="w-5 h-5 text-primary" />
               Nouveau Rendez-vous
             </DialogTitle>
           </DialogHeader>
@@ -501,14 +501,14 @@ const AgendaPage = () => {
           <div className="space-y-4">
             {/* Contact */}
             <div>
-              <Label className="text-slate-700">Contact *</Label>
+              <Label className="text-foreground">Contact *</Label>
               <Select value={formData.contact_id} onValueChange={(v) => setFormData({...formData, contact_id: v})}>
-                <SelectTrigger className="bg-white border-slate-200 text-slate-900">
+                <SelectTrigger className="bg-card border-border text-foreground">
                   <SelectValue placeholder="Sélectionner un contact" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-50 border-slate-200">
+                <SelectContent className="bg-secondary border-border">
                   {contacts.map(c => (
-                    <SelectItem key={c.id} value={c.id} className="text-slate-900 hover:bg-slate-100">
+                    <SelectItem key={c.id} value={c.id} className="text-foreground hover:bg-secondary">
                       {c.first_name} {c.last_name} {c.email && `(${c.email})`}
                     </SelectItem>
                   ))}
@@ -518,81 +518,81 @@ const AgendaPage = () => {
             
             {/* Title */}
             <div>
-              <Label className="text-slate-700">Titre du RDV *</Label>
+              <Label className="text-foreground">Titre du RDV *</Label>
               <Input 
                 value={formData.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
                 placeholder="Ex: Présentation devis"
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
               />
             </div>
             
             {/* Date & Time */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-slate-700">Date *</Label>
+                <Label className="text-foreground">Date *</Label>
                 <Input 
                   type="date"
                   value={formData.start_date}
                   onChange={(e) => setFormData({...formData, start_date: e.target.value})}
-                  className="bg-white border-slate-200 text-slate-900"
+                  className="bg-card border-border text-foreground"
                 />
               </div>
               <div>
-                <Label className="text-slate-700">Heure *</Label>
+                <Label className="text-foreground">Heure *</Label>
                 <Input 
                   type="time"
                   value={formData.start_time}
                   onChange={(e) => setFormData({...formData, start_time: e.target.value})}
-                  className="bg-white border-slate-200 text-slate-900"
+                  className="bg-card border-border text-foreground"
                 />
               </div>
             </div>
             
             {/* Duration */}
             <div>
-              <Label className="text-slate-700">Durée</Label>
+              <Label className="text-foreground">Durée</Label>
               <Select value={String(formData.duration_minutes)} onValueChange={(v) => setFormData({...formData, duration_minutes: parseInt(v)})}>
-                <SelectTrigger className="bg-white border-slate-200 text-slate-900">
+                <SelectTrigger className="bg-card border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-50 border-slate-200">
-                  <SelectItem value="15" className="text-slate-900 hover:bg-slate-100">15 minutes</SelectItem>
-                  <SelectItem value="30" className="text-slate-900 hover:bg-slate-100">30 minutes</SelectItem>
-                  <SelectItem value="45" className="text-slate-900 hover:bg-slate-100">45 minutes</SelectItem>
-                  <SelectItem value="60" className="text-slate-900 hover:bg-slate-100">1 heure</SelectItem>
-                  <SelectItem value="90" className="text-slate-900 hover:bg-slate-100">1h30</SelectItem>
-                  <SelectItem value="120" className="text-slate-900 hover:bg-slate-100">2 heures</SelectItem>
+                <SelectContent className="bg-secondary border-border">
+                  <SelectItem value="15" className="text-foreground hover:bg-secondary">15 minutes</SelectItem>
+                  <SelectItem value="30" className="text-foreground hover:bg-secondary">30 minutes</SelectItem>
+                  <SelectItem value="45" className="text-foreground hover:bg-secondary">45 minutes</SelectItem>
+                  <SelectItem value="60" className="text-foreground hover:bg-secondary">1 heure</SelectItem>
+                  <SelectItem value="90" className="text-foreground hover:bg-secondary">1h30</SelectItem>
+                  <SelectItem value="120" className="text-foreground hover:bg-secondary">2 heures</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             {/* Description */}
             <div>
-              <Label className="text-slate-700">Description</Label>
+              <Label className="text-foreground">Description</Label>
               <Textarea 
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                 placeholder="Détails du rendez-vous..."
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
                 rows={3}
               />
             </div>
             
             {/* Link Invoice/Quote */}
             <div>
-              <Label className="text-slate-700 flex items-center gap-1">
+              <Label className="text-foreground flex items-center gap-1">
                 <FileText className="w-4 h-4" />
                 Associer un devis/facture
               </Label>
               <Select value={formData.invoice_id || "none"} onValueChange={(v) => setFormData({...formData, invoice_id: v === "none" ? "" : v})}>
-                <SelectTrigger className="bg-white border-slate-200 text-slate-900">
+                <SelectTrigger className="bg-card border-border text-foreground">
                   <SelectValue placeholder="Aucun" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-50 border-slate-200">
-                  <SelectItem value="none" className="text-slate-900 hover:bg-slate-100">Aucun</SelectItem>
+                <SelectContent className="bg-secondary border-border">
+                  <SelectItem value="none" className="text-foreground hover:bg-secondary">Aucun</SelectItem>
                   {invoices.map(inv => (
-                    <SelectItem key={inv.id} value={inv.id} className="text-slate-900 hover:bg-slate-100">
+                    <SelectItem key={inv.id} value={inv.id} className="text-foreground hover:bg-secondary">
                       {inv.invoice_number || inv.quote_number} - {inv.contact_name || 'Sans nom'}
                     </SelectItem>
                   ))}
@@ -602,18 +602,18 @@ const AgendaPage = () => {
             
             {/* Link Document */}
             <div>
-              <Label className="text-slate-700 flex items-center gap-1">
+              <Label className="text-foreground flex items-center gap-1">
                 <Paperclip className="w-4 h-4" />
                 Joindre un document
               </Label>
               <Select value={formData.document_id || "none"} onValueChange={(v) => setFormData({...formData, document_id: v === "none" ? "" : v})}>
-                <SelectTrigger className="bg-white border-slate-200 text-slate-900">
+                <SelectTrigger className="bg-card border-border text-foreground">
                   <SelectValue placeholder="Aucun" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-50 border-slate-200">
-                  <SelectItem value="none" className="text-slate-900 hover:bg-slate-100">Aucun</SelectItem>
+                <SelectContent className="bg-secondary border-border">
+                  <SelectItem value="none" className="text-foreground hover:bg-secondary">Aucun</SelectItem>
                   {documents.map(doc => (
-                    <SelectItem key={doc.id} value={doc.id} className="text-slate-900 hover:bg-slate-100">
+                    <SelectItem key={doc.id} value={doc.id} className="text-foreground hover:bg-secondary">
                       {doc.name}
                     </SelectItem>
                   ))}
@@ -622,21 +622,21 @@ const AgendaPage = () => {
             </div>
             
             {/* Reminders info */}
-            <div className="bg-white rounded-lg p-3 border border-slate-200">
-              <div className="text-sm font-medium text-slate-700 mb-2 flex items-center gap-1">
+            <div className="bg-card rounded-lg p-3 border border-border">
+              <div className="text-sm font-medium text-foreground mb-2 flex items-center gap-1">
                 <Bell className="w-4 h-4" />
                 Relances automatiques configurées
               </div>
               <div className="flex flex-wrap gap-2">
                 {reminderSettings.filter(r => r.email || r.sms).map((r, i) => (
-                  <span key={i} className="text-xs px-2 py-1 bg-indigo-100 rounded text-indigo-700">
+                  <span key={i} className="text-xs px-2 py-1 bg-brand-soft rounded text-indigo-700">
                     {r.name} {r.email && '📧'} {r.sms && '📱'}
                   </span>
                 ))}
               </div>
               <button 
                 onClick={() => { setShowCreateModal(false); setShowSettingsModal(true); }}
-                className="text-xs text-indigo-600 hover:underline mt-2"
+                className="text-xs text-primary hover:underline mt-2"
               >
                 Modifier les relances →
               </button>
@@ -644,7 +644,7 @@ const AgendaPage = () => {
           </div>
           
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowCreateModal(false)} className="text-slate-900">
+            <Button variant="ghost" onClick={() => setShowCreateModal(false)} className="text-foreground">
               Annuler
             </Button>
             <Button onClick={handleCreateAppointment} className="bg-gradient-to-r from-indigo-500 to-purple-500">
@@ -657,10 +657,10 @@ const AgendaPage = () => {
 
       {/* Detail Modal */}
       <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-lg">
+        <DialogContent className="bg-secondary border-border text-foreground max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-indigo-600" />
+              <Calendar className="w-5 h-5 text-primary" />
               {selectedAppointment?.title}
             </DialogTitle>
           </DialogHeader>
@@ -668,13 +668,13 @@ const AgendaPage = () => {
           {selectedAppointment && (
             <div className="space-y-4">
               {/* Date & Time */}
-              <div className="flex items-center gap-3 text-slate-700">
-                <Clock className="w-5 h-5 text-indigo-600" />
+              <div className="flex items-center gap-3 text-foreground">
+                <Clock className="w-5 h-5 text-primary" />
                 <div>
                   <div className="font-medium">
                     {new Date(selectedAppointment.start_datetime).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                   </div>
-                  <div className="text-sm text-slate-500">
+                  <div className="text-sm text-muted-foreground">
                     {new Date(selectedAppointment.start_datetime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - {selectedAppointment.duration_minutes} min
                   </div>
                 </div>
@@ -682,11 +682,11 @@ const AgendaPage = () => {
               
               {/* Contact */}
               {selectedAppointment.contact && (
-                <div className="flex items-center gap-3 text-slate-700">
-                  <User className="w-5 h-5 text-indigo-600" />
+                <div className="flex items-center gap-3 text-foreground">
+                  <User className="w-5 h-5 text-primary" />
                   <div>
                     <div className="font-medium">{selectedAppointment.contact.first_name} {selectedAppointment.contact.last_name}</div>
-                    <div className="text-sm text-slate-500">{selectedAppointment.contact.email}</div>
+                    <div className="text-sm text-muted-foreground">{selectedAppointment.contact.email}</div>
                   </div>
                 </div>
               )}
@@ -694,12 +694,12 @@ const AgendaPage = () => {
               {/* Meet Link */}
               {selectedAppointment.google_meet_link && (
                 <div className="flex items-center gap-3">
-                  <Video className="w-5 h-5 text-green-600" />
+                  <Video className="w-5 h-5 text-success" />
                   <a
                     href={selectedAppointment.google_meet_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-green-600 hover:underline flex items-center gap-1"
+                    className="text-success hover:underline flex items-center gap-1"
                   >
                     Rejoindre Google Meet <ExternalLink className="w-4 h-4" />
                   </a>
@@ -708,40 +708,40 @@ const AgendaPage = () => {
               
               {/* Description */}
               {selectedAppointment.description && (
-                <div className="bg-white rounded-lg p-3">
-                  <div className="text-sm text-slate-500 mb-1">Description</div>
-                  <div className="text-slate-700">{selectedAppointment.description}</div>
+                <div className="bg-card rounded-lg p-3">
+                  <div className="text-sm text-muted-foreground mb-1">Description</div>
+                  <div className="text-foreground">{selectedAppointment.description}</div>
                 </div>
               )}
               
               {/* Invoice */}
               {selectedAppointment.invoice && (
-                <div className="flex items-center gap-3 text-slate-700">
-                  <FileText className="w-5 h-5 text-purple-400" />
+                <div className="flex items-center gap-3 text-foreground">
+                  <FileText className="w-5 h-5 text-primary" />
                   <span>Document: {selectedAppointment.invoice.invoice_number || selectedAppointment.invoice.quote_number}</span>
                 </div>
               )}
               
               {/* Actions */}
-              <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-200">
+              <div className="flex flex-wrap gap-2 pt-4 border-t border-border">
                 {!selectedAppointment.email_sent ? (
-                  <Button onClick={() => sendInvitation(selectedAppointment.id)} className="bg-indigo-500 hover:bg-indigo-600">
+                  <Button onClick={() => sendInvitation(selectedAppointment.id)} className="bg-brand hover:bg-primary">
                     <Mail className="w-4 h-4 mr-2" />
                     Envoyer l'invitation
                   </Button>
                 ) : (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-green-100 rounded text-green-700 text-sm">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-success-soft rounded text-success text-sm">
                     <Check className="w-4 h-4" />
                     Invitation envoyée
                   </div>
                 )}
                 
-                <Button onClick={() => sendSmsReminder(selectedAppointment.id)} variant="outline" className="border-slate-200 text-slate-900 hover:bg-slate-100">
+                <Button onClick={() => sendSmsReminder(selectedAppointment.id)} variant="outline" className="border-border text-foreground hover:bg-secondary">
                   <MessageSquare className="w-4 h-4 mr-2" />
                   Envoyer SMS
                 </Button>
                 
-                <Button onClick={() => deleteAppointment(selectedAppointment.id)} variant="ghost" className="text-red-400 hover:bg-red-500/20">
+                <Button onClick={() => deleteAppointment(selectedAppointment.id)} variant="ghost" className="text-danger hover:bg-danger-soft">
                   <Trash2 className="w-4 h-4 mr-2" />
                   Supprimer
                 </Button>
@@ -753,10 +753,10 @@ const AgendaPage = () => {
 
       {/* Settings Modal - Expanded with Email/SMS Templates */}
       <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-white max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="bg-secondary border-border text-white max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5 text-indigo-600" />
+              <Settings className="w-5 h-5 text-primary" />
               Paramètres Agenda / RDV
             </DialogTitle>
           </DialogHeader>
@@ -765,15 +765,15 @@ const AgendaPage = () => {
             {/* Section 1: Relances */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Bell className="w-5 h-5 text-indigo-600" />
+                <Bell className="w-5 h-5 text-primary" />
                 Relances automatiques
               </h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 Configurez jusqu'à 4 relances avant chaque RDV.
               </p>
               
               {reminderSettings.map((reminder, index) => (
-                <div key={index} className="bg-white rounded-lg p-4 border border-slate-200">
+                <div key={index} className="bg-card rounded-lg p-4 border border-border">
                   <div className="flex items-center justify-between mb-3">
                     <Input 
                       value={reminder.name}
@@ -782,7 +782,7 @@ const AgendaPage = () => {
                         updated[index].name = e.target.value;
                         setReminderSettings(updated);
                       }}
-                      className="bg-white border-slate-200 text-slate-900 w-20"
+                      className="bg-card border-border text-foreground w-20"
                     />
                     <Select 
                       value={String(reminder.delay_minutes)} 
@@ -792,19 +792,19 @@ const AgendaPage = () => {
                         setReminderSettings(updated);
                       }}
                     >
-                      <SelectTrigger className="bg-white border-slate-200 text-slate-900 w-40">
+                      <SelectTrigger className="bg-card border-border text-foreground w-40">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-50 border-slate-200">
-                        <SelectItem value="0" className="text-slate-900 hover:bg-slate-100">À l'heure (H-0)</SelectItem>
-                        <SelectItem value="30" className="text-slate-900 hover:bg-slate-100">30 min avant</SelectItem>
-                        <SelectItem value="60" className="text-slate-900 hover:bg-slate-100">1h avant</SelectItem>
-                        <SelectItem value="120" className="text-slate-900 hover:bg-slate-100">2h avant</SelectItem>
-                        <SelectItem value="180" className="text-slate-900 hover:bg-slate-100">3h avant</SelectItem>
-                        <SelectItem value="1440" className="text-slate-900 hover:bg-slate-100">1 jour avant (J-1)</SelectItem>
-                        <SelectItem value="2880" className="text-slate-900 hover:bg-slate-100">2 jours avant (J-2)</SelectItem>
-                        <SelectItem value="4320" className="text-slate-900 hover:bg-slate-100">3 jours avant (J-3)</SelectItem>
-                        <SelectItem value="10080" className="text-slate-900 hover:bg-slate-100">1 semaine avant</SelectItem>
+                      <SelectContent className="bg-secondary border-border">
+                        <SelectItem value="0" className="text-foreground hover:bg-secondary">À l'heure (H-0)</SelectItem>
+                        <SelectItem value="30" className="text-foreground hover:bg-secondary">30 min avant</SelectItem>
+                        <SelectItem value="60" className="text-foreground hover:bg-secondary">1h avant</SelectItem>
+                        <SelectItem value="120" className="text-foreground hover:bg-secondary">2h avant</SelectItem>
+                        <SelectItem value="180" className="text-foreground hover:bg-secondary">3h avant</SelectItem>
+                        <SelectItem value="1440" className="text-foreground hover:bg-secondary">1 jour avant (J-1)</SelectItem>
+                        <SelectItem value="2880" className="text-foreground hover:bg-secondary">2 jours avant (J-2)</SelectItem>
+                        <SelectItem value="4320" className="text-foreground hover:bg-secondary">3 jours avant (J-3)</SelectItem>
+                        <SelectItem value="10080" className="text-foreground hover:bg-secondary">1 semaine avant</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -819,10 +819,10 @@ const AgendaPage = () => {
                           updated[index].email = e.target.checked;
                           setReminderSettings(updated);
                         }}
-                        className="rounded bg-slate-100 border-slate-200"
+                        className="rounded bg-secondary border-border"
                       />
-                      <Mail className="w-4 h-4 text-indigo-600" />
-                      <span className="text-sm text-slate-700">Email</span>
+                      <Mail className="w-4 h-4 text-primary" />
+                      <span className="text-sm text-foreground">Email</span>
                     </label>
                     
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -834,10 +834,10 @@ const AgendaPage = () => {
                           updated[index].sms = e.target.checked;
                           setReminderSettings(updated);
                         }}
-                        className="rounded bg-slate-100 border-slate-200"
+                        className="rounded bg-secondary border-border"
                       />
-                      <MessageSquare className="w-4 h-4 text-green-400" />
-                      <span className="text-sm text-slate-700">SMS</span>
+                      <MessageSquare className="w-4 h-4 text-success" />
+                      <span className="text-sm text-foreground">SMS</span>
                     </label>
                   </div>
                 </div>
@@ -845,74 +845,74 @@ const AgendaPage = () => {
             </div>
             
             {/* Section 2: Template Email */}
-            <div className="space-y-4 pt-4 border-t border-slate-200">
+            <div className="space-y-4 pt-4 border-t border-border">
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Mail className="w-5 h-5 text-indigo-600" />
+                <Mail className="w-5 h-5 text-primary" />
                 Template Email d'invitation
               </h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 L'email d'invitation est envoyé manuellement au client. Il contient automatiquement :
               </p>
-              <div className="bg-white rounded-lg p-4 border border-slate-200 space-y-2">
+              <div className="bg-card rounded-lg p-4 border border-border space-y-2">
                 <div className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-green-400" />
-                  <span className="text-slate-700">Titre et description du RDV</span>
+                  <Check className="w-4 h-4 text-success" />
+                  <span className="text-foreground">Titre et description du RDV</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-green-400" />
-                  <span className="text-slate-700">Date, heure et durée</span>
+                  <Check className="w-4 h-4 text-success" />
+                  <span className="text-foreground">Date, heure et durée</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-green-400" />
-                  <span className="text-slate-700">Lien Google Meet (si généré)</span>
+                  <Check className="w-4 h-4 text-success" />
+                  <span className="text-foreground">Lien Google Meet (si généré)</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-green-400" />
-                  <span className="text-slate-700">N° de devis/facture associé</span>
+                  <Check className="w-4 h-4 text-success" />
+                  <span className="text-foreground">N° de devis/facture associé</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Check className="w-4 h-4 text-green-400" />
-                  <span className="text-slate-700">Lien vers le document joint</span>
+                  <Check className="w-4 h-4 text-success" />
+                  <span className="text-foreground">Lien vers le document joint</span>
                 </div>
               </div>
-              <p className="text-xs text-slate-500">
-                Pour personnaliser le template, modifiez le fichier <code className="bg-slate-100 px-1 rounded">/backend/routes/appointments.py</code> fonction <code className="bg-slate-100 px-1 rounded">send_invitation_email</code>
+              <p className="text-xs text-muted-foreground">
+                Pour personnaliser le template, modifiez le fichier <code className="bg-secondary px-1 rounded">/backend/routes/appointments.py</code> fonction <code className="bg-secondary px-1 rounded">send_invitation_email</code>
               </p>
             </div>
             
             {/* Section 3: Template SMS */}
-            <div className="space-y-4 pt-4 border-t border-slate-200">
+            <div className="space-y-4 pt-4 border-t border-border">
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-green-400" />
+                <MessageSquare className="w-5 h-5 text-success" />
                 Template SMS de rappel
               </h3>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 Format du SMS envoyé :
               </p>
-              <div className="bg-white rounded-lg p-4 border border-slate-200">
+              <div className="bg-card rounded-lg p-4 border border-border">
                 <code className="text-sm text-green-300">
                   Rappel RDV Alpha Agency: [Titre] le [Date] à [Heure]. Meet: [Lien]
                 </code>
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 Expéditeur SMS : <strong>AlphaAgency</strong>
               </p>
             </div>
             
             {/* Section 4: Google Meet */}
-            <div className="space-y-4 pt-4 border-t border-slate-200">
+            <div className="space-y-4 pt-4 border-t border-border">
               <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Video className="w-5 h-5 text-green-400" />
+                <Video className="w-5 h-5 text-success" />
                 Google Meet
               </h3>
-              <div className="bg-white rounded-lg p-4 border border-slate-200">
+              <div className="bg-card rounded-lg p-4 border border-border">
                 {googleConnected ? (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-green-400">
+                    <div className="flex items-center gap-2 text-success">
                       <Check className="w-5 h-5" />
                       <span>Google Calendar connecté : {googleEmail}</span>
                     </div>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                       Un lien Google Meet sera automatiquement généré à chaque création de RDV.
                     </p>
                   </div>
@@ -922,10 +922,10 @@ const AgendaPage = () => {
                       <AlertCircle className="w-5 h-5" />
                       <span>Google Calendar non connecté</span>
                     </div>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                       Connectez Google Calendar pour générer automatiquement des liens Meet.
                     </p>
-                    <Button onClick={connectGoogle} className="mt-2 bg-slate-100 hover:bg-white/20">
+                    <Button onClick={connectGoogle} className="mt-2 bg-secondary hover:bg-card/20">
                       <Video className="w-4 h-4 mr-2" />
                       Connecter Google Calendar
                     </Button>
@@ -936,7 +936,7 @@ const AgendaPage = () => {
           </div>
           
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowSettingsModal(false)} className="text-slate-900">
+            <Button variant="ghost" onClick={() => setShowSettingsModal(false)} className="text-foreground">
               Annuler
             </Button>
             <Button onClick={saveReminderSettings} className="bg-gradient-to-r from-indigo-500 to-purple-500">

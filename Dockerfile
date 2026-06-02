@@ -12,7 +12,9 @@ WORKDIR /app
 COPY frontend/package.json ./
 
 # Install dependencies — no lockfile since none exists in repo
-RUN yarn install --no-lockfile --non-interactive
+# --ignore-engines : camera-controls (dep transitive de @react-three/drei) déclare un engine node
+# plus récent et faisait échouer l'install ; c'est une lib navigateur, l'engine ne gate que l'install.
+RUN yarn install --no-lockfile --non-interactive --ignore-engines
 
 # Copy all frontend source
 COPY frontend/ .

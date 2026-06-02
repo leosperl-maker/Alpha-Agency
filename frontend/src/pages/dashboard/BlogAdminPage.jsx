@@ -355,14 +355,14 @@ const BlogAdminPage = () => {
     return (
       <div data-testid="blog-editor" className="h-full flex flex-col">
         {/* Editor Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-slate-50 backdrop-blur-xl">
+        <div className="flex items-center justify-between p-4 border-b border-border bg-secondary backdrop-blur-xl">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" onClick={() => setIsEditing(false)} className="text-slate-500">
+            <Button variant="ghost" onClick={() => setIsEditing(false)} className="text-muted-foreground">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Retour
             </Button>
-            <span className="text-slate-400">|</span>
-            <h1 className="text-lg font-semibold text-slate-900">
+            <span className="text-muted-foreground">|</span>
+            <h1 className="text-lg font-semibold text-foreground">
               {editingPost ? "Modifier l'article" : "Nouvel article"}
             </h1>
           </div>
@@ -371,7 +371,7 @@ const BlogAdminPage = () => {
               variant="outline"
               onClick={() => savePost("draft")}
               disabled={saving}
-              className="border-slate-200 text-slate-900"
+              className="border-border text-foreground"
             >
               {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
               Brouillon
@@ -379,7 +379,7 @@ const BlogAdminPage = () => {
             <Button
               onClick={() => savePost("published")}
               disabled={saving}
-              className="bg-indigo-600 hover:bg-indigo-500"
+              className="bg-primary hover:brightness-110"
             >
               {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
               Publier
@@ -398,7 +398,7 @@ const BlogAdminPage = () => {
                   value={formData.title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   placeholder="Titre de l'article"
-                  className="text-3xl font-bold bg-transparent border-0 border-b border-slate-200 rounded-none px-0 h-auto py-3 focus-visible:ring-0 focus-visible:border-indigo-500"
+                  className="text-3xl font-bold bg-transparent border-0 border-b border-border rounded-none px-0 h-auto py-3 focus-visible:ring-0 focus-visible:border-indigo-500"
                 />
               </div>
 
@@ -408,13 +408,13 @@ const BlogAdminPage = () => {
                   value={formData.excerpt}
                   onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
                   placeholder="Extrait / résumé de l'article (affiché dans les aperçus)"
-                  className="bg-white border-slate-200 min-h-20"
+                  className="bg-card border-border min-h-20"
                 />
               </div>
 
               {/* Content Blocks - Using AdvancedBlockEditor */}
               <div className="space-y-4">
-                <Label className="text-lg text-slate-900 font-semibold flex items-center gap-2">
+                <Label className="text-lg text-foreground font-semibold flex items-center gap-2">
                   <FileText className="w-5 h-5" />
                   Contenu
                 </Label>
@@ -427,7 +427,7 @@ const BlogAdminPage = () => {
           </div>
 
           {/* Sidebar Panel */}
-          <aside className="w-80 border-l border-slate-200 bg-slate-50 backdrop-blur-xl overflow-y-auto">
+          <aside className="w-80 border-l border-border bg-secondary backdrop-blur-xl overflow-y-auto">
             <ScrollArea className="h-full">
               <div className="p-4 space-y-6">
                 {/* Status */}
@@ -437,13 +437,13 @@ const BlogAdminPage = () => {
                     value={formData.status}
                     onValueChange={(v) => setFormData(prev => ({ ...prev, status: v }))}
                   >
-                    <SelectTrigger className="bg-white border-slate-200">
+                    <SelectTrigger className="bg-card border-border">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-50 border-slate-200">
-                      <SelectItem value="draft" className="text-slate-900">Brouillon</SelectItem>
-                      <SelectItem value="published" className="text-slate-900">Publié</SelectItem>
-                      <SelectItem value="archived" className="text-slate-900">Archivé</SelectItem>
+                    <SelectContent className="bg-secondary border-border">
+                      <SelectItem value="draft" className="text-foreground">Brouillon</SelectItem>
+                      <SelectItem value="published" className="text-foreground">Publié</SelectItem>
+                      <SelectItem value="archived" className="text-foreground">Archivé</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -455,7 +455,7 @@ const BlogAdminPage = () => {
                     value={formData.author_name}
                     onChange={(e) => setFormData(prev => ({ ...prev, author_name: e.target.value }))}
                     placeholder="Nom de l'auteur"
-                    className="bg-white border-slate-200"
+                    className="bg-card border-border"
                   />
                 </div>
                 
@@ -466,7 +466,7 @@ const BlogAdminPage = () => {
                     value={formData.category}
                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                     placeholder="Ex: Marketing, Tech, Actualités..."
-                    className="bg-white border-slate-200"
+                    className="bg-card border-border"
                   />
                 </div>
 
@@ -491,13 +491,13 @@ const BlogAdminPage = () => {
                     </div>
                   ) : (
                     <label className="block cursor-pointer">
-                      <div className="border-2 border-dashed border-slate-200 rounded-lg p-6 text-center hover:border-indigo-500 transition-colors">
+                      <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-indigo-500 transition-colors">
                         {uploadingImage ? (
-                          <Loader2 className="w-8 h-8 mx-auto animate-spin text-slate-500" />
+                          <Loader2 className="w-8 h-8 mx-auto animate-spin text-muted-foreground" />
                         ) : (
                           <>
-                            <FileText className="w-8 h-8 mx-auto text-slate-400 mb-2" />
-                            <p className="text-sm text-slate-500">Cliquez pour uploader</p>
+                            <FileText className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                            <p className="text-sm text-muted-foreground">Cliquez pour uploader</p>
                           </>
                         )}
                       </div>
@@ -518,7 +518,7 @@ const BlogAdminPage = () => {
                     value={formData.slug}
                     onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
                     placeholder="url-de-l-article"
-                    className="bg-white border-slate-200"
+                    className="bg-card border-border"
                   />
                 </div>
 
@@ -538,26 +538,26 @@ const BlogAdminPage = () => {
                       </Badge>
                     ))}
                     {availableTags.length === 0 && (
-                      <p className="text-sm text-slate-400">Aucun tag disponible</p>
+                      <p className="text-sm text-muted-foreground">Aucun tag disponible</p>
                     )}
                   </div>
                 </div>
 
                 {/* SEO */}
-                <div className="space-y-4 pt-4 border-t border-slate-200">
-                  <Label className="text-slate-700">SEO</Label>
+                <div className="space-y-4 pt-4 border-t border-border">
+                  <Label className="text-foreground">SEO</Label>
                   <div className="space-y-2">
                     <Input
                       value={formData.meta_title}
                       onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
                       placeholder="Titre SEO (optionnel)"
-                      className="bg-white border-slate-200 text-sm"
+                      className="bg-card border-border text-sm"
                     />
                     <Textarea
                       value={formData.meta_description}
                       onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
                       placeholder="Description SEO (optionnel)"
-                      className="bg-white border-slate-200 text-sm min-h-16"
+                      className="bg-card border-border text-sm min-h-16"
                     />
                   </div>
                 </div>
@@ -575,10 +575,10 @@ const BlogAdminPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Blog</h1>
-          <p className="text-slate-500 text-sm">Gérez vos articles de blog</p>
+          <h1 className="text-2xl font-bold text-foreground">Blog</h1>
+          <p className="text-muted-foreground text-sm">Gérez vos articles de blog</p>
         </div>
-        <Button onClick={createNewPost} className="bg-indigo-600 hover:bg-indigo-500">
+        <Button onClick={createNewPost} className="bg-primary hover:brightness-110">
           <Plus className="w-4 h-4 mr-2" />
           Nouvel article
         </Button>
@@ -586,40 +586,40 @@ const BlogAdminPage = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <Card className="bg-white backdrop-blur-xl border-slate-200">
+        <Card className="bg-card backdrop-blur-xl border-border">
           <CardContent className="pt-4">
-            <p className="text-3xl font-bold text-slate-900">{stats.total}</p>
-            <p className="text-slate-500 text-sm">Total</p>
+            <p className="text-3xl font-bold text-foreground">{stats.total}</p>
+            <p className="text-muted-foreground text-sm">Total</p>
           </CardContent>
         </Card>
-        <Card className="bg-white backdrop-blur-xl border-slate-200">
+        <Card className="bg-card backdrop-blur-xl border-border">
           <CardContent className="pt-4">
-            <p className="text-3xl font-bold text-green-400">{stats.published}</p>
-            <p className="text-slate-500 text-sm">Publiés</p>
+            <p className="text-3xl font-bold text-success">{stats.published}</p>
+            <p className="text-muted-foreground text-sm">Publiés</p>
           </CardContent>
         </Card>
-        <Card className="bg-white backdrop-blur-xl border-slate-200">
+        <Card className="bg-card backdrop-blur-xl border-border">
           <CardContent className="pt-4">
-            <p className="text-3xl font-bold text-amber-400">{stats.draft}</p>
-            <p className="text-slate-500 text-sm">Brouillons</p>
+            <p className="text-3xl font-bold text-warning">{stats.draft}</p>
+            <p className="text-muted-foreground text-sm">Brouillons</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Comments Moderation Section */}
       {pendingCommentsCount > 0 && (
-        <Card className="bg-amber-500/10 border-amber-500/30">
+        <Card className="bg-warning-soft border-amber-500/30">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5 text-amber-400" />
+                <div className="w-10 h-10 rounded-full bg-warning-soft flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-warning" />
                 </div>
                 <div>
-                  <p className="text-slate-900 font-medium">
+                  <p className="text-foreground font-medium">
                     {pendingCommentsCount} commentaire{pendingCommentsCount > 1 ? 's' : ''} en attente
                   </p>
-                  <p className="text-slate-500 text-sm">Modération requise</p>
+                  <p className="text-muted-foreground text-sm">Modération requise</p>
                 </div>
               </div>
               <Button 
@@ -629,7 +629,7 @@ const BlogAdminPage = () => {
                   fetchAllComments("pending");
                   setShowCommentsModal(true);
                 }}
-                className="bg-amber-500 hover:bg-amber-400 text-black"
+                className="bg-warning hover:bg-amber-400 text-black"
               >
                 Modérer
               </Button>
@@ -641,23 +641,23 @@ const BlogAdminPage = () => {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Rechercher un article..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white backdrop-blur-xl border-slate-200"
+            className="pl-10 bg-card backdrop-blur-xl border-border"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40 bg-white backdrop-blur-xl border-slate-200">
+          <SelectTrigger className="w-40 bg-card backdrop-blur-xl border-border">
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
-          <SelectContent className="bg-slate-50 border-slate-200">
-            <SelectItem value="all" className="text-slate-900">Tous</SelectItem>
-            <SelectItem value="published" className="text-slate-900">Publiés</SelectItem>
-            <SelectItem value="draft" className="text-slate-900">Brouillons</SelectItem>
-            <SelectItem value="archived" className="text-slate-900">Archivés</SelectItem>
+          <SelectContent className="bg-secondary border-border">
+            <SelectItem value="all" className="text-foreground">Tous</SelectItem>
+            <SelectItem value="published" className="text-foreground">Publiés</SelectItem>
+            <SelectItem value="draft" className="text-foreground">Brouillons</SelectItem>
+            <SelectItem value="archived" className="text-foreground">Archivés</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -665,17 +665,17 @@ const BlogAdminPage = () => {
       {/* Posts List */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : filteredPosts.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
-          <FileText className="w-12 h-12 mx-auto text-slate-400 mb-3" />
-          <h3 className="text-slate-900 font-medium mb-1">Aucun article</h3>
-          <p className="text-slate-500 text-sm mb-4">
+        <div className="text-center py-12 bg-card rounded-xl border border-border">
+          <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+          <h3 className="text-foreground font-medium mb-1">Aucun article</h3>
+          <p className="text-muted-foreground text-sm mb-4">
             {searchQuery ? "Aucun article ne correspond à votre recherche" : "Créez votre premier article"}
           </p>
           {!searchQuery && (
-            <Button onClick={createNewPost} className="bg-indigo-600 hover:bg-indigo-500">
+            <Button onClick={createNewPost} className="bg-primary hover:brightness-110">
               <Plus className="w-4 h-4 mr-2" />
               Créer un article
             </Button>
@@ -684,7 +684,7 @@ const BlogAdminPage = () => {
       ) : (
         <div className="grid gap-4">
           {filteredPosts.map(post => (
-            <Card key={post.id} className="bg-white backdrop-blur-xl border-slate-200 hover:border-slate-200 transition-colors">
+            <Card key={post.id} className="bg-card backdrop-blur-xl border-border hover:border-border transition-colors">
               <CardContent className="p-4">
                 <div className="flex gap-4">
                   {/* Thumbnail */}
@@ -700,33 +700,33 @@ const BlogAdminPage = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h3 className="font-semibold text-slate-900 truncate">{post.title}</h3>
-                        <p className="text-slate-500 text-sm line-clamp-2 mt-1">{post.excerpt}</p>
+                        <h3 className="font-semibold text-foreground truncate">{post.title}</h3>
+                        <p className="text-muted-foreground text-sm line-clamp-2 mt-1">{post.excerpt}</p>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="w-4 h-4 text-slate-500" />
+                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="bg-slate-50 border-slate-200">
-                          <DropdownMenuItem onClick={() => editPost(post)} className="text-slate-900">
+                        <DropdownMenuContent className="bg-secondary border-border">
+                          <DropdownMenuItem onClick={() => editPost(post)} className="text-foreground">
                             <Edit className="w-4 h-4 mr-2" />
                             Modifier
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => window.open(`/actualites/${post.slug}`, '_blank')}
-                            className="text-slate-900"
+                            className="text-foreground"
                           >
                             <Eye className="w-4 h-4 mr-2" />
                             Aperçu
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => viewComments(post)} className="text-slate-900">
+                          <DropdownMenuItem onClick={() => viewComments(post)} className="text-foreground">
                             <MessageCircle className="w-4 h-4 mr-2" />
                             Commentaires
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-slate-100" />
-                          <DropdownMenuItem onClick={() => deletePost(post.id)} className="text-red-400">
+                          <DropdownMenuSeparator className="bg-secondary" />
+                          <DropdownMenuItem onClick={() => deletePost(post.id)} className="text-danger">
                             <Trash2 className="w-4 h-4 mr-2" />
                             Supprimer
                           </DropdownMenuItem>
@@ -735,7 +735,7 @@ const BlogAdminPage = () => {
                     </div>
                     
                     {/* Meta */}
-                    <div className="flex items-center gap-3 mt-3 text-xs text-slate-400">
+                    <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
                       <Badge variant={post.status === "published" ? "default" : "secondary"} className="text-xs">
                         {post.status === "published" ? "Publié" : post.status === "draft" ? "Brouillon" : "Archivé"}
                       </Badge>
@@ -765,17 +765,17 @@ const BlogAdminPage = () => {
       
       {/* Comments Modal with Moderation */}
       {showCommentsModal && (
-        <div className="fixed inset-0 bg-white backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-50 rounded-2xl border border-slate-200 w-full max-w-3xl max-h-[85vh] overflow-hidden">
+        <div className="fixed inset-0 bg-card backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-secondary rounded-2xl border border-border w-full max-w-3xl max-h-[85vh] overflow-hidden">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+            <div className="flex items-center justify-between p-4 border-b border-border">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5 text-indigo-600" />
+                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5 text-primary" />
                   {selectedPostForComments ? "Commentaires de l'article" : "Modération des commentaires"}
                 </h2>
                 {selectedPostForComments && (
-                  <p className="text-slate-500 text-sm truncate max-w-md mt-1">
+                  <p className="text-muted-foreground text-sm truncate max-w-md mt-1">
                     {selectedPostForComments.title}
                   </p>
                 )}
@@ -787,7 +787,7 @@ const BlogAdminPage = () => {
                   setShowCommentsModal(false);
                   setSelectedPostForComments(null);
                 }}
-                className="text-slate-500 hover:text-slate-900"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -795,7 +795,7 @@ const BlogAdminPage = () => {
             
             {/* Tabs for moderation view */}
             {!selectedPostForComments && (
-              <div className="flex gap-2 p-4 border-b border-slate-200 bg-slate-100">
+              <div className="flex gap-2 p-4 border-b border-border bg-secondary">
                 {[
                   { key: "pending", label: "En attente", color: "amber" },
                   { key: "approved", label: "Approuvés", color: "green" },
@@ -811,7 +811,7 @@ const BlogAdminPage = () => {
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                       commentsTab === tab.key
                         ? `bg-${tab.color}-500/20 text-${tab.color}-400 border border-${tab.color}-500/30`
-                        : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                     }`}
                     style={commentsTab === tab.key ? {
                       backgroundColor: tab.color === "amber" ? "rgba(245,158,11,0.2)" :
@@ -835,12 +835,12 @@ const BlogAdminPage = () => {
             <div className="p-4 overflow-y-auto max-h-[55vh]">
               {loadingComments ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
               ) : (selectedPostForComments ? selectedPostComments : allComments).length === 0 ? (
                 <div className="text-center py-12">
-                  <MessageCircle className="w-12 h-12 mx-auto text-slate-900/20 mb-3" />
-                  <p className="text-slate-500">
+                  <MessageCircle className="w-12 h-12 mx-auto text-foreground/20 mb-3" />
+                  <p className="text-muted-foreground">
                     {selectedPostForComments 
                       ? "Aucun commentaire sur cet article"
                       : `Aucun commentaire ${commentsTab === "pending" ? "en attente" : commentsTab === "approved" ? "approuvé" : commentsTab === "rejected" ? "rejeté" : ""}`
@@ -852,17 +852,17 @@ const BlogAdminPage = () => {
                   {(selectedPostForComments ? selectedPostComments : allComments).map(comment => (
                     <div 
                       key={comment.id} 
-                      className={`bg-white rounded-xl p-4 border ${
+                      className={`bg-card rounded-xl p-4 border ${
                         comment.status === "pending" ? "border-amber-500/30" :
                         comment.status === "approved" ? "border-green-500/30" :
-                        comment.status === "rejected" ? "border-red-500/30" : "border-slate-200"
+                        comment.status === "rejected" ? "border-red-500/30" : "border-border"
                       }`}
                     >
                       {/* Article info if in moderation view */}
                       {!selectedPostForComments && comment.article_title && (
-                        <div className="mb-3 pb-3 border-b border-slate-200">
-                          <p className="text-slate-400 text-xs">Article :</p>
-                          <p className="text-slate-700 text-sm font-medium">{comment.article_title}</p>
+                        <div className="mb-3 pb-3 border-b border-border">
+                          <p className="text-muted-foreground text-xs">Article :</p>
+                          <p className="text-foreground text-sm font-medium">{comment.article_title}</p>
                         </div>
                       )}
                       
@@ -873,19 +873,19 @@ const BlogAdminPage = () => {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-medium text-slate-900">{comment.author || comment.name}</span>
+                              <span className="font-medium text-foreground">{comment.author || comment.name}</span>
                               <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                comment.status === "pending" ? "bg-amber-100 text-amber-700" :
-                                comment.status === "approved" ? "bg-green-100 text-green-700" :
-                                comment.status === "rejected" ? "bg-red-100 text-red-700" :
-                                comment.status === "spam" ? "bg-gray-500/20 text-gray-400" : ""
+                                comment.status === "pending" ? "bg-warning-soft text-warning" :
+                                comment.status === "approved" ? "bg-success-soft text-success" :
+                                comment.status === "rejected" ? "bg-danger-soft text-danger" :
+                                comment.status === "spam" ? "bg-secondary text-muted-foreground" : ""
                               }`}>
                                 {comment.status === "pending" ? "En attente" :
                                  comment.status === "approved" ? "Approuvé" :
                                  comment.status === "rejected" ? "Rejeté" :
                                  comment.status === "spam" ? "Spam" : comment.status}
                               </span>
-                              <span className="text-slate-400 text-xs">
+                              <span className="text-muted-foreground text-xs">
                                 {new Date(comment.created_at).toLocaleDateString('fr-FR', {
                                   day: 'numeric',
                                   month: 'short',
@@ -896,21 +896,21 @@ const BlogAdminPage = () => {
                               </span>
                             </div>
                             {comment.email && (
-                              <p className="text-slate-400 text-xs">{comment.email}</p>
+                              <p className="text-muted-foreground text-xs">{comment.email}</p>
                             )}
-                            <p className="text-slate-700 mt-2">{comment.content}</p>
+                            <p className="text-foreground mt-2">{comment.content}</p>
                           </div>
                         </div>
                       </div>
                       
                       {/* Action buttons */}
-                      <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-200">
+                      <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border">
                         {comment.status === "pending" && (
                           <>
                             <Button 
                               size="sm"
                               onClick={() => moderateComment(comment.id, "approved")}
-                              className="bg-green-600 hover:bg-green-500 text-white"
+                              className="bg-green-600 hover:bg-success text-white"
                             >
                               <CheckCircle className="w-4 h-4 mr-1" />
                               Approuver
@@ -919,7 +919,7 @@ const BlogAdminPage = () => {
                               size="sm"
                               variant="outline"
                               onClick={() => moderateComment(comment.id, "rejected")}
-                              className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                              className="border-red-500/50 text-danger hover:bg-danger-soft"
                             >
                               <XCircle className="w-4 h-4 mr-1" />
                               Rejeter
@@ -928,7 +928,7 @@ const BlogAdminPage = () => {
                               size="sm"
                               variant="ghost"
                               onClick={() => moderateComment(comment.id, "spam")}
-                              className="text-slate-500 hover:text-slate-900/80"
+                              className="text-muted-foreground hover:text-foreground/80"
                             >
                               Spam
                             </Button>
@@ -939,7 +939,7 @@ const BlogAdminPage = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => moderateComment(comment.id, "approved")}
-                            className="border-green-500/50 text-green-400 hover:bg-green-500/10"
+                            className="border-green-500/50 text-success hover:bg-success-soft"
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
                             Approuver
@@ -949,7 +949,7 @@ const BlogAdminPage = () => {
                           size="sm"
                           variant="ghost"
                           onClick={() => deleteComment(comment.id)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 ml-auto"
+                          className="text-danger hover:text-red-300 hover:bg-danger-soft ml-auto"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -961,8 +961,8 @@ const BlogAdminPage = () => {
             </div>
             
             {/* Modal Footer */}
-            <div className="p-4 border-t border-slate-200 bg-slate-100">
-              <p className="text-slate-400 text-sm text-center">
+            <div className="p-4 border-t border-border bg-secondary">
+              <p className="text-muted-foreground text-sm text-center">
                 {(selectedPostForComments ? selectedPostComments : allComments).length} commentaire{(selectedPostForComments ? selectedPostComments : allComments).length > 1 ? 's' : ''}
               </p>
             </div>

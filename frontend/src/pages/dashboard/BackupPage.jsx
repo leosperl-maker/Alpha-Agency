@@ -65,23 +65,23 @@ const BackupPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="p-6 bg-white min-h-screen">
+    <div className="p-6 bg-card min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Sauvegardes</h1>
-          <p className="text-slate-500">Gestion des sauvegardes automatiques de la base de données</p>
+          <h1 className="text-2xl font-bold text-foreground">Sauvegardes</h1>
+          <p className="text-muted-foreground">Gestion des sauvegardes automatiques de la base de données</p>
         </div>
         <Button 
           onClick={triggerBackup} 
           disabled={backingUp}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white"
+          className="bg-primary hover:brightness-110 text-white"
         >
           {backingUp ? (
             <>
@@ -99,15 +99,15 @@ const BackupPage = () => {
 
       {/* Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card className="bg-white backdrop-blur-xl border-slate-200">
+        <Card className="bg-card backdrop-blur-xl border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className={`p-3 rounded-full ${status?.system_active ? 'bg-green-100' : 'bg-red-100'}`}>
-                <Server className={`w-5 h-5 ${status?.system_active ? 'text-green-600' : 'text-red-600'}`} />
+              <div className={`p-3 rounded-full ${status?.system_active ? 'bg-success-soft' : 'bg-danger-soft'}`}>
+                <Server className={`w-5 h-5 ${status?.system_active ? 'text-success' : 'text-danger'}`} />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Système</p>
-                <p className="font-bold text-slate-900">
+                <p className="text-sm text-muted-foreground">Système</p>
+                <p className="font-bold text-foreground">
                   {status?.system_active ? 'Actif' : 'Inactif'}
                 </p>
               </div>
@@ -115,15 +115,15 @@ const BackupPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white backdrop-blur-xl border-slate-200">
+        <Card className="bg-card backdrop-blur-xl border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className={`p-3 rounded-full ${status?.dropbox_configured ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                <Cloud className={`w-5 h-5 ${status?.dropbox_configured ? 'text-blue-600' : 'text-gray-400'}`} />
+              <div className={`p-3 rounded-full ${status?.dropbox_configured ? 'bg-info-soft' : 'bg-secondary'}`}>
+                <Cloud className={`w-5 h-5 ${status?.dropbox_configured ? 'text-info' : 'text-muted-foreground'}`} />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Dropbox</p>
-                <p className="font-bold text-slate-900">
+                <p className="text-sm text-muted-foreground">Dropbox</p>
+                <p className="font-bold text-foreground">
                   {status?.dropbox_configured ? 'Configuré' : 'Non configuré'}
                 </p>
               </div>
@@ -131,15 +131,15 @@ const BackupPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white backdrop-blur-xl border-slate-200">
+        <Card className="bg-card backdrop-blur-xl border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className={`p-3 rounded-full ${status?.email_configured ? 'bg-green-100' : 'bg-gray-100'}`}>
-                <Mail className={`w-5 h-5 ${status?.email_configured ? 'text-green-600' : 'text-gray-400'}`} />
+              <div className={`p-3 rounded-full ${status?.email_configured ? 'bg-success-soft' : 'bg-secondary'}`}>
+                <Mail className={`w-5 h-5 ${status?.email_configured ? 'text-success' : 'text-muted-foreground'}`} />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Email</p>
-                <p className="font-bold text-slate-900">
+                <p className="text-sm text-muted-foreground">Email</p>
+                <p className="font-bold text-foreground">
                   {status?.email_configured ? 'Configuré' : 'Non configuré'}
                 </p>
               </div>
@@ -147,15 +147,15 @@ const BackupPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white backdrop-blur-xl border-slate-200">
+        <Card className="bg-card backdrop-blur-xl border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-full bg-indigo-600/10">
-                <Database className="w-5 h-5 text-indigo-600" />
+              <div className="p-3 rounded-full bg-primary/10">
+                <Database className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Total backups</p>
-                <p className="font-bold text-slate-900">{status?.total_backups || 0}</p>
+                <p className="text-sm text-muted-foreground">Total backups</p>
+                <p className="font-bold text-foreground">{status?.total_backups || 0}</p>
               </div>
             </div>
           </CardContent>
@@ -164,49 +164,49 @@ const BackupPage = () => {
 
       {/* Configuration Info */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <Card className="bg-white backdrop-blur-xl border-slate-200">
+        <Card className="bg-card backdrop-blur-xl border-border">
           <CardHeader>
-            <CardTitle className="text-slate-900 flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <Settings className="w-5 h-5" />
               Configuration
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-white rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-card rounded-lg">
               <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-slate-500" />
-                <span className="text-slate-900">Fréquence</span>
+                <Clock className="w-5 h-5 text-muted-foreground" />
+                <span className="text-foreground">Fréquence</span>
               </div>
-              <Badge className="bg-blue-100 text-blue-700 border-none">
+              <Badge className="bg-info-soft text-info border-none">
                 {status?.schedule || "Toutes les 6 heures"}
               </Badge>
             </div>
             
-            <div className="flex justify-between items-center p-3 bg-white rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-card rounded-lg">
               <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-slate-500" />
-                <span className="text-slate-900">Destinataire</span>
+                <Mail className="w-5 h-5 text-muted-foreground" />
+                <span className="text-foreground">Destinataire</span>
               </div>
-              <span className="text-slate-500 text-sm">{status?.email_recipient || "Non configuré"}</span>
+              <span className="text-muted-foreground text-sm">{status?.email_recipient || "Non configuré"}</span>
             </div>
             
-            <div className="flex justify-between items-center p-3 bg-white rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-card rounded-lg">
               <div className="flex items-center gap-3">
-                <History className="w-5 h-5 text-slate-500" />
-                <span className="text-slate-900">Rétention</span>
+                <History className="w-5 h-5 text-muted-foreground" />
+                <span className="text-foreground">Rétention</span>
               </div>
-              <Badge className="bg-slate-100 text-slate-500 border-none">
+              <Badge className="bg-secondary text-muted-foreground border-none">
                 {status?.retention_days || 30} jours
               </Badge>
             </div>
             
             {status?.scheduler?.next_run && (
-              <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+              <div className="flex justify-between items-center p-3 bg-success-soft rounded-lg">
                 <div className="flex items-center gap-3">
-                  <RefreshCw className="w-5 h-5 text-green-600" />
-                  <span className="text-slate-900">Prochain backup</span>
+                  <RefreshCw className="w-5 h-5 text-success" />
+                  <span className="text-foreground">Prochain backup</span>
                 </div>
-                <span className="text-green-600 font-medium text-sm">
+                <span className="text-success font-medium text-sm">
                   {formatDate(status.scheduler.next_run)}
                 </span>
               </div>
@@ -215,9 +215,9 @@ const BackupPage = () => {
         </Card>
 
         {/* Last Backup */}
-        <Card className="bg-white backdrop-blur-xl border-slate-200">
+        <Card className="bg-card backdrop-blur-xl border-border">
           <CardHeader>
-            <CardTitle className="text-slate-900 flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <Database className="w-5 h-5" />
               Dernier backup
             </CardTitle>
@@ -226,21 +226,21 @@ const BackupPage = () => {
             {status?.last_backup ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Date</span>
-                  <span className="font-medium text-slate-900">{formatDate(status.last_backup.started_at)}</span>
+                  <span className="text-muted-foreground">Date</span>
+                  <span className="font-medium text-foreground">{formatDate(status.last_backup.started_at)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Type</span>
-                  <Badge className={status.last_backup.manual ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-500"}>
+                  <span className="text-muted-foreground">Type</span>
+                  <Badge className={status.last_backup.manual ? "bg-info-soft text-info" : "bg-secondary text-muted-foreground"}>
                     {status.last_backup.manual ? "Manuel" : "Automatique"}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Statut</span>
+                  <span className="text-muted-foreground">Statut</span>
                   <Badge className={
                     status.last_backup.status === "completed" 
-                      ? "bg-green-100 text-green-700" 
-                      : "bg-red-100 text-red-700"
+                      ? "bg-success-soft text-success" 
+                      : "bg-danger-soft text-danger"
                   }>
                     {status.last_backup.status === "completed" ? (
                       <><CheckCircle className="w-3 h-3 mr-1" /> Réussi</>
@@ -250,28 +250,28 @@ const BackupPage = () => {
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Taille</span>
-                  <span className="font-medium text-slate-900">{formatSize(status.last_backup.file_size)}</span>
+                  <span className="text-muted-foreground">Taille</span>
+                  <span className="font-medium text-foreground">{formatSize(status.last_backup.file_size)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Dropbox</span>
+                  <span className="text-muted-foreground">Dropbox</span>
                   {status.last_backup.dropbox_uploaded ? (
-                    <Badge className="bg-green-100 text-green-700"><CheckCircle className="w-3 h-3 mr-1" /> Uploadé</Badge>
+                    <Badge className="bg-success-soft text-success"><CheckCircle className="w-3 h-3 mr-1" /> Uploadé</Badge>
                   ) : (
-                    <Badge className="bg-slate-100 text-slate-500">Non uploadé</Badge>
+                    <Badge className="bg-secondary text-muted-foreground">Non uploadé</Badge>
                   )}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Email</span>
+                  <span className="text-muted-foreground">Email</span>
                   {status.last_backup.email_sent ? (
-                    <Badge className="bg-green-100 text-green-700"><CheckCircle className="w-3 h-3 mr-1" /> Envoyé</Badge>
+                    <Badge className="bg-success-soft text-success"><CheckCircle className="w-3 h-3 mr-1" /> Envoyé</Badge>
                   ) : (
-                    <Badge className="bg-slate-100 text-slate-500">Non envoyé</Badge>
+                    <Badge className="bg-secondary text-muted-foreground">Non envoyé</Badge>
                   )}
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8 text-slate-500">
+              <div className="text-center py-8 text-muted-foreground">
                 <Database className="w-12 h-12 mx-auto mb-3 text-[#E5E5E5]" />
                 <p>Aucun backup effectué</p>
                 <p className="text-sm mt-1">Cliquez sur "Backup manuel" pour créer le premier backup</p>
@@ -282,58 +282,58 @@ const BackupPage = () => {
       </div>
 
       {/* History */}
-      <Card className="bg-white backdrop-blur-xl border-slate-200">
+      <Card className="bg-card backdrop-blur-xl border-border">
         <CardHeader>
-          <CardTitle className="text-slate-900 flex items-center gap-2">
+          <CardTitle className="text-foreground flex items-center gap-2">
             <History className="w-5 h-5" />
             Historique des sauvegardes
           </CardTitle>
         </CardHeader>
         <CardContent>
           {history.length === 0 ? (
-            <p className="text-center text-slate-500 py-8">Aucun historique disponible</p>
+            <p className="text-center text-muted-foreground py-8">Aucun historique disponible</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left border-b border-slate-200">
-                    <th className="pb-3 text-slate-500 font-medium">Date</th>
-                    <th className="pb-3 text-slate-500 font-medium">Type</th>
-                    <th className="pb-3 text-slate-500 font-medium">Statut</th>
-                    <th className="pb-3 text-slate-500 font-medium">Taille</th>
-                    <th className="pb-3 text-slate-500 font-medium">Dropbox</th>
-                    <th className="pb-3 text-slate-500 font-medium">Email</th>
+                  <tr className="text-left border-b border-border">
+                    <th className="pb-3 text-muted-foreground font-medium">Date</th>
+                    <th className="pb-3 text-muted-foreground font-medium">Type</th>
+                    <th className="pb-3 text-muted-foreground font-medium">Statut</th>
+                    <th className="pb-3 text-muted-foreground font-medium">Taille</th>
+                    <th className="pb-3 text-muted-foreground font-medium">Dropbox</th>
+                    <th className="pb-3 text-muted-foreground font-medium">Email</th>
                   </tr>
                 </thead>
                 <tbody>
                   {history.map((backup, index) => (
-                    <tr key={backup.backup_id || index} className="border-b border-slate-200 last:border-0">
-                      <td className="py-3 text-slate-900">{formatDate(backup.started_at)}</td>
+                    <tr key={backup.backup_id || index} className="border-b border-border last:border-0">
+                      <td className="py-3 text-foreground">{formatDate(backup.started_at)}</td>
                       <td className="py-3">
-                        <Badge className={backup.manual ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-500"}>
+                        <Badge className={backup.manual ? "bg-info-soft text-info" : "bg-secondary text-muted-foreground"}>
                           {backup.manual ? "Manuel" : "Auto"}
                         </Badge>
                       </td>
                       <td className="py-3">
                         {backup.status === "completed" ? (
-                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <CheckCircle className="w-5 h-5 text-success" />
                         ) : (
-                          <AlertCircle className="w-5 h-5 text-red-600" />
+                          <AlertCircle className="w-5 h-5 text-danger" />
                         )}
                       </td>
-                      <td className="py-3 text-slate-500">{formatSize(backup.file_size)}</td>
+                      <td className="py-3 text-muted-foreground">{formatSize(backup.file_size)}</td>
                       <td className="py-3">
                         {backup.dropbox_uploaded ? (
-                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <CheckCircle className="w-5 h-5 text-success" />
                         ) : (
-                          <span className="text-slate-500">-</span>
+                          <span className="text-muted-foreground">-</span>
                         )}
                       </td>
                       <td className="py-3">
                         {backup.email_sent ? (
-                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <CheckCircle className="w-5 h-5 text-success" />
                         ) : (
-                          <span className="text-slate-500">-</span>
+                          <span className="text-muted-foreground">-</span>
                         )}
                       </td>
                     </tr>

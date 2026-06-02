@@ -67,7 +67,7 @@ const ICON_OPTIONS = [
   { value: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: '#25D366' },
   { value: 'telegram', label: 'Telegram', icon: Send, color: '#0088cc' },
   { value: 'email', label: 'Email', icon: Mail, color: '#EA4335' },
-  { value: 'website', label: 'Site Web', icon: Globe, color: '#6366f1' },
+  { value: 'website', label: 'Site Web', icon: Globe, color: '#E11D2E' },
   { value: 'shop', label: 'Boutique', icon: ShoppingBag, color: '#F59E0B' },
   { value: 'calendar', label: 'Calendrier', icon: Calendar, color: '#10B981' },
   { value: 'phone', label: 'Téléphone', icon: Phone, color: '#3B82F6' },
@@ -82,8 +82,8 @@ const ICON_OPTIONS = [
 
 const THEME_PRESETS = [
   { id: 'minimal', name: 'Minimal', bg: '#ffffff', text: '#1a1a1a' },
-  { id: 'dark', name: 'Dark', bg: '#0f0f1a', text: '#ffffff' },
-  { id: 'gradient', name: 'Gradient', bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', text: '#ffffff' },
+  { id: 'dark', name: 'Sombre', bg: '#0f0f1a', text: '#ffffff' },
+  { id: 'gradient', name: 'Dégradé', bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', text: '#ffffff' },
   { id: 'ocean', name: 'Ocean', bg: 'linear-gradient(135deg, #0077b6 0%, #00b4d8 100%)', text: '#ffffff' },
   { id: 'sunset', name: 'Sunset', bg: 'linear-gradient(135deg, #f72585 0%, #7209b7 100%)', text: '#ffffff' },
   { id: 'nature', name: 'Nature', bg: '#f0fdf4', text: '#166534' },
@@ -114,36 +114,112 @@ const SortableLinkItem = ({ link, onEdit, onDelete, onToggle }) => {
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 ${isDragging ? 'z-50' : ''}`}
+      className={`flex items-center gap-3 p-3 bg-card rounded-xl border border-border ${isDragging ? 'z-50' : ''}`}
     >
-      <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-900/60">
+      <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none select-none text-muted-foreground hover:text-foreground/60">
         <GripVertical className="w-5 h-5" />
       </button>
       
       {link.thumbnail ? (
         <img src={link.thumbnail} alt="" className="w-10 h-10 rounded-lg object-cover" />
       ) : (
-        <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-          <IconComponent className="w-5 h-5 text-slate-500" />
+        <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+          <IconComponent className="w-5 h-5 text-muted-foreground" />
         </div>
       )}
       
       <div className="flex-1 min-w-0">
-        <p className="text-slate-900 font-medium truncate">{link.label}</p>
-        <p className="text-slate-400 text-xs truncate">{link.url}</p>
+        <p className="text-foreground font-medium truncate">{link.label}</p>
+        <p className="text-muted-foreground text-xs truncate">{link.url}</p>
       </div>
       
       <Switch
         checked={link.is_active}
         onCheckedChange={() => onToggle(link)}
-        className="data-[state=checked]:bg-green-500"
+        className="data-[state=checked]:bg-success"
       />
       
-      <Button variant="ghost" size="icon" onClick={() => onEdit(link)} className="text-slate-500 hover:text-slate-900 hover:bg-slate-100">
+      <Button variant="ghost" size="icon" onClick={() => onEdit(link)} className="text-muted-foreground hover:text-foreground hover:bg-secondary">
         <Edit2 className="w-4 h-4" />
       </Button>
       
-      <Button variant="ghost" size="icon" onClick={() => onDelete(link)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
+      <Button variant="ghost" size="icon" onClick={() => onDelete(link)} className="text-danger hover:text-red-300 hover:bg-danger-soft">
+        <Trash2 className="w-4 h-4" />
+      </Button>
+    </div>
+  );
+};
+
+// Sortable Block Item (unified content blocks — drag to reorder)
+const SortableBlockItem = ({ block, onEdit, onDelete, onToggle }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : (block.is_active ? 1 : 0.5),
+  };
+
+  const blockTypeInfo = SECTION_TYPES.find(t => t.id === block.block_type) || { icon: Link, name: 'Bloc' };
+  const BlockIcon = blockTypeInfo.icon;
+  const isLink = block.block_type.includes('link');
+  const tint = isLink ? 'rgba(225,29,46,0.18)' :
+    block.block_type === 'text' ? 'rgba(34,197,94,0.2)' :
+    block.block_type === 'image' ? 'rgba(236,72,153,0.2)' :
+    (block.block_type === 'video' || block.block_type === 'youtube') ? 'rgba(239,68,68,0.2)' :
+    block.block_type === 'carousel' ? 'rgba(168,85,247,0.2)' : 'rgba(127,127,140,0.15)';
+  const iconColor = isLink ? '#E11D2E' :
+    block.block_type === 'text' ? '#22c55e' :
+    block.block_type === 'image' ? '#ec4899' :
+    (block.block_type === 'video' || block.block_type === 'youtube') ? '#ef4444' :
+    block.block_type === 'carousel' ? '#a855f7' : '#9ca3af';
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-2 sm:gap-3 p-3 rounded-xl border transition-colors ${
+        block.is_active ? 'bg-card border-border' : 'bg-secondary border-border'
+      } ${isDragging ? 'z-50' : ''}`}
+    >
+      <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none select-none text-muted-foreground hover:text-foreground/60 flex-shrink-0">
+        <GripVertical className="w-5 h-5" />
+      </button>
+
+      {(block.thumbnail || block.media_url) ? (
+        <img src={block.thumbnail || block.media_url} alt="" className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
+      ) : (
+        <div className="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: tint }}>
+          <BlockIcon className="w-5 h-5" style={{ color: iconColor }} />
+        </div>
+      )}
+
+      <div className="flex-1 min-w-0">
+        <p className="text-foreground font-medium truncate">
+          {block.label || block.content?.substring(0, 40) || blockTypeInfo.name}
+        </p>
+        <p className="text-muted-foreground text-xs truncate">
+          {block.block_type === 'link' && block.url}
+          {block.block_type === 'link_image' && block.url}
+          {block.block_type === 'text' && 'Bloc de texte'}
+          {block.block_type === 'image' && 'Image'}
+          {block.block_type === 'video' && 'Vidéo'}
+          {block.block_type === 'youtube' && block.youtube_url}
+          {block.block_type === 'carousel' && `${block.items?.length || 0} éléments`}
+          {block.block_type === 'header' && 'Titre'}
+          {block.block_type === 'divider' && 'Séparateur'}
+        </p>
+      </div>
+
+      <Switch
+        checked={block.is_active}
+        onCheckedChange={() => onToggle(block)}
+        className="data-[state=checked]:bg-success flex-shrink-0"
+      />
+      <Button variant="ghost" size="icon" onClick={() => onEdit(block)} className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary flex-shrink-0">
+        <Edit2 className="w-4 h-4" />
+      </Button>
+      <Button variant="ghost" size="icon" onClick={() => onDelete(block)} className="h-8 w-8 text-danger hover:text-red-300 hover:bg-danger-soft flex-shrink-0">
         <Trash2 className="w-4 h-4" />
       </Button>
     </div>
@@ -153,37 +229,37 @@ const SortableLinkItem = ({ link, onEdit, onDelete, onToggle }) => {
 // Social Link Item
 const SocialLinkItem = ({ social, onEdit, onDelete, onToggle, stats }) => {
   const IconComponent = ICON_OPTIONS.find(i => i.value === social.icon)?.icon || Globe;
-  const iconColor = ICON_OPTIONS.find(i => i.value === social.icon)?.color || '#6366f1';
+  const iconColor = ICON_OPTIONS.find(i => i.value === social.icon)?.color || '#E11D2E';
   
   return (
-    <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200">
+    <div className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border">
       <div 
         className="w-10 h-10 rounded-full flex items-center justify-center"
         style={{ background: iconColor }}
       >
-        <IconComponent className="w-5 h-5 text-slate-900" />
+        <IconComponent className="w-5 h-5 text-foreground" />
       </div>
       
       <div className="flex-1 min-w-0">
-        <p className="text-slate-900 font-medium">{social.label || social.icon}</p>
-        <p className="text-slate-400 text-xs truncate">{social.url}</p>
+        <p className="text-foreground font-medium">{social.label || social.icon}</p>
+        <p className="text-muted-foreground text-xs truncate">{social.url}</p>
       </div>
       
       {stats > 0 && (
-        <Badge className="bg-indigo-500/20 text-indigo-600">{stats} clics</Badge>
+        <Badge className="bg-brand-soft text-primary">{stats} clics</Badge>
       )}
       
       <Switch
         checked={social.is_active}
         onCheckedChange={() => onToggle(social)}
-        className="data-[state=checked]:bg-green-500"
+        className="data-[state=checked]:bg-success"
       />
       
-      <Button variant="ghost" size="icon" onClick={() => onEdit(social)} className="text-slate-500 hover:text-slate-900 hover:bg-slate-100">
+      <Button variant="ghost" size="icon" onClick={() => onEdit(social)} className="text-muted-foreground hover:text-foreground hover:bg-secondary">
         <Edit2 className="w-4 h-4" />
       </Button>
       
-      <Button variant="ghost" size="icon" onClick={() => onDelete(social)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
+      <Button variant="ghost" size="icon" onClick={() => onDelete(social)} className="text-danger hover:text-red-300 hover:bg-danger-soft">
         <Trash2 className="w-4 h-4" />
       </Button>
     </div>
@@ -194,6 +270,7 @@ const MultilinkPage = () => {
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPage, setSelectedPage] = useState(null);
+  const [previewKey, setPreviewKey] = useState(0);
   const [pageLinks, setPageLinks] = useState([]);
   const [pageStats, setPageStats] = useState(null);
   const [activeTab, setActiveTab] = useState('content');
@@ -223,7 +300,7 @@ const MultilinkPage = () => {
       button_bg: '#E2E8F0',
       button_text: '#ffffff',
       button_hover: '#E2E8F0',
-      accent: '#6366f1'
+      accent: '#E11D2E'
     },
     design_settings: {
       button_style: 'rounded',
@@ -310,10 +387,16 @@ const MultilinkPage = () => {
   const [domainStatus, setDomainStatus] = useState(null);
   const [checkingDomain, setCheckingDomain] = useState(false);
   const [savingDomain, setSavingDomain] = useState(false);
+  // Rattachements CRM (Documents / Contacts) — aide l'agent IA à retrouver le logo/le client
+  const [crmDocuments, setCrmDocuments] = useState([]);
+  const [crmContacts, setCrmContacts] = useState([]);
+  const [crmDocSearch, setCrmDocSearch] = useState('');
+  const [crmContactSearch, setCrmContactSearch] = useState('');
   
   // DnD sensors
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    // distance:8 → un simple clic ne déclenche pas un drag ; le drag démarre après un vrai déplacement
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -339,6 +422,16 @@ const MultilinkPage = () => {
       setPageLinks(response.data.links || []);
       setPageSections(response.data.sections || []);
       setPageBlocks(response.data.blocks || []); // NEW: Unified blocks
+      setPreviewKey(k => k + 1); // refresh live phone preview after any save/refetch
+      // Charger les listes CRM pour les rattachements (Documents + Contacts), une fois
+      api.get('/documents', { params: { flat: true } }).then(r => {
+        const d = Array.isArray(r.data) ? r.data : (r.data?.documents || r.data?.items || []);
+        setCrmDocuments(d.filter(x => x && x.id));
+      }).catch(() => {});
+      api.get('/contacts').then(r => {
+        const c = Array.isArray(r.data) ? r.data : (r.data?.contacts || r.data?.items || []);
+        setCrmContacts(c.filter(x => x && x.id));
+      }).catch(() => {});
       // Initialize custom domain input
       setCustomDomainInput(response.data.custom_domain || '');
       setDomainStatus(null);
@@ -382,7 +475,7 @@ const MultilinkPage = () => {
           button_bg: '#E2E8F0',
           button_text: '#ffffff',
           button_hover: '#E2E8F0',
-          accent: '#6366f1'
+          accent: '#E11D2E'
         },
         design_settings: page.design_settings || {
           button_style: 'rounded',
@@ -416,7 +509,7 @@ const MultilinkPage = () => {
           button_bg: '#E2E8F0',
           button_text: '#ffffff',
           button_hover: '#E2E8F0',
-          accent: '#6366f1'
+          accent: '#E11D2E'
         },
         design_settings: {
           button_style: 'rounded',
@@ -465,6 +558,15 @@ const MultilinkPage = () => {
       setSaving(false);
     }
   };
+
+  const toggleLinkedDoc = (id) => setPageForm(f => {
+    const cur = f.linked_document_ids || [];
+    return { ...f, linked_document_ids: cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id] };
+  });
+  const toggleLinkedContact = (id) => setPageForm(f => {
+    const cur = f.linked_contact_ids || [];
+    return { ...f, linked_contact_ids: cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id] };
+  });
 
   const savePageSettings = async () => {
     if (!selectedPage) return;
@@ -1158,7 +1260,7 @@ const MultilinkPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -1168,13 +1270,13 @@ const MultilinkPage = () => {
       {/* Header - Mobile Optimized */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2 sm:gap-3">
-            <Link2 className="w-5 h-5 sm:w-7 sm:h-7 text-indigo-600" />
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2 sm:gap-3">
+            <Link2 className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
             Multilink
           </h1>
-          <p className="text-slate-500 text-sm sm:text-base mt-0.5 sm:mt-1">Créez des pages de liens professionnelles</p>
+          <p className="text-muted-foreground text-sm sm:text-base mt-0.5 sm:mt-1">Créez des pages de liens professionnelles</p>
         </div>
-        <Button onClick={() => openPageDialog()} className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto">
+        <Button onClick={() => openPageDialog()} className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" /> Nouvelle page
         </Button>
       </div>
@@ -1182,13 +1284,13 @@ const MultilinkPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
         {/* Pages List - Horizontal scroll on mobile */}
         <div className="lg:col-span-3 space-y-3">
-          <h2 className="text-slate-500 text-xs sm:text-sm font-medium uppercase tracking-wider">Mes pages</h2>
+          <h2 className="text-muted-foreground text-xs sm:text-sm font-medium uppercase tracking-wider">Mes pages</h2>
           
           {pages.length === 0 ? (
-            <div className="bg-white rounded-xl p-6 sm:p-8 text-center border border-slate-200">
-              <Link2 className="w-10 h-10 sm:w-12 sm:h-12 text-slate-900/20 mx-auto mb-3" />
-              <p className="text-slate-500 text-sm sm:text-base">Aucune page créée</p>
-              <Button onClick={() => openPageDialog()} className="mt-4 bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto">
+            <div className="bg-card rounded-xl p-6 sm:p-8 text-center border border-border">
+              <Link2 className="w-10 h-10 sm:w-12 sm:h-12 text-foreground/20 mx-auto mb-3" />
+              <p className="text-muted-foreground text-sm sm:text-base">Aucune page créée</p>
+              <Button onClick={() => openPageDialog()} className="mt-4 bg-primary hover:bg-primary/90 w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" /> Créer ma première page
               </Button>
             </div>
@@ -1200,28 +1302,28 @@ const MultilinkPage = () => {
                   onClick={() => fetchPageDetails(page)}
                   className={`p-3 sm:p-4 rounded-xl cursor-pointer transition-all min-w-[200px] lg:min-w-0 flex-shrink-0 lg:flex-shrink ${
                     selectedPage?.id === page.id 
-                      ? 'bg-indigo-50 border-2 border-indigo-500' 
-                      : 'bg-white border border-slate-200 hover:bg-slate-100'
+                      ? 'bg-brand-soft border-2 border-primary' 
+                      : 'bg-card border border-border hover:bg-secondary'
                   }`}
                 >
                   <div className="flex items-center gap-2 sm:gap-3">
                     {page.profile_image ? (
                       <img src={page.profile_image} alt="" className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover" />
                     ) : (
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                        <Link2 className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-brand-soft flex items-center justify-center">
+                        <Link2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-slate-900 font-medium truncate flex items-center gap-1 text-sm sm:text-base">
+                      <p className="text-foreground font-medium truncate flex items-center gap-1 text-sm sm:text-base">
                         {page.title}
-                        {page.verified && <Verified className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />}
+                        {page.verified && <Verified className="w-3 h-3 sm:w-4 sm:h-4 text-info" />}
                       </p>
-                      <p className="text-slate-400 text-[10px] sm:text-xs">/{page.slug}</p>
+                      <p className="text-muted-foreground text-[10px] sm:text-xs">/{page.slug}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 sm:gap-4 mt-2 sm:mt-3 text-[10px] sm:text-xs text-slate-400">
+                  <div className="flex items-center gap-3 sm:gap-4 mt-2 sm:mt-3 text-[10px] sm:text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Eye className="w-3 h-3" /> {page.total_views}
                     </span>
@@ -1235,64 +1337,70 @@ const MultilinkPage = () => {
           )}
         </div>
 
-        {/* Page Editor */}
+        {/* Page Editor + live phone preview */}
         <div className="lg:col-span-9">
+          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-4 sm:gap-6 items-start">
+          <div className="min-w-0">
           {selectedPage ? (
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
               {/* Page Header */}
-              <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
-                <div className="flex items-center gap-3">
+              <div className="p-3 sm:p-4 border-b border-border flex items-center justify-between gap-2 bg-card">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                   {selectedPage.profile_image && (
-                    <img src={selectedPage.profile_image} alt="" className="w-10 h-10 rounded-full object-cover" />
+                    <img src={selectedPage.profile_image} alt="" className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover flex-shrink-0" />
                   )}
-                  <div>
-                    <h2 className="text-slate-900 font-bold flex items-center gap-2">
-                      {selectedPage.title}
-                      {selectedPage.verified && <Verified className="w-4 h-4 text-blue-400" />}
+                  <div className="min-w-0">
+                    <h2 className="text-foreground font-bold flex items-center gap-1.5 min-w-0">
+                      <span className="truncate">{selectedPage.title}</span>
+                      {selectedPage.verified && <Verified className="w-4 h-4 text-info flex-shrink-0" />}
                     </h2>
-                    <p className="text-slate-400 text-xs">alphagency.fr/lien-bio/{selectedPage.slug}</p>
+                    <p className="text-muted-foreground text-xs truncate">alphagency.fr/lien-bio/{selectedPage.slug}</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-2">
+
+                <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon"
                     onClick={() => copyLink(selectedPage.slug)}
-                    className="text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    title="Copier le lien"
                   >
                     {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon"
                     onClick={() => setQrDialogOpen(true)}
-                    className="text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary"
                     title="QR Code"
                   >
                     <QrCode className="w-4 h-4" />
                   </Button>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon"
                     onClick={() => fetchPageStats(selectedPage)}
-                    className="text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    title="Statistiques"
                   >
                     <BarChart3 className="w-4 h-4" />
                   </Button>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon"
                     onClick={() => window.open(`/lien-bio/${selectedPage.slug}`, '_blank')}
-                    className="text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-secondary"
+                    title="Ouvrir la page"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Button>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon"
                     onClick={() => deletePage(selectedPage)}
-                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    className="h-8 w-8 text-danger hover:text-red-300 hover:bg-danger-soft"
+                    title="Supprimer la page"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -1302,23 +1410,23 @@ const MultilinkPage = () => {
               {/* Tabs like Zaap */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div className="overflow-x-auto scrollbar-hide">
-                  <TabsList className="w-max min-w-full bg-white border-b border-slate-200 rounded-none h-auto p-0 flex">
-                    <TabsTrigger value="content" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-slate-900 whitespace-nowrap">
+                  <TabsList className="w-max min-w-full bg-card border-b border-border rounded-none h-auto p-0 flex">
+                    <TabsTrigger value="content" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground whitespace-nowrap">
                       <Layout className="w-4 h-4 mr-2" /> Contenu
                     </TabsTrigger>
-                    <TabsTrigger value="design" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-slate-900 whitespace-nowrap">
+                    <TabsTrigger value="design" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground whitespace-nowrap">
                       <Palette className="w-4 h-4 mr-2" /> Design
                     </TabsTrigger>
-                    <TabsTrigger value="profile" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-slate-900 whitespace-nowrap">
+                    <TabsTrigger value="profile" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground whitespace-nowrap">
                       <Type className="w-4 h-4 mr-2" /> Profil
                     </TabsTrigger>
-                    <TabsTrigger value="socials" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-slate-900 whitespace-nowrap">
+                    <TabsTrigger value="socials" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground whitespace-nowrap">
                       <Share2 className="w-4 h-4 mr-2" /> Réseaux
                     </TabsTrigger>
-                    <TabsTrigger value="seo" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-slate-900 whitespace-nowrap">
+                    <TabsTrigger value="seo" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground whitespace-nowrap">
                       <Search className="w-4 h-4 mr-2" /> SEO
                     </TabsTrigger>
-                    <TabsTrigger value="analytics" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 data-[state=active]:text-slate-900 whitespace-nowrap">
+                    <TabsTrigger value="analytics" className="flex-shrink-0 px-4 py-3 rounded-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-foreground whitespace-nowrap">
                       <BarChart3 className="w-4 h-4 mr-2" /> Analytics
                     </TabsTrigger>
                   </TabsList>
@@ -1328,26 +1436,26 @@ const MultilinkPage = () => {
                 <TabsContent value="content" className="p-4 space-y-4">
                   {/* Add Block Button */}
                   <div className="flex items-center justify-between">
-                    <h3 className="text-slate-900 font-medium flex items-center gap-2">
+                    <h3 className="text-foreground font-medium flex items-center gap-2">
                       <Zap className="w-4 h-4 text-yellow-400" />
                       Blocs ({pageBlocks.length})
                     </h3>
-                    <Button onClick={() => openBlockDialog()} size="sm" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700">
+                    <Button onClick={() => openBlockDialog()} size="sm" className="bg-primary hover:bg-primary/90">
                       <Plus className="w-4 h-4 mr-1" /> Ajouter un bloc
                     </Button>
                   </div>
 
                   {/* Blocks List - Unified drag & drop */}
                   {pageBlocks.length === 0 ? (
-                    <div className="text-center py-12 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-dashed border-slate-200">
-                      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center">
-                        <Sparkles className="w-8 h-8 text-purple-400" />
+                    <div className="text-center py-12 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-dashed border-border">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-soft flex items-center justify-center">
+                        <Sparkles className="w-8 h-8 text-primary" />
                       </div>
-                      <h4 className="text-slate-900 font-medium mb-2">Créez votre page</h4>
-                      <p className="text-slate-500 text-sm mb-4 max-w-xs mx-auto">
+                      <h4 className="text-foreground font-medium mb-2">Créez votre page</h4>
+                      <p className="text-muted-foreground text-sm mb-4 max-w-xs mx-auto">
                         Ajoutez des liens, images, vidéos, textes et plus encore
                       </p>
-                      <Button onClick={() => openBlockDialog()} className="bg-gradient-to-r from-purple-600 to-indigo-600">
+                      <Button onClick={() => openBlockDialog()} className="bg-primary hover:bg-primary/90">
                         <Plus className="w-4 h-4 mr-2" /> Ajouter un bloc
                       </Button>
                     </div>
@@ -1355,95 +1463,15 @@ const MultilinkPage = () => {
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleBlockDragEnd}>
                       <SortableContext items={pageBlocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
                         <div className="space-y-2">
-                          {pageBlocks.map(block => {
-                            const blockTypeInfo = SECTION_TYPES.find(t => t.id === block.block_type) || { icon: Link, name: 'Bloc' };
-                            const BlockIcon = blockTypeInfo.icon;
-                            
-                            return (
-                              <div 
-                                key={block.id}
-                                className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                                  block.is_active 
-                                    ? 'bg-white border-slate-200 hover:border-slate-200' 
-                                    : 'bg-slate-50 border-slate-200 opacity-50'
-                                }`}
-                              >
-                                <div className="cursor-grab text-slate-400 hover:text-slate-900/60">
-                                  <GripVertical className="w-5 h-5" />
-                                </div>
-                                
-                                {/* Thumbnail preview for media blocks */}
-                                {(block.thumbnail || block.media_url) ? (
-                                  <img 
-                                    src={block.thumbnail || block.media_url} 
-                                    alt="" 
-                                    className="w-12 h-12 rounded-lg object-cover"
-                                  />
-                                ) : (
-                                  <div 
-                                    className="w-12 h-12 rounded-lg flex items-center justify-center"
-                                    style={{ 
-                                      backgroundColor: block.block_type.includes('link') ? 'rgba(99,102,241,0.2)' :
-                                        block.block_type === 'text' ? 'rgba(34,197,94,0.2)' :
-                                        block.block_type === 'image' ? 'rgba(236,72,153,0.2)' :
-                                        block.block_type === 'video' ? 'rgba(239,68,68,0.2)' :
-                                        block.block_type === 'youtube' ? 'rgba(239,68,68,0.2)' :
-                                        block.block_type === 'carousel' ? 'rgba(168,85,247,0.2)' :
-                                        '#E2E8F0'
-                                    }}
-                                  >
-                                    <BlockIcon className="w-5 h-5" style={{
-                                      color: block.block_type.includes('link') ? '#6366f1' :
-                                        block.block_type === 'text' ? '#22c55e' :
-                                        block.block_type === 'image' ? '#ec4899' :
-                                        block.block_type === 'video' || block.block_type === 'youtube' ? '#ef4444' :
-                                        block.block_type === 'carousel' ? '#a855f7' :
-                                        '#ffffff'
-                                    }} />
-                                  </div>
-                                )}
-                                
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-slate-900 font-medium truncate">
-                                    {block.label || block.content?.substring(0, 40) || blockTypeInfo.name}
-                                  </p>
-                                  <p className="text-slate-400 text-xs truncate">
-                                    {block.block_type === 'link' && block.url}
-                                    {block.block_type === 'link_image' && block.url}
-                                    {block.block_type === 'text' && 'Bloc de texte'}
-                                    {block.block_type === 'image' && 'Image'}
-                                    {block.block_type === 'video' && 'Vidéo'}
-                                    {block.block_type === 'youtube' && block.youtube_url}
-                                    {block.block_type === 'carousel' && `${block.items?.length || 0} éléments`}
-                                    {block.block_type === 'header' && 'Titre'}
-                                    {block.block_type === 'divider' && 'Séparateur'}
-                                  </p>
-                                </div>
-                                
-                                <Switch
-                                  checked={block.is_active}
-                                  onCheckedChange={() => toggleBlock(block)}
-                                  className="data-[state=checked]:bg-green-500"
-                                />
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  onClick={() => openBlockDialog(block)} 
-                                  className="text-slate-500 hover:text-slate-900 hover:bg-slate-100"
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  onClick={() => deleteBlock(block)} 
-                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            );
-                          })}
+                          {pageBlocks.map(block => (
+                            <SortableBlockItem
+                              key={block.id}
+                              block={block}
+                              onEdit={openBlockDialog}
+                              onDelete={deleteBlock}
+                              onToggle={toggleBlock}
+                            />
+                          ))}
                         </div>
                       </SortableContext>
                     </DndContext>
@@ -1454,7 +1482,7 @@ const MultilinkPage = () => {
                 <TabsContent value="design" className="p-4 space-y-6">
                   {/* Theme Selection */}
                   <div>
-                    <Label className="text-slate-900 mb-3 block">Thème de base</Label>
+                    <Label className="text-foreground mb-3 block">Thème de base</Label>
                     <div className="grid grid-cols-4 gap-3">
                       {THEME_PRESETS.map(theme => (
                         <button
@@ -1462,15 +1490,15 @@ const MultilinkPage = () => {
                           onClick={() => setPageForm({ ...pageForm, theme: theme.id })}
                           className={`p-3 rounded-xl border-2 transition-all ${
                             pageForm.theme === theme.id 
-                              ? 'border-indigo-500' 
-                              : 'border-slate-200 hover:border-white/30'
+                              ? 'border-primary' 
+                              : 'border-border hover:border-foreground/30'
                           }`}
                         >
                           <div 
                             className="w-full h-16 rounded-lg mb-2"
                             style={{ background: theme.bg }}
                           />
-                          <p className="text-slate-900 text-xs">{theme.name}</p>
+                          <p className="text-foreground text-xs">{theme.name}</p>
                         </button>
                       ))}
                     </div>
@@ -1478,7 +1506,7 @@ const MultilinkPage = () => {
 
                   {/* Button Style */}
                   <div>
-                    <Label className="text-slate-900 mb-3 block">Style des boutons</Label>
+                    <Label className="text-foreground mb-3 block">Style des boutons</Label>
                     <div className="grid grid-cols-5 gap-3">
                       {BUTTON_STYLES.map(style => (
                         <button
@@ -1489,28 +1517,28 @@ const MultilinkPage = () => {
                           })}
                           className={`p-3 rounded-xl border-2 transition-all ${
                             pageForm.design_settings?.button_style === style.id 
-                              ? 'border-indigo-500' 
-                              : 'border-slate-200 hover:border-white/30'
+                              ? 'border-primary' 
+                              : 'border-border hover:border-foreground/30'
                           }`}
                         >
-                          <div className={`w-full h-8 bg-white/20 ${style.preview}`} />
-                          <p className="text-slate-900 text-xs mt-2">{style.name}</p>
+                          <div className={`w-full h-8 bg-card/20 ${style.preview}`} />
+                          <p className="text-foreground text-xs mt-2">{style.name}</p>
                         </button>
                       ))}
                     </div>
                   </div>
 
                   {/* Full Color Customization Section - zaap.bio style */}
-                  <div className="bg-white rounded-xl p-4 space-y-4 border border-slate-200">
+                  <div className="bg-card rounded-xl p-4 space-y-4 border border-border">
                     <div className="flex items-center gap-2 mb-2">
-                      <Palette className="w-5 h-5 text-indigo-600" />
-                      <h4 className="text-slate-900 font-medium">Personnalisation des couleurs</h4>
+                      <Palette className="w-5 h-5 text-primary" />
+                      <h4 className="text-foreground font-medium">Personnalisation des couleurs</h4>
                     </div>
-                    <p className="text-slate-500 text-xs mb-4">Personnalisez chaque élément de votre page</p>
+                    <p className="text-muted-foreground text-xs mb-4">Personnalisez chaque élément de votre page</p>
                     
                     {/* Background Color */}
                     <div className="space-y-2">
-                      <Label className="text-slate-600 text-sm">Fond de page (Background)</Label>
+                      <Label className="text-muted-foreground text-sm">Fond de page</Label>
                       <div className="flex items-center gap-3">
                         <input
                           type="color"
@@ -1520,7 +1548,7 @@ const MultilinkPage = () => {
                             theme: 'custom',
                             custom_colors: { ...pageForm.custom_colors, background: e.target.value }
                           })}
-                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-slate-200"
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-border"
                         />
                         <Input
                           value={pageForm.custom_colors?.background || '#0f0f1a'}
@@ -1529,7 +1557,7 @@ const MultilinkPage = () => {
                             theme: 'custom',
                             custom_colors: { ...pageForm.custom_colors, background: e.target.value }
                           })}
-                          className="bg-white border-slate-200 text-slate-900 flex-1"
+                          className="bg-card border-border text-foreground flex-1"
                           placeholder="#0f0f1a"
                         />
                       </div>
@@ -1537,7 +1565,7 @@ const MultilinkPage = () => {
 
                     {/* Card Background Color */}
                     <div className="space-y-2">
-                      <Label className="text-slate-600 text-sm">Fond des cartes</Label>
+                      <Label className="text-muted-foreground text-sm">Fond des cartes</Label>
                       <div className="flex items-center gap-3">
                         <input
                           type="color"
@@ -1547,7 +1575,7 @@ const MultilinkPage = () => {
                             theme: 'custom',
                             custom_colors: { ...pageForm.custom_colors, card_bg: e.target.value, button_bg: e.target.value }
                           })}
-                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-slate-200"
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-border"
                         />
                         <Input
                           value={pageForm.custom_colors?.card_bg || '#2a2a3e'}
@@ -1556,7 +1584,7 @@ const MultilinkPage = () => {
                             theme: 'custom',
                             custom_colors: { ...pageForm.custom_colors, card_bg: e.target.value, button_bg: e.target.value }
                           })}
-                          className="bg-white border-slate-200 text-slate-900 flex-1"
+                          className="bg-card border-border text-foreground flex-1"
                           placeholder="#2a2a3e"
                         />
                       </div>
@@ -1564,7 +1592,7 @@ const MultilinkPage = () => {
 
                     {/* Text Color */}
                     <div className="space-y-2">
-                      <Label className="text-slate-600 text-sm">Couleur du texte</Label>
+                      <Label className="text-muted-foreground text-sm">Couleur du texte</Label>
                       <div className="flex items-center gap-3">
                         <input
                           type="color"
@@ -1574,7 +1602,7 @@ const MultilinkPage = () => {
                             theme: 'custom',
                             custom_colors: { ...pageForm.custom_colors, text: e.target.value }
                           })}
-                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-slate-200"
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-border"
                         />
                         <Input
                           value={pageForm.custom_colors?.text || '#ffffff'}
@@ -1583,7 +1611,7 @@ const MultilinkPage = () => {
                             theme: 'custom',
                             custom_colors: { ...pageForm.custom_colors, text: e.target.value }
                           })}
-                          className="bg-white border-slate-200 text-slate-900 flex-1"
+                          className="bg-card border-border text-foreground flex-1"
                           placeholder="#ffffff"
                         />
                       </div>
@@ -1591,34 +1619,34 @@ const MultilinkPage = () => {
 
                     {/* Button Background */}
                     <div className="space-y-2">
-                      <Label className="text-slate-600 text-sm">Couleur des boutons</Label>
+                      <Label className="text-muted-foreground text-sm">Couleur des boutons</Label>
                       <div className="flex items-center gap-3">
                         <input
                           type="color"
-                          value={pageForm.custom_colors?.button_bg?.startsWith('#') ? pageForm.custom_colors.button_bg : '#6366f1'}
+                          value={pageForm.custom_colors?.button_bg?.startsWith('#') ? pageForm.custom_colors.button_bg : '#E11D2E'}
                           onChange={(e) => setPageForm({
                             ...pageForm,
                             theme: 'custom',
                             custom_colors: { ...pageForm.custom_colors, button_bg: e.target.value }
                           })}
-                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-slate-200"
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-border"
                         />
                         <Input
-                          value={pageForm.custom_colors?.button_bg || '#6366f1'}
+                          value={pageForm.custom_colors?.button_bg || '#E11D2E'}
                           onChange={(e) => setPageForm({
                             ...pageForm,
                             theme: 'custom',
                             custom_colors: { ...pageForm.custom_colors, button_bg: e.target.value }
                           })}
-                          className="bg-white border-slate-200 text-slate-900 flex-1"
-                          placeholder="#6366f1"
+                          className="bg-card border-border text-foreground flex-1"
+                          placeholder="#E11D2E"
                         />
                       </div>
                     </div>
 
                     {/* Button Text Color */}
                     <div className="space-y-2">
-                      <Label className="text-slate-600 text-sm">Texte des boutons</Label>
+                      <Label className="text-muted-foreground text-sm">Texte des boutons</Label>
                       <div className="flex items-center gap-3">
                         <input
                           type="color"
@@ -1628,7 +1656,7 @@ const MultilinkPage = () => {
                             theme: 'custom',
                             custom_colors: { ...pageForm.custom_colors, button_text: e.target.value }
                           })}
-                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-slate-200"
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-border"
                         />
                         <Input
                           value={pageForm.custom_colors?.button_text || '#ffffff'}
@@ -1637,7 +1665,7 @@ const MultilinkPage = () => {
                             theme: 'custom',
                             custom_colors: { ...pageForm.custom_colors, button_text: e.target.value }
                           })}
-                          className="bg-white border-slate-200 text-slate-900 flex-1"
+                          className="bg-card border-border text-foreground flex-1"
                           placeholder="#ffffff"
                         />
                       </div>
@@ -1645,44 +1673,44 @@ const MultilinkPage = () => {
 
                     {/* Accent Color */}
                     <div className="space-y-2">
-                      <Label className="text-slate-600 text-sm">Couleur d'accent</Label>
+                      <Label className="text-muted-foreground text-sm">Couleur d'accent</Label>
                       <div className="flex items-center gap-3">
                         <input
                           type="color"
-                          value={pageForm.custom_colors?.accent || '#6366f1'}
+                          value={pageForm.custom_colors?.accent || '#E11D2E'}
                           onChange={(e) => setPageForm({
                             ...pageForm,
                             theme: 'custom',
                             custom_colors: { ...pageForm.custom_colors, accent: e.target.value }
                           })}
-                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-slate-200"
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-border"
                         />
                         <Input
-                          value={pageForm.custom_colors?.accent || '#6366f1'}
+                          value={pageForm.custom_colors?.accent || '#E11D2E'}
                           onChange={(e) => setPageForm({
                             ...pageForm,
                             theme: 'custom',
                             custom_colors: { ...pageForm.custom_colors, accent: e.target.value }
                           })}
-                          className="bg-white border-slate-200 text-slate-900 flex-1"
-                          placeholder="#6366f1"
+                          className="bg-card border-border text-foreground flex-1"
+                          placeholder="#E11D2E"
                         />
                       </div>
                     </div>
                   </div>
 
                   {/* Display Options */}
-                  <div className="bg-white rounded-xl p-4 space-y-4 border border-slate-200">
+                  <div className="bg-card rounded-xl p-4 space-y-4 border border-border">
                     <div className="flex items-center gap-2 mb-2">
-                      <Settings className="w-5 h-5 text-indigo-600" />
-                      <h4 className="text-slate-900 font-medium">Options d'affichage</h4>
+                      <Settings className="w-5 h-5 text-primary" />
+                      <h4 className="text-foreground font-medium">Options d'affichage</h4>
                     </div>
                     
                     {/* Show/Hide Title */}
-                    <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-card rounded-lg">
                       <div>
-                        <p className="text-slate-900 text-sm">Afficher le titre</p>
-                        <p className="text-slate-400 text-xs">Le titre apparaît sur la page publique</p>
+                        <p className="text-foreground text-sm">Afficher le titre</p>
+                        <p className="text-muted-foreground text-xs">Le titre apparaît sur la page publique</p>
                       </div>
                       <Switch
                         checked={pageForm.design_settings?.show_title !== false}
@@ -1690,14 +1718,14 @@ const MultilinkPage = () => {
                           ...pageForm,
                           design_settings: { ...pageForm.design_settings, show_title: checked }
                         })}
-                        className="data-[state=checked]:bg-green-500"
+                        className="data-[state=checked]:bg-success"
                       />
                     </div>
                   </div>
 
                   {/* Live Preview Mini */}
-                  <div className="bg-white rounded-xl p-4 border border-slate-200">
-                    <Label className="text-slate-600 text-sm mb-3 block">Aperçu en direct</Label>
+                  <div className="bg-card rounded-xl p-4 border border-border">
+                    <Label className="text-muted-foreground text-sm mb-3 block">Aperçu en direct</Label>
                     <div 
                       className="rounded-xl p-4 min-h-[150px]"
                       style={{ background: pageForm.custom_colors?.background || '#0f0f1a' }}
@@ -1705,7 +1733,7 @@ const MultilinkPage = () => {
                       <div className="text-center mb-3">
                         <div 
                           className="w-12 h-12 rounded-full mx-auto mb-2"
-                          style={{ background: pageForm.custom_colors?.accent || '#6366f1' }}
+                          style={{ background: pageForm.custom_colors?.accent || '#E11D2E' }}
                         />
                         {pageForm.design_settings?.show_title !== false && (
                           <p style={{ color: pageForm.custom_colors?.text || '#ffffff' }} className="font-bold">Titre</p>
@@ -1721,7 +1749,7 @@ const MultilinkPage = () => {
                       <div 
                         className="rounded-full py-2 px-4 text-center text-sm font-medium"
                         style={{ 
-                          background: pageForm.custom_colors?.accent || '#6366f1',
+                          background: pageForm.custom_colors?.accent || '#E11D2E',
                           color: pageForm.custom_colors?.button_text || '#ffffff'
                         }}
                       >
@@ -1731,7 +1759,7 @@ const MultilinkPage = () => {
                   </div>
 
                   {/* Save Button */}
-                  <Button onClick={savePageSettings} disabled={saving} className="w-full bg-indigo-600 hover:bg-indigo-700">
+                  <Button onClick={savePageSettings} disabled={saving} className="w-full bg-primary hover:bg-primary/90">
                     {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                     Enregistrer le design
                   </Button>
@@ -1741,58 +1769,58 @@ const MultilinkPage = () => {
                 <TabsContent value="profile" className="p-4 space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-slate-900">Titre</Label>
+                      <Label className="text-foreground">Titre</Label>
                       <Input
                         value={pageForm.title}
                         onChange={(e) => setPageForm({ ...pageForm, title: e.target.value })}
-                        className="bg-white border-slate-200 text-slate-900"
+                        className="bg-card border-border text-foreground"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-900">Slug (URL)</Label>
+                      <Label className="text-foreground">Slug (URL)</Label>
                       <div className="flex items-center gap-2">
-                        <span className="text-slate-400 text-sm">/lien-bio/</span>
+                        <span className="text-muted-foreground text-sm">/lien-bio/</span>
                         <Input
                           value={pageForm.slug}
                           onChange={(e) => setPageForm({ ...pageForm, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })}
-                          className="bg-white border-slate-200 text-slate-900"
+                          className="bg-card border-border text-foreground"
                         />
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-slate-900">Bio</Label>
+                    <Label className="text-foreground">Bio</Label>
                     <Textarea
                       value={pageForm.bio}
                       onChange={(e) => setPageForm({ ...pageForm, bio: e.target.value })}
                       placeholder="Décrivez-vous en quelques mots..."
-                      className="bg-white border-slate-200 text-slate-900 min-h-[100px]"
+                      className="bg-card border-border text-foreground min-h-[100px]"
                     />
                   </div>
 
                   {/* Profile Image */}
                   <div className="space-y-2">
-                    <Label className="text-slate-900">Photo de profil</Label>
+                    <Label className="text-foreground">Photo de profil</Label>
                     <div className="flex items-center gap-4">
                       {pageForm.profile_image ? (
                         <div className="relative">
                           <img src={pageForm.profile_image} alt="" className="w-24 h-24 rounded-full object-cover" />
                           <button
                             onClick={() => setPageForm({ ...pageForm, profile_image: '' })}
-                            className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
+                            className="absolute -top-1 -right-1 w-6 h-6 bg-danger rounded-full flex items-center justify-center"
                           >
-                            <X className="w-3 h-3 text-slate-900" />
+                            <X className="w-3 h-3 text-foreground" />
                           </button>
                         </div>
                       ) : (
-                        <div className="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center">
-                          <Image className="w-10 h-10 text-slate-400" />
+                        <div className="w-24 h-24 rounded-full bg-secondary flex items-center justify-center">
+                          <Image className="w-10 h-10 text-muted-foreground" />
                         </div>
                       )}
                       <label className="cursor-pointer">
                         <input type="file" accept="image/*" onChange={(e) => uploadImage(e, 'profile_image')} className="hidden" />
-                        <div className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white text-sm transition-colors">
+                        <div className="px-4 py-2 bg-primary hover:bg-primary/90 rounded-lg text-white text-sm transition-colors">
                           {uploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Choisir une image'}
                         </div>
                       </label>
@@ -1801,26 +1829,26 @@ const MultilinkPage = () => {
 
                   {/* Banner Image */}
                   <div className="space-y-2">
-                    <Label className="text-slate-900">Image bannière (optionnel)</Label>
+                    <Label className="text-foreground">Image bannière (optionnel)</Label>
                     <div className="flex items-center gap-4">
                       {pageForm.banner_image ? (
                         <div className="relative">
                           <img src={pageForm.banner_image} alt="" className="w-40 h-24 rounded-lg object-cover" />
                           <button
                             onClick={() => setPageForm({ ...pageForm, banner_image: '' })}
-                            className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
+                            className="absolute -top-1 -right-1 w-6 h-6 bg-danger rounded-full flex items-center justify-center"
                           >
-                            <X className="w-3 h-3 text-slate-900" />
+                            <X className="w-3 h-3 text-foreground" />
                           </button>
                         </div>
                       ) : (
-                        <div className="w-40 h-24 rounded-lg bg-slate-100 flex items-center justify-center border-2 border-dashed border-slate-200">
-                          <ImagePlus className="w-8 h-8 text-slate-400" />
+                        <div className="w-40 h-24 rounded-lg bg-secondary flex items-center justify-center border-2 border-dashed border-border">
+                          <ImagePlus className="w-8 h-8 text-muted-foreground" />
                         </div>
                       )}
                       <label className="cursor-pointer">
                         <input type="file" accept="image/*" onChange={(e) => uploadImage(e, 'banner_image')} className="hidden" />
-                        <div className="px-4 py-2 bg-slate-100 hover:bg-white/20 rounded-lg text-slate-900 text-sm transition-colors">
+                        <div className="px-4 py-2 bg-secondary hover:bg-card/20 rounded-lg text-foreground text-sm transition-colors">
                           Ajouter une bannière
                         </div>
                       </label>
@@ -1828,19 +1856,88 @@ const MultilinkPage = () => {
                   </div>
 
                   {/* Page Status */}
-                  <div className="flex items-center justify-between p-4 bg-white rounded-xl">
+                  <div className="flex items-center justify-between p-4 bg-card rounded-xl">
                     <div>
-                      <p className="text-slate-900 font-medium">Page active</p>
-                      <p className="text-slate-400 text-xs">La page sera visible publiquement</p>
+                      <p className="text-foreground font-medium">Page active</p>
+                      <p className="text-muted-foreground text-xs">La page sera visible publiquement</p>
                     </div>
                     <Switch
                       checked={pageForm.is_active}
                       onCheckedChange={(checked) => setPageForm({ ...pageForm, is_active: checked })}
-                      className="data-[state=checked]:bg-green-500"
+                      className="data-[state=checked]:bg-success"
                     />
                   </div>
 
-                  <Button onClick={savePageSettings} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
+                  {/* Rattachements CRM — relie logo/visuels (Documents) + client (Contact) pour l'agent IA */}
+                  <div className="space-y-4 pt-4 border-t border-border">
+                    <div>
+                      <Label className="text-foreground flex items-center gap-2"><Link2 className="w-4 h-4 text-primary" /> Rattachements CRM</Label>
+                      <p className="text-muted-foreground text-xs mt-1">Reliez le logo et les visuels (Documents) et la fiche client (Contact). L'assistant IA s'en sert pour créer ou adapter cette page.</p>
+                    </div>
+
+                    {/* Documents liés */}
+                    <div className="space-y-2">
+                      <p className="text-muted-foreground text-xs uppercase tracking-wider">Documents liés <span className="text-primary">({(pageForm.linked_document_ids || []).length})</span></p>
+                      <div className="relative">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <Input value={crmDocSearch} onChange={(e) => setCrmDocSearch(e.target.value)} placeholder="Rechercher un document..." className="pl-9 bg-background border-border text-foreground" />
+                      </div>
+                      <div className="max-h-44 overflow-y-auto rounded-xl border border-border divide-y divide-border">
+                        {(() => {
+                          const q = crmDocSearch.toLowerCase();
+                          const list = crmDocuments.filter(d => !q || (d.name || '').toLowerCase().includes(q));
+                          if (list.length === 0) return <p className="text-muted-foreground text-xs p-3 text-center">Aucun document</p>;
+                          return list.slice(0, 60).map(d => {
+                            const sel = (pageForm.linked_document_ids || []).includes(d.id);
+                            return (
+                              <button key={d.id} type="button" onClick={() => toggleLinkedDoc(d.id)} className={`w-full flex items-center gap-3 p-2.5 text-left transition-colors ${sel ? 'bg-brand-soft' : 'hover:bg-secondary'}`}>
+                                {d.file_type === 'image' && d.file_url ? (
+                                  <img src={d.file_url} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
+                                ) : (
+                                  <div className="w-8 h-8 rounded bg-secondary flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-muted-foreground" /></div>
+                                )}
+                                <span className="flex-1 min-w-0 text-foreground text-sm truncate">{d.name || 'Document'}</span>
+                                {sel && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
+                              </button>
+                            );
+                          });
+                        })()}
+                      </div>
+                    </div>
+
+                    {/* Contacts liés */}
+                    <div className="space-y-2">
+                      <p className="text-muted-foreground text-xs uppercase tracking-wider">Contacts liés <span className="text-primary">({(pageForm.linked_contact_ids || []).length})</span></p>
+                      <div className="relative">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <Input value={crmContactSearch} onChange={(e) => setCrmContactSearch(e.target.value)} placeholder="Rechercher un contact..." className="pl-9 bg-background border-border text-foreground" />
+                      </div>
+                      <div className="max-h-44 overflow-y-auto rounded-xl border border-border divide-y divide-border">
+                        {(() => {
+                          const fmt = c => [c.first_name, c.last_name].filter(Boolean).join(' ') || c.company || c.email || 'Contact';
+                          const q = crmContactSearch.toLowerCase();
+                          const list = crmContacts.filter(c => !q || fmt(c).toLowerCase().includes(q));
+                          if (list.length === 0) return <p className="text-muted-foreground text-xs p-3 text-center">Aucun contact</p>;
+                          return list.slice(0, 60).map(c => {
+                            const sel = (pageForm.linked_contact_ids || []).includes(c.id);
+                            const name = fmt(c);
+                            return (
+                              <button key={c.id} type="button" onClick={() => toggleLinkedContact(c.id)} className={`w-full flex items-center gap-3 p-2.5 text-left transition-colors ${sel ? 'bg-brand-soft' : 'hover:bg-secondary'}`}>
+                                <div className="w-8 h-8 rounded-full bg-brand-soft flex items-center justify-center flex-shrink-0 text-primary text-xs font-semibold">{name.charAt(0).toUpperCase()}</div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-foreground text-sm truncate">{name}</p>
+                                  {c.company && <p className="text-muted-foreground text-xs truncate">{c.company}</p>}
+                                </div>
+                                {sel && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
+                              </button>
+                            );
+                          });
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button onClick={savePageSettings} disabled={saving} className="bg-primary hover:bg-primary/90">
                     {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                     Enregistrer le profil
                   </Button>
@@ -1850,16 +1947,16 @@ const MultilinkPage = () => {
                 <TabsContent value="socials" className="p-4 space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-slate-900 font-medium">Réseaux sociaux</h3>
-                      <p className="text-slate-400 text-xs">Icônes affichées en haut de votre page</p>
+                      <h3 className="text-foreground font-medium">Réseaux sociaux</h3>
+                      <p className="text-muted-foreground text-xs">Icônes affichées en haut de votre page</p>
                     </div>
-                    <Button onClick={() => openSocialDialog()} size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+                    <Button onClick={() => openSocialDialog()} size="sm" className="bg-primary hover:bg-primary/90">
                       <Plus className="w-4 h-4 mr-1" /> Ajouter
                     </Button>
                   </div>
 
                   {(pageForm.social_links || []).length === 0 ? (
-                    <div className="text-center py-12 text-slate-400 bg-white rounded-xl">
+                    <div className="text-center py-12 text-muted-foreground bg-card rounded-xl">
                       <Share2 className="w-10 h-10 mx-auto mb-3 opacity-50" />
                       <p>Aucun réseau social ajouté</p>
                       <p className="text-xs mt-1">Les icônes s&apos;afficheront en haut de votre page</p>
@@ -1883,7 +1980,7 @@ const MultilinkPage = () => {
                 {/* SEO TAB */}
                 <TabsContent value="seo" className="p-4 space-y-6">
                   <div className="space-y-2">
-                    <Label className="text-slate-900">Titre SEO</Label>
+                    <Label className="text-foreground">Titre SEO</Label>
                     <Input
                       value={pageForm.seo_settings?.title || ''}
                       onChange={(e) => setPageForm({ 
@@ -1891,13 +1988,13 @@ const MultilinkPage = () => {
                         seo_settings: { ...pageForm.seo_settings, title: e.target.value }
                       })}
                       placeholder={pageForm.title}
-                      className="bg-white border-slate-200 text-slate-900"
+                      className="bg-card border-border text-foreground"
                     />
-                    <p className="text-slate-400 text-xs">Titre affiché dans les résultats Google</p>
+                    <p className="text-muted-foreground text-xs">Titre affiché dans les résultats Google</p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-slate-900">Description SEO</Label>
+                    <Label className="text-foreground">Description SEO</Label>
                     <Textarea
                       value={pageForm.seo_settings?.description || ''}
                       onChange={(e) => setPageForm({ 
@@ -1905,15 +2002,15 @@ const MultilinkPage = () => {
                         seo_settings: { ...pageForm.seo_settings, description: e.target.value }
                       })}
                       placeholder={pageForm.bio}
-                      className="bg-white border-slate-200 text-slate-900 min-h-[100px]"
+                      className="bg-card border-border text-foreground min-h-[100px]"
                     />
-                    <p className="text-slate-400 text-xs">Description affichée dans les résultats Google</p>
+                    <p className="text-muted-foreground text-xs">Description affichée dans les résultats Google</p>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-white rounded-xl">
+                  <div className="flex items-center justify-between p-4 bg-card rounded-xl">
                     <div>
-                      <p className="text-slate-900 font-medium">Indexation Google</p>
-                      <p className="text-slate-400 text-xs">Autoriser Google à indexer cette page</p>
+                      <p className="text-foreground font-medium">Indexation Google</p>
+                      <p className="text-muted-foreground text-xs">Autoriser Google à indexer cette page</p>
                     </div>
                     <Switch
                       checked={pageForm.seo_settings?.indexable !== false}
@@ -1921,33 +2018,33 @@ const MultilinkPage = () => {
                         ...pageForm, 
                         seo_settings: { ...pageForm.seo_settings, indexable: checked }
                       })}
-                      className="data-[state=checked]:bg-green-500"
+                      className="data-[state=checked]:bg-success"
                     />
                   </div>
 
-                  <Button onClick={savePageSettings} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
+                  <Button onClick={savePageSettings} disabled={saving} className="bg-primary hover:bg-primary/90">
                     {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                     Enregistrer le SEO
                   </Button>
 
                   {/* CUSTOM DOMAIN SECTION */}
-                  <div className="border-t border-slate-200 pt-6 mt-6">
+                  <div className="border-t border-border pt-6 mt-6">
                     <div className="flex items-center gap-2 mb-4">
-                      <Globe2 className="w-5 h-5 text-indigo-600" />
-                      <h3 className="text-slate-900 font-medium">Domaine personnalisé</h3>
+                      <Globe2 className="w-5 h-5 text-primary" />
+                      <h3 className="text-foreground font-medium">Domaine personnalisé</h3>
                     </div>
                     
-                    <p className="text-slate-500 text-sm mb-4">
+                    <p className="text-muted-foreground text-sm mb-4">
                       Associez un domaine personnalisé à cette page (ex: bio.votre-domaine.com)
                     </p>
 
                     {/* Current domain display */}
                     {selectedPage?.custom_domain && (
-                      <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-xl">
+                      <div className="mb-4 p-3 bg-success-soft border border-success/20 rounded-xl">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-green-400" />
-                            <span className="text-green-400 text-sm font-medium">
+                            <CheckCircle2 className="w-4 h-4 text-success" />
+                            <span className="text-success text-sm font-medium">
                               Domaine configuré: {selectedPage.custom_domain}
                             </span>
                           </div>
@@ -1956,7 +2053,7 @@ const MultilinkPage = () => {
                             size="sm"
                             onClick={removeCustomDomain}
                             disabled={savingDomain}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-7"
+                            className="text-danger hover:text-red-300 hover:bg-danger-soft h-7"
                           >
                             <Trash2 className="w-3 h-3 mr-1" />
                             Supprimer
@@ -1972,12 +2069,12 @@ const MultilinkPage = () => {
                           value={customDomainInput}
                           onChange={(e) => setCustomDomainInput(e.target.value.toLowerCase().replace(/^https?:\/\//, ''))}
                           placeholder="bio.votre-domaine.com"
-                          className="bg-white border-slate-200 text-slate-900 flex-1"
+                          className="bg-card border-border text-foreground flex-1"
                         />
                         <Button 
                           onClick={saveCustomDomain} 
                           disabled={savingDomain || !customDomainInput.trim()}
-                          className="bg-indigo-600 hover:bg-indigo-700"
+                          className="bg-primary hover:bg-primary/90"
                         >
                           {savingDomain ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -1993,7 +2090,7 @@ const MultilinkPage = () => {
                           variant="outline"
                           onClick={checkDomainStatus}
                           disabled={checkingDomain}
-                          className="w-full border-slate-200 text-slate-900 hover:bg-slate-50"
+                          className="w-full border-border text-foreground hover:bg-secondary"
                         >
                           {checkingDomain ? (
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -2009,38 +2106,38 @@ const MultilinkPage = () => {
                     {domainStatus && (
                       <div className={`mt-4 p-4 rounded-xl border ${
                         domainStatus.dns_configured 
-                          ? 'bg-green-500/10 border-green-500/20' 
-                          : 'bg-yellow-500/10 border-yellow-500/20'
+                          ? 'bg-success-soft border-success/20' 
+                          : 'bg-warning-soft border-yellow-500/20'
                       }`}>
                         <div className="flex items-start gap-3">
                           {domainStatus.dns_configured ? (
-                            <CheckCircle2 className="w-5 h-5 text-green-400 mt-0.5" />
+                            <CheckCircle2 className="w-5 h-5 text-success mt-0.5" />
                           ) : (
                             <AlertCircle className="w-5 h-5 text-yellow-400 mt-0.5" />
                           )}
                           <div className="flex-1">
                             <p className={`font-medium ${
-                              domainStatus.dns_configured ? 'text-green-400' : 'text-yellow-400'
+                              domainStatus.dns_configured ? 'text-success' : 'text-yellow-400'
                             }`}>
                               {domainStatus.dns_configured ? 'DNS configuré correctement' : 'Configuration DNS requise'}
                             </p>
-                            <p className="text-slate-500 text-sm mt-1">
+                            <p className="text-muted-foreground text-sm mt-1">
                               {domainStatus.dns_message || 'Suivez les instructions ci-dessous pour configurer votre domaine.'}
                             </p>
                             
                             {/* DNS Instructions */}
                             {domainStatus.instructions && !domainStatus.dns_configured && (
-                              <div className="mt-3 p-3 bg-slate-100 rounded-lg">
-                                <p className="text-slate-700 text-sm font-medium mb-2">Instructions de configuration:</p>
-                                <ol className="text-slate-500 text-sm space-y-2">
+                              <div className="mt-3 p-3 bg-secondary rounded-lg">
+                                <p className="text-foreground text-sm font-medium mb-2">Instructions de configuration:</p>
+                                <ol className="text-muted-foreground text-sm space-y-2">
                                   <li>1. Accédez à votre panneau de gestion DNS</li>
-                                  <li>2. Ajoutez un enregistrement <strong className="text-slate-900">CNAME</strong></li>
+                                  <li>2. Ajoutez un enregistrement <strong className="text-foreground">CNAME</strong></li>
                                   <li className="pl-4">
-                                    <span className="text-indigo-600">Nom/Host:</span> {customDomainInput.split('.')[0] || 'bio'}
+                                    <span className="text-primary">Nom/Host:</span> {customDomainInput.split('.')[0] || 'bio'}
                                   </li>
                                   <li className="pl-4">
-                                    <span className="text-indigo-600">Valeur/Target:</span> 
-                                    <code className="ml-1 bg-slate-100 px-2 py-0.5 rounded text-xs">
+                                    <span className="text-primary">Valeur/Target:</span> 
+                                    <code className="ml-1 bg-secondary px-2 py-0.5 rounded text-xs">
                                       {domainStatus.instructions?.dns_record?.split('→')[2]?.trim() || 'alphagency.fr'}
                                     </code>
                                   </li>
@@ -2056,7 +2153,7 @@ const MultilinkPage = () => {
                                 href={domainStatus.url} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 mt-2 text-green-400 hover:text-green-300 text-sm"
+                                className="inline-flex items-center gap-1 mt-2 text-success hover:text-green-300 text-sm"
                               >
                                 <ExternalLink className="w-3 h-3" />
                                 Ouvrir {domainStatus.url}
@@ -2068,9 +2165,9 @@ const MultilinkPage = () => {
                     )}
 
                     {/* Help text */}
-                    <div className="mt-4 p-3 bg-white rounded-lg">
-                      <p className="text-slate-400 text-xs">
-                        <strong className="text-slate-500">💡 Conseil:</strong> Pour utiliser un sous-domaine comme <code className="bg-slate-100 px-1 rounded">bio.votre-site.com</code>, 
+                    <div className="mt-4 p-3 bg-card rounded-lg">
+                      <p className="text-muted-foreground text-xs">
+                        <strong className="text-muted-foreground">💡 Conseil:</strong> Pour utiliser un sous-domaine comme <code className="bg-secondary px-1 rounded">bio.votre-site.com</code>, 
                         créez un enregistrement CNAME pointant vers notre serveur. La propagation DNS peut prendre jusqu&apos;à 24 heures.
                       </p>
                     </div>
@@ -2081,45 +2178,45 @@ const MultilinkPage = () => {
                 <TabsContent value="analytics" className="p-4 space-y-6">
                   {/* Quick Stats Cards */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl p-4 border border-indigo-500/20">
-                      <div className="flex items-center gap-2 text-indigo-600 mb-2">
+                    <div className="bg-brand-soft rounded-xl p-4 border border-primary/20">
+                      <div className="flex items-center gap-2 text-primary mb-2">
                         <Eye className="w-4 h-4" />
                         <span className="text-xs font-medium">Vues totales</span>
                       </div>
-                      <p className="text-2xl font-bold text-slate-900">{pageStats?.total_views || selectedPage?.total_views || 0}</p>
+                      <p className="text-2xl font-bold text-foreground">{pageStats?.total_views || selectedPage?.total_views || 0}</p>
                       {pageStats?.views_growth !== undefined && (
-                        <p className={`text-xs mt-1 ${pageStats.views_growth >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <p className={`text-xs mt-1 ${pageStats.views_growth >= 0 ? 'text-success' : 'text-danger'}`}>
                           {pageStats.views_growth >= 0 ? '+' : ''}{pageStats.views_growth}% vs période précédente
                         </p>
                       )}
                     </div>
-                    <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-4 border border-green-500/20">
-                      <div className="flex items-center gap-2 text-green-400 mb-2">
+                    <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-4 border border-success/20">
+                      <div className="flex items-center gap-2 text-success mb-2">
                         <MousePointerClick className="w-4 h-4" />
                         <span className="text-xs font-medium">Clics totaux</span>
                       </div>
-                      <p className="text-2xl font-bold text-slate-900">{pageStats?.total_clicks || selectedPage?.total_clicks || 0}</p>
+                      <p className="text-2xl font-bold text-foreground">{pageStats?.total_clicks || selectedPage?.total_clicks || 0}</p>
                       {pageStats?.clicks_growth !== undefined && (
-                        <p className={`text-xs mt-1 ${pageStats.clicks_growth >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <p className={`text-xs mt-1 ${pageStats.clicks_growth >= 0 ? 'text-success' : 'text-danger'}`}>
                           {pageStats.clicks_growth >= 0 ? '+' : ''}{pageStats.clicks_growth}% vs période précédente
                         </p>
                       )}
                     </div>
                     <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-xl p-4 border border-amber-500/20">
-                      <div className="flex items-center gap-2 text-amber-400 mb-2">
+                      <div className="flex items-center gap-2 text-warning mb-2">
                         <TrendingUp className="w-4 h-4" />
                         <span className="text-xs font-medium">Taux de clic</span>
                       </div>
-                      <p className="text-2xl font-bold text-slate-900">{pageStats?.ctr || 0}%</p>
-                      <p className="text-xs text-slate-400 mt-1">CTR moyen</p>
+                      <p className="text-2xl font-bold text-foreground">{pageStats?.ctr || 0}%</p>
+                      <p className="text-xs text-muted-foreground mt-1">CTR moyen</p>
                     </div>
                     <div className="bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-xl p-4 border border-pink-500/20">
                       <div className="flex items-center gap-2 text-pink-400 mb-2">
                         <Zap className="w-4 h-4" />
                         <span className="text-xs font-medium">Blocs actifs</span>
                       </div>
-                      <p className="text-2xl font-bold text-slate-900">{pageBlocks.filter(b => b.is_active).length}</p>
-                      <p className="text-xs text-slate-400 mt-1">sur {pageBlocks.length} total</p>
+                      <p className="text-2xl font-bold text-foreground">{pageBlocks.filter(b => b.is_active).length}</p>
+                      <p className="text-xs text-muted-foreground mt-1">sur {pageBlocks.length} total</p>
                     </div>
                   </div>
 
@@ -2127,7 +2224,7 @@ const MultilinkPage = () => {
                   {!pageStats && (
                     <Button 
                       onClick={() => fetchPageStats(selectedPage)}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700"
+                      className="w-full bg-primary hover:bg-primary/90"
                     >
                       <BarChart3 className="w-4 h-4 mr-2" />
                       Charger les analytics détaillés
@@ -2137,35 +2234,35 @@ const MultilinkPage = () => {
                   {/* Detailed Block Stats */}
                   {pageStats?.block_stats && pageStats.block_stats.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="text-slate-900 font-medium flex items-center gap-2">
-                        <MousePointerClick className="w-4 h-4 text-green-400" />
+                      <h4 className="text-foreground font-medium flex items-center gap-2">
+                        <MousePointerClick className="w-4 h-4 text-success" />
                         Clics par bloc
                       </h4>
                       <div className="space-y-2">
                         {pageStats.block_stats.map((stat, index) => (
                           <div 
                             key={stat.block_id || index}
-                            className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200"
+                            className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border"
                           >
                             {stat.thumbnail ? (
                               <img src={stat.thumbnail} alt="" className="w-10 h-10 rounded-lg object-cover" />
                             ) : (
-                              <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-                                <Link className="w-5 h-5 text-slate-400" />
+                              <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+                                <Link className="w-5 h-5 text-muted-foreground" />
                               </div>
                             )}
                             <div className="flex-1 min-w-0">
-                              <p className="text-slate-900 font-medium truncate">{stat.label}</p>
-                              <p className="text-slate-400 text-xs truncate">
+                              <p className="text-foreground font-medium truncate">{stat.label}</p>
+                              <p className="text-muted-foreground text-xs truncate">
                                 {stat.type} {stat.url && `• ${stat.url}`}
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-slate-900 font-bold">{stat.clicks}</p>
-                              <p className="text-slate-400 text-xs">clics</p>
+                              <p className="text-foreground font-bold">{stat.clicks}</p>
+                              <p className="text-muted-foreground text-xs">clics</p>
                             </div>
                             {/* Progress bar */}
-                            <div className="w-20 h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="w-20 h-2 bg-secondary rounded-full overflow-hidden">
                               <div 
                                 className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
                                 style={{ 
@@ -2182,18 +2279,18 @@ const MultilinkPage = () => {
                   {/* Legacy Link Stats */}
                   {pageStats?.link_stats && pageStats.link_stats.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="text-slate-900 font-medium flex items-center gap-2">
-                        <Link className="w-4 h-4 text-indigo-600" />
+                      <h4 className="text-foreground font-medium flex items-center gap-2">
+                        <Link className="w-4 h-4 text-primary" />
                         Clics par lien (legacy)
                       </h4>
                       <div className="space-y-2">
                         {pageStats.link_stats.map((stat, index) => (
                           <div 
                             key={stat.link_id || index}
-                            className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200"
+                            className="flex items-center justify-between p-3 bg-card rounded-xl border border-border"
                           >
-                            <span className="text-slate-900 truncate">{stat.label}</span>
-                            <Badge className="bg-indigo-500/20 text-indigo-600">{stat.clicks} clics</Badge>
+                            <span className="text-foreground truncate">{stat.label}</span>
+                            <Badge className="bg-brand-soft text-primary">{stat.clicks} clics</Badge>
                           </div>
                         ))}
                       </div>
@@ -2203,11 +2300,11 @@ const MultilinkPage = () => {
                   {/* Views by day chart placeholder */}
                   {pageStats?.views_by_day && pageStats.views_by_day.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="text-slate-900 font-medium flex items-center gap-2">
-                        <Eye className="w-4 h-4 text-indigo-600" />
+                      <h4 className="text-foreground font-medium flex items-center gap-2">
+                        <Eye className="w-4 h-4 text-primary" />
                         Vues par jour (30 derniers jours)
                       </h4>
-                      <div className="bg-white rounded-xl p-4 border border-slate-200">
+                      <div className="bg-card rounded-xl p-4 border border-border">
                         <div className="flex items-end gap-1 h-32">
                           {pageStats.views_by_day.slice(-30).map((day, index) => {
                             const maxViews = Math.max(...pageStats.views_by_day.map(d => d.count));
@@ -2215,18 +2312,18 @@ const MultilinkPage = () => {
                             return (
                               <div 
                                 key={day.date || index}
-                                className="flex-1 bg-gradient-to-t from-indigo-500 to-purple-500 rounded-t-sm hover:from-indigo-400 hover:to-purple-400 transition-all cursor-pointer group relative"
+                                className="flex-1 bg-primary rounded-t-sm hover:bg-primary/80 transition-all cursor-pointer group relative"
                                 style={{ height: `${Math.max(4, height)}%` }}
                                 title={`${day.date}: ${day.count} vues`}
                               >
-                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-white rounded text-xs text-slate-900 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-card rounded text-xs text-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                                   {day.date}: {day.count} vues
                                 </div>
                               </div>
                             );
                           })}
                         </div>
-                        <div className="flex justify-between mt-2 text-xs text-slate-400">
+                        <div className="flex justify-between mt-2 text-xs text-muted-foreground">
                           <span>{pageStats.views_by_day[0]?.date}</span>
                           <span>{pageStats.views_by_day[pageStats.views_by_day.length - 1]?.date}</span>
                         </div>
@@ -2236,7 +2333,7 @@ const MultilinkPage = () => {
 
                   {/* Empty state */}
                   {!pageStats && (
-                    <div className="text-center py-8 text-slate-400">
+                    <div className="text-center py-8 text-muted-foreground">
                       <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-40" />
                       <p>Cliquez sur le bouton ci-dessus pour charger les analytics</p>
                     </div>
@@ -2245,55 +2342,86 @@ const MultilinkPage = () => {
               </Tabs>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-              <Link2 className="w-16 h-16 text-slate-900/10 mx-auto mb-4" />
-              <p className="text-slate-400 text-lg">Sélectionnez une page</p>
-              <p className="text-slate-400 text-sm mt-1">ou créez-en une nouvelle</p>
+            <div className="bg-card rounded-xl border border-border p-12 text-center">
+              <Link2 className="w-16 h-16 text-foreground/10 mx-auto mb-4" />
+              <p className="text-muted-foreground text-lg">Sélectionnez une page</p>
+              <p className="text-muted-foreground text-sm mt-1">ou créez-en une nouvelle</p>
             </div>
           )}
+          </div>
+
+          {selectedPage && (
+            <div className="hidden xl:block xl:sticky xl:top-6">
+              <div className="flex items-center justify-between mb-3 px-1">
+                <Label className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Aperçu en direct</Label>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-secondary" onClick={() => setPreviewKey(k => k + 1)} title="Rafraîchir l'aperçu">
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-secondary" onClick={() => window.open(`/lien-bio/${selectedPage.slug}`, '_blank')} title="Ouvrir dans un onglet">
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </div>
+              <div className="mx-auto w-[300px] rounded-[2.5rem] border-[10px] border-[#0e0e12] bg-[#0e0e12] shadow-pop ring-1 ring-border/60">
+                <div className="relative overflow-hidden rounded-[1.8rem] bg-black" style={{ aspectRatio: '300 / 620' }}>
+                  <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 h-5 w-24 rounded-full bg-[#0e0e12]" />
+                  <iframe
+                    key={previewKey}
+                    src={`/lien-bio/${selectedPage.slug}?preview=1`}
+                    title="Aperçu de la page"
+                    className="absolute inset-0 h-full w-full border-0"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+              <p className="text-center text-muted-foreground text-[11px] mt-3">Aperçu de la version publiée · mis à jour à chaque enregistrement</p>
+            </div>
+          )}
+          </div>
         </div>
       </div>
 
       {/* Page Creation Dialog */}
       <Dialog open={pageDialogOpen} onOpenChange={setPageDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-md">
+        <DialogContent className="bg-secondary border-border text-foreground max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <Link2 className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Link2 className="w-5 h-5 text-primary" />
               {editingPage ? 'Modifier la page' : 'Nouvelle page'}
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
             <div className="space-y-2">
-              <Label className="text-slate-900">Titre *</Label>
+              <Label className="text-foreground">Titre *</Label>
               <Input
                 value={pageForm.title}
                 onChange={(e) => setPageForm({ ...pageForm, title: e.target.value })}
                 placeholder="Mon Linktree"
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
               />
             </div>
             
             <div className="space-y-2">
-              <Label className="text-slate-900">Slug (URL)</Label>
+              <Label className="text-foreground">Slug (URL)</Label>
               <div className="flex items-center gap-2">
-                <span className="text-slate-400 text-sm whitespace-nowrap">/lien-bio/</span>
+                <span className="text-muted-foreground text-sm whitespace-nowrap">/lien-bio/</span>
                 <Input
                   value={pageForm.slug}
                   onChange={(e) => setPageForm({ ...pageForm, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })}
                   placeholder="auto-généré"
-                  className="bg-white border-slate-200 text-slate-900"
+                  className="bg-card border-border text-foreground"
                 />
               </div>
             </div>
           </div>
 
           <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setPageDialogOpen(false)} className="border-slate-200 text-slate-900">
+            <Button variant="outline" onClick={() => setPageDialogOpen(false)} className="border-border text-foreground">
               Annuler
             </Button>
-            <Button onClick={savePage} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={savePage} disabled={saving} className="bg-primary hover:bg-primary/90">
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {editingPage ? 'Mettre à jour' : 'Créer'}
             </Button>
@@ -2303,20 +2431,20 @@ const MultilinkPage = () => {
 
       {/* Link Dialog */}
       <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-md max-h-[90vh] overflow-y-auto [&>button]:hidden">
+        <DialogContent className="bg-secondary border-border text-foreground max-w-md max-h-[90vh] overflow-y-auto [&>button]:hidden">
           <div 
             className="flex items-center justify-between mb-4"
             style={{ paddingTop: 'max(0px, env(safe-area-inset-top, 0px))' }}
           >
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <Link className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Link className="w-5 h-5 text-primary" />
               {editingLink ? 'Modifier le lien' : 'Ajouter un lien'}
             </DialogTitle>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setLinkDialogOpen(false)}
-              className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-8 w-8"
+              className="text-muted-foreground hover:text-foreground hover:bg-secondary h-8 w-8"
             >
               <X className="w-5 h-5" />
             </Button>
@@ -2325,26 +2453,26 @@ const MultilinkPage = () => {
           <div className="space-y-4">
             {/* Thumbnail Upload */}
             <div className="space-y-2">
-              <Label className="text-slate-900">Image de la carte (optionnel)</Label>
-              <p className="text-slate-400 text-xs mb-2">📐 Format recommandé : 1200×630px (ratio 1.91:1)</p>
+              <Label className="text-foreground">Image de la carte (optionnel)</Label>
+              <p className="text-muted-foreground text-xs mb-2">📐 Format recommandé : 1200×630px (ratio 1.91:1)</p>
               <div className="flex items-center gap-4">
                 {linkForm.thumbnail ? (
                   <div className="relative">
                     <img 
                       src={linkForm.thumbnail} 
                       alt="" 
-                      className="w-24 h-24 rounded-xl object-cover border border-slate-200"
+                      className="w-24 h-24 rounded-xl object-cover border border-border"
                     />
                     <button
                       onClick={() => setLinkForm({ ...linkForm, thumbnail: '' })}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-danger rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
                     >
-                      <X className="w-3 h-3 text-slate-900" />
+                      <X className="w-3 h-3 text-foreground" />
                     </button>
                   </div>
                 ) : (
-                  <div className="w-24 h-24 rounded-xl bg-white border-2 border-dashed border-slate-200 flex items-center justify-center">
-                    <Image className="w-8 h-8 text-slate-400" />
+                  <div className="w-24 h-24 rounded-xl bg-card border-2 border-dashed border-border flex items-center justify-center">
+                    <Image className="w-8 h-8 text-muted-foreground" />
                   </div>
                 )}
                 <label className="cursor-pointer flex-1">
@@ -2371,58 +2499,58 @@ const MultilinkPage = () => {
                     }} 
                     className="hidden" 
                   />
-                  <div className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white text-sm transition-colors text-center">
+                  <div className="px-4 py-2 bg-primary hover:bg-primary/90 rounded-lg text-white text-sm transition-colors text-center">
                     {uploadingImage ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Choisir une image'}
                   </div>
                 </label>
               </div>
-              <p className="text-slate-400 text-xs">L'image apparaîtra sur la carte du lien comme sur zaap.bio</p>
+              <p className="text-muted-foreground text-xs">L'image apparaîtra sur la carte du lien comme sur zaap.bio</p>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-900">Label *</Label>
+              <Label className="text-foreground">Label *</Label>
               <Input
                 value={linkForm.label}
                 onChange={(e) => setLinkForm({ ...linkForm, label: e.target.value })}
                 placeholder="Mon site web"
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-900">URL *</Label>
+              <Label className="text-foreground">URL *</Label>
               <Input
                 value={linkForm.url}
                 onChange={(e) => setLinkForm({ ...linkForm, url: e.target.value })}
                 placeholder="https://example.com"
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-900">Description (optionnel)</Label>
+              <Label className="text-foreground">Description (optionnel)</Label>
               <Input
                 value={linkForm.description}
                 onChange={(e) => setLinkForm({ ...linkForm, description: e.target.value })}
                 placeholder="Courte description..."
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-900">Icône</Label>
+              <Label className="text-foreground">Icône</Label>
               <Select value={linkForm.icon} onValueChange={(value) => setLinkForm({ ...linkForm, icon: value })}>
-                <SelectTrigger className="bg-white border-slate-200 text-slate-900">
+                <SelectTrigger className="bg-card border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-50 border-slate-200 max-h-60">
+                <SelectContent className="bg-secondary border-border max-h-60">
                   {ICON_OPTIONS.map(option => {
                     const Icon = option.icon;
                     return (
-                      <SelectItem key={option.value} value={option.value} className="text-slate-900">
+                      <SelectItem key={option.value} value={option.value} className="text-foreground">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: option.color }}>
-                            <Icon className="w-3 h-3 text-slate-900" />
+                            <Icon className="w-3 h-3 text-foreground" />
                           </div>
                           <span>{option.label}</span>
                         </div>
@@ -2433,21 +2561,21 @@ const MultilinkPage = () => {
               </Select>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-              <span className="text-slate-900">Lien actif</span>
+            <div className="flex items-center justify-between p-3 bg-card rounded-lg">
+              <span className="text-foreground">Lien actif</span>
               <Switch
                 checked={linkForm.is_active}
                 onCheckedChange={(checked) => setLinkForm({ ...linkForm, is_active: checked })}
-                className="data-[state=checked]:bg-green-500"
+                className="data-[state=checked]:bg-success"
               />
             </div>
           </div>
 
           <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setLinkDialogOpen(false)} className="border-slate-200 text-slate-900">
+            <Button variant="outline" onClick={() => setLinkDialogOpen(false)} className="border-border text-foreground">
               Annuler
             </Button>
-            <Button onClick={saveLink} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={saveLink} disabled={saving} className="bg-primary hover:bg-primary/90">
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {editingLink ? 'Mettre à jour' : 'Ajouter'}
             </Button>
@@ -2457,20 +2585,20 @@ const MultilinkPage = () => {
 
       {/* Social Dialog */}
       <Dialog open={socialDialogOpen} onOpenChange={setSocialDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-md max-h-[90vh] overflow-y-auto [&>button]:hidden">
+        <DialogContent className="bg-secondary border-border text-foreground max-w-md max-h-[90vh] overflow-y-auto [&>button]:hidden">
           <div 
             className="flex items-center justify-between mb-4"
             style={{ paddingTop: 'max(0px, env(safe-area-inset-top, 0px))' }}
           >
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <Share2 className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Share2 className="w-5 h-5 text-primary" />
               {editingSocial ? 'Modifier' : 'Ajouter un réseau social'}
             </DialogTitle>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSocialDialogOpen(false)}
-              className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-8 w-8"
+              className="text-muted-foreground hover:text-foreground hover:bg-secondary h-8 w-8"
             >
               <X className="w-5 h-5" />
             </Button>
@@ -2478,7 +2606,7 @@ const MultilinkPage = () => {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-slate-900">Réseau social</Label>
+              <Label className="text-foreground">Réseau social</Label>
               <div className="grid grid-cols-5 gap-2">
                 {ICON_OPTIONS.filter(i => ['instagram', 'facebook', 'twitter', 'youtube', 'linkedin', 'tiktok', 'whatsapp', 'telegram', 'email', 'website'].includes(i.value)).map(option => {
                   const Icon = option.icon;
@@ -2488,15 +2616,15 @@ const MultilinkPage = () => {
                       onClick={() => setSocialForm({ ...socialForm, icon: option.value })}
                       className={`p-3 rounded-xl border-2 transition-all ${
                         socialForm.icon === option.value 
-                          ? 'border-indigo-500 bg-indigo-500/20' 
-                          : 'border-slate-200 hover:border-white/30'
+                          ? 'border-primary bg-brand-soft' 
+                          : 'border-border hover:border-foreground/30'
                       }`}
                     >
                       <div 
                         className="w-8 h-8 mx-auto rounded-full flex items-center justify-center"
                         style={{ background: option.color }}
                       >
-                        <Icon className="w-4 h-4 text-slate-900" />
+                        <Icon className="w-4 h-4 text-foreground" />
                       </div>
                     </button>
                   );
@@ -2505,38 +2633,38 @@ const MultilinkPage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-900">URL du profil *</Label>
+              <Label className="text-foreground">URL du profil *</Label>
               <Input
                 value={socialForm.url}
                 onChange={(e) => setSocialForm({ ...socialForm, url: e.target.value })}
                 placeholder="https://instagram.com/monprofil"
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
               />
             </div>
 
             {/* Custom Icon Image - especially useful for website */}
             <div className="space-y-2">
-              <Label className="text-slate-900">Icône personnalisée (optionnel)</Label>
-              <p className="text-slate-400 text-xs">Remplace l'icône par défaut par votre propre image</p>
+              <Label className="text-foreground">Icône personnalisée (optionnel)</Label>
+              <p className="text-muted-foreground text-xs">Remplace l'icône par défaut par votre propre image</p>
               <div className="flex items-center gap-4">
                 {socialForm.custom_icon ? (
                   <div className="relative">
                     <img 
                       src={socialForm.custom_icon} 
                       alt="" 
-                      className="w-16 h-16 rounded-full object-cover border-2 border-slate-200" 
+                      className="w-16 h-16 rounded-full object-cover border-2 border-border" 
                     />
                     <button
                       type="button"
                       onClick={() => setSocialForm({ ...socialForm, custom_icon: '' })}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600"
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-danger rounded-full flex items-center justify-center hover:bg-red-600"
                     >
-                      <X className="w-3 h-3 text-slate-900" />
+                      <X className="w-3 h-3 text-foreground" />
                     </button>
                   </div>
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-slate-100 border border-dashed border-slate-200 flex items-center justify-center">
-                    <ImagePlus className="w-6 h-6 text-slate-400" />
+                  <div className="w-16 h-16 rounded-full bg-secondary border border-dashed border-border flex items-center justify-center">
+                    <ImagePlus className="w-6 h-6 text-muted-foreground" />
                   </div>
                 )}
                 <label className="cursor-pointer">
@@ -2560,28 +2688,28 @@ const MultilinkPage = () => {
                     }} 
                     className="hidden" 
                   />
-                  <div className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white text-sm cursor-pointer">
+                  <div className="px-4 py-2 bg-primary hover:bg-primary/90 rounded-lg text-white text-sm cursor-pointer">
                     Uploader une image
                   </div>
                 </label>
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-              <span className="text-slate-900">Actif</span>
+            <div className="flex items-center justify-between p-3 bg-card rounded-lg">
+              <span className="text-foreground">Actif</span>
               <Switch
                 checked={socialForm.is_active}
                 onCheckedChange={(checked) => setSocialForm({ ...socialForm, is_active: checked })}
-                className="data-[state=checked]:bg-green-500"
+                className="data-[state=checked]:bg-success"
               />
             </div>
           </div>
 
           <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setSocialDialogOpen(false)} className="border-slate-200 text-slate-900">
+            <Button variant="outline" onClick={() => setSocialDialogOpen(false)} className="border-border text-foreground">
               Annuler
             </Button>
-            <Button onClick={saveSocial} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={saveSocial} disabled={saving} className="bg-primary hover:bg-primary/90">
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {editingSocial ? 'Mettre à jour' : 'Ajouter'}
             </Button>
@@ -2591,20 +2719,20 @@ const MultilinkPage = () => {
 
       {/* Section Dialog */}
       <Dialog open={sectionDialogOpen} onOpenChange={setSectionDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-lg max-h-[90vh] overflow-y-auto [&>button]:hidden">
+        <DialogContent className="bg-secondary border-border text-foreground max-w-lg max-h-[90vh] overflow-y-auto [&>button]:hidden">
           <div 
             className="flex items-center justify-between mb-4"
             style={{ paddingTop: 'max(0px, env(safe-area-inset-top, 0px))' }}
           >
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <LayoutGrid className="w-5 h-5 text-purple-400" />
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <LayoutGrid className="w-5 h-5 text-primary" />
               {editingSection ? 'Modifier la section' : 'Ajouter une section'}
             </DialogTitle>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSectionDialogOpen(false)}
-              className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-8 w-8"
+              className="text-muted-foreground hover:text-foreground hover:bg-secondary h-8 w-8"
             >
               <X className="w-5 h-5" />
             </Button>
@@ -2613,11 +2741,11 @@ const MultilinkPage = () => {
           <div className="space-y-4">
             {/* Block Type Selection - zaap.bio style with categories */}
             <div className="space-y-3">
-              <Label className="text-slate-900">Choisir un type de bloc</Label>
+              <Label className="text-foreground">Choisir un type de bloc</Label>
               
               {/* Category: Basics */}
               <div>
-                <p className="text-slate-500 text-xs uppercase tracking-wider mb-2">Basiques</p>
+                <p className="text-muted-foreground text-xs uppercase tracking-wider mb-2">Basiques</p>
                 <div className="grid grid-cols-2 gap-2">
                   {BLOCK_CATEGORIES.basics.map(type => {
                     const Icon = type.icon;
@@ -2627,16 +2755,16 @@ const MultilinkPage = () => {
                         onClick={() => setSectionForm({ ...sectionForm, section_type: type.id })}
                         className={`p-3 rounded-xl border transition-all text-left flex items-start gap-3 ${
                           sectionForm.section_type === type.id 
-                            ? 'border-purple-500 bg-purple-500/20' 
-                            : 'border-slate-200 hover:border-white/30 hover:bg-slate-50'
+                            ? 'border-primary bg-brand-soft' 
+                            : 'border-border hover:border-foreground/30 hover:bg-secondary'
                         }`}
                       >
-                        <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                          <Icon className="w-5 h-5 text-purple-400" />
+                        <div className="w-10 h-10 rounded-lg bg-brand-soft flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-5 h-5 text-primary" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-slate-900 text-sm font-medium">{type.name}</p>
-                          <p className="text-slate-500 text-xs line-clamp-1">{type.description}</p>
+                          <p className="text-foreground text-sm font-medium">{type.name}</p>
+                          <p className="text-muted-foreground text-xs line-clamp-1">{type.description}</p>
                         </div>
                       </button>
                     );
@@ -2646,7 +2774,7 @@ const MultilinkPage = () => {
               
               {/* Category: Content */}
               <div>
-                <p className="text-slate-500 text-xs uppercase tracking-wider mb-2">Contenu</p>
+                <p className="text-muted-foreground text-xs uppercase tracking-wider mb-2">Contenu</p>
                 <div className="grid grid-cols-2 gap-2">
                   {BLOCK_CATEGORIES.content.map(type => {
                     const Icon = type.icon;
@@ -2656,16 +2784,16 @@ const MultilinkPage = () => {
                         onClick={() => setSectionForm({ ...sectionForm, section_type: type.id })}
                         className={`p-3 rounded-xl border transition-all text-left flex items-start gap-3 ${
                           sectionForm.section_type === type.id 
-                            ? 'border-blue-500 bg-blue-500/20' 
-                            : 'border-slate-200 hover:border-white/30 hover:bg-slate-50'
+                            ? 'border-blue-500 bg-info-soft' 
+                            : 'border-border hover:border-foreground/30 hover:bg-secondary'
                         }`}
                       >
-                        <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                          <Icon className="w-5 h-5 text-blue-400" />
+                        <div className="w-10 h-10 rounded-lg bg-info-soft flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-5 h-5 text-info" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-slate-900 text-sm font-medium">{type.name}</p>
-                          <p className="text-slate-500 text-xs line-clamp-1">{type.description}</p>
+                          <p className="text-foreground text-sm font-medium">{type.name}</p>
+                          <p className="text-muted-foreground text-xs line-clamp-1">{type.description}</p>
                         </div>
                       </button>
                     );
@@ -2676,24 +2804,24 @@ const MultilinkPage = () => {
 
             {/* Section Title */}
             <div className="space-y-2">
-              <Label className="text-slate-900">Titre (optionnel)</Label>
+              <Label className="text-foreground">Titre (optionnel)</Label>
               <Input
                 value={sectionForm.title}
                 onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })}
                 placeholder="Titre de la section"
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
               />
             </div>
 
             {/* Content for Text/Header sections */}
             {(sectionForm.section_type === 'text' || sectionForm.section_type === 'header') && (
               <div className="space-y-2">
-                <Label className="text-slate-900">Contenu *</Label>
+                <Label className="text-foreground">Contenu *</Label>
                 <Textarea
                   value={sectionForm.content}
                   onChange={(e) => setSectionForm({ ...sectionForm, content: e.target.value })}
                   placeholder="Votre texte ici..."
-                  className="bg-white border-slate-200 text-slate-900 min-h-[100px]"
+                  className="bg-card border-border text-foreground min-h-[100px]"
                 />
               </div>
             )}
@@ -2703,26 +2831,26 @@ const MultilinkPage = () => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-slate-900">Éléments du carousel</Label>
-                    <p className="text-slate-400 text-xs mt-0.5">📐 Images: 400×500px (ratio 4:5)</p>
+                    <Label className="text-foreground">Éléments du carousel</Label>
+                    <p className="text-muted-foreground text-xs mt-0.5">📐 Images: 400×500px (ratio 4:5)</p>
                   </div>
-                  <Button size="sm" onClick={addCarouselItem} className="bg-purple-600 hover:bg-purple-700">
+                  <Button size="sm" onClick={addCarouselItem} className="bg-primary hover:bg-primary/90">
                     <Plus className="w-4 h-4 mr-1" /> Ajouter
                   </Button>
                 </div>
                 
                 {sectionForm.items.length === 0 ? (
-                  <div className="text-center py-6 text-slate-400 bg-white rounded-xl">
+                  <div className="text-center py-6 text-muted-foreground bg-card rounded-xl">
                     <p className="text-sm">Aucun élément</p>
                     <p className="text-xs mt-1">Ajoutez des cartes comme sur zaap.bio</p>
                   </div>
                 ) : (
                   <div className="space-y-3 max-h-60 overflow-y-auto">
                     {sectionForm.items.map((item, index) => (
-                      <div key={index} className="p-3 bg-white rounded-xl border border-slate-200 space-y-2">
+                      <div key={index} className="p-3 bg-card rounded-xl border border-border space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-500 text-xs">Élément {index + 1}</span>
-                          <Button size="sm" variant="ghost" onClick={() => removeCarouselItem(index)} className="text-red-400 hover:text-red-300 h-6 w-6 p-0">
+                          <span className="text-muted-foreground text-xs">Élément {index + 1}</span>
+                          <Button size="sm" variant="ghost" onClick={() => removeCarouselItem(index)} className="text-danger hover:text-red-300 h-6 w-6 p-0">
                             <X className="w-4 h-4" />
                           </Button>
                         </div>
@@ -2730,25 +2858,25 @@ const MultilinkPage = () => {
                           value={item.image}
                           onChange={(e) => updateCarouselItem(index, 'image', e.target.value)}
                           placeholder="URL de l'image (400×500px recommandé)"
-                          className="bg-white border-slate-200 text-slate-900 text-sm"
+                          className="bg-card border-border text-foreground text-sm"
                         />
                         <Input
                           value={item.title}
                           onChange={(e) => updateCarouselItem(index, 'title', e.target.value)}
                           placeholder="Titre"
-                          className="bg-white border-slate-200 text-slate-900 text-sm"
+                          className="bg-card border-border text-foreground text-sm"
                         />
                         <Input
                           value={item.subtitle}
                           onChange={(e) => updateCarouselItem(index, 'subtitle', e.target.value)}
                           placeholder="Sous-titre (optionnel)"
-                          className="bg-white border-slate-200 text-slate-900 text-sm"
+                          className="bg-card border-border text-foreground text-sm"
                         />
                         <Input
                           value={item.url}
                           onChange={(e) => updateCarouselItem(index, 'url', e.target.value)}
                           placeholder="URL au clic (optionnel)"
-                          className="bg-white border-slate-200 text-slate-900 text-sm"
+                          className="bg-card border-border text-foreground text-sm"
                         />
                       </div>
                     ))}
@@ -2760,33 +2888,33 @@ const MultilinkPage = () => {
             {/* Image URLs for Image section */}
             {sectionForm.section_type === 'image' && (
               <div className="space-y-2">
-                <Label className="text-slate-900">URLs des images (une par ligne)</Label>
-                <p className="text-slate-400 text-xs">📐 Format carré recommandé: 600×600px</p>
+                <Label className="text-foreground">URLs des images (une par ligne)</Label>
+                <p className="text-muted-foreground text-xs">📐 Format carré recommandé: 600×600px</p>
                 <Textarea
                   value={sectionForm.images.join('\n')}
                   onChange={(e) => setSectionForm({ ...sectionForm, images: e.target.value.split('\n').filter(url => url.trim()) })}
                   placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
-                  className="bg-white border-slate-200 text-slate-900 min-h-[100px]"
+                  className="bg-card border-border text-foreground min-h-[100px]"
                 />
               </div>
             )}
 
             {/* Active toggle */}
-            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-              <span className="text-slate-900">Section active</span>
+            <div className="flex items-center justify-between p-3 bg-card rounded-lg">
+              <span className="text-foreground">Section active</span>
               <Switch
                 checked={sectionForm.is_active}
                 onCheckedChange={(checked) => setSectionForm({ ...sectionForm, is_active: checked })}
-                className="data-[state=checked]:bg-green-500"
+                className="data-[state=checked]:bg-success"
               />
             </div>
           </div>
 
           <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setSectionDialogOpen(false)} className="border-slate-200 text-slate-900">
+            <Button variant="outline" onClick={() => setSectionDialogOpen(false)} className="border-border text-foreground">
               Annuler
             </Button>
-            <Button onClick={saveSection} disabled={saving} className="bg-purple-600 hover:bg-purple-700">
+            <Button onClick={saveSection} disabled={saving} className="bg-primary hover:bg-primary/90">
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {editingSection ? 'Mettre à jour' : 'Ajouter'}
             </Button>
@@ -2796,31 +2924,31 @@ const MultilinkPage = () => {
 
       {/* UNIFIED BLOCK DIALOG - Zaap.bio style avec WYSIWYG */}
       <Dialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-2xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
+        <DialogContent className="bg-secondary border-border text-foreground max-w-2xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
           <div 
             className="flex items-center justify-between mb-4"
             style={{ paddingTop: 'max(0px, env(safe-area-inset-top, 0px))' }}
           >
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              {blockForm.block_type === 'link_image' && <><Image className="w-5 h-5 text-indigo-600" /> Edit Link &amp; Image</>}
-              {blockForm.block_type === 'link' && <><Link className="w-5 h-5 text-indigo-600" /> Edit Link</>}
-              {blockForm.block_type === 'text' && <><Type className="w-5 h-5 text-indigo-600" /> Update Text Block</>}
-              {blockForm.block_type === 'button' && <><ExternalLink className="w-5 h-5 text-indigo-600" /> Edit Button</>}
-              {blockForm.block_type === 'image' && <><Image className="w-5 h-5 text-pink-400" /> Image Block</>}
-              {blockForm.block_type === 'video' && <><Video className="w-5 h-5 text-red-400" /> Video Block</>}
-              {blockForm.block_type === 'youtube' && <><Youtube className="w-5 h-5 text-red-400" /> YouTube Embed</>}
-              {blockForm.block_type === 'carousel' && <><LayoutGrid className="w-5 h-5 text-purple-400" /> Carousel</>}
-              {blockForm.block_type === 'header' && <><Heading className="w-5 h-5 text-blue-400" /> Header</>}
-              {blockForm.block_type === 'divider' && <><Minus className="w-5 h-5 text-gray-400" /> Divider</>}
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              {blockForm.block_type === 'link_image' && <><Image className="w-5 h-5 text-primary" /> {editingBlock ? 'Modifier' : 'Nouveau'} : Lien + image</>}
+              {blockForm.block_type === 'link' && <><Link className="w-5 h-5 text-primary" /> {editingBlock ? 'Modifier' : 'Nouveau'} : Lien</>}
+              {blockForm.block_type === 'text' && <><Type className="w-5 h-5 text-primary" /> {editingBlock ? 'Modifier' : 'Nouveau'} : Bloc de texte</>}
+              {blockForm.block_type === 'button' && <><ExternalLink className="w-5 h-5 text-primary" /> {editingBlock ? 'Modifier' : 'Nouveau'} : Bouton</>}
+              {blockForm.block_type === 'image' && <><Image className="w-5 h-5 text-pink-400" /> {editingBlock ? 'Modifier' : 'Nouveau'} : Image</>}
+              {blockForm.block_type === 'video' && <><Video className="w-5 h-5 text-danger" /> {editingBlock ? 'Modifier' : 'Nouveau'} : Vidéo</>}
+              {blockForm.block_type === 'youtube' && <><Youtube className="w-5 h-5 text-danger" /> {editingBlock ? 'Modifier' : 'Nouveau'} : Vidéo YouTube</>}
+              {blockForm.block_type === 'carousel' && <><LayoutGrid className="w-5 h-5 text-primary" /> {editingBlock ? 'Modifier' : 'Nouveau'} : Carrousel</>}
+              {blockForm.block_type === 'header' && <><Heading className="w-5 h-5 text-info" /> {editingBlock ? 'Modifier' : 'Nouveau'} : Titre</>}
+              {blockForm.block_type === 'divider' && <><Minus className="w-5 h-5 text-muted-foreground" /> {editingBlock ? 'Modifier' : 'Nouveau'} : Séparateur</>}
               {!editingBlock && !['link_image','link','text','button','image','video','youtube','carousel','header','divider'].includes(blockForm.block_type) && <>
-                <Sparkles className="w-5 h-5 text-purple-400" /> Ajouter un bloc
+                <Sparkles className="w-5 h-5 text-primary" /> Ajouter un bloc
               </>}
             </DialogTitle>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setBlockDialogOpen(false)}
-              className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-8 w-8"
+              className="text-muted-foreground hover:text-foreground hover:bg-secondary h-8 w-8"
             >
               <X className="w-5 h-5" />
             </Button>
@@ -2830,11 +2958,11 @@ const MultilinkPage = () => {
             {/* Block Type Selection - Only show when adding new */}
             {!editingBlock && (
               <div className="space-y-3">
-                <Label className="text-slate-900">Type de bloc</Label>
+                <Label className="text-foreground">Type de bloc</Label>
                 
                 {/* Links */}
                 <div>
-                  <p className="text-slate-500 text-xs uppercase tracking-wider mb-2">Liens</p>
+                  <p className="text-muted-foreground text-xs uppercase tracking-wider mb-2">Liens</p>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { id: 'link', name: 'Lien simple', icon: Link },
@@ -2846,14 +2974,14 @@ const MultilinkPage = () => {
                         onClick={() => setBlockForm({ ...blockForm, block_type: type.id })}
                         className={`p-2.5 rounded-xl border transition-all text-left flex items-center gap-2 ${
                           blockForm.block_type === type.id 
-                            ? 'border-indigo-500 bg-indigo-500/20' 
-                            : 'border-slate-200 hover:border-white/30'
+                            ? 'border-primary bg-brand-soft' 
+                            : 'border-border hover:border-foreground/30'
                         }`}
                       >
-                        <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
-                          <type.icon className="w-4 h-4 text-indigo-600" />
+                        <div className="w-8 h-8 rounded-lg bg-brand-soft flex items-center justify-center flex-shrink-0">
+                          <type.icon className="w-4 h-4 text-primary" />
                         </div>
-                        <span className="text-slate-900 text-sm">{type.name}</span>
+                        <span className="text-foreground text-sm">{type.name}</span>
                       </button>
                     ))}
                   </div>
@@ -2861,27 +2989,27 @@ const MultilinkPage = () => {
 
                 {/* Media */}
                 <div>
-                  <p className="text-slate-500 text-xs uppercase tracking-wider mb-2">Médias</p>
+                  <p className="text-muted-foreground text-xs uppercase tracking-wider mb-2">Médias</p>
                   <div className="grid grid-cols-4 gap-2">
                     {[
                       { id: 'image', name: 'Image', icon: Image, bgColor: 'bg-pink-500/20', color: 'text-pink-400' },
-                      { id: 'video', name: 'Vidéo', icon: Video, bgColor: 'bg-red-500/20', color: 'text-red-400' },
-                      { id: 'youtube', name: 'YouTube', icon: Youtube, bgColor: 'bg-red-500/20', color: 'text-red-400' },
-                      { id: 'carousel', name: 'Carousel', icon: LayoutGrid, bgColor: 'bg-purple-500/20', color: 'text-purple-400' },
+                      { id: 'video', name: 'Vidéo', icon: Video, bgColor: 'bg-danger-soft', color: 'text-danger' },
+                      { id: 'youtube', name: 'YouTube', icon: Youtube, bgColor: 'bg-danger-soft', color: 'text-danger' },
+                      { id: 'carousel', name: 'Carrousel', icon: LayoutGrid, bgColor: 'bg-brand-soft', color: 'text-primary' },
                     ].map(type => (
                       <button
                         key={type.id}
                         onClick={() => setBlockForm({ ...blockForm, block_type: type.id })}
                         className={`p-2.5 rounded-xl border transition-all flex flex-col items-center gap-1.5 ${
                           blockForm.block_type === type.id 
-                            ? 'border-purple-500 bg-purple-500/20' 
-                            : 'border-slate-200 hover:border-white/30'
+                            ? 'border-primary bg-brand-soft' 
+                            : 'border-border hover:border-foreground/30'
                         }`}
                       >
                         <div className={`w-10 h-10 rounded-lg ${type.bgColor} flex items-center justify-center`}>
                           <type.icon className={`w-5 h-5 ${type.color}`} />
                         </div>
-                        <span className="text-slate-900 text-xs">{type.name}</span>
+                        <span className="text-foreground text-xs">{type.name}</span>
                       </button>
                     ))}
                   </div>
@@ -2889,26 +3017,26 @@ const MultilinkPage = () => {
 
                 {/* Content */}
                 <div>
-                  <p className="text-slate-500 text-xs uppercase tracking-wider mb-2">Contenu</p>
+                  <p className="text-muted-foreground text-xs uppercase tracking-wider mb-2">Contenu</p>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { id: 'text', name: 'Texte', icon: FileText, bgColor: 'bg-green-500/20', color: 'text-green-400' },
-                      { id: 'header', name: 'Titre', icon: Heading, bgColor: 'bg-blue-500/20', color: 'text-blue-400' },
-                      { id: 'divider', name: 'Séparateur', icon: Minus, bgColor: 'bg-gray-500/20', color: 'text-gray-400' },
+                      { id: 'text', name: 'Texte', icon: FileText, bgColor: 'bg-success-soft', color: 'text-success' },
+                      { id: 'header', name: 'Titre', icon: Heading, bgColor: 'bg-info-soft', color: 'text-info' },
+                      { id: 'divider', name: 'Séparateur', icon: Minus, bgColor: 'bg-secondary', color: 'text-muted-foreground' },
                     ].map(type => (
                       <button
                         key={type.id}
                         onClick={() => setBlockForm({ ...blockForm, block_type: type.id })}
                         className={`p-2.5 rounded-xl border transition-all text-left flex items-center gap-2 ${
                           blockForm.block_type === type.id 
-                            ? 'border-green-500 bg-green-500/20' 
-                            : 'border-slate-200 hover:border-white/30'
+                            ? 'border-success bg-success-soft' 
+                            : 'border-border hover:border-foreground/30'
                         }`}
                       >
                         <div className={`w-8 h-8 rounded-lg ${type.bgColor} flex items-center justify-center flex-shrink-0`}>
                           <type.icon className={`w-4 h-4 ${type.color}`} />
                         </div>
-                        <span className="text-slate-900 text-sm">{type.name}</span>
+                        <span className="text-foreground text-sm">{type.name}</span>
                       </button>
                     ))}
                   </div>
@@ -2919,51 +3047,51 @@ const MultilinkPage = () => {
             {/* ============ LINK + IMAGE FORM (zaap.bio style) ============ */}
             {blockForm.block_type === 'link_image' && (
               <div className="space-y-4">
-                <p className="text-slate-500 text-sm">Edit the details for this link.</p>
+                <p className="text-muted-foreground text-sm">Modifie le lien et son image.</p>
                 
                 {/* Heading (Label) */}
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Heading *</Label>
+                  <Label className="text-foreground">Heading *</Label>
                   <Input
                     value={blockForm.label}
                     onChange={(e) => setBlockForm({ ...blockForm, label: e.target.value })}
                     placeholder="Site Web"
-                    className="bg-white border-slate-200 text-slate-900"
+                    className="bg-card border-border text-foreground"
                   />
                 </div>
 
                 {/* Description */}
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Description</Label>
+                  <Label className="text-foreground">Description</Label>
                   <Textarea
                     value={blockForm.description}
                     onChange={(e) => setBlockForm({ ...blockForm, description: e.target.value })}
                     placeholder="Démarquez-vous avec Alpha Agency, votre agence de marketing digital..."
-                    className="bg-white border-slate-200 text-slate-900 min-h-[80px]"
+                    className="bg-card border-border text-foreground min-h-[80px]"
                   />
                 </div>
 
                 {/* Link URL */}
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Link URL *</Label>
+                  <Label className="text-foreground">URL du lien *</Label>
                   <Input
                     value={blockForm.url}
                     onChange={(e) => setBlockForm({ ...blockForm, url: e.target.value })}
                     placeholder="https://alphagency.fr/"
-                    className="bg-white border-slate-200 text-slate-900"
+                    className="bg-card border-border text-foreground"
                   />
                 </div>
 
                 {/* Open link in */}
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Open link in:</Label>
+                  <Label className="text-foreground">Open link in:</Label>
                   <div className="flex gap-2">
                     <Button
                       type="button"
                       variant={blockForm.settings?.open_in !== 'new_tab' ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setBlockForm({ ...blockForm, settings: { ...blockForm.settings, open_in: 'same_tab' } })}
-                      className={blockForm.settings?.open_in !== 'new_tab' ? 'bg-indigo-600' : 'border-slate-200 text-slate-600'}
+                      className={blockForm.settings?.open_in !== 'new_tab' ? 'bg-primary' : 'border-border text-muted-foreground'}
                     >
                       Same Tab
                     </Button>
@@ -2972,7 +3100,7 @@ const MultilinkPage = () => {
                       variant={blockForm.settings?.open_in === 'new_tab' ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setBlockForm({ ...blockForm, settings: { ...blockForm.settings, open_in: 'new_tab' } })}
-                      className={blockForm.settings?.open_in === 'new_tab' ? 'bg-indigo-600' : 'border-slate-200 text-slate-600'}
+                      className={blockForm.settings?.open_in === 'new_tab' ? 'bg-primary' : 'border-border text-muted-foreground'}
                     >
                       New Tab
                     </Button>
@@ -2981,28 +3109,28 @@ const MultilinkPage = () => {
 
                 {/* Button Text */}
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Button Text *</Label>
+                  <Label className="text-foreground">Texte du bouton *</Label>
                   <Input
                     value={blockForm.settings?.button_text || 'En Savoir +'}
                     onChange={(e) => setBlockForm({ ...blockForm, settings: { ...blockForm.settings, button_text: e.target.value } })}
                     placeholder="En Savoir +"
-                    className="bg-white border-slate-200 text-slate-900"
+                    className="bg-card border-border text-foreground"
                   />
                 </div>
 
                 {/* Image Upload - Only upload, no URL option */}
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Image</Label>
-                  <div className="bg-white rounded-xl p-4 border border-slate-200">
+                  <Label className="text-foreground">Image</Label>
+                  <div className="bg-card rounded-xl p-4 border border-border">
                     {blockForm.thumbnail ? (
                       <div className="relative">
-                        <img src={blockForm.thumbnail} alt="" className="w-full h-48 rounded-xl object-contain bg-slate-100" />
+                        <img src={blockForm.thumbnail} alt="" className="w-full h-48 rounded-xl object-contain bg-secondary" />
                         <button
                           type="button"
                           onClick={() => setBlockForm({ ...blockForm, thumbnail: '' })}
-                          className="absolute top-2 right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600"
+                          className="absolute top-2 right-2 w-8 h-8 bg-danger rounded-full flex items-center justify-center hover:bg-red-600"
                         >
-                          <X className="w-4 h-4 text-slate-900" />
+                          <X className="w-4 h-4 text-foreground" />
                         </button>
                       </div>
                     ) : (
@@ -3030,16 +3158,16 @@ const MultilinkPage = () => {
                           }} 
                           className="hidden" 
                         />
-                        <div className="flex flex-col items-center py-8 border-2 border-dashed border-slate-200 rounded-xl hover:border-indigo-500/50 transition-colors">
+                        <div className="flex flex-col items-center py-8 border-2 border-dashed border-border rounded-xl hover:border-primary/40 transition-colors">
                           {uploadingBlockMedia ? (
-                            <Loader2 className="w-12 h-12 text-indigo-600 animate-spin" />
+                            <Loader2 className="w-12 h-12 text-primary animate-spin" />
                           ) : (
                             <>
-                              <div className="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-3">
-                                <ImagePlus className="w-8 h-8 text-indigo-600" />
+                              <div className="w-16 h-16 rounded-2xl bg-brand-soft flex items-center justify-center mb-3">
+                                <ImagePlus className="w-8 h-8 text-primary" />
                               </div>
-                              <p className="text-slate-900 font-medium">Cliquer pour uploader</p>
-                              <p className="text-slate-500 text-xs mt-1">JPG, PNG, WebP (max 10MB)</p>
+                              <p className="text-foreground font-medium">Cliquer pour uploader</p>
+                              <p className="text-muted-foreground text-xs mt-1">JPG, PNG, WebP (max 10MB)</p>
                             </>
                           )}
                         </div>
@@ -3054,46 +3182,46 @@ const MultilinkPage = () => {
             {blockForm.block_type === 'link' && (
               <>
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Label *</Label>
+                  <Label className="text-foreground">Label *</Label>
                   <Input
                     value={blockForm.label}
                     onChange={(e) => setBlockForm({ ...blockForm, label: e.target.value })}
                     placeholder="Mon lien"
-                    className="bg-white border-slate-200 text-slate-900"
+                    className="bg-card border-border text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-900">URL *</Label>
+                  <Label className="text-foreground">URL *</Label>
                   <Input
                     value={blockForm.url}
                     onChange={(e) => setBlockForm({ ...blockForm, url: e.target.value })}
                     placeholder="https://..."
-                    className="bg-white border-slate-200 text-slate-900"
+                    className="bg-card border-border text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Description (optionnel)</Label>
+                  <Label className="text-foreground">Description (optionnel)</Label>
                   <Input
                     value={blockForm.description}
                     onChange={(e) => setBlockForm({ ...blockForm, description: e.target.value })}
                     placeholder="Courte description..."
-                    className="bg-white border-slate-200 text-slate-900"
+                    className="bg-card border-border text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Icône</Label>
+                  <Label className="text-foreground">Icône</Label>
                   <Select value={blockForm.icon || 'link'} onValueChange={(value) => setBlockForm({ ...blockForm, icon: value })}>
-                    <SelectTrigger className="bg-white border-slate-200 text-slate-900">
+                    <SelectTrigger className="bg-card border-border text-foreground">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-50 border-slate-200 max-h-60">
+                    <SelectContent className="bg-secondary border-border max-h-60">
                       {ICON_OPTIONS.map(option => {
                         const Icon = option.icon;
                         return (
-                          <SelectItem key={option.value} value={option.value} className="text-slate-900">
+                          <SelectItem key={option.value} value={option.value} className="text-foreground">
                             <div className="flex items-center gap-2">
                               <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: option.color }}>
-                                <Icon className="w-3 h-3 text-slate-900" />
+                                <Icon className="w-3 h-3 text-foreground" />
                               </div>
                               <span>{option.label}</span>
                             </div>
@@ -3110,21 +3238,21 @@ const MultilinkPage = () => {
             {blockForm.block_type === 'button' && (
               <>
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Texte du bouton *</Label>
+                  <Label className="text-foreground">Texte du bouton *</Label>
                   <Input
                     value={blockForm.label}
                     onChange={(e) => setBlockForm({ ...blockForm, label: e.target.value })}
                     placeholder="Découvrir"
-                    className="bg-white border-slate-200 text-slate-900"
+                    className="bg-card border-border text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-900">URL *</Label>
+                  <Label className="text-foreground">URL *</Label>
                   <Input
                     value={blockForm.url}
                     onChange={(e) => setBlockForm({ ...blockForm, url: e.target.value })}
                     placeholder="https://..."
-                    className="bg-white border-slate-200 text-slate-900"
+                    className="bg-card border-border text-foreground"
                   />
                 </div>
               </>
@@ -3133,7 +3261,7 @@ const MultilinkPage = () => {
             {/* ============ TEXT BLOCK WITH WYSIWYG ============ */}
             {blockForm.block_type === 'text' && (
               <div className="space-y-2" data-color-mode="dark">
-                <p className="text-slate-500 text-sm mb-4">Share text, notes, or information on your page.</p>
+                <p className="text-muted-foreground text-sm mb-4">Share text, notes, or information on your page.</p>
                 <MDEditor
                   value={blockForm.content || ''}
                   onChange={(value) => setBlockForm({ ...blockForm, content: value || '' })}
@@ -3147,19 +3275,19 @@ const MultilinkPage = () => {
                     borderRadius: '8px',
                   }}
                 />
-                <p className="text-slate-400 text-xs mt-2">Utilisez Markdown pour le formatage: **gras**, *italique*, # titre, - liste</p>
+                <p className="text-muted-foreground text-xs mt-2">Utilisez Markdown pour le formatage: **gras**, *italique*, # titre, - liste</p>
               </div>
             )}
 
             {/* ============ HEADER BLOCK ============ */}
             {blockForm.block_type === 'header' && (
               <div className="space-y-2">
-                <Label className="text-slate-900">Titre *</Label>
+                <Label className="text-foreground">Titre *</Label>
                 <Input
                   value={blockForm.content}
                   onChange={(e) => setBlockForm({ ...blockForm, content: e.target.value })}
                   placeholder="Votre titre..."
-                  className="bg-white border-slate-200 text-slate-900 text-xl font-bold"
+                  className="bg-card border-border text-foreground text-xl font-bold"
                 />
               </div>
             )}
@@ -3167,25 +3295,25 @@ const MultilinkPage = () => {
             {/* ============ IMAGE/VIDEO UPLOAD ============ */}
             {['image', 'video'].includes(blockForm.block_type) && (
               <div className="space-y-2">
-                <Label className="text-slate-900">
+                <Label className="text-foreground">
                   {blockForm.block_type === 'image' ? 'Image' : 'Vidéo'} *
                 </Label>
-                <p className="text-slate-400 text-xs">
+                <p className="text-muted-foreground text-xs">
                   {blockForm.block_type === 'image' ? '📐 Formats: JPG, PNG, WebP (max 10MB)' : '📹 Formats: MP4, MOV, WebM (max 100MB)'}
                 </p>
-                <div className="flex flex-col items-center gap-3 p-4 bg-white rounded-xl border border-dashed border-slate-200">
+                <div className="flex flex-col items-center gap-3 p-4 bg-card rounded-xl border border-dashed border-border">
                   {blockForm.media_url ? (
                     <div className="relative w-full">
                       {blockForm.media_type === 'image' || blockForm.block_type === 'image' ? (
-                        <img src={blockForm.media_url} alt="" className="w-full h-48 rounded-lg object-contain bg-slate-100" />
+                        <img src={blockForm.media_url} alt="" className="w-full h-48 rounded-lg object-contain bg-secondary" />
                       ) : (
-                        <video src={blockForm.media_url} className="w-full h-48 rounded-lg object-contain bg-slate-100" controls />
+                        <video src={blockForm.media_url} className="w-full h-48 rounded-lg object-contain bg-secondary" controls />
                       )}
                       <button
                         onClick={() => setBlockForm({ ...blockForm, media_url: '', media_type: '' })}
-                        className="absolute top-2 right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center"
+                        className="absolute top-2 right-2 w-8 h-8 bg-danger rounded-full flex items-center justify-center"
                       >
-                        <X className="w-4 h-4 text-slate-900" />
+                        <X className="w-4 h-4 text-foreground" />
                       </button>
                     </div>
                   ) : (
@@ -3196,15 +3324,15 @@ const MultilinkPage = () => {
                         onChange={(e) => handleBlockMediaUpload(e.target.files?.[0])} 
                         className="hidden" 
                       />
-                      <div className="flex flex-col items-center py-8 border-2 border-dashed border-slate-200 rounded-xl hover:border-indigo-500/50 transition-colors">
+                      <div className="flex flex-col items-center py-8 border-2 border-dashed border-border rounded-xl hover:border-primary/40 transition-colors">
                         {uploadingBlockMedia ? (
-                          <Loader2 className="w-12 h-12 text-indigo-600 animate-spin" />
+                          <Loader2 className="w-12 h-12 text-primary animate-spin" />
                         ) : (
                           <>
-                            <div className="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center mb-3">
-                              {blockForm.block_type === 'image' ? <Image className="w-8 h-8 text-indigo-600" /> : <Video className="w-8 h-8 text-indigo-600" />}
+                            <div className="w-16 h-16 rounded-2xl bg-brand-soft flex items-center justify-center mb-3">
+                              {blockForm.block_type === 'image' ? <Image className="w-8 h-8 text-primary" /> : <Video className="w-8 h-8 text-primary" />}
                             </div>
-                            <p className="text-slate-900 font-medium">Cliquer pour uploader</p>
+                            <p className="text-foreground font-medium">Cliquer pour uploader</p>
                           </>
                         )}
                       </div>
@@ -3215,38 +3343,38 @@ const MultilinkPage = () => {
                 {/* Aspect ratio & Rounded settings */}
                 <div className="grid grid-cols-2 gap-3 mt-3">
                   <div className="space-y-1.5">
-                    <Label className="text-slate-900 text-xs">Format</Label>
+                    <Label className="text-foreground text-xs">Format</Label>
                     <Select 
                       value={blockForm.settings?.aspect_ratio || 'auto'} 
                       onValueChange={(value) => setBlockForm({ ...blockForm, settings: { ...blockForm.settings, aspect_ratio: value } })}
                     >
-                      <SelectTrigger className="bg-white border-slate-200 text-slate-900 text-sm h-9">
+                      <SelectTrigger className="bg-card border-border text-foreground text-sm h-9">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-50 border-slate-200">
-                        <SelectItem value="auto" className="text-slate-900">Auto</SelectItem>
-                        <SelectItem value="1:1" className="text-slate-900">1:1 (Carré)</SelectItem>
-                        <SelectItem value="4:5" className="text-slate-900">4:5 (Portrait)</SelectItem>
-                        <SelectItem value="16:9" className="text-slate-900">16:9 (Paysage)</SelectItem>
-                        <SelectItem value="9:16" className="text-slate-900">9:16 (Story)</SelectItem>
+                      <SelectContent className="bg-secondary border-border">
+                        <SelectItem value="auto" className="text-foreground">Auto</SelectItem>
+                        <SelectItem value="1:1" className="text-foreground">1:1 (Carré)</SelectItem>
+                        <SelectItem value="4:5" className="text-foreground">4:5 (Portrait)</SelectItem>
+                        <SelectItem value="16:9" className="text-foreground">16:9 (Paysage)</SelectItem>
+                        <SelectItem value="9:16" className="text-foreground">9:16 (Story)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-slate-900 text-xs">Bords arrondis</Label>
+                    <Label className="text-foreground text-xs">Bords arrondis</Label>
                     <Select 
                       value={blockForm.settings?.rounded || 'lg'} 
                       onValueChange={(value) => setBlockForm({ ...blockForm, settings: { ...blockForm.settings, rounded: value } })}
                     >
-                      <SelectTrigger className="bg-white border-slate-200 text-slate-900 text-sm h-9">
+                      <SelectTrigger className="bg-card border-border text-foreground text-sm h-9">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-50 border-slate-200">
-                        <SelectItem value="none" className="text-slate-900">Aucun</SelectItem>
-                        <SelectItem value="sm" className="text-slate-900">Léger</SelectItem>
-                        <SelectItem value="md" className="text-slate-900">Moyen</SelectItem>
-                        <SelectItem value="lg" className="text-slate-900">Arrondi</SelectItem>
-                        <SelectItem value="full" className="text-slate-900">Cercle</SelectItem>
+                      <SelectContent className="bg-secondary border-border">
+                        <SelectItem value="none" className="text-foreground">Aucun</SelectItem>
+                        <SelectItem value="sm" className="text-foreground">Léger</SelectItem>
+                        <SelectItem value="md" className="text-foreground">Moyen</SelectItem>
+                        <SelectItem value="lg" className="text-foreground">Arrondi</SelectItem>
+                        <SelectItem value="full" className="text-foreground">Cercle</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -3257,14 +3385,14 @@ const MultilinkPage = () => {
             {/* ============ YOUTUBE URL ============ */}
             {blockForm.block_type === 'youtube' && (
               <div className="space-y-2">
-                <Label className="text-slate-900">URL YouTube *</Label>
+                <Label className="text-foreground">URL YouTube *</Label>
                 <Input
                   value={blockForm.youtube_url}
                   onChange={(e) => setBlockForm({ ...blockForm, youtube_url: e.target.value })}
                   placeholder="https://www.youtube.com/watch?v=..."
-                  className="bg-white border-slate-200 text-slate-900"
+                  className="bg-card border-border text-foreground"
                 />
-                <p className="text-slate-400 text-xs">Collez le lien d'une vidéo YouTube</p>
+                <p className="text-muted-foreground text-xs">Collez le lien d'une vidéo YouTube</p>
               </div>
             )}
 
@@ -3273,44 +3401,44 @@ const MultilinkPage = () => {
               <div className="space-y-4">
                 {/* Add Element Buttons */}
                 <div>
-                  <Label className="text-slate-900 mb-3 block">Ajouter un élément</Label>
+                  <Label className="text-foreground mb-3 block">Ajouter un élément</Label>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
                       onClick={() => addBlockCarouselItem('image')}
-                      className="p-3 rounded-xl border border-slate-200 hover:border-pink-500/50 hover:bg-pink-500/10 transition-all flex flex-col items-center gap-2"
+                      className="p-3 rounded-xl border border-border hover:border-pink-500/50 hover:bg-pink-500/10 transition-all flex flex-col items-center gap-2"
                     >
                       <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center">
                         <Image className="w-5 h-5 text-pink-400" />
                       </div>
-                      <span className="text-slate-900 text-xs">Image</span>
+                      <span className="text-foreground text-xs">Image</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => addBlockCarouselItem('video')}
-                      className="p-3 rounded-xl border border-slate-200 hover:border-red-500/50 hover:bg-red-500/10 transition-all flex flex-col items-center gap-2"
+                      className="p-3 rounded-xl border border-border hover:border-red-500/50 hover:bg-danger-soft transition-all flex flex-col items-center gap-2"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
-                        <Video className="w-5 h-5 text-red-400" />
+                      <div className="w-10 h-10 rounded-lg bg-danger-soft flex items-center justify-center">
+                        <Video className="w-5 h-5 text-danger" />
                       </div>
-                      <span className="text-slate-900 text-xs">Vidéo</span>
+                      <span className="text-foreground text-xs">Vidéo</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => addBlockCarouselItem('link_image')}
-                      className="p-3 rounded-xl border border-slate-200 hover:border-indigo-500/50 hover:bg-indigo-500/10 transition-all flex flex-col items-center gap-2"
+                      className="p-3 rounded-xl border border-border hover:border-primary/40 hover:brightness-110/10 transition-all flex flex-col items-center gap-2"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                        <Link className="w-5 h-5 text-indigo-600" />
+                      <div className="w-10 h-10 rounded-lg bg-brand-soft flex items-center justify-center">
+                        <Link className="w-5 h-5 text-primary" />
                       </div>
-                      <span className="text-slate-900 text-xs">Image + Lien</span>
+                      <span className="text-foreground text-xs">Image + Lien</span>
                     </button>
                   </div>
                 </div>
                 
                 {/* Elements List */}
                 {blockForm.items.length === 0 ? (
-                  <div className="text-center py-8 bg-white rounded-xl text-slate-400">
+                  <div className="text-center py-8 bg-card rounded-xl text-muted-foreground">
                     <LayoutGrid className="w-10 h-10 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">Aucun élément dans le carrousel</p>
                     <p className="text-xs mt-1">Cliquez sur un type ci-dessus pour ajouter</p>
@@ -3318,14 +3446,14 @@ const MultilinkPage = () => {
                 ) : (
                   <div className="space-y-3 max-h-[400px] overflow-y-auto">
                     {blockForm.items.map((item, index) => (
-                      <div key={index} className="p-4 bg-white rounded-xl border border-slate-200">
+                      <div key={index} className="p-4 bg-card rounded-xl border border-border">
                         {/* Header */}
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
-                            <span className="text-slate-400 text-xs">#{index + 1}</span>
+                            <span className="text-muted-foreground text-xs">#{index + 1}</span>
                             <Badge className={
-                              item.type === 'video' ? 'bg-red-100 text-red-700' :
-                              item.type === 'link_image' ? 'bg-indigo-500/20 text-indigo-600' :
+                              item.type === 'video' ? 'bg-danger-soft text-danger' :
+                              item.type === 'link_image' ? 'bg-brand-soft text-primary' :
                               'bg-pink-100 text-pink-700'
                             }>
                               {item.type === 'video' ? 'Vidéo' : item.type === 'link_image' ? 'Image + Lien' : 'Image'}
@@ -3335,7 +3463,7 @@ const MultilinkPage = () => {
                             size="sm" 
                             variant="ghost" 
                             onClick={() => removeBlockCarouselItem(index)} 
-                            className="text-red-400 hover:text-red-300 h-7 w-7 p-0"
+                            className="text-danger hover:text-red-300 h-7 w-7 p-0"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -3348,7 +3476,7 @@ const MultilinkPage = () => {
                               {item.media_type === 'video' || item.type === 'video' ? (
                                 <video 
                                   src={item.media_url} 
-                                  className="w-full h-32 rounded-lg object-cover bg-slate-100" 
+                                  className="w-full h-32 rounded-lg object-cover bg-secondary" 
                                   controls 
                                 />
                               ) : (
@@ -3361,9 +3489,9 @@ const MultilinkPage = () => {
                               <button
                                 type="button"
                                 onClick={() => updateBlockCarouselItem(index, 'media_url', '')}
-                                className="absolute top-2 right-2 w-7 h-7 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600"
+                                className="absolute top-2 right-2 w-7 h-7 bg-danger rounded-full flex items-center justify-center hover:bg-red-600"
                               >
-                                <X className="w-4 h-4 text-slate-900" />
+                                <X className="w-4 h-4 text-foreground" />
                               </button>
                             </div>
                           ) : (
@@ -3374,22 +3502,22 @@ const MultilinkPage = () => {
                                 onChange={(e) => uploadCarouselMedia(index, e.target.files?.[0])} 
                                 className="hidden" 
                               />
-                              <div className="flex flex-col items-center py-6 border-2 border-dashed border-slate-200 rounded-xl hover:border-indigo-500/50 transition-colors">
+                              <div className="flex flex-col items-center py-6 border-2 border-dashed border-border rounded-xl hover:border-primary/40 transition-colors">
                                 {uploadingBlockMedia ? (
-                                  <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+                                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
                                 ) : (
                                   <>
                                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${
-                                      item.type === 'video' ? 'bg-red-500/20' : 'bg-pink-500/20'
+                                      item.type === 'video' ? 'bg-danger-soft' : 'bg-pink-500/20'
                                     }`}>
                                       {item.type === 'video' ? (
-                                        <Video className="w-6 h-6 text-red-400" />
+                                        <Video className="w-6 h-6 text-danger" />
                                       ) : (
                                         <ImagePlus className="w-6 h-6 text-pink-400" />
                                       )}
                                     </div>
-                                    <p className="text-slate-900 text-sm">Cliquer pour uploader</p>
-                                    <p className="text-slate-400 text-xs mt-1">
+                                    <p className="text-foreground text-sm">Cliquer pour uploader</p>
+                                    <p className="text-muted-foreground text-xs mt-1">
                                       {item.type === 'video' ? 'MP4, MOV, WebM' : 'JPG, PNG, WebP'}
                                     </p>
                                   </>
@@ -3405,7 +3533,7 @@ const MultilinkPage = () => {
                             value={item.title || ''}
                             onChange={(e) => updateBlockCarouselItem(index, 'title', e.target.value)}
                             placeholder="Titre (optionnel)"
-                            className="bg-white border-slate-200 text-slate-900 text-sm h-9"
+                            className="bg-card border-border text-foreground text-sm h-9"
                           />
                         </div>
 
@@ -3417,7 +3545,7 @@ const MultilinkPage = () => {
                                 value={item.description || ''}
                                 onChange={(e) => updateBlockCarouselItem(index, 'description', e.target.value)}
                                 placeholder="Description..."
-                                className="bg-white border-slate-200 text-slate-900 text-sm min-h-[60px]"
+                                className="bg-card border-border text-foreground text-sm min-h-[60px]"
                               />
                             </div>
                             <div className="grid grid-cols-2 gap-2">
@@ -3425,13 +3553,13 @@ const MultilinkPage = () => {
                                 value={item.url || ''}
                                 onChange={(e) => updateBlockCarouselItem(index, 'url', e.target.value)}
                                 placeholder="URL du lien *"
-                                className="bg-white border-slate-200 text-slate-900 text-sm h-9"
+                                className="bg-card border-border text-foreground text-sm h-9"
                               />
                               <Input
                                 value={item.button_text || 'En Savoir +'}
                                 onChange={(e) => updateBlockCarouselItem(index, 'button_text', e.target.value)}
                                 placeholder="Texte du bouton"
-                                className="bg-white border-slate-200 text-slate-900 text-sm h-9"
+                                className="bg-card border-border text-foreground text-sm h-9"
                               />
                             </div>
                           </>
@@ -3445,22 +3573,22 @@ const MultilinkPage = () => {
 
             {/* Active toggle - Always show */}
             {blockForm.block_type !== 'divider' && (
-              <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                <span className="text-slate-900">Bloc actif</span>
+              <div className="flex items-center justify-between p-3 bg-card rounded-lg">
+                <span className="text-foreground">Bloc actif</span>
                 <Switch
                   checked={blockForm.is_active}
                   onCheckedChange={(checked) => setBlockForm({ ...blockForm, is_active: checked })}
-                  className="data-[state=checked]:bg-green-500"
+                  className="data-[state=checked]:bg-success"
                 />
               </div>
             )}
           </div>
 
           <DialogFooter className="mt-4 flex gap-2">
-            <Button variant="outline" onClick={() => setBlockDialogOpen(false)} className="border-slate-200 text-slate-900">
+            <Button variant="outline" onClick={() => setBlockDialogOpen(false)} className="border-border text-foreground">
               Cancel
             </Button>
-            <Button onClick={saveBlock} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={saveBlock} disabled={saving} className="bg-primary hover:bg-primary/90">
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {editingBlock ? 'Apply Changes' : 'Ajouter'}
             </Button>
@@ -3470,20 +3598,20 @@ const MultilinkPage = () => {
 
       {/* Stats Dialog - Enhanced Analytics */}
       <Dialog open={statsDialogOpen} onOpenChange={setStatsDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-3xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
+        <DialogContent className="bg-secondary border-border text-foreground max-w-3xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
           <div 
             className="flex items-center justify-between mb-4"
             style={{ paddingTop: 'max(0px, env(safe-area-inset-top, 0px))' }}
           >
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <BarChart3 className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <BarChart3 className="w-5 h-5 text-primary" />
               Analytics - {selectedPage?.title}
             </DialogTitle>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setStatsDialogOpen(false)}
-              className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 h-8 w-8"
+              className="text-muted-foreground hover:text-foreground hover:bg-secondary h-8 w-8"
             >
               <X className="w-5 h-5" />
             </Button>
@@ -3492,58 +3620,58 @@ const MultilinkPage = () => {
           {pageStats && (
             <div className="space-y-6">
               {/* Period Info */}
-              <div className="flex items-center justify-between text-slate-500 text-sm">
+              <div className="flex items-center justify-between text-muted-foreground text-sm">
                 <span>Période : {pageStats.period_days} derniers jours</span>
-                <span className="text-slate-400">Comparé aux {pageStats.period_days} jours précédents</span>
+                <span className="text-muted-foreground">Comparé aux {pageStats.period_days} jours précédents</span>
               </div>
 
               {/* KPIs with Growth */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-blue-500/10 rounded-xl p-4">
+                <div className="bg-info-soft rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <Eye className="w-6 h-6 text-blue-400" />
+                    <Eye className="w-6 h-6 text-info" />
                     {pageStats.views_growth !== 0 && (
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${pageStats.views_growth > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${pageStats.views_growth > 0 ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'}`}>
                         {pageStats.views_growth > 0 ? '+' : ''}{pageStats.views_growth}%
                       </span>
                     )}
                   </div>
-                  <p className="text-2xl font-bold text-slate-900">{pageStats.total_views.toLocaleString()}</p>
-                  <p className="text-slate-500 text-sm">Vues totales</p>
+                  <p className="text-2xl font-bold text-foreground">{pageStats.total_views.toLocaleString()}</p>
+                  <p className="text-muted-foreground text-sm">Vues totales</p>
                   {pageStats.prev_total_views > 0 && (
-                    <p className="text-slate-400 text-xs mt-1">vs {pageStats.prev_total_views.toLocaleString()} précédemment</p>
+                    <p className="text-muted-foreground text-xs mt-1">vs {pageStats.prev_total_views.toLocaleString()} précédemment</p>
                   )}
                 </div>
-                <div className="bg-green-500/10 rounded-xl p-4">
+                <div className="bg-success-soft rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <TrendingUp className="w-6 h-6 text-green-400" />
+                    <TrendingUp className="w-6 h-6 text-success" />
                     {pageStats.clicks_growth !== 0 && (
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${pageStats.clicks_growth > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${pageStats.clicks_growth > 0 ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'}`}>
                         {pageStats.clicks_growth > 0 ? '+' : ''}{pageStats.clicks_growth}%
                       </span>
                     )}
                   </div>
-                  <p className="text-2xl font-bold text-slate-900">{pageStats.total_clicks.toLocaleString()}</p>
-                  <p className="text-slate-500 text-sm">Clics totaux</p>
+                  <p className="text-2xl font-bold text-foreground">{pageStats.total_clicks.toLocaleString()}</p>
+                  <p className="text-muted-foreground text-sm">Clics totaux</p>
                   {pageStats.prev_total_clicks > 0 && (
-                    <p className="text-slate-400 text-xs mt-1">vs {pageStats.prev_total_clicks.toLocaleString()} précédemment</p>
+                    <p className="text-muted-foreground text-xs mt-1">vs {pageStats.prev_total_clicks.toLocaleString()} précédemment</p>
                   )}
                 </div>
-                <div className="bg-purple-500/10 rounded-xl p-4">
+                <div className="bg-brand-soft rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <BarChart3 className="w-6 h-6 text-purple-400" />
+                    <BarChart3 className="w-6 h-6 text-primary" />
                   </div>
-                  <p className="text-2xl font-bold text-slate-900">{pageStats.ctr}%</p>
-                  <p className="text-slate-500 text-sm">Taux de conversion</p>
-                  <p className="text-slate-400 text-xs mt-1">Clics / Vues</p>
+                  <p className="text-2xl font-bold text-foreground">{pageStats.ctr}%</p>
+                  <p className="text-muted-foreground text-sm">Taux de conversion</p>
+                  <p className="text-muted-foreground text-xs mt-1">Clics / Vues</p>
                 </div>
               </div>
 
               {/* Mini Chart - Views by Day */}
               {pageStats.views_by_day?.length > 0 && (
-                <div className="bg-white rounded-xl p-4">
-                  <h3 className="text-slate-900 font-medium mb-3 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-indigo-600" />
+                <div className="bg-card rounded-xl p-4">
+                  <h3 className="text-foreground font-medium mb-3 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-primary" />
                     Vues par jour
                   </h3>
                   <div className="flex items-end gap-1 h-24">
@@ -3553,18 +3681,18 @@ const MultilinkPage = () => {
                       return (
                         <div 
                           key={i} 
-                          className="flex-1 bg-indigo-500/50 rounded-t hover:bg-indigo-500 transition-colors group relative"
+                          className="flex-1 bg-primary/40 rounded-t hover:brightness-110 transition-colors group relative"
                           style={{ height: `${Math.max(height, 2)}%` }}
                           title={`${day.date}: ${day.count} vues`}
                         >
-                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-slate-900 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-10">
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-10">
                             {day.count}
                           </div>
                         </div>
                       );
                     })}
                   </div>
-                  <div className="flex justify-between mt-2 text-slate-400 text-xs">
+                  <div className="flex justify-between mt-2 text-muted-foreground text-xs">
                     <span>{pageStats.views_by_day[0]?.date?.slice(5)}</span>
                     <span>{pageStats.views_by_day[pageStats.views_by_day.length - 1]?.date?.slice(5)}</span>
                   </div>
@@ -3574,22 +3702,22 @@ const MultilinkPage = () => {
               {/* Block Stats - NEW */}
               {pageStats.block_stats?.length > 0 && (
                 <div>
-                  <h3 className="text-slate-900 font-medium mb-3 flex items-center gap-2">
-                    <LayoutGrid className="w-4 h-4 text-purple-400" />
+                  <h3 className="text-foreground font-medium mb-3 flex items-center gap-2">
+                    <LayoutGrid className="w-4 h-4 text-primary" />
                     Performance des blocs
                   </h3>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {pageStats.block_stats.map((block, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg hover:bg-slate-100 transition-colors">
-                        <span className="text-slate-400 text-sm w-6">{index + 1}.</span>
+                      <div key={index} className="flex items-center gap-3 p-3 bg-card rounded-lg hover:bg-secondary transition-colors">
+                        <span className="text-muted-foreground text-sm w-6">{index + 1}.</span>
                         {block.thumbnail && (
                           <img src={block.thumbnail} alt="" className="w-10 h-10 rounded-lg object-cover" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-slate-900 truncate">{block.label}</p>
-                          <p className="text-slate-400 text-xs">{block.type}</p>
+                          <p className="text-foreground truncate">{block.label}</p>
+                          <p className="text-muted-foreground text-xs">{block.type}</p>
                         </div>
-                        <Badge className="bg-purple-100 text-purple-700">{block.clicks} clics</Badge>
+                        <Badge className="bg-brand-soft text-primary">{block.clicks} clics</Badge>
                       </div>
                     ))}
                   </div>
@@ -3599,16 +3727,16 @@ const MultilinkPage = () => {
               {/* Link Stats - Legacy */}
               {pageStats.link_stats?.length > 0 && (
                 <div>
-                  <h3 className="text-slate-900 font-medium mb-3 flex items-center gap-2">
-                    <Link className="w-4 h-4 text-indigo-600" />
+                  <h3 className="text-foreground font-medium mb-3 flex items-center gap-2">
+                    <Link className="w-4 h-4 text-primary" />
                     Performance des liens (legacy)
                   </h3>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {pageStats.link_stats.map((link, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg hover:bg-slate-100 transition-colors">
-                        <span className="text-slate-400 text-sm w-6">{index + 1}.</span>
-                        <span className="flex-1 text-slate-900 truncate">{link.label}</span>
-                        <Badge className="bg-indigo-500/20 text-indigo-600">{link.clicks} clics</Badge>
+                      <div key={index} className="flex items-center gap-3 p-3 bg-card rounded-lg hover:bg-secondary transition-colors">
+                        <span className="text-muted-foreground text-sm w-6">{index + 1}.</span>
+                        <span className="flex-1 text-foreground truncate">{link.label}</span>
+                        <Badge className="bg-brand-soft text-primary">{link.clicks} clics</Badge>
                       </div>
                     ))}
                   </div>
@@ -3617,17 +3745,17 @@ const MultilinkPage = () => {
 
               {/* No data message */}
               {(!pageStats.block_stats?.length && !pageStats.link_stats?.length && pageStats.total_views === 0) && (
-                <div className="text-center py-8 bg-white rounded-xl">
-                  <BarChart3 className="w-12 h-12 text-slate-900/20 mx-auto mb-3" />
-                  <p className="text-slate-500">Aucune donnée pour cette période</p>
-                  <p className="text-slate-400 text-sm mt-1">Partagez votre page pour commencer à collecter des statistiques</p>
+                <div className="text-center py-8 bg-card rounded-xl">
+                  <BarChart3 className="w-12 h-12 text-foreground/20 mx-auto mb-3" />
+                  <p className="text-muted-foreground">Aucune donnée pour cette période</p>
+                  <p className="text-muted-foreground text-sm mt-1">Partagez votre page pour commencer à collecter des statistiques</p>
                 </div>
               )}
             </div>
           )}
 
           <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setStatsDialogOpen(false)} className="border-slate-200 text-slate-900">
+            <Button variant="outline" onClick={() => setStatsDialogOpen(false)} className="border-border text-foreground">
               Fermer
             </Button>
           </DialogFooter>
@@ -3636,10 +3764,10 @@ const MultilinkPage = () => {
 
       {/* QR Code Dialog */}
       <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-md">
+        <DialogContent className="bg-secondary border-border text-foreground max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <QrCode className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <QrCode className="w-5 h-5 text-primary" />
               QR Code - {selectedPage?.title}
             </DialogTitle>
           </DialogHeader>
@@ -3648,7 +3776,7 @@ const MultilinkPage = () => {
             {/* QR Code Preview */}
             <div 
               ref={qrRef}
-              className="bg-white rounded-2xl p-6 mx-auto w-fit"
+              className="bg-card rounded-2xl p-6 mx-auto w-fit"
             >
               <QRCodeSVG 
                 value={getPageUrl()}
@@ -3662,8 +3790,8 @@ const MultilinkPage = () => {
 
             {/* URL Display */}
             <div className="text-center">
-              <p className="text-slate-500 text-sm mb-1">URL de la page</p>
-              <p className="text-slate-900 font-medium break-all text-sm bg-white rounded-lg px-3 py-2">
+              <p className="text-muted-foreground text-sm mb-1">URL de la page</p>
+              <p className="text-foreground font-medium break-all text-sm bg-card rounded-lg px-3 py-2">
                 {getPageUrl()}
               </p>
             </div>
@@ -3672,7 +3800,7 @@ const MultilinkPage = () => {
             <div className="flex gap-3">
               <Button 
                 onClick={() => downloadQrCode('png')}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                className="flex-1 bg-primary hover:bg-primary/90"
               >
                 <Download className="w-4 h-4 mr-2" />
                 PNG (1024px)
@@ -3680,7 +3808,7 @@ const MultilinkPage = () => {
               <Button 
                 onClick={() => downloadQrCode('svg')}
                 variant="outline"
-                className="flex-1 border-slate-200 text-slate-900 hover:bg-slate-50"
+                className="flex-1 border-border text-foreground hover:bg-secondary"
               >
                 <Download className="w-4 h-4 mr-2" />
                 SVG
@@ -3688,15 +3816,15 @@ const MultilinkPage = () => {
             </div>
 
             {/* Tips */}
-            <div className="bg-white rounded-lg p-3">
-              <p className="text-slate-400 text-xs">
-                <strong className="text-slate-500">💡 Conseil:</strong> Le format PNG est idéal pour les impressions (cartes de visite, flyers). Le format SVG est vectoriel et peut être agrandi sans perte de qualité.
+            <div className="bg-card rounded-lg p-3">
+              <p className="text-muted-foreground text-xs">
+                <strong className="text-muted-foreground">💡 Conseil:</strong> Le format PNG est idéal pour les impressions (cartes de visite, flyers). Le format SVG est vectoriel et peut être agrandi sans perte de qualité.
               </p>
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setQrDialogOpen(false)} className="border-slate-200 text-slate-900">
+            <Button variant="outline" onClick={() => setQrDialogOpen(false)} className="border-border text-foreground">
               Fermer
             </Button>
           </DialogFooter>

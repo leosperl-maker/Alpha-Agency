@@ -23,26 +23,23 @@ import LoginPage from "./pages/dashboard/LoginPage";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
 import DashboardOverview from "./pages/dashboard/DashboardOverview";
 import ContactsPage from "./pages/dashboard/ContactsPage";
-import PipelinePage from "./pages/dashboard/PipelinePage";
 import InvoicesPage from "./pages/dashboard/InvoicesPage";
 import PortfolioManagePage from "./pages/dashboard/PortfolioManagePageNew";
 import DemandesPage from "./pages/dashboard/DemandesPage";
 import SettingsPage from "./pages/dashboard/SettingsPage";
 import DocumentsPage from "./pages/dashboard/DocumentsPage";
-import TasksPage from "./pages/dashboard/TasksPage";
+import TransfersPage from "./pages/dashboard/TransfersPage";
 import BudgetPage from "./pages/dashboard/BudgetPage";
 import BackupPage from "./pages/dashboard/BackupPage";
 import UsersPage from "./pages/dashboard/UsersPage";
 import AIAssistantPage from "./pages/dashboard/AIAssistantPageNew";
 import NewsPage from "./pages/dashboard/NewsPage";
-import SocialMediaPage from "./pages/dashboard/SocialMediaPageNew";
 import BlogAdminPage from "./pages/dashboard/BlogAdminPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ThingsPage from "./pages/dashboard/ThingsPage";
 import AgendaPage from "./pages/dashboard/AgendaPage";
 import EditorialCalendarPage from "./pages/dashboard/EditorialCalendarPage";
 import MultilinkPage from "./pages/dashboard/MultilinkPage";
-import InstagramStoryPage from "./pages/dashboard/InstagramStoryPage";
 
 // Public pages
 import TransferDownloadPage from "./pages/TransferDownloadPage";
@@ -96,26 +93,23 @@ function App() {
             <Route index element={<DashboardOverview />} />
             <Route path="demandes" element={<DemandesPage />} />
             <Route path="contacts" element={<ContactsPage />} />
-            <Route path="pipeline" element={<PipelinePage />} />
             <Route path="facturation" element={<InvoicesPage />} />
             <Route path="devis" element={<Navigate to="/admin/facturation?tab=devis" replace />} />
             <Route path="factures" element={<Navigate to="/admin/facturation?tab=facture" replace />} />
             <Route path="realisations" element={<PortfolioManagePage />} />
             <Route path="documents" element={<DocumentsPage />} />
-            <Route path="taches" element={<TasksPage />} />
+            <Route path="transferts" element={<TransfersPage />} />
             <Route path="budget" element={<BudgetPage />} />
             <Route path="sauvegardes" element={<BackupPage />} />
             <Route path="utilisateurs" element={<UsersPage />} />
             <Route path="assistant" element={<AIAssistantPage />} />
             <Route path="actualites" element={<NewsPage />} />
             <Route path="blog" element={<BlogAdminPage />} />
-            <Route path="social-media" element={<SocialMediaPage />} />
             <Route path="parametres" element={<SettingsPage />} />
             <Route path="things" element={<ThingsPage />} />
             <Route path="agenda" element={<AgendaPage />} />
             <Route path="editorial" element={<EditorialCalendarPage />} />
             <Route path="multilink" element={<MultilinkPage />} />
-            <Route path="instagram-stories" element={<InstagramStoryPage />} />
           </Route>
           
           {/* PWA Widget Page for iPhone */}

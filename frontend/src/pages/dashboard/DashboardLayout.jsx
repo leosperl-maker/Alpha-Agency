@@ -2,397 +2,145 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Users, Kanban, FileText, Receipt, Settings,
-  LogOut, Menu, X, Image, Inbox, FileCheck, CheckSquare, Wallet, Database,
-  UserCog, Newspaper, Share2, ChevronLeft, Bell, Search,
-  User, ChevronDown, AlertCircle, Clock, FileWarning, UserPlus, Sun, Moon,
-  ListTodo, Calendar, CalendarDays, Link2, Command,
-  FileSearch, Contact, Briefcase, DollarSign, Keyboard, HelpCircle,
-  Wifi, WifiOff, Instagram
+  LogOut, X, Image, Inbox, FileCheck, CheckSquare, Wallet, Database,
+  UserCog, Newspaper, Share2, Search, Send, MoreHorizontal,
+  ChevronDown, UserPlus, Sun, Moon, Monitor,
+  Calendar, CalendarDays, Link2, Command,
+  FileSearch, Contact, Briefcase, Keyboard, Instagram, Wifi, WifiOff
 } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import FloatingAIChat from "../../components/FloatingAIChat";
-import QuickActions from "../../components/QuickActions";
 import NotificationCenter from "../../components/NotificationCenter";
+import AssistantOrb from "../../components/AssistantOrb";
+import AssistantChat from "../../components/AssistantChat";
 import { tasksAPI, contactsAPI, invoicesAPI, opportunitiesAPI } from "../../lib/api";
 import { useTheme } from "../../contexts/ThemeContext";
-import {
-  Dialog,
-  DialogContent,
-} from "../../components/ui/dialog";
+import { Dialog, DialogContent } from "../../components/ui/dialog";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
   const { isOnline, wasOffline } = useOnlineStatus();
   const [user, setUser] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Topbar states
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+  const [moreOpen, setMoreOpen] = useState(false);        // mobile "Plus" sheet
   const [profileOpen, setProfileOpen] = useState(false);
-
-  // Refs for click outside
-  const searchRef = useRef(null);
-  const notifRef = useRef(null);
   const profileRef = useRef(null);
-  const commandInputRef = useRef(null);
 
-  // Command palette state
+  // Command palette (⌘K / AI bar)
+  const commandInputRef = useRef(null);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
   const [commandResults, setCommandResults] = useState([]);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
-
-  // Keyboard shortcut state - MUST be declared before useEffect that uses them
   const [lastKeyPressed, setLastKeyPressed] = useState(null);
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const openAssistant = useCallback(() => setAssistantOpen(true), []);
 
   useEffect(() => {
     const token = localStorage.getItem("alpha_token");
     const userData = localStorage.getItem("alpha_user");
-
-    if (!token) {
-      navigate("/admin/login");
-      return;
-    }
-
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-
-    // Fetch notifications
-    fetchNotifications();
+    if (!token) { navigate("/admin/login"); return; }
+    if (userData) setUser(JSON.parse(userData));
   }, [navigate]);
 
-  // Click outside handlers
+  // Close profile dropdown on outside click
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (searchRef.current && !searchRef.current.contains(e.target)) {
-        setSearchOpen(false);
-      }
-      if (notifRef.current && !notifRef.current.contains(e.target)) {
-        setNotificationsOpen(false);
-      }
-      if (profileRef.current && !profileRef.current.contains(e.target)) {
-        setProfileOpen(false);
-      }
+    const handler = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const fetchNotifications = async () => {
-    try {
-      // Fetch overdue tasks
-      const tasksRes = await tasksAPI.getAll({ status: 'todo,in_progress' });
-      const overdueTasks = (tasksRes.data || []).filter(t => {
-        if (!t.due_date) return false;
-        return new Date(t.due_date) < new Date();
-      }).slice(0, 3);
+  // Lock body scroll while the mobile sheet is open
+  useEffect(() => {
+    document.body.style.overflow = moreOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [moreOpen]);
 
-      // Fetch overdue invoices
-      const invoicesRes = await invoicesAPI.getAll({ status: 'pending,overdue' });
-      const overdueInvoices = (invoicesRes.data || []).filter(i => i.status === 'overdue').slice(0, 3);
+  // ================== COMMAND PALETTE / AI BAR ==================
+  const openCommand = useCallback(() => {
+    setCommandPaletteOpen(true);
+    setCommandQuery("");
+    setTimeout(() => commandInputRef.current?.focus(), 60);
+  }, []);
 
-      // Fetch new leads (recent contacts)
-      const contactsRes = await contactsAPI.getAll({ type: 'lead' });
-      const recentLeads = (contactsRes.data || []).slice(0, 3);
-
-      const notifs = [];
-
-      overdueTasks.forEach(t => {
-        notifs.push({
-          id: `task-${t.id}`,
-          type: 'task',
-          title: 'Tâche en retard',
-          message: t.title,
-          icon: Clock,
-          color: 'text-orange-400',
-          link: '/admin/taches'
-        });
-      });
-
-      overdueInvoices.forEach(i => {
-        notifs.push({
-          id: `invoice-${i.id}`,
-          type: 'invoice',
-          title: 'Facture impayée',
-          message: `${i.number || 'Facture'} - ${i.total?.toFixed(2) || 0}€`,
-          icon: FileWarning,
-          color: 'text-red-400',
-          link: '/admin/facturation'
-        });
-      });
-
-      recentLeads.slice(0, 2).forEach(c => {
-        notifs.push({
-          id: `contact-${c.id}`,
-          type: 'contact',
-          title: 'Nouveau lead',
-          message: `${c.first_name} ${c.last_name}`,
-          icon: UserPlus,
-          color: 'text-green-400',
-          link: '/admin/contacts'
-        });
-      });
-
-      setNotifications(notifs.slice(0, 5));
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
-  };
-
-  const handleSearch = async (query) => {
-    setSearchQuery(query);
-    if (query.length < 2) {
-      setSearchResults([]);
-      return;
-    }
-
-    try {
-      const [contactsRes, tasksRes] = await Promise.all([
-        contactsAPI.getAll({ search: query }),
-        tasksAPI.getAll({ search: query })
-      ]);
-
-      const results = [];
-      (contactsRes.data || []).slice(0, 3).forEach(c => {
-        results.push({
-          id: `contact-${c.id}`,
-          type: 'Contact',
-          title: `${c.first_name} ${c.last_name}`,
-          subtitle: c.company || c.email,
-          icon: Users,
-          link: '/admin/contacts'
-        });
-      });
-      (tasksRes.data || []).slice(0, 3).forEach(t => {
-        results.push({
-          id: `task-${t.id}`,
-          type: 'Tâche',
-          title: t.title,
-          subtitle: t.status,
-          icon: CheckSquare,
-          link: '/admin/taches'
-        });
-      });
-
-      setSearchResults(results);
-    } catch (error) {
-      console.error("Search error:", error);
-    }
-  };
-
-  // ================== COMMAND PALETTE (⌘K) ==================
-
-  // All searchable items
   const allNavigationItems = [
-    { id: 'nav-dashboard', type: 'Navigation', title: "Vue d'ensemble", icon: LayoutDashboard, action: () => navigate('/admin'), keywords: 'dashboard accueil home' },
+    { id: 'nav-dashboard', type: 'Navigation', title: "Aujourd'hui", icon: LayoutDashboard, action: () => navigate('/admin'), keywords: 'dashboard accueil home vue ensemble' },
     { id: 'nav-contacts', type: 'Navigation', title: "Contacts", icon: Users, action: () => navigate('/admin/contacts'), keywords: 'clients prospects' },
-    { id: 'nav-pipeline', type: 'Navigation', title: "Pipeline", icon: Kanban, action: () => navigate('/admin/pipeline'), keywords: 'ventes deals opportunités' },
-    { id: 'nav-tasks', type: 'Navigation', title: "Tâches", icon: CheckSquare, action: () => navigate('/admin/taches'), keywords: 'todo list' },
     { id: 'nav-agenda', type: 'Navigation', title: "Agenda / RDV", icon: Calendar, action: () => navigate('/admin/agenda'), keywords: 'calendrier rendez-vous' },
     { id: 'nav-editorial', type: 'Navigation', title: "Calendrier Éditorial", icon: CalendarDays, action: () => navigate('/admin/editorial'), keywords: 'posts publications' },
     { id: 'nav-multilink', type: 'Navigation', title: "Multilink", icon: Link2, action: () => navigate('/admin/multilink'), keywords: 'bio links page' },
+    { id: 'nav-transfers', type: 'Navigation', title: "Transferts", icon: Send, action: () => navigate('/admin/transferts'), keywords: 'wetransfer fichiers partage envoi client' },
     { id: 'nav-invoices', type: 'Navigation', title: "Facturation", icon: Receipt, action: () => navigate('/admin/facturation'), keywords: 'factures devis' },
     { id: 'nav-budget', type: 'Navigation', title: "Budget", icon: Wallet, action: () => navigate('/admin/budget'), keywords: 'finances argent' },
-    { id: 'nav-social', type: 'Navigation', title: "Social Media", icon: Share2, action: () => navigate('/admin/social-media'), keywords: 'réseaux sociaux instagram facebook' },
     { id: 'nav-settings', type: 'Navigation', title: "Paramètres", icon: Settings, action: () => navigate('/admin/parametres'), keywords: 'config configuration' },
   ];
 
   const quickActionItems = [
-    { id: 'action-contact', type: 'Action rapide', title: "Créer un contact", icon: UserPlus, action: () => { setCommandPaletteOpen(false); /* trigger quick action */ }, keywords: 'nouveau client' },
-    { id: 'action-task', type: 'Action rapide', title: "Créer une tâche", icon: CheckSquare, action: () => { setCommandPaletteOpen(false); }, keywords: 'nouvelle todo' },
+    { id: 'action-contact', type: 'Action rapide', title: "Créer un contact", icon: UserPlus, action: () => { setCommandPaletteOpen(false); navigate('/admin/contacts'); }, keywords: 'nouveau client' },
     { id: 'action-invoice', type: 'Action rapide', title: "Créer une facture", icon: Receipt, action: () => { setCommandPaletteOpen(false); navigate('/admin/facturation'); }, keywords: 'nouvelle facture devis' },
-    { id: 'action-opportunity', type: 'Action rapide', title: "Créer une opportunité", icon: Briefcase, action: () => { setCommandPaletteOpen(false); navigate('/admin/pipeline'); }, keywords: 'nouveau deal' },
   ];
 
-  // Global search function
   const performGlobalSearch = useCallback(async (query) => {
     if (!query.trim()) {
-      setCommandResults([...allNavigationItems.slice(0, 5), ...quickActionItems]);
+      setCommandResults([...allNavigationItems.slice(0, 6), ...quickActionItems]);
+      setSelectedCommandIndex(0);
       return;
     }
-
     setIsSearching(true);
-    const lowerQuery = query.toLowerCase();
-
-    // Filter navigation items
-    const navResults = allNavigationItems.filter(item =>
-      item.title.toLowerCase().includes(lowerQuery) ||
-      item.keywords.toLowerCase().includes(lowerQuery)
-    );
-
-    // Filter quick actions
-    const actionResults = quickActionItems.filter(item =>
-      item.title.toLowerCase().includes(lowerQuery) ||
-      item.keywords.toLowerCase().includes(lowerQuery)
-    );
-
-    // Search in database
+    const q = query.toLowerCase();
+    const navResults = allNavigationItems.filter(i => i.title.toLowerCase().includes(q) || i.keywords.toLowerCase().includes(q));
+    const actionResults = quickActionItems.filter(i => i.title.toLowerCase().includes(q) || i.keywords.toLowerCase().includes(q));
     let dbResults = [];
     try {
-      const [contactsRes, tasksRes, invoicesRes, opportunitiesRes] = await Promise.all([
+      const [contactsRes, invoicesRes] = await Promise.all([
         contactsAPI.getAll({ search: query }).catch(() => ({ data: [] })),
-        tasksAPI.getAll({ search: query }).catch(() => ({ data: [] })),
-        invoicesAPI.getAll({ search: query }).catch(() => ({ data: [] })),
-        opportunitiesAPI.getAll({ search: query }).catch(() => ({ data: [] }))
+        invoicesAPI.getAll({ search: query }).catch(() => ({ data: [] }))
       ]);
-
-      (contactsRes.data || []).slice(0, 3).forEach(c => {
-        dbResults.push({
-          id: `contact-${c.id}`,
-          type: 'Contact',
-          title: `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.email,
-          subtitle: c.company || c.email,
-          icon: Contact,
-          action: () => { setCommandPaletteOpen(false); navigate('/admin/contacts'); }
-        });
-      });
-
-      (tasksRes.data || []).slice(0, 3).forEach(t => {
-        dbResults.push({
-          id: `task-${t.id}`,
-          type: 'Tâche',
-          title: t.title,
-          subtitle: t.status === 'todo' ? 'À faire' : t.status === 'in_progress' ? 'En cours' : 'Terminée',
-          icon: CheckSquare,
-          action: () => { setCommandPaletteOpen(false); navigate('/admin/taches'); }
-        });
-      });
-
-      (invoicesRes.data || []).slice(0, 2).forEach(i => {
-        dbResults.push({
-          id: `invoice-${i.id}`,
-          type: 'Facture',
-          title: i.number || `Facture ${i.client_name}`,
-          subtitle: `${i.total?.toFixed(2) || 0}€`,
-          icon: Receipt,
-          action: () => { setCommandPaletteOpen(false); navigate('/admin/facturation'); }
-        });
-      });
-
-      (opportunitiesRes.data || []).slice(0, 2).forEach(o => {
-        dbResults.push({
-          id: `opportunity-${o.id}`,
-          type: 'Opportunité',
-          title: o.name,
-          subtitle: `${o.amount?.toFixed(0) || 0}€`,
-          icon: Briefcase,
-          action: () => { setCommandPaletteOpen(false); navigate('/admin/pipeline'); }
-        });
-      });
-    } catch (error) {
-      console.error("Search error:", error);
-    }
-
+      (contactsRes.data || []).slice(0, 3).forEach(c => dbResults.push({
+        id: `contact-${c.id}`, type: 'Contact', title: `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.email,
+        subtitle: c.company || c.email, icon: Contact, action: () => { setCommandPaletteOpen(false); navigate('/admin/contacts'); }
+      }));
+      (invoicesRes.data || []).slice(0, 2).forEach(i => dbResults.push({
+        id: `invoice-${i.id}`, type: 'Facture', title: i.number || `Facture ${i.client_name}`,
+        subtitle: `${i.total?.toFixed(2) || 0}€`, icon: Receipt, action: () => { setCommandPaletteOpen(false); navigate('/admin/facturation'); }
+      }));
+    } catch (e) { /* offline / no backend */ }
     setCommandResults([...navResults, ...actionResults, ...dbResults]);
     setSelectedCommandIndex(0);
     setIsSearching(false);
   }, [navigate]);
 
+  // Seed default results (nav + quick actions) whenever the assistant opens
+  useEffect(() => {
+    if (commandPaletteOpen) performGlobalSearch("");
+  }, [commandPaletteOpen, performGlobalSearch]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // ⌘K or Ctrl+K - Open command palette
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setCommandPaletteOpen(prev => !prev);
-        setCommandQuery("");
-        performGlobalSearch("");
-      }
-
-      // Escape - Close palette
-      if (e.key === 'Escape' && commandPaletteOpen) {
-        setCommandPaletteOpen(false);
-      }
-
-      // Navigate results with arrow keys
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setCommandPaletteOpen(p => !p); setCommandQuery(""); performGlobalSearch(""); }
+      if (e.key === 'Escape' && commandPaletteOpen) setCommandPaletteOpen(false);
       if (commandPaletteOpen) {
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          setSelectedCommandIndex(prev =>
-            prev < commandResults.length - 1 ? prev + 1 : 0
-          );
-        }
-        if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          setSelectedCommandIndex(prev =>
-            prev > 0 ? prev - 1 : commandResults.length - 1
-          );
-        }
-        if (e.key === 'Enter' && commandResults[selectedCommandIndex]) {
-          e.preventDefault();
-          commandResults[selectedCommandIndex].action();
-          setCommandPaletteOpen(false);
-        }
+        if (e.key === 'ArrowDown') { e.preventDefault(); setSelectedCommandIndex(p => p < commandResults.length - 1 ? p + 1 : 0); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); setSelectedCommandIndex(p => p > 0 ? p - 1 : commandResults.length - 1); }
+        if (e.key === 'Enter' && commandResults[selectedCommandIndex]) { e.preventDefault(); commandResults[selectedCommandIndex].action(); setCommandPaletteOpen(false); }
       }
-
-      // Quick shortcuts (when palette closed and not in input/textarea)
       if (!commandPaletteOpen && !e.target.closest('input, textarea, [contenteditable="true"]')) {
-        // Single key shortcuts
-        if (e.key === '?' && e.shiftKey) {
-          e.preventDefault();
-          setShowShortcutsHelp(prev => !prev);
-        }
-
-        // G + key sequences for navigation
+        if (e.key === '?' && e.shiftKey) { e.preventDefault(); setShowShortcutsHelp(p => !p); }
         if (lastKeyPressed === 'g') {
-          e.preventDefault();
-          const gShortcuts = {
-            'd': '/admin',           // Go Dashboard
-            'c': '/admin/contacts',  // Go Contacts
-            't': '/admin/taches',    // Go Tasks
-            'p': '/admin/pipeline',  // Go Pipeline
-            'a': '/admin/assistant', // Go Assistant
-            'f': '/admin/facturation', // Go Facturation
-            's': '/admin/social-media', // Go Social
-            'e': '/admin/editorial', // Go Editorial
-            'm': '/admin/multilink', // Go Multilink
-            'b': '/admin/budget',    // Go Budget
-          };
-
-          if (gShortcuts[e.key.toLowerCase()]) {
-            navigate(gShortcuts[e.key.toLowerCase()]);
-            setLastKeyPressed(null);
-            return;
-          }
+          const g = { 'd': '/admin', 'c': '/admin/contacts', 'f': '/admin/facturation', 'e': '/admin/editorial', 'm': '/admin/multilink', 'b': '/admin/budget' };
+          if (g[e.key.toLowerCase()]) { e.preventDefault(); navigate(g[e.key.toLowerCase()]); setLastKeyPressed(null); return; }
         }
-
-        // Store last key for sequences
-        if (e.key === 'g') {
-          setLastKeyPressed('g');
-          setTimeout(() => setLastKeyPressed(null), 1000); // Reset after 1s
-        }
-
-        // N for new (based on current page)
-        if (e.key === 'n' && !e.metaKey && !e.ctrlKey) {
-          // This will be handled by individual pages
-        }
+        if (e.key === 'g') { setLastKeyPressed('g'); setTimeout(() => setLastKeyPressed(null), 1000); }
       }
     };
-
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [commandPaletteOpen, commandResults, selectedCommandIndex, performGlobalSearch, lastKeyPressed, navigate]);
-
-  // Focus input when palette opens
-  useEffect(() => {
-    if (commandPaletteOpen) {
-      setTimeout(() => commandInputRef.current?.focus(), 100);
-    }
-  }, [commandPaletteOpen]);
-
-  // ================== END COMMAND PALETTE ==================
 
   const handleLogout = () => {
     localStorage.removeItem("alpha_token");
@@ -400,16 +148,13 @@ const DashboardLayout = () => {
     navigate("/admin/login");
   };
 
-  // Navigation groups
+  // ================== NAVIGATION MODEL ==================
   const navGroups = [
-    { label: "CRM", items: [
-      { path: "/admin", icon: LayoutDashboard, label: "Vue d'ensemble", end: true },
+    { label: "Pilotage", items: [
+      { path: "/admin", icon: LayoutDashboard, label: "Aujourd'hui", end: true },
       { path: "/admin/demandes", icon: Inbox, label: "Demandes" },
       { path: "/admin/contacts", icon: Users, label: "Contacts" },
-      { path: "/admin/pipeline", icon: Kanban, label: "Pipeline" },
-      { path: "/admin/taches", icon: CheckSquare, label: "Tâches" },
-      { path: "/admin/things", icon: ListTodo, label: "Things" },
-      { path: "/admin/agenda", icon: Calendar, label: "Agenda / RDV" },
+      { path: "/admin/agenda", icon: Calendar, label: "Agenda" },
     ]},
     { label: "Finances", items: [
       { path: "/admin/facturation", icon: Receipt, label: "Facturation" },
@@ -418,85 +163,72 @@ const DashboardLayout = () => {
     { label: "Contenu", items: [
       { path: "/admin/actualites", icon: Newspaper, label: "Actualités" },
       { path: "/admin/blog", icon: FileText, label: "Blog" },
-      { path: "/admin/social-media", icon: Share2, label: "Social Media" },
-      { path: "/admin/editorial", icon: CalendarDays, label: "Calendrier Éditorial" },
+      { path: "/admin/editorial", icon: CalendarDays, label: "Éditorial" },
       { path: "/admin/multilink", icon: Link2, label: "Multilink" },
-      { path: "/admin/instagram-stories", icon: Instagram, label: "Stories" },
     ]},
-    { label: "Administration", items: [
+    { label: "Atelier", items: [
       { path: "/admin/realisations", icon: Image, label: "Réalisations" },
       { path: "/admin/documents", icon: FileCheck, label: "Documents" },
+      { path: "/admin/transferts", icon: Send, label: "Transferts" },
       { path: "/admin/sauvegardes", icon: Database, label: "Sauvegardes" },
       ...(user?.role === 'super_admin' ? [{ path: "/admin/utilisateurs", icon: UserCog, label: "Utilisateurs" }] : []),
       { path: "/admin/parametres", icon: Settings, label: "Paramètres" },
     ]},
   ];
+  const navItems = navGroups.flatMap(g => g.items);
+  const currentPage = navItems.find(i => i.end ? location.pathname === i.path : location.pathname.startsWith(i.path));
 
-  // Flatten navGroups for navItems (used for currentPage detection etc.)
-  const navItems = navGroups.flatMap(group => group.items);
+  // Mobile bottom-bar tabs (5 slots, center = AI)
+  const tabHome = { path: "/admin", icon: LayoutDashboard, label: "Aujourd'hui", end: true };
+  const tabContacts = { path: "/admin/contacts", icon: Users, label: "Contacts" };
+  const tabInvoices = { path: "/admin/facturation", icon: Receipt, label: "Factures" };
 
-  // Get current page title
-  const currentPage = navItems.find(item =>
-    item.end ? location.pathname === item.path : location.pathname.startsWith(item.path)
-  );
+  const isDark = resolvedTheme === 'dark';
+  const logoSrc = process.env.PUBLIC_URL + (isDark ? "/logo-header-white.png" : "/logo-header-black.png");
+  const themeOptions = [
+    { value: 'system', label: 'Auto', icon: Monitor },
+    { value: 'light', label: 'Clair', icon: Sun },
+    { value: 'dark', label: 'Sombre', icon: Moon },
+  ];
+  const isTabActive = (tab) => tab.end ? location.pathname === tab.path : location.pathname.startsWith(tab.path);
 
   return (
-    <div data-testid="dashboard-layout" className="min-h-screen bg-[#0A0507] flex overflow-hidden">
+    <div className="admin-body relative min-h-screen bg-background text-foreground">
 
-      {/* Sidebar - Desktop */}
-      <aside className={`
-        hidden lg:flex flex-col fixed inset-y-0 left-0 z-40
-        bg-[#0C0709] border-r border-white/10 shadow-sm
-        transition-all duration-300
-        ${sidebarOpen ? 'w-64' : 'w-20'}
-      `}>
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 flex-shrink-0">
-          {sidebarOpen ? (
-            <img
-              src={process.env.PUBLIC_URL + "/logo-header-white.png"}
-              alt="Alpha Agency"
-              className="h-9 w-auto"
-            />
-          ) : (
-            <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center">
-              <span className="text-white font-bold text-lg">A</span>
-            </div>
-          )}
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-white/[0.08] text-white/50 hover:text-white transition-colors"
-          >
-            <ChevronLeft className={`w-5 h-5 transition-transform ${!sidebarOpen ? 'rotate-180' : ''}`} />
-          </button>
-        </div>
+      {/* ===================== DESKTOP RAIL (slim, expand on hover) ===================== */}
+      <aside className="group/rail hidden lg:flex flex-col fixed inset-y-0 left-0 z-40 w-[78px] hover:w-64 hover:shadow-pop bg-card border-r border-border overflow-hidden transition-[width] duration-200 ease-out">
+        {/* Brand */}
+        <button onClick={() => navigate('/admin')} className="h-16 flex items-center gap-3 px-[18px] w-full flex-shrink-0" title="Alpha Agency">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center shadow-elev flex-shrink-0">
+            <span className="text-white font-bold text-lg">A</span>
+          </div>
+          <span className="font-bold text-foreground text-lg whitespace-nowrap opacity-0 group-hover/rail:opacity-100 transition-opacity">Alpha<span className="text-primary">.</span></span>
+        </button>
 
-        {/* Nav Items - Scrollable */}
-        <nav className="flex-1 p-3 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+        {/* AI launcher */}
+        <button onClick={openAssistant} title="Assistant IA"
+          className="mx-2 mb-2 h-11 px-[9px] rounded-2xl flex items-center gap-3 hover:bg-secondary transition-colors flex-shrink-0">
+          <AssistantOrb size={26} pulse />
+          <span className="text-sm font-medium text-foreground whitespace-nowrap opacity-0 group-hover/rail:opacity-100 transition-opacity">Assistant</span>
+        </button>
+
+        {/* Nav */}
+        <nav className="flex-1 w-full overflow-y-auto overflow-x-hidden px-2 py-1 min-h-0">
           {navGroups.map((group) => (
-            <div key={group.label} className="mb-4">
-              {sidebarOpen && (
-                <p className="px-3 mb-1 text-[10px] uppercase tracking-wider text-white/40 font-semibold">
-                  {group.label}
-                </p>
-              )}
-              <div className="space-y-0.5">
+            <div key={group.label} className="mb-2">
+              <p className="px-3 h-6 flex items-center text-[10px] uppercase tracking-wider text-muted-foreground font-semibold whitespace-nowrap opacity-0 group-hover/rail:opacity-100 transition-opacity">{group.label}</p>
+              <div className="space-y-1">
                 {group.items.map((item) => (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    end={item.end}
-                    className={({ isActive }) => `
-                      flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all
-                      ${isActive
-                        ? 'bg-[rgba(225,29,46,0.15)] text-white font-semibold'
-                        : 'text-white/70 hover:bg-white/[0.06] hover:text-white'
-                      }
-                    `}
-                  >
-                    <item.icon className={`w-5 h-5 flex-shrink-0`} />
-                    {sidebarOpen && (
-                      <span className="text-sm whitespace-nowrap">{item.label}</span>
+                  <NavLink key={item.path} to={item.path} end={item.end} title={item.label}
+                    className={({ isActive }) => `relative flex items-center gap-3 h-11 px-[11px] rounded-2xl transition-colors ${
+                      isActive ? 'bg-brand-soft text-primary font-medium' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                    }`}>
+                    {({ isActive }) => (
+                      <>
+                        {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-r-full bg-primary" />}
+                        <item.icon className="w-5 h-5 flex-shrink-0" />
+                        <span className="text-sm whitespace-nowrap opacity-0 group-hover/rail:opacity-100 transition-opacity">{item.label}</span>
+                      </>
                     )}
                   </NavLink>
                 ))}
@@ -505,310 +237,237 @@ const DashboardLayout = () => {
           ))}
         </nav>
 
-        {/* User Section - Fixed at bottom */}
-        <div className="p-3 border-t border-white/10 flex-shrink-0">
-          <div className={`flex items-center gap-3 p-2 rounded-xl bg-white/[0.05] ${!sidebarOpen ? 'justify-center' : ''}`}>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-              {user?.name?.charAt(0) || 'A'}
-            </div>
-            {sidebarOpen && (
-              <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">{user?.name || 'Admin'}</p>
-                <p className="text-white/50 text-xs truncate">{user?.role || 'Utilisateur'}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </aside>
-
-      {/* Mobile Sidebar Overlay */}
-      {mobileMenuOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Mobile Sidebar */}
-      <aside className={`
-        lg:hidden fixed inset-y-0 left-0 z-50 w-72 flex flex-col
-        bg-[#0C0709] border-r border-white/10 shadow-lg
-        transform transition-transform duration-300
-        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
-        <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 flex-shrink-0">
-          <img
-            src={process.env.PUBLIC_URL + "/logo-header-white.png"}
-            alt="Alpha Agency"
-            className="h-8 w-auto"
-          />
-          <button
-            onClick={() => setMobileMenuOpen(false)}
-            className="p-2 rounded-lg hover:bg-white/[0.08] text-white/80"
-          >
-            <X className="w-5 h-5" />
+        {/* Theme + profile */}
+        <div className="w-full px-2 py-3 space-y-1 border-t border-border flex-shrink-0">
+          <button onClick={toggleTheme} title={isDark ? 'Thème clair' : 'Thème sombre'}
+            className="w-full h-11 px-[11px] rounded-2xl flex items-center gap-3 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+            {isDark ? <Sun className="w-5 h-5 flex-shrink-0" /> : <Moon className="w-5 h-5 flex-shrink-0" />}
+            <span className="text-sm whitespace-nowrap opacity-0 group-hover/rail:opacity-100 transition-opacity">{isDark ? 'Thème clair' : 'Thème sombre'}</span>
           </button>
-        </div>
-        <nav className="flex-1 overflow-y-auto py-4 px-3 min-h-0" style={{
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(148,163,184,0.5) transparent'
-        }}>
-          <style>{`
-            nav::-webkit-scrollbar { width: 6px; }
-            nav::-webkit-scrollbar-track { background: transparent; }
-            nav::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.5); border-radius: 3px; }
-          `}</style>
-          {navGroups.map((group) => (
-            <div key={group.label} className="mb-4">
-              <p className="px-3 mb-1 text-[10px] uppercase tracking-wider text-white/40 font-semibold">
-                {group.label}
-              </p>
-              <div className="space-y-0.5">
-                {group.items.map((item) => (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    end={item.end}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={({ isActive }) => `
-                      flex items-center gap-3 px-3 py-3 rounded-xl transition-all
-                      ${isActive
-                        ? 'bg-[rgba(225,29,46,0.15)] text-white font-semibold border border-[rgba(225,29,46,0.3)]'
-                        : 'text-white/70 hover:text-white hover:bg-white/[0.06]'}
-                    `}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <span className="text-sm font-medium">{item.label}</span>
-                  </NavLink>
-                ))}
-              </div>
-            </div>
-          ))}
-        </nav>
-        <div className="p-4 border-t border-white/10">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[rgba(225,29,46,0.12)] text-[#E11D2E] hover:bg-[rgba(225,29,46,0.22)] transition-colors"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Déconnexion</span>
+          <button onClick={() => navigate('/admin/parametres')} title={user?.name || 'Profil'}
+            className="w-full h-12 px-[7px] rounded-2xl flex items-center gap-3 hover:bg-secondary transition-colors">
+            <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center text-white font-semibold flex-shrink-0">{user?.name?.charAt(0) || 'A'}</span>
+            <span className="min-w-0 text-left opacity-0 group-hover/rail:opacity-100 transition-opacity">
+              <span className="block text-sm font-medium text-foreground truncate">{user?.name || 'Admin'}</span>
+              <span className="block text-xs text-muted-foreground truncate">{user?.role || 'Profil'}</span>
+            </span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'}`}>
-        {/* Top Bar - with safe area for iOS */}
-        <header className="sticky top-0 z-30 bg-[#0C0709]/80 backdrop-blur-lg border-b border-white/10 flex items-center justify-between px-4 lg:px-6" style={{ paddingTop: 'max(env(safe-area-inset-top), 0.5rem)', minHeight: '4rem' }}>
-          {/* Left: Mobile menu + Page title */}
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-white/[0.08] text-white/80"
-              data-testid="mobile-menu-btn"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-white font-semibold text-lg">{currentPage?.label || 'Dashboard'}</h1>
-              <p className="text-white/50 text-xs hidden sm:block">Alpha Agency CRM</p>
-            </div>
-          </div>
+      {/* ===================== MAIN COLUMN ===================== */}
+      <div className="lg:pl-[78px] min-w-0 flex flex-col min-h-screen">
 
-          {/* Right: Search + Actions */}
-          <div className="flex items-center gap-3">
-            {/* Search - Opens Command Palette */}
-            <button
-              onClick={() => { setCommandPaletteOpen(true); setCommandQuery(""); performGlobalSearch(""); }}
-              className="hidden sm:flex items-center gap-2 px-3 py-2 bg-white/[0.06] border border-white/10 rounded-xl text-white/40 hover:text-white/70 hover:bg-white/[0.08] hover:border-white/20 transition-all w-48 lg:w-64"
-            >
-              <Search className="w-4 h-4" />
-              <span className="text-sm flex-1 text-left">Rechercher...</span>
-              <kbd className="hidden lg:flex items-center gap-0.5 px-1.5 py-0.5 bg-white/[0.06] rounded text-[10px] text-white/40">
+        {/* Top bar */}
+        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+          <div className="flex items-center gap-3 px-4 lg:px-6 h-16">
+            {/* Brand (mobile) + page title */}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center lg:hidden flex-shrink-0">
+                <span className="text-white font-bold">A</span>
+              </div>
+              <h1 className="text-foreground font-semibold text-base lg:text-lg leading-tight truncate">{currentPage?.label || 'Aujourd\'hui'}</h1>
+            </div>
+
+            {/* AI command bar (center) — tablet & desktop → opens the assistant */}
+            <button onClick={openAssistant}
+              className="hidden md:flex flex-1 max-w-xl mx-auto items-center gap-2.5 h-10 px-3.5 rounded-2xl bg-secondary border border-border text-muted-foreground hover:border-primary/40 hover:bg-card transition-all">
+              <AssistantOrb size={18} />
+              <span className="text-sm flex-1 text-left truncate">Demander à l'assistant…</span>
+              <kbd className="flex items-center gap-0.5 px-1.5 py-0.5 bg-background/60 border border-border rounded text-[10px] flex-shrink-0" title="Recherche rapide">
                 <Command className="w-3 h-3" />K
               </kbd>
             </button>
 
-            {/* Mobile Search Button */}
-            <button
-              onClick={() => { setCommandPaletteOpen(true); setCommandQuery(""); performGlobalSearch(""); }}
-              className="sm:hidden p-2 rounded-xl hover:bg-white/[0.08] text-white/50"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-
-            {/* Notifications - Using NotificationCenter component */}
-            <NotificationCenter />
-
-            {/* User Profile */}
-            <div ref={profileRef} className="relative hidden sm:block">
-              <button
-                onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2 pl-3 border-l border-white/10 hover:bg-white/[0.06] rounded-r-xl pr-2 py-1 transition-colors"
-              >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center text-white font-semibold text-sm">
-                  {user?.name?.charAt(0) || 'A'}
-                </div>
-                <span className="text-white/80 text-sm font-medium hidden lg:block">{user?.name?.split(' ')[0]}</span>
-                <ChevronDown className="w-4 h-4 text-white/40" />
+            {/* Right actions */}
+            <div className="flex items-center gap-1 flex-shrink-0 ml-auto md:ml-0">
+              <button onClick={openCommand} title="Assistant / recherche"
+                className="md:hidden p-2 rounded-xl hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                <Search className="w-5 h-5" />
               </button>
-
-              {/* Profile Dropdown */}
-              {profileOpen && (
-                <div className="absolute top-full right-0 mt-2 w-56 bg-[#0C0709] border border-white/10 rounded-xl overflow-hidden shadow-xl z-50">
-                  <div className="p-3 border-b border-white/10">
-                    <p className="text-white font-medium text-sm">{user?.name || 'Admin'}</p>
-                    <p className="text-white/50 text-xs">{user?.email}</p>
+              <button onClick={toggleTheme} title={isDark ? 'Thème clair' : 'Thème sombre'}
+                className="lg:hidden p-2 rounded-xl hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+              <NotificationCenter />
+              <div ref={profileRef} className="relative hidden sm:block">
+                <button onClick={() => setProfileOpen(!profileOpen)}
+                  className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center text-white font-semibold text-sm">
+                    {user?.name?.charAt(0) || 'A'}
                   </div>
-                  <div className="p-1">
-                    <button
-                      onClick={() => {
-                        navigate('/admin/parametres');
-                        setProfileOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 p-2 hover:bg-white/[0.06] rounded-lg transition-colors text-white/80 text-sm"
-                    >
-                      <Settings className="w-4 h-4" />
-                      Paramètres
-                    </button>
-
-                    {/* Theme Toggle */}
-                    <div className="border-t border-white/10 mt-1 pt-1">
-                      <button
-                        onClick={toggleTheme}
-                        className="w-full flex items-center justify-between p-2 hover:bg-white/[0.06] rounded-lg transition-colors text-white/80 text-sm"
-                      >
-                        <div className="flex items-center gap-3">
-                          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                          <span>Thème {theme === 'dark' ? 'clair' : 'sombre'}</span>
+                  <ChevronDown className="w-4 h-4 text-muted-foreground hidden lg:block" />
+                </button>
+                {profileOpen && (
+                  <div className="absolute top-full right-0 mt-2 w-60 bg-popover border border-border rounded-2xl overflow-hidden shadow-pop z-50">
+                    <div className="p-3 border-b border-border">
+                      <p className="text-foreground font-medium text-sm">{user?.name || 'Admin'}</p>
+                      <p className="text-muted-foreground text-xs truncate">{user?.email}</p>
+                    </div>
+                    <div className="p-2">
+                      <button onClick={() => { navigate('/admin/parametres'); setProfileOpen(false); }}
+                        className="w-full flex items-center gap-3 p-2 hover:bg-secondary rounded-lg transition-colors text-foreground text-sm">
+                        <Settings className="w-4 h-4" /> Paramètres
+                      </button>
+                      <div className="mt-2 pt-2 border-t border-border">
+                        <p className="px-2 mb-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Apparence</p>
+                        <div className="flex items-center gap-1 p-1 rounded-xl bg-secondary">
+                          {themeOptions.map(opt => (
+                            <button key={opt.value} onClick={() => setTheme(opt.value)}
+                              className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[11px] font-medium transition-all ${theme === opt.value ? 'bg-card text-primary shadow-elev' : 'text-muted-foreground hover:text-foreground'}`}>
+                              <opt.icon className="w-4 h-4" /> {opt.label}
+                            </button>
+                          ))}
                         </div>
-                        <div className={`w-8 h-4 rounded-full relative transition-colors ${theme === 'dark' ? 'bg-[#E11D2E]' : 'bg-white/15'}`}>
-                          <div className={`absolute w-3 h-3 rounded-full bg-[#0C0709] top-0.5 transition-all ${theme === 'dark' ? 'left-4' : 'left-0.5'}`} />
-                        </div>
+                      </div>
+                      <button onClick={handleLogout}
+                        className="w-full flex items-center gap-3 p-2 mt-2 hover:bg-danger-soft rounded-lg transition-colors text-danger text-sm">
+                        <LogOut className="w-4 h-4" /> Déconnexion
                       </button>
                     </div>
-
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 p-2 hover:bg-[rgba(225,29,46,0.12)] rounded-lg transition-colors text-red-500 text-sm mt-1"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Déconnexion
-                    </button>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
+
+          {/* Connectivity banners */}
+          {!isOnline && (
+            <div className="bg-warning text-white px-4 py-1.5 flex items-center justify-center gap-2 text-xs font-medium">
+              <WifiOff className="w-3.5 h-3.5" /> Mode hors ligne
+            </div>
+          )}
+          {isOnline && wasOffline && (
+            <div className="bg-success text-white px-4 py-1.5 flex items-center justify-center gap-2 text-xs font-medium">
+              <Wifi className="w-3.5 h-3.5" /> Connexion rétablie
+            </div>
+          )}
         </header>
 
-        {/* Offline Indicator */}
-        {!isOnline && (
-          <div className="bg-amber-500/90 text-black px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium">
-            <WifiOff className="w-4 h-4" />
-            Mode hors ligne - Certaines fonctionnalités peuvent être limitées
-          </div>
-        )}
-
-        {/* Back Online Indicator */}
-        {isOnline && wasOffline && (
-          <div className="bg-green-500/90 text-black px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium animate-in slide-in-from-top duration-300">
-            <Wifi className="w-4 h-4" />
-            Connexion rétablie
-          </div>
-        )}
-
-        {/* Page Content */}
-        <main className="flex-1 p-4 lg:p-6 relative z-10">
-          <Outlet />
+        {/* Page content */}
+        <main className="flex-1 min-w-0 p-4 lg:p-6 pb-28 lg:pb-8 relative z-10">
+          <Outlet context={{ openCommand, openAssistant }} />
         </main>
       </div>
 
-      {/* Floating AI Chat */}
-      <FloatingAIChat />
-
-      {/* Quick Actions Button */}
-      <QuickActions />
-
-      {/* Command Palette (⌘K) */}
-      <Dialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
-        <DialogContent className="bg-[#140E11]/95 backdrop-blur-xl border-white/10 p-0 max-w-xl overflow-hidden shadow-2xl">
-          {/* Search Input */}
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
-            <Search className="w-5 h-5 text-white/40" />
-            <input
-              ref={commandInputRef}
-              value={commandQuery}
-              onChange={(e) => {
-                setCommandQuery(e.target.value);
-                performGlobalSearch(e.target.value);
-              }}
-              placeholder="Rechercher ou taper une commande..."
-              className="flex-1 bg-transparent text-white placeholder-white/30 outline-none text-base"
-              autoFocus
-            />
-            <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 bg-white/[0.06] rounded text-white/40 text-xs">
-              <Command className="w-3 h-3" />K
-            </kbd>
+      {/* ===================== MOBILE BOTTOM TAB BAR ===================== */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur-xl border-t border-border"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="grid grid-cols-5 items-end h-16 px-1">
+          <BottomTab tab={tabHome} active={isTabActive(tabHome)} onClick={() => navigate(tabHome.path)} />
+          <BottomTab tab={tabContacts} active={isTabActive(tabContacts)} onClick={() => navigate(tabContacts.path)} />
+          {/* Center AI */}
+          <div className="flex justify-center">
+            <button onClick={openAssistant} aria-label="Assistant IA" className="-mt-6 active:scale-95 transition-transform">
+              <span className="block rounded-full shadow-pop"><AssistantOrb size={56} pulse /></span>
+              <span className="block text-[10px] font-medium text-primary mt-0.5">Assistant</span>
+            </button>
           </div>
+          <BottomTab tab={tabInvoices} active={isTabActive(tabInvoices)} onClick={() => navigate(tabInvoices.path)} />
+          <button onClick={() => setMoreOpen(true)}
+            className="flex flex-col items-center justify-center gap-1 h-full text-muted-foreground active:text-foreground">
+            <MoreHorizontal className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Plus</span>
+          </button>
+        </div>
+      </nav>
 
-          {/* Results */}
+      {/* ===================== MOBILE "PLUS" SHEET ===================== */}
+      {moreOpen && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMoreOpen(false)} />
+          <div className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto bg-card border-t border-border rounded-t-3xl"
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}>
+            <div className="sticky top-0 bg-card pt-3 pb-2 px-5 flex items-center justify-between border-b border-border">
+              <img src={logoSrc} alt="Alpha Agency" className="h-7 w-auto" />
+              <button onClick={() => setMoreOpen(false)} className="p-2 rounded-xl hover:bg-secondary text-muted-foreground"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-4 space-y-5">
+              {navGroups.map(group => (
+                <div key={group.label}>
+                  <p className="px-1 mb-2 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{group.label}</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {group.items.map(item => (
+                      <NavLink key={item.path} to={item.path} end={item.end} onClick={() => setMoreOpen(false)}
+                        className={({ isActive }) => `flex flex-col items-center gap-2 py-3.5 rounded-2xl border text-center transition-colors ${
+                          isActive ? 'bg-brand-soft border-primary/30 text-primary' : 'bg-secondary border-transparent text-foreground/80 hover:text-foreground'
+                        }`}>
+                        <item.icon className="w-5 h-5" />
+                        <span className="text-[11px] font-medium leading-tight">{item.label}</span>
+                      </NavLink>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {/* Appearance + logout */}
+              <div className="pt-1">
+                <p className="px-1 mb-2 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Apparence</p>
+                <div className="flex items-center gap-1 p-1 rounded-2xl bg-secondary">
+                  {themeOptions.map(opt => (
+                    <button key={opt.value} onClick={() => setTheme(opt.value)}
+                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-medium transition-all ${theme === opt.value ? 'bg-card text-primary shadow-elev' : 'text-muted-foreground'}`}>
+                      <opt.icon className="w-4 h-4" /> {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-brand-soft text-primary font-medium">
+                <LogOut className="w-5 h-5" /> Déconnexion
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== ASSISTANT IA (chat Gemini) ===================== */}
+      <AssistantChat open={assistantOpen} onOpenChange={setAssistantOpen} />
+
+      {/* ===================== COMMAND PALETTE (recherche ⌘K) ===================== */}
+      <Dialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
+        <DialogContent className="bg-popover/95 backdrop-blur-xl border-border text-foreground p-0 max-w-xl overflow-hidden shadow-pop">
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+            <AssistantOrb size={22} />
+            <input ref={commandInputRef} value={commandQuery}
+              onChange={(e) => { setCommandQuery(e.target.value); performGlobalSearch(e.target.value); }}
+              placeholder="Demander à l'assistant ou rechercher…"
+              className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-base" autoFocus />
+            <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 bg-secondary rounded text-muted-foreground text-xs"><Command className="w-3 h-3" />K</kbd>
+          </div>
           <div className="max-h-[60vh] overflow-y-auto p-2">
             {isSearching ? (
-              <div className="flex items-center justify-center py-8 text-white/40">
-                <div className="w-5 h-5 border-2 border-[#E11D2E] border-t-transparent rounded-full animate-spin mr-2" />
-                Recherche...
+              <div className="flex items-center justify-center py-8 text-muted-foreground">
+                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" /> Recherche…
               </div>
             ) : commandResults.length === 0 ? (
-              <div className="text-center py-8 text-white/40">
+              <div className="text-center py-8 text-muted-foreground">
                 <FileSearch className="w-8 h-8 mx-auto mb-2 opacity-40" />
                 <p>Aucun résultat pour "{commandQuery}"</p>
               </div>
             ) : (
               <div className="space-y-1">
-                {/* Group by type */}
                 {['Navigation', 'Action rapide', 'Contact', 'Tâche', 'Facture', 'Opportunité'].map(type => {
                   const items = commandResults.filter(r => r.type === type);
                   if (items.length === 0) return null;
                   return (
                     <div key={type}>
-                      <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-white/40 font-medium">
-                        {type}
-                      </p>
-                      {items.map((result, idx) => {
-                        const globalIndex = commandResults.indexOf(result);
+                      <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{type}</p>
+                      {items.map((result) => {
+                        const idx = commandResults.indexOf(result);
                         const Icon = result.icon;
                         return (
-                          <button
-                            key={result.id}
-                            onClick={() => {
-                              result.action();
-                              setCommandPaletteOpen(false);
-                            }}
-                            onMouseEnter={() => setSelectedCommandIndex(globalIndex)}
-                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                              selectedCommandIndex === globalIndex
-                                ? 'bg-[rgba(225,29,46,0.15)] text-white'
-                                : 'text-white/70 hover:bg-white/[0.06] hover:text-white'
-                            }`}
-                          >
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                              selectedCommandIndex === globalIndex ? 'bg-[rgba(225,29,46,0.22)]' : 'bg-white/[0.06]'
-                            }`}>
+                          <button key={result.id}
+                            onClick={() => { result.action(); setCommandPaletteOpen(false); }}
+                            onMouseEnter={() => setSelectedCommandIndex(idx)}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${selectedCommandIndex === idx ? 'bg-brand-soft text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'}`}>
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedCommandIndex === idx ? 'bg-brand-soft' : 'bg-secondary'}`}>
                               <Icon className="w-4 h-4" />
                             </div>
                             <div className="flex-1 text-left">
                               <p className="text-sm font-medium">{result.title}</p>
-                              {result.subtitle && (
-                                <p className="text-xs text-white/40">{result.subtitle}</p>
-                              )}
+                              {result.subtitle && <p className="text-xs text-muted-foreground">{result.subtitle}</p>}
                             </div>
-                            {selectedCommandIndex === globalIndex && (
-                              <kbd className="px-2 py-0.5 bg-white/[0.06] rounded text-white/40 text-xs">
-                                Entrée
-                              </kbd>
-                            )}
+                            {selectedCommandIndex === idx && <kbd className="px-2 py-0.5 bg-secondary rounded text-muted-foreground text-xs">Entrée</kbd>}
                           </button>
                         );
                       })}
@@ -818,99 +477,66 @@ const DashboardLayout = () => {
               </div>
             )}
           </div>
-
-          {/* Footer */}
-          <div className="px-4 py-2 border-t border-white/10 bg-white/[0.05] flex items-center justify-between text-xs text-white/40">
+          <div className="px-4 py-2 border-t border-border bg-secondary/50 flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded">↑↓</kbd> Naviguer</span>
-              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded">Entrée</kbd> Sélectionner</span>
-              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded">Échap</kbd> Fermer</span>
+              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-secondary rounded">↑↓</kbd> Naviguer</span>
+              <span className="hidden sm:flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-secondary rounded">↵</kbd> Ouvrir</span>
+              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-secondary rounded">Échap</kbd> Fermer</span>
             </div>
-            <button
-              onClick={() => { setCommandPaletteOpen(false); setShowShortcutsHelp(true); }}
-              className="flex items-center gap-1 hover:text-white/80 transition-colors"
-            >
-              <Keyboard className="w-3 h-3" />
-              <span className="hidden sm:inline">Raccourcis</span>
+            <button onClick={() => { setCommandPaletteOpen(false); setShowShortcutsHelp(true); }} className="flex items-center gap-1 hover:text-foreground transition-colors">
+              <Keyboard className="w-3 h-3" /><span className="hidden sm:inline">Raccourcis</span>
             </button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Keyboard Shortcuts Help Dialog */}
+      {/* ===================== SHORTCUTS HELP ===================== */}
       <Dialog open={showShortcutsHelp} onOpenChange={setShowShortcutsHelp}>
-        <DialogContent className="bg-[#140E11]/95 backdrop-blur-xl border-white/10 shadow-2xl max-w-lg">
+        <DialogContent className="bg-popover/95 backdrop-blur-xl border-border text-foreground shadow-pop max-w-lg">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center">
-              <Keyboard className="w-5 h-5 text-white" />
-            </div>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center"><Keyboard className="w-5 h-5 text-white" /></div>
             <div>
-              <h2 className="text-lg font-semibold text-white">Raccourcis clavier</h2>
-              <p className="text-xs text-white/50">Naviguez plus rapidement dans l&apos;application</p>
+              <h2 className="text-lg font-semibold text-foreground">Raccourcis clavier</h2>
+              <p className="text-xs text-muted-foreground">Navigue plus vite dans l'application</p>
             </div>
           </div>
-
           <div className="space-y-4">
-            {/* Global shortcuts */}
             <div>
-              <p className="text-xs uppercase tracking-wider text-white/40 mb-2">Global</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Global</p>
               <div className="space-y-1.5">
-                {[
-                  { keys: ['⌘', 'K'], label: 'Recherche globale' },
-                  { keys: ['?'], label: 'Afficher cette aide' },
-                  { keys: ['Échap'], label: 'Fermer les modals' },
-                ].map((shortcut, i) => (
-                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/[0.06]">
-                    <span className="text-sm text-white/70">{shortcut.label}</span>
-                    <div className="flex items-center gap-1">
-                      {shortcut.keys.map((key, j) => (
-                        <kbd key={j} className="px-2 py-0.5 bg-white/[0.06] rounded text-white/50 text-xs min-w-[24px] text-center">
-                          {key}
-                        </kbd>
-                      ))}
-                    </div>
+                {[{ keys: ['⌘', 'K'], label: 'Assistant / recherche' }, { keys: ['?'], label: 'Cette aide' }, { keys: ['Échap'], label: 'Fermer' }].map((s, i) => (
+                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-secondary">
+                    <span className="text-sm text-foreground/80">{s.label}</span>
+                    <div className="flex items-center gap-1">{s.keys.map((k, j) => <kbd key={j} className="px-2 py-0.5 bg-secondary rounded text-muted-foreground text-xs min-w-[24px] text-center">{k}</kbd>)}</div>
                   </div>
                 ))}
               </div>
             </div>
-
-            {/* Navigation shortcuts */}
             <div>
-              <p className="text-xs uppercase tracking-wider text-white/40 mb-2">Navigation (G puis...)</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Aller à (G puis…)</p>
               <div className="grid grid-cols-2 gap-1.5">
-                {[
-                  { key: 'D', label: 'Dashboard' },
-                  { key: 'C', label: 'Contacts' },
-                  { key: 'T', label: 'Tâches' },
-                  { key: 'P', label: 'Pipeline' },
-                  { key: 'F', label: 'Facturation' },
-                  { key: 'S', label: 'Social Media' },
-                  { key: 'E', label: 'Éditorial' },
-                  { key: 'M', label: 'Multilink' },
-                  { key: 'A', label: 'Assistant' },
-                  { key: 'B', label: 'Budget' },
-                ].map((shortcut, i) => (
-                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/[0.06]">
-                    <span className="text-xs text-white/70">{shortcut.label}</span>
-                    <div className="flex items-center gap-1">
-                      <kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded text-white/50 text-[10px]">G</kbd>
-                      <kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded text-white/50 text-[10px]">{shortcut.key}</kbd>
-                    </div>
+                {[{ key: 'D', label: "Aujourd'hui" }, { key: 'C', label: 'Contacts' }, { key: 'F', label: 'Facturation' }, { key: 'E', label: 'Éditorial' }, { key: 'M', label: 'Multilink' }, { key: 'B', label: 'Budget' }].map((s, i) => (
+                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-secondary">
+                    <span className="text-xs text-foreground/80">{s.label}</span>
+                    <div className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-secondary rounded text-muted-foreground text-[10px]">G</kbd><kbd className="px-1.5 py-0.5 bg-secondary rounded text-muted-foreground text-[10px]">{s.key}</kbd></div>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-white/10 text-center">
-            <p className="text-xs text-white/40">
-              Les raccourcis fonctionnent quand vous n&apos;êtes pas dans un champ de texte
-            </p>
           </div>
         </DialogContent>
       </Dialog>
     </div>
   );
 };
+
+// Mobile bottom-bar tab
+const BottomTab = ({ tab, active, onClick }) => (
+  <button onClick={onClick}
+    className={`flex flex-col items-center justify-center gap-1 h-full transition-colors ${active ? 'text-primary' : 'text-muted-foreground active:text-foreground'}`}>
+    <tab.icon className="w-5 h-5" />
+    <span className="text-[10px] font-medium">{tab.label}</span>
+  </button>
+);
 
 export default DashboardLayout;

@@ -87,7 +87,7 @@ const SOCIAL_COLORS = {
   tiktok: '#000000',
   snapchat: '#FFFC00',
   email: '#EA4335',
-  website: '#6366f1'
+  website: '#E11D2E'
 };
 
 // Recommended image dimensions for cards
@@ -198,7 +198,7 @@ const CarouselSection = ({ items, colors, onItemClick }) => {
                         onClick={() => onItemClick({ url: item.url, id: item.id })}
                         className="mt-3 w-full py-2.5 rounded-full text-sm font-medium transition-all hover:opacity-90"
                         style={{ 
-                          backgroundColor: colors.accent || '#6366f1',
+                          backgroundColor: colors.accent || '#E11D2E',
                           color: colors.button_text || '#ffffff'
                         }}
                       >
@@ -303,13 +303,15 @@ const LinkBioPage = ({ customDomain }) => {
     const fetchPage = async () => {
       try {
         let response;
-        
+        // Aperçu admin (iframe) : ?preview=1 → le backend ne compte pas la visite comme une vraie vue
+        const previewQS = new URLSearchParams(window.location.search).get('preview') === '1' ? '?preview=1' : '';
+
         // Si on a un domaine personnalisé, utiliser l'API domaine
         if (customDomain) {
-          response = await fetch(`${API_URL}/api/multilink/domain/${customDomain}`);
+          response = await fetch(`${API_URL}/api/multilink/domain/${customDomain}${previewQS}`);
         } else {
           // Sinon, utiliser l'API slug standard
-          response = await fetch(`${API_URL}/api/multilink/public/${slug}`);
+          response = await fetch(`${API_URL}/api/multilink/public/${slug}${previewQS}`);
         }
         
         if (!response.ok) {
@@ -474,15 +476,15 @@ const LinkBioPage = ({ customDomain }) => {
                 alt={page.title}
                 className="w-28 h-28 rounded-full object-cover border-4 shadow-2xl"
                 style={{ 
-                  borderColor: colors.accent || '#6366f1',
-                  boxShadow: `0 0 40px ${colors.accent || '#6366f1'}40`
+                  borderColor: colors.accent || '#E11D2E',
+                  boxShadow: `0 0 40px ${colors.accent || '#E11D2E'}40`
                 }}
               />
               {/* Verified badge */}
               {page.verified && (
                 <div 
                   className="absolute bottom-1 right-1 w-7 h-7 rounded-full flex items-center justify-center"
-                  style={{ background: colors.accent || '#6366f1' }}
+                  style={{ background: colors.accent || '#E11D2E' }}
                 >
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -517,7 +519,7 @@ const LinkBioPage = ({ customDomain }) => {
         {socialLinks.length > 0 && (
           <div className="flex justify-center gap-3 mb-10 flex-wrap">
             {socialLinks.filter(s => s.is_active).map((social, index) => {
-              const bgColor = SOCIAL_COLORS[social.icon] || colors.accent || '#6366f1';
+              const bgColor = SOCIAL_COLORS[social.icon] || colors.accent || '#E11D2E';
               
               // Get modern icon component
               const getModernIcon = (iconName) => {
@@ -608,7 +610,7 @@ const LinkBioPage = ({ customDomain }) => {
                       }}
                       className={`px-8 py-3 ${roundedClass} font-medium text-base transition-all duration-300 hover:scale-[1.05] hover:opacity-90`}
                       style={{
-                        backgroundColor: colors.accent || '#6366f1',
+                        backgroundColor: colors.accent || '#E11D2E',
                         color: colors.button_text || '#ffffff'
                       }}
                     >
@@ -633,9 +635,9 @@ const LinkBioPage = ({ customDomain }) => {
                   >
                     <div 
                       className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: (colors.accent || '#6366f1') + '20' }}
+                      style={{ backgroundColor: (colors.accent || '#E11D2E') + '20' }}
                     >
-                      <IconComponent className="w-5 h-5" style={{ color: colors.accent || '#6366f1' }} />
+                      <IconComponent className="w-5 h-5" style={{ color: colors.accent || '#E11D2E' }} />
                     </div>
                     <div className="flex-1 text-left min-w-0">
                       <p className="font-semibold">{block.label}</p>
@@ -682,7 +684,7 @@ const LinkBioPage = ({ customDomain }) => {
                         }}
                         className="mt-4 px-6 py-2.5 rounded-full font-medium text-sm transition-all hover:opacity-90"
                         style={{ 
-                          backgroundColor: colors.accent || '#6366f1',
+                          backgroundColor: colors.accent || '#E11D2E',
                           color: colors.button_text || '#ffffff'
                         }}
                       >
@@ -767,7 +769,7 @@ const LinkBioPage = ({ customDomain }) => {
                       .prose h3 { font-size: 1.1em; }
                       .prose ul, .prose ol { padding-left: 1.5em; margin: 0.5em 0; text-align: left; }
                       .prose li { margin: 0.25em 0; }
-                      .prose a { color: ${colors.accent || '#6366f1'}; text-decoration: underline; }
+                      .prose a { color: ${colors.accent || '#E11D2E'}; text-decoration: underline; }
                       .prose strong { font-weight: 700; }
                       .prose em { font-style: italic; }
                     `}</style>
@@ -919,9 +921,9 @@ const LinkBioPage = ({ customDomain }) => {
                 {/* Link icon */}
                 <div 
                   className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: (colors.accent || '#6366f1') + '20' }}
+                  style={{ backgroundColor: (colors.accent || '#E11D2E') + '20' }}
                 >
-                  <IconComponent className="w-5 h-5" style={{ color: colors.accent || '#6366f1' }} />
+                  <IconComponent className="w-5 h-5" style={{ color: colors.accent || '#E11D2E' }} />
                 </div>
                 
                 {/* Link content */}

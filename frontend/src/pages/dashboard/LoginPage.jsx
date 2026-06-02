@@ -12,12 +12,25 @@ import FluidHeroLazy from "../../components/three/FluidHeroLazy";
 const RED = "#E11D2E";
 const fieldClass = "bg-white/[0.05] border-white/15 text-white placeholder:text-white/30 focus:border-white/40 h-12 pl-11 rounded-xl";
 
+// Dev-only: when running on localhost without a backend, allow entering the
+// admin to preview the UI. Never shown in production.
+const isLocalDev = typeof window !== "undefined" &&
+  ["localhost", "127.0.0.1", ""].includes(window.location.hostname);
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
+
+  const handleDevAccess = () => {
+    localStorage.setItem("alpha_token", "dev-preview-token");
+    localStorage.setItem("alpha_user", JSON.stringify({ name: "Léo", role: "super_admin", email: "leo@alpha-agency.fr" }));
+    localStorage.setItem("alpha_token_expiry", Date.now() + 24 * 60 * 60 * 1000);
+    toast.success("Mode démo local");
+    navigate("/admin");
+  };
 
   useEffect(() => {
     const savedEmail = localStorage.getItem("alpha_remember_email");
@@ -127,6 +140,16 @@ const LoginPage = () => {
           <p className="mt-6 text-center text-xs text-white/30">
             Accès réservé aux administrateurs Alpha Agency
           </p>
+
+          {isLocalDev && (
+            <button
+              type="button"
+              onClick={handleDevAccess}
+              className="mt-4 w-full py-2.5 rounded-xl border border-dashed border-white/20 text-white/50 hover:text-white hover:border-white/40 text-xs font-mono uppercase tracking-wider transition-colors"
+            >
+              ⚡ Entrer en mode démo (local)
+            </button>
+          )}
         </div>
       </motion.div>
     </div>

@@ -128,93 +128,93 @@ html, body {
 }
 
 @layer base {
-    :root {
-        --background: 210 40% 98%;
-        --foreground: 0 0% 10%;
-        --card: 0 0% 100%;
-        --card-foreground: 0 0% 10%;
+    /* ============================================================
+       ALPHA ADMIN — DESIGN TOKENS (light + dark · brand red)
+       Single source of truth. UI consumes shadcn semantic names
+       (bg-background / bg-card / text-foreground / border-border /
+       bg-primary …) plus the brand-soft & status helpers below.
+       Theme is set via [data-theme] + .dark/.light on <html>
+       (admin, OS-aware) and pinned to dark on the public site.
+       ============================================================ */
+    :root,
+    .light,
+    [data-theme="light"] {
+        --background: 220 22% 97%;        /* canvas      #F4F6F9 */
+        --foreground: 222 47% 11%;        /* ink         #0F172A */
+        --card: 0 0% 100%;                /* surface     #FFFFFF */
+        --card-foreground: 222 47% 11%;
         --popover: 0 0% 100%;
-        --popover-foreground: 0 0% 10%;
-        --primary: 221 83% 53%;
+        --popover-foreground: 222 47% 11%;
+        --primary: 354 77% 50%;           /* brand red   #E11D2E */
         --primary-foreground: 0 0% 100%;
-        --secondary: 0 0% 96%;
-        --secondary-foreground: 0 0% 10%;
-        --muted: 0 0% 96%;
-        --muted-foreground: 0 0% 45%;
-        --accent: 221 83% 53%;
+        --secondary: 220 18% 95%;         /* raised / hover */
+        --secondary-foreground: 222 30% 20%;
+        --muted: 220 16% 94%;
+        --muted-foreground: 218 12% 42%;  /* #5B6472 */
+        --accent: 354 77% 50%;
         --accent-foreground: 0 0% 100%;
-        --destructive: 0 62% 30%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 90%;
-        --input: 0 0% 90%;
-        --ring: 221 83% 53%;
-        --chart-1: 221 83% 53%;
-        --chart-2: 160 60% 45%;
-        --chart-3: 30 80% 55%;
-        --chart-4: 280 65% 60%;
-        --chart-5: 340 75% 55%;
-        --radius: 0.25rem;
-        
-        /* Custom theme variables */
-        --bg-primary: #FFFFFF;
-        --bg-secondary: #F8FAFC;
-        --bg-card: #FFFFFF;
-        --text-primary: #1A1A1A;
-        --text-secondary: #4A4A4A;
-        --border-color: rgba(0, 0, 0, 0.1);
+        --destructive: 0 72% 48%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 216 18% 90%;            /* #E2E6EC */
+        --input: 216 18% 90%;
+        --ring: 354 77% 50%;
+        --radius: 0.7rem;
+
+        --chart-1: 354 77% 50%;
+        --chart-2: 256 72% 60%;
+        --chart-3: 38 92% 50%;
+        --chart-4: 160 70% 42%;
+        --chart-5: 217 91% 60%;
+
+        /* Brand + status helpers (consumed via Tailwind aliases) */
+        --brand-soft: rgba(225, 29, 46, 0.10);
+        --success: #16A34A; --success-soft: rgba(22, 163, 74, 0.12);
+        --warning: #D97706; --warning-soft: rgba(217, 119, 6, 0.12);
+        --danger:  #DC2626; --danger-soft:  rgba(220, 38, 38, 0.12);
+        --info:    #2563EB; --info-soft:    rgba(37, 99, 235, 0.12);
+
+        --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+        --shadow-pop: 0 14px 38px -10px rgba(16, 24, 40, 0.20);
+        color-scheme: light;
     }
 
-    /* Light mode explicit */
-    .light, [data-theme="light"] {
-        --background: 210 40% 98%;
-        --foreground: 0 0% 10%;
-        --card: 0 0% 100%;
-        --card-foreground: 0 0% 10%;
-        --popover: 0 0% 100%;
-        --popover-foreground: 0 0% 10%;
-        --primary: 221 83% 53%;
+    .dark,
+    [data-theme="dark"] {
+        --background: 336 33% 4%;         /* brand near-black #0A0507 */
+        --foreground: 330 12% 96%;        /* warm white */
+        --card: 335 22% 7%;               /* surface */
+        --card-foreground: 330 12% 96%;
+        --popover: 335 24% 9%;
+        --popover-foreground: 330 12% 96%;
+        --primary: 352 100% 63%;          /* brand red, brightened #FF4257 */
         --primary-foreground: 0 0% 100%;
-        --secondary: 0 0% 96%;
-        --secondary-foreground: 0 0% 10%;
-        --muted: 0 0% 96%;
-        --muted-foreground: 0 0% 45%;
-        --border: 0 0% 90%;
-        --input: 0 0% 90%;
-
-        --bg-primary: #FFFFFF;
-        --bg-secondary: #F8FAFC;
-        --bg-card: #FFFFFF;
-        --text-primary: #1A1A1A;
-        --text-secondary: #4A4A4A;
-        --border-color: rgba(0, 0, 0, 0.1);
-    }
-
-    /* Dark mode for dashboard */
-    .dark, [data-theme="dark"] {
-        --background: 0 0% 2%;
-        --foreground: 0 0% 98%;
-        --card: 0 0% 4%;
-        --card-foreground: 0 0% 98%;
-        --popover: 0 0% 4%;
-        --popover-foreground: 0 0% 98%;
-        --primary: 239 84% 67%;
-        --primary-foreground: 0 0% 100%;
-        --secondary: 0 0% 8%;
-        --secondary-foreground: 0 0% 98%;
-        --muted: 0 0% 8%;
-        --muted-foreground: 0 0% 63%;
-        --accent: 239 84% 67%;
+        --secondary: 337 18% 12%;         /* raised / hover */
+        --secondary-foreground: 330 12% 92%;
+        --muted: 337 16% 13%;
+        --muted-foreground: 336 8% 62%;
+        --accent: 352 100% 63%;
         --accent-foreground: 0 0% 100%;
-        --border: 0 0% 12%;
-        --input: 0 0% 12%;
-        --ring: 239 84% 67%;
-        
-        --bg-primary: #02040A;
-        --bg-secondary: #0A0A0A;
-        --bg-card: rgba(255, 255, 255, 0.03);
-        --text-primary: #FFFFFF;
-        --text-secondary: rgba(255, 255, 255, 0.6);
-        --border-color: rgba(255, 255, 255, 0.1);
+        --destructive: 0 72% 58%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 336 14% 16%;
+        --input: 336 14% 18%;
+        --ring: 352 100% 63%;
+
+        --chart-1: 352 100% 66%;
+        --chart-2: 256 90% 72%;
+        --chart-3: 38 96% 58%;
+        --chart-4: 160 70% 50%;
+        --chart-5: 217 91% 66%;
+
+        --brand-soft: rgba(255, 66, 87, 0.14);
+        --success: #34D399; --success-soft: rgba(52, 211, 153, 0.14);
+        --warning: #FBBF24; --warning-soft: rgba(251, 191, 36, 0.14);
+        --danger:  #FB7185; --danger-soft:  rgba(251, 113, 133, 0.16);
+        --info:    #60A5FA; --info-soft:    rgba(96, 165, 250, 0.14);
+
+        --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.02), 0 12px 32px -14px rgba(0, 0, 0, 0.7);
+        --shadow-pop: 0 24px 56px -14px rgba(0, 0, 0, 0.78);
+        color-scheme: dark;
     }
 }
 
@@ -236,52 +236,8 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Light theme (default for public pages) */
-body.light, body[data-theme="light"] {
-    background-color: #F8FAFC !important;
-    color: #1A1A1A !important;
-}
-
-body.light .glass-sidebar,
-body[data-theme="light"] .glass-sidebar {
-    background: rgba(255, 255, 255, 0.9) !important;
-    border-right: 1px solid rgba(0, 0, 0, 0.1) !important;
-}
-
-body.light .glass-panel,
-body[data-theme="light"] .glass-panel {
-    background: rgba(255, 255, 255, 0.8) !important;
-    border-color: rgba(0, 0, 0, 0.1) !important;
-}
-
-body.light .kpi-card,
-body[data-theme="light"] .kpi-card {
-    background: rgba(255, 255, 255, 0.9) !important;
-    border-color: rgba(0, 0, 0, 0.1) !important;
-}
-
-body.light .nav-item,
-body[data-theme="light"] .nav-item {
-    color: #4A4A4A !important;
-}
-
-body.light .nav-item:hover,
-body[data-theme="light"] .nav-item:hover {
-    background: rgba(99, 102, 241, 0.1) !important;
-    color: #1A1A1A !important;
-}
-
-body.light .nav-item.active,
-body[data-theme="light"] .nav-item.active {
-    background: rgba(99, 102, 241, 0.15) !important;
-    color: #4F46E5 !important;
-}
-
-/* Dark theme (not used — kept for reference) */
-body.dark, body[data-theme="dark"] {
-    background-color: #F8FAFC !important;
-    color: #1E293B !important;
-}
+/* Theme is driven by tokens on <html> (see @layer base above).
+   Body inherits bg-background / text-foreground via the base layer. */
 
 /* Theme-aware utility classes */
 .theme-bg {
@@ -380,29 +336,32 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'JetBrains Mono', monospace;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar — neutral & subtle (no loud red chrome) */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #F5F5F5;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #CE0202;
-    border-radius: 4px;
+    background: rgba(127, 127, 140, 0.35);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #B00202;
+    background: rgba(127, 127, 140, 0.55);
+    background-clip: padding-box;
 }
 
 /* Selection */
 ::selection {
-    background: #6366F1;
-    color: white;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
 }
 
 /* Glass panels */
@@ -561,23 +520,10 @@ h1, h2, h3, h4, h5, h6 {
     to { opacity: 1; }
 }
 
-/* Custom input styles */
+/* Inputs follow the active theme. Components (shadcn <Input>, explicit
+   classes) own their fill; raw inputs inherit foreground + token border. */
 input, textarea, select {
-    background: #FFFFFF;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    color: #1A1A1A;
-    transition: border-color 0.3s ease;
-}
-
-input:focus, textarea:focus, select:focus {
-    outline: none;
-    border-color: #CE0202;
-}
-
-.dark input, .dark textarea, .dark select {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    color: #1E293B;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* Dashboard specific */
@@ -692,24 +638,36 @@ a[href*="emergent.sh"] {
 /* Import fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
-/* Admin-specific body background */
+/* Admin shell root — token background + subtle brand ambient glow */
 .admin-body {
-    background: #02040A;
+    background: hsl(var(--background));
     min-height: 100vh;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
 }
 
 .admin-body::before {
     content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 40%);
+    inset: 0;
+    background: radial-gradient(60% 50% at 50% -8%, var(--brand-soft) 0%, transparent 60%),
+                radial-gradient(40% 40% at 100% 100%, hsl(var(--primary) / 0.06) 0%, transparent 55%);
     pointer-events: none;
     z-index: 0;
+}
+
+/* Subtle, theme-aware scrollbars inside the admin (public keeps brand red) */
+.admin-body { scrollbar-width: thin; scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent; }
+.admin-body ::-webkit-scrollbar { width: 8px; height: 8px; }
+.admin-body ::-webkit-scrollbar-track { background: transparent; }
+.admin-body ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.25);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+.admin-body ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.45);
+    background-clip: padding-box;
 }
 
 /* Glass panel base */

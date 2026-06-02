@@ -227,7 +227,7 @@ export default function ImportContactsDialog({ open, onOpenChange, onImportSucce
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-white max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-card max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[#1A1A1A] flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-[#CE0202]" />
@@ -253,7 +253,7 @@ export default function ImportContactsDialog({ open, onOpenChange, onImportSucce
                   isDragActive
                     ? "border-[#CE0202] bg-[#CE0202]/5"
                     : file
-                    ? "border-green-500 bg-green-50"
+                    ? "border-green-500 bg-success-soft"
                     : "border-[#E5E5E5] hover:border-[#CE0202] hover:bg-[#F8F8F8]"
                 }`}
               >
@@ -265,8 +265,8 @@ export default function ImportContactsDialog({ open, onOpenChange, onImportSucce
                   </div>
                 ) : file ? (
                   <div className="flex flex-col items-center gap-3">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                      <FileSpreadsheet className="w-8 h-8 text-green-600" />
+                    <div className="w-16 h-16 bg-success-soft rounded-full flex items-center justify-center">
+                      <FileSpreadsheet className="w-8 h-8 text-success" />
                     </div>
                     <div>
                       <p className="text-[#1A1A1A] font-medium">{file.name}</p>
@@ -282,7 +282,7 @@ export default function ImportContactsDialog({ open, onOpenChange, onImportSucce
                         setFile(null);
                         setParseResult(null);
                       }}
-                      className="text-red-500 hover:text-red-600"
+                      className="text-danger hover:text-danger"
                     >
                       <X className="w-4 h-4 mr-1" />
                       Supprimer
@@ -395,10 +395,10 @@ export default function ImportContactsDialog({ open, onOpenChange, onImportSucce
                             value={mapping[col] || "ignore"}
                             onValueChange={(value) => handleMappingChange(col, value)}
                           >
-                            <SelectTrigger className="w-full bg-white border-[#E5E5E5]">
+                            <SelectTrigger className="w-full bg-card border-[#E5E5E5]">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
+                            <SelectContent className="bg-card">
                               {CONTACT_FIELDS.map((field) => (
                                 <SelectItem key={field.value} value={field.value}>
                                   {field.label}
@@ -414,9 +414,9 @@ export default function ImportContactsDialog({ open, onOpenChange, onImportSucce
               </div>
 
               {!isMappingValid() && (
-                <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <AlertCircle className="w-4 h-4 text-yellow-600" />
-                  <span className="text-sm text-yellow-700">
+                <div className="flex items-center gap-2 p-3 bg-warning-soft border border-yellow-200 rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-warning" />
+                  <span className="text-sm text-warning">
                     Vous devez mapper au moins l'email ou le téléphone.
                   </span>
                 </div>
@@ -615,34 +615,34 @@ export default function ImportContactsDialog({ open, onOpenChange, onImportSucce
               animate={{ opacity: 1, scale: 1 }}
               className="space-y-4 text-center"
             >
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-8 h-8 text-green-600" />
+              <div className="w-16 h-16 bg-success-soft rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-8 h-8 text-success" />
               </div>
 
               <h3 className="text-xl font-bold text-[#1A1A1A]">Import terminé !</h3>
 
               <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">{importResult.imported}</p>
-                  <p className="text-xs text-green-700">Importés</p>
+                <div className="p-4 bg-success-soft rounded-lg">
+                  <p className="text-2xl font-bold text-success">{importResult.imported}</p>
+                  <p className="text-xs text-success">Importés</p>
                 </div>
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <p className="text-2xl font-bold text-blue-600">{importResult.updated}</p>
-                  <p className="text-xs text-blue-700">Mis à jour</p>
+                <div className="p-4 bg-info-soft rounded-lg">
+                  <p className="text-2xl font-bold text-info">{importResult.updated}</p>
+                  <p className="text-xs text-info">Mis à jour</p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-gray-600">{importResult.skipped}</p>
-                  <p className="text-xs text-gray-700">Ignorés</p>
+                <div className="p-4 bg-secondary rounded-lg">
+                  <p className="text-2xl font-bold text-muted-foreground">{importResult.skipped}</p>
+                  <p className="text-xs text-foreground">Ignorés</p>
                 </div>
               </div>
 
               {importResult.errors.length > 0 && (
-                <div className="mt-4 p-4 bg-red-50 rounded-lg text-left max-h-40 overflow-y-auto">
-                  <h4 className="font-medium text-red-700 mb-2 flex items-center gap-2">
+                <div className="mt-4 p-4 bg-danger-soft rounded-lg text-left max-h-40 overflow-y-auto">
+                  <h4 className="font-medium text-danger mb-2 flex items-center gap-2">
                     <AlertCircle className="w-4 h-4" />
                     Erreurs ({importResult.errors.length})
                   </h4>
-                  <ul className="text-sm text-red-600 space-y-1">
+                  <ul className="text-sm text-danger space-y-1">
                     {importResult.errors.map((err, i) => (
                       <li key={i}>• {err}</li>
                     ))}

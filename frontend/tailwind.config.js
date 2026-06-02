@@ -58,7 +58,17 @@ module.exports = {
                                 '4': 'hsl(var(--chart-4))',
                                 '5': 'hsl(var(--chart-5))'
                         },
-                        // CRM accent colors
+                        // Brand + status (theme-aware, driven by CSS tokens)
+                        brand: {
+                                DEFAULT: 'hsl(var(--primary))',
+                                fg: 'hsl(var(--primary-foreground))',
+                                soft: 'var(--brand-soft)'
+                        },
+                        success: { DEFAULT: 'var(--success)', soft: 'var(--success-soft)' },
+                        warning: { DEFAULT: 'var(--warning)', soft: 'var(--warning-soft)' },
+                        danger: { DEFAULT: 'var(--danger)', soft: 'var(--danger-soft)' },
+                        info: { DEFAULT: 'var(--info)', soft: 'var(--info-soft)' },
+                        // CRM accent colors (legacy)
                         crm: {
                                 primary: '#3B82F6',
                                 success: '#10B981',
@@ -75,7 +85,10 @@ module.exports = {
                 boxShadow: {
                         'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
                         'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-                        'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'
+                        'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                        // Theme-aware elevation (light + dark)
+                        'elev': 'var(--shadow-card)',
+                        'pop': 'var(--shadow-pop)'
                 },
                 keyframes: {
                         'accordion-down': {

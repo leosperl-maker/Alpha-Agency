@@ -21,7 +21,9 @@ const MainLayout = () => {
       };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    // Public site is a fixed dark design — pin dark tokens locally so it
+    // never follows the admin's light/dark/OS preference.
+    <div data-theme="dark" className="dark min-h-screen flex flex-col bg-[#0A0507]">
       <Navbar />
       <main className="flex-1">
         <AnimatePresence mode="wait" initial={false}>

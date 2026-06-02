@@ -204,17 +204,17 @@ const InvoicesPage = () => {
   }, [searchParams, setSearchParams]);
 
   const statusConfig = {
-    brouillon: { label: "Brouillon", color: "bg-slate-100 text-slate-700", icon: FileText },
-    en_attente: { label: "En attente", color: "bg-amber-100 text-amber-700", icon: Clock },
-    envoyee: { label: "Envoyée", color: "bg-blue-100 text-blue-700", icon: Mail },
-    "partiellement_payée": { label: "Partiel", color: "bg-orange-100 text-orange-700", icon: PiggyBank },
-    "payée": { label: "Payée", color: "bg-green-100 text-green-700", icon: CheckCircle },
-    en_retard: { label: "En retard", color: "bg-red-100 text-red-700", icon: AlertTriangle },
-    annulee: { label: "Annulée", color: "bg-slate-100 text-slate-500", icon: XCircle },
+    brouillon: { label: "Brouillon", color: "bg-secondary text-foreground", icon: FileText },
+    en_attente: { label: "En attente", color: "bg-warning-soft text-warning", icon: Clock },
+    envoyee: { label: "Envoyée", color: "bg-info-soft text-info", icon: Mail },
+    "partiellement_payée": { label: "Partiel", color: "bg-warning-soft text-warning", icon: PiggyBank },
+    "payée": { label: "Payée", color: "bg-success-soft text-success", icon: CheckCircle },
+    en_retard: { label: "En retard", color: "bg-danger-soft text-danger", icon: AlertTriangle },
+    annulee: { label: "Annulée", color: "bg-secondary text-muted-foreground", icon: XCircle },
     // Aliases for backward compatibility
-    payee: { label: "Payée", color: "bg-green-100 text-green-700", icon: CheckCircle },
-    "soldée": { label: "Payée", color: "bg-green-100 text-green-700", icon: CheckCircle },
-    "partiel": { label: "Partiel", color: "bg-orange-100 text-orange-700", icon: PiggyBank },
+    payee: { label: "Payée", color: "bg-success-soft text-success", icon: CheckCircle },
+    "soldée": { label: "Payée", color: "bg-success-soft text-success", icon: CheckCircle },
+    "partiel": { label: "Partiel", color: "bg-warning-soft text-warning", icon: PiggyBank },
   };
 
   const paymentMethods = {
@@ -439,9 +439,9 @@ const InvoicesPage = () => {
   const getInvoiceTypeBadge = (invoice) => {
     const type = invoice.invoice_type || 'standard';
     if (type === 'deposit') {
-      return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Acompte</Badge>;
+      return <Badge variant="outline" className="bg-info-soft text-info border-info/30">Acompte</Badge>;
     } else if (type === 'balance') {
-      return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Solde</Badge>;
+      return <Badge variant="outline" className="bg-brand-soft text-primary border-primary/30">Solde</Badge>;
     }
     return null;
   };
@@ -946,9 +946,9 @@ const InvoicesPage = () => {
     const companyVat = settings?.company_vat || COMPANY_INFO.tva;
     
     return (
-      <div className="bg-white backdrop-blur-xl border border-slate-200 rounded-lg shadow-lg overflow-hidden h-full">
-        <div className="bg-white px-4 py-2 border-b border-slate-200 flex items-center justify-between">
-          <span className="text-sm font-medium text-slate-500">Aperçu</span>
+      <div className="bg-card backdrop-blur-xl border border-border rounded-lg shadow-lg overflow-hidden h-full">
+        <div className="bg-card px-4 py-2 border-b border-border flex items-center justify-between">
+          <span className="text-sm font-medium text-muted-foreground">Aperçu</span>
           <Badge variant="outline" className="text-xs">
             {documentType === 'devis' ? 'DEVIS' : 'FACTURE'}
           </Badge>
@@ -958,58 +958,58 @@ const InvoicesPage = () => {
           <div className="flex justify-between items-start mb-6">
             <div>
               <img src={COMPANY_INFO.logo} alt="Alpha Agency" className="h-12 mb-2" />
-              <p className="text-[8px] text-slate-500">{COMPANY_INFO.tagline}</p>
+              <p className="text-[8px] text-muted-foreground">{COMPANY_INFO.tagline}</p>
             </div>
             <div className="text-right">
-              <h2 className="text-lg font-bold text-indigo-600 mb-1">
+              <h2 className="text-lg font-bold text-primary mb-1">
                 {documentType === 'devis' ? 'DEVIS' : 'FACTURE'}
               </h2>
-              <p className="text-slate-500">N° {editingInvoice?.invoice_number || 'NOUVEAU'}</p>
-              <p className="text-slate-500">Date: {today}</p>
+              <p className="text-muted-foreground">N° {editingInvoice?.invoice_number || 'NOUVEAU'}</p>
+              <p className="text-muted-foreground">Date: {today}</p>
             </div>
           </div>
 
           {/* Company & Client Info */}
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-white p-3 rounded">
-              <p className="font-bold text-slate-900 mb-1">{companyName}</p>
-              <p className="text-slate-500">{companyAddress}</p>
-              <p className="text-slate-500">Tél: {companyPhone}</p>
-              <p className="text-slate-500">{companyEmail}</p>
-              <p className="text-slate-500 mt-1">SIRET: {companySiret}</p>
-              {companyVat && <p className="text-slate-500">TVA: {companyVat}</p>}
+            <div className="bg-card p-3 rounded">
+              <p className="font-bold text-foreground mb-1">{companyName}</p>
+              <p className="text-muted-foreground">{companyAddress}</p>
+              <p className="text-muted-foreground">Tél: {companyPhone}</p>
+              <p className="text-muted-foreground">{companyEmail}</p>
+              <p className="text-muted-foreground mt-1">SIRET: {companySiret}</p>
+              {companyVat && <p className="text-muted-foreground">TVA: {companyVat}</p>}
             </div>
-            <div className="bg-white p-3 rounded">
-              <p className="font-bold text-slate-500 mb-1">DESTINATAIRE</p>
+            <div className="bg-card p-3 rounded">
+              <p className="font-bold text-muted-foreground mb-1">DESTINATAIRE</p>
               {contact ? (
                 <>
-                  <p className="font-bold text-slate-900">{contact.first_name} {contact.last_name}</p>
-                  {contact.company && <p className="text-slate-500">{contact.company}</p>}
-                  {contact.company_address && <p className="text-slate-500">{contact.company_address}</p>}
-                  {contact.email && <p className="text-slate-500">{contact.email}</p>}
-                  {contact.phone && <p className="text-slate-500">Tél: {contact.phone}</p>}
-                  {contact.siret && <p className="text-slate-500 mt-1">SIRET: {contact.siret}</p>}
+                  <p className="font-bold text-foreground">{contact.first_name} {contact.last_name}</p>
+                  {contact.company && <p className="text-muted-foreground">{contact.company}</p>}
+                  {contact.company_address && <p className="text-muted-foreground">{contact.company_address}</p>}
+                  {contact.email && <p className="text-muted-foreground">{contact.email}</p>}
+                  {contact.phone && <p className="text-muted-foreground">Tél: {contact.phone}</p>}
+                  {contact.siret && <p className="text-muted-foreground mt-1">SIRET: {contact.siret}</p>}
                 </>
               ) : (
-                <p className="text-slate-400 italic">Sélectionnez un client</p>
+                <p className="text-muted-foreground italic">Sélectionnez un client</p>
               )}
             </div>
           </div>
 
           {/* Dates */}
           <div className="flex gap-4 mb-4 text-[10px]">
-            <div className="bg-indigo-600/10 px-3 py-1 rounded">
-              <span className="text-indigo-600 font-medium">Date d&apos;émission:</span> {today}
+            <div className="bg-primary/10 px-3 py-1 rounded">
+              <span className="text-primary font-medium">Date d&apos;émission:</span> {today}
             </div>
-            <div className="bg-indigo-600/10 px-3 py-1 rounded">
-              <span className="text-indigo-600 font-medium">Échéance:</span> {dueDate}
+            <div className="bg-primary/10 px-3 py-1 rounded">
+              <span className="text-primary font-medium">Échéance:</span> {dueDate}
             </div>
           </div>
 
           {/* Items Table */}
           <table className="w-full mb-4">
             <thead>
-              <tr className="bg-slate-100 text-slate-700">
+              <tr className="bg-secondary text-foreground">
                 <th className="text-left p-2 text-[10px]">Désignation</th>
                 <th className="text-center p-2 text-[10px] w-12">Qté</th>
                 <th className="text-right p-2 text-[10px] w-16">P.U. HT</th>
@@ -1019,14 +1019,14 @@ const InvoicesPage = () => {
             </thead>
             <tbody>
               {items.filter(i => i.title || i.description).map((item, index) => (
-                <tr key={index} className="border-b border-slate-200">
+                <tr key={index} className="border-b border-border">
                   <td className="p-2 text-[10px]">
                     {item.title && <div className="font-semibold">{item.title}</div>}
-                    {item.description && <div className="text-slate-500 whitespace-pre-wrap">{item.description}</div>}
+                    {item.description && <div className="text-muted-foreground whitespace-pre-wrap">{item.description}</div>}
                   </td>
                   <td className="p-2 text-[10px] text-center">{item.quantity}</td>
                   <td className="p-2 text-[10px] text-right">{formatCurrency(item.unit_price)}</td>
-                  <td className="p-2 text-[10px] text-center text-indigo-600">
+                  <td className="p-2 text-[10px] text-center text-primary">
                     {item.discount > 0 
                       ? (item.discountType === "fixed" 
                           ? `-${formatCurrency(item.discount)}` 
@@ -1038,7 +1038,7 @@ const InvoicesPage = () => {
               ))}
               {items.filter(i => i.title || i.description).length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-4 text-center text-slate-400 italic">
+                  <td colSpan={5} className="p-4 text-center text-muted-foreground italic">
                     Ajoutez des lignes à votre {documentType}
                   </td>
                 </tr>
@@ -1050,68 +1050,68 @@ const InvoicesPage = () => {
           <div className="flex justify-end mb-4">
             <div className="w-56">
               <div className="flex justify-between py-1 text-[10px]">
-                <span className="text-slate-500">Sous-total HT</span>
+                <span className="text-muted-foreground">Sous-total HT</span>
                 <span>{formatCurrency(calculateSubtotal())}</span>
               </div>
               {globalDiscount.value > 0 && (
                 <>
-                  <div className="flex justify-between py-1 text-[10px] text-indigo-600">
+                  <div className="flex justify-between py-1 text-[10px] text-primary">
                     <span>Remise globale {globalDiscount.type === "percent" ? `(${globalDiscount.value}%)` : ''}</span>
                     <span>-{formatCurrency(calculateGlobalDiscountAmount())}</span>
                   </div>
                   <div className="flex justify-between py-1 text-[10px]">
-                    <span className="text-slate-500">Sous-total après remise</span>
+                    <span className="text-muted-foreground">Sous-total après remise</span>
                     <span>{formatCurrency(calculateSubtotalAfterDiscount())}</span>
                   </div>
                 </>
               )}
               <div className="flex justify-between py-1 text-[10px]">
-                <span className="text-slate-500">TVA (8.5%)</span>
+                <span className="text-muted-foreground">TVA (8.5%)</span>
                 <span>{formatCurrency(calculateTVA())}</span>
               </div>
               <div className="flex justify-between py-2 text-sm font-bold border-t-2 border-green-600/50 mt-1">
-                <span className="text-green-700 text-[10px] leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
-                <span className="text-green-700">{formatCurrency(calculateTotal())}</span>
+                <span className="text-success text-[10px] leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
+                <span className="text-success">{formatCurrency(calculateTotal())}</span>
               </div>
             </div>
           </div>
 
           {/* Conditions */}
           {(settings?.default_conditions || formData.conditions) && (
-            <div className="bg-white p-3 rounded mb-4">
+            <div className="bg-card p-3 rounded mb-4">
               <p className="font-bold text-[10px] mb-1">Conditions de règlement:</p>
-              <p className="text-[10px] text-slate-500 whitespace-pre-wrap">{settings?.default_conditions || formData.conditions}</p>
+              <p className="text-[10px] text-muted-foreground whitespace-pre-wrap">{settings?.default_conditions || formData.conditions}</p>
             </div>
           )}
           
           {/* Bank Details */}
           {(settings?.bank_details || formData.bank_details) && (
-            <div className="bg-white p-3 rounded mb-4">
+            <div className="bg-card p-3 rounded mb-4">
               <p className="font-bold text-[10px] mb-1">Détails du paiement:</p>
-              <p className="text-[10px] text-slate-500">Bénéficiaire: {companyName}</p>
-              <p className="text-[10px] text-slate-500 whitespace-pre-wrap font-mono">{settings?.bank_details || formData.bank_details}</p>
+              <p className="text-[10px] text-muted-foreground">Bénéficiaire: {companyName}</p>
+              <p className="text-[10px] text-muted-foreground whitespace-pre-wrap font-mono">{settings?.bank_details || formData.bank_details}</p>
             </div>
           )}
 
           {/* Notes */}
           {formData.notes && (
-            <div className="bg-white p-3 rounded mb-4">
+            <div className="bg-card p-3 rounded mb-4">
               <p className="font-bold text-[10px] mb-1">Notes:</p>
-              <p className="text-[10px] text-slate-500 whitespace-pre-wrap">{formData.notes}</p>
+              <p className="text-[10px] text-muted-foreground whitespace-pre-wrap">{formData.notes}</p>
             </div>
           )}
           
           {/* Signature for devis - simplified */}
           {documentType === 'devis' && (
-            <div className="border-t border-slate-200 pt-4 mt-4">
+            <div className="border-t border-border pt-4 mt-4">
               <p className="font-bold text-[10px] mb-2">Bon pour accord &amp; signature :</p>
-              <div className="h-8 border-b border-slate-300 w-64"></div>
+              <div className="h-8 border-b border-border w-64"></div>
             </div>
           )}
 
           {/* Footer */}
-          <div className="border-t border-slate-200 pt-4 mt-4">
-            <div className="text-[7px] text-slate-400 text-center">
+          <div className="border-t border-border pt-4 mt-4">
+            <div className="text-[7px] text-muted-foreground text-center">
               <p>{companyName} - {companyAddress}</p>
               <p>SIRET: {companySiret} | TVA: {companyVat}</p>
               <p className="mt-1">En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement.</p>
@@ -1127,15 +1127,15 @@ const InvoicesPage = () => {
       {/* Header */}
       <div className="flex flex-col gap-3">
         <div>
-          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900">Facturation</h1>
-          <p className="text-slate-500 text-xs sm:text-sm">{invoices.length} documents</p>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">Facturation</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm">{invoices.length} documents</p>
         </div>
         <div className="flex gap-2">
           <Button 
             variant="outline"
             size="sm"
             onClick={() => setServicesDialogOpen(true)}
-            className="border-slate-200 h-8 px-2 sm:px-3"
+            className="border-border h-8 px-2 sm:px-3"
           >
             <Package className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
@@ -1143,19 +1143,19 @@ const InvoicesPage = () => {
             variant="outline"
             size="sm"
             onClick={() => setSettingsDialogOpen(true)}
-            className="border-slate-200 h-8 px-2 sm:px-3"
+            className="border-border h-8 px-2 sm:px-3"
             title="Paramètres facturation"
           >
             <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-500 text-white h-8 px-2 sm:px-3">
+              <Button size="sm" className="bg-primary hover:brightness-110 text-white h-8 px-2 sm:px-3">
                 <Plus className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
                 <span className="hidden sm:inline text-xs">Nouveau</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-slate-50 border-slate-200">
+            <DropdownMenuContent className="bg-secondary border-border">
               <DropdownMenuItem onClick={() => openCreateSheet('facture')} className="cursor-pointer text-xs">
                 <Receipt className="w-3 h-3 mr-2" />
                 Facture
@@ -1171,47 +1171,47 @@ const InvoicesPage = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-2">
-        <div className="bg-white backdrop-blur-xl rounded-lg border border-slate-200 p-2 sm:p-3">
+        <div className="bg-card backdrop-blur-xl rounded-lg border border-border p-2 sm:p-3">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-blue-500/20 rounded-lg flex-shrink-0">
-              <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" />
+            <div className="p-1.5 bg-info-soft rounded-lg flex-shrink-0">
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-info" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-slate-500 text-[10px]">Attente</p>
-              <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">{formatCurrency(totalPending)}</p>
+              <p className="text-muted-foreground text-[10px]">Attente</p>
+              <p className="text-xs sm:text-sm font-bold text-foreground truncate">{formatCurrency(totalPending)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white backdrop-blur-xl rounded-lg border border-slate-200 p-2 sm:p-3">
+        <div className="bg-card backdrop-blur-xl rounded-lg border border-border p-2 sm:p-3">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-green-500/20 rounded-lg flex-shrink-0">
-              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
+            <div className="p-1.5 bg-success-soft rounded-lg flex-shrink-0">
+              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-success" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-slate-500 text-[10px]">Payées</p>
-              <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">{formatCurrency(totalPaid)}</p>
+              <p className="text-muted-foreground text-[10px]">Payées</p>
+              <p className="text-xs sm:text-sm font-bold text-foreground truncate">{formatCurrency(totalPaid)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white backdrop-blur-xl rounded-lg border border-slate-200 p-2 sm:p-3">
+        <div className="bg-card backdrop-blur-xl rounded-lg border border-border p-2 sm:p-3">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-red-500/20 rounded-lg flex-shrink-0">
-              <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
+            <div className="p-1.5 bg-danger-soft rounded-lg flex-shrink-0">
+              <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 text-danger" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-slate-500 text-[10px]">Retard</p>
-              <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">{formatCurrency(totalOverdue)}</p>
+              <p className="text-muted-foreground text-[10px]">Retard</p>
+              <p className="text-xs sm:text-sm font-bold text-foreground truncate">{formatCurrency(totalOverdue)}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white backdrop-blur-xl rounded-lg border border-indigo-500/20 p-2 sm:p-3">
+        <div className="bg-card backdrop-blur-xl rounded-lg border border-indigo-500/20 p-2 sm:p-3">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-indigo-500/20 rounded-lg flex-shrink-0">
-              <Euro className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-600" />
+            <div className="p-1.5 bg-brand-soft rounded-lg flex-shrink-0">
+              <Euro className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-slate-500 text-[10px]">Total</p>
-              <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+              <p className="text-muted-foreground text-[10px]">Total</p>
+              <p className="text-xs sm:text-sm font-bold text-foreground truncate">
                 {formatCurrency(invoices.reduce((sum, i) => sum + (i.total || 0), 0))}
               </p>
             </div>
@@ -1221,20 +1221,20 @@ const InvoicesPage = () => {
       {/* Filters */}
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-slate-500" />
+          <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
           <Input
             placeholder="Rechercher..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-7 sm:pl-10 bg-white backdrop-blur-xl border-slate-200 text-slate-900 h-8 sm:h-9 text-xs sm:text-sm"
+            className="pl-7 sm:pl-10 bg-card backdrop-blur-xl border-border text-foreground h-8 sm:h-9 text-xs sm:text-sm"
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-24 sm:w-36 bg-white backdrop-blur-xl border-slate-200 text-slate-900 h-8 sm:h-9 text-xs sm:text-sm">
+          <SelectTrigger className="w-24 sm:w-36 bg-card backdrop-blur-xl border-border text-foreground h-8 sm:h-9 text-xs sm:text-sm">
             <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
-          <SelectContent className="bg-slate-50 border-slate-200">
+          <SelectContent className="bg-secondary border-border">
             <SelectItem value="all" className="text-xs">Tous</SelectItem>
             {Object.entries(statusConfig).map(([key, config]) => (
               <SelectItem key={key} value={key} className="text-xs">{config.label}</SelectItem>
@@ -1247,13 +1247,13 @@ const InvoicesPage = () => {
       {loading ? (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-white animate-pulse rounded-lg" />
+            <div key={i} className="h-20 bg-card animate-pulse rounded-lg" />
           ))}
         </div>
       ) : filteredInvoices.length === 0 ? (
-        <div className="bg-white backdrop-blur-xl rounded-lg border border-slate-200 p-8 text-center">
-          <Receipt className="w-10 h-10 text-slate-500 mx-auto mb-3" />
-          <p className="text-slate-500 text-sm">
+        <div className="bg-card backdrop-blur-xl rounded-lg border border-border p-8 text-center">
+          <Receipt className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">
             {searchQuery || filterStatus !== "all" ? "Aucun document" : "Aucun document créé"}
           </p>
         </div>
@@ -1263,15 +1263,15 @@ const InvoicesPage = () => {
           <div className="sm:hidden space-y-2">
             {/* Mobile Bulk actions bar */}
             {selectedIds.length > 0 && (
-              <div className="bg-indigo-50 border border-indigo-500/30 rounded-lg px-3 py-2 flex items-center gap-2 sticky top-0 z-10">
-                <span className="text-xs text-slate-900">{selectedIds.length} sélectionné(s)</span>
-                <Button size="sm" variant="ghost" onClick={handleBulkDownload} disabled={isDownloading} className="text-slate-900 hover:bg-slate-100 h-7 px-2">
+              <div className="bg-brand-soft border border-indigo-500/30 rounded-lg px-3 py-2 flex items-center gap-2 sticky top-0 z-10">
+                <span className="text-xs text-foreground">{selectedIds.length} sélectionné(s)</span>
+                <Button size="sm" variant="ghost" onClick={handleBulkDownload} disabled={isDownloading} className="text-foreground hover:bg-secondary h-7 px-2">
                   <Download className="w-3 h-3" />
                 </Button>
-                <Button size="sm" variant="ghost" onClick={handleBulkDelete} className="text-red-400 hover:bg-red-500/10 h-7 px-2">
+                <Button size="sm" variant="ghost" onClick={handleBulkDelete} className="text-danger hover:bg-danger-soft h-7 px-2">
                   <Trash2 className="w-3 h-3" />
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="text-slate-500 hover:bg-slate-100 h-7 px-2 ml-auto">
+                <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="text-muted-foreground hover:bg-secondary h-7 px-2 ml-auto">
                   <X className="w-3 h-3" />
                 </Button>
               </div>
@@ -1283,20 +1283,20 @@ const InvoicesPage = () => {
               const isDevis = invoice.invoice_number?.startsWith('DEV-') || invoice.document_type === 'devis';
               const isSelected = selectedIds.includes(invoice.id);
               return (
-                <div key={invoice.id} className={`bg-white backdrop-blur-xl rounded-lg border ${isSelected ? 'border-indigo-500' : 'border-slate-200'} p-4`}>
+                <div key={invoice.id} className={`bg-card backdrop-blur-xl rounded-lg border ${isSelected ? 'border-indigo-500' : 'border-border'} p-4`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start gap-3">
-                      <button onClick={() => toggleSelect(invoice.id)} className="mt-0.5 text-slate-500 hover:text-slate-900">
-                        {isSelected ? <CheckSquare className="w-4 h-4 text-indigo-600" /> : <Square className="w-4 h-4" />}
+                      <button onClick={() => toggleSelect(invoice.id)} className="mt-0.5 text-muted-foreground hover:text-foreground">
+                        {isSelected ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4" />}
                       </button>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${invoice.invoice_number?.startsWith('DEV-') ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${invoice.invoice_number?.startsWith('DEV-') ? 'bg-info-soft text-info' : 'bg-success-soft text-emerald-700'}`}>
                             {invoice.invoice_number?.startsWith('DEV-') ? 'DEVIS' : 'FACTURE'}
                           </span>
-                          <span className="font-mono font-medium text-slate-900 text-sm">{invoice.invoice_number}</span>
+                          <span className="font-mono font-medium text-foreground text-sm">{invoice.invoice_number}</span>
                         </div>
-                        <p className="text-xs text-slate-500 mt-0.5">{formatDate(invoice.created_at)}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{formatDate(invoice.created_at)}</p>
                       </div>
                     </div>
                     <Badge className={`${status.color} text-xs`}>
@@ -1304,46 +1304,46 @@ const InvoicesPage = () => {
                       {status.label}
                     </Badge>
                   </div>
-                  <p className="font-medium text-slate-900 text-sm ml-7">{getContactName(invoice.contact_id)}</p>
+                  <p className="font-medium text-foreground text-sm ml-7">{getContactName(invoice.contact_id)}</p>
                   {getContactCompany(invoice.contact_id) && (
-                    <p className="text-xs text-slate-500 ml-7">{getContactCompany(invoice.contact_id)}</p>
+                    <p className="text-xs text-muted-foreground ml-7">{getContactCompany(invoice.contact_id)}</p>
                   )}
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-200">
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
                     <div>
-                      <p className="text-xs text-slate-500">Total</p>
-                      <p className="font-mono font-bold text-slate-900">{formatCurrency(invoice.total)}</p>
+                      <p className="text-xs text-muted-foreground">Total</p>
+                      <p className="font-mono font-bold text-foreground">{formatCurrency(invoice.total)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-slate-500">Payé</p>
-                      <p className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-green-600' : 'text-slate-500'}`}>
+                      <p className="text-xs text-muted-foreground">Payé</p>
+                      <p className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-success' : 'text-muted-foreground'}`}>
                         {formatCurrency(totalPaid)}
                       </p>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-600 hover:text-indigo-500 hover:bg-indigo-50" onClick={() => handleDownloadPDF(invoice)} title="Télécharger">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary hover:bg-brand-soft" onClick={() => handleDownloadPDF(invoice)} title="Télécharger">
                         <Download className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:text-emerald-500 hover:bg-emerald-50" onClick={() => openEmailDialog(invoice)} title="Envoyer par email">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-success hover:text-emerald-500 hover:bg-success-soft" onClick={() => openEmailDialog(invoice)} title="Envoyer par email">
                         <Mail className="w-4 h-4" />
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="w-4 h-4 text-slate-500" />
+                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-slate-50 border-slate-200">
-                          <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-slate-900">
+                        <DropdownMenuContent align="end" className="bg-secondary border-border">
+                          <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-foreground">
                             <Eye className="w-4 h-4 mr-2" /> Voir
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleChangeStatus(invoice)} className="text-slate-900">
+                          <DropdownMenuItem onClick={() => handleChangeStatus(invoice)} className="text-foreground">
                             <Clock className="w-4 h-4 mr-2" /> Changer statut
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-green-600">
+                          <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-success">
                             <CreditCard className="w-4 h-4 mr-2" /> Paiement
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-slate-100" />
-                          <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-red-600">
+                          <DropdownMenuSeparator className="bg-secondary" />
+                          <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-danger">
                             <Trash2 className="w-4 h-4 mr-2" /> Supprimer
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -1356,39 +1356,39 @@ const InvoicesPage = () => {
           </div>
 
           {/* Desktop Table View */}
-          <div className="hidden sm:block bg-white backdrop-blur-xl rounded-lg border border-slate-200 overflow-hidden overflow-x-auto">
+          <div className="hidden sm:block bg-card backdrop-blur-xl rounded-lg border border-border overflow-hidden overflow-x-auto">
             {/* Bulk actions bar */}
             {selectedIds.length > 0 && (
-              <div className="bg-indigo-50 border-b border-indigo-500/30 px-4 py-2 flex items-center gap-3">
-                <span className="text-sm text-slate-900">{selectedIds.length} sélectionné(s)</span>
-                <Button size="sm" variant="ghost" onClick={handleBulkDownload} disabled={isDownloading} className="text-slate-900 hover:bg-slate-100">
+              <div className="bg-brand-soft border-b border-indigo-500/30 px-4 py-2 flex items-center gap-3">
+                <span className="text-sm text-foreground">{selectedIds.length} sélectionné(s)</span>
+                <Button size="sm" variant="ghost" onClick={handleBulkDownload} disabled={isDownloading} className="text-foreground hover:bg-secondary">
                   <Download className="w-4 h-4 mr-1" /> Télécharger
                 </Button>
-                <Button size="sm" variant="ghost" onClick={handleBulkDelete} className="text-red-400 hover:bg-red-500/10">
+                <Button size="sm" variant="ghost" onClick={handleBulkDelete} className="text-danger hover:bg-danger-soft">
                   <Trash2 className="w-4 h-4 mr-1" /> Supprimer
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="text-slate-500 hover:bg-slate-100 ml-auto">
+                <Button size="sm" variant="ghost" onClick={() => setSelectedIds([])} className="text-muted-foreground hover:bg-secondary ml-auto">
                   Annuler
                 </Button>
               </div>
             )}
             <table className="w-full">
-              <thead className="bg-white border-b border-slate-200">
+              <thead className="bg-card border-b border-border">
                 <tr>
                   <th className="w-10 px-3 py-3">
-                    <button onClick={toggleSelectAll} className="text-slate-500 hover:text-slate-900">
+                    <button onClick={toggleSelectAll} className="text-muted-foreground hover:text-foreground">
                       {selectedIds.length === filteredInvoices.length && filteredInvoices.length > 0 ? 
                         <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
                     </button>
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase">Numéro</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase">Client</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase hidden md:table-cell">Date</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase hidden lg:table-cell">Échéance</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase">Montant</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase">Payé</th>
-                  <th className="text-center px-4 py-3 text-xs font-medium text-slate-500 uppercase">Statut</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase">Actions</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Numéro</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Client</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase hidden md:table-cell">Date</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase hidden lg:table-cell">Échéance</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Montant</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Payé</th>
+                  <th className="text-center px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Statut</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-muted-foreground uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -1405,26 +1405,26 @@ const InvoicesPage = () => {
                   const isExpanded = !!expandedParents[invoice.id];
                   return (
                     <React.Fragment key={invoice.id}>
-                    <tr className={`hover:bg-slate-50 transition-colors ${isSelected ? 'bg-indigo-600/10' : ''}`}>
+                    <tr className={`hover:bg-secondary transition-colors ${isSelected ? 'bg-primary/10' : ''}`}>
                       <td className="w-10 px-3 py-4">
-                        <button onClick={() => toggleSelect(invoice.id)} className="text-slate-500 hover:text-slate-900">
-                          {isSelected ? <CheckSquare className="w-4 h-4 text-indigo-600" /> : <Square className="w-4 h-4" />}
+                        <button onClick={() => toggleSelect(invoice.id)} className="text-muted-foreground hover:text-foreground">
+                          {isSelected ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4" />}
                         </button>
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-2">
                           {hasChildren ? (
-                            <button onClick={() => toggleExpand(invoice.id)} className="text-slate-400 hover:text-indigo-600 transition-colors flex-shrink-0" title={isExpanded ? "Masquer les sous-factures" : `Voir ${childrenMap[invoice.id].length} sous-facture(s)`}>
+                            <button onClick={() => toggleExpand(invoice.id)} className="text-muted-foreground hover:text-primary transition-colors flex-shrink-0" title={isExpanded ? "Masquer les sous-factures" : `Voir ${childrenMap[invoice.id].length} sous-facture(s)`}>
                               <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                             </button>
                           ) : <span className="w-4 flex-shrink-0" />}
-                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap ${isDevis ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap ${isDevis ? 'bg-info-soft text-info' : 'bg-success-soft text-emerald-700'}`}>
                             {isDevis ? 'DEVIS' : 'FACTURE'}
                           </span>
-                          <span className="font-mono font-medium text-slate-900 text-sm">{invoice.invoice_number}</span>
+                          <span className="font-mono font-medium text-foreground text-sm">{invoice.invoice_number}</span>
                           {getInvoiceTypeBadge(invoice)}
                           {hasChildren && !isExpanded && (
-                            <span className="text-[9px] bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded-full font-medium">
+                            <span className="text-[9px] bg-brand-soft text-primary px-1.5 py-0.5 rounded-full font-medium">
                               {childrenMap[invoice.id].length} doc
                             </span>
                           )}
@@ -1432,30 +1432,30 @@ const InvoicesPage = () => {
                       </td>
                       <td className="px-4 py-4">
                         <div>
-                          <p className="font-medium text-slate-900 text-sm">{getContactName(invoice.contact_id)}</p>
+                          <p className="font-medium text-foreground text-sm">{getContactName(invoice.contact_id)}</p>
                           {getContactCompany(invoice.contact_id) && (
-                            <p className="text-xs text-slate-500">{getContactCompany(invoice.contact_id)}</p>
+                            <p className="text-xs text-muted-foreground">{getContactCompany(invoice.contact_id)}</p>
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-sm text-slate-500 hidden md:table-cell">
+                      <td className="px-4 py-4 text-sm text-muted-foreground hidden md:table-cell">
                         {formatDate(invoice.created_at)}
                       </td>
-                      <td className="px-4 py-4 text-sm text-slate-500 hidden lg:table-cell">
+                      <td className="px-4 py-4 text-sm text-muted-foreground hidden lg:table-cell">
                         {formatDate(invoice.due_date)}
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <span className="font-mono font-bold text-slate-900 text-sm">{formatCurrency(invoice.total)}</span>
+                        <span className="font-mono font-bold text-foreground text-sm">{formatCurrency(invoice.total)}</span>
                       </td>
                       <td className="px-4 py-4 text-right">
                         <div className="flex flex-col items-end gap-1">
-                          <span className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-green-600 font-bold' : 'text-slate-500'}`}>
+                          <span className={`font-mono text-sm ${totalPaid >= invoice.total ? 'text-success font-bold' : 'text-muted-foreground'}`}>
                             {formatCurrency(totalPaid)}
                           </span>
                           {invoice.total > 0 && totalPaid > 0 && totalPaid < invoice.total && (
-                            <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="w-16 h-1.5 bg-secondary rounded-full overflow-hidden">
                               <div 
-                                className="h-full bg-orange-500 rounded-full transition-all"
+                                className="h-full bg-warning rounded-full transition-all"
                                 style={{ width: `${Math.min(paymentProgress, 100)}%` }}
                               />
                             </div>
@@ -1470,44 +1470,44 @@ const InvoicesPage = () => {
                       </td>
                       <td className="px-4 py-4 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-600 hover:text-indigo-500 hover:bg-indigo-50" onClick={() => handleDownloadPDF(invoice)} title="Télécharger PDF">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary hover:bg-brand-soft" onClick={() => handleDownloadPDF(invoice)} title="Télécharger PDF">
                             <Download className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:text-emerald-500 hover:bg-emerald-50" onClick={() => openEmailDialog(invoice)} title="Envoyer par email">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-success hover:text-emerald-500 hover:bg-success-soft" onClick={() => openEmailDialog(invoice)} title="Envoyer par email">
                             <Mail className="w-4 h-4" />
                           </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="w-4 h-4 text-slate-500" />
+                                <MoreVertical className="w-4 h-4 text-muted-foreground" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-slate-50 border-slate-200 w-48">
-                              <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-slate-900">
+                            <DropdownMenuContent align="end" className="bg-secondary border-border w-48">
+                              <DropdownMenuItem onClick={() => { setSelectedInvoice(invoice); setViewDialogOpen(true); }} className="text-foreground">
                                 <Eye className="w-4 h-4 mr-2" /> Voir le document
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleChangeStatus(invoice)} className="text-slate-900">
+                              <DropdownMenuItem onClick={() => handleChangeStatus(invoice)} className="text-foreground">
                                 <Clock className="w-4 h-4 mr-2" /> Changer statut
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDuplicate(invoice)} className="text-slate-900">
+                              <DropdownMenuItem onClick={() => handleDuplicate(invoice)} className="text-foreground">
                                 <Copy className="w-4 h-4 mr-2" /> Dupliquer
                               </DropdownMenuItem>
                               {invoice.document_type === 'devis' && invoice.status !== 'payée' && (
-                                <DropdownMenuItem onClick={() => handleConvertToInvoice(invoice)} className="text-green-400">
+                                <DropdownMenuItem onClick={() => handleConvertToInvoice(invoice)} className="text-success">
                                   <ArrowRightLeft className="w-4 h-4 mr-2" /> Convertir en facture
                               </DropdownMenuItem>
                               )}
                               {/* Deposit & Balance options - only for factures, not deposit/balance themselves */}
                               {invoice.document_type === 'facture' && (!invoice.invoice_type || invoice.invoice_type === 'standard') && (
                                 <>
-                                  <DropdownMenuSeparator className="bg-slate-100" />
-                                  <DropdownMenuItem onClick={() => openDepositDialog(invoice)} className="text-blue-400">
+                                  <DropdownMenuSeparator className="bg-secondary" />
+                                  <DropdownMenuItem onClick={() => openDepositDialog(invoice)} className="text-info">
                                     <PiggyBank className="w-4 h-4 mr-2" /> Créer facture d&apos;acompte
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => openBalanceDialog(invoice)} className="text-purple-400">
+                                  <DropdownMenuItem onClick={() => openBalanceDialog(invoice)} className="text-primary">
                                     <Banknote className="w-4 h-4 mr-2" /> Créer facture de solde
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => openRelatedDialog(invoice)} className="text-slate-600">
+                                  <DropdownMenuItem onClick={() => openRelatedDialog(invoice)} className="text-muted-foreground">
                                     <FileText className="w-4 h-4 mr-2" /> Voir factures liées
                                   </DropdownMenuItem>
                                 </>
@@ -1517,19 +1517,19 @@ const InvoicesPage = () => {
                                 <DropdownMenuItem onClick={() => {
                                   const parent = invoices.find(i => i.invoice_number === invoice.parent_invoice_number);
                                   if (parent) openRelatedDialog(parent);
-                                }} className="text-slate-600">
+                                }} className="text-muted-foreground">
                                   <FileText className="w-4 h-4 mr-2" /> Voir facture principale ({invoice.parent_invoice_number})
                                 </DropdownMenuItem>
                               )}
-                              <DropdownMenuSeparator className="bg-slate-100" />
-                              <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-green-400">
+                              <DropdownMenuSeparator className="bg-secondary" />
+                              <DropdownMenuItem onClick={() => openPaymentDialog(invoice)} className="text-success">
                                 <CreditCard className="w-4 h-4 mr-2" /> Enregistrer paiement
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator className="bg-slate-100" />
-                              <DropdownMenuItem onClick={() => openEditSheet(invoice)} className="text-slate-900">
+                              <DropdownMenuSeparator className="bg-secondary" />
+                              <DropdownMenuItem onClick={() => openEditSheet(invoice)} className="text-foreground">
                                 <Edit className="w-4 h-4 mr-2" /> Modifier
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-red-400">
+                              <DropdownMenuItem onClick={() => handleDelete(invoice.id)} className="text-danger">
                                 <Trash2 className="w-4 h-4 mr-2" /> Supprimer
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -1544,24 +1544,24 @@ const InvoicesPage = () => {
                       const childPaid = child.total_paid || 0;
                       const isBalance = child.invoice_type === 'balance';
                       return (
-                        <tr key={child.id} className="bg-indigo-50/40 border-l-4 border-l-indigo-300 hover:bg-indigo-50/70 transition-colors">
+                        <tr key={child.id} className="bg-brand-soft/40 border-l-4 border-l-indigo-300 hover:bg-brand-soft/70 transition-colors">
                           <td className="w-10 px-3 py-3"></td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2 pl-5">
-                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap ${isBalance ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap ${isBalance ? 'bg-brand-soft text-primary' : 'bg-info-soft text-info'}`}>
                                 {isBalance ? 'SOLDE' : 'ACOMPTE'}
                               </span>
-                              <span className="font-mono text-xs text-slate-700">{child.invoice_number}</span>
+                              <span className="font-mono text-xs text-foreground">{child.invoice_number}</span>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-sm text-slate-500">{getContactName(child.contact_id)}</td>
-                          <td className="px-4 py-3 text-xs text-slate-400 hidden md:table-cell">{formatDate(child.created_at)}</td>
-                          <td className="px-4 py-3 text-xs text-slate-400 hidden lg:table-cell">{formatDate(child.due_date)}</td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground">{getContactName(child.contact_id)}</td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground hidden md:table-cell">{formatDate(child.created_at)}</td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">{formatDate(child.due_date)}</td>
                           <td className="px-4 py-3 text-right">
-                            <span className="font-mono text-sm text-slate-700">{formatCurrency(child.total)}</span>
+                            <span className="font-mono text-sm text-foreground">{formatCurrency(child.total)}</span>
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <span className={`font-mono text-sm ${childPaid >= child.total ? 'text-green-600 font-bold' : 'text-slate-400'}`}>
+                            <span className={`font-mono text-sm ${childPaid >= child.total ? 'text-success font-bold' : 'text-muted-foreground'}`}>
                               {formatCurrency(childPaid)}
                             </span>
                           </td>
@@ -1570,9 +1570,9 @@ const InvoicesPage = () => {
                           </td>
                           <td className="px-4 py-3 text-right">
                             <div className="flex items-center justify-end gap-1">
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-indigo-500 hover:bg-indigo-50" onClick={() => handleDownloadPDF(child)} title="PDF"><Download className="w-3 h-3" /></Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-green-500 hover:bg-green-50" onClick={() => openPaymentDialog(child)} title="Paiement"><CreditCard className="w-3 h-3" /></Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-red-400 hover:bg-red-50" onClick={() => handleDelete(child.id)} title="Supprimer"><Trash2 className="w-3 h-3" /></Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-primary hover:bg-brand-soft" onClick={() => handleDownloadPDF(child)} title="PDF"><Download className="w-3 h-3" /></Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-success hover:bg-success-soft" onClick={() => openPaymentDialog(child)} title="Paiement"><CreditCard className="w-3 h-3" /></Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-danger hover:bg-danger-soft" onClick={() => handleDelete(child.id)} title="Supprimer"><Trash2 className="w-3 h-3" /></Button>
                             </div>
                           </td>
                         </tr>
@@ -1589,13 +1589,13 @@ const InvoicesPage = () => {
 
       {/* Create/Edit Sheet with Preview */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-[1400px] p-0 bg-white overflow-hidden">
+        <SheetContent side="right" className="w-full sm:max-w-[1400px] p-0 bg-card overflow-hidden">
           <div className="flex h-full">
             {/* Form Side - Full width on mobile, 50% on desktop */}
-            <div className="w-full lg:w-1/2 p-4 sm:p-6 overflow-y-auto bg-white backdrop-blur-xl border-r border-slate-200">
+            <div className="w-full lg:w-1/2 p-4 sm:p-6 overflow-y-auto bg-card backdrop-blur-xl border-r border-border">
               <SheetHeader className="mb-4 sm:mb-6">
                 <div className="flex items-center justify-between">
-                  <SheetTitle className="text-slate-900 flex items-center gap-2">
+                  <SheetTitle className="text-foreground flex items-center gap-2">
                     {documentType === 'devis' ? <FileText className="w-5 h-5" /> : <Receipt className="w-5 h-5" />}
                     {editingInvoice ? `Modifier ${documentType === 'devis' ? 'le devis' : 'la facture'}` : `Nouvelle ${documentType === 'devis' ? 'devis' : 'facture'}`}
                   </SheetTitle>
@@ -1604,7 +1604,7 @@ const InvoicesPage = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() => setSettingsDialogOpen(true)}
-                    className="text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                    className="text-muted-foreground hover:text-foreground hover:bg-secondary"
                     title="Paramètres du document"
                   >
                     <Settings className="w-5 h-5" />
@@ -1616,7 +1616,7 @@ const InvoicesPage = () => {
                 {/* Client & Dates */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-slate-900">Client *</Label>
+                    <Label className="text-foreground">Client *</Label>
                     <div className="flex gap-2">
                       <Select
                         value={formData.contact_id}
@@ -1629,21 +1629,21 @@ const InvoicesPage = () => {
                         }}
                         required
                       >
-                        <SelectTrigger className="bg-white border-slate-200 text-slate-900 flex-1">
+                        <SelectTrigger className="bg-card border-border text-foreground flex-1">
                           <SelectValue placeholder="Sélectionner un client" />
                         </SelectTrigger>
-                        <SelectContent className="bg-slate-50 border-slate-200 max-h-60">
-                          <SelectItem value="new" className="text-indigo-600 font-medium">
+                        <SelectContent className="bg-secondary border-border max-h-60">
+                          <SelectItem value="new" className="text-primary font-medium">
                             <div className="flex items-center gap-2">
                               <Plus className="w-4 h-4" />
                               Créer un nouveau client
                             </div>
                           </SelectItem>
-                          <div className="border-t border-slate-200 my-1"></div>
+                          <div className="border-t border-border my-1"></div>
                           {contacts.map((contact) => (
                             <SelectItem key={contact.id} value={contact.id}>
                               {contact.first_name} {contact.last_name}
-                              {contact.company && <span className="text-slate-500 ml-1">({contact.company})</span>}
+                              {contact.company && <span className="text-muted-foreground ml-1">({contact.company})</span>}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -1651,22 +1651,22 @@ const InvoicesPage = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-900">Échéance</Label>
+                    <Label className="text-foreground">Échéance</Label>
                     <Input
                       type="date"
                       value={formData.due_date}
                       onChange={(e) => setFormData({...formData, due_date: e.target.value})}
-                      className="bg-white border-slate-200 text-slate-900"
+                      className="bg-card border-border text-foreground"
                     />
                   </div>
                 </div>
 
                 {/* Saved Services */}
                 {savedServices.length > 0 && (
-                  <div className="bg-white rounded-lg p-4">
+                  <div className="bg-card rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <Package className="w-4 h-4 text-indigo-600" />
-                      <span className="text-sm font-medium text-slate-900">Services enregistrés</span>
+                      <Package className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-medium text-foreground">Services enregistrés</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {savedServices.map((service) => (
@@ -1682,7 +1682,7 @@ const InvoicesPage = () => {
                           <Plus className="w-3 h-3 mr-1 flex-shrink-0" />
                           <span>
                             <span className="font-bold">{service.title}</span>
-                            <span className="ml-1 text-slate-500">({formatCurrency(service.price)})</span>
+                            <span className="ml-1 text-muted-foreground">({formatCurrency(service.price)})</span>
                           </span>
                         </Button>
                       ))}
@@ -1693,22 +1693,22 @@ const InvoicesPage = () => {
                 {/* Items */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label className="text-slate-900 font-semibold">Lignes de facturation</Label>
-                    <Button type="button" variant="ghost" onClick={addItem} className="text-indigo-600">
+                    <Label className="text-foreground font-semibold">Lignes de facturation</Label>
+                    <Button type="button" variant="ghost" onClick={addItem} className="text-primary">
                       <Plus className="w-4 h-4 mr-1" /> Ajouter une ligne
                     </Button>
                   </div>
                   
                   {items.map((item, index) => (
-                    <div key={index} className="bg-white rounded-lg p-3 space-y-2">
+                    <div key={index} className="bg-card rounded-lg p-3 space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-slate-500">Ligne {index + 1}</span>
+                        <span className="text-xs text-muted-foreground">Ligne {index + 1}</span>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => removeItem(index)}
-                          className="text-red-500 h-6 w-6 p-0"
+                          className="text-danger h-6 w-6 p-0"
                           disabled={items.length === 1}
                         >
                           <Trash2 className="w-3 h-3" />
@@ -1718,29 +1718,29 @@ const InvoicesPage = () => {
                         placeholder="Titre du service (ex: Création site web)"
                         value={item.title || ""}
                         onChange={(e) => updateItem(index, "title", e.target.value)}
-                        className="bg-white backdrop-blur-xl border-slate-200 text-slate-900 font-semibold"
+                        className="bg-card backdrop-blur-xl border-border text-foreground font-semibold"
                       />
                       <Textarea
                         placeholder="Description détaillée (optionnel)"
                         value={item.description || ""}
                         onChange={(e) => updateItem(index, "description", e.target.value)}
-                        className="bg-white backdrop-blur-xl border-slate-200 text-slate-900 text-sm"
+                        className="bg-card backdrop-blur-xl border-border text-foreground text-sm"
                         rows={2}
                       />
                       <div className="grid grid-cols-3 gap-2">
                         <div>
-                          <Label className="text-xs text-slate-500">Quantité</Label>
+                          <Label className="text-xs text-muted-foreground">Quantité</Label>
                           <Input
                             type="number"
                             min="1"
                             placeholder="1"
                             value={item.quantity}
                             onChange={(e) => updateItem(index, "quantity", e.target.value)}
-                            className="bg-white backdrop-blur-xl border-slate-200 text-slate-900"
+                            className="bg-card backdrop-blur-xl border-border text-foreground"
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-slate-500">Prix HT (€)</Label>
+                          <Label className="text-xs text-muted-foreground">Prix HT (€)</Label>
                           <Input
                             type="number"
                             min="0"
@@ -1748,20 +1748,20 @@ const InvoicesPage = () => {
                             placeholder="0.00"
                             value={item.unit_price}
                             onChange={(e) => updateItem(index, "unit_price", e.target.value)}
-                            className="bg-white backdrop-blur-xl border-slate-200 text-slate-900"
+                            className="bg-card backdrop-blur-xl border-border text-foreground"
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-slate-500">Remise</Label>
+                          <Label className="text-xs text-muted-foreground">Remise</Label>
                           <div className="flex gap-1">
                             <Select
                               value={item.discountType || "percent"}
                               onValueChange={(v) => updateItem(index, "discountType", v)}
                             >
-                              <SelectTrigger className="w-16 bg-white backdrop-blur-xl border-slate-200 px-2">
+                              <SelectTrigger className="w-16 bg-card backdrop-blur-xl border-border px-2">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-slate-50">
+                              <SelectContent className="bg-secondary">
                                 <SelectItem value="percent">%</SelectItem>
                                 <SelectItem value="fixed">€</SelectItem>
                               </SelectContent>
@@ -1773,19 +1773,19 @@ const InvoicesPage = () => {
                               placeholder="0"
                               value={item.discount || 0}
                               onChange={(e) => updateItem(index, "discount", e.target.value)}
-                              className="flex-1 bg-white backdrop-blur-xl border-slate-200 text-slate-900"
+                              className="flex-1 bg-card backdrop-blur-xl border-border text-foreground"
                             />
                           </div>
                         </div>
                       </div>
                       {(item.title || item.description) && item.unit_price > 0 && (
                         <div className="flex justify-between items-center text-sm">
-                          <span className="text-indigo-600">
+                          <span className="text-primary">
                             {item.discount > 0 && (
                               <>Remise: -{formatCurrency(calculateLineDiscount(item))} {item.discountType === "percent" ? `(${item.discount}%)` : ''}</>
                             )}
                           </span>
-                          <span className="font-medium text-slate-900">
+                          <span className="font-medium text-foreground">
                             Total ligne: {formatCurrency(calculateLineTotal(item))}
                           </span>
                         </div>
@@ -1797,8 +1797,8 @@ const InvoicesPage = () => {
                 {/* Global Discount */}
                 <div className="bg-gradient-to-r from-[#CE0202]/10 to-[#CE0202]/5 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <Label className="text-slate-900 font-semibold flex items-center gap-2">
-                      <Percent className="w-4 h-4 text-indigo-600" />
+                    <Label className="text-foreground font-semibold flex items-center gap-2">
+                      <Percent className="w-4 h-4 text-primary" />
                       Remise globale
                     </Label>
                   </div>
@@ -1807,10 +1807,10 @@ const InvoicesPage = () => {
                       value={globalDiscount.type}
                       onValueChange={(v) => setGlobalDiscount({ ...globalDiscount, type: v })}
                     >
-                      <SelectTrigger className="w-32 bg-white backdrop-blur-xl border-slate-200">
+                      <SelectTrigger className="w-32 bg-card backdrop-blur-xl border-border">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-50">
+                      <SelectContent className="bg-secondary">
                         <SelectItem value="percent">%</SelectItem>
                         <SelectItem value="fixed">€ fixe</SelectItem>
                       </SelectContent>
@@ -1822,11 +1822,11 @@ const InvoicesPage = () => {
                       placeholder="0"
                       value={globalDiscount.value || ""}
                       onChange={(e) => setGlobalDiscount({ ...globalDiscount, value: parseFloat(e.target.value) || 0 })}
-                      className="flex-1 bg-white backdrop-blur-xl border-slate-200 text-slate-900"
+                      className="flex-1 bg-card backdrop-blur-xl border-border text-foreground"
                     />
                   </div>
                   {globalDiscount.value > 0 && (
-                    <div className="mt-2 text-sm text-indigo-600 font-medium">
+                    <div className="mt-2 text-sm text-primary font-medium">
                       Remise appliquée: -{formatCurrency(calculateGlobalDiscountAmount())}
                     </div>
                   )}
@@ -1834,11 +1834,11 @@ const InvoicesPage = () => {
 
                 {/* Notes */}
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Notes</Label>
+                  <Label className="text-foreground">Notes</Label>
                   <Textarea
                     value={formData.notes}
                     onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                    className="bg-white border-slate-200 text-slate-900"
+                    className="bg-card border-border text-foreground"
                     rows={2}
                     placeholder="Notes visibles sur le document..."
                   />
@@ -1847,28 +1847,28 @@ const InvoicesPage = () => {
                 {/* Totals */}
                 <div className="bg-[#1A1A1A] text-white rounded-lg p-4">
                   <div className="flex justify-between py-1">
-                    <span className="text-slate-600">Sous-total HT</span>
+                    <span className="text-muted-foreground">Sous-total HT</span>
                     <span className="font-mono">{formatCurrency(calculateSubtotal())}</span>
                   </div>
                   {globalDiscount.value > 0 && (
-                    <div className="flex justify-between py-1 text-indigo-600">
+                    <div className="flex justify-between py-1 text-primary">
                       <span>Remise globale ({globalDiscount.type === "percent" ? `${globalDiscount.value}%` : "fixe"})</span>
                       <span className="font-mono">-{formatCurrency(calculateGlobalDiscountAmount())}</span>
                     </div>
                   )}
                   {globalDiscount.value > 0 && (
                     <div className="flex justify-between py-1">
-                      <span className="text-slate-600">Sous-total après remise</span>
+                      <span className="text-muted-foreground">Sous-total après remise</span>
                       <span className="font-mono">{formatCurrency(calculateSubtotalAfterDiscount())}</span>
                     </div>
                   )}
                   <div className="flex justify-between py-1">
-                    <span className="text-slate-600">TVA (8.5%)</span>
+                    <span className="text-muted-foreground">TVA (8.5%)</span>
                     <span className="font-mono">{formatCurrency(calculateTVA())}</span>
                   </div>
                   <div className="flex justify-between py-2 text-xl font-bold border-t border-green-500/50 mt-2">
-                    <span className="text-green-500 text-sm leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
-                    <span className="font-mono text-green-500">{formatCurrency(calculateTotal())}</span>
+                    <span className="text-success text-sm leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
+                    <span className="font-mono text-success">{formatCurrency(calculateTotal())}</span>
                   </div>
                 </div>
 
@@ -1880,7 +1880,7 @@ const InvoicesPage = () => {
                   <Button 
                     type="submit" 
                     disabled={saving || !formData.contact_id}
-                    className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white"
+                    className="flex-1 bg-primary hover:brightness-110 text-white"
                   >
                     {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                     {editingInvoice ? "Mettre à jour" : "Créer"}
@@ -1899,16 +1899,16 @@ const InvoicesPage = () => {
 
       {/* Settings Dialog - Full Page Style like Qonto */}
       <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
-        <DialogContent className="bg-white border-slate-200 max-w-6xl h-[90vh] p-0 flex flex-col">
+        <DialogContent className="bg-card border-border max-w-6xl h-[90vh] p-0 flex flex-col">
           <div className="flex flex-1 min-h-0">
             {/* Left Panel - Settings with SCROLL */}
             <div className="w-full lg:w-1/2 flex flex-col min-h-0">
-              <DialogHeader className="p-6 pb-4 border-b border-slate-200 flex-shrink-0">
-                <DialogTitle className="text-slate-900 flex items-center gap-2 text-xl">
-                  <Settings className="w-6 h-6 text-indigo-600" />
+              <DialogHeader className="p-6 pb-4 border-b border-border flex-shrink-0">
+                <DialogTitle className="text-foreground flex items-center gap-2 text-xl">
+                  <Settings className="w-6 h-6 text-primary" />
                   Paramètres de facturation
                 </DialogTitle>
-                <p className="text-slate-500 text-sm">Configurez les valeurs par défaut pour vos documents</p>
+                <p className="text-muted-foreground text-sm">Configurez les valeurs par défaut pour vos documents</p>
               </DialogHeader>
               
               {/* Scrollable content area */}
@@ -1916,123 +1916,123 @@ const InvoicesPage = () => {
               
               {/* Numbering Section */}
               <div className="space-y-4">
-                <h3 className="text-slate-900 font-semibold flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-indigo-600" />
+                <h3 className="text-foreground font-semibold flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary" />
                   Numérotation automatique
                 </h3>
-                <p className="text-slate-500 text-xs">Assurez-vous que vos documents portent un numéro unique et séquentiel.</p>
+                <p className="text-muted-foreground text-xs">Assurez-vous que vos documents portent un numéro unique et séquentiel.</p>
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-3 p-4 bg-white rounded-lg">
-                    <Label className="text-slate-900 text-sm font-medium">Factures</Label>
+                  <div className="space-y-3 p-4 bg-card rounded-lg">
+                    <Label className="text-foreground text-sm font-medium">Factures</Label>
                     <div className="space-y-2">
-                      <Label className="text-slate-500 text-xs">Préfixe</Label>
+                      <Label className="text-muted-foreground text-xs">Préfixe</Label>
                       <Input
                         value={invoiceSettings?.invoice_prefix || "FAC-(AAAA)-"}
                         onChange={(e) => setInvoiceSettings({...invoiceSettings, invoice_prefix: e.target.value})}
-                        className="bg-white border-slate-200 text-slate-900 text-sm"
+                        className="bg-card border-border text-foreground text-sm"
                         placeholder="FAC-(AAAA)-"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-500 text-xs">Prochain numéro</Label>
+                      <Label className="text-muted-foreground text-xs">Prochain numéro</Label>
                       <Input
                         type="number"
                         value={invoiceSettings?.invoice_next_number || "1"}
                         onChange={(e) => setInvoiceSettings({...invoiceSettings, invoice_next_number: e.target.value})}
-                        className="bg-white border-slate-200 text-slate-900 text-sm"
+                        className="bg-card border-border text-foreground text-sm"
                       />
                     </div>
-                    <p className="text-xs text-indigo-600">Aperçu: FAC-2026-001</p>
+                    <p className="text-xs text-primary">Aperçu: FAC-2026-001</p>
                   </div>
                   
-                  <div className="space-y-3 p-4 bg-white rounded-lg">
-                    <Label className="text-slate-900 text-sm font-medium">Devis</Label>
+                  <div className="space-y-3 p-4 bg-card rounded-lg">
+                    <Label className="text-foreground text-sm font-medium">Devis</Label>
                     <div className="space-y-2">
-                      <Label className="text-slate-500 text-xs">Préfixe</Label>
+                      <Label className="text-muted-foreground text-xs">Préfixe</Label>
                       <Input
                         value={invoiceSettings?.quote_prefix || "DEV-(AAAA)-"}
                         onChange={(e) => setInvoiceSettings({...invoiceSettings, quote_prefix: e.target.value})}
-                        className="bg-white border-slate-200 text-slate-900 text-sm"
+                        className="bg-card border-border text-foreground text-sm"
                         placeholder="DEV-(AAAA)-"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-slate-500 text-xs">Prochain numéro</Label>
+                      <Label className="text-muted-foreground text-xs">Prochain numéro</Label>
                       <Input
                         type="number"
                         value={invoiceSettings?.quote_next_number || "1"}
                         onChange={(e) => setInvoiceSettings({...invoiceSettings, quote_next_number: e.target.value})}
-                        className="bg-white border-slate-200 text-slate-900 text-sm"
+                        className="bg-card border-border text-foreground text-sm"
                       />
                     </div>
-                    <p className="text-xs text-indigo-600">Aperçu: DEV-2026-001</p>
+                    <p className="text-xs text-primary">Aperçu: DEV-2026-001</p>
                   </div>
                 </div>
               </div>
               
               {/* Company Info Section */}
               <div className="space-y-4">
-                <h3 className="text-slate-900 font-semibold flex items-center gap-2">
-                  <Receipt className="w-4 h-4 text-indigo-600" />
+                <h3 className="text-foreground font-semibold flex items-center gap-2">
+                  <Receipt className="w-4 h-4 text-primary" />
                   Informations entreprise
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-slate-500 text-xs">Nom de l'entreprise</Label>
+                    <Label className="text-muted-foreground text-xs">Nom de l'entreprise</Label>
                     <Input
                       value={invoiceSettings?.company_name || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, company_name: e.target.value})}
-                      className="bg-white border-slate-200 text-slate-900 text-sm"
+                      className="bg-card border-border text-foreground text-sm"
                       placeholder="Alpha Agency"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-500 text-xs">Email</Label>
+                    <Label className="text-muted-foreground text-xs">Email</Label>
                     <Input
                       value={invoiceSettings?.company_email || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, company_email: e.target.value})}
-                      className="bg-white border-slate-200 text-slate-900 text-sm"
+                      className="bg-card border-border text-foreground text-sm"
                       placeholder="contact@alphagency.fr"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-slate-500 text-xs">Adresse complète</Label>
+                    <Label className="text-muted-foreground text-xs">Adresse complète</Label>
                     <Input
                       value={invoiceSettings?.company_address || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, company_address: e.target.value})}
-                      className="bg-white border-slate-200 text-slate-900 text-sm"
+                      className="bg-card border-border text-foreground text-sm"
                       placeholder="Immeuble Carat, Jarry, 97122 Baie-Mahault"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-500 text-xs">Téléphone</Label>
+                    <Label className="text-muted-foreground text-xs">Téléphone</Label>
                     <Input
                       value={invoiceSettings?.company_phone || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, company_phone: e.target.value})}
-                      className="bg-white border-slate-200 text-slate-900 text-sm"
+                      className="bg-card border-border text-foreground text-sm"
                       placeholder="06 90 55 30 18"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-slate-500 text-xs">SIRET</Label>
+                    <Label className="text-muted-foreground text-xs">SIRET</Label>
                     <Input
                       value={invoiceSettings?.company_siret || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, company_siret: e.target.value})}
-                      className="bg-white border-slate-200 text-slate-900 text-sm"
+                      className="bg-card border-border text-foreground text-sm"
                       placeholder="91255383100013"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-500 text-xs">N° TVA Intracommunautaire</Label>
+                    <Label className="text-muted-foreground text-xs">N° TVA Intracommunautaire</Label>
                     <Input
                       value={invoiceSettings?.company_vat || ""}
                       onChange={(e) => setInvoiceSettings({...invoiceSettings, company_vat: e.target.value})}
-                      className="bg-white border-slate-200 text-slate-900 text-sm"
+                      className="bg-card border-border text-foreground text-sm"
                       placeholder="FR47912553831"
                     />
                   </div>
@@ -2041,14 +2041,14 @@ const InvoicesPage = () => {
               
               {/* Conditions Section - 4 types différents */}
               <div className="space-y-4">
-                <h3 className="text-slate-900 font-semibold flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-indigo-600" />
+                <h3 className="text-foreground font-semibold flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary" />
                   Conditions de règlement par type de document
                 </h3>
                 
                 {/* Devis */}
-                <div className="bg-white rounded-lg p-4 space-y-2">
-                  <Label className="text-blue-400 font-medium flex items-center gap-2">
+                <div className="bg-card rounded-lg p-4 space-y-2">
+                  <Label className="text-info font-medium flex items-center gap-2">
                     <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
                     Devis
                   </Label>
@@ -2057,12 +2057,12 @@ const InvoicesPage = () => {
                     onChange={(e) => setInvoiceSettings({...invoiceSettings, conditions_devis: e.target.value})}
                     placeholder="• Ce devis est valable 30 jours...
 • Un acompte de 50% est exigé..."
-                    className="bg-white border-slate-200 text-slate-900 min-h-[100px] text-sm"
+                    className="bg-card border-border text-foreground min-h-[100px] text-sm"
                   />
                 </div>
                 
                 {/* Facture standard */}
-                <div className="bg-white rounded-lg p-4 space-y-2">
+                <div className="bg-card rounded-lg p-4 space-y-2">
                   <Label className="text-emerald-400 font-medium flex items-center gap-2">
                     <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>
                     Facture standard
@@ -2072,12 +2072,12 @@ const InvoicesPage = () => {
                     onChange={(e) => setInvoiceSettings({...invoiceSettings, conditions_facture: e.target.value})}
                     placeholder="• Paiement par virement bancaire...
 • Le règlement doit intervenir sous 30 jours..."
-                    className="bg-white border-slate-200 text-slate-900 min-h-[100px] text-sm"
+                    className="bg-card border-border text-foreground min-h-[100px] text-sm"
                   />
                 </div>
                 
                 {/* Facture d'acompte */}
-                <div className="bg-white rounded-lg p-4 space-y-2">
+                <div className="bg-card rounded-lg p-4 space-y-2">
                   <Label className="text-blue-300 font-medium flex items-center gap-2">
                     <span className="w-2 h-2 bg-blue-300 rounded-full"></span>
                     Facture d&apos;acompte
@@ -2087,14 +2087,14 @@ const InvoicesPage = () => {
                     onChange={(e) => setInvoiceSettings({...invoiceSettings, conditions_acompte: e.target.value})}
                     placeholder="• Cette facture correspond à un acompte...
 • Paiement exigible à réception..."
-                    className="bg-white border-slate-200 text-slate-900 min-h-[100px] text-sm"
+                    className="bg-card border-border text-foreground min-h-[100px] text-sm"
                   />
-                  <p className="text-xs text-slate-400">Ne jamais mentionner &quot;un acompte est exigé&quot; ici car cette facture EST l&apos;acompte.</p>
+                  <p className="text-xs text-muted-foreground">Ne jamais mentionner &quot;un acompte est exigé&quot; ici car cette facture EST l&apos;acompte.</p>
                 </div>
                 
                 {/* Facture de solde */}
-                <div className="bg-white rounded-lg p-4 space-y-2">
-                  <Label className="text-purple-400 font-medium flex items-center gap-2">
+                <div className="bg-card rounded-lg p-4 space-y-2">
+                  <Label className="text-primary font-medium flex items-center gap-2">
                     <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
                     Facture de solde
                   </Label>
@@ -2103,57 +2103,57 @@ const InvoicesPage = () => {
                     onChange={(e) => setInvoiceSettings({...invoiceSettings, conditions_solde: e.target.value})}
                     placeholder="• Cette facture correspond au solde...
 • Paiement exigible à réception..."
-                    className="bg-white border-slate-200 text-slate-900 min-h-[100px] text-sm"
+                    className="bg-card border-border text-foreground min-h-[100px] text-sm"
                   />
-                  <p className="text-xs text-slate-400">Le récapitulatif des acomptes versés sera ajouté automatiquement.</p>
+                  <p className="text-xs text-muted-foreground">Le récapitulatif des acomptes versés sera ajouté automatiquement.</p>
                 </div>
               </div>
               
               {/* Bank Details Section */}
               <div className="space-y-4">
-                <h3 className="text-slate-900 font-semibold">Coordonnées bancaires</h3>
+                <h3 className="text-foreground font-semibold">Coordonnées bancaires</h3>
                 <Textarea
                   value={invoiceSettings?.bank_details || formData.bank_details || ""}
                   onChange={(e) => setInvoiceSettings({...invoiceSettings, bank_details: e.target.value})}
                   placeholder="IBAN : FR76 ...
 BIC/SWIFT : ...
 BANQUE : ..."
-                  className="bg-white border-slate-200 text-slate-900 min-h-[80px] text-sm"
+                  className="bg-card border-border text-foreground min-h-[80px] text-sm"
                 />
               </div>
               
               {/* Signature Text */}
               <div className="space-y-2">
-                <h3 className="text-slate-900 font-semibold">Texte avant signature (devis)</h3>
+                <h3 className="text-foreground font-semibold">Texte avant signature (devis)</h3>
                 <Input
                   value={invoiceSettings?.signature_text || "Bon pour accord"}
                   onChange={(e) => setInvoiceSettings({...invoiceSettings, signature_text: e.target.value})}
-                  className="bg-white border-slate-200 text-slate-900 text-sm"
+                  className="bg-card border-border text-foreground text-sm"
                 />
               </div>
               </div>
               
               {/* Action Buttons - Fixed at bottom */}
-              <div className="flex gap-3 p-6 border-t border-slate-200 flex-shrink-0 bg-white">
-                <Button variant="outline" onClick={() => setSettingsDialogOpen(false)} className="flex-1 border-slate-200 text-slate-900 hover:bg-slate-50">
+              <div className="flex gap-3 p-6 border-t border-border flex-shrink-0 bg-card">
+                <Button variant="outline" onClick={() => setSettingsDialogOpen(false)} className="flex-1 border-border text-foreground hover:bg-secondary">
                   Annuler
                 </Button>
-                <Button onClick={saveSettings} className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                <Button onClick={saveSettings} className="flex-1 bg-primary hover:bg-indigo-700">
                   <Save className="w-4 h-4 mr-2" /> Enregistrer
                 </Button>
               </div>
             </div>
             
             {/* Right Panel - Preview */}
-            <div className="hidden lg:block lg:w-1/2 bg-white border-l border-slate-200 overflow-y-auto p-6">
+            <div className="hidden lg:block lg:w-1/2 bg-card border-l border-border overflow-y-auto p-6">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-slate-900 font-semibold">Aperçu du document</h3>
+                <h3 className="text-foreground font-semibold">Aperçu du document</h3>
                 <div className="flex gap-2">
                   <Button 
                     variant={documentType === 'devis' ? 'default' : 'outline'} 
                     size="sm"
                     onClick={() => setDocumentType('devis')}
-                    className={documentType === 'devis' ? 'bg-indigo-600' : 'border-slate-200 text-white hover:bg-slate-50'}
+                    className={documentType === 'devis' ? 'bg-primary' : 'border-border text-white hover:bg-secondary'}
                   >
                     Devis
                   </Button>
@@ -2161,7 +2161,7 @@ BANQUE : ..."
                     variant={documentType === 'facture' ? 'default' : 'outline'} 
                     size="sm"
                     onClick={() => setDocumentType('facture')}
-                    className={documentType === 'facture' ? 'bg-indigo-600' : 'border-slate-200 text-white hover:bg-slate-50'}
+                    className={documentType === 'facture' ? 'bg-primary' : 'border-border text-white hover:bg-secondary'}
                   >
                     Facture
                   </Button>
@@ -2169,42 +2169,42 @@ BANQUE : ..."
               </div>
               
               {/* Full Preview - Uses invoiceSettings in real-time */}
-              <div className="bg-white rounded-lg shadow-lg p-6 text-black text-xs" style={{ transform: 'scale(0.85)', transformOrigin: 'top left', width: '118%' }}>
+              <div className="bg-card rounded-lg shadow-lg p-6 text-black text-xs" style={{ transform: 'scale(0.85)', transformOrigin: 'top left', width: '118%' }}>
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     <img src={COMPANY_INFO.logo} alt="Logo" className="h-10 mb-2" />
-                    <p className="text-[8px] text-gray-500">{COMPANY_INFO.tagline}</p>
+                    <p className="text-[8px] text-muted-foreground">{COMPANY_INFO.tagline}</p>
                   </div>
                   <div className="text-right">
-                    <h2 className="text-lg font-bold text-red-600 mb-1">
+                    <h2 className="text-lg font-bold text-danger mb-1">
                       {documentType === 'devis' ? 'DEVIS' : 'FACTURE'}
                     </h2>
-                    <p className="text-gray-600">N° {documentType === 'devis' ? 'DEV-' : 'FAC-'}2026-001</p>
-                    <p className="text-gray-600">Date: {new Date().toLocaleDateString('fr-FR')}</p>
+                    <p className="text-muted-foreground">N° {documentType === 'devis' ? 'DEV-' : 'FAC-'}2026-001</p>
+                    <p className="text-muted-foreground">Date: {new Date().toLocaleDateString('fr-FR')}</p>
                   </div>
                 </div>
                 
                 {/* Company & Client Side by Side - USES SETTINGS */}
                 <div className="flex justify-between mb-6 text-[10px]">
                   <div className="w-[45%]">
-                    <p className="font-bold text-gray-800 mb-1">{invoiceSettings?.company_name || COMPANY_INFO.name}</p>
-                    <p className="text-gray-600">{invoiceSettings?.company_address || `${COMPANY_INFO.address}, ${COMPANY_INFO.city}`}</p>
-                    <p className="text-gray-600">Tél: {invoiceSettings?.company_phone || COMPANY_INFO.phone}</p>
-                    <p className="text-gray-600">{invoiceSettings?.company_email || COMPANY_INFO.email}</p>
+                    <p className="font-bold text-foreground mb-1">{invoiceSettings?.company_name || COMPANY_INFO.name}</p>
+                    <p className="text-muted-foreground">{invoiceSettings?.company_address || `${COMPANY_INFO.address}, ${COMPANY_INFO.city}`}</p>
+                    <p className="text-muted-foreground">Tél: {invoiceSettings?.company_phone || COMPANY_INFO.phone}</p>
+                    <p className="text-muted-foreground">{invoiceSettings?.company_email || COMPANY_INFO.email}</p>
                   </div>
                   <div className="w-[45%] text-right">
-                    <p className="font-bold text-red-600 mb-1">DESTINATAIRE</p>
-                    <p className="font-semibold text-gray-800">Nom du client</p>
-                    <p className="text-gray-600">Entreprise</p>
-                    <p className="text-gray-600">client@email.com</p>
+                    <p className="font-bold text-danger mb-1">DESTINATAIRE</p>
+                    <p className="font-semibold text-foreground">Nom du client</p>
+                    <p className="text-muted-foreground">Entreprise</p>
+                    <p className="text-muted-foreground">client@email.com</p>
                   </div>
                 </div>
                 
                 {/* Items Table */}
                 <table className="w-full mb-4 text-[9px]">
                   <thead>
-                    <tr className="bg-gray-800 text-slate-900">
+                    <tr className="bg-gray-800 text-foreground">
                       <th className="p-2 text-left">Désignation</th>
                       <th className="p-2 text-center w-10">Qté</th>
                       <th className="p-2 text-right w-16">P.U. HT</th>
@@ -2213,10 +2213,10 @@ BANQUE : ..."
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-gray-200">
+                    <tr className="border-b border-border">
                       <td className="p-2">
                         <div className="font-semibold">Prestation exemple</div>
-                        <div className="text-gray-500 text-[8px]">Description du service</div>
+                        <div className="text-muted-foreground text-[8px]">Description du service</div>
                       </td>
                       <td className="p-2 text-center">1</td>
                       <td className="p-2 text-right">500,00 €</td>
@@ -2229,15 +2229,15 @@ BANQUE : ..."
                 {/* Totals */}
                 <div className="flex justify-end mb-4">
                   <div className="w-48 text-[10px]">
-                    <div className="flex justify-between py-1 border-b border-gray-200">
+                    <div className="flex justify-between py-1 border-b border-border">
                       <span>Total HT</span>
                       <span>500,00 €</span>
                     </div>
-                    <div className="flex justify-between py-1 border-b border-gray-200">
+                    <div className="flex justify-between py-1 border-b border-border">
                       <span>TVA (8.5%)</span>
                       <span>42,50 €</span>
                     </div>
-                    <div className="flex justify-between py-1 font-bold text-green-500">
+                    <div className="flex justify-between py-1 font-bold text-success">
                       <span className="text-xs leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
                       <span>542,50 €</span>
                     </div>
@@ -2253,7 +2253,7 @@ BANQUE : ..."
                     conditionsText = invoiceSettings?.conditions_facture || invoiceSettings?.default_conditions || '';
                   }
                   return conditionsText && (
-                    <div className="text-[8px] text-gray-600 mb-3 p-2 bg-gray-50 rounded">
+                    <div className="text-[8px] text-muted-foreground mb-3 p-2 bg-secondary rounded">
                       <p className="font-bold mb-1">Conditions de {documentType === 'devis' ? 'règlement' : 'paiement'}:</p>
                       <p className="whitespace-pre-wrap">{conditionsText}</p>
                     </div>
@@ -2262,7 +2262,7 @@ BANQUE : ..."
                 
                 {/* Bank Details */}
                 {invoiceSettings?.bank_details && (
-                  <div className="text-[8px] text-gray-600 mb-3 p-2 bg-gray-50 rounded">
+                  <div className="text-[8px] text-muted-foreground mb-3 p-2 bg-secondary rounded">
                     <p className="font-bold mb-1">Détails du paiement:</p>
                     <p>Bénéficiaire: {invoiceSettings?.company_name || COMPANY_INFO.name}</p>
                     <p className="whitespace-pre-wrap">{invoiceSettings.bank_details}</p>
@@ -2271,7 +2271,7 @@ BANQUE : ..."
                 
                 {/* Signature for quotes */}
                 {documentType === 'devis' && (
-                  <div className="text-[9px] text-gray-600 mt-4 pt-4 border-t">
+                  <div className="text-[9px] text-muted-foreground mt-4 pt-4 border-t">
                     <div className="flex justify-between">
                       <div>
                         <p className="font-bold mb-2">Pour Alpha Agency</p>
@@ -2286,7 +2286,7 @@ BANQUE : ..."
                 )}
                 
                 {/* Footer - USES SETTINGS */}
-                <div className="border-t mt-4 pt-3 text-[7px] text-gray-500 text-center">
+                <div className="border-t mt-4 pt-3 text-[7px] text-muted-foreground text-center">
                   <p>{invoiceSettings?.company_name || COMPANY_INFO.name} - {invoiceSettings?.company_address || `${COMPANY_INFO.address}, ${COMPANY_INFO.city}`}</p>
                   <p>SIRET: {invoiceSettings?.company_siret || COMPANY_INFO.siret} | TVA: {invoiceSettings?.company_vat || COMPANY_INFO.tva}</p>
                   <p className="mt-1">En cas de retard de paiement: pénalités au taux légal x3 + 40€ de frais de recouvrement.</p>
@@ -2299,52 +2299,52 @@ BANQUE : ..."
 
       {/* Services Management Dialog */}
       <Dialog open={servicesDialogOpen} onOpenChange={setServicesDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 max-w-2xl">
+        <DialogContent className="bg-secondary border-border max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-slate-900 flex items-center gap-2">
-              <Package className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <Package className="w-5 h-5 text-primary" />
               Services enregistrés
             </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             {/* Add New Service */}
-            <div className="bg-white rounded-lg p-4 space-y-3">
-              <p className="text-sm font-medium text-slate-900">Ajouter un nouveau service</p>
+            <div className="bg-card rounded-lg p-4 space-y-3">
+              <p className="text-sm font-medium text-foreground">Ajouter un nouveau service</p>
               <div className="space-y-3">
                 <div>
-                  <Label className="text-xs text-slate-500">Titre du service *</Label>
+                  <Label className="text-xs text-muted-foreground">Titre du service *</Label>
                   <Input
                     placeholder="Ex: Site web vitrine, Logo professionnel, Community Management..."
                     value={newService.title}
                     onChange={(e) => setNewService({...newService, title: e.target.value})}
-                    className="bg-white backdrop-blur-xl border-slate-200 font-bold"
+                    className="bg-card backdrop-blur-xl border-border font-bold"
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-slate-500">Description détaillée</Label>
+                  <Label className="text-xs text-muted-foreground">Description détaillée</Label>
                   <Textarea
                     placeholder="Décrivez en détail ce que comprend ce service : fonctionnalités incluses, livrables, délais, etc."
                     value={newService.description}
                     onChange={(e) => setNewService({...newService, description: e.target.value})}
-                    className="bg-white backdrop-blur-xl border-slate-200 min-h-[100px]"
+                    className="bg-card backdrop-blur-xl border-border min-h-[100px]"
                     rows={4}
                   />
                 </div>
                 <div className="flex gap-3 items-end">
                   <div className="flex-1">
-                    <Label className="text-xs text-slate-500">Prix HT (€) *</Label>
+                    <Label className="text-xs text-muted-foreground">Prix HT (€) *</Label>
                     <Input
                       type="number"
                       placeholder="0.00"
                       value={newService.price || ""}
                       onChange={(e) => setNewService({...newService, price: parseFloat(e.target.value) || 0})}
-                      className="bg-white backdrop-blur-xl border-slate-200"
+                      className="bg-card backdrop-blur-xl border-border"
                     />
                   </div>
                   <Button 
                     onClick={handleAddService} 
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                    className="bg-primary hover:brightness-110 text-white"
                     disabled={!newService.title || !newService.price}
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -2357,37 +2357,37 @@ BANQUE : ..."
             {/* Services List */}
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {savedServices.length === 0 ? (
-                <p className="text-center text-slate-500 py-4">Aucun service enregistré</p>
+                <p className="text-center text-muted-foreground py-4">Aucun service enregistré</p>
               ) : (
                 savedServices.map((service) => (
-                  <div key={service.id} className="p-4 bg-white rounded-lg">
+                  <div key={service.id} className="p-4 bg-card rounded-lg">
                     {editingService?.id === service.id ? (
                       <div className="space-y-3">
                         <div>
-                          <Label className="text-xs text-slate-500">Titre</Label>
+                          <Label className="text-xs text-muted-foreground">Titre</Label>
                           <Input
                             value={editingService.title}
                             onChange={(e) => setEditingService({...editingService, title: e.target.value})}
-                            className="bg-white backdrop-blur-xl border-slate-200 font-bold"
+                            className="bg-card backdrop-blur-xl border-border font-bold"
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-slate-500">Description</Label>
+                          <Label className="text-xs text-muted-foreground">Description</Label>
                           <Textarea
                             value={editingService.description || ""}
                             onChange={(e) => setEditingService({...editingService, description: e.target.value})}
-                            className="bg-white backdrop-blur-xl border-slate-200"
+                            className="bg-card backdrop-blur-xl border-border"
                             rows={3}
                           />
                         </div>
                         <div className="flex gap-3 items-end">
                           <div className="flex-1">
-                            <Label className="text-xs text-slate-500">Prix HT (€)</Label>
+                            <Label className="text-xs text-muted-foreground">Prix HT (€)</Label>
                             <Input
                               type="number"
                               value={editingService.price}
                               onChange={(e) => setEditingService({...editingService, price: parseFloat(e.target.value) || 0})}
-                              className="bg-white backdrop-blur-xl border-slate-200"
+                              className="bg-card backdrop-blur-xl border-border"
                             />
                           </div>
                           <Button size="sm" onClick={handleUpdateService} className="bg-green-600 hover:bg-green-700 text-white">
@@ -2401,17 +2401,17 @@ BANQUE : ..."
                     ) : (
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <p className="font-bold text-slate-900">{service.title}</p>
+                          <p className="font-bold text-foreground">{service.title}</p>
                           {service.description && (
-                            <p className="text-sm text-slate-500 mt-1 whitespace-pre-wrap">{service.description}</p>
+                            <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{service.description}</p>
                           )}
-                          <p className="text-lg text-indigo-600 font-mono mt-2">{formatCurrency(service.price)}</p>
+                          <p className="text-lg text-primary font-mono mt-2">{formatCurrency(service.price)}</p>
                         </div>
                         <div className="flex gap-1 flex-shrink-0">
                           <Button size="sm" variant="ghost" onClick={() => setEditingService(service)}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => handleDeleteService(service.id)} className="text-red-500">
+                          <Button size="sm" variant="ghost" onClick={() => handleDeleteService(service.id)} className="text-danger">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -2427,12 +2427,12 @@ BANQUE : ..."
 
       {/* View Invoice Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-secondary border-border max-w-3xl max-h-[90vh] overflow-y-auto">
           {selectedInvoice && (
             <>
               <DialogHeader>
                 <div className="flex items-center justify-between">
-                  <DialogTitle className="text-slate-900">
+                  <DialogTitle className="text-foreground">
                     {selectedInvoice.invoice_number}
                   </DialogTitle>
                   <Badge className={statusConfig[selectedInvoice.status]?.color}>
@@ -2445,38 +2445,38 @@ BANQUE : ..."
                 {/* Header Info */}
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <p className="text-sm text-slate-500">Client</p>
-                    <p className="font-medium text-slate-900">{getContactName(selectedInvoice.contact_id)}</p>
+                    <p className="text-sm text-muted-foreground">Client</p>
+                    <p className="font-medium text-foreground">{getContactName(selectedInvoice.contact_id)}</p>
                     {getContactCompany(selectedInvoice.contact_id) && (
-                      <p className="text-sm text-slate-500">{getContactCompany(selectedInvoice.contact_id)}</p>
+                      <p className="text-sm text-muted-foreground">{getContactCompany(selectedInvoice.contact_id)}</p>
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-slate-500">Date d'émission</p>
-                    <p className="font-medium text-slate-900">{formatDate(selectedInvoice.created_at)}</p>
-                    <p className="text-sm text-slate-500 mt-2">Échéance</p>
-                    <p className="font-medium text-slate-900">{formatDate(selectedInvoice.due_date)}</p>
+                    <p className="text-sm text-muted-foreground">Date d'émission</p>
+                    <p className="font-medium text-foreground">{formatDate(selectedInvoice.created_at)}</p>
+                    <p className="text-sm text-muted-foreground mt-2">Échéance</p>
+                    <p className="font-medium text-foreground">{formatDate(selectedInvoice.due_date)}</p>
                   </div>
                 </div>
 
                 {/* Items Table */}
-                <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <div className="border border-border rounded-lg overflow-hidden">
                   <table className="w-full">
-                    <thead className="bg-white">
+                    <thead className="bg-card">
                       <tr>
-                        <th className="text-left px-4 py-2 text-xs font-medium text-slate-500">Description</th>
-                        <th className="text-center px-4 py-2 text-xs font-medium text-slate-500">Qté</th>
-                        <th className="text-right px-4 py-2 text-xs font-medium text-slate-500">Prix unitaire</th>
-                        <th className="text-right px-4 py-2 text-xs font-medium text-slate-500">Total HT</th>
+                        <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">Description</th>
+                        <th className="text-center px-4 py-2 text-xs font-medium text-muted-foreground">Qté</th>
+                        <th className="text-right px-4 py-2 text-xs font-medium text-muted-foreground">Prix unitaire</th>
+                        <th className="text-right px-4 py-2 text-xs font-medium text-muted-foreground">Total HT</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E5E5E5]">
                       {selectedInvoice.items?.map((item, index) => (
                         <tr key={index}>
-                          <td className="px-4 py-3 text-slate-900">{item.description}</td>
-                          <td className="px-4 py-3 text-center text-slate-500">{item.quantity}</td>
-                          <td className="px-4 py-3 text-right font-mono text-slate-500">{formatCurrency(item.unit_price)}</td>
-                          <td className="px-4 py-3 text-right font-mono text-slate-900">{formatCurrency(item.quantity * item.unit_price)}</td>
+                          <td className="px-4 py-3 text-foreground">{item.description}</td>
+                          <td className="px-4 py-3 text-center text-muted-foreground">{item.quantity}</td>
+                          <td className="px-4 py-3 text-right font-mono text-muted-foreground">{formatCurrency(item.unit_price)}</td>
+                          <td className="px-4 py-3 text-right font-mono text-foreground">{formatCurrency(item.quantity * item.unit_price)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -2487,16 +2487,16 @@ BANQUE : ..."
                 <div className="flex justify-end">
                   <div className="w-64 space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-500">Sous-total HT</span>
+                      <span className="text-muted-foreground">Sous-total HT</span>
                       <span className="font-mono">{formatCurrency(selectedInvoice.subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-500">TVA (8.5%)</span>
+                      <span className="text-muted-foreground">TVA (8.5%)</span>
                       <span className="font-mono">{formatCurrency(selectedInvoice.tax)}</span>
                     </div>
                     <div className="flex justify-between text-lg font-bold border-t border-green-500/50 pt-2">
-                      <span className="text-green-500 text-sm leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
-                      <span className="font-mono text-green-500">{formatCurrency(selectedInvoice.total)}</span>
+                      <span className="text-success text-sm leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
+                      <span className="font-mono text-success">{formatCurrency(selectedInvoice.total)}</span>
                     </div>
                   </div>
                 </div>
@@ -2505,8 +2505,8 @@ BANQUE : ..."
                 {selectedInvoice.status !== 'brouillon' && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-indigo-600" />
+                      <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-primary" />
                         Paiements
                       </h3>
                       {selectedInvoice.status !== 'payée' && selectedInvoice.status !== 'payee' && selectedInvoice.status !== 'annulee' && (
@@ -2517,7 +2517,7 @@ BANQUE : ..."
                             setViewDialogOpen(false);
                             openPaymentDialog(selectedInvoice);
                           }}
-                          className="text-indigo-600 border-indigo-500/50"
+                          className="text-primary border-primary/40"
                         >
                           <Plus className="w-3 h-3 mr-1" />
                           Ajouter
@@ -2527,17 +2527,17 @@ BANQUE : ..."
 
                     {/* Payment Summary */}
                     <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-white rounded-lg p-3 text-center">
-                        <p className="text-xs text-slate-500">Total facture</p>
-                        <p className="font-mono font-bold text-slate-900">{formatCurrency(selectedInvoice.total)}</p>
+                      <div className="bg-card rounded-lg p-3 text-center">
+                        <p className="text-xs text-muted-foreground">Total facture</p>
+                        <p className="font-mono font-bold text-foreground">{formatCurrency(selectedInvoice.total)}</p>
                       </div>
-                      <div className="bg-green-50 rounded-lg p-3 text-center">
-                        <p className="text-xs text-green-600">Payé</p>
-                        <p className="font-mono font-bold text-green-700">{formatCurrency(selectedInvoice.total_paid || 0)}</p>
+                      <div className="bg-success-soft rounded-lg p-3 text-center">
+                        <p className="text-xs text-success">Payé</p>
+                        <p className="font-mono font-bold text-success">{formatCurrency(selectedInvoice.total_paid || 0)}</p>
                       </div>
-                      <div className={`rounded-lg p-3 text-center ${(selectedInvoice.remaining || (selectedInvoice.total - (selectedInvoice.total_paid || 0))) > 0 ? 'bg-orange-50' : 'bg-green-50'}`}>
-                        <p className={`text-xs ${(selectedInvoice.remaining || (selectedInvoice.total - (selectedInvoice.total_paid || 0))) > 0 ? 'text-orange-600' : 'text-green-600'}`}>Reste à payer</p>
-                        <p className={`font-mono font-bold ${(selectedInvoice.remaining || (selectedInvoice.total - (selectedInvoice.total_paid || 0))) > 0 ? 'text-orange-700' : 'text-green-700'}`}>
+                      <div className={`rounded-lg p-3 text-center ${(selectedInvoice.remaining || (selectedInvoice.total - (selectedInvoice.total_paid || 0))) > 0 ? 'bg-warning-soft' : 'bg-success-soft'}`}>
+                        <p className={`text-xs ${(selectedInvoice.remaining || (selectedInvoice.total - (selectedInvoice.total_paid || 0))) > 0 ? 'text-warning' : 'text-success'}`}>Reste à payer</p>
+                        <p className={`font-mono font-bold ${(selectedInvoice.remaining || (selectedInvoice.total - (selectedInvoice.total_paid || 0))) > 0 ? 'text-warning' : 'text-success'}`}>
                           {formatCurrency(selectedInvoice.remaining || (selectedInvoice.total - (selectedInvoice.total_paid || 0)))}
                         </p>
                       </div>
@@ -2545,14 +2545,14 @@ BANQUE : ..."
 
                     {/* Payments List */}
                     {selectedInvoice.payments && selectedInvoice.payments.length > 0 ? (
-                      <div className="border border-slate-200 rounded-lg overflow-hidden">
+                      <div className="border border-border rounded-lg overflow-hidden">
                         <table className="w-full">
-                          <thead className="bg-white">
+                          <thead className="bg-card">
                             <tr>
-                              <th className="text-left px-4 py-2 text-xs font-medium text-slate-500">Date</th>
-                              <th className="text-left px-4 py-2 text-xs font-medium text-slate-500">Méthode</th>
-                              <th className="text-right px-4 py-2 text-xs font-medium text-slate-500">Montant</th>
-                              <th className="text-right px-4 py-2 text-xs font-medium text-slate-500">Actions</th>
+                              <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">Date</th>
+                              <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">Méthode</th>
+                              <th className="text-right px-4 py-2 text-xs font-medium text-muted-foreground">Montant</th>
+                              <th className="text-right px-4 py-2 text-xs font-medium text-muted-foreground">Actions</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-[#E5E5E5]">
@@ -2560,25 +2560,25 @@ BANQUE : ..."
                               const method = paymentMethods[payment.payment_method] || paymentMethods.virement;
                               const MethodIcon = method.icon;
                               return (
-                                <tr key={payment.id} className="hover:bg-slate-50">
-                                  <td className="px-4 py-3 text-sm text-slate-900">
+                                <tr key={payment.id} className="hover:bg-secondary">
+                                  <td className="px-4 py-3 text-sm text-foreground">
                                     {formatDate(payment.payment_date)}
                                   </td>
                                   <td className="px-4 py-3">
-                                    <div className="flex items-center gap-2 text-sm text-slate-500">
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                       <MethodIcon className="w-4 h-4" />
                                       {method.label}
                                     </div>
                                   </td>
                                   <td className="px-4 py-3 text-right">
-                                    <span className="font-mono font-medium text-green-600">{formatCurrency(payment.amount)}</span>
+                                    <span className="font-mono font-medium text-success">{formatCurrency(payment.amount)}</span>
                                   </td>
                                   <td className="px-4 py-3 text-right">
                                     <Button
                                       size="sm"
                                       variant="ghost"
                                       onClick={() => handleDeletePayment(selectedInvoice.id, payment.id)}
-                                      className="text-red-500 hover:text-red-700 h-7 w-7 p-0"
+                                      className="text-danger hover:text-danger h-7 w-7 p-0"
                                     >
                                       <Trash2 className="w-3 h-3" />
                                     </Button>
@@ -2590,7 +2590,7 @@ BANQUE : ..."
                         </table>
                       </div>
                     ) : (
-                      <div className="text-center py-6 text-slate-500 bg-white rounded-lg">
+                      <div className="text-center py-6 text-muted-foreground bg-card rounded-lg">
                         <Banknote className="w-8 h-8 mx-auto mb-2 opacity-50" />
                         <p className="text-sm">Aucun paiement enregistré</p>
                       </div>
@@ -2605,7 +2605,7 @@ BANQUE : ..."
                 </Button>
                 <Button 
                   onClick={() => handleDownloadPDF(selectedInvoice)}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                  className="bg-primary hover:brightness-110 text-white"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Télécharger PDF
@@ -2618,10 +2618,10 @@ BANQUE : ..."
 
       {/* Add Payment Dialog */}
       <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 max-w-md">
+        <DialogContent className="bg-secondary border-border max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-slate-900 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-primary" />
               Enregistrer un paiement
             </DialogTitle>
           </DialogHeader>
@@ -2629,22 +2629,22 @@ BANQUE : ..."
           {selectedInvoiceForPayment && (
             <div className="space-y-4">
               {/* Invoice Summary */}
-              <div className="bg-white rounded-lg p-4 space-y-2">
+              <div className="bg-card rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Facture</span>
+                  <span className="text-muted-foreground">Facture</span>
                   <span className="font-mono font-medium">{selectedInvoiceForPayment.invoice_number}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-green-500 text-xs leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
-                  <span className="font-mono text-green-500">{formatCurrency(selectedInvoiceForPayment.total)}</span>
+                  <span className="text-success text-xs leading-tight">Montant Total de votre<br/>investissement (TTC)</span>
+                  <span className="font-mono text-success">{formatCurrency(selectedInvoiceForPayment.total)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Déjà payé</span>
-                  <span className="font-mono text-green-600">{formatCurrency(selectedInvoiceForPayment.total_paid || 0)}</span>
+                  <span className="text-muted-foreground">Déjà payé</span>
+                  <span className="font-mono text-success">{formatCurrency(selectedInvoiceForPayment.total_paid || 0)}</span>
                 </div>
-                <div className="flex justify-between text-sm font-bold border-t border-slate-200 pt-2">
-                  <span className="text-slate-900">Reste à payer</span>
-                  <span className="font-mono text-indigo-600">
+                <div className="flex justify-between text-sm font-bold border-t border-border pt-2">
+                  <span className="text-foreground">Reste à payer</span>
+                  <span className="font-mono text-primary">
                     {formatCurrency((selectedInvoiceForPayment.total || 0) - (selectedInvoiceForPayment.total_paid || 0))}
                   </span>
                 </div>
@@ -2653,9 +2653,9 @@ BANQUE : ..."
               {/* Payment Form */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Montant *</Label>
+                  <Label className="text-foreground">Montant *</Label>
                   <div className="relative">
-                    <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       type="number"
                       step="0.01"
@@ -2663,34 +2663,34 @@ BANQUE : ..."
                       placeholder="0.00"
                       value={paymentForm.amount}
                       onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-                      className="pl-10 bg-white border-slate-200 text-slate-900 font-mono"
+                      className="pl-10 bg-card border-border text-foreground font-mono"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Date du paiement *</Label>
+                  <Label className="text-foreground">Date du paiement *</Label>
                   <div className="relative">
-                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       type="date"
                       value={paymentForm.payment_date}
                       onChange={(e) => setPaymentForm({ ...paymentForm, payment_date: e.target.value })}
-                      className="pl-10 bg-white border-slate-200 text-slate-900"
+                      className="pl-10 bg-card border-border text-foreground"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Méthode de paiement</Label>
+                  <Label className="text-foreground">Méthode de paiement</Label>
                   <Select
                     value={paymentForm.payment_method}
                     onValueChange={(value) => setPaymentForm({ ...paymentForm, payment_method: value })}
                   >
-                    <SelectTrigger className="bg-white border-slate-200 text-slate-900">
+                    <SelectTrigger className="bg-card border-border text-foreground">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-50 border-slate-200">
+                    <SelectContent className="bg-secondary border-border">
                       {Object.entries(paymentMethods).map(([key, method]) => {
                         const Icon = method.icon;
                         return (
@@ -2707,12 +2707,12 @@ BANQUE : ..."
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-slate-900">Notes (optionnel)</Label>
+                  <Label className="text-foreground">Notes (optionnel)</Label>
                   <Textarea
                     placeholder="Référence de virement, numéro de chèque..."
                     value={paymentForm.notes}
                     onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
-                    className="bg-white border-slate-200 text-slate-900"
+                    className="bg-card border-border text-foreground"
                     rows={2}
                   />
                 </div>
@@ -2725,7 +2725,7 @@ BANQUE : ..."
                 <Button 
                   onClick={handleAddPayment}
                   disabled={savingPayment || !paymentForm.amount}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white"
+                  className="bg-primary hover:brightness-110 text-white"
                 >
                   {savingPayment ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
                   Enregistrer
@@ -2738,33 +2738,33 @@ BANQUE : ..."
 
       {/* Email Confirmation Dialog */}
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 max-w-md">
+        <DialogContent className="bg-secondary border-border max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-slate-900 flex items-center gap-2">
+            <DialogTitle className="text-foreground flex items-center gap-2">
               <Mail className="w-5 h-5 text-emerald-400" />
               Envoyer par email
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-slate-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               {emailInvoice?.document_type === 'devis' ? 'Devis' : 'Facture'} {emailInvoice?.invoice_number}
             </p>
             <div className="space-y-2">
-              <Label className="text-slate-900">Adresse email du destinataire</Label>
+              <Label className="text-foreground">Adresse email du destinataire</Label>
               <Input
                 type="email"
                 value={emailRecipient}
                 onChange={(e) => setEmailRecipient(e.target.value)}
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
                 placeholder="client@email.com"
               />
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Une copie sera envoyée à leo.sperl@alphagency.com
             </p>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setEmailDialogOpen(false)} className="border-slate-200 text-slate-900 hover:bg-slate-50">
+            <Button variant="outline" onClick={() => setEmailDialogOpen(false)} className="border-border text-foreground hover:bg-secondary">
               Annuler
             </Button>
             <Button onClick={handleSendEmail} disabled={sendingEmail || !emailRecipient} className="bg-emerald-600 hover:bg-emerald-700">
@@ -2777,22 +2777,22 @@ BANQUE : ..."
 
       {/* Phase 2: After Creation Dialog */}
       <Dialog open={phase2DialogOpen} onOpenChange={setPhase2DialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 max-w-lg">
+        <DialogContent className="bg-secondary border-border max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-slate-900 flex items-center gap-2">
+            <DialogTitle className="text-foreground flex items-center gap-2">
               <CheckCircle className="w-6 h-6 text-emerald-400" />
               {createdInvoice?.document_type === 'devis' ? 'Devis' : 'Facture'} créé{createdInvoice?.document_type === 'devis' ? '' : 'e'} !
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="bg-white rounded-lg p-4">
-              <p className="text-slate-900 font-mono text-lg">{createdInvoice?.invoice_number}</p>
-              <p className="text-slate-500 text-sm mt-1">
+            <div className="bg-card rounded-lg p-4">
+              <p className="text-foreground font-mono text-lg">{createdInvoice?.invoice_number}</p>
+              <p className="text-muted-foreground text-sm mt-1">
                 {getContactName(createdInvoice?.contact_id)} • {formatCurrency(createdInvoice?.total || 0)}
               </p>
             </div>
             
-            <p className="text-slate-600 text-sm">Que souhaitez-vous faire ?</p>
+            <p className="text-muted-foreground text-sm">Que souhaitez-vous faire ?</p>
             
             <div className="space-y-2">
               <Button 
@@ -2820,12 +2820,12 @@ BANQUE : ..."
                     toast.success("PDF téléchargé");
                   }
                 }}
-                className="w-full justify-start bg-indigo-50 hover:bg-indigo-600/30 text-indigo-600 border border-indigo-600/30"
+                className="w-full justify-start bg-brand-soft hover:bg-primary/30 text-primary border border-indigo-600/30"
               >
                 <Download className="w-5 h-5 mr-3" />
                 <div className="text-left">
                   <p className="font-medium">Télécharger le PDF</p>
-                  <p className="text-xs text-indigo-600/70">Sauvegarder sur votre appareil</p>
+                  <p className="text-xs text-primary/70">Sauvegarder sur votre appareil</p>
                 </div>
               </Button>
               
@@ -2837,18 +2837,18 @@ BANQUE : ..."
                     setViewDialogOpen(true);
                   }
                 }}
-                className="w-full justify-start bg-white hover:bg-slate-100 text-slate-900 border border-slate-200"
+                className="w-full justify-start bg-card hover:bg-secondary text-foreground border border-border"
               >
                 <Eye className="w-5 h-5 mr-3" />
                 <div className="text-left">
                   <p className="font-medium">Voir l'aperçu</p>
-                  <p className="text-xs text-slate-500">Prévisualiser le document</p>
+                  <p className="text-xs text-muted-foreground">Prévisualiser le document</p>
                 </div>
               </Button>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPhase2DialogOpen(false)} className="border-slate-200 text-slate-900 hover:bg-slate-50">
+            <Button variant="outline" onClick={() => setPhase2DialogOpen(false)} className="border-border text-foreground hover:bg-secondary">
               Fermer
             </Button>
           </DialogFooter>
@@ -2857,76 +2857,76 @@ BANQUE : ..."
 
       {/* New Contact Dialog */}
       <Dialog open={newContactDialogOpen} onOpenChange={setNewContactDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-secondary border-border max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-slate-900 flex items-center gap-2">
-              <Plus className="w-5 h-5 text-indigo-600" />
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <Plus className="w-5 h-5 text-primary" />
               Nouveau client
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-slate-900">Prénom</Label>
+                <Label className="text-foreground">Prénom</Label>
                 <Input
                   value={newContactData.first_name}
                   onChange={(e) => setNewContactData({...newContactData, first_name: e.target.value})}
-                  className="bg-white border-slate-200 text-slate-900"
+                  className="bg-card border-border text-foreground"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-900">Nom</Label>
+                <Label className="text-foreground">Nom</Label>
                 <Input
                   value={newContactData.last_name}
                   onChange={(e) => setNewContactData({...newContactData, last_name: e.target.value})}
-                  className="bg-white border-slate-200 text-slate-900"
+                  className="bg-card border-border text-foreground"
                 />
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label className="text-slate-900">Entreprise</Label>
+              <Label className="text-foreground">Entreprise</Label>
               <Input
                 value={newContactData.company}
                 onChange={(e) => setNewContactData({...newContactData, company: e.target.value})}
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
               />
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-slate-900">Email</Label>
+                <Label className="text-foreground">Email</Label>
                 <Input
                   type="email"
                   value={newContactData.email}
                   onChange={(e) => setNewContactData({...newContactData, email: e.target.value})}
-                  className="bg-white border-slate-200 text-slate-900"
+                  className="bg-card border-border text-foreground"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-900">Téléphone</Label>
+                <Label className="text-foreground">Téléphone</Label>
                 <Input
                   value={newContactData.phone}
                   onChange={(e) => setNewContactData({...newContactData, phone: e.target.value})}
-                  className="bg-white border-slate-200 text-slate-900"
+                  className="bg-card border-border text-foreground"
                 />
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label className="text-slate-900">SIRET</Label>
+              <Label className="text-foreground">SIRET</Label>
               <div className="flex gap-2">
                 <Input
                   value={newContactData.siret}
                   onChange={(e) => setNewContactData({...newContactData, siret: e.target.value})}
                   placeholder="N° SIRET (14 chiffres)"
-                  className="bg-white border-slate-200 text-slate-900"
+                  className="bg-card border-border text-foreground"
                 />
                 <Button
                   type="button"
                   variant="outline"
                   disabled={lookingUpSiret}
-                  className="border-slate-200 text-slate-900 hover:bg-slate-50 shrink-0"
+                  className="border-border text-foreground hover:bg-secondary shrink-0"
                   onClick={async () => {
                     if (!newContactData.siret) {
                       toast.error("Saisissez un SIRET");
@@ -2961,34 +2961,34 @@ BANQUE : ..."
                 </Button>
               </div>
               {newContactData.company_address && (
-                <p className="text-xs text-slate-500 mt-1">📍 {newContactData.company_address}</p>
+                <p className="text-xs text-muted-foreground mt-1">📍 {newContactData.company_address}</p>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-slate-900">Poste</Label>
+                <Label className="text-foreground">Poste</Label>
                 <Input
                   value={newContactData.poste}
                   onChange={(e) => setNewContactData({...newContactData, poste: e.target.value})}
-                  className="bg-white border-slate-200 text-slate-900"
+                  className="bg-card border-border text-foreground"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-900">Ville</Label>
+                <Label className="text-foreground">Ville</Label>
                 <Input
                   value={newContactData.city}
                   onChange={(e) => setNewContactData({...newContactData, city: e.target.value})}
-                  className="bg-white border-slate-200 text-slate-900"
+                  className="bg-card border-border text-foreground"
                 />
               </div>
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setNewContactDialogOpen(false)} className="border-slate-200 text-slate-900 hover:bg-slate-50">
+            <Button variant="outline" onClick={() => setNewContactDialogOpen(false)} className="border-border text-foreground hover:bg-secondary">
               Annuler
             </Button>
-            <Button onClick={handleCreateNewContact} disabled={savingContact} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={handleCreateNewContact} disabled={savingContact} className="bg-primary hover:bg-indigo-700">
               {savingContact ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
               Créer et sélectionner
             </Button>
@@ -2998,41 +2998,41 @@ BANQUE : ..."
 
       {/* Deposit Invoice Dialog */}
       <Dialog open={depositDialogOpen} onOpenChange={setDepositDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-md">
+        <DialogContent className="bg-secondary border-border text-foreground max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <PiggyBank className="w-5 h-5 text-blue-400" />
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <PiggyBank className="w-5 h-5 text-info" />
               Créer une facture d&apos;acompte
             </DialogTitle>
           </DialogHeader>
           
           {selectedParentInvoice && (
-            <div className="bg-white rounded-lg p-3 mb-4">
-              <p className="text-sm text-slate-500">Facture principale</p>
-              <p className="font-mono font-bold text-slate-900">{selectedParentInvoice.invoice_number}</p>
-              <p className="text-lg font-bold text-slate-900">{formatCurrency(selectedParentInvoice.total)}</p>
+            <div className="bg-card rounded-lg p-3 mb-4">
+              <p className="text-sm text-muted-foreground">Facture principale</p>
+              <p className="font-mono font-bold text-foreground">{selectedParentInvoice.invoice_number}</p>
+              <p className="text-lg font-bold text-foreground">{formatCurrency(selectedParentInvoice.total)}</p>
             </div>
           )}
           
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-slate-900">Type de calcul</Label>
+              <Label className="text-foreground">Type de calcul</Label>
               <Select
                 value={depositForm.deposit_type}
                 onValueChange={(value) => setDepositForm({...depositForm, deposit_type: value})}
               >
-                <SelectTrigger className="bg-white border-slate-200 text-slate-900">
+                <SelectTrigger className="bg-card border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-50 border-slate-200">
-                  <SelectItem value="percent" className="text-slate-900">Pourcentage (%)</SelectItem>
-                  <SelectItem value="amount" className="text-slate-900">Montant fixe (€)</SelectItem>
+                <SelectContent className="bg-secondary border-border">
+                  <SelectItem value="percent" className="text-foreground">Pourcentage (%)</SelectItem>
+                  <SelectItem value="amount" className="text-foreground">Montant fixe (€)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label className="text-slate-900">
+              <Label className="text-foreground">
                 {depositForm.deposit_type === 'percent' ? 'Pourcentage' : 'Montant'}
               </Label>
               <div className="flex items-center gap-2">
@@ -3043,12 +3043,12 @@ BANQUE : ..."
                   step={depositForm.deposit_type === 'percent' ? 5 : 0.01}
                   value={depositForm.deposit_value}
                   onChange={(e) => setDepositForm({...depositForm, deposit_value: parseFloat(e.target.value) || 0})}
-                  className="bg-white border-slate-200 text-slate-900"
+                  className="bg-card border-border text-foreground"
                 />
-                <span className="text-slate-500">{depositForm.deposit_type === 'percent' ? '%' : '€'}</span>
+                <span className="text-muted-foreground">{depositForm.deposit_type === 'percent' ? '%' : '€'}</span>
               </div>
               {depositForm.deposit_type === 'percent' && selectedParentInvoice && (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   = {formatCurrency((selectedParentInvoice.total * depositForm.deposit_value / 100))}
                 </p>
               )}
@@ -3064,7 +3064,7 @@ BANQUE : ..."
                     variant={depositForm.deposit_value === pct ? "default" : "outline"}
                     size="sm"
                     onClick={() => setDepositForm({...depositForm, deposit_value: pct})}
-                    className={depositForm.deposit_value === pct ? "bg-blue-600" : "border-slate-200 text-white hover:bg-slate-100"}
+                    className={depositForm.deposit_value === pct ? "bg-blue-600" : "border-border text-white hover:bg-secondary"}
                   >
                     {pct}%
                   </Button>
@@ -3073,39 +3073,39 @@ BANQUE : ..."
             )}
             
             <div className="space-y-2">
-              <Label className="text-slate-900">Date du contrat (optionnel)</Label>
+              <Label className="text-foreground">Date du contrat (optionnel)</Label>
               <Input
                 type="text"
                 placeholder="Ex: 15/01/2026"
                 value={depositForm.contract_date}
                 onChange={(e) => setDepositForm({...depositForm, contract_date: e.target.value})}
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
               />
             </div>
             
             <div className="space-y-2">
-              <Label className="text-slate-900">Libellé personnalisé (optionnel)</Label>
+              <Label className="text-foreground">Libellé personnalisé (optionnel)</Label>
               <Textarea
                 placeholder="Laissez vide pour utiliser le libellé par défaut"
                 value={depositForm.label}
                 onChange={(e) => setDepositForm({...depositForm, label: e.target.value})}
-                className="bg-white border-slate-200 text-slate-900 min-h-[80px]"
+                className="bg-card border-border text-foreground min-h-[80px]"
               />
             </div>
             
             <div className="space-y-2">
-              <Label className="text-slate-900">Date d&apos;échéance (optionnel)</Label>
+              <Label className="text-foreground">Date d&apos;échéance (optionnel)</Label>
               <Input
                 type="date"
                 value={depositForm.due_date}
                 onChange={(e) => setDepositForm({...depositForm, due_date: e.target.value})}
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
               />
             </div>
           </div>
           
           <DialogFooter className="gap-2 mt-4">
-            <Button variant="outline" onClick={() => setDepositDialogOpen(false)} className="border-slate-200 text-slate-900 hover:bg-slate-50">
+            <Button variant="outline" onClick={() => setDepositDialogOpen(false)} className="border-border text-foreground hover:bg-secondary">
               Annuler
             </Button>
             <Button onClick={handleCreateDeposit} disabled={savingDeposit} className="bg-blue-600 hover:bg-blue-700">
@@ -3118,44 +3118,44 @@ BANQUE : ..."
 
       {/* Balance Invoice Dialog */}
       <Dialog open={balanceDialogOpen} onOpenChange={setBalanceDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-md">
+        <DialogContent className="bg-secondary border-border text-foreground max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
-              <Banknote className="w-5 h-5 text-purple-400" />
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Banknote className="w-5 h-5 text-primary" />
               Créer une facture de solde
             </DialogTitle>
           </DialogHeader>
           
           {selectedParentInvoice && (
-            <div className="bg-white rounded-lg p-3 mb-4">
-              <p className="text-sm text-slate-500">Facture principale</p>
-              <p className="font-mono font-bold text-slate-900">{selectedParentInvoice.invoice_number}</p>
-              <p className="text-lg font-bold text-slate-900">{formatCurrency(selectedParentInvoice.total)}</p>
-              <div className="mt-2 pt-2 border-t border-slate-200">
-                <p className="text-sm text-slate-500">Déjà payé: <span className="text-green-400">{formatCurrency(selectedParentInvoice.total_paid || 0)}</span></p>
-                <p className="text-sm text-slate-500">Reste à facturer: <span className="text-orange-400">{formatCurrency((selectedParentInvoice.total || 0) - (selectedParentInvoice.total_paid || 0))}</span></p>
+            <div className="bg-card rounded-lg p-3 mb-4">
+              <p className="text-sm text-muted-foreground">Facture principale</p>
+              <p className="font-mono font-bold text-foreground">{selectedParentInvoice.invoice_number}</p>
+              <p className="text-lg font-bold text-foreground">{formatCurrency(selectedParentInvoice.total)}</p>
+              <div className="mt-2 pt-2 border-t border-border">
+                <p className="text-sm text-muted-foreground">Déjà payé: <span className="text-success">{formatCurrency(selectedParentInvoice.total_paid || 0)}</span></p>
+                <p className="text-sm text-muted-foreground">Reste à facturer: <span className="text-orange-400">{formatCurrency((selectedParentInvoice.total || 0) - (selectedParentInvoice.total_paid || 0))}</span></p>
               </div>
             </div>
           )}
           
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-slate-900">Libellé personnalisé (optionnel)</Label>
+              <Label className="text-foreground">Libellé personnalisé (optionnel)</Label>
               <Textarea
                 placeholder="Laissez vide pour utiliser le libellé par défaut"
                 value={balanceForm.label}
                 onChange={(e) => setBalanceForm({...balanceForm, label: e.target.value})}
-                className="bg-white border-slate-200 text-slate-900 min-h-[80px]"
+                className="bg-card border-border text-foreground min-h-[80px]"
               />
             </div>
             
             <div className="space-y-2">
-              <Label className="text-slate-900">Date d&apos;échéance (optionnel)</Label>
+              <Label className="text-foreground">Date d&apos;échéance (optionnel)</Label>
               <Input
                 type="date"
                 value={balanceForm.due_date}
                 onChange={(e) => setBalanceForm({...balanceForm, due_date: e.target.value})}
-                className="bg-white border-slate-200 text-slate-900"
+                className="bg-card border-border text-foreground"
               />
             </div>
             
@@ -3165,19 +3165,19 @@ BANQUE : ..."
                 id="force_without_deposits"
                 checked={balanceForm.force_without_deposits}
                 onChange={(e) => setBalanceForm({...balanceForm, force_without_deposits: e.target.checked})}
-                className="w-4 h-4 rounded border-slate-200 bg-white"
+                className="w-4 h-4 rounded border-border bg-card"
               />
-              <Label htmlFor="force_without_deposits" className="text-slate-500 text-sm cursor-pointer">
+              <Label htmlFor="force_without_deposits" className="text-muted-foreground text-sm cursor-pointer">
                 Créer sans acompte préalable
               </Label>
             </div>
           </div>
           
           <DialogFooter className="gap-2 mt-4">
-            <Button variant="outline" onClick={() => setBalanceDialogOpen(false)} className="border-slate-200 text-slate-900 hover:bg-slate-50">
+            <Button variant="outline" onClick={() => setBalanceDialogOpen(false)} className="border-border text-foreground hover:bg-secondary">
               Annuler
             </Button>
-            <Button onClick={handleCreateBalance} disabled={savingDeposit} className="bg-purple-600 hover:bg-purple-700">
+            <Button onClick={handleCreateBalance} disabled={savingDeposit} className="bg-primary hover:bg-purple-700">
               {savingDeposit ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Banknote className="w-4 h-4 mr-2" />}
               Créer le solde
             </Button>
@@ -3187,9 +3187,9 @@ BANQUE : ..."
 
       {/* Related Invoices Dialog */}
       <Dialog open={relatedDialogOpen} onOpenChange={setRelatedDialogOpen}>
-        <DialogContent className="bg-slate-50 border-slate-200 text-slate-900 max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="bg-secondary border-border text-foreground max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-slate-900">
+            <DialogTitle className="flex items-center gap-2 text-foreground">
               <FileText className="w-5 h-5" />
               Factures liées
             </DialogTitle>
@@ -3198,16 +3198,16 @@ BANQUE : ..."
           {relatedInvoices && (
             <div className="space-y-4">
               {/* Parent Invoice */}
-              <div className="bg-white rounded-lg p-4">
-                <h3 className="text-sm font-bold text-slate-500 mb-2">FACTURE PRINCIPALE</h3>
+              <div className="bg-card rounded-lg p-4">
+                <h3 className="text-sm font-bold text-muted-foreground mb-2">FACTURE PRINCIPALE</h3>
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-mono font-bold text-slate-900 text-lg">{relatedInvoices.parent?.invoice_number}</p>
-                    <p className="text-slate-500">{getContactName(selectedParentInvoice?.contact_id)}</p>
+                    <p className="font-mono font-bold text-foreground text-lg">{relatedInvoices.parent?.invoice_number}</p>
+                    <p className="text-muted-foreground">{getContactName(selectedParentInvoice?.contact_id)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-mono font-bold text-slate-900 text-lg">{formatCurrency(relatedInvoices.parent?.total)}</p>
-                    <Badge className={`${relatedInvoices.parent?.status === 'soldée' ? 'bg-green-100 text-green-700' : relatedInvoices.parent?.status === 'partiellement_payée' ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-500'}`}>
+                    <p className="font-mono font-bold text-foreground text-lg">{formatCurrency(relatedInvoices.parent?.total)}</p>
+                    <Badge className={`${relatedInvoices.parent?.status === 'soldée' ? 'bg-success-soft text-success' : relatedInvoices.parent?.status === 'partiellement_payée' ? 'bg-warning-soft text-warning' : 'bg-secondary text-muted-foreground'}`}>
                       {relatedInvoices.parent?.status}
                     </Badge>
                   </div>
@@ -3216,39 +3216,39 @@ BANQUE : ..."
               
               {/* Summary */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-blue-500/10 rounded-lg p-3 text-center">
-                  <p className="text-xs text-blue-400 mb-1">Acomptes ({relatedInvoices.summary?.deposits_count || 0})</p>
-                  <p className="font-mono font-bold text-slate-900">{formatCurrency(relatedInvoices.summary?.total_deposits_paid || 0)}</p>
-                  <p className="text-xs text-slate-400">payés sur {formatCurrency(relatedInvoices.summary?.total_deposits_amount || 0)}</p>
+                <div className="bg-info-soft rounded-lg p-3 text-center">
+                  <p className="text-xs text-info mb-1">Acomptes ({relatedInvoices.summary?.deposits_count || 0})</p>
+                  <p className="font-mono font-bold text-foreground">{formatCurrency(relatedInvoices.summary?.total_deposits_paid || 0)}</p>
+                  <p className="text-xs text-muted-foreground">payés sur {formatCurrency(relatedInvoices.summary?.total_deposits_amount || 0)}</p>
                 </div>
-                <div className="bg-purple-500/10 rounded-lg p-3 text-center">
-                  <p className="text-xs text-purple-400 mb-1">Solde</p>
-                  <p className="font-mono font-bold text-slate-900">{formatCurrency(relatedInvoices.summary?.balance_paid || 0)}</p>
-                  <p className="text-xs text-slate-400">payés sur {formatCurrency(relatedInvoices.summary?.balance_amount || 0)}</p>
+                <div className="bg-brand-soft rounded-lg p-3 text-center">
+                  <p className="text-xs text-primary mb-1">Solde</p>
+                  <p className="font-mono font-bold text-foreground">{formatCurrency(relatedInvoices.summary?.balance_paid || 0)}</p>
+                  <p className="text-xs text-muted-foreground">payés sur {formatCurrency(relatedInvoices.summary?.balance_amount || 0)}</p>
                 </div>
-                <div className="bg-green-500/10 rounded-lg p-3 text-center">
-                  <p className="text-xs text-green-400 mb-1">Reste à payer</p>
-                  <p className="font-mono font-bold text-slate-900">{formatCurrency(relatedInvoices.summary?.remaining || 0)}</p>
+                <div className="bg-success-soft rounded-lg p-3 text-center">
+                  <p className="text-xs text-success mb-1">Reste à payer</p>
+                  <p className="font-mono font-bold text-foreground">{formatCurrency(relatedInvoices.summary?.remaining || 0)}</p>
                 </div>
               </div>
               
               {/* Deposits List */}
               {relatedInvoices.deposits?.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-bold text-blue-400 mb-2 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-info mb-2 flex items-center gap-2">
                     <PiggyBank className="w-4 h-4" />
                     FACTURES D'ACOMPTE
                   </h3>
                   <div className="space-y-2">
                     {relatedInvoices.deposits.map((deposit) => (
-                      <div key={deposit.id} className="bg-white rounded-lg p-3 flex justify-between items-center">
+                      <div key={deposit.id} className="bg-card rounded-lg p-3 flex justify-between items-center">
                         <div>
-                          <p className="font-mono font-medium text-slate-900">{deposit.invoice_number}</p>
-                          <p className="text-xs text-slate-500">{deposit.deposit_percent}% - {formatDate(deposit.created_at)}</p>
+                          <p className="font-mono font-medium text-foreground">{deposit.invoice_number}</p>
+                          <p className="text-xs text-muted-foreground">{deposit.deposit_percent}% - {formatDate(deposit.created_at)}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-mono font-bold text-slate-900">{formatCurrency(deposit.total)}</p>
-                          <Badge className={`${deposit.status === 'payée' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                          <p className="font-mono font-bold text-foreground">{formatCurrency(deposit.total)}</p>
+                          <Badge className={`${deposit.status === 'payée' ? 'bg-success-soft text-success' : 'bg-secondary text-muted-foreground'}`}>
                             {deposit.status}
                           </Badge>
                         </div>
@@ -3261,18 +3261,18 @@ BANQUE : ..."
               {/* Balance Invoice */}
               {relatedInvoices.balance && (
                 <div>
-                  <h3 className="text-sm font-bold text-purple-400 mb-2 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-primary mb-2 flex items-center gap-2">
                     <Banknote className="w-4 h-4" />
                     FACTURE DE SOLDE
                   </h3>
-                  <div className="bg-white rounded-lg p-3 flex justify-between items-center">
+                  <div className="bg-card rounded-lg p-3 flex justify-between items-center">
                     <div>
-                      <p className="font-mono font-medium text-slate-900">{relatedInvoices.balance.invoice_number}</p>
-                      <p className="text-xs text-slate-500">{formatDate(relatedInvoices.balance.created_at)}</p>
+                      <p className="font-mono font-medium text-foreground">{relatedInvoices.balance.invoice_number}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(relatedInvoices.balance.created_at)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-mono font-bold text-slate-900">{formatCurrency(relatedInvoices.balance.total)}</p>
-                      <Badge className={`${relatedInvoices.balance.status === 'payée' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                      <p className="font-mono font-bold text-foreground">{formatCurrency(relatedInvoices.balance.total)}</p>
+                      <Badge className={`${relatedInvoices.balance.status === 'payée' ? 'bg-success-soft text-success' : 'bg-secondary text-muted-foreground'}`}>
                         {relatedInvoices.balance.status}
                       </Badge>
                     </div>
@@ -3282,7 +3282,7 @@ BANQUE : ..."
               
               {/* No deposits or balance yet */}
               {(!relatedInvoices.deposits || relatedInvoices.deposits.length === 0) && !relatedInvoices.balance && (
-                <div className="text-center py-8 text-slate-400">
+                <div className="text-center py-8 text-muted-foreground">
                   <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
                   <p>Aucune facture d&apos;acompte ou de solde créée</p>
                   <p className="text-sm mt-2">Utilisez le menu d&apos;actions pour créer des factures liées</p>
@@ -3292,7 +3292,7 @@ BANQUE : ..."
           )}
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRelatedDialogOpen(false)} className="border-slate-200 text-slate-900 hover:bg-slate-50">
+            <Button variant="outline" onClick={() => setRelatedDialogOpen(false)} className="border-border text-foreground hover:bg-secondary">
               Fermer
             </Button>
           </DialogFooter>
