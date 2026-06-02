@@ -84,7 +84,7 @@ DÉROULÉ (suis cet ordre, une question à la fois) :
  Si plusieurs besoins, creuse chacun. Reformule régulièrement pour valider ta compréhension. Vise l'exhaustivité : l'équipe doit pouvoir chiffrer sans rappeler le prospect.
 
 ÉTAPE 5 — CLÔTURE
- Récapitule le besoin en 2 ou 3 phrases, fais confirmer au prospect, remercie-le et annonce que l'équipe d'Alpha Agency revient très vite avec une proposition personnalisée. Puis émets le bloc [QUOTE] avec ta recommandation de devis pour l'équipe.
+ Dès que le prospect indique qu'il a terminé, qu'on peut préparer la proposition, ou te remercie pour conclure : récapitule le besoin en 2 ou 3 phrases, remercie-le et annonce que l'équipe d'Alpha Agency revient très vite avec une proposition personnalisée. Tu DOIS alors OBLIGATOIREMENT, à la fin de ce message, ré-émettre le bloc [LEAD] complet PUIS le bloc [QUOTE] avec une ligne par prestation identifiée. C'est impératif : sans [QUOTE], l'équipe n'a aucun devis à préparer. N'attends pas d'avoir tous les détails parfaits, fais ta meilleure estimation.
 
 RÈGLES :
 - Tu ne connais que les informations PUBLIQUES d'Alpha Agency ci-dessous. Tu n'as accès à AUCUNE donnée client, devis ou dossier interne. Refuse poliment toute demande confidentielle et recentre sur le projet du visiteur.
@@ -132,7 +132,13 @@ _MAX_MESSAGES = 80
 _MAX_CHARS = 2000
 _SESSION_RESEARCH: dict = {}   # session_id -> texte de recherche
 _SESSION_CONTACT: dict = {}    # session_id -> {id, name, email}
+_SESSION_QUOTED: set = set()   # session_ids déjà devisés (évite les doublons)
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+# Signaux de clôture côté prospect (déclenchent le devis de secours)
+_CLOSING_RE = re.compile(
+    r"\b(c'est (tout|bon|ok|parfait)|rien d'autre|pas d'autre|merci (alex|beaucoup|à vous|pour tout)|"
+    r"au revoir|bonne (journée|soirée)|pr[ée]parez|on (fait|y va) comme [çc]a|tr[èe]s bien merci|"
+    r"hate|hâte de|impatient)\b", re.IGNORECASE)
 
 
 def _client_ip(request: Request) -> str:
@@ -339,6 +345,8 @@ async def _save_lead(data: dict, ip: str):
                          ("budget", budget)):
             if val:
                 updates[key] = val
+        if budget:
+            updates["score"] = "chaud"
         if note_text:
             updates["note"] = note_text
             updates["infos_sup"] = besoin or project
@@ -428,6 +436,41 @@ async def _create_devis(contact_id: str, items: list, notes: str = ""):
     await db.invoices.insert_one(doc)
     logger.info(f"public_chat: devis {number} créé (contact {contact_id})")
     return number, total
+
+
+async def _generate_quote_from_convo(messages):
+    """Filet de sécurité : génère les lignes d'un devis depuis la conversation (Gemini JSON forcé)."""
+    if not _gemini_client:
+        return None
+    transcript = "\n".join(
+        f"{'Prospect' if m.role == 'user' else 'Conseiller'}: {(m.content or '')[:1500]}"
+        for m in messages if m.role in ("user", "assistant")
+    )[:12000]
+    prompt = (
+        "Tu chiffres pour Alpha Agency (agence de communication, Guadeloupe). À partir de la "
+        "conversation ci-dessous, génère un devis pour les prestations demandées par le prospect.\n"
+        "Réponds UNIQUEMENT par un JSON valide, sans texte autour :\n"
+        '{"items":[{"title":"","description":"","quantity":1,"unit_price":0}],"notes":""}\n'
+        "Règles : une ligne par prestation ; unit_price en euros HT ; montants réalistes d'agence "
+        "(gestion réseaux sociaux ~400-900€/mois, site vitrine ~1500-3500€, e-commerce ~3000-7000€, "
+        "logo/identité ~500-1500€, shooting photo ~400-900€) ; quantity = nombre de mois pour un "
+        "abonnement mensuel, sinon 1 ; notes = court contexte pour l'équipe.\n\nCONVERSATION:\n" + transcript
+    )
+    for mdl in GEMINI_MODELS:
+        def _call(m=mdl):
+            resp = _gemini_client.models.generate_content(
+                model=m, contents=prompt,
+                config=_genai_types.GenerateContentConfig(response_mime_type="application/json"),
+            )
+            return (getattr(resp, "text", "") or "").strip()
+        try:
+            data = json.loads(await asyncio.to_thread(_call))
+            if isinstance(data, dict) and data.get("items"):
+                return data
+        except Exception as e:
+            logger.warning(f"public_chat: devis fallback ({mdl}) échoué: {e}")
+            continue
+    return None
 
 
 def _notify_leo(kind: str, info: dict):
@@ -535,14 +578,26 @@ async def public_chat(req: PubChatRequest, request: Request):
             if is_new:
                 await asyncio.to_thread(_notify_leo, "lead", lead)
 
-    # 3) Devis (à la clôture)
+    # 3) Devis : bloc [QUOTE] émis par l'agent
     _, quote = _extract_block(raw, "QUOTE")
-    if quote and _SESSION_CONTACT.get(sid):
-        c = _SESSION_CONTACT[sid]
-        devis = await _create_devis(c["id"], quote.get("items", []), quote.get("notes", ""))
+    contact = _SESSION_CONTACT.get(sid)
+    if quote and contact and sid not in _SESSION_QUOTED:
+        devis = await _create_devis(contact["id"], quote.get("items", []), quote.get("notes", ""))
         if devis:
+            _SESSION_QUOTED.add(sid)
             await asyncio.to_thread(_notify_leo, "devis",
-                                    {"name": c["name"], "number": devis[0], "total": devis[1]})
+                                    {"name": contact["name"], "number": devis[0], "total": devis[1]})
+
+    # 3b) Filet de sécurité : prospect qui clôt + lead capturé + pas encore de devis -> génère le devis
+    last_user = msgs[-1].content if (msgs and msgs[-1].role == "user") else ""
+    if (sid not in _SESSION_QUOTED and contact and len(msgs) >= 6 and _CLOSING_RE.search(last_user or "")):
+        qdata = await _generate_quote_from_convo(msgs)
+        if qdata:
+            devis = await _create_devis(contact["id"], qdata.get("items", []), qdata.get("notes", ""))
+            if devis:
+                _SESSION_QUOTED.add(sid)
+                await asyncio.to_thread(_notify_leo, "devis",
+                                        {"name": contact["name"], "number": devis[0], "total": devis[1]})
 
     message = _strip_all_blocks(raw) or "Pouvez-vous m'en dire un peu plus sur votre projet ?"
     return {"message": message, "session_id": sid, "lead_captured": lead_captured, "available": True}
