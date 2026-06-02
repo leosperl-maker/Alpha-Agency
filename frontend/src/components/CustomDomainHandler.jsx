@@ -3,36 +3,42 @@ import LinkBioPage from '../pages/public/LinkBioPage';
 
 /**
  * Ce composant détecte si l'utilisateur accède via un domaine personnalisé
- * (ex: bio.antilla-martinique.com) et affiche la page Multilink correspondante.
- * 
- * Domaines connus de l'application (à ne pas traiter comme domaine personnalisé) :
- * - alphagency.fr
- * - localhost
- * - *.preview.emergentagent.com
+ * et affiche la page Multilink correspondante. Deux cas servent une page client :
+ *  - domaine propre du client (ex: bio.antilla-martinique.com)
+ *  - sous-domaine wildcard de l'agence (ex: antilla.alphagency.fr)
+ *
+ * L'apex alphagency.fr + www (et quelques sous-domaines réservés) restent l'app.
  */
 
-const KNOWN_DOMAINS = [
-  'alphagency.fr',
-  'www.alphagency.fr',
-  'localhost',
-  'preview.emergentagent.com'
-];
+// Domaine racine de l'agence : apex + www = site/app ; les AUTRES sous-domaines = pages clients.
+const ROOT_DOMAIN = 'alphagency.fr';
+const RESERVED_SUBDOMAINS = ['www', 'app', 'admin', 'api', 'mail', 'ftp', 'cdn', 'static', 'staging', 'dev', 'preview'];
+
+// Autres domaines techniques (et leurs sous-domaines) à ne jamais traiter comme custom.
+const KNOWN_DOMAINS = ['localhost', 'preview.emergentagent.com'];
 
 const isKnownDomain = (hostname) => {
-  // Check exact match
+  hostname = (hostname || '').toLowerCase();
+
+  // Apex de l'agence
+  if (hostname === ROOT_DOMAIN) return true;
+
+  // Sous-domaine de l'agence : réservé => app ; sinon => page client (custom domain)
+  if (hostname.endsWith(`.${ROOT_DOMAIN}`)) {
+    const sub = hostname.slice(0, -`.${ROOT_DOMAIN}`.length).split('.').pop();
+    return RESERVED_SUBDOMAINS.includes(sub);
+  }
+
+  // Domaines techniques + leurs sous-domaines
   if (KNOWN_DOMAINS.includes(hostname)) return true;
-  
-  // Check if it's a subdomain of known domains
   for (const domain of KNOWN_DOMAINS) {
     if (hostname.endsWith(`.${domain}`)) return true;
   }
-  
-  // Check localhost with port
+
+  // localhost avec port + adresses IP
   if (hostname.startsWith('localhost')) return true;
-  
-  // Check if it's an IP address
   if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) return true;
-  
+
   return false;
 };
 

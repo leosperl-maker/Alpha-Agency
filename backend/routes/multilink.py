@@ -1464,12 +1464,26 @@ async def get_page_by_domain(domain: str, request: Request):
     elif domain.startswith('https://'):
         domain = domain[8:]
     
-    # Find page by custom domain
+    # 1) Domaine propre du client (ex: bio.antilla-martinique.com) -> match exact
     page = await db.multilink_pages.find_one({
         "custom_domain": domain,
         "is_active": True
     })
-    
+
+    # 2) Wildcard *.alphagency.fr : <slug>.alphagency.fr sert la page slug=<slug>
+    #    sans configuration manuelle (chaque page est instantanément accessible).
+    if not page:
+        ROOT = "alphagency.fr"
+        if domain.endswith(f".{ROOT}"):
+            sub = domain[: -len(f".{ROOT}")].split(".")[-1]
+            reserved = {"www", "app", "admin", "api", "mail", "ftp", "cdn",
+                        "static", "staging", "dev", "preview"}
+            if sub and sub not in reserved:
+                page = await db.multilink_pages.find_one({
+                    "slug": sub,
+                    "is_active": True
+                })
+
     if not page:
         raise HTTPException(status_code=404, detail="Aucune page associée à ce domaine")
     
