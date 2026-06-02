@@ -19,7 +19,7 @@ import { Button } from "../components/ui/button";
 import LottieLoader from "../components/motion/LottieLoaderLazy";
 import Magnetic from "../components/motion/Magnetic";
 import RotatingWord from "../components/motion/RotatingWord";
-import HeroOrbs from "../components/motion/HeroOrbs";
+import FluidHeroLazy from "../components/three/FluidHeroLazy";
 
 // Palette bordeaux / rouge profond (aucun rose)
 const RED = "#E11D2E";        // rouge vif lisible sur fond sombre
@@ -88,15 +88,25 @@ const HomePage = () => {
         data-testid="hero-section"
         className="relative min-h-screen w-full flex flex-col justify-center px-6 sm:px-10 lg:px-16 pt-32 pb-24 overflow-hidden"
       >
-        {/* Halos bordeaux réactifs au curseur (transform-only, fiable) */}
-        <HeroOrbs />
-        {/* Vignette + grain */}
+        {/* Fond bordeaux CSS (repli + base) toujours présent */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: `radial-gradient(90% 80% at 30% 40%, transparent 0%, ${BG} 82%)` }}
+          style={{ background: "radial-gradient(120% 90% at 28% 32%, #2A0712 0%, #0A0507 70%)" }}
           aria-hidden="true"
         />
-        <div className="absolute inset-0 grain-overlay opacity-[0.10] pointer-events-none" aria-hidden="true" />
+        {/* Fond WebGL interactif (réagit au curseur) — lazy, par-dessus la base */}
+        <FluidHeroLazy className="absolute inset-0 z-0" />
+        {/* Dégradé de lisibilité (assombrit le côté texte) + grain */}
+        <div
+          className="absolute inset-0 z-[1] pointer-events-none bg-gradient-to-r from-[#0A0507]/85 via-[#0A0507]/40 to-transparent"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute inset-0 z-[1] pointer-events-none"
+          style={{ background: `radial-gradient(100% 90% at 30% 40%, transparent 0%, ${BG} 88%)` }}
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 z-[1] grain-overlay opacity-[0.10] pointer-events-none" aria-hidden="true" />
 
         <div className="max-w-[1400px] mx-auto w-full relative z-10">
           {/* Ligne méta : pastille à gauche, infos éditoriales à droite */}
