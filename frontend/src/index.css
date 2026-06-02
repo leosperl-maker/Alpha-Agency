@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Manrope:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Syne:wght@600;700;800&family=Manrope:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -1017,8 +1017,9 @@ a[href*="emergent.sh"] {
     color: transparent;
 }
 
-/* Police d'affichage publique */
-.font-display-syne { font-family: 'Syne', sans-serif; }
+/* Police d'affichage publique — Sora (nette et lisible) */
+.font-display,
+.font-display-syne { font-family: 'Sora', sans-serif; letter-spacing: -0.01em; }
 
 @media (prefers-reduced-motion: reduce) {
     .alpha-marquee { animation: none; }
