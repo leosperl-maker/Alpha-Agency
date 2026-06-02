@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, Search, Filter, Mail, Phone, Building, Calendar, Trash2,
-  Edit, Upload, Briefcase, DollarSign, FileText, Info, Eye
+  Edit, Upload, Briefcase, DollarSign, FileText, Info, Eye,
+  X, MapPin, Hash, FolderOpen, User, Target, Sparkles
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -32,6 +34,17 @@ const SCORE_TONE = {
   froid: "bg-info-soft text-info",
 };
 
+const InfoRow = ({ icon: Icon, label, value }) => {
+  if (!value) return null;
+  return (
+    <div className="flex items-center gap-2.5 py-1.5 min-w-0">
+      <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+      <span className="text-xs text-muted-foreground w-20 flex-shrink-0">{label}</span>
+      <span className="text-sm text-foreground truncate">{value}</span>
+    </div>
+  );
+};
+
 const ContactsPage = () => {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +55,7 @@ const ContactsPage = () => {
   const [editingContact, setEditingContact] = useState(null);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
   const [selectedContactId, setSelectedContactId] = useState(null);
+  const [expandedContact, setExpandedContact] = useState(null);
   const [formData, setFormData] = useState({
     first_name: "", last_name: "", email: "", phone: "", company: "", city: "",
     poste: "", project_type: "", budget: "", note: "", infos_sup: "",
@@ -113,6 +127,13 @@ const ContactsPage = () => {
 
   const openDetail = (id) => { setSelectedContactId(id); setDetailSheetOpen(true); };
 
+  useEffect(() => {
+    if (!expandedContact) return;
+    const onKey = (e) => { if (e.key === "Escape") setExpandedContact(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [expandedContact]);
+
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     try {
@@ -150,7 +171,7 @@ const ContactsPage = () => {
   const clientCount = contacts.filter(c => c.status === "client" || c.status === "vip").length;
 
   return (
-    <div data-testid="contacts-page" className="max-w-5xl mx-auto space-y-5">
+    <div data-testid="contacts-page" className="max-w-7xl mx-auto space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -282,55 +303,143 @@ const ContactsPage = () => {
         </Select>
       </div>
 
-      {/* List */}
+      {/* Grille de cartes */}
       {loading ? (
-        <div className="space-y-2.5">{[1, 2, 3, 4].map(i => <div key={i} className="h-[72px] bg-card border border-border animate-pulse rounded-2xl" />)}</div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
+          {[...Array(12)].map((_, i) => <div key={i} className="h-44 bg-card border border-border animate-pulse rounded-2xl" />)}
+        </div>
       ) : filteredContacts.length === 0 ? (
         <div className="rounded-2xl border border-border bg-card p-12 text-center">
           <p className="text-muted-foreground">Aucun contact trouvé</p>
           <Button onClick={resetForm} className="mt-3"><Plus className="w-4 h-4 mr-2" /> Créer un contact</Button>
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
           {filteredContacts.map((contact) => (
-            <div
+            <motion.button
               key={contact.id}
+              layoutId={`contact-card-${contact.id}`}
               data-testid={`contact-${contact.id}`}
-              onClick={() => openDetail(contact.id)}
-              className="group bg-card border border-border rounded-2xl p-3.5 sm:p-4 hover:border-primary/30 hover:shadow-elev transition-all cursor-pointer"
+              onClick={() => setExpandedContact(contact)}
+              whileHover={{ y: -6 }}
+              whileTap={{ scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 420, damping: 32 }}
+              className="group relative text-left rounded-2xl border border-border bg-card overflow-hidden shadow-elev hover:shadow-pop hover:border-primary/40"
             >
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center text-white font-bold flex-shrink-0">
+              {/* reflet holographique au survol */}
+              <span className="pointer-events-none absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(115deg,transparent_25%,rgba(255,255,255,0.12)_45%,transparent_65%)]" />
+              {/* bandeau */}
+              <div className="h-14 bg-gradient-to-br from-[#E11D2E] via-[#9A1230] to-[#3A0A1B] relative">
+                <span className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_30%_15%,rgba(255,255,255,0.5),transparent_55%)]" />
+                {contact.source === "chatbot" && (
+                  <span className="absolute top-1.5 right-1.5 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-black/30 text-white text-[9px] font-medium"><Sparkles className="w-2.5 h-2.5" />IA</span>
+                )}
+              </div>
+              {/* contenu */}
+              <div className="px-2.5 pb-3 -mt-7 flex flex-col items-center text-center">
+                <motion.div layoutId={`contact-avatar-${contact.id}`} className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] ring-4 ring-card flex items-center justify-center text-white font-bold text-base shadow-lg">
                   {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-foreground font-semibold truncate">{contact.first_name} {contact.last_name}</h3>
-                    <Badge className={`${STATUS_TONE[contact.status] || STATUS_TONE.nouveau} border-0 text-[11px] hidden sm:inline-flex`}>{STATUS_LABEL[contact.status] || contact.status}</Badge>
-                    {contact.score && <Badge className={`${SCORE_TONE[contact.score] || SCORE_TONE.tiède} border-0 text-[11px] hidden sm:inline-flex`}>{contact.score}</Badge>}
-                  </div>
-                  <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground mt-0.5 min-w-0">
-                    <span className="flex items-center gap-1 truncate"><Mail className="w-3 h-3 flex-shrink-0" />{contact.email}</span>
-                    {contact.company && <span className="hidden md:flex items-center gap-1 truncate"><Building className="w-3 h-3 flex-shrink-0" />{contact.company}</span>}
-                    {contact.phone && <span className="hidden lg:flex items-center gap-1 truncate"><Phone className="w-3 h-3 flex-shrink-0" />{contact.phone}</span>}
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="sm" onClick={() => openDetail(contact.id)} className="h-9 w-9 p-0 text-muted-foreground hover:text-primary" title="Voir"><Eye className="w-4 h-4" /></Button>
-                  <Button variant="ghost" size="sm" onClick={() => openEditDialog(contact)} className="h-9 w-9 p-0 text-muted-foreground hover:text-foreground" title="Modifier"><Edit className="w-4 h-4" /></Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(contact.id)} className="h-9 w-9 p-0 text-muted-foreground hover:text-danger" title="Supprimer"><Trash2 className="w-4 h-4" /></Button>
+                </motion.div>
+                <h3 className="mt-2 text-sm font-semibold text-foreground leading-tight truncate w-full">{contact.first_name} {contact.last_name}</h3>
+                {contact.company
+                  ? <p className="text-[11px] text-muted-foreground flex items-center gap-1 max-w-full"><Building className="w-3 h-3 flex-shrink-0" /><span className="truncate">{contact.company}</span></p>
+                  : <p className="text-[11px] text-muted-foreground/50 italic">Particulier</p>}
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-1">
+                  <Badge className={`${STATUS_TONE[contact.status] || STATUS_TONE.nouveau} border-0 text-[10px] px-1.5`}>{STATUS_LABEL[contact.status] || contact.status}</Badge>
+                  {contact.score && <Badge className={`${SCORE_TONE[contact.score] || SCORE_TONE.tiède} border-0 text-[10px] px-1.5`}>{contact.score}</Badge>}
                 </div>
               </div>
-              {/* Mobile badges */}
-              <div className="flex sm:hidden flex-wrap gap-1.5 mt-3">
-                <Badge className={`${STATUS_TONE[contact.status] || STATUS_TONE.nouveau} border-0 text-[11px]`}>{STATUS_LABEL[contact.status] || contact.status}</Badge>
-                {contact.score && <Badge className={`${SCORE_TONE[contact.score] || SCORE_TONE.tiède} border-0 text-[11px]`}>{contact.score}</Badge>}
-                {contact.company && <Badge variant="outline" className="text-[11px] border-border"><Building className="w-3 h-3 mr-1" />{contact.company}</Badge>}
-              </div>
-            </div>
+            </motion.button>
           ))}
         </div>
       )}
+
+      {/* Fiche agrandie au centre (la carte morphe via layoutId) */}
+      <AnimatePresence>
+        {expandedContact && (
+          <motion.div
+            key="contact-modal"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6"
+          >
+            <div
+              onClick={() => setExpandedContact(null)}
+              className="absolute inset-0 bg-background/70 backdrop-blur-md"
+            />
+            <motion.div
+              layoutId={`contact-card-${expandedContact.id}`}
+              transition={{ type: "spring", stiffness: 320, damping: 34 }}
+              className="relative w-full max-w-2xl max-h-[88vh] overflow-y-auto overscroll-contain rounded-3xl border border-border bg-card shadow-pop"
+            >
+              {/* bandeau */}
+              <div className="h-28 sm:h-32 bg-gradient-to-br from-[#E11D2E] via-[#9A1230] to-[#3A0A1B] relative">
+                <span className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,0.5),transparent_55%)]" />
+                <button onClick={() => setExpandedContact(null)} className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/25 hover:bg-black/40 text-white flex items-center justify-center transition-colors"><X className="w-5 h-5" /></button>
+              </div>
+              {/* avatar */}
+              <div className="px-5 sm:px-7 -mt-12 relative">
+                <motion.div layoutId={`contact-avatar-${expandedContact.id}`} className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] ring-4 ring-card flex items-center justify-center text-white font-bold text-3xl shadow-xl">
+                  {expandedContact.first_name?.charAt(0)}{expandedContact.last_name?.charAt(0)}
+                </motion.div>
+              </div>
+              {/* contenu (fade-in après le morph) */}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="px-5 sm:px-7 pt-3 pb-6">
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="min-w-0">
+                    <h2 className="text-2xl font-bold text-foreground">{expandedContact.first_name} {expandedContact.last_name}</h2>
+                    {expandedContact.company && (
+                      <p className="text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                        <Building className="w-4 h-4 flex-shrink-0" />
+                        {expandedContact.company}{(expandedContact.poste || expandedContact.position) ? ` · ${expandedContact.poste || expandedContact.position}` : ""}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <Badge className={`${STATUS_TONE[expandedContact.status] || STATUS_TONE.nouveau} border-0`}>{STATUS_LABEL[expandedContact.status] || expandedContact.status}</Badge>
+                    {expandedContact.score && <Badge className={`${SCORE_TONE[expandedContact.score] || SCORE_TONE.tiède} border-0`}>{expandedContact.score}</Badge>}
+                  </div>
+                </div>
+
+                {/* actions rapides */}
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {expandedContact.email && <a href={`mailto:${expandedContact.email}`} className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"><Mail className="w-4 h-4" />Email</a>}
+                  {expandedContact.phone && <a href={`tel:${expandedContact.phone}`} className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary text-foreground text-sm font-medium hover:bg-secondary/70 transition-colors"><Phone className="w-4 h-4" />Appeler</a>}
+                  <button onClick={() => { const c = expandedContact; setExpandedContact(null); openEditDialog(c); }} className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary text-foreground text-sm font-medium hover:bg-secondary/70 transition-colors"><Edit className="w-4 h-4" />Modifier</button>
+                </div>
+
+                {/* infos */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 mt-5">
+                  <InfoRow icon={Mail} label="Email" value={expandedContact.email} />
+                  <InfoRow icon={Phone} label="Téléphone" value={expandedContact.phone} />
+                  <InfoRow icon={User} label="Fonction" value={expandedContact.poste || expandedContact.position} />
+                  <InfoRow icon={MapPin} label="Ville" value={expandedContact.city} />
+                  <InfoRow icon={MapPin} label="Adresse" value={expandedContact.company_address} />
+                  <InfoRow icon={Hash} label="SIRET" value={expandedContact.siret} />
+                  <InfoRow icon={Briefcase} label="Activité" value={expandedContact.company_activite} />
+                  <InfoRow icon={Target} label="Projet" value={expandedContact.project_type} />
+                  <InfoRow icon={DollarSign} label="Budget" value={expandedContact.budget} />
+                  <InfoRow icon={Sparkles} label="Source" value={expandedContact.source} />
+                  <InfoRow icon={Calendar} label="Créé le" value={expandedContact.created_at ? new Date(expandedContact.created_at).toLocaleDateString("fr-FR") : null} />
+                </div>
+
+                {/* besoin / notes */}
+                {(expandedContact.besoin || expandedContact.note || expandedContact.message) && (
+                  <div className="mt-5 rounded-2xl border border-border bg-popover p-4">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-1.5"><Info className="w-3.5 h-3.5" />Besoin / Notes</p>
+                    <p className="text-sm text-foreground whitespace-pre-line">{expandedContact.besoin || expandedContact.note || expandedContact.message}</p>
+                  </div>
+                )}
+
+                {/* footer */}
+                <div className="flex flex-wrap items-center justify-between gap-2 mt-6 pt-4 border-t border-border">
+                  <button onClick={() => { const id = expandedContact.id; setExpandedContact(null); openDetail(id); }} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-soft text-primary text-sm font-semibold hover:opacity-80 transition-opacity"><FolderOpen className="w-4 h-4" />Dossier complet</button>
+                  <button onClick={() => { const id = expandedContact.id; setExpandedContact(null); handleDelete(id); }} className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-danger text-sm font-medium hover:bg-danger-soft transition-colors"><Trash2 className="w-4 h-4" />Supprimer</button>
+                </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <ImportContactsDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} onImportSuccess={() => { fetchContacts(); toast.success("Import terminé avec succès"); }} />
       <ContactDetailSheet open={detailSheetOpen} onOpenChange={setDetailSheetOpen} contactId={selectedContactId} />
