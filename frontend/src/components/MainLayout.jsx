@@ -2,6 +2,7 @@ import { useLocation, useOutlet } from "react-router-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import ChatWidget from "./ChatWidget";
 import { useSmoothScroll } from "../hooks/useSmoothScroll";
 
 const MainLayout = () => {
@@ -40,6 +41,7 @@ const MainLayout = () => {
         </AnimatePresence>
       </main>
       <Footer />
+      <ChatWidget />
     </div>
   );
 };

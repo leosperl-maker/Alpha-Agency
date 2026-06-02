@@ -474,7 +474,9 @@ const MultilinkPage = () => {
       setPageBlocks(response.data.blocks || []); // NEW: Unified blocks
       setPreviewKey(k => k + 1); // refresh live phone preview after any save/refetch
       // Charger les listes CRM pour les rattachements (Documents + Contacts), une fois
-      api.get('/documents', { params: { flat: true } }).then(r => {
+      // NB: les fichiers/visuels du CRM vivent dans le file-manager (POST /file-manager/upload),
+      // PAS dans /documents (système legacy vide). flat=true = tous dossiers confondus.
+      api.get('/file-manager', { params: { flat: true } }).then(r => {
         const d = Array.isArray(r.data) ? r.data : (r.data?.documents || r.data?.items || []);
         setCrmDocuments(d.filter(x => x && x.id));
       }).catch(() => {});
@@ -1946,8 +1948,8 @@ const MultilinkPage = () => {
                             const sel = (pageForm.linked_document_ids || []).includes(d.id);
                             return (
                               <button key={d.id} type="button" onClick={() => toggleLinkedDoc(d.id)} className={`w-full flex items-center gap-3 p-2.5 text-left transition-colors ${sel ? 'bg-brand-soft' : 'hover:bg-secondary'}`}>
-                                {d.file_type === 'image' && d.file_url ? (
-                                  <img src={d.file_url} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
+                                {d.file_type === 'image' && (d.url || d.file_url) ? (
+                                  <img src={d.url || d.file_url} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
                                 ) : (
                                   <div className="w-8 h-8 rounded bg-secondary flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-muted-foreground" /></div>
                                 )}
