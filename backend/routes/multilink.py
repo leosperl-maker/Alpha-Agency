@@ -592,10 +592,13 @@ async def _load_image_bytes(image_base64, image_url):
     if image_url:
         if not _httpx:
             raise HTTPException(status_code=500, detail="httpx indisponible")
-        async with _httpx.AsyncClient(timeout=20, follow_redirects=True) as c:
-            r = await c.get(image_url)
-            r.raise_for_status()
-            return r.content, r.headers.get("content-type", "image/png").split(";")[0]
+        try:
+            async with _httpx.AsyncClient(timeout=20, follow_redirects=True) as c:
+                r = await c.get(image_url)
+                r.raise_for_status()
+                return r.content, r.headers.get("content-type", "image/png").split(";")[0]
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Image inaccessible ({type(e).__name__})")
     raise HTTPException(status_code=400, detail="image_base64 ou image_url requis")
 
 
@@ -609,8 +612,8 @@ async def extract_palette(req: PaletteRequest, current_user: dict = Depends(get_
     try:
         raw = await asyncio.to_thread(_extract_palette_sync, img_bytes, mime)
     except Exception as e:
-        logger.error(f"extract-palette gemini error: {e}")
-        raise HTTPException(status_code=502, detail="Échec de l'analyse du logo")
+        logger.error(f"extract-palette gemini error: {type(e).__name__}: {e}")
+        raise HTTPException(status_code=502, detail=f"Échec de l'analyse du logo: {type(e).__name__}: {str(e)[:300]}")
     m = _re.search(r"\{.*\}", raw, _re.DOTALL)
     if not m:
         raise HTTPException(status_code=502, detail="Réponse IA inattendue")
