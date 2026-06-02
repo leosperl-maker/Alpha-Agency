@@ -37,7 +37,8 @@ const DemandesPage = () => {
   const fetchDemandes = async () => {
     try {
       const response = await contactsAPI.getAll();
-      const websiteLeads = response.data.filter(c => c.source === "website");
+      // Demandes entrantes = formulaire du site ("website") + chatbot IA ("chatbot")
+      const websiteLeads = response.data.filter(c => c.source === "website" || c.source === "chatbot");
       setDemandes(websiteLeads);
     } catch (error) {
       toast.error("Erreur lors du chargement des demandes");

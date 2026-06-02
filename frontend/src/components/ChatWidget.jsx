@@ -121,6 +121,7 @@ const ChatWidget = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? undefined : { opacity: 0, y: 24, scale: 0.96 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            data-lenis-prevent
             className="fixed bottom-5 right-5 z-50 flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0A0507]/95 backdrop-blur-xl shadow-2xl w-[380px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[calc(100vh-2.5rem)]"
             style={{ marginBottom: "env(safe-area-inset-bottom)" }}
           >
@@ -151,7 +152,7 @@ const ChatWidget = () => {
             </div>
 
             {/* Messages */}
-            <div className="relative flex-1 overflow-y-auto px-4 py-4 space-y-3">
+            <div data-lenis-prevent className="relative flex-1 overflow-y-auto overscroll-contain px-4 py-4 space-y-3">
               {messages.map((m, i) => (
                 <div
                   key={i}

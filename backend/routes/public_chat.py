@@ -547,21 +547,6 @@ async def public_chat_health():
     return {"available": bool(_gemini_client), "greeting": GREETING}
 
 
-@router.get("/_debug/email")
-async def _debug_email(token: str = ""):
-    """Diagnostic temporaire de la notification email (gated)."""
-    if token != "alpha-mail-check-2026":
-        raise HTTPException(status_code=404, detail="Not found")
-    recips = await _resolve_recipients()
-    status, text = await _notify_leo("lead", {
-        "first_name": "Test", "last_name": "Notification", "email": "test@example.com",
-        "company": "Diagnostic Chatbot", "phone": "—", "poste": "—",
-        "besoin": "Vérification de la notification email du chatbot", "budget": "—",
-    })
-    return {"has_brevo_key": bool(BREVO_API_KEY), "sender": BREVO_SENDER_EMAIL,
-            "recipients": recips, "brevo_status": status, "brevo_text": text}
-
-
 @router.post("/chat")
 async def public_chat(req: PubChatRequest, request: Request):
     ip = _client_ip(request)
@@ -639,5 +624,8 @@ async def public_chat(req: PubChatRequest, request: Request):
                 await asyncio.to_thread(_notify_leo, "devis",
                                         {"name": contact["name"], "number": devis[0], "total": devis[1]})
 
-    message = _strip_all_blocks(raw) or "Pouvez-vous m'en dire un peu plus sur votre projet ?"
+    message = _strip_all_blocks(raw)
+    if not message:
+        message = ("Merci beaucoup ! L'équipe d'Alpha Agency revient vers vous très vite avec une proposition personnalisée."
+                   if (contact or lead_captured) else "Pouvez-vous m'en dire un peu plus sur votre projet ?")
     return {"message": message, "session_id": sid, "lead_captured": lead_captured, "available": True}
