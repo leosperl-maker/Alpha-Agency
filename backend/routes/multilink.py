@@ -1151,12 +1151,13 @@ async def get_public_page(slug: str, request: Request):
     
     page["sections"] = sections
     
-    # Record view (async, don't wait)
-    try:
-        await record_page_view(page["id"], request)
-    except Exception as e:
-        logger.error(f"Failed to record view: {e}")
-    
+    # Record view (async, don't wait) — skip when loaded from the admin live preview (?preview=1)
+    if request.query_params.get("preview") != "1":
+        try:
+            await record_page_view(page["id"], request)
+        except Exception as e:
+            logger.error(f"Failed to record view: {e}")
+
     return page
 
 
