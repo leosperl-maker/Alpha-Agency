@@ -575,11 +575,24 @@ def _extract_palette_sync(img_bytes: bytes, mime: str) -> str:
         "- button_bg : fond des boutons (souvent proche de accent)\n"
         "- button_text : texte des boutons, contraste fort avec button_bg"
     )
-    resp = _ML_GEMINI.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=[_ml_types.Part.from_bytes(data=img_bytes, mime_type=mime), prompt],
-    )
-    return (getattr(resp, "text", "") or "").strip()
+    candidates = ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-flash-latest", "gemini-2.5-flash-lite"]
+    last_err = None
+    for _model in candidates:
+        try:
+            resp = _ML_GEMINI.models.generate_content(
+                model=_model,
+                contents=[_ml_types.Part.from_bytes(data=img_bytes, mime_type=mime), prompt],
+            )
+            txt = (getattr(resp, "text", "") or "").strip()
+            if txt:
+                return txt
+        except Exception as e:
+            last_err = e
+    try:
+        avail = [getattr(m, "name", "") for m in _ML_GEMINI.models.list() if "flash" in (getattr(m, "name", "") or "").lower()][:8]
+    except Exception:
+        avail = []
+    raise RuntimeError(f"aucun modèle vision OK ({type(last_err).__name__}: {last_err}); flash dispo: {avail}")
 
 
 async def _load_image_bytes(image_base64, image_url):
