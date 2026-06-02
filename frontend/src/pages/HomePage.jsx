@@ -19,6 +19,7 @@ import { Button } from "../components/ui/button";
 import ShaderBackground from "../components/three/ShaderBackground";
 import PulsingBadge from "../components/three/PulsingBadge";
 import LottieLoader from "../components/motion/LottieLoaderLazy";
+import Magnetic from "../components/motion/Magnetic";
 
 const RED = "#FF3D6E";
 
@@ -106,13 +107,26 @@ const HomePage = () => {
                 data-testid="hero-headline"
                 className="font-display font-extrabold leading-[1.02] tracking-tight text-[2.75rem] sm:text-6xl lg:text-8xl text-white"
               >
-                On crée des marques
-                <br />
-                <span
-                  className="bg-clip-text text-transparent"
-                  style={{ backgroundImage: "linear-gradient(100deg,#FF3D6E,#CE0202 40%,#7A1FA2)" }}
-                >
-                  qui marquent.
+                <span className="block overflow-hidden pb-1">
+                  <motion.span
+                    className="block"
+                    initial={{ y: rm ? 0 : "110%" }}
+                    animate={{ y: 0 }}
+                    transition={{ delay: 0.15, duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    On crée des marques
+                  </motion.span>
+                </span>
+                <span className="block overflow-hidden pb-2">
+                  <motion.span
+                    className="block bg-clip-text text-transparent"
+                    style={{ backgroundImage: "linear-gradient(100deg,#FF3D6E,#CE0202 40%,#7A1FA2)" }}
+                    initial={{ y: rm ? 0 : "110%" }}
+                    animate={{ y: 0 }}
+                    transition={{ delay: 0.32, duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    qui marquent.
+                  </motion.span>
                 </span>
               </h1>
 
@@ -123,24 +137,28 @@ const HomePage = () => {
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                <Link to="/contact">
-                  <Button
-                    data-testid="hero-cta-devis"
-                    className="bg-white hover:bg-white/90 text-[#05010A] hover:text-[#05010A] rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider transition-all duration-300 w-full sm:w-auto"
-                  >
-                    Demander un devis
-                    <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
-                  </Button>
-                </Link>
-                <Link to="/realisations">
-                  <Button
-                    data-testid="hero-cta-offres"
-                    variant="outline"
-                    className="border-white/25 hover:border-white hover:bg-white/10 text-white rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider bg-white/5 backdrop-blur-sm transition-all duration-300 w-full sm:w-auto"
-                  >
-                    Voir nos réalisations
-                  </Button>
-                </Link>
+                <Magnetic>
+                  <Link to="/contact">
+                    <Button
+                      data-testid="hero-cta-devis"
+                      className="bg-white hover:bg-white/90 text-[#05010A] hover:text-[#05010A] rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider transition-all duration-300 w-full sm:w-auto"
+                    >
+                      Demander un devis
+                      <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
+                    </Button>
+                  </Link>
+                </Magnetic>
+                <Magnetic>
+                  <Link to="/realisations">
+                    <Button
+                      data-testid="hero-cta-offres"
+                      variant="outline"
+                      className="border-white/25 hover:border-white hover:bg-white/10 text-white rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider bg-white/5 backdrop-blur-sm transition-all duration-300 w-full sm:w-auto"
+                    >
+                      Voir nos réalisations
+                    </Button>
+                  </Link>
+                </Magnetic>
               </div>
             </motion.div>
           </div>

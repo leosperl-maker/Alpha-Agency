@@ -3,11 +3,14 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import ChatWidget from "./ChatWidget";
+import CustomCursor from "./motion/CustomCursor";
+import { useSmoothScroll } from "../hooks/useSmoothScroll";
 
 const MainLayout = () => {
   const location = useLocation();
   const outlet = useOutlet();
   const rm = useReducedMotion();
+  useSmoothScroll();
 
   // Transition de page douce entre les routes publiques.
   // useOutlet() fige le contenu de la route courante pour une sortie propre.
@@ -21,6 +24,7 @@ const MainLayout = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <CustomCursor />
       <Navbar />
       <main className="flex-1">
         <AnimatePresence mode="wait" initial={false}>

@@ -1024,3 +1024,22 @@ a[href*="emergent.sh"] {
 @media (prefers-reduced-motion: reduce) {
     .alpha-marquee { animation: none; }
 }
+
+/* Curseur personnalisé (desktop) */
+body.custom-cursor-active,
+body.custom-cursor-active a,
+body.custom-cursor-active button { cursor: none; }
+.cursor-layer { position: fixed; inset: 0; z-index: 9999; pointer-events: none; mix-blend-mode: difference; }
+.cursor-dot {
+    position: fixed; top: 0; left: 0; width: 6px; height: 6px; margin: -3px 0 0 -3px;
+    background: #ffffff; border-radius: 50%; will-change: transform;
+}
+.cursor-ring {
+    position: fixed; top: 0; left: 0; width: 34px; height: 34px; margin: -17px 0 0 -17px;
+    border: 1.5px solid #ffffff; border-radius: 50%; will-change: transform;
+    transition: width .25s ease, height .25s ease, margin .25s ease, opacity .25s ease;
+}
+.cursor-ring.cursor-ring--hover {
+    width: 56px; height: 56px; margin: -28px 0 0 -28px; opacity: 0.7;
+}
+@media (pointer: coarse) { .cursor-layer { display: none; } }
