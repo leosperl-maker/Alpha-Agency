@@ -984,3 +984,42 @@ a[href*="emergent.sh"] {
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
+
+/* ======================================== */
+/* PUBLIC SITE — ÉDITORIAL 2026 (grain, marquee, display) */
+/* ======================================== */
+
+/* Grain / film texture overlay — à poser en absolute inset-0 pointer-events-none */
+.grain-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+}
+
+/* Marquee défilant horizontal (bandeau de services) */
+@keyframes alpha-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+.alpha-marquee {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: alpha-marquee 28s linear infinite;
+}
+.alpha-marquee-fast { animation-duration: 18s; }
+
+/* Texte avec contour (outline) pour effet éditorial */
+.text-stroke-dark {
+    -webkit-text-stroke: 1.5px #0A0A0A;
+    color: transparent;
+}
+.text-stroke-light {
+    -webkit-text-stroke: 1.5px rgba(255,255,255,0.55);
+    color: transparent;
+}
+
+/* Police d'affichage publique */
+.font-display-syne { font-family: 'Syne', sans-serif; }
+
+@media (prefers-reduced-motion: reduce) {
+    .alpha-marquee { animation: none; }
+}
