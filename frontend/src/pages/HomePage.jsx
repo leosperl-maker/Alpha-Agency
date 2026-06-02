@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useParallax } from "../hooks/useParallax";
+import HeroSceneLazy from "../components/three/HeroSceneLazy";
 import {
   Globe,
   Users,
@@ -96,6 +97,8 @@ const HomePage = () => {
         {/* halo rouge décoratif (parallax) */}
         <div ref={haloRef} className="absolute -top-24 -right-24 w-[36rem] h-[36rem] rounded-full blur-3xl opacity-20 pointer-events-none"
              style={{ background: `radial-gradient(circle, ${RED}, transparent 65%)` }} aria-hidden="true" />
+        {/* Scène 3D légère (lazy, desktop uniquement) — accent de marque en fond */}
+        <HeroSceneLazy className="absolute inset-y-0 right-0 w-1/2 z-0 opacity-50 pointer-events-none hidden lg:block" />
 
         <div className="max-w-7xl mx-auto w-full relative z-10 grid lg:grid-cols-12 gap-10 items-center">
           {/* Colonne texte */}
