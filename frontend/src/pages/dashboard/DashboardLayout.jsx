@@ -441,42 +441,42 @@ const DashboardLayout = () => {
   );
 
   return (
-    <div data-testid="dashboard-layout" className="min-h-screen bg-slate-50 flex overflow-hidden">
+    <div data-testid="dashboard-layout" className="min-h-screen bg-[#0A0507] flex overflow-hidden">
 
       {/* Sidebar - Desktop */}
       <aside className={`
         hidden lg:flex flex-col fixed inset-y-0 left-0 z-40
-        bg-white border-r border-slate-200 shadow-sm
+        bg-[#0C0709] border-r border-white/10 shadow-sm
         transition-all duration-300
         ${sidebarOpen ? 'w-64' : 'w-20'}
       `}>
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 flex-shrink-0">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 flex-shrink-0">
           {sidebarOpen ? (
             <img
-              src={process.env.PUBLIC_URL + "/logo-header-black.png"}
+              src={process.env.PUBLIC_URL + "/logo-header-white.png"}
               alt="Alpha Agency"
               className="h-9 w-auto"
             />
           ) : (
-            <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+            <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center">
               <span className="text-white font-bold text-lg">A</span>
             </div>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors"
+            className="p-2 rounded-lg hover:bg-white/[0.08] text-white/50 hover:text-white transition-colors"
           >
             <ChevronLeft className={`w-5 h-5 transition-transform ${!sidebarOpen ? 'rotate-180' : ''}`} />
           </button>
         </div>
 
         {/* Nav Items - Scrollable */}
-        <nav className="flex-1 p-3 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+        <nav className="flex-1 p-3 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           {navGroups.map((group) => (
             <div key={group.label} className="mb-4">
               {sidebarOpen && (
-                <p className="px-3 mb-1 text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+                <p className="px-3 mb-1 text-[10px] uppercase tracking-wider text-white/40 font-semibold">
                   {group.label}
                 </p>
               )}
@@ -489,8 +489,8 @@ const DashboardLayout = () => {
                     className={({ isActive }) => `
                       flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all
                       ${isActive
-                        ? 'bg-indigo-50 text-indigo-700 font-semibold'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-[rgba(225,29,46,0.15)] text-white font-semibold'
+                        : 'text-white/70 hover:bg-white/[0.06] hover:text-white'
                       }
                     `}
                   >
@@ -506,15 +506,15 @@ const DashboardLayout = () => {
         </nav>
 
         {/* User Section - Fixed at bottom */}
-        <div className="p-3 border-t border-slate-200 flex-shrink-0">
-          <div className={`flex items-center gap-3 p-2 rounded-xl bg-slate-50 ${!sidebarOpen ? 'justify-center' : ''}`}>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+        <div className="p-3 border-t border-white/10 flex-shrink-0">
+          <div className={`flex items-center gap-3 p-2 rounded-xl bg-white/[0.05] ${!sidebarOpen ? 'justify-center' : ''}`}>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
               {user?.name?.charAt(0) || 'A'}
             </div>
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
-                <p className="text-slate-900 text-sm font-medium truncate">{user?.name || 'Admin'}</p>
-                <p className="text-slate-500 text-xs truncate">{user?.role || 'Utilisateur'}</p>
+                <p className="text-white text-sm font-medium truncate">{user?.name || 'Admin'}</p>
+                <p className="text-white/50 text-xs truncate">{user?.role || 'Utilisateur'}</p>
               </div>
             )}
           </div>
@@ -532,19 +532,19 @@ const DashboardLayout = () => {
       {/* Mobile Sidebar */}
       <aside className={`
         lg:hidden fixed inset-y-0 left-0 z-50 w-72 flex flex-col
-        bg-white border-r border-slate-200 shadow-lg
+        bg-[#0C0709] border-r border-white/10 shadow-lg
         transform transition-transform duration-300
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 flex-shrink-0">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 flex-shrink-0">
           <img
-            src={process.env.PUBLIC_URL + "/logo-header-black.png"}
+            src={process.env.PUBLIC_URL + "/logo-header-white.png"}
             alt="Alpha Agency"
             className="h-8 w-auto"
           />
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="p-2 rounded-lg hover:bg-slate-100 text-slate-700"
+            className="p-2 rounded-lg hover:bg-white/[0.08] text-white/80"
           >
             <X className="w-5 h-5" />
           </button>
@@ -561,7 +561,7 @@ const DashboardLayout = () => {
           `}</style>
           {navGroups.map((group) => (
             <div key={group.label} className="mb-4">
-              <p className="px-3 mb-1 text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+              <p className="px-3 mb-1 text-[10px] uppercase tracking-wider text-white/40 font-semibold">
                 {group.label}
               </p>
               <div className="space-y-0.5">
@@ -574,8 +574,8 @@ const DashboardLayout = () => {
                     className={({ isActive }) => `
                       flex items-center gap-3 px-3 py-3 rounded-xl transition-all
                       ${isActive
-                        ? 'bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}
+                        ? 'bg-[rgba(225,29,46,0.15)] text-white font-semibold border border-[rgba(225,29,46,0.3)]'
+                        : 'text-white/70 hover:text-white hover:bg-white/[0.06]'}
                     `}
                   >
                     <item.icon className="w-5 h-5" />
@@ -586,10 +586,10 @@ const DashboardLayout = () => {
             </div>
           ))}
         </nav>
-        <div className="p-4 border-t border-slate-200">
+        <div className="p-4 border-t border-white/10">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[rgba(225,29,46,0.12)] text-[#E11D2E] hover:bg-[rgba(225,29,46,0.22)] transition-colors"
           >
             <LogOut className="w-5 h-5" />
             <span className="font-medium">Déconnexion</span>
@@ -600,19 +600,19 @@ const DashboardLayout = () => {
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'}`}>
         {/* Top Bar - with safe area for iOS */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-lg border-b border-slate-200 flex items-center justify-between px-4 lg:px-6" style={{ paddingTop: 'max(env(safe-area-inset-top), 0.5rem)', minHeight: '4rem' }}>
+        <header className="sticky top-0 z-30 bg-[#0C0709]/80 backdrop-blur-lg border-b border-white/10 flex items-center justify-between px-4 lg:px-6" style={{ paddingTop: 'max(env(safe-area-inset-top), 0.5rem)', minHeight: '4rem' }}>
           {/* Left: Mobile menu + Page title */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 text-slate-700"
+              className="lg:hidden p-2 rounded-lg hover:bg-white/[0.08] text-white/80"
               data-testid="mobile-menu-btn"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-slate-900 font-semibold text-lg">{currentPage?.label || 'Dashboard'}</h1>
-              <p className="text-slate-500 text-xs hidden sm:block">Alpha Agency CRM</p>
+              <h1 className="text-white font-semibold text-lg">{currentPage?.label || 'Dashboard'}</h1>
+              <p className="text-white/50 text-xs hidden sm:block">Alpha Agency CRM</p>
             </div>
           </div>
 
@@ -621,11 +621,11 @@ const DashboardLayout = () => {
             {/* Search - Opens Command Palette */}
             <button
               onClick={() => { setCommandPaletteOpen(true); setCommandQuery(""); performGlobalSearch(""); }}
-              className="hidden sm:flex items-center gap-2 px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 hover:border-slate-300 transition-all w-48 lg:w-64"
+              className="hidden sm:flex items-center gap-2 px-3 py-2 bg-white/[0.06] border border-white/10 rounded-xl text-white/40 hover:text-white/70 hover:bg-white/[0.08] hover:border-white/20 transition-all w-48 lg:w-64"
             >
               <Search className="w-4 h-4" />
               <span className="text-sm flex-1 text-left">Rechercher...</span>
-              <kbd className="hidden lg:flex items-center gap-0.5 px-1.5 py-0.5 bg-slate-100 rounded text-[10px] text-slate-400">
+              <kbd className="hidden lg:flex items-center gap-0.5 px-1.5 py-0.5 bg-white/[0.06] rounded text-[10px] text-white/40">
                 <Command className="w-3 h-3" />K
               </kbd>
             </button>
@@ -633,7 +633,7 @@ const DashboardLayout = () => {
             {/* Mobile Search Button */}
             <button
               onClick={() => { setCommandPaletteOpen(true); setCommandQuery(""); performGlobalSearch(""); }}
-              className="sm:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-500"
+              className="sm:hidden p-2 rounded-xl hover:bg-white/[0.08] text-white/50"
             >
               <Search className="w-5 h-5" />
             </button>
@@ -645,21 +645,21 @@ const DashboardLayout = () => {
             <div ref={profileRef} className="relative hidden sm:block">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2 pl-3 border-l border-slate-200 hover:bg-slate-50 rounded-r-xl pr-2 py-1 transition-colors"
+                className="flex items-center gap-2 pl-3 border-l border-white/10 hover:bg-white/[0.06] rounded-r-xl pr-2 py-1 transition-colors"
               >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center text-white font-semibold text-sm">
                   {user?.name?.charAt(0) || 'A'}
                 </div>
-                <span className="text-slate-700 text-sm font-medium hidden lg:block">{user?.name?.split(' ')[0]}</span>
-                <ChevronDown className="w-4 h-4 text-slate-400" />
+                <span className="text-white/80 text-sm font-medium hidden lg:block">{user?.name?.split(' ')[0]}</span>
+                <ChevronDown className="w-4 h-4 text-white/40" />
               </button>
 
               {/* Profile Dropdown */}
               {profileOpen && (
-                <div className="absolute top-full right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xl z-50">
-                  <div className="p-3 border-b border-slate-200">
-                    <p className="text-slate-900 font-medium text-sm">{user?.name || 'Admin'}</p>
-                    <p className="text-slate-500 text-xs">{user?.email}</p>
+                <div className="absolute top-full right-0 mt-2 w-56 bg-[#0C0709] border border-white/10 rounded-xl overflow-hidden shadow-xl z-50">
+                  <div className="p-3 border-b border-white/10">
+                    <p className="text-white font-medium text-sm">{user?.name || 'Admin'}</p>
+                    <p className="text-white/50 text-xs">{user?.email}</p>
                   </div>
                   <div className="p-1">
                     <button
@@ -667,31 +667,31 @@ const DashboardLayout = () => {
                         navigate('/admin/parametres');
                         setProfileOpen(false);
                       }}
-                      className="w-full flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-700 text-sm"
+                      className="w-full flex items-center gap-3 p-2 hover:bg-white/[0.06] rounded-lg transition-colors text-white/80 text-sm"
                     >
                       <Settings className="w-4 h-4" />
                       Paramètres
                     </button>
 
                     {/* Theme Toggle */}
-                    <div className="border-t border-slate-200 mt-1 pt-1">
+                    <div className="border-t border-white/10 mt-1 pt-1">
                       <button
                         onClick={toggleTheme}
-                        className="w-full flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-700 text-sm"
+                        className="w-full flex items-center justify-between p-2 hover:bg-white/[0.06] rounded-lg transition-colors text-white/80 text-sm"
                       >
                         <div className="flex items-center gap-3">
                           {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                           <span>Thème {theme === 'dark' ? 'clair' : 'sombre'}</span>
                         </div>
-                        <div className={`w-8 h-4 rounded-full relative transition-colors ${theme === 'dark' ? 'bg-indigo-600' : 'bg-slate-300'}`}>
-                          <div className={`absolute w-3 h-3 rounded-full bg-white top-0.5 transition-all ${theme === 'dark' ? 'left-4' : 'left-0.5'}`} />
+                        <div className={`w-8 h-4 rounded-full relative transition-colors ${theme === 'dark' ? 'bg-[#E11D2E]' : 'bg-white/15'}`}>
+                          <div className={`absolute w-3 h-3 rounded-full bg-[#0C0709] top-0.5 transition-all ${theme === 'dark' ? 'left-4' : 'left-0.5'}`} />
                         </div>
                       </button>
                     </div>
 
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 p-2 hover:bg-red-50 rounded-lg transition-colors text-red-500 text-sm mt-1"
+                      className="w-full flex items-center gap-3 p-2 hover:bg-[rgba(225,29,46,0.12)] rounded-lg transition-colors text-red-500 text-sm mt-1"
                     >
                       <LogOut className="w-4 h-4" />
                       Déconnexion
@@ -733,10 +733,10 @@ const DashboardLayout = () => {
 
       {/* Command Palette (⌘K) */}
       <Dialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
-        <DialogContent className="bg-white/95 backdrop-blur-xl border-slate-200 p-0 max-w-xl overflow-hidden shadow-2xl">
+        <DialogContent className="bg-[#140E11]/95 backdrop-blur-xl border-white/10 p-0 max-w-xl overflow-hidden shadow-2xl">
           {/* Search Input */}
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200">
-            <Search className="w-5 h-5 text-slate-400" />
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
+            <Search className="w-5 h-5 text-white/40" />
             <input
               ref={commandInputRef}
               value={commandQuery}
@@ -745,10 +745,10 @@ const DashboardLayout = () => {
                 performGlobalSearch(e.target.value);
               }}
               placeholder="Rechercher ou taper une commande..."
-              className="flex-1 bg-transparent text-slate-900 placeholder-slate-400 outline-none text-base"
+              className="flex-1 bg-transparent text-white placeholder-white/30 outline-none text-base"
               autoFocus
             />
-            <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 bg-slate-100 rounded text-slate-400 text-xs">
+            <kbd className="hidden sm:flex items-center gap-1 px-2 py-1 bg-white/[0.06] rounded text-white/40 text-xs">
               <Command className="w-3 h-3" />K
             </kbd>
           </div>
@@ -756,12 +756,12 @@ const DashboardLayout = () => {
           {/* Results */}
           <div className="max-h-[60vh] overflow-y-auto p-2">
             {isSearching ? (
-              <div className="flex items-center justify-center py-8 text-slate-400">
-                <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mr-2" />
+              <div className="flex items-center justify-center py-8 text-white/40">
+                <div className="w-5 h-5 border-2 border-[#E11D2E] border-t-transparent rounded-full animate-spin mr-2" />
                 Recherche...
               </div>
             ) : commandResults.length === 0 ? (
-              <div className="text-center py-8 text-slate-400">
+              <div className="text-center py-8 text-white/40">
                 <FileSearch className="w-8 h-8 mx-auto mb-2 opacity-40" />
                 <p>Aucun résultat pour "{commandQuery}"</p>
               </div>
@@ -773,7 +773,7 @@ const DashboardLayout = () => {
                   if (items.length === 0) return null;
                   return (
                     <div key={type}>
-                      <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-slate-400 font-medium">
+                      <p className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-white/40 font-medium">
                         {type}
                       </p>
                       {items.map((result, idx) => {
@@ -789,23 +789,23 @@ const DashboardLayout = () => {
                             onMouseEnter={() => setSelectedCommandIndex(globalIndex)}
                             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                               selectedCommandIndex === globalIndex
-                                ? 'bg-indigo-50 text-indigo-700'
-                                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                                ? 'bg-[rgba(225,29,46,0.15)] text-white'
+                                : 'text-white/70 hover:bg-white/[0.06] hover:text-white'
                             }`}
                           >
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                              selectedCommandIndex === globalIndex ? 'bg-indigo-100' : 'bg-slate-100'
+                              selectedCommandIndex === globalIndex ? 'bg-[rgba(225,29,46,0.22)]' : 'bg-white/[0.06]'
                             }`}>
                               <Icon className="w-4 h-4" />
                             </div>
                             <div className="flex-1 text-left">
                               <p className="text-sm font-medium">{result.title}</p>
                               {result.subtitle && (
-                                <p className="text-xs text-slate-400">{result.subtitle}</p>
+                                <p className="text-xs text-white/40">{result.subtitle}</p>
                               )}
                             </div>
                             {selectedCommandIndex === globalIndex && (
-                              <kbd className="px-2 py-0.5 bg-slate-100 rounded text-slate-400 text-xs">
+                              <kbd className="px-2 py-0.5 bg-white/[0.06] rounded text-white/40 text-xs">
                                 Entrée
                               </kbd>
                             )}
@@ -820,15 +820,15 @@ const DashboardLayout = () => {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-2 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-400">
+          <div className="px-4 py-2 border-t border-white/10 bg-white/[0.05] flex items-center justify-between text-xs text-white/40">
             <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-slate-100 rounded">↑↓</kbd> Naviguer</span>
-              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-slate-100 rounded">Entrée</kbd> Sélectionner</span>
-              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-slate-100 rounded">Échap</kbd> Fermer</span>
+              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded">↑↓</kbd> Naviguer</span>
+              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded">Entrée</kbd> Sélectionner</span>
+              <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded">Échap</kbd> Fermer</span>
             </div>
             <button
               onClick={() => { setCommandPaletteOpen(false); setShowShortcutsHelp(true); }}
-              className="flex items-center gap-1 hover:text-slate-700 transition-colors"
+              className="flex items-center gap-1 hover:text-white/80 transition-colors"
             >
               <Keyboard className="w-3 h-3" />
               <span className="hidden sm:inline">Raccourcis</span>
@@ -839,32 +839,32 @@ const DashboardLayout = () => {
 
       {/* Keyboard Shortcuts Help Dialog */}
       <Dialog open={showShortcutsHelp} onOpenChange={setShowShortcutsHelp}>
-        <DialogContent className="bg-white/95 backdrop-blur-xl border-slate-200 shadow-2xl max-w-lg">
+        <DialogContent className="bg-[#140E11]/95 backdrop-blur-xl border-white/10 shadow-2xl max-w-lg">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center">
               <Keyboard className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Raccourcis clavier</h2>
-              <p className="text-xs text-slate-500">Naviguez plus rapidement dans l&apos;application</p>
+              <h2 className="text-lg font-semibold text-white">Raccourcis clavier</h2>
+              <p className="text-xs text-white/50">Naviguez plus rapidement dans l&apos;application</p>
             </div>
           </div>
 
           <div className="space-y-4">
             {/* Global shortcuts */}
             <div>
-              <p className="text-xs uppercase tracking-wider text-slate-400 mb-2">Global</p>
+              <p className="text-xs uppercase tracking-wider text-white/40 mb-2">Global</p>
               <div className="space-y-1.5">
                 {[
                   { keys: ['⌘', 'K'], label: 'Recherche globale' },
                   { keys: ['?'], label: 'Afficher cette aide' },
                   { keys: ['Échap'], label: 'Fermer les modals' },
                 ].map((shortcut, i) => (
-                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-50">
-                    <span className="text-sm text-slate-600">{shortcut.label}</span>
+                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/[0.06]">
+                    <span className="text-sm text-white/70">{shortcut.label}</span>
                     <div className="flex items-center gap-1">
                       {shortcut.keys.map((key, j) => (
-                        <kbd key={j} className="px-2 py-0.5 bg-slate-100 rounded text-slate-500 text-xs min-w-[24px] text-center">
+                        <kbd key={j} className="px-2 py-0.5 bg-white/[0.06] rounded text-white/50 text-xs min-w-[24px] text-center">
                           {key}
                         </kbd>
                       ))}
@@ -876,7 +876,7 @@ const DashboardLayout = () => {
 
             {/* Navigation shortcuts */}
             <div>
-              <p className="text-xs uppercase tracking-wider text-slate-400 mb-2">Navigation (G puis...)</p>
+              <p className="text-xs uppercase tracking-wider text-white/40 mb-2">Navigation (G puis...)</p>
               <div className="grid grid-cols-2 gap-1.5">
                 {[
                   { key: 'D', label: 'Dashboard' },
@@ -890,11 +890,11 @@ const DashboardLayout = () => {
                   { key: 'A', label: 'Assistant' },
                   { key: 'B', label: 'Budget' },
                 ].map((shortcut, i) => (
-                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-slate-50">
-                    <span className="text-xs text-slate-600">{shortcut.label}</span>
+                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/[0.06]">
+                    <span className="text-xs text-white/70">{shortcut.label}</span>
                     <div className="flex items-center gap-1">
-                      <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 text-[10px]">G</kbd>
-                      <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 text-[10px]">{shortcut.key}</kbd>
+                      <kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded text-white/50 text-[10px]">G</kbd>
+                      <kbd className="px-1.5 py-0.5 bg-white/[0.06] rounded text-white/50 text-[10px]">{shortcut.key}</kbd>
                     </div>
                   </div>
                 ))}
@@ -902,8 +902,8 @@ const DashboardLayout = () => {
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-200 text-center">
-            <p className="text-xs text-slate-400">
+          <div className="mt-4 pt-3 border-t border-white/10 text-center">
+            <p className="text-xs text-white/40">
               Les raccourcis fonctionnent quand vous n&apos;êtes pas dans un champ de texte
             </p>
           </div>
