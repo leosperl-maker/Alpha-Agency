@@ -14,6 +14,20 @@ from pydantic import BaseModel
 
 from .database import db, get_current_user
 
+# ── WS2 : génération IA (vision Gemini pour extraire une palette depuis un logo) ──
+import base64 as _b64
+try:
+    import httpx as _httpx
+except Exception:
+    _httpx = None
+try:
+    from google import genai as _ml_genai
+    from google.genai import types as _ml_types
+    _ML_GEMINI = _ml_genai.Client(api_key=os.environ.get("GEMINI_API_KEY", "")) if os.environ.get("GEMINI_API_KEY") else None
+except Exception as _ml_e:  # ImportError ou erreur d'init → vision désactivée, pas de crash au boot
+    _ML_GEMINI = None
+    _ml_types = None
+
 logger = logging.getLogger("multilink")
 
 router = APIRouter()
@@ -155,6 +169,17 @@ class PageUpdate(BaseModel):
     linked_contact_ids: Optional[List[str]] = None   # Fiches contact CRM rattachées
     verified: Optional[bool] = None
     is_active: Optional[bool] = None
+
+class PaletteRequest(BaseModel):
+    image_base64: Optional[str] = None  # data URL ou base64 brut
+    image_url: Optional[str] = None     # le backend télécharge l'image
+
+class DuplicatePageRequest(BaseModel):
+    title: str
+    slug: Optional[str] = None
+    custom_colors: Optional[dict] = None  # palette à appliquer (sinon = celle du template)
+    profile_image: Optional[str] = None
+    bio: Optional[str] = None
 
 class LinksReorder(BaseModel):
     link_ids: List[str]  # Ordered list of link IDs
@@ -534,6 +559,130 @@ async def delete_page(page_id: str, current_user: dict = Depends(get_current_use
     await db.multilink_views.delete_many({"page_id": page_id})
     
     return {"message": "Page supprimée"}
+
+
+# ==================== WS2 : GÉNÉRATION IA (palette logo + duplication template) ====================
+
+def _extract_palette_sync(img_bytes: bytes, mime: str) -> str:
+    prompt = (
+        "Tu es directeur artistique. À partir de CE LOGO, propose une palette harmonieuse "
+        "pour une page de liens (style Linktree) qui met le logo en valeur et reste très lisible.\n"
+        "Réponds UNIQUEMENT en JSON strict, aucun texte autour :\n"
+        '{"background":"#RRGGBB","text":"#RRGGBB","accent":"#RRGGBB","button_bg":"#RRGGBB","button_text":"#RRGGBB"}\n'
+        "- background : fond de page (sombre ou clair selon l'ambiance du logo)\n"
+        "- text : couleur de texte, contraste fort avec background\n"
+        "- accent : couleur de marque dominante du logo\n"
+        "- button_bg : fond des boutons (souvent proche de accent)\n"
+        "- button_text : texte des boutons, contraste fort avec button_bg"
+    )
+    resp = _ML_GEMINI.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=[_ml_types.Part.from_bytes(data=img_bytes, mime_type=mime), prompt],
+    )
+    return (getattr(resp, "text", "") or "").strip()
+
+
+async def _load_image_bytes(image_base64, image_url):
+    if image_base64:
+        raw = image_base64.split(",", 1)[1] if "," in image_base64 else image_base64
+        mime = "image/png"
+        if image_base64.startswith("data:"):
+            mime = image_base64[5:].split(";")[0] or mime
+        return _b64.b64decode(raw), mime
+    if image_url:
+        if not _httpx:
+            raise HTTPException(status_code=500, detail="httpx indisponible")
+        async with _httpx.AsyncClient(timeout=20, follow_redirects=True) as c:
+            r = await c.get(image_url)
+            r.raise_for_status()
+            return r.content, r.headers.get("content-type", "image/png").split(";")[0]
+    raise HTTPException(status_code=400, detail="image_base64 ou image_url requis")
+
+
+@router.post("/extract-palette", response_model=dict)
+async def extract_palette(req: PaletteRequest, current_user: dict = Depends(get_current_user)):
+    """Extrait une palette de couleurs depuis un logo (vision Gemini)."""
+    if not _ML_GEMINI:
+        raise HTTPException(status_code=503, detail="Gemini non configuré (GEMINI_API_KEY absent)")
+    import asyncio, json as _json, re as _re
+    img_bytes, mime = await _load_image_bytes(req.image_base64, req.image_url)
+    try:
+        raw = await asyncio.to_thread(_extract_palette_sync, img_bytes, mime)
+    except Exception as e:
+        logger.error(f"extract-palette gemini error: {e}")
+        raise HTTPException(status_code=502, detail="Échec de l'analyse du logo")
+    m = _re.search(r"\{.*\}", raw, _re.DOTALL)
+    if not m:
+        raise HTTPException(status_code=502, detail="Réponse IA inattendue")
+    try:
+        palette = _json.loads(m.group(0))
+    except Exception:
+        raise HTTPException(status_code=502, detail="Palette illisible")
+    clean = {}
+    for k in ("background", "text", "accent", "button_bg", "button_text"):
+        v = palette.get(k)
+        if isinstance(v, str) and _re.fullmatch(r"#[0-9A-Fa-f]{6}", v.strip()):
+            clean[k] = v.strip()
+    if "accent" not in clean:
+        raise HTTPException(status_code=502, detail="Palette incomplète")
+    return {"palette": clean}
+
+
+@router.post("/pages/{page_id}/duplicate", response_model=dict)
+async def duplicate_page(page_id: str, req: DuplicatePageRequest, current_user: dict = Depends(get_current_user)):
+    """Duplique une page (template) en appliquant de nouvelles couleurs + identité (WS2)."""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    src = await db.multilink_pages.find_one({"id": page_id, "user_id": user_id})
+    if not src:
+        raise HTTPException(status_code=404, detail="Page source non trouvée")
+
+    new_slug = (req.slug or generate_slug(req.title)).strip()
+    if await db.multilink_pages.find_one({"slug": new_slug}):
+        raise HTTPException(status_code=400, detail=f"Le slug '{new_slug}' est déjà utilisé")
+
+    new_id = str(uuid.uuid4())
+    custom_colors = req.custom_colors if req.custom_colors else src.get("custom_colors")
+    theme = "custom" if req.custom_colors else src.get("theme", "dark")
+    theme_colors = THEME_PRESETS.get(theme, THEME_PRESETS["dark"]).copy()
+    if custom_colors:
+        theme_colors = {**theme_colors, **custom_colors}
+
+    now = datetime.now(timezone.utc).isoformat()
+    new_bio = req.bio if req.bio is not None else src.get("bio")
+    new_doc = {
+        "id": new_id,
+        "user_id": user_id,
+        "slug": new_slug,
+        "title": req.title,
+        "bio": new_bio,
+        "profile_image": req.profile_image or src.get("profile_image"),
+        "banner_image": src.get("banner_image"),
+        "theme": theme,
+        "theme_colors": theme_colors,
+        "custom_colors": custom_colors,
+        "design_settings": src.get("design_settings"),
+        "seo_settings": {**(src.get("seo_settings") or {}), "title": req.title, "description": new_bio or ""},
+        "social_links": src.get("social_links") or [],
+        "custom_font": src.get("custom_font"),
+        "linked_document_ids": [],
+        "linked_contact_ids": [],
+        "verified": False,
+        "is_active": True,
+        "created_at": now,
+        "updated_at": now,
+    }
+    await db.multilink_pages.insert_one(new_doc)
+
+    src_blocks = await db.multilink_blocks.find({"page_id": page_id}, {"_id": 0}).sort("order", 1).to_list(500)
+    for b in src_blocks:
+        nb = dict(b)
+        nb["id"] = str(uuid.uuid4())
+        nb["page_id"] = new_id
+        nb["created_at"] = now
+        await db.multilink_blocks.insert_one(nb)
+
+    logger.info(f"Duplicated page {page_id} -> {new_id} ({new_slug})")
+    return {"id": new_id, "slug": new_slug, "url": f"/lien-bio/{new_slug}", "blocks_copied": len(src_blocks), "message": "Page créée à partir du template"}
 
 
 # ==================== ADMIN ROUTES - LINKS ====================
@@ -1273,7 +1422,7 @@ EXEMPLE:
 
 CONFIGURATION REQUISE CÔTÉ CLIENT:
 1. Ajouter un enregistrement DNS CNAME:
-   bio.antilla-martinique.com → CNAME → votre-domaine-emergent.com
+   bio.antilla-martinique.com → CNAME → <cible CNAME fournie par Railway (Settings → Domains)>
    
 2. Attendre la propagation DNS (quelques minutes à 24h)
 
@@ -1397,10 +1546,11 @@ async def set_custom_domain(
             "message": f"Domaine personnalisé configuré: {domain}",
             "custom_domain": domain,
             "instructions": {
-                "step1": f"Ajoutez un enregistrement DNS CNAME:",
-                "dns_record": f"{domain} → CNAME → alphagency.fr",
-                "step2": "Attendez la propagation DNS (quelques minutes à 24h)",
-                "step3": f"Testez en accédant à https://{domain}"
+                "step1": "Dans Railway → service Alpha-Agency → Settings → Domains, ajoutez ce domaine (Railway fournit alors une cible CNAME + SSL auto).",
+                "step2": f"Chez le registrar DNS : {domain} → CNAME → <cible fournie par Railway>",
+                "step3": "Attendez la propagation DNS (quelques minutes à 24h).",
+                "step4": f"Testez : https://{domain}",
+                "note": "Sous-domaine de alphagency.fr (ex: client.alphagency.fr) : un wildcard *.alphagency.fr → cible Railway active tout sous-domaine sans action du client."
             }
         }
     else:
