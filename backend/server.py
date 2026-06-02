@@ -6626,6 +6626,10 @@ app.include_router(worker_router, prefix="/api", tags=["publication-worker"])
 from routes.multilink import router as multilink_router
 app.include_router(multilink_router, prefix="/api/multilink", tags=["multilink"])
 
+# Public chatbot (site vitrine, non authentifié) → /api/public/chat
+from routes.public_chat import router as public_chat_router
+app.include_router(public_chat_router, prefix="/api", tags=["public-chat"])
+
 # MoltBot Integration (Full CRM Access)
 from routes.moltbot import router as moltbot_router
 app.include_router(moltbot_router, prefix="/api", tags=["moltbot"])
