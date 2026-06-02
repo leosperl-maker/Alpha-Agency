@@ -626,7 +626,7 @@ async def extract_palette(req: PaletteRequest, current_user: dict = Depends(get_
         raw = await asyncio.to_thread(_extract_palette_sync, img_bytes, mime)
     except Exception as e:
         logger.error(f"extract-palette gemini error: {type(e).__name__}: {e}")
-        raise HTTPException(status_code=502, detail=f"Échec de l'analyse du logo: {type(e).__name__}: {str(e)[:300]}")
+        raise HTTPException(status_code=502, detail="Échec de l'analyse du logo. Réessaie avec une image plus nette ou un autre format.")
     m = _re.search(r"\{.*\}", raw, _re.DOTALL)
     if not m:
         raise HTTPException(status_code=502, detail="Réponse IA inattendue")

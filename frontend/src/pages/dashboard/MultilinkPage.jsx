@@ -392,6 +392,14 @@ const MultilinkPage = () => {
   const [crmContacts, setCrmContacts] = useState([]);
   const [crmDocSearch, setCrmDocSearch] = useState('');
   const [crmContactSearch, setCrmContactSearch] = useState('');
+  // WS2 — générateur "depuis un logo"
+  const [genDialogOpen, setGenDialogOpen] = useState(false);
+  const [genTitle, setGenTitle] = useState('');
+  const [genSlug, setGenSlug] = useState('');
+  const [genTemplateId, setGenTemplateId] = useState('');
+  const [genLogo, setGenLogo] = useState(null);     // dataURL
+  const [genPalette, setGenPalette] = useState(null);
+  const [genBusy, setGenBusy] = useState(false);
   
   // DnD sensors
   const sensors = useSensors(
@@ -410,6 +418,48 @@ const MultilinkPage = () => {
       setLoading(false);
     }
   }, []);
+
+  // ── WS2 : génération d'une page depuis un logo ──
+  const openGenDialog = () => {
+    setGenTitle(''); setGenSlug(''); setGenLogo(null); setGenPalette(null);
+    setGenTemplateId(pages[0]?.id || '');
+    setGenDialogOpen(true);
+  };
+  const handleGenLogo = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => { setGenLogo(e.target.result); setGenPalette(null); };
+    reader.readAsDataURL(file);
+  };
+  const analyzeGenLogo = async () => {
+    if (!genLogo) { toast.error('Choisis un logo'); return; }
+    setGenBusy(true);
+    try {
+      const res = await api.post('/multilink/extract-palette', { image_base64: genLogo });
+      setGenPalette(res.data.palette);
+      toast.success('Palette extraite du logo ✨');
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Échec de l'analyse du logo");
+    } finally { setGenBusy(false); }
+  };
+  const createFromTemplate = async () => {
+    if (!genTemplateId) { toast.error('Choisis un template à dupliquer'); return; }
+    if (!genTitle.trim()) { toast.error('Donne un nom à la page'); return; }
+    setGenBusy(true);
+    try {
+      const res = await api.post(`/multilink/pages/${genTemplateId}/duplicate`, {
+        title: genTitle.trim(),
+        slug: genSlug.trim() || undefined,
+        custom_colors: genPalette || undefined,
+      });
+      toast.success('Page générée !');
+      setGenDialogOpen(false);
+      await fetchPages();
+      if (res.data?.id) fetchPageDetails({ id: res.data.id });
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Échec de la génération');
+    } finally { setGenBusy(false); }
+  };
 
   useEffect(() => {
     fetchPages();
@@ -1276,9 +1326,14 @@ const MultilinkPage = () => {
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base mt-0.5 sm:mt-1">Créez des pages de liens professionnelles</p>
         </div>
-        <Button onClick={() => openPageDialog()} className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
-          <Plus className="w-4 h-4 mr-2" /> Nouvelle page
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button onClick={openGenDialog} variant="outline" className="border-primary/40 bg-brand-soft text-primary hover:bg-brand-soft hover:text-primary w-full sm:w-auto">
+            <Sparkles className="w-4 h-4 mr-2" /> Générer (IA)
+          </Button>
+          <Button onClick={() => openPageDialog()} className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
+            <Plus className="w-4 h-4 mr-2" /> Nouvelle page
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
@@ -2383,6 +2438,83 @@ const MultilinkPage = () => {
       </div>
 
       {/* Page Creation Dialog */}
+      {/* WS2 — Générer une page depuis un logo (IA) */}
+      <Dialog open={genDialogOpen} onOpenChange={setGenDialogOpen}>
+        <DialogContent className="bg-secondary border-border text-foreground max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Sparkles className="w-5 h-5 text-primary" /> Générer une page depuis un logo
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <p className="text-muted-foreground text-sm">Charge le logo du client : l'IA en extrait les couleurs, puis on duplique un template à sa charte.</p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-foreground">Nom de la page *</Label>
+                <Input value={genTitle} onChange={(e) => setGenTitle(e.target.value)} placeholder="Ex : Fit Holistik" className="bg-background border-border text-foreground" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-foreground">Slug (optionnel)</Label>
+                <Input value={genSlug} onChange={(e) => setGenSlug(e.target.value)} placeholder="auto-généré" className="bg-background border-border text-foreground" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-foreground">Template à dupliquer</Label>
+              <select value={genTemplateId} onChange={(e) => setGenTemplateId(e.target.value)} className="w-full rounded-lg bg-background border border-border text-foreground px-3 py-2 text-sm">
+                {pages.length === 0 && <option value="">Aucune page existante</option>}
+                {pages.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
+              </select>
+              <p className="text-muted-foreground text-xs">La structure (blocs, réseaux) de ce template est copiée, avec les nouvelles couleurs.</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-foreground">Logo du client</Label>
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="w-16 h-16 rounded-xl border border-border bg-background flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {genLogo ? <img src={genLogo} alt="" className="w-full h-full object-contain" /> : <ImagePlus className="w-6 h-6 text-muted-foreground" />}
+                </div>
+                <label className="cursor-pointer">
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleGenLogo(e.target.files?.[0])} />
+                  <span className="inline-flex items-center px-3 py-2 rounded-lg bg-secondary border border-border text-foreground text-sm hover:bg-secondary/80">
+                    <ImagePlus className="w-4 h-4 mr-2" /> Choisir un logo
+                  </span>
+                </label>
+                <Button onClick={analyzeGenLogo} disabled={!genLogo || genBusy} variant="outline" className="border-primary/40 text-primary hover:bg-brand-soft">
+                  {genBusy && !genPalette ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />} Analyser
+                </Button>
+              </div>
+            </div>
+
+            {genPalette && (
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-xs uppercase tracking-wider">Palette extraite</Label>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {['background','accent','button_bg','text','button_text'].filter(k => genPalette[k]).map(k => (
+                    <div key={k} className="flex flex-col items-center gap-1">
+                      <div className="w-9 h-9 rounded-lg border border-border" style={{ background: genPalette[k] }} />
+                      <span className="text-[10px] text-muted-foreground">{genPalette[k]}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-xl p-4 mt-1" style={{ background: genPalette.background || '#0f0f1a' }}>
+                  <p className="text-center font-bold mb-2" style={{ color: genPalette.text || '#ffffff' }}>{genTitle || 'Aperçu'}</p>
+                  <div className="rounded-full py-2 text-center text-sm font-medium" style={{ background: genPalette.button_bg || genPalette.accent, color: genPalette.button_text || '#ffffff' }}>Bouton</div>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter className="mt-4 gap-2">
+            <Button variant="outline" onClick={() => setGenDialogOpen(false)} className="border-border text-foreground">Annuler</Button>
+            <Button onClick={createFromTemplate} disabled={genBusy || !genTemplateId} className="bg-primary hover:bg-primary/90">
+              {genBusy && genPalette ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+              Générer la page
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={pageDialogOpen} onOpenChange={setPageDialogOpen}>
         <DialogContent className="bg-secondary border-border text-foreground max-w-md">
           <DialogHeader>
