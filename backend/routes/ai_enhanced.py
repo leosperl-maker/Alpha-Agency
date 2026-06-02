@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 # Environment variables
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 AI_DAILY_LIMIT = 200
 
 # Check if emergentintegrations is available
@@ -29,6 +30,36 @@ try:
 except ImportError:
     EMERGENT_AVAILABLE = False
     logger.warning("emergentintegrations not installed - AI features will be limited")
+
+# Direct Gemini (google-genai) — used when GEMINI_API_KEY is set (preferred provider)
+try:
+    from google import genai as _google_genai
+    from google.genai import types as _genai_types
+    _gemini_client = _google_genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
+    GEMINI_AVAILABLE = bool(GEMINI_API_KEY)
+except Exception as _gemini_err:  # ImportError or client init error
+    _gemini_client = None
+    GEMINI_AVAILABLE = False
+    logger.warning(f"google-genai unavailable: {_gemini_err}")
+
+
+async def _gemini_generate(system_message: str, messages, model: str) -> str:
+    """Run a chat completion directly on Gemini with the full conversation."""
+    import asyncio
+    contents = []
+    for m in messages:
+        role = "model" if getattr(m, "role", "user") == "assistant" else "user"
+        contents.append({"role": role, "parts": [{"text": m.content or ""}]})
+
+    def _call():
+        resp = _gemini_client.models.generate_content(
+            model=model,
+            contents=contents,
+            config=_genai_types.GenerateContentConfig(system_instruction=system_message),
+        )
+        return (getattr(resp, "text", "") or "").strip()
+
+    return await asyncio.to_thread(_call)
 
 
 # ==================== MODELS ====================
@@ -612,11 +643,14 @@ async def execute_action_endpoint(request: ActionRequest, current_user: dict = D
 @router.post("/chat")
 async def enhanced_chat(request: ChatRequest, current_user: dict = Depends(get_current_user)):
     """Chat with AI - supports text and image attachments. Now context-aware!"""
-    if not EMERGENT_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Module IA non disponible")
-    if not EMERGENT_LLM_KEY:
-        raise HTTPException(status_code=503, detail="Clé API non configurée")
-    
+    # Prefer direct Gemini when a gemini model is requested and the key is set.
+    use_gemini = (request.model or "").startswith("gemini") and GEMINI_AVAILABLE
+    if not use_gemini:
+        if not EMERGENT_AVAILABLE:
+            raise HTTPException(status_code=503, detail="Module IA non disponible")
+        if not EMERGENT_LLM_KEY:
+            raise HTTPException(status_code=503, detail="Clé API non configurée (ni Gemini ni Emergent)")
+
     user_id = current_user.get("user_id") or current_user.get("id")
     can_proceed, remaining = await check_daily_limit(user_id)
     if not can_proceed:
@@ -692,39 +726,36 @@ Utilise ces données pour répondre aux questions de l'utilisateur. Si l'utilisa
         else:
             system_message = base_system_message + action_instructions
         
-        # Initialize chat
-        chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=session_id,
-            system_message=system_message
-        )
-        
-        # Set model
         model = request.model or "gpt-4o"
-        if model.startswith("gemini"):
-            chat.with_model("gemini", model)
-        else:
-            chat.with_model("openai", model)
-        
+
         # Get the last user message
         last_msg = request.messages[-1] if request.messages else None
         if not last_msg or last_msg.role != "user":
             raise HTTPException(status_code=400, detail="Message utilisateur requis")
-        
-        # Build message with optional image
-        if last_msg.image_url and last_msg.image_url.startswith("data:"):
-            # Extract base64 from data URL
-            base64_data = last_msg.image_url.split(",")[1] if "," in last_msg.image_url else last_msg.image_url
-            user_message = UserMessage(
-                text=last_msg.content,
-                file_contents=[ImageContent(image_base64=base64_data)]
-            )
+
+        if use_gemini:
+            # Direct Gemini with the full conversation (text). Images fall back to Emergent.
+            if last_msg.image_url and last_msg.image_url.startswith("data:") and EMERGENT_AVAILABLE and EMERGENT_LLM_KEY:
+                chat = LlmChat(api_key=EMERGENT_LLM_KEY, session_id=session_id, system_message=system_message)
+                chat.with_model("gemini", model)
+                base64_data = last_msg.image_url.split(",")[1] if "," in last_msg.image_url else last_msg.image_url
+                response = await chat.send_message(UserMessage(text=last_msg.content, file_contents=[ImageContent(image_base64=base64_data)]))
+            else:
+                response = await _gemini_generate(system_message, request.messages, model)
         else:
-            user_message = UserMessage(text=last_msg.content)
-        
-        # Send message
-        response = await chat.send_message(user_message)
-        
+            # Emergent fallback (OpenAI / Gemini via Emergent universal key)
+            chat = LlmChat(api_key=EMERGENT_LLM_KEY, session_id=session_id, system_message=system_message)
+            if model.startswith("gemini"):
+                chat.with_model("gemini", model)
+            else:
+                chat.with_model("openai", model)
+            if last_msg.image_url and last_msg.image_url.startswith("data:"):
+                base64_data = last_msg.image_url.split(",")[1] if "," in last_msg.image_url else last_msg.image_url
+                user_message = UserMessage(text=last_msg.content, file_contents=[ImageContent(image_base64=base64_data)])
+            else:
+                user_message = UserMessage(text=last_msg.content)
+            response = await chat.send_message(user_message)
+
         # Check for actions in response
         action_result = None
         clean_response = response
