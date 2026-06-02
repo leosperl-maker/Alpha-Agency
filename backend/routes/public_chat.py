@@ -473,52 +473,93 @@ async def _generate_quote_from_convo(messages):
     return None
 
 
-def _notify_leo(kind: str, info: dict):
-    """Envoie un email Brevo à l'équipe (synchrone, best-effort)."""
-    if not BREVO_API_KEY:
-        return
+async def _resolve_recipients():
+    """Destinataires : l'email Google connecté (comme les emails de RDV) + secours."""
+    emails = []
     try:
-        import requests
-        if kind == "lead":
-            name = f"{info.get('first_name','')} {info.get('last_name','')}".strip() or "Prospect"
-            company = info.get("company") or "—"
-            rows = "".join(
-                f"<tr><td style='padding:4px 10px;color:#666'>{k}</td>"
-                f"<td style='padding:4px 10px'><b>{(info.get(v) or '—')}</b></td></tr>"
-                for k, v in [("Nom", "first_name"), ("Email", "email"), ("Téléphone", "phone"),
-                             ("Entreprise", "company"), ("Poste", "poste"),
-                             ("Besoin", "besoin"), ("Budget", "budget")]
-            )
-            subject = f"🔔 Nouveau lead chatbot : {name} ({company})"
-            html = (f"<h2>Nouveau lead via le chatbot du site</h2>"
-                    f"<table style='border-collapse:collapse'>{rows}</table>"
-                    f"<p><a href='{SITE_URL}/admin/demandes'>Voir dans le CRM (Demandes)</a></p>")
-        else:  # devis
-            subject = f"📄 Devis prêt à valider : {info.get('number','')} — {info.get('name','')}"
-            html = (f"<h2>Un devis a été pré-rempli par l'assistant IA</h2>"
-                    f"<p>Numéro : <b>{info.get('number','')}</b> — Total estimé : "
-                    f"<b>{info.get('total',0):.2f} € TTC</b> (à vérifier).</p>"
-                    f"<p>Client : <b>{info.get('name','')}</b></p>"
-                    f"<p><a href='{SITE_URL}/admin/facturation'>Vérifier le devis</a></p>")
-        requests.post(
+        s = await db.settings.find_one({"type": "google_calendar_tokens"})
+        if s and s.get("google_email"):
+            emails.append(s["google_email"])
+    except Exception:
+        pass
+    for e in (LEAD_NOTIFY_EMAIL, "admin@alphagency.fr"):
+        if e and e not in emails:
+            emails.append(e)
+    return emails[:3]
+
+
+def _build_email(kind: str, info: dict):
+    if kind == "lead":
+        name = f"{info.get('first_name','')} {info.get('last_name','')}".strip() or "Prospect"
+        company = info.get("company") or "—"
+        rows = "".join(
+            f"<tr><td style='padding:4px 10px;color:#666'>{k}</td>"
+            f"<td style='padding:4px 10px'><b>{(info.get(v) or '—')}</b></td></tr>"
+            for k, v in [("Nom", "first_name"), ("Email", "email"), ("Téléphone", "phone"),
+                         ("Entreprise", "company"), ("Poste", "poste"),
+                         ("Besoin", "besoin"), ("Budget", "budget")]
+        )
+        subject = f"🔔 Nouveau lead chatbot : {name} ({company})"
+        html = (f"<h2>Nouveau lead via le chatbot du site</h2>"
+                f"<table style='border-collapse:collapse'>{rows}</table>"
+                f"<p><a href='{SITE_URL}/admin/demandes'>Voir dans le CRM (Demandes)</a></p>")
+    else:  # devis
+        subject = f"📄 Devis prêt à valider : {info.get('number','')} — {info.get('name','')}"
+        html = (f"<h2>Un devis a été pré-rempli par l'assistant IA</h2>"
+                f"<p>Numéro : <b>{info.get('number','')}</b> — Total estimé : "
+                f"<b>{info.get('total',0):.2f} € TTC</b> (à vérifier).</p>"
+                f"<p>Client : <b>{info.get('name','')}</b></p>"
+                f"<p><a href='{SITE_URL}/admin/facturation'>Vérifier le devis</a></p>")
+    return subject, html
+
+
+def _send_brevo(to_emails, subject: str, html: str):
+    """Envoi Brevo synchrone. Retourne (status, text) pour diagnostic."""
+    if not BREVO_API_KEY:
+        return 0, "no_brevo_key"
+    import requests
+    try:
+        r = requests.post(
             "https://api.brevo.com/v3/smtp/email",
-            headers={"api-key": BREVO_API_KEY, "Content-Type": "application/json"},
-            json={
-                "sender": {"name": BREVO_SENDER_NAME, "email": BREVO_SENDER_EMAIL},
-                "to": [{"email": LEAD_NOTIFY_EMAIL, "name": "Alpha Agency"}],
-                "subject": subject,
-                "htmlContent": html,
-            },
+            headers={"api-key": BREVO_API_KEY, "Content-Type": "application/json", "accept": "application/json"},
+            json={"sender": {"name": BREVO_SENDER_NAME, "email": BREVO_SENDER_EMAIL},
+                  "to": [{"email": e} for e in to_emails],
+                  "subject": subject, "htmlContent": html},
             timeout=15,
         )
+        if r.status_code not in (200, 201, 202):
+            logger.error(f"public_chat brevo error {r.status_code}: {r.text[:200]}")
+        return r.status_code, r.text[:300]
     except Exception as e:
-        logger.error(f"public_chat: email notif échouée: {e}")
+        logger.error(f"public_chat brevo exception: {e}")
+        return -1, str(e)[:200]
+
+
+async def _notify_leo(kind: str, info: dict):
+    recips = await _resolve_recipients()
+    subject, html = _build_email(kind, info)
+    return await asyncio.to_thread(_send_brevo, recips, subject, html)
 
 
 # ==================== Endpoints ====================
 @router.get("/chat/health")
 async def public_chat_health():
     return {"available": bool(_gemini_client), "greeting": GREETING}
+
+
+@router.get("/_debug/email")
+async def _debug_email(token: str = ""):
+    """Diagnostic temporaire de la notification email (gated)."""
+    if token != "alpha-mail-check-2026":
+        raise HTTPException(status_code=404, detail="Not found")
+    recips = await _resolve_recipients()
+    status, text = await _notify_leo("lead", {
+        "first_name": "Test", "last_name": "Notification", "email": "test@example.com",
+        "company": "Diagnostic Chatbot", "phone": "—", "poste": "—",
+        "besoin": "Vérification de la notification email du chatbot", "budget": "—",
+    })
+    return {"has_brevo_key": bool(BREVO_API_KEY), "sender": BREVO_SENDER_EMAIL,
+            "recipients": recips, "brevo_status": status, "brevo_text": text}
 
 
 @router.post("/chat")
@@ -576,7 +617,7 @@ async def public_chat(req: PubChatRequest, request: Request):
             }
             lead_captured = True
             if is_new:
-                await asyncio.to_thread(_notify_leo, "lead", lead)
+                await _notify_leo("lead", lead)
 
     # 3) Devis : bloc [QUOTE] émis par l'agent
     _, quote = _extract_block(raw, "QUOTE")
@@ -585,8 +626,7 @@ async def public_chat(req: PubChatRequest, request: Request):
         devis = await _create_devis(contact["id"], quote.get("items", []), quote.get("notes", ""))
         if devis:
             _SESSION_QUOTED.add(sid)
-            await asyncio.to_thread(_notify_leo, "devis",
-                                    {"name": contact["name"], "number": devis[0], "total": devis[1]})
+            await _notify_leo("devis", {"name": contact["name"], "number": devis[0], "total": devis[1]})
 
     # 3b) Filet de sécurité : prospect qui clôt + lead capturé + pas encore de devis -> génère le devis
     last_user = msgs[-1].content if (msgs and msgs[-1].role == "user") else ""
