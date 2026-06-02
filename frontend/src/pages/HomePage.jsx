@@ -19,10 +19,10 @@ import { Button } from "../components/ui/button";
 import LottieLoader from "../components/motion/LottieLoaderLazy";
 import Magnetic from "../components/motion/Magnetic";
 import RotatingWord from "../components/motion/RotatingWord";
+import HeroOrbs from "../components/motion/HeroOrbs";
 
 // Palette bordeaux / rouge profond (aucun rose)
 const RED = "#E11D2E";        // rouge vif lisible sur fond sombre
-const BORDEAUX = "#5C0A1E";   // bordeaux profond
 const BG = "#0A0507";         // noir chaud
 const WORD_GRADIENT = "linear-gradient(100deg,#F2384A,#C8102E 45%,#6E0A1C)";
 const heroWords = ["marques", "sites web", "campagnes", "vidéos", "images"];
@@ -86,62 +86,55 @@ const HomePage = () => {
       {/* ===================== HERO — ambiance bordeaux + titre cinétique ===================== */}
       <section
         data-testid="hero-section"
-        className="relative min-h-screen w-full flex items-center justify-center px-6 pt-28 pb-20 overflow-hidden"
+        className="relative min-h-screen w-full flex flex-col justify-center px-6 sm:px-10 lg:px-16 pt-32 pb-24 overflow-hidden"
       >
-        {/* Orbes lumineux bordeaux (animation transform-only = fluide, pas de WebGL) */}
-        <motion.div
-          aria-hidden="true"
-          className="absolute rounded-full blur-[130px] pointer-events-none"
-          style={{ width: "44rem", height: "44rem", top: "-12%", left: "-8%", background: BORDEAUX, opacity: 0.6 }}
-          animate={rm ? {} : { x: [0, 70, 0], y: [0, 50, 0] }}
-          transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          aria-hidden="true"
-          className="absolute rounded-full blur-[130px] pointer-events-none"
-          style={{ width: "38rem", height: "38rem", bottom: "-15%", right: "-6%", background: "#7A0F22", opacity: 0.5 }}
-          animate={rm ? {} : { x: [0, -60, 0], y: [0, -40, 0] }}
-          transition={{ duration: 32, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          aria-hidden="true"
-          className="absolute rounded-full blur-[100px] pointer-events-none"
-          style={{ width: "22rem", height: "22rem", top: "30%", left: "55%", background: "#3A0712", opacity: 0.6 }}
-          animate={rm ? {} : { x: [0, -40, 0], y: [0, 30, 0] }}
-          transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Vignette + grain pour la lisibilité et le grain ciné */}
+        {/* Halos bordeaux réactifs au curseur (transform-only, fiable) */}
+        <HeroOrbs />
+        {/* Vignette + grain */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: `radial-gradient(70% 60% at 50% 42%, transparent 0%, ${BG} 80%)` }}
+          style={{ background: `radial-gradient(90% 80% at 30% 40%, transparent 0%, ${BG} 82%)` }}
           aria-hidden="true"
         />
         <div className="absolute inset-0 grain-overlay opacity-[0.10] pointer-events-none" aria-hidden="true" />
 
-        <div className="max-w-5xl mx-auto w-full relative z-10 flex flex-col items-center text-center">
-          <motion.div
-            className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full bg-white/[0.04] backdrop-blur-md border border-white/10 text-xs font-mono uppercase tracking-[0.25em] text-white/70"
-            initial={{ opacity: 0, y: rm ? 0 : 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping" style={{ backgroundColor: RED }} />
-              <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: RED }} />
-            </span>
-            Agence créative 360° · Guadeloupe
-          </motion.div>
+        <div className="max-w-[1400px] mx-auto w-full relative z-10">
+          {/* Ligne méta : pastille à gauche, infos éditoriales à droite */}
+          <div className="flex items-start justify-between gap-6 mb-10 lg:mb-14">
+            <motion.div
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] backdrop-blur-md border border-white/10 text-[11px] sm:text-xs font-mono uppercase tracking-[0.25em] text-white/70"
+              initial={{ opacity: 0, y: rm ? 0 : 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping" style={{ backgroundColor: RED }} />
+                <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: RED }} />
+              </span>
+              Agence créative 360°
+            </motion.div>
 
+            <motion.div
+              className="hidden lg:flex flex-col items-end text-right font-mono uppercase tracking-[0.2em] text-[11px] text-white/40 leading-relaxed"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+            >
+              <span>Guadeloupe · Caraïbe</span>
+              <span className="text-white/55">Site · Social · Photo · Vidéo · Ads</span>
+            </motion.div>
+          </div>
+
+          {/* Accroche surdimensionnée, alignée à gauche */}
           <h1
             data-testid="hero-headline"
-            className="font-display font-extrabold leading-[1.12] tracking-tight text-[2.6rem] sm:text-7xl lg:text-[7rem] text-white"
+            className="font-display font-extrabold leading-[1.02] tracking-tight text-white text-left text-[clamp(2.7rem,11vw,9rem)]"
           >
             <motion.span
               className="block"
-              initial={{ opacity: 0, y: rm ? 0 : 24 }}
+              initial={{ opacity: 0, y: rm ? 0 : 26 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.08, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
               On crée des
             </motion.span>
@@ -152,66 +145,74 @@ const HomePage = () => {
             />
             <motion.span
               className="block"
-              initial={{ opacity: 0, y: rm ? 0 : 24 }}
+              initial={{ opacity: 0, y: rm ? 0 : 26 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.22, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
               qui marquent.
             </motion.span>
           </h1>
 
-          <motion.p
-            className="mt-8 text-base sm:text-lg text-white/65 max-w-2xl mx-auto leading-relaxed"
-            initial={{ opacity: 0, y: rm ? 0 : 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.7 }}
-          >
-            Site web, réseaux sociaux, photo, vidéo et publicité digitale.
-            Une agence 360° en Guadeloupe qui transforme votre présence en ligne
-            en véritable moteur de croissance.
-          </motion.p>
+          {/* Bas : paragraphe à gauche, CTA à droite (grille éditoriale) */}
+          <div className="mt-12 lg:mt-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+            <motion.p
+              className="text-base sm:text-lg text-white/60 max-w-md leading-relaxed"
+              initial={{ opacity: 0, y: rm ? 0 : 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.7 }}
+            >
+              Site web, réseaux sociaux, photo, vidéo et publicité digitale —
+              une agence 360° en Guadeloupe qui transforme votre présence en ligne
+              en véritable moteur de croissance.
+            </motion.p>
 
-          <motion.div
-            className="mt-10 flex flex-col sm:flex-row gap-4 justify-center"
-            initial={{ opacity: 0, y: rm ? 0 : 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55, duration: 0.7 }}
-          >
-            <Magnetic>
-              <Link to="/contact">
-                <Button
-                  data-testid="hero-cta-devis"
-                  className="bg-white hover:bg-white/90 text-[#0A0507] hover:text-[#0A0507] rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider transition-all duration-300 w-full sm:w-auto"
-                >
-                  Demander un devis
-                  <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
-                </Button>
-              </Link>
-            </Magnetic>
-            <Magnetic>
-              <Link to="/realisations">
-                <Button
-                  data-testid="hero-cta-offres"
-                  variant="outline"
-                  className="border-white/25 hover:border-white hover:bg-white/10 text-white rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider bg-white/[0.04] backdrop-blur-sm transition-all duration-300 w-full sm:w-auto"
-                >
-                  Voir nos réalisations
-                </Button>
-              </Link>
-            </Magnetic>
-          </motion.div>
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 shrink-0"
+              initial={{ opacity: 0, y: rm ? 0 : 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.52, duration: 0.7 }}
+            >
+              <Magnetic>
+                <Link to="/contact">
+                  <Button
+                    data-testid="hero-cta-devis"
+                    className="bg-white hover:bg-white/90 text-[#0A0507] hover:text-[#0A0507] rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider transition-all duration-300 w-full sm:w-auto"
+                  >
+                    Demander un devis
+                    <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
+                  </Button>
+                </Link>
+              </Magnetic>
+              <Magnetic>
+                <Link to="/realisations">
+                  <Button
+                    data-testid="hero-cta-offres"
+                    variant="outline"
+                    className="border-white/25 hover:border-white hover:bg-white/10 text-white rounded-full px-8 py-6 text-sm font-bold uppercase tracking-wider bg-white/[0.04] backdrop-blur-sm transition-all duration-300 w-full sm:w-auto"
+                  >
+                    Voir nos réalisations
+                  </Button>
+                </Link>
+              </Magnetic>
+            </motion.div>
+          </div>
         </div>
 
-        {/* Indicateur de scroll */}
+        {/* Indicateur de scroll (coin bas droit, éditorial) */}
         <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block z-20"
-          animate={rm ? {} : { y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
+          className="absolute bottom-8 right-8 hidden md:flex items-center gap-3 z-20 text-[11px] font-mono uppercase tracking-[0.25em] text-white/40"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.9, duration: 0.8 }}
           aria-hidden="true"
         >
-          <div className="w-6 h-10 border-2 border-white/25 rounded-full flex justify-center pt-2">
-            <div className="w-1.5 h-3 rounded-full" style={{ backgroundColor: RED }} />
-          </div>
+          Défiler
+          <motion.span
+            className="block w-px h-10 origin-top"
+            style={{ backgroundColor: RED }}
+            animate={rm ? {} : { scaleY: [0.3, 1, 0.3] }}
+            transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+          />
         </motion.div>
       </section>
 
