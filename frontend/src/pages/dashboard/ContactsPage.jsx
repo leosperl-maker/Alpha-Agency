@@ -315,39 +315,37 @@ const ContactsPage = () => {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
-          {filteredContacts.map((contact) => (
+          {filteredContacts.map((contact, i) => (
             <motion.button
-              key={contact.id}
-              layoutId={`contact-card-${contact.id}`}
+              key={contact.id || `row-${i}`}
+              layoutId={`contact-card-${contact.id || `row-${i}`}`}
               data-testid={`contact-${contact.id}`}
               onClick={() => setExpandedContact(contact)}
               whileHover={{ y: -6 }}
               whileTap={{ scale: 0.96 }}
               transition={{ type: "spring", stiffness: 420, damping: 32 }}
-              className="group relative text-left rounded-2xl border border-border bg-card overflow-hidden shadow-elev hover:shadow-pop hover:border-primary/40"
+              className="group relative flex flex-col items-center text-center rounded-2xl border border-border bg-card p-4 overflow-hidden shadow-elev hover:shadow-pop hover:border-primary/40"
             >
               {/* reflet holographique au survol */}
-              <span className="pointer-events-none absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(115deg,transparent_25%,rgba(255,255,255,0.12)_45%,transparent_65%)]" />
-              {/* bandeau */}
-              <div className="h-14 bg-gradient-to-br from-[#E11D2E] via-[#9A1230] to-[#3A0A1B] relative">
-                <span className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_30%_15%,rgba(255,255,255,0.5),transparent_55%)]" />
-                {contact.source === "chatbot" && (
-                  <span className="absolute top-1.5 right-1.5 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-black/30 text-white text-[9px] font-medium"><Sparkles className="w-2.5 h-2.5" />IA</span>
-                )}
-              </div>
-              {/* contenu */}
-              <div className="px-2.5 pb-3 -mt-7 flex flex-col items-center text-center">
-                <motion.div layoutId={`contact-avatar-${contact.id}`} className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] ring-4 ring-card flex items-center justify-center text-white font-bold text-base shadow-lg">
+              <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(125deg,transparent_30%,rgba(225,29,46,0.07)_50%,transparent_70%)]" />
+              {/* badge IA */}
+              {contact.source === "chatbot" && (
+                <span className="absolute top-2 right-2 z-10 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-brand-soft text-primary text-[9px] font-semibold"><Sparkles className="w-2.5 h-2.5" />IA</span>
+              )}
+              {/* avatar net (halo au survol, jamais coupé) */}
+              <div className="relative mb-2.5">
+                <span className="pointer-events-none absolute -inset-2 rounded-3xl bg-[#E11D2E]/30 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <motion.div layoutId={`contact-avatar-${contact.id}`} className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center text-white font-bold text-lg shadow-lg ring-1 ring-white/10">
                   {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
                 </motion.div>
-                <h3 className="mt-2 text-sm font-semibold text-foreground leading-tight truncate w-full">{contact.first_name} {contact.last_name}</h3>
-                {contact.company
-                  ? <p className="text-[11px] text-muted-foreground flex items-center gap-1 max-w-full"><Building className="w-3 h-3 flex-shrink-0" /><span className="truncate">{contact.company}</span></p>
-                  : <p className="text-[11px] text-muted-foreground/50 italic">Particulier</p>}
-                <div className="mt-2 flex flex-wrap items-center justify-center gap-1">
-                  <Badge className={`${STATUS_TONE[contact.status] || STATUS_TONE.nouveau} border-0 text-[10px] px-1.5`}>{STATUS_LABEL[contact.status] || contact.status}</Badge>
-                  {contact.score && <Badge className={`${SCORE_TONE[contact.score] || SCORE_TONE.tiède} border-0 text-[10px] px-1.5`}>{contact.score}</Badge>}
-                </div>
+              </div>
+              <h3 className="text-sm font-semibold text-foreground leading-tight truncate w-full">{contact.first_name} {contact.last_name}</h3>
+              {contact.company
+                ? <p className="mt-0.5 text-[11px] text-muted-foreground flex items-center justify-center gap-1 max-w-full"><Building className="w-3 h-3 flex-shrink-0" /><span className="truncate">{contact.company}</span></p>
+                : <p className="mt-0.5 text-[11px] text-muted-foreground/50 italic">Particulier</p>}
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-1">
+                <Badge className={`${STATUS_TONE[contact.status] || STATUS_TONE.nouveau} border-0 text-[10px] px-1.5`}>{STATUS_LABEL[contact.status] || contact.status}</Badge>
+                {contact.score && <Badge className={`${SCORE_TONE[contact.score] || SCORE_TONE.tiède} border-0 text-[10px] px-1.5`}>{contact.score}</Badge>}
               </div>
             </motion.button>
           ))}

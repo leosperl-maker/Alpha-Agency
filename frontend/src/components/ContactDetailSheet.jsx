@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "./ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "./ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -42,6 +41,7 @@ import {
   Download,
   MoreVertical,
   Star,
+  X,
   BarChart3,
   Users
 } from "lucide-react";
@@ -136,7 +136,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
     qualifié: { bg: "bg-warning-soft", text: "text-warning", dot: "bg-warning" },
     proposition: { bg: "bg-warning-soft", text: "text-warning", dot: "bg-warning" },
     négociation: { bg: "bg-pink-100", text: "text-pink-700", dot: "bg-pink-500" },
-    en_discussion: { bg: "bg-brand-soft", text: "text-indigo-700", dot: "bg-brand" },
+    en_discussion: { bg: "bg-brand-soft", text: "text-primary", dot: "bg-brand" },
     client: { bg: "bg-success-soft", text: "text-success", dot: "bg-success" },
     gagné: { bg: "bg-success-soft", text: "text-success", dot: "bg-success" },
     perdu: { bg: "bg-danger-soft", text: "text-danger", dot: "bg-danger" }
@@ -257,36 +257,41 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
   const timeline = getTimelineItems();
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent 
-        side="right" 
-        className="w-full sm:max-w-[500px] md:max-w-[600px] p-0 bg-card border-l border-border overflow-hidden"
-      >
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl w-[95vw] p-0 gap-0 bg-card border-border max-h-[90vh] overflow-y-auto overscroll-contain rounded-2xl [&>button]:hidden">
+        <DialogTitle className="sr-only">Fiche du contact</DialogTitle>
         {loading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+          <div className="flex items-center justify-center py-24">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : contact ? (
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col">
             {/* Header - Glassmorphic Style */}
-            <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 text-white p-4 sm:p-6">
+            <div className="relative bg-gradient-to-br from-[#E11D2E] via-[#9A1230] to-[#3A0A1B] text-white p-4 sm:p-6">
               {/* Quick Actions */}
               <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex gap-1">
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  className="text-foreground hover:text-foreground hover:bg-secondary h-8 w-8 p-0"
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-white/80 hover:text-white hover:bg-white/15 h-8 w-8 p-0"
                 >
                   <Star className="w-4 h-4" />
                 </Button>
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  className="text-foreground hover:text-foreground hover:bg-secondary h-8 w-8 p-0"
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-white/80 hover:text-white hover:bg-white/15 h-8 w-8 p-0"
                   onClick={() => navigate(`/admin/contacts?edit=${contact.id}`)}
                 >
                   <Pencil className="w-4 h-4" />
                 </Button>
+                <button
+                  onClick={() => onOpenChange(false)}
+                  className="h-8 w-8 rounded-md text-white/80 hover:text-white hover:bg-white/15 flex items-center justify-center transition-colors"
+                  aria-label="Fermer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
 
               <div className="flex items-start gap-3 sm:gap-4">
@@ -659,12 +664,12 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                     <div className="space-y-4 pt-3">
                       {loadingFinancials ? (
                         <div className="flex items-center justify-center py-8">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         </div>
                       ) : financialData ? (
                         <>
                           {/* Company Info */}
-                          <Card className="border-border bg-gradient-to-br from-indigo-600/20 to-purple-600/20">
+                          <Card className="border-border bg-gradient-to-br from-[#E11D2E]/15 to-[#7A0F2B]/15">
                             <CardContent className="p-4">
                               <div className="flex items-start gap-3">
                                 <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center">
@@ -674,11 +679,11 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                                   <h3 className="font-bold text-foreground text-lg">{financialData.nom}</h3>
                                   <p className="text-muted-foreground text-sm">{financialData.forme_juridique}</p>
                                   <div className="flex flex-wrap gap-2 mt-2">
-                                    <Badge variant="outline" className="border-primary/40 text-indigo-300">
+                                    <Badge variant="outline" className="border-primary/40 text-primary">
                                       SIREN: {financialData.siren}
                                     </Badge>
                                     {financialData.siret && (
-                                      <Badge variant="outline" className="border-purple-500/50 text-purple-300">
+                                      <Badge variant="outline" className="border-primary/40 text-primary">
                                         SIRET: {financialData.siret}
                                       </Badge>
                                     )}
@@ -748,7 +753,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                                   {financialData.bilans.map((bilan, idx) => (
                                     <div key={idx} className="bg-card rounded-lg p-3">
                                       <div className="flex items-center justify-between mb-2">
-                                        <Badge className="bg-primary/30 text-indigo-300">{bilan.annee}</Badge>
+                                        <Badge className="bg-brand-soft text-primary">{bilan.annee}</Badge>
                                         {idx > 0 && financialData.bilans[idx-1] && bilan.chiffre_affaires && financialData.bilans[idx-1].chiffre_affaires && (
                                           <div className="flex items-center gap-1 text-xs">
                                             {bilan.chiffre_affaires > financialData.bilans[idx-1].chiffre_affaires ? (
@@ -896,8 +901,8 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
             <p className="text-muted-foreground">Contact non trouvé</p>
           </div>
         )}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 };
 
