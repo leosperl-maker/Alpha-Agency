@@ -149,19 +149,20 @@ const LegalPage = ({ type }) => {
   const pageContent = content[type] || content.mentions;
 
   return (
-    <div data-testid={`legal-page-${type}`} className="bg-white">
+    <div data-testid={`legal-page-${type}`} className="text-white" style={{ backgroundColor: "#0A0507" }}>
       {/* Hero */}
-      <section className="relative pt-32 pb-16 px-6 overflow-hidden bg-[#F8F8F8]">
+      <section className="relative pt-36 pb-16 px-6 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(110% 80% at 50% 0%, #2A0712 0%, #0A0507 65%)" }} aria-hidden="true" />
         <div className="max-w-4xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-4xl sm:text-5xl font-bold text-[#1A1A1A] mb-6">
+            <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight mb-6">
               {pageContent.title}
             </h1>
-            <p className="text-[#666666]">
+            <p className="text-white/50">
               Dernière mise à jour : {new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
             </p>
           </motion.div>
@@ -171,7 +172,7 @@ const LegalPage = ({ type }) => {
       {/* Content */}
       <section className="px-6 pb-24 py-12">
         <div className="max-w-4xl mx-auto">
-          <div className="space-y-12">
+          <div className="space-y-8">
             {pageContent.sections.map((section, index) => (
               <motion.div
                 key={index}
@@ -179,11 +180,11 @@ const LegalPage = ({ type }) => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-[#F8F8F8] p-8 rounded-lg border border-[#E5E5E5]"
+                className="bg-white/[0.03] p-8 rounded-2xl border border-white/10"
               >
-                <h2 className="text-2xl font-bold text-[#1A1A1A] mb-4">{section.title}</h2>
-                <div 
-                  className="text-[#666666] leading-relaxed [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>li]:mb-2 [&_a]:text-[#CE0202] [&_a]:hover:underline"
+                <h2 className="font-display text-2xl font-bold mb-4">{section.title}</h2>
+                <div
+                  className="text-white/65 leading-relaxed [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>li]:mb-2 [&_strong]:text-white [&_a]:text-[#E11D2E] [&_a]:hover:underline"
                   dangerouslySetInnerHTML={{ __html: section.content }}
                 />
               </motion.div>

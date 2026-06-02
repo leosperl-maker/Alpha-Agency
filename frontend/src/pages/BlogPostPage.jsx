@@ -295,7 +295,7 @@ const BlogPostPage = () => {
       icon: TwitterXIcon,
       url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
       color: "#000000",
-      bgColor: "bg-gray-100 hover:bg-gray-200"
+      bgColor: "bg-white/[0.06] hover:bg-white/10"
     },
     {
       name: "LinkedIn",
@@ -364,14 +364,14 @@ const BlogPostPage = () => {
 
   if (loading) {
     return (
-      <div className="bg-white min-h-screen pt-24 px-4 sm:px-6">
+      <div className="bg-[#0A0507] min-h-screen text-white pt-24 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="h-6 bg-gray-200 animate-pulse rounded mb-4 w-1/4" />
-          <div className="h-10 bg-gray-200 animate-pulse rounded mb-4" />
-          <div className="aspect-[2/1] bg-gray-200 animate-pulse rounded-xl mb-8" />
+          <div className="h-6 bg-white/10 animate-pulse rounded mb-4 w-1/4" />
+          <div className="h-10 bg-white/10 animate-pulse rounded mb-4" />
+          <div className="aspect-[2/1] bg-white/10 animate-pulse rounded-xl mb-8" />
           <div className="space-y-4">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-4 bg-gray-200 animate-pulse rounded" />
+              <div key={i} className="h-4 bg-white/10 animate-pulse rounded" />
             ))}
           </div>
         </div>
@@ -381,10 +381,10 @@ const BlogPostPage = () => {
 
   if (!post) {
     return (
-      <div className="bg-white min-h-screen pt-32 px-6 text-center">
+      <div className="bg-[#0A0507] min-h-screen text-white pt-32 px-6 text-center">
         <div className="max-w-md mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Article non trouvé</h1>
-          <p className="text-gray-600 mb-6">L'article que vous recherchez n'existe pas ou a été supprimé.</p>
+          <h1 className="text-2xl font-bold text-white mb-4">Article non trouvé</h1>
+          <p className="text-white/60 mb-6">L'article que vous recherchez n'existe pas ou a été supprimé.</p>
           <Link to="/actualites">
             <Button className="bg-[#1A1A1A] hover:bg-[#333] text-white rounded-full">
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -399,9 +399,9 @@ const BlogPostPage = () => {
   const readTime = post.read_time || calculateReadTime(post.content || JSON.stringify(post.content_blocks));
 
   return (
-    <div data-testid="blog-post-page" className="bg-white min-h-screen print:bg-white">
+    <div data-testid="blog-post-page" className="bg-[#0A0507] min-h-screen text-white print:bg-white">
       {/* Reading Progress Bar */}
-      <div className="fixed top-0 left-0 right-0 h-1 bg-gray-200 z-50 print:hidden">
+      <div className="fixed top-0 left-0 right-0 h-1 bg-white/10 z-50 print:hidden">
         <motion.div 
           className="h-full bg-[#CE0202]"
           style={{ width: `${readingProgress}%` }}
@@ -424,7 +424,7 @@ const BlogPostPage = () => {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:scale-110 transition-transform"
+                className="w-10 h-10 rounded-full bg-white/[0.06] shadow-lg border border-white/10 flex items-center justify-center hover:scale-110 transition-transform"
                 style={{ color: link.color }}
                 title={link.name}
               >
@@ -433,7 +433,7 @@ const BlogPostPage = () => {
             ))}
             <button
               onClick={() => copyToClipboard()}
-              className="w-10 h-10 rounded-full bg-white shadow-lg border border-gray-100 flex items-center justify-center hover:scale-110 transition-transform text-gray-600"
+              className="w-10 h-10 rounded-full bg-white/[0.06] shadow-lg border border-white/10 flex items-center justify-center hover:scale-110 transition-transform text-white/60"
               title="Copier le lien"
             >
               {copied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
@@ -448,7 +448,7 @@ const BlogPostPage = () => {
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: showFloatingShare ? 1 : 0, x: showFloatingShare ? 0 : 50 }}
           onClick={() => setShowTOC(true)}
-          className="fixed right-4 top-1/3 z-40 hidden lg:flex items-center gap-2 px-4 py-2 bg-white shadow-lg border border-gray-100 rounded-full hover:bg-gray-50 transition-colors print:hidden"
+          className="fixed right-4 top-1/3 z-40 hidden lg:flex items-center gap-2 px-4 py-2 bg-white/[0.06] shadow-lg border border-white/10 rounded-full hover:bg-white/[0.03] transition-colors print:hidden"
         >
           <List className="w-4 h-4" />
           <span className="text-sm font-medium">Sommaire</span>
@@ -469,12 +469,12 @@ const BlogPostPage = () => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[70vh] overflow-y-auto"
+              className="bg-[#1A1012] rounded-2xl p-6 max-w-md w-full max-h-[70vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Sommaire</h3>
-                <button onClick={() => setShowTOC(false)} className="text-gray-400 hover:text-gray-600">
+                <h3 className="text-lg font-bold text-white">Sommaire</h3>
+                <button onClick={() => setShowTOC(false)} className="text-white/40 hover:text-white/60">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -486,7 +486,7 @@ const BlogPostPage = () => {
                     className={`block w-full text-left px-3 py-2 rounded-lg transition-colors ${
                       activeSection === item.id 
                         ? 'bg-[#CE0202]/10 text-[#CE0202]' 
-                        : 'hover:bg-gray-100 text-gray-700'
+                        : 'hover:bg-white/[0.06] text-white/80'
                     } ${item.level === 3 ? 'pl-6 text-sm' : 'font-medium'}`}
                   >
                     {item.text}
@@ -552,14 +552,14 @@ const BlogPostPage = () => {
           >
             <Link 
               to="/actualites"
-              className="inline-flex items-center gap-2 text-gray-500 hover:text-[#1A1A1A] transition-colors text-sm font-medium"
+              className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
               Retour aux articles
             </Link>
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-2 text-gray-500 hover:text-[#1A1A1A] transition-colors text-sm"
+              className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm"
               title="Imprimer l'article"
             >
               <Printer className="w-4 h-4" />
@@ -583,7 +583,7 @@ const BlogPostPage = () => {
                 <Badge 
                   key={i}
                   variant="outline"
-                  className="text-gray-600 border-gray-300 text-xs"
+                  className="text-white/60 border-gray-300 text-xs"
                 >
                   #{tag}
                 </Badge>
@@ -593,27 +593,27 @@ const BlogPostPage = () => {
             {/* Title */}
             <h1 
               data-testid="post-title"
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight"
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight"
             >
               {post.title}
             </h1>
 
             {/* Excerpt */}
             {post.excerpt && (
-              <p className="text-xl text-gray-600 mb-6 leading-relaxed">
+              <p className="text-xl text-white/60 mb-6 leading-relaxed">
                 {post.excerpt}
               </p>
             )}
 
             {/* Meta info */}
-            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-gray-500 text-sm mb-8 pb-6 border-b border-gray-200">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-white/50 text-sm mb-8 pb-6 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                  <User className="w-5 h-5 text-gray-600" />
+                <div className="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center">
+                  <User className="w-5 h-5 text-white/60" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{post.author_name || "Alpha Agency"}</p>
-                  <p className="text-xs text-gray-500">Auteur</p>
+                  <p className="font-medium text-white">{post.author_name || "Alpha Agency"}</p>
+                  <p className="text-xs text-white/50">Auteur</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -662,10 +662,10 @@ const BlogPostPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-[#CE0202] prose-strong:text-gray-900 prose-ul:text-gray-700 prose-ol:text-gray-700"
+            className="prose prose-lg max-w-none prose-headings:text-white prose-p:text-white/80 prose-a:text-[#CE0202] prose-strong:text-white prose-ul:text-white/80 prose-ol:text-white/80"
           >
             {post.content_blocks && post.content_blocks.length > 0 ? (
-              <div className="text-gray-700 [&_h1]:text-gray-900 [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-10 [&_h1]:mb-4 [&_h2]:text-gray-900 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-4 [&_h2]:scroll-mt-24 [&_h3]:text-gray-900 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-6 [&_h3]:mb-3 [&_h3]:scroll-mt-24 [&_p]:mb-4 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4 [&_li]:mb-2 [&_blockquote]:border-l-4 [&_blockquote]:border-[#CE0202] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_img]:rounded-xl [&_img]:shadow-lg [&_img]:cursor-zoom-in">
+              <div className="text-white/80 [&_h1]:text-white [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-10 [&_h1]:mb-4 [&_h2]:text-white [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-4 [&_h2]:scroll-mt-24 [&_h3]:text-white [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-6 [&_h3]:mb-3 [&_h3]:scroll-mt-24 [&_p]:mb-4 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4 [&_li]:mb-2 [&_blockquote]:border-l-4 [&_blockquote]:border-[#CE0202] [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-white/60 [&_img]:rounded-xl [&_img]:shadow-lg [&_img]:cursor-zoom-in">
                 {post.content_blocks.map((block, index) => {
                   // Add heading ID for TOC
                   if (block.type === 'heading' && (block.level === 2 || block.level === 3)) {
@@ -675,12 +675,12 @@ const BlogPostPage = () => {
                       <div key={index} className="group relative">
                         <HeadingTag 
                           data-heading-id={headingId}
-                          className={`${block.level === 2 ? 'text-2xl font-bold mt-8 mb-4' : 'text-xl font-semibold mt-6 mb-3'} text-gray-900 scroll-mt-24`}
+                          className={`${block.level === 2 ? 'text-2xl font-bold mt-8 mb-4' : 'text-xl font-semibold mt-6 mb-3'} text-white scroll-mt-24`}
                         >
                           {block.content}
                           <button
                             onClick={() => copyAnchorLink(headingId)}
-                            className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-[#CE0202] print:hidden"
+                            className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity text-white/40 hover:text-[#CE0202] print:hidden"
                             title="Copier le lien"
                           >
                             <LinkIcon className="w-4 h-4 inline" />
@@ -704,7 +704,7 @@ const BlogPostPage = () => {
                           onClick={() => setLightboxImage(block.url)}
                         />
                         {block.caption && (
-                          <p className="text-center text-sm text-gray-500 mt-2">{block.caption}</p>
+                          <p className="text-center text-sm text-white/50 mt-2">{block.caption}</p>
                         )}
                       </div>
                     );
@@ -712,7 +712,7 @@ const BlogPostPage = () => {
                   
                   if (block.type === 'quote') {
                     return (
-                      <blockquote key={index} className="border-l-4 border-[#CE0202] pl-4 italic text-gray-600 my-6">
+                      <blockquote key={index} className="border-l-4 border-[#CE0202] pl-4 italic text-white/60 my-6">
                         {block.content}
                       </blockquote>
                     );
@@ -724,27 +724,27 @@ const BlogPostPage = () => {
             ) : post.content ? (
               <div 
                 dangerouslySetInnerHTML={{ __html: post.content }}
-                className="text-gray-700"
+                className="text-white/80"
               />
             ) : (
-              <p className="text-gray-500 italic">Aucun contenu disponible.</p>
+              <p className="text-white/50 italic">Aucun contenu disponible.</p>
             )}
           </motion.div>
         </div>
       </article>
 
       {/* Reactions Section */}
-      <section className="py-8 bg-white border-t border-gray-100 print:hidden">
+      <section className="py-8 border-t border-white/10 print:hidden">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-center gap-6">
-            <span className="text-gray-500 text-sm font-medium">Cet article vous a plu ?</span>
+            <span className="text-white/50 text-sm font-medium">Cet article vous a plu ?</span>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleReaction('like')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
                   userReaction === 'like' 
                     ? 'bg-blue-100 text-blue-600' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-white/[0.06] text-white/60 hover:bg-white/10'
                 }`}
               >
                 <ThumbsUp className="w-5 h-5" />
@@ -755,7 +755,7 @@ const BlogPostPage = () => {
                 className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
                   userReaction === 'love' 
                     ? 'bg-red-100 text-red-500' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-white/[0.06] text-white/60 hover:bg-white/10'
                 }`}
               >
                 <Heart className="w-5 h-5" />
@@ -766,7 +766,7 @@ const BlogPostPage = () => {
                 className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
                   userReaction === 'fire' 
                     ? 'bg-orange-100 text-orange-500' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-white/[0.06] text-white/60 hover:bg-white/10'
                 }`}
               >
                 <Flame className="w-5 h-5" />
@@ -778,16 +778,16 @@ const BlogPostPage = () => {
       </section>
 
       {/* Share Section */}
-      <section className="bg-[#F8F8F8] py-10 print:hidden">
+      <section className="bg-white/[0.03] py-10 print:hidden">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100">
+          <div className="bg-white/[0.04] rounded-2xl p-6 sm:p-8 shadow-sm border border-white/10">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                <Share2 className="w-5 h-5 text-gray-700" />
+              <div className="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center">
+                <Share2 className="w-5 h-5 text-white/80" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Partager cet article</h3>
-                <p className="text-sm text-gray-500">Aidez-nous à diffuser ce contenu</p>
+                <h3 className="font-semibold text-white">Partager cet article</h3>
+                <p className="text-sm text-white/50">Aidez-nous à diffuser ce contenu</p>
               </div>
             </div>
 
@@ -804,23 +804,23 @@ const BlogPostPage = () => {
                   <div style={{ color: link.color }}>
                     <link.icon />
                   </div>
-                  <span className="text-xs text-gray-600 font-medium">{link.name}</span>
+                  <span className="text-xs text-white/60 font-medium">{link.name}</span>
                 </a>
               ))}
               
               <button
                 onClick={() => copyToClipboard()}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gray-100 hover:bg-gray-200 transition-all"
+                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/[0.06] hover:bg-white/10 transition-all"
                 title="Copier le lien"
               >
-                <div className="text-gray-600">
+                <div className="text-white/60">
                   {copied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
                 </div>
-                <span className="text-xs text-gray-600 font-medium">{copied ? "Copié !" : "Copier"}</span>
+                <span className="text-xs text-white/60 font-medium">{copied ? "Copié !" : "Copier"}</span>
               </button>
             </div>
 
-            <p className="mt-4 text-xs text-gray-400 text-center">
+            <p className="mt-4 text-xs text-white/40 text-center">
               Pour Instagram, copiez le lien et partagez-le dans votre story ou bio
             </p>
           </div>
@@ -828,27 +828,27 @@ const BlogPostPage = () => {
       </section>
 
       {/* Comments Section */}
-      <section className="py-12 bg-white print:hidden">
+      <section className="py-12 print:hidden">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-gray-700" />
+            <div className="w-10 h-10 rounded-full bg-white/[0.06] flex items-center justify-center">
+              <MessageCircle className="w-5 h-5 text-white/80" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900">Commentaires ({comments.length})</h3>
-              <p className="text-sm text-gray-500">Partagez votre avis sur cet article</p>
+              <h3 className="text-xl font-bold text-white">Commentaires ({comments.length})</h3>
+              <p className="text-sm text-white/50">Partagez votre avis sur cet article</p>
             </div>
           </div>
 
           {/* Comment Form */}
-          <div className="bg-white rounded-2xl p-6 mb-8 border border-gray-200 shadow-sm">
-            <h4 className="font-semibold text-gray-900 mb-4">
+          <div className="bg-white/[0.04] rounded-2xl p-6 mb-8 border border-white/10 shadow-sm">
+            <h4 className="font-semibold text-white mb-4">
               {replyTo ? "Répondre au commentaire" : "Laisser un commentaire"}
             </h4>
             {replyTo && (
               <button 
                 onClick={() => setReplyTo(null)}
-                className="text-sm text-gray-600 hover:text-gray-900 hover:underline mb-4"
+                className="text-sm text-white/60 hover:text-white hover:underline mb-4"
               >
                 ← Annuler la réponse
               </button>
@@ -856,7 +856,7 @@ const BlogPostPage = () => {
             <form onSubmit={handleSubmitComment} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white/80 mb-1">
                     Nom <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -865,12 +865,12 @@ const BlogPostPage = () => {
                     value={newComment.name}
                     onChange={(e) => setNewComment({ ...newComment, name: e.target.value })}
                     style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A' }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white/80 mb-1">
                     Email (optionnel)
                   </label>
                   <input
@@ -879,12 +879,12 @@ const BlogPostPage = () => {
                     value={newComment.email}
                     onChange={(e) => setNewComment({ ...newComment, email: e.target.value })}
                     style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A' }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/80 mb-1">
                   Commentaire <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -893,7 +893,7 @@ const BlogPostPage = () => {
                   onChange={(e) => setNewComment({ ...newComment, content: e.target.value })}
                   rows={4}
                   style={{ backgroundColor: '#FFFFFF', color: '#1A1A1A' }}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400 resize-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400 resize-none"
                   required
                 />
               </div>
@@ -917,14 +917,14 @@ const BlogPostPage = () => {
           {/* Comments List */}
           <div className="space-y-6">
             {comments.length === 0 ? (
-              <div className="text-center py-12 bg-[#F8F8F8] rounded-2xl border border-gray-200">
-                <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600">Aucun commentaire pour le moment.</p>
-                <p className="text-sm text-gray-400 mt-1">Soyez le premier à commenter cet article !</p>
+              <div className="text-center py-12 bg-white/[0.03] rounded-2xl border border-white/10">
+                <MessageCircle className="w-12 h-12 text-white/30 mx-auto mb-4" />
+                <p className="text-white/60">Aucun commentaire pour le moment.</p>
+                <p className="text-sm text-white/40 mt-1">Soyez le premier à commenter cet article !</p>
               </div>
             ) : (
               comments.map((comment) => (
-                <div key={comment.id} className="bg-white border border-gray-200 rounded-xl p-5">
+                <div key={comment.id} className="bg-white/[0.04] border border-white/10 rounded-xl p-5">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-semibold flex-shrink-0">
                       {comment.name.charAt(0).toUpperCase()}
@@ -932,24 +932,24 @@ const BlogPostPage = () => {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <span className="font-semibold text-gray-900">{comment.name}</span>
-                          <span className="text-gray-400 text-sm ml-2">
+                          <span className="font-semibold text-white">{comment.name}</span>
+                          <span className="text-white/40 text-sm ml-2">
                             {formatDate(comment.created_at)}
                           </span>
                         </div>
                       </div>
-                      <p className="text-gray-700 mb-3">{comment.content}</p>
+                      <p className="text-white/80 mb-3">{comment.content}</p>
                       <div className="flex items-center gap-4">
                         <button 
                           onClick={() => handleLikeComment(comment.id)}
-                          className="flex items-center gap-1 text-gray-500 hover:text-gray-900 text-sm transition-colors"
+                          className="flex items-center gap-1 text-white/50 hover:text-white text-sm transition-colors"
                         >
                           <ThumbsUp className="w-4 h-4" />
                           <span>{comment.likes || 0}</span>
                         </button>
                         <button 
                           onClick={() => setReplyTo(comment.id)}
-                          className="flex items-center gap-1 text-gray-500 hover:text-gray-900 text-sm transition-colors"
+                          className="flex items-center gap-1 text-white/50 hover:text-white text-sm transition-colors"
                         >
                           <MessageCircle className="w-4 h-4" />
                           Répondre
@@ -957,17 +957,17 @@ const BlogPostPage = () => {
                       </div>
 
                       {comment.replies && comment.replies.length > 0 && (
-                        <div className="mt-4 pl-4 border-l-2 border-gray-200 space-y-4">
+                        <div className="mt-4 pl-4 border-l-2 border-white/10 space-y-4">
                           {comment.replies.map((reply) => (
-                            <div key={reply.id} className="bg-[#F8F8F8] rounded-lg p-4">
+                            <div key={reply.id} className="bg-white/[0.03] rounded-lg p-4">
                               <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center text-white text-sm font-semibold">
                                   {reply.name.charAt(0).toUpperCase()}
                                 </div>
-                                <span className="font-semibold text-gray-900 text-sm">{reply.name}</span>
-                                <span className="text-gray-400 text-xs">{formatDate(reply.created_at)}</span>
+                                <span className="font-semibold text-white text-sm">{reply.name}</span>
+                                <span className="text-white/40 text-xs">{formatDate(reply.created_at)}</span>
                               </div>
-                              <p className="text-gray-700 text-sm">{reply.content}</p>
+                              <p className="text-white/80 text-sm">{reply.content}</p>
                             </div>
                           ))}
                         </div>
@@ -983,18 +983,18 @@ const BlogPostPage = () => {
 
       {/* Article Navigation */}
       {(prevPost || nextPost) && (
-        <section className="py-8 bg-[#F8F8F8] border-t border-gray-200 print:hidden">
+        <section className="py-8 bg-white/[0.03] border-t border-white/10 print:hidden">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {prevPost ? (
                 <Link 
                   to={`/actualites/${prevPost.slug}`}
-                  className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-100 hover:border-gray-300 transition-colors"
+                  className="group flex items-center gap-4 p-4 bg-white/[0.04] rounded-xl border border-white/10 hover:border-white/30 transition-colors"
                 >
-                  <ChevronLeft className="w-8 h-8 text-gray-400 group-hover:text-[#1A1A1A] transition-colors flex-shrink-0" />
+                  <ChevronLeft className="w-8 h-8 text-white/40 group-hover:text-white transition-colors flex-shrink-0" />
                   <div className="text-left">
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Article précédent</p>
-                    <p className="font-medium text-gray-900 line-clamp-1 group-hover:text-[#CE0202] transition-colors">
+                    <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Article précédent</p>
+                    <p className="font-medium text-white line-clamp-1 group-hover:text-[#CE0202] transition-colors">
                       {prevPost.title}
                     </p>
                   </div>
@@ -1005,12 +1005,12 @@ const BlogPostPage = () => {
               {nextPost && (
                 <Link 
                   to={`/actualites/${nextPost.slug}`}
-                  className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-100 hover:border-gray-300 transition-colors md:flex-row-reverse md:text-right"
+                  className="group flex items-center gap-4 p-4 bg-white/[0.04] rounded-xl border border-white/10 hover:border-white/30 transition-colors md:flex-row-reverse md:text-right"
                 >
-                  <ChevronRight className="w-8 h-8 text-gray-400 group-hover:text-[#1A1A1A] transition-colors flex-shrink-0" />
+                  <ChevronRight className="w-8 h-8 text-white/40 group-hover:text-white transition-colors flex-shrink-0" />
                   <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Article suivant</p>
-                    <p className="font-medium text-gray-900 line-clamp-1 group-hover:text-[#CE0202] transition-colors">
+                    <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Article suivant</p>
+                    <p className="font-medium text-white line-clamp-1 group-hover:text-[#CE0202] transition-colors">
                       {nextPost.title}
                     </p>
                   </div>
@@ -1023,15 +1023,15 @@ const BlogPostPage = () => {
 
       {/* Related Posts */}
       {relatedPosts.length > 0 && (
-        <section className="py-12 bg-white print:hidden">
+        <section className="py-12 print:hidden">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-8">Articles similaires</h3>
+            <h3 className="text-2xl font-bold text-white mb-8">Articles similaires</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {relatedPosts.map((relatedPost) => (
                 <Link 
                   key={relatedPost.id} 
                   to={`/actualites/${relatedPost.slug}`}
-                  className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100"
+                  className="group bg-white/[0.04] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-white/10"
                 >
                   {(relatedPost.featured_image || relatedPost.image_url) && (
                     <div className="aspect-[16/9] overflow-hidden">
@@ -1043,11 +1043,11 @@ const BlogPostPage = () => {
                     </div>
                   )}
                   <div className="p-4">
-                    <h4 className="font-semibold text-gray-900 group-hover:text-[#CE0202] transition-colors line-clamp-2 mb-2">
+                    <h4 className="font-semibold text-white group-hover:text-[#CE0202] transition-colors line-clamp-2 mb-2">
                       {relatedPost.title}
                     </h4>
-                    <p className="text-sm text-gray-500 line-clamp-2">{relatedPost.excerpt}</p>
-                    <div className="flex items-center gap-2 mt-3 text-[#1A1A1A] text-sm font-medium">
+                    <p className="text-sm text-white/50 line-clamp-2">{relatedPost.excerpt}</p>
+                    <div className="flex items-center gap-2 mt-3 text-white text-sm font-medium">
                       Lire l'article
                       <ChevronRight className="w-4 h-4" />
                     </div>
@@ -1069,7 +1069,7 @@ const BlogPostPage = () => {
             Discutons ensemble de vos besoins et trouvons la meilleure solution pour votre entreprise.
           </p>
           <Link to="/contact">
-            <Button size="lg" className="bg-white text-[#1A1A1A] hover:bg-gray-100 rounded-full px-8">
+            <Button size="lg" className="bg-white text-[#0A0507] hover:bg-white/90 rounded-full px-8">
               Contactez-nous
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
