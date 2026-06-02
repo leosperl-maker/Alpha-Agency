@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import ShaderBackground from "../components/three/ShaderBackground";
-import PulsingBadge from "../components/three/PulsingBadge";
 import LottieLoader from "../components/motion/LottieLoaderLazy";
 import Magnetic from "../components/motion/Magnetic";
 
@@ -89,8 +88,9 @@ const HomePage = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-[#05010A] via-[#05010A]/45 to-[#05010A]/70" aria-hidden="true" />
           <div className="absolute inset-0 grain-overlay opacity-[0.08] pointer-events-none" aria-hidden="true" />
 
-          <div className="max-w-6xl mx-auto w-full relative z-10">
+          <div className="max-w-5xl mx-auto w-full relative z-10 flex flex-col items-center text-center">
             <motion.div
+              className="flex flex-col items-center"
               initial={{ opacity: 0, y: rm ? 0 : 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
@@ -130,13 +130,13 @@ const HomePage = () => {
                 </span>
               </h1>
 
-              <p className="mt-7 text-base sm:text-lg text-white/70 max-w-xl leading-relaxed">
+              <p className="mt-7 text-base sm:text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
                 Site web, réseaux sociaux, photo, vidéo et publicité digitale.
                 Une agence 360° en Guadeloupe qui transforme votre présence en ligne
                 en véritable moteur de croissance.
               </p>
 
-              <div className="mt-10 flex flex-col sm:flex-row gap-4">
+              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
                 <Magnetic>
                   <Link to="/contact">
                     <Button
@@ -161,11 +161,6 @@ const HomePage = () => {
                 </Magnetic>
               </div>
             </motion.div>
-          </div>
-
-          {/* Badge animé signature */}
-          <div className="absolute bottom-8 right-6 z-20 hidden sm:block">
-            <PulsingBadge />
           </div>
 
           {/* Indicateur de scroll */}
@@ -375,11 +370,16 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ===================== CTA FINAL — shader ===================== */}
-      <ShaderBackground className="border-t border-white/10">
-        <section className="py-28 px-6 relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#05010A]/80 via-[#05010A]/55 to-[#05010A]/85" aria-hidden="true" />
-          <motion.div {...fadeUp} className="max-w-4xl mx-auto text-center relative z-10">
+      {/* ===================== CTA FINAL ===================== */}
+      <section className="py-28 px-6 relative overflow-hidden border-t border-white/10">
+        {/* Dégradé CSS (pas de WebGL ici, pour la fluidité) */}
+        <div
+          className="absolute inset-0"
+          style={{ background: "radial-gradient(120% 80% at 50% 120%, #CE0202 0%, #4A0A2E 35%, #05010A 70%)" }}
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 grain-overlay opacity-[0.08] pointer-events-none" aria-hidden="true" />
+        <motion.div {...fadeUp} className="max-w-4xl mx-auto text-center relative z-10">
             <LottieLoader size={56} className="mx-auto mb-6" />
             <h2 className="font-display text-4xl lg:text-7xl font-extrabold tracking-tight text-white mb-6">
               Prêt à <span style={{ color: RED }}>marquer</span> les esprits ?
@@ -409,7 +409,6 @@ const HomePage = () => {
             </div>
           </motion.div>
         </section>
-      </ShaderBackground>
     </div>
   );
 };
