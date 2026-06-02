@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useParallax } from "../hooks/useParallax";
 import HeroSceneLazy from "../components/three/HeroSceneLazy";
+import LottieLoader from "../components/motion/LottieLoaderLazy";
 import {
   Globe,
   Users,
@@ -377,6 +378,7 @@ const HomePage = () => {
         <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[40rem] h-[40rem] rounded-full blur-3xl opacity-25 pointer-events-none"
              style={{ background: `radial-gradient(circle, ${RED}, transparent 65%)` }} aria-hidden="true" />
         <motion.div {...fadeUp} className="max-w-4xl mx-auto text-center relative z-10">
+          <LottieLoader size={56} className="mx-auto mb-6" />
           <h2 className="font-display-syne text-4xl lg:text-7xl font-extrabold tracking-tight text-white mb-6">
             Prêt à <span style={{ color: RED }}>briller</span> ?
           </h2>
