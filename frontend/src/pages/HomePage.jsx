@@ -12,7 +12,8 @@ import {
   Zap,
   Shield,
   ChevronRight,
-  Palette
+  Palette,
+  Rocket
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -161,8 +162,9 @@ const HomePage = () => {
       {/* Promo Banner */}
       <section className="bg-[#CE0202] py-4 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-white font-semibold text-center md:text-left">
-            🚀 Site web professionnel (vitrine ou e-commerce) à partir de <span className="text-2xl font-bold">90€/mois</span> • Engagement 24 mois
+          <p className="text-white font-semibold text-center md:text-left flex items-center justify-center md:justify-start gap-2">
+            <Rocket className="w-5 h-5 shrink-0" aria-hidden="true" />
+            <span>Site web professionnel (vitrine ou e-commerce) à partir de <span className="text-2xl font-bold">90€/mois</span> • Engagement 24 mois</span>
           </p>
           <Link to="/offres">
             <Button 
