@@ -6431,7 +6431,17 @@ app.add_middleware(
 async def startup_db_client():
     # Create initial super admin if no users exist
     await create_initial_super_admin()
-    
+
+    # Initialize backup system (sinon /backup/* renvoie 500 "not initialized")
+    global backup_manager
+    try:
+        backup_manager = BackupManager(db)
+        backup_scheduler.set_backup_manager(backup_manager)
+        backup_scheduler.start()
+        logger.info("Backup system initialized (manager + scheduler)")
+    except Exception as e:
+        logger.error(f"Backup init failed: {e}")
+
 
 # ==================== DATA MANAGEMENT ====================
 
