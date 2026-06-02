@@ -106,6 +106,17 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
     }
   };
 
+  const toggleFavorite = async () => {
+    if (!contact) return;
+    const next = !contact.favorite;
+    setContact({ ...contact, favorite: next });
+    try {
+      await contactsAPI.update(contact.id, { favorite: next });
+    } catch (e) {
+      setContact({ ...contact, favorite: !next });
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -232,20 +243,6 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
       });
     });
     
-    // Add opportunities to timeline
-    history.opportunities?.forEach(opp => {
-      items.push({
-        type: 'opportunity',
-        date: opp.created_at,
-        title: opp.title,
-        subtitle: formatCurrency(opp.amount),
-        status: opp.stage,
-        icon: Target,
-        color: 'orange',
-        data: opp
-      });
-    });
-    
     // Sort by date descending
     return items.sort((a, b) => new Date(b.date) - new Date(a.date));
   };
@@ -273,9 +270,11 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="text-white/80 hover:text-white hover:bg-white/15 h-8 w-8 p-0"
+                  onClick={toggleFavorite}
+                  title={contact.favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+                  className={`hover:bg-white/15 h-8 w-8 p-0 ${contact.favorite ? "text-yellow-300 hover:text-yellow-200" : "text-white/80 hover:text-white"}`}
                 >
-                  <Star className="w-4 h-4" />
+                  <Star className={`w-4 h-4 ${contact.favorite ? "fill-yellow-300" : ""}`} />
                 </Button>
                 <Button
                   size="sm"
@@ -383,10 +382,6 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 <TabsTrigger value="timeline" className="data-[state=active]:bg-card text-xs sm:text-sm px-1 sm:px-2">
                   <History className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Activité</span>
-                </TabsTrigger>
-                <TabsTrigger value="deals" className="data-[state=active]:bg-card text-xs sm:text-sm px-1 sm:px-2">
-                  <DollarSign className="w-3.5 h-3.5 sm:mr-1" />
-                  <span className="hidden sm:inline">Affaires</span>
                 </TabsTrigger>
                 <TabsTrigger value="docs" className="data-[state=active]:bg-card text-xs sm:text-sm px-1 sm:px-2">
                   <FileText className="w-3.5 h-3.5 sm:mr-1" />
@@ -531,41 +526,6 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                         </div>
                       </div>
                     )}
-                  </div>
-                </ScrollArea>
-              </TabsContent>
-
-              {/* Deals Tab */}
-              <TabsContent value="deals" className="flex-1 overflow-hidden mt-0 px-3 sm:px-4 pb-4">
-                <ScrollArea className="h-full">
-                  <div className="space-y-4 pt-3">
-                    {/* Opportunities */}
-                    <div>
-                      <h3 className="font-semibold text-sm text-foreground flex items-center gap-2 mb-3">
-                        <Target className="w-4 h-4 text-[#CE0202]" />
-                        Opportunités
-                      </h3>
-                      {history?.opportunities?.length > 0 ? (
-                        <div className="space-y-2">
-                          {history.opportunities.map((opp) => (
-                            <Card key={opp.id} className="border-border cursor-pointer hover:border-[#CE0202]/30 transition-colors">
-                              <CardContent className="p-3 flex items-center justify-between">
-                                <div className="min-w-0">
-                                  <p className="font-medium text-sm text-foreground truncate">{opp.title}</p>
-                                  <p className="text-xs text-muted-foreground">{opp.stage}</p>
-                                </div>
-                                <div className="text-right flex-shrink-0">
-                                  <p className="font-bold text-[#CE0202]">{formatCurrency(opp.amount)}</p>
-                                  <p className="text-[10px] text-muted-foreground">{opp.probability}%</p>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground text-center py-4">Aucune opportunité</p>
-                      )}
-                    </div>
                   </div>
                 </ScrollArea>
               </TabsContent>

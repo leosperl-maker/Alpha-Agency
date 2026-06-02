@@ -173,6 +173,7 @@ class ContactUpdate(BaseModel):
     siret: Optional[str] = None
     company_address: Optional[str] = None
     company_activite: Optional[str] = None
+    favorite: Optional[bool] = None
 
 class OpportunityCreate(BaseModel):
     contact_id: str

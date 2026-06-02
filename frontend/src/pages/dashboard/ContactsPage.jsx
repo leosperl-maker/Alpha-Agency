@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, Search, Filter, Mail, Phone, Building, Calendar, Trash2,
   Edit, Upload, Briefcase, DollarSign, FileText, Info, Eye,
-  X, MapPin, Hash, FolderOpen, User, Target, Sparkles
+  X, MapPin, Hash, FolderOpen, User, Target, Sparkles, Star
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -166,7 +166,7 @@ const ContactsPage = () => {
     const q = searchQuery.toLowerCase();
     return c.first_name?.toLowerCase().includes(q) || c.last_name?.toLowerCase().includes(q) ||
       c.email?.toLowerCase().includes(q) || c.company?.toLowerCase().includes(q);
-  });
+  }).sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0));
 
   const clientCount = contacts.filter(c => c.status === "client" || c.status === "vip").length;
 
@@ -328,6 +328,10 @@ const ContactsPage = () => {
             >
               {/* reflet holographique au survol */}
               <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(125deg,transparent_30%,rgba(225,29,46,0.07)_50%,transparent_70%)]" />
+              {/* étoile favori */}
+              {contact.favorite && (
+                <span className="absolute top-2 left-2 z-10"><Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" /></span>
+              )}
               {/* badge IA */}
               {contact.source === "chatbot" && (
                 <span className="absolute top-2 right-2 z-10 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-brand-soft text-primary text-[9px] font-semibold"><Sparkles className="w-2.5 h-2.5" />IA</span>
@@ -440,7 +444,7 @@ const ContactsPage = () => {
       </AnimatePresence>
 
       <ImportContactsDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} onImportSuccess={() => { fetchContacts(); toast.success("Import terminé avec succès"); }} />
-      <ContactDetailSheet open={detailSheetOpen} onOpenChange={setDetailSheetOpen} contactId={selectedContactId} />
+      <ContactDetailSheet open={detailSheetOpen} onOpenChange={(v) => { setDetailSheetOpen(v); if (!v) fetchContacts(); }} contactId={selectedContactId} />
     </div>
   );
 };
