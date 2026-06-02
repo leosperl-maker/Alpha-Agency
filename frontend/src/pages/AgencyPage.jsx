@@ -116,7 +116,7 @@ const AgencyPage = () => {
               </p>
               <p className="text-[#666666] text-lg mb-6">
                 Nous croyons que la performance digitale ne devrait pas être réservée aux grandes entreprises. 
-                C'est pourquoi nous avons créé une offre accessible : un site web professionnel à partir de 90€/mois, 
+                C'est pourquoi nous avons créé une offre accessible : un site web professionnel à partir de 49€/mois, 
                 livré en seulement 7 jours.
               </p>
               <p className="text-[#666666] text-lg">

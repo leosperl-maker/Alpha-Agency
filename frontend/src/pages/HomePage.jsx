@@ -25,15 +25,15 @@ import FluidHeroLazy from "../components/three/FluidHeroLazy";
 const RED = "#E11D2E";        // rouge vif lisible sur fond sombre
 const BG = "#0A0507";         // noir chaud
 const WORD_GRADIENT = "linear-gradient(100deg,#F2384A,#C8102E 45%,#6E0A1C)";
-const heroWords = ["marques", "sites web", "campagnes", "vidéos", "images"];
+const heroWords = ["sites web", "marques", "campagnes", "contenus", "vidéos"];
 
 const services = [
-  { icon: Globe, title: "Site Web", description: "Sites vitrines & e-commerce livrés en 7 jours.", highlight: "Dès 90€/mois", big: true },
-  { icon: Users, title: "Community Management", description: "Gestion complète de vos réseaux sociaux.", highlight: "Stratégie & contenu" },
-  { icon: Camera, title: "Photographie", description: "Shootings pro pour votre marque.", highlight: "Corporate & produits" },
-  { icon: Video, title: "Vidéographie", description: "Captation & montage haute qualité.", highlight: "Reels & spots", big: true },
-  { icon: Palette, title: "Infographie", description: "Création graphique en tout genre.", highlight: "Print & digital" },
-  { icon: Target, title: "Publicité Digitale", description: "Campagnes Meta, Google & TikTok Ads.", highlight: "ROI optimisé" },
+  { icon: Globe, title: "Création de sites web", description: "Sites vitrines et e-commerce, livrés en 7 jours, pensés pour convertir.", highlight: "Dès 49€/mois", big: true },
+  { icon: Users, title: "Réseaux sociaux", description: "On gère vos comptes au quotidien : stratégie, contenu, communauté.", highlight: "Community management", big: true },
+  { icon: Camera, title: "Photographie", description: "Des shootings pro pour mettre vos produits et votre marque en valeur.", highlight: "Corporate et produits" },
+  { icon: Video, title: "Vidéographie", description: "Captation et montage de qualité : reels, spots, formats courts.", highlight: "Reels et spots" },
+  { icon: Palette, title: "Infographie", description: "Vos visuels print et digital, créés sur mesure.", highlight: "Print et digital" },
+  { icon: Target, title: "Publicité digitale", description: "Des campagnes Meta, Google et TikTok qui rapportent.", highlight: "Meta, Google, TikTok" },
 ];
 
 const stats = [
@@ -171,9 +171,9 @@ const HomePage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.7 }}
             >
-              Site web, réseaux sociaux, photo, vidéo et publicité digitale —
-              une agence 360° en Guadeloupe qui transforme votre présence en ligne
-              en véritable moteur de croissance.
+              On crée des sites web qui convertissent et on fait vivre vos réseaux
+              sociaux au quotidien. Photo, vidéo, publicité en ligne : on s'occupe
+              du reste. Une agence 360° en Guadeloupe, à vos côtés pour de vrai.
             </motion.p>
 
             <motion.div
@@ -374,12 +374,12 @@ const HomePage = () => {
               <span style={{ color: RED }}>ancrée ici.</span>
             </h2>
             <p className="text-white/65 text-lg mb-5 max-w-xl">
-              Basée en Guadeloupe, Alpha Agency accompagne les entreprises des Antilles
-              et d'ailleurs dans leur transformation digitale depuis plus de 5 ans.
+              On est une agence guadeloupéenne. Depuis plus de 5 ans, on aide les
+              entreprises d'ici (et d'ailleurs) à exister vraiment en ligne.
             </p>
             <p className="text-white/65 text-lg mb-10 max-w-xl">
-              Notre mission : rendre un digital de niveau mondial accessible à toutes les
-              entreprises locales, avec un accompagnement sur-mesure.
+              L'idée est simple : un travail au niveau des grandes agences, mais
+              accessible, humain et fait sur mesure pour les entreprises locales.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">

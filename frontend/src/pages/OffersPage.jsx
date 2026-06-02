@@ -18,7 +18,7 @@ const OffersPage = () => {
   const mainOffer = {
     title: "Site Web Professionnel",
     subtitle: "Vitrine ou E-commerce",
-    price: "90",
+    price: "49",
     period: "/mois",
     engagement: "Engagement 24 mois",
     highlight: "Le plus populaire",
@@ -162,7 +162,7 @@ const OffersPage = () => {
                       data-testid="main-offer-cta"
                       className="bg-[#CE0202] hover:bg-[#B00202] text-white hover:text-white rounded-none px-8 py-6 text-sm font-bold uppercase tracking-wider w-full sm:w-auto"
                     >
-                      Lancer mon site à 90€/mois
+                      Lancer mon site à 49€/mois
                       <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
                   </Link>

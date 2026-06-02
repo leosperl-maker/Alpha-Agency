@@ -68,7 +68,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <Link to="/offres" className="text-[#A1A1AA] hover:text-white text-sm animated-underline">
-                  Site web à 90€/mois
+                  Site web à 49€/mois
                 </Link>
               </li>
               <li>
