@@ -768,6 +768,17 @@ async def _notify_leo(kind: str, info: dict):
     return await asyncio.to_thread(_send_brevo, recips, subject, html)
 
 
+async def _sms_devis(name: str, number: str, total: float):
+    """SMS équipe : devis prêt à valider, avec le lien vers la facturation (cf. demande Léo)."""
+    try:
+        from utils.sms import notify_admin_sms
+        msg = (f"Alpha Agency : devis {number} prêt à valider ({total:.0f}€) pour {name}.\n"
+               f"Voir : {SITE_URL}/admin/facturation")
+        await asyncio.to_thread(notify_admin_sms, msg)
+    except Exception as e:
+        logger.error(f"SMS devis failed: {e}")
+
+
 # ==================== Endpoints ====================
 @router.get("/chat/health")
 async def public_chat_health():
@@ -867,7 +878,7 @@ async def public_chat(req: PubChatRequest, request: Request):
                     company = lead.get("company") or "particulier"
                     besoin = lead.get("besoin") or lead.get("project_type") or "un projet"
                     sms = (f"Alpha Agency : nouvelle demande chatbot de {name} ({company}) "
-                           f"pour {besoin}. Devis en attente d'approbation dans le CRM.")
+                           f"pour {besoin}.\nVoir la demande : {SITE_URL}/admin/demandes")
                     await asyncio.to_thread(notify_admin_sms, sms)
                 except Exception as e:
                     logger.error(f"SMS lead alert failed: {e}")
@@ -896,6 +907,7 @@ async def public_chat(req: PubChatRequest, request: Request):
             await db.contacts.update_one({"id": contact["id"]},
                                          {"$set": {"completion_status": "complet", "conversation_step": "clôturé"}})
             await _notify_leo("devis", {"name": contact["name"], "number": devis[0], "total": devis[1]})
+            await _sms_devis(contact["name"], devis[0], devis[1])
 
     # 3b) Filet de sécurité : prospect qui clôt + lead capturé + pas encore de devis -> génère le devis
     last_user = msgs[-1].content if (msgs and msgs[-1].role == "user") else ""
@@ -908,6 +920,7 @@ async def public_chat(req: PubChatRequest, request: Request):
                 await db.contacts.update_one({"id": contact["id"]},
                                              {"$set": {"completion_status": "complet", "conversation_step": "clôturé"}})
                 await _notify_leo("devis", {"name": contact["name"], "number": devis[0], "total": devis[1]})
+                await _sms_devis(contact["name"], devis[0], devis[1])
 
     message = _strip_all_blocks(raw)
     if not message:

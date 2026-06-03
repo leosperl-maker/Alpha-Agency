@@ -1148,7 +1148,7 @@ const EditorialCalendarPage = () => {
 
       {/* Calendar View */}
       {viewMode === 'calendar' && (
-        <div className="bg-card backdrop-blur-xl rounded-xl border border-border overflow-hidden">
+        <div className="bg-card backdrop-blur-xl rounded-xl border border-border overflow-x-auto">
           {/* Month navigation */}
           <div className="flex items-center justify-between p-4 border-b border-border">
             <Button variant="ghost" onClick={() => navigateMonth(-1)} className="text-foreground">
@@ -1161,7 +1161,7 @@ const EditorialCalendarPage = () => {
           </div>
 
           {/* Day headers */}
-          <div className="grid grid-cols-7 border-b border-border">
+          <div className="grid grid-cols-7 border-b border-border min-w-[760px]">
             {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
               <div key={day} className="p-2 text-center text-muted-foreground text-sm font-medium">
                 {day}
@@ -1170,7 +1170,7 @@ const EditorialCalendarPage = () => {
           </div>
 
           {/* Calendar grid */}
-          <div className="grid grid-cols-7">
+          <div className="grid grid-cols-7 min-w-[760px]">
             {getCalendarDays().map((day, idx) => {
               const dayPosts = getPostsForDay(day.date);
               const dayKeyDates = getKeyDatesForDay(day.date);

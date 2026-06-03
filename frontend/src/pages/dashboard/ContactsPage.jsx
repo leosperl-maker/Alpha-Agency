@@ -83,6 +83,13 @@ const ContactsPage = () => {
   };
 
   useEffect(() => { fetchContacts(); }, [filterStatus]); // eslint-disable-line
+  // Verrouille le scroll de la page derrière la fiche ouverte (sinon, sur mobile, c'est le fond qui défile).
+  useEffect(() => {
+    if (!expandedContact) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [expandedContact]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -209,7 +216,7 @@ const ContactsPage = () => {
                     <span className="text-sm text-muted-foreground">Créé le : <strong className="text-foreground">{formatDate(editingContact.created_at)}</strong></span>
                   </div>
                 )}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Prénom *</Label>
                     <Input value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} required />
@@ -223,7 +230,7 @@ const ContactsPage = () => {
                   <Label>Email *</Label>
                   <Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Téléphone</Label>
                     <Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
@@ -241,7 +248,7 @@ const ContactsPage = () => {
                   </div>
                   {formData.company_address && <p className="text-xs text-muted-foreground mt-1">📍 {formData.company_address}</p>}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1"><Briefcase className="w-3 h-3" /> Poste</Label>
                     <Input value={formData.poste} onChange={(e) => setFormData({ ...formData, poste: e.target.value })} placeholder="Ex : Gérant" />
@@ -255,7 +262,7 @@ const ContactsPage = () => {
                   <Label className="flex items-center gap-1"><DollarSign className="w-3 h-3" /> Budget</Label>
                   <Input value={formData.budget} onChange={(e) => setFormData({ ...formData, budget: e.target.value })} placeholder="Ex : 5 000 € - 10 000 €" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Statut</Label>
                     <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>

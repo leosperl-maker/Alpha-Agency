@@ -1594,7 +1594,7 @@ const InvoicesPage = () => {
             {/* Form Side - Full width on mobile, 50% on desktop */}
             <div className="w-full lg:w-1/2 p-4 sm:p-6 overflow-y-auto bg-card backdrop-blur-xl border-r border-border">
               <SheetHeader className="mb-4 sm:mb-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pr-10">
                   <SheetTitle className="text-foreground flex items-center gap-2">
                     {documentType === 'devis' ? <FileText className="w-5 h-5" /> : <Receipt className="w-5 h-5" />}
                     {editingInvoice ? `Modifier ${documentType === 'devis' ? 'le devis' : 'la facture'}` : `Nouvelle ${documentType === 'devis' ? 'devis' : 'facture'}`}
@@ -1708,10 +1708,10 @@ const InvoicesPage = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeItem(index)}
-                          className="text-danger h-6 w-6 p-0"
+                          className="text-danger h-9 w-9 p-0 flex-shrink-0"
                           disabled={items.length === 1}
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                       <Input
@@ -1727,7 +1727,7 @@ const InvoicesPage = () => {
                         className="bg-card backdrop-blur-xl border-border text-foreground text-sm"
                         rows={2}
                       />
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         <div>
                           <Label className="text-xs text-muted-foreground">Quantité</Label>
                           <Input
@@ -1751,7 +1751,7 @@ const InvoicesPage = () => {
                             className="bg-card backdrop-blur-xl border-border text-foreground"
                           />
                         </div>
-                        <div>
+                        <div className="col-span-2 sm:col-span-1">
                           <Label className="text-xs text-muted-foreground">Remise</Label>
                           <div className="flex gap-1">
                             <Select
@@ -1922,7 +1922,7 @@ const InvoicesPage = () => {
                 </h3>
                 <p className="text-muted-foreground text-xs">Assurez-vous que vos documents portent un numéro unique et séquentiel.</p>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-3 p-4 bg-card rounded-lg">
                     <Label className="text-foreground text-sm font-medium">Factures</Label>
                     <div className="space-y-2">
@@ -1977,7 +1977,7 @@ const InvoicesPage = () => {
                   <Receipt className="w-4 h-4 text-primary" />
                   Informations entreprise
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-muted-foreground text-xs">Nom de l'entreprise</Label>
                     <Input
@@ -1997,7 +1997,7 @@ const InvoicesPage = () => {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-muted-foreground text-xs">Adresse complète</Label>
                     <Input
@@ -2017,7 +2017,7 @@ const InvoicesPage = () => {
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-muted-foreground text-xs">SIRET</Label>
                     <Input
@@ -2440,10 +2440,23 @@ BANQUE : ..."
                   </Badge>
                 </div>
               </DialogHeader>
-              
+
+              {/* Actions : voir le vrai document (PDF) / modifier / envoyer */}
+              <div className="flex flex-wrap gap-2 mb-1">
+                <Button size="sm" onClick={() => handleDownloadPDF(selectedInvoice)} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Download className="w-4 h-4 mr-1.5" /> Télécharger le PDF
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => { setViewDialogOpen(false); openEditSheet(selectedInvoice); }} className="border-border">
+                  <Edit className="w-4 h-4 mr-1.5" /> Modifier
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => { setViewDialogOpen(false); openEmailDialog(selectedInvoice); }} className="border-border">
+                  <Mail className="w-4 h-4 mr-1.5" /> Envoyer
+                </Button>
+              </div>
+
               <div className="space-y-6">
                 {/* Header Info */}
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <p className="text-sm text-muted-foreground">Client</p>
                     <p className="font-medium text-foreground">{getContactName(selectedInvoice.contact_id)}</p>
@@ -2460,8 +2473,8 @@ BANQUE : ..."
                 </div>
 
                 {/* Items Table */}
-                <div className="border border-border rounded-lg overflow-hidden">
-                  <table className="w-full">
+                <div className="border border-border rounded-lg overflow-x-auto">
+                  <table className="w-full min-w-[480px]">
                     <thead className="bg-card">
                       <tr>
                         <th className="text-left px-4 py-2 text-xs font-medium text-muted-foreground">Description</th>
@@ -2485,7 +2498,7 @@ BANQUE : ..."
 
                 {/* Totals */}
                 <div className="flex justify-end">
-                  <div className="w-64 space-y-2">
+                  <div className="w-full sm:w-64 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Sous-total HT</span>
                       <span className="font-mono">{formatCurrency(selectedInvoice.subtotal)}</span>
@@ -2526,7 +2539,7 @@ BANQUE : ..."
                     </div>
 
                     {/* Payment Summary */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="bg-card rounded-lg p-3 text-center">
                         <p className="text-xs text-muted-foreground">Total facture</p>
                         <p className="font-mono font-bold text-foreground">{formatCurrency(selectedInvoice.total)}</p>
@@ -2865,7 +2878,7 @@ BANQUE : ..."
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-foreground">Prénom</Label>
                 <Input
@@ -2893,7 +2906,7 @@ BANQUE : ..."
               />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-foreground">Email</Label>
                 <Input
@@ -2965,7 +2978,7 @@ BANQUE : ..."
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-foreground">Poste</Label>
                 <Input

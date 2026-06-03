@@ -428,9 +428,9 @@ const AgendaPage = () => {
 
       {/* Calendar Grid or List */}
       {viewMode === 'month' ? (
-        <div className="bg-card backdrop-blur-sm rounded-xl border border-border overflow-hidden">
+        <div className="bg-card backdrop-blur-sm rounded-xl border border-border overflow-x-auto">
           {/* Day headers */}
-          <div className="grid grid-cols-7 bg-secondary">
+          <div className="grid grid-cols-7 bg-secondary min-w-[700px]">
             {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(day => (
               <div key={day} className="p-2 text-center text-sm font-medium text-muted-foreground">
                 {day}
@@ -439,7 +439,7 @@ const AgendaPage = () => {
           </div>
           
           {/* Calendar grid */}
-          <div className="grid grid-cols-7">
+          <div className="grid grid-cols-7 min-w-[700px]">
             {renderCalendarGrid()}
           </div>
         </div>

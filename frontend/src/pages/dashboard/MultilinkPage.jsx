@@ -1540,7 +1540,7 @@ const MultilinkPage = () => {
                   {/* Theme Selection */}
                   <div>
                     <Label className="text-foreground mb-3 block">Thème de base</Label>
-                    <div className="grid grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       {THEME_PRESETS.map(theme => (
                         <button
                           key={theme.id}
@@ -1564,7 +1564,7 @@ const MultilinkPage = () => {
                   {/* Button Style */}
                   <div>
                     <Label className="text-foreground mb-3 block">Style des boutons</Label>
-                    <div className="grid grid-cols-5 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                       {BUTTON_STYLES.map(style => (
                         <button
                           key={style.id}
