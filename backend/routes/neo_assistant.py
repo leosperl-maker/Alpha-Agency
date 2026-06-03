@@ -520,8 +520,39 @@ _INT = {"type": "integer"}
 _BOOL = {"type": "boolean"}
 
 # Chaque outil : name, description, params (json schema), validation (garde-fou A.5), run(args, uid)
+async def _exec_web_search(args, uid):
+    """Recherche web temps réel via Gemini (Google Search grounding), appel séparé du loop d'outils."""
+    q = (args.get("query") or "").strip()
+    if not q:
+        return {"success": False, "message": "Requête vide."}
+    if not _client:
+        return {"success": False, "message": "Recherche indisponible (IA non configurée)."}
+    def _call():
+        cfg = _t.GenerateContentConfig(tools=[_t.Tool(google_search=_t.GoogleSearch())])
+        return _client.models.generate_content(model="gemini-2.5-flash", contents=q, config=cfg)
+    try:
+        resp = await asyncio.to_thread(_call)
+        txt = (getattr(resp, "text", "") or "").strip()
+        sources = []
+        try:
+            gm = resp.candidates[0].grounding_metadata
+            for c in (getattr(gm, "grounding_chunks", None) or [])[:5]:
+                w = getattr(c, "web", None)
+                if w:
+                    sources.append({"title": getattr(w, "title", "") or "", "uri": getattr(w, "uri", "") or ""})
+        except Exception:
+            pass
+        return {"success": True, "result": txt[:4000] or "Aucun résultat.", "sources": sources}
+    except Exception as e:
+        logger.warning(f"neo web_search: {e}")
+        return {"success": False, "message": f"Recherche échouée: {str(e)[:150]}"}
+
+
 TOOLS = [
     # --- Lecture ---
+    {"name": "web_search", "validation": False, "run": _exec_web_search,
+     "description": "Recherche sur le web en temps réel (Google via Gemini) : prix du marché, info sur une entreprise/personne, veille concurrentielle, tendances, actualité, inspiration créative. À utiliser dès qu'une info récente ou externe au CRM est utile.",
+     "params": _obj({"query": _STR})},
     {"name": "search_contacts", "validation": False, "run": _exec_search_contacts,
      "description": "Cherche des contacts par texte (nom/entreprise/email) et/ou statut.",
      "params": _obj({"query": _STR, "status": _STR, "limit": _INT})},
