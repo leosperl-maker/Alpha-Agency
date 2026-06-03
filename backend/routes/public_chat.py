@@ -114,6 +114,7 @@ CONTINUITÉ (TRÈS IMPORTANT, lis bien) :
 - Ne redemande JAMAIS une information déjà donnée. Relis tout l'historique avant chaque réponse et tiens-toi à l'étape où tu en es.
 - Émets [RESEARCH] une seule fois (quand tu as l'entreprise). Émets [LEAD] une fois quand tu as prénom+nom+email, puis ré-émets-le COMPLET (budget + tous les détails de la découverte) seulement à la toute fin, juste avant [QUOTE].
 - Place chaque bloc technique SEUL sur sa propre ligne, à la TOUTE FIN du message, jamais au milieu d'une phrase. N'écris jamais une balise de fermeture toute seule.
+- N'écris JAMAIS ton raisonnement interne ni de balises de réflexion ([THOUGHT], [PLAN], [ANALYSIS]...). Réponds directement au prospect, sans préambule technique. Seuls [RESEARCH], [LEAD] et [QUOTE] sont autorisés, à la fin du message.
 
 Si la conversation vient de commencer (l'historique ne contient que ton message d'accueil), présente-toi en une phrase et demande le prénom et le nom. Sinon, poursuis directement la découverte là où tu en étais, sans recommencer."""
 
@@ -333,14 +334,18 @@ def _extract_block(text: str, tag: str):
 
 
 def _strip_all_blocks(text: str) -> str:
-    """Retire toutes les formes de balises techniques, même malformées/isolées."""
+    """Retire toutes les formes de balises techniques + tout raisonnement interne fuité."""
     text = text or ""
     # [TAG]{...}[/TAG] complet
     text = re.sub(r"\[(RESEARCH|LEAD|QUOTE)\]\s*\{.*?\}\s*\[/\1\]", "", text, flags=re.DOTALL | re.IGNORECASE)
     # [TAG]{...} (ouverture + json sans fermeture)
     text = re.sub(r"\[(?:RESEARCH|LEAD|QUOTE)\]\s*\{.*?\}", "", text, flags=re.DOTALL | re.IGNORECASE)
+    # blocs de raisonnement interne que le modèle invente parfois ([THOUGHT], [PLAN]...) — avec fermeture
+    text = re.sub(r"\[(THOUGHT|REASONING|PLAN|INTERNAL|THINK|NOTE|ANALYSIS)\].*?\[/\1\]", "", text, flags=re.DOTALL | re.IGNORECASE)
+    # ... ou sans fermeture : du marqueur jusqu'à une ligne vide, un autre bloc, ou la fin
+    text = re.sub(r"\[(?:THOUGHT|REASONING|PLAN|INTERNAL|THINK|ANALYSIS)\].*?(?=\n\s*\n|\[[A-Z]|$)", "", text, flags=re.DOTALL | re.IGNORECASE)
     # balises isolées [TAG] ou [/TAG]
-    text = re.sub(r"\[/?(?:RESEARCH|LEAD|QUOTE)\]", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\[/?(?:RESEARCH|LEAD|QUOTE|THOUGHT|REASONING|PLAN|INTERNAL|THINK|NOTE|ANALYSIS)\]", "", text, flags=re.IGNORECASE)
     # nettoyage des espaces/lignes vides résiduels
     text = re.sub(r"[ \t]+\n", "\n", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
