@@ -539,7 +539,18 @@ async def _gemini_call(contents, system):
             t0 = time.time()
             resp = await asyncio.to_thread(_call)
             await _log("llm", {"model": mdl, "latency_ms": int((time.time() - t0) * 1000)})
-            return resp, mdl
+            # Gemini renvoie parfois une réponse VIDE (ni texte ni appel d'outil), surtout avec
+            # beaucoup d'outils -> on bascule sur le modèle suivant de la chaîne au lieu d'abandonner.
+            has_fc = bool(getattr(resp, "function_calls", None))
+            try:
+                has_txt = bool((resp.text or "").strip())
+            except Exception:
+                has_txt = False
+            if has_fc or has_txt:
+                return resp, mdl
+            last_err = "empty_response"
+            logger.warning(f"neo: modèle {mdl} a renvoyé une réponse vide, essai du modèle suivant")
+            continue
         except Exception as e:
             last_err = e
             logger.warning(f"neo: modèle {mdl} a échoué: {e}")
