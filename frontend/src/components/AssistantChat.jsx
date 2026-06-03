@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, X, Loader2, CheckCircle2, Eraser, Sunrise, Clock } from "lucide-react";
+import { Send, X, Loader2, CheckCircle2, Eraser, Sunrise, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
 import { aiEnhancedAPI, neoAPI } from "../lib/api";
 import AssistantOrb from "./AssistantOrb";
 
@@ -26,6 +26,8 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   const [loading, setLoading] = useState(false);
   const [convId, setConvId] = useState(null);
   const [resolved, setResolved] = useState({}); // action_id -> 'done' | 'cancelled'
+  const [fb, setFb] = useState({});        // msgIndex -> 'up' | 'down-open' | 'sent'
+  const [fbNote, setFbNote] = useState({}); // msgIndex -> texte de correction
   const endRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -89,6 +91,14 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
       setMessages((prev) => [...prev, { role: "assistant", content: "⚠️ Impossible de traiter l'action (connexion).", error: true }]);
     }
   }, [resolved]);
+
+  // Apprentissage : 👍/👎 (+ note) sur les réponses de Néo
+  const sendFeedback = useCallback(async (i, rating, note) => {
+    setFb((s) => ({ ...s, [i]: "sent" }));
+    try {
+      await neoAPI.feedback({ rating, note: note || "", message: messages[i]?.content || "", conversation_id: convId });
+    } catch (e) { /* feedback best-effort */ }
+  }, [messages, convId]);
 
   const loadBriefing = useCallback(async () => {
     if (loading) return;
@@ -209,6 +219,27 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
                       )}
                     </div>
                   ))}
+                  {m.role === "assistant" && !m.error && m.content && (
+                    <div className="mt-2 pt-1.5 border-t border-border/50">
+                      {fb[i] === "sent" ? (
+                        <span className="text-[11px] text-muted-foreground">Merci, c'est noté ✓</span>
+                      ) : fb[i] === "down-open" ? (
+                        <div className="flex items-center gap-1.5">
+                          <input value={fbNote[i] || ""} onChange={(e) => setFbNote((s) => ({ ...s, [i]: e.target.value }))}
+                            onKeyDown={(e) => { if (e.key === "Enter") sendFeedback(i, "down", fbNote[i]); }}
+                            placeholder="Qu'est-ce qui n'allait pas ?"
+                            className="flex-1 bg-background border border-border rounded-lg px-2 py-1 text-xs text-foreground outline-none" />
+                          <button onClick={() => sendFeedback(i, "down", fbNote[i])} className="px-2 py-1 rounded-lg bg-primary text-white text-xs font-medium flex-shrink-0">Envoyer</button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] text-muted-foreground">Utile ?</span>
+                          <button onClick={() => sendFeedback(i, "up")} title="Bonne réponse" className="text-muted-foreground hover:text-success transition-colors"><ThumbsUp className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => setFb((s) => ({ ...s, [i]: "down-open" }))} title="À améliorer" className="text-muted-foreground hover:text-danger transition-colors"><ThumbsDown className="w-3.5 h-3.5" /></button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ))

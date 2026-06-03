@@ -424,6 +424,7 @@ export const neoAPI = {
   chat: (data) => api.post('/neo/chat', data),
   confirmAction: (actionId) => api.post('/neo/confirm-action', { action_id: actionId }),
   cancelAction: (actionId) => api.post('/neo/cancel-action', { action_id: actionId }),
+  feedback: (data) => api.post('/neo/feedback', data),
 };
 
 // File Manager API (Gestionnaire de fichiers)

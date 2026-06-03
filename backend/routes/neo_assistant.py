@@ -67,6 +67,9 @@ Tu disposes d'une MÉMOIRE durable (objectifs chiffrés, règles et préférence
 faits clients). Tiens-en compte et mets-la à jour : quand Léo te confie un objectif, une règle, une
 préférence ou un fait important, mémorise-le (remember / update_objective / log_day) ; au besoin, retrouve
 avec recall. Challenge Léo si une demande contredit un objectif ou une règle enregistrés.
+APPRENTISSAGE : quand Léo te CORRIGE (une info, une approche, un ton, un prix), retiens immédiatement la
+correction via remember(type="lesson", content="...") pour ne plus refaire l'erreur. Applique scrupuleusement
+les LEÇONS APPRISES présentes dans ta mémoire ci-dessous.
 
 Si tu ignores une donnée, dis-le et propose de vérifier (utilise crm_query). N'invente jamais un chiffre.
 Quand tu as fini d'agir, réponds en clair à Léo (résultat + éventuelles validations en attente)."""
@@ -182,7 +185,7 @@ async def _exec_crm_query(args, uid):
 
 
 # ==================== Mémoire de Néo (Phase 3 / B.4) ====================
-_MEM_TYPES = ("objective", "rule", "daily_log", "client_fact", "decision")
+_MEM_TYPES = ("objective", "rule", "daily_log", "client_fact", "decision", "lesson")
 
 
 async def _exec_remember(args, uid):
@@ -249,13 +252,20 @@ async def _central_memory() -> str:
         return ""
     objs = [r["content"] for r in rows if r.get("type") == "objective"]
     rules = [r["content"] for r in rows if r.get("type") == "rule"]
-    if not objs and not rules:
+    try:
+        lessons = [r.get("content") for r in await db.neo_memory.find(
+            {"type": "lesson"}, {"_id": 0, "content": 1}).sort("created_at", -1).to_list(15)]
+    except Exception:
+        lessons = []
+    if not (objs or rules or lessons):
         return ""
     out = "\n\n=== MÉMOIRE DE NÉO (tiens-en compte absolument) ==="
     if objs:
         out += "\nOBJECTIFS :\n" + "\n".join(f"- {o}" for o in objs)
     if rules:
         out += "\nRÈGLES DE LÉO :\n" + "\n".join(f"- {r}" for r in rules)
+    if lessons:
+        out += "\nLEÇONS APPRISES (corrections passées de Léo, applique-les) :\n" + "\n".join(f"- {l}" for l in lessons if l)
     return out
 
 
@@ -486,6 +496,13 @@ class ConfirmRequest(BaseModel):
     action_id: str
 
 
+class FeedbackRequest(BaseModel):
+    rating: str  # 'up' | 'down'
+    message: Optional[str] = None  # le message de Néo évalué
+    note: Optional[str] = None     # la correction / le commentaire de Léo
+    conversation_id: Optional[str] = None
+
+
 @router.get("/health")
 async def neo_health():
     return {"available": bool(_client), "model_chain": NEO_MODELS, "tools": [t["name"] for t in TOOLS]}
@@ -522,3 +539,28 @@ async def neo_confirm(req: ConfirmRequest, current_user: dict = Depends(get_curr
 async def neo_cancel(req: ConfirmRequest, current_user: dict = Depends(get_current_user)):
     await db.neo_pending_actions.update_one({"id": req.action_id}, {"$set": {"status": "cancelled"}})
     return {"success": True, "message": "Action annulée."}
+
+
+@router.post("/feedback")
+async def neo_feedback(req: FeedbackRequest, current_user: dict = Depends(get_current_user)):
+    """Apprentissage de Néo (cf. demande Léo « les deux ») :
+    - 👍/👎 sur les réponses ; un 👎 avec note (ou un 👍 avec note) devient une LEÇON injectée
+      dans le cerveau de Néo à chaque appel ; tout est journalisé comme signal d'apprentissage."""
+    uid = current_user.get("user_id") or current_user.get("id")
+    now = datetime.now(timezone.utc).isoformat()
+    rating = (req.rating or "").strip().lower()
+    note = (req.note or "").strip()
+    lesson = None
+    if rating == "down":
+        lesson = "À ÉVITER : " + (note or "réponse jugée insatisfaisante par Léo (reformuler, être plus utile)")
+    elif rating == "up" and note:
+        lesson = "BONNE APPROCHE (à reproduire) : " + note
+    if lesson:
+        await db.neo_memory.insert_one({"id": str(uuid.uuid4()), "type": "lesson", "content": lesson[:1000],
+                                        "created_at": now, "user_id": uid})
+    await db.neo_feedback.insert_one({"id": str(uuid.uuid4()), "rating": rating, "note": note[:1000],
+                                      "message": (req.message or "")[:2000], "conversation_id": req.conversation_id,
+                                      "user_id": uid, "created_at": now})
+    await _log("feedback", {"rating": rating, "has_note": bool(note), "user_id": uid})
+    return {"success": True,
+            "message": "Merci, je retiens." if rating == "up" else "Compris, je corrige et je le retiens pour la prochaine fois."}
