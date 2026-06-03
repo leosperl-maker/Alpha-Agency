@@ -913,10 +913,13 @@ async def neo_tts(req: TtsRequest, current_user: dict = Depends(get_current_user
                   "voice_settings": {"stability": 0.5, "similarity_boost": 0.75, "style": 0.0, "use_speaker_boost": True}},
             timeout=45,
         )
-        r.raise_for_status()
     except Exception as e:
-        logger.warning(f"neo TTS error: {e}")
-        raise HTTPException(status_code=502, detail=f"Voix indisponible: {str(e)[:160]}")
+        logger.warning(f"neo TTS injoignable: {e}")
+        raise HTTPException(status_code=502, detail=f"Voix injoignable: {str(e)[:160]}")
+    if r.status_code != 200:
+        body = (r.text or "")[:300]
+        logger.warning(f"neo TTS {r.status_code}: {body}")
+        raise HTTPException(status_code=502, detail=f"ElevenLabs {r.status_code}: {body}")
     return Response(content=r.content, media_type="audio/mpeg", headers={"Cache-Control": "no-store"})
 
 
