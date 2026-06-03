@@ -16,7 +16,7 @@ import uuid
 import time
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 
 from fastapi import APIRouter, HTTPException, Depends, Response
@@ -57,6 +57,9 @@ ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
 ELEVENLABS_VOICE_ID = os.environ.get("ELEVENLABS_VOICE_ID", "qlfxsYlCv09qu8y6PkmY")  # « Eric - Top France » (FR, masculin, dynamique) — changeable via env ou /neo/voices
 ELEVENLABS_MODEL = os.environ.get("ELEVENLABS_MODEL", "eleven_multilingual_v2")
 
+# Base URL publique (pour les liens de téléchargement de fichiers que Néo génère)
+PUBLIC_BASE = os.environ.get("PUBLIC_BASE_URL", "https://www.alphagency.fr").rstrip("/")
+
 MAX_ITERS = 6  # garde-fou anti-boucle de la boucle agentique
 
 NEO_SYSTEM = """Tu es Néo, l'associé co-gérant IA d'Alpha Agency (agence de communication digitale, Guadeloupe).
@@ -73,7 +76,9 @@ Comportement :
 
 Tu as accès à l'intégralité du CRM via des OUTILS (function calling). Utilise-les pour répondre
 précisément et pour AGIR. Enchaîne plusieurs outils si besoin (ex: chercher des leads puis créer
-des relances). Avant toute action qui SORT vers un client (email, SMS, devis envoyé, relance) ou
+des relances).
+Tu PEUX chercher sur le WEB en temps réel via l'outil web_search (prix du marché, info entreprise/personne,
+veille, tendances, actualité, inspiration). Ne dis JAMAIS que tu n'as pas accès à internet : utilise web_search. Avant toute action qui SORT vers un client (email, SMS, devis envoyé, relance) ou
 toute SUPPRESSION, l'outil te répondra « EN ATTENTE DE VALIDATION » : préviens Léo que c'est
 préparé et qu'il doit valider. Tu ne déclenches jamais de paiement.
 
@@ -548,11 +553,42 @@ async def _exec_web_search(args, uid):
         return {"success": False, "message": f"Recherche échouée: {str(e)[:150]}"}
 
 
+async def _exec_get_invoice_pdf(args, uid):
+    """Récupère un devis/facture (par numéro ou client) et renvoie un lien de téléchargement (30 min)."""
+    import secrets
+    num = (args.get("invoice_number") or "").strip()
+    name = (args.get("contact_name") or "").strip()
+    inv = None
+    if num:
+        inv = await db.invoices.find_one({"invoice_number": {"$regex": num, "$options": "i"}}, {"_id": 0})
+    if not inv and name:
+        c = await _find_contact(name)
+        if c:
+            rows = await db.invoices.find({"contact_id": c.get("id")}, {"_id": 0}).sort("created_at", -1).to_list(1)
+            inv = rows[0] if rows else None
+    if not inv:
+        return {"success": False, "message": "Aucun devis/facture trouvé pour cette référence ou ce client."}
+    token = secrets.token_urlsafe(32)
+    await db.pdf_tokens.insert_one({
+        "token": token, "invoice_id": inv["id"],
+        "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=30)).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    dtype = "devis" if inv.get("document_type") == "devis" else "facture"
+    url = f"{PUBLIC_BASE}/api/invoices/{inv['id']}/pdf-download/{token}"
+    return {"success": True,
+            "result": {"type": dtype, "number": inv.get("invoice_number"), "total": inv.get("total"), "download_url": url},
+            "message": f"{dtype} {inv.get('invoice_number')} prêt à télécharger : {url}"}
+
+
 TOOLS = [
     # --- Lecture ---
     {"name": "web_search", "validation": False, "run": _exec_web_search,
      "description": "Recherche sur le web en temps réel (Google via Gemini) : prix du marché, info sur une entreprise/personne, veille concurrentielle, tendances, actualité, inspiration créative. À utiliser dès qu'une info récente ou externe au CRM est utile.",
      "params": _obj({"query": _STR})},
+    {"name": "get_invoice_pdf", "validation": False, "run": _exec_get_invoice_pdf,
+     "description": "Récupère un devis ou une facture (par numéro ex 'FAC-2026-0010', ou par nom de client = le plus récent) et renvoie un LIEN de téléchargement du PDF à donner à Léo. Utilise-le quand Léo demande de lui envoyer/récupérer un devis ou une facture.",
+     "params": _obj({"invoice_number": _STR, "contact_name": _STR})},
     {"name": "search_contacts", "validation": False, "run": _exec_search_contacts,
      "description": "Cherche des contacts par texte (nom/entreprise/email) et/ou statut.",
      "params": _obj({"query": _STR, "status": _STR, "limit": _INT})},

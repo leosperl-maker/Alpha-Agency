@@ -16,6 +16,16 @@ const ACTION_LABELS = {
   merge_contacts: "Fusionner les fiches en doublon",
 };
 
+// Rend les URLs cliquables dans les réponses de Néo (liens de fichiers / devis)
+const renderContent = (text) => {
+  if (!text) return text;
+  return String(text).split(/(https?:\/\/[^\s]+)/g).map((p, i) =>
+    /^https?:\/\//.test(p)
+      ? <a key={i} href={p} target="_blank" rel="noopener noreferrer" className="underline break-all font-medium">{p}</a>
+      : p
+  );
+};
+
 /**
  * Néo — l'associé co-gérant IA d'Alpha Agency. Conversationnel, connecté au vrai CRM,
  * agit via function calling natif (/api/neo/chat). Les actions sortantes/irréversibles
@@ -327,7 +337,7 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
                       ? "bg-danger-soft text-danger rounded-bl-md"
                       : "bg-secondary text-foreground rounded-bl-md"
                 }`}>
-                  {m.content}
+                  {renderContent(m.content)}
                   {m.actionsDone?.length > 0 && (
                     <div className="mt-2 flex items-center gap-1.5 text-success text-xs font-medium">
                       <CheckCircle2 className="w-3.5 h-3.5" /> {m.actionsDone.length} action{m.actionsDone.length > 1 ? "s" : ""} effectuée{m.actionsDone.length > 1 ? "s" : ""}
