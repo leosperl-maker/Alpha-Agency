@@ -589,6 +589,29 @@ async def _exec_get_invoice_pdf(args, uid):
             "message": f"{dtype} {inv.get('invoice_number')} prêt à télécharger : {url}"}
 
 
+async def _exec_delegate_task(args, uid):
+    """Délègue une sous-tâche lourde à un sous-agent focalisé (rédaction, analyse, idéation, plan)."""
+    objective = (args.get("objective") or "").strip()
+    context = (args.get("context") or "").strip()
+    if not objective:
+        return {"success": False, "message": "Objectif vide."}
+    sub_system = ("Tu es un sous-agent expert d'Alpha Agency (agence de communication digitale, Guadeloupe), "
+                  "missionné par Néo. Réalise la tâche de façon complète, concrète et directement exploitable. "
+                  "Sois structuré et actionnable. Réponds en français.")
+    prompt = f"Mission : {objective}"
+    if context:
+        prompt += f"\n\nContexte :\n{context}"
+    try:
+        out = await _gemini_text(sub_system, prompt)
+        return {"success": True, "result": (out or "")[:6000]}
+    except Exception:
+        try:
+            out = await _claude_text(sub_system, prompt)
+            return {"success": True, "result": (out or "")[:6000]}
+        except Exception as e2:
+            return {"success": False, "message": f"Sous-agent indisponible: {str(e2)[:120]}"}
+
+
 TOOLS = [
     # --- Lecture ---
     {"name": "web_search", "validation": False, "run": _exec_web_search,
@@ -597,6 +620,9 @@ TOOLS = [
     {"name": "get_invoice_pdf", "validation": False, "run": _exec_get_invoice_pdf,
      "description": "Récupère un devis ou une facture (par numéro ex 'FAC-2026-0010', ou par nom de client = le plus récent) et renvoie un LIEN de téléchargement du PDF à donner à Léo. Utilise-le quand Léo demande de lui envoyer/récupérer un devis ou une facture.",
      "params": _obj({"invoice_number": _STR, "contact_name": _STR})},
+    {"name": "delegate_task", "validation": False, "run": _exec_delegate_task,
+     "description": "Délègue une sous-tâche lourde à un sous-agent focalisé : rédiger une proposition/offre commerciale, analyser un marché, générer des idées de contenu/campagne, structurer un plan. Donne un objectif clair + le contexte utile. À utiliser quand la tâche mérite un vrai travail dédié.",
+     "params": _obj({"objective": _STR, "context": _STR})},
     {"name": "search_contacts", "validation": False, "run": _exec_search_contacts,
      "description": "Cherche des contacts par texte (nom/entreprise/email) et/ou statut.",
      "params": _obj({"query": _STR, "status": _STR, "limit": _INT})},
@@ -843,6 +869,35 @@ def _fr_json(res: dict) -> dict:
 
 
 # ==================== Boucle agentique ====================
+def _extract_docx_text(raw: bytes) -> str:
+    try:
+        import io, docx
+        d = docx.Document(io.BytesIO(raw))
+        return "\n".join(p.text for p in d.paragraphs if p.text)
+    except Exception as e:
+        logger.warning(f"docx extract: {e}")
+        return ""
+
+
+def _extract_pptx_text(raw: bytes) -> str:
+    try:
+        import io
+        from pptx import Presentation
+        prs = Presentation(io.BytesIO(raw))
+        out = []
+        for slide in prs.slides:
+            for shape in slide.shapes:
+                if getattr(shape, "has_text_frame", False):
+                    for para in shape.text_frame.paragraphs:
+                        t = "".join(r.text for r in para.runs)
+                        if t:
+                            out.append(t)
+        return "\n".join(out)
+    except Exception as e:
+        logger.warning(f"pptx extract: {e}")
+        return ""
+
+
 async def run_neo(messages: list, user_id: str, voice: bool = False, attachments: list = None) -> dict:
     if not _client:
         return {"message": "Néo est momentanément indisponible (clé IA manquante).", "available": False}
@@ -858,8 +913,17 @@ async def run_neo(messages: list, user_id: str, voice: bool = False, attachments
             try:
                 raw = _b64.b64decode((att.get("data") or "").split(",")[-1])
                 mime = att.get("mime_type") or "application/octet-stream"
+                name = (att.get("name") or "").lower()
                 if raw and (mime.startswith("image/") or mime == "application/pdf"):
                     contents[-1].parts.append(_t.Part.from_bytes(data=raw, mime_type=mime))
+                elif raw and (name.endswith(".docx") or "wordprocessingml" in mime):
+                    txt = _extract_docx_text(raw)
+                    if txt:
+                        contents[-1].parts.append(_t.Part.from_text(text=f"[Contenu du fichier {att.get('name')}]\n{txt[:12000]}"))
+                elif raw and (name.endswith(".pptx") or "presentationml" in mime):
+                    txt = _extract_pptx_text(raw)
+                    if txt:
+                        contents[-1].parts.append(_t.Part.from_text(text=f"[Contenu du fichier {att.get('name')}]\n{txt[:12000]}"))
             except Exception as e:
                 logger.warning(f"neo attachment skip: {e}")
 
@@ -898,12 +962,67 @@ async def run_neo(messages: list, user_id: str, voice: bool = False, attachments
             "available": True, "pending_actions": pending, "actions_done": actions}
 
 
+# ==================== Cerveau Claude (tool-use Anthropic) — moteur alternatif ====================
+def _anthropic_tools():
+    return [{"name": t["name"], "description": t["description"], "input_schema": t["params"]} for t in TOOLS]
+
+
+async def _claude_messages_call(system: str, messages: list, tools: list):
+    import requests
+    def _call():
+        r = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={"x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
+            json={"model": NEO_STRATEGIC_MODEL, "max_tokens": 2000, "system": system, "tools": tools, "messages": messages},
+            timeout=70)
+        r.raise_for_status()
+        return r.json()
+    return await asyncio.to_thread(_call)
+
+
+async def run_neo_claude(messages: list, user_id: str, voice: bool = False) -> dict:
+    """Même boucle agentique que run_neo mais pilotée par Claude (tool-use Anthropic)."""
+    import json as _json
+    if not ANTHROPIC_API_KEY:
+        return await run_neo(messages, user_id, voice=voice)
+    system = NEO_SYSTEM + _now_line() + await _central_memory()
+    if voice:
+        system += ("\n\n[MODE VOCAL] Tu réponds à l'oral : bref et naturel, 2-3 phrases maximum, "
+                   "sans listes à puces, sans markdown, sans emojis. Ton conversationnel, droit au but.")
+    conv = [{"role": ("assistant" if m.get("role") == "assistant" else "user"),
+             "content": (m.get("content") or "")[:8000]} for m in messages if m.get("content")]
+    tools = _anthropic_tools()
+    pending, actions = [], []
+    for _ in range(MAX_ITERS):
+        data = await _claude_messages_call(system, conv, tools)
+        blocks = data.get("content", []) or []
+        tool_uses = [b for b in blocks if b.get("type") == "tool_use"]
+        if not tool_uses:
+            txt = "".join(b.get("text", "") for b in blocks if b.get("type") == "text").strip()
+            return {"message": txt or "C'est noté.", "available": True,
+                    "pending_actions": pending, "actions_done": actions, "brain": "claude"}
+        conv.append({"role": "assistant", "content": blocks})
+        results = []
+        for tu in tool_uses:
+            res = await execute_tool(tu.get("name"), tu.get("input") or {}, user_id)
+            if res.get("pending"):
+                pending.append({"action_id": res["action_id"], "name": tu.get("name"), "args": tu.get("input") or {}})
+            elif res.get("success", True):
+                actions.append({"name": tu.get("name")})
+            results.append({"type": "tool_result", "tool_use_id": tu.get("id"),
+                            "content": _json.dumps(res, ensure_ascii=False, default=str)[:6000]})
+        conv.append({"role": "user", "content": results})
+    return {"message": "J'ai atteint la limite d'étapes. Reformule ou demande la suite.",
+            "available": True, "pending_actions": pending, "actions_done": actions, "brain": "claude"}
+
+
 # ==================== Endpoints ====================
 class NeoChatRequest(BaseModel):
     messages: List[dict]
     conversation_id: Optional[str] = None
     mode: Optional[str] = None  # "voice" => réponses orales concises
     attachments: Optional[List[dict]] = None  # [{name, mime_type, data(base64)}] image/PDF
+    brain: Optional[str] = None  # "gemini" (défaut) | "claude"
 
 
 class ConfirmRequest(BaseModel):
@@ -1043,7 +1162,15 @@ async def neo_chat(req: NeoChatRequest, current_user: dict = Depends(get_current
     if not msgs:
         raise HTTPException(status_code=400, detail="Message requis")
     try:
-        result = await run_neo(msgs, user_id, voice=(req.mode == "voice"), attachments=req.attachments)
+        brain = (req.brain or "gemini").lower()
+        if brain == "claude" and not req.attachments:
+            try:
+                result = await run_neo_claude(msgs, user_id, voice=(req.mode == "voice"))
+            except Exception as e:
+                logger.warning(f"neo claude KO, repli Gemini: {e}")
+                result = await run_neo(msgs, user_id, voice=(req.mode == "voice"), attachments=req.attachments)
+        else:
+            result = await run_neo(msgs, user_id, voice=(req.mode == "voice"), attachments=req.attachments)
     except Exception as e:
         logger.error(f"neo chat error: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur Néo: {str(e)[:200]}")

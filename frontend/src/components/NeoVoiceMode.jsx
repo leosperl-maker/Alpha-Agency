@@ -10,7 +10,7 @@ const IS_IOS = typeof navigator !== "undefined" && /iP(hone|ad|od)/.test(navigat
  * Boucle mains-libres : tu parles -> Néo réfléchit -> Néo répond en voix -> il réécoute.
  * Partage la conversation (messages/convId) avec le chat texte via onExchange.
  */
-const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchange }) => {
+const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, onExchange }) => {
   const [phase, setPhase] = useState("idle"); // idle | listening | thinking | speaking | error
   const [transcript, setTranscript] = useState(""); // ce que TU dis (live)
   const [caption, setCaption] = useState("");        // ce que NÉO répond
@@ -156,6 +156,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
         messages: history.map((m) => ({ role: m.role, content: m.content })),
         conversation_id: convId,
         mode: "voice",
+        brain,
       });
       const d = res.data || {};
       if (d.conversation_id) onConvId?.(d.conversation_id);
@@ -172,7 +173,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
       setCaption(msg);
       if (runningRef.current) await speak(msg);
     }
-  }, [convId, onConvId, onExchange, speak]);
+  }, [convId, onConvId, onExchange, speak, brain]);
 
   const startListening = useCallback(() => {
     if (!runningRef.current) return;

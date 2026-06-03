@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, X, Loader2, CheckCircle2, History, SquarePen, Trash2, Sunrise, Clock, ThumbsUp, ThumbsDown, Mic, Volume2, VolumeX, Square, AudioLines, Paperclip } from "lucide-react";
+import { Send, X, Loader2, CheckCircle2, History, SquarePen, Trash2, Sunrise, Clock, ThumbsUp, ThumbsDown, Mic, Volume2, VolumeX, Square, AudioLines, Paperclip, Cpu } from "lucide-react";
 import { aiEnhancedAPI, neoAPI } from "../lib/api";
 import AssistantOrb from "./AssistantOrb";
 import NeoVoiceMode from "./NeoVoiceMode";
@@ -80,6 +80,7 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
         messages: history.map((m) => ({ role: m.role, content: m.content })),
         conversation_id: convId,
         attachments: atts.length ? atts : undefined,
+        brain,
       });
       const d = res.data || {};
       if (d.conversation_id) setConvId(d.conversation_id);
@@ -101,7 +102,7 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
     } finally {
       setLoading(false);
     }
-  }, [input, loading, messages, convId, attachments]);
+  }, [input, loading, messages, convId, attachments, brain]);
 
   const resolveAction = useCallback(async (actionId, name, confirm) => {
     if (resolved[actionId]) return;
@@ -156,6 +157,10 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   // ====== Voix de Néo : dictée (navigateur) + synthèse vocale premium (ElevenLabs) ======
   const [listening, setListening] = useState(false);
   const [voiceMode, setVoiceMode] = useState(false); // mode vocal plein écran (Operator)
+  const [brain, setBrain] = useState(() => { try { return localStorage.getItem("neoBrain") || "gemini"; } catch { return "gemini"; } });
+  const toggleBrain = useCallback(() => {
+    setBrain((b) => { const nb = b === "claude" ? "gemini" : "claude"; try { localStorage.setItem("neoBrain", nb); } catch (e) {} return nb; });
+  }, []);
   const [voiceOn, setVoiceOn] = useState(() => { try { return localStorage.getItem("neoVoice") === "1"; } catch { return false; } });
   const [speakingIdx, setSpeakingIdx] = useState(null);
   const recognitionRef = useRef(null);
@@ -297,6 +302,10 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <button onClick={toggleBrain} title={`Cerveau : ${brain === "claude" ? "Claude" : "Gemini"} — cliquer pour changer`}
+              className="flex items-center gap-1 px-2 h-8 rounded-xl text-[11px] font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+              <Cpu className="w-3.5 h-3.5" />{brain === "claude" ? "Claude" : "Gemini"}
+            </button>
             <button onClick={() => setVoiceMode(true)} title="Mode vocal plein écran"
               className="p-2 rounded-xl text-primary hover:bg-primary/10 transition-colors">
               <AudioLines className="w-4 h-4" />
@@ -436,7 +445,7 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
             </div>
           )}
           <div className="flex items-end gap-2 rounded-2xl bg-background border border-border focus-within:border-primary/40 transition-colors p-1.5 pl-2">
-            <input ref={fileInputRef} type="file" accept="image/*,application/pdf" multiple className="hidden" onChange={handleFiles} />
+            <input ref={fileInputRef} type="file" accept="image/*,application/pdf,.docx,.pptx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation" multiple className="hidden" onChange={handleFiles} />
             <button onClick={() => fileInputRef.current?.click()} title="Joindre une image ou un PDF"
               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
               <Paperclip className="w-4 h-4" />
@@ -501,6 +510,7 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
         onClose={() => setVoiceMode(false)}
         messages={messages}
         convId={convId}
+        brain={brain}
         onConvId={setConvId}
         onExchange={(u, a) => setMessages((prev) => [...prev, u, a])}
       />
