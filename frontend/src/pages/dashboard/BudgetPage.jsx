@@ -1461,12 +1461,6 @@ const BudgetPage = () => {
             <TabsTrigger value="forecast" className="data-[state=active]:bg-primary data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
               <Target className="w-3 h-3 mr-1" /> Prévi.
             </TabsTrigger>
-            <TabsTrigger value="cashflow" className="data-[state=active]:bg-primary data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
-              <TrendingUp className="w-3 h-3 mr-1" /> Cash
-            </TabsTrigger>
-            <TabsTrigger value="qonto" className="data-[state=active]:bg-primary data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
-              <Building2 className="w-3 h-3 mr-1" /> Qonto
-            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -1869,14 +1863,6 @@ const BudgetPage = () => {
           />
         </TabsContent>
 
-        {/* Cashflow Tab (Phase 4) */}
-        <TabsContent value="cashflow" className="space-y-6">
-          <CashflowTab formatCurrency={formatCurrency} />
-        </TabsContent>
-
-        <TabsContent value="qonto" className="space-y-6">
-          <QontoTab formatCurrency={formatCurrency} />
-        </TabsContent>
       </Tabs>
 
       {/* Import Dialog */}
