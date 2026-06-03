@@ -885,6 +885,7 @@ async def neo_treasury(current_user: dict = Depends(get_current_user)):
 class TtsRequest(BaseModel):
     text: str
     voice_id: Optional[str] = None
+    model: Optional[str] = None  # ex: "eleven_flash_v2_5" pour le mode vocal (latence ~minimale)
 
 
 def _clean_for_speech(text: str) -> str:
@@ -913,7 +914,7 @@ async def neo_tts(req: TtsRequest, current_user: dict = Depends(get_current_user
             requests.post,
             f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
             headers={"xi-api-key": ELEVENLABS_API_KEY, "Content-Type": "application/json", "Accept": "audio/mpeg"},
-            json={"text": text, "model_id": ELEVENLABS_MODEL,
+            json={"text": text, "model_id": (req.model or ELEVENLABS_MODEL),
                   "voice_settings": {"stability": 0.5, "similarity_boost": 0.75, "style": 0.0, "use_speaker_boost": True}},
             timeout=45,
         )

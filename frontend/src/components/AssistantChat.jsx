@@ -150,7 +150,8 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
     const myIdx = idx ?? -1;
     setSpeakingIdx(myIdx);
     try {
-      const res = await neoAPI.tts(text);
+      let savedVoice; try { savedVoice = localStorage.getItem("neoVoiceId") || undefined; } catch (e) { savedVoice = undefined; }
+      const res = await neoAPI.tts(text, savedVoice);
       if (seq !== speakSeqRef.current) return; // une lecture plus récente a pris le relais
       const url = URL.createObjectURL(res.data);
       const audio = new Audio(url);

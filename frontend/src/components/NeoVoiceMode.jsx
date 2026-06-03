@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Mic, MicOff, Loader2 } from "lucide-react";
+import { X, Mic, MicOff, Loader2, ChevronDown, Check } from "lucide-react";
 import { neoAPI } from "../lib/api";
 
 /**
@@ -13,6 +13,9 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
   const [transcript, setTranscript] = useState(""); // ce que TU dis (live)
   const [caption, setCaption] = useState("");        // ce que NÉO répond
   const [errMsg, setErrMsg] = useState("");
+  const [voices, setVoices] = useState([]);
+  const [voiceId, setVoiceId] = useState(() => { try { return localStorage.getItem("neoVoiceId") || ""; } catch { return ""; } });
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const recRef = useRef(null);
   const audioCtxRef = useRef(null);
@@ -23,8 +26,15 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
   const runningRef = useRef(false);   // la boucle vocale est-elle active
   const phaseRef = useRef("idle");
   const histRef = useRef(messages);   // historique courant (sans re-render)
+  const voiceIdRef = useRef(voiceId);
 
   useEffect(() => { histRef.current = messages; }, [messages]);
+  useEffect(() => { voiceIdRef.current = voiceId; }, [voiceId]);
+  useEffect(() => {
+    if (open && voices.length === 0) {
+      neoAPI.voices().then((r) => setVoices(r.data?.voices || [])).catch(() => {});
+    }
+  }, [open, voices.length]);
   const setPhaseBoth = (p) => { phaseRef.current = p; setPhase(p); };
 
   // ---- Orbe : animation pilotée par l'amplitude audio ----
@@ -66,7 +76,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
     if (!text) { startListeningRef.current?.(); return; }
     setPhaseBoth("speaking");
     try {
-      const res = await neoAPI.tts(text);
+      const res = await neoAPI.tts(text, voiceIdRef.current || undefined, "eleven_flash_v2_5");
       if (!runningRef.current) return;
       const url = URL.createObjectURL(res.data);
       const audio = new Audio(url);
@@ -97,6 +107,15 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
       if (runningRef.current) startListeningRef.current?.();
     }
   }, [animateOrb, resetOrb]);
+
+  // changer la voix de Néo (persisté) + échantillon immédiat
+  const pickVoice = useCallback((id) => {
+    setVoiceId(id);
+    voiceIdRef.current = id;
+    try { localStorage.setItem("neoVoiceId", id); } catch (e) { /* noop */ }
+    setPickerOpen(false);
+    speak("Voilà ma nouvelle voix. On continue ?");
+  }, [speak]);
 
   // ---- Une réplique : envoie au moteur Néo puis fait parler ----
   const handleUtterance = useCallback(async (text) => {
@@ -221,15 +240,33 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
 
       {/* Header */}
       <div className="relative w-full flex items-center justify-between px-5 pt-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 min-w-0">
           <span className="text-white/90 font-semibold tracking-tight">Néo</span>
-          <span className="text-white/40 text-xs">· mode vocal</span>
+          <button onClick={() => setPickerOpen((v) => !v)} title="Changer la voix"
+            className="flex items-center gap-1 text-white/70 hover:text-white text-xs bg-white/10 hover:bg-white/20 rounded-full px-3 py-1.5 transition-colors max-w-[55vw]">
+            <span className="truncate">{(voices.find((v) => v.voice_id === voiceId)?.name) || "Eric"}</span>
+            <ChevronDown className="w-3 h-3 flex-shrink-0" />
+          </button>
         </div>
         <button onClick={onClose} title="Quitter le mode vocal"
           className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors backdrop-blur-sm">
           <X className="w-5 h-5" />
         </button>
       </div>
+
+      {pickerOpen && (
+        <div className="absolute top-16 left-5 z-10 w-64 max-h-[52vh] overflow-y-auto rounded-2xl bg-[#1a0509]/95 backdrop-blur-md border border-white/15 shadow-pop p-1.5">
+          {voices.length === 0 ? (
+            <p className="text-white/50 text-xs p-3">Chargement des voix…</p>
+          ) : voices.map((v) => (
+            <button key={v.voice_id} onClick={() => pickVoice(v.voice_id)}
+              className="w-full text-left flex items-center justify-between gap-2 px-3 py-2 rounded-xl hover:bg-white/10 text-sm text-white/85 transition-colors">
+              <span className="truncate">{v.name}</span>
+              {voiceId === v.voice_id && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Orbe central */}
       <div className="relative flex-1 w-full flex flex-col items-center justify-center gap-8 px-6">
