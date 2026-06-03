@@ -116,6 +116,30 @@ async def _exec_get_contact(args, uid):
     return {"success": True, "contact": _clean(c)}
 
 
+async def _exec_get_contact_history(args, uid):
+    """Fil chronologique d'un contact : lead, relances, devis/factures, tâches (Phase 6)."""
+    c = await _find_contact(args)
+    if not c:
+        return {"success": False, "error": "Contact non trouvé"}
+    cid = c["id"]
+    events = []
+    if c.get("created_at"):
+        events.append({"date": c["created_at"], "type": "lead", "label": f"Fiche créée (source : {c.get('source', 'n/c')})"})
+    if c.get("last_followup_at"):
+        events.append({"date": c["last_followup_at"], "type": "relance", "label": "Relance envoyée par email"})
+    for inv in await db.invoices.find({"contact_id": cid}, {"_id": 0, "invoice_number": 1, "document_type": 1,
+                                                            "status": 1, "total": 1, "created_at": 1}).to_list(50):
+        events.append({"date": inv.get("created_at"), "type": inv.get("document_type", "facture"),
+                       "label": f"{inv.get('document_type', 'facture')} {inv.get('invoice_number')} "
+                                f"({inv.get('status')}, {inv.get('total')}€)"})
+    for t in await db.tasks.find({"contact_id": cid}, {"_id": 0, "title": 1, "status": 1, "created_at": 1}).to_list(50):
+        events.append({"date": t.get("created_at"), "type": "tache",
+                       "label": f"Tâche : {t.get('title')} ({t.get('status')})"})
+    events = [e for e in events if e.get("date")]
+    events.sort(key=lambda e: e["date"], reverse=True)
+    return {"success": True, "contact": _contact_name(c), "status": c.get("status"), "events": events[:40]}
+
+
 async def _exec_list_leads(args, uid):
     only_hot = bool(args.get("only_hot"))
     limit = min(int(args.get("limit") or 10), 50)
@@ -360,6 +384,9 @@ TOOLS = [
      "params": _obj({"query": _STR, "status": _STR, "limit": _INT})},
     {"name": "get_contact", "validation": False, "run": _exec_get_contact,
      "description": "Récupère la fiche complète d'un contact par nom/entreprise/email ou id.",
+     "params": _obj({"contact_name": _STR, "contact_id": _STR})},
+    {"name": "get_contact_history", "validation": False, "run": _exec_get_contact_history,
+     "description": "Historique chronologique d'un contact (lead, relances, devis/factures, tâches) — pour raconter son parcours.",
      "params": _obj({"contact_name": _STR, "contact_id": _STR})},
     {"name": "list_leads", "validation": False, "run": _exec_list_leads,
      "description": "Liste les leads récents (site + chatbot). only_hot=true pour les leads chauds (score>=70).",

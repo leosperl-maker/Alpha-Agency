@@ -195,14 +195,28 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
     }
   };
 
-  // Generate timeline items from history
+  // Generate timeline items — fil unifié (lead, relance Néo, devis, factures, tâches)
   const getTimelineItems = () => {
-    if (!history) return [];
-    
     const items = [];
-    
+
+    // Fiche créée (point de départ du lead)
+    if (contact?.created_at) {
+      items.push({
+        type: 'lead', date: contact.created_at, title: 'Fiche créée',
+        subtitle: contact.source ? `Source : ${contact.source}` : 'Contact',
+        icon: User, color: 'blue', data: {}
+      });
+    }
+    // Relance envoyée par Néo
+    if (contact?.last_followup_at) {
+      items.push({
+        type: 'relance', date: contact.last_followup_at, title: 'Relance envoyée',
+        subtitle: 'Email', icon: Send, color: 'green', data: {}
+      });
+    }
+
     // Add quotes to timeline
-    history.quotes?.forEach(quote => {
+    history?.quotes?.forEach(quote => {
       items.push({
         type: 'quote',
         date: quote.created_at,
@@ -216,7 +230,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
     });
     
     // Add invoices to timeline
-    history.invoices?.forEach(invoice => {
+    history?.invoices?.forEach(invoice => {
       items.push({
         type: 'invoice',
         date: invoice.created_at,
@@ -230,7 +244,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
     });
     
     // Add tasks to timeline
-    history.tasks?.forEach(task => {
+    history?.tasks?.forEach(task => {
       items.push({
         type: 'task',
         date: task.created_at,
