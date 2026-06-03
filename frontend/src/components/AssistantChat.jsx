@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, X, Loader2, CheckCircle2, History, SquarePen, Trash2, Sunrise, Clock, ThumbsUp, ThumbsDown, Mic, Volume2, VolumeX, Square, AudioLines } from "lucide-react";
+import { Send, X, Loader2, CheckCircle2, History, SquarePen, Trash2, Sunrise, Clock, ThumbsUp, ThumbsDown, Mic, Volume2, VolumeX, Square, AudioLines, Paperclip } from "lucide-react";
 import { aiEnhancedAPI, neoAPI } from "../lib/api";
 import AssistantOrb from "./AssistantOrb";
 import NeoVoiceMode from "./NeoVoiceMode";
@@ -39,8 +39,21 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   const [resolved, setResolved] = useState({}); // action_id -> 'done' | 'cancelled'
   const [fb, setFb] = useState({});        // msgIndex -> 'up' | 'down-open' | 'sent'
   const [fbNote, setFbNote] = useState({}); // msgIndex -> texte de correction
+  const [attachments, setAttachments] = useState([]); // [{name, mime_type, data}]
   const endRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  const handleFiles = useCallback((e) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach((f) => {
+      if (f.size > 15 * 1024 * 1024) return; // 15 Mo max
+      const reader = new FileReader();
+      reader.onload = () => setAttachments((a) => [...a, { name: f.name, mime_type: f.type || "application/octet-stream", data: reader.result }]);
+      reader.readAsDataURL(f);
+    });
+    e.target.value = "";
+  }, []);
 
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 80);
@@ -51,17 +64,22 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   }, [messages, loading]);
 
   const send = useCallback(async (text) => {
-    const content = (text ?? input).trim();
-    if (!content || loading) return;
-    const userMsg = { role: "user", content };
+    const typed = (text ?? input).trim();
+    const atts = attachments;
+    if ((!typed && atts.length === 0) || loading) return;
+    const content = typed || "Analyse ce fichier.";
+    const label = atts.length ? `${content}\n📎 ${atts.map((a) => a.name).join(", ")}` : content;
+    const userMsg = { role: "user", content: label };
     const history = [...messages, userMsg];
     setMessages(history);
     setInput("");
+    setAttachments([]);
     setLoading(true);
     try {
       const res = await neoAPI.chat({
         messages: history.map((m) => ({ role: m.role, content: m.content })),
         conversation_id: convId,
+        attachments: atts.length ? atts : undefined,
       });
       const d = res.data || {};
       if (d.conversation_id) setConvId(d.conversation_id);
@@ -83,7 +101,7 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
     } finally {
       setLoading(false);
     }
-  }, [input, loading, messages, convId]);
+  }, [input, loading, messages, convId, attachments]);
 
   const resolveAction = useCallback(async (actionId, name, confirm) => {
     if (resolved[actionId]) return;
@@ -407,7 +425,22 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
 
         {/* Input */}
         <div className="p-3 border-t border-border flex-shrink-0">
-          <div className="flex items-end gap-2 rounded-2xl bg-background border border-border focus-within:border-primary/40 transition-colors p-1.5 pl-3.5">
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {attachments.map((a, i) => (
+                <span key={i} className="inline-flex items-center gap-1 text-xs bg-secondary rounded-lg px-2 py-1 text-foreground">
+                  <Paperclip className="w-3 h-3" /><span className="max-w-[150px] truncate">{a.name}</span>
+                  <button onClick={() => setAttachments((att) => att.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-danger"><X className="w-3 h-3" /></button>
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="flex items-end gap-2 rounded-2xl bg-background border border-border focus-within:border-primary/40 transition-colors p-1.5 pl-2">
+            <input ref={fileInputRef} type="file" accept="image/*,application/pdf" multiple className="hidden" onChange={handleFiles} />
+            <button onClick={() => fileInputRef.current?.click()} title="Joindre une image ou un PDF"
+              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+              <Paperclip className="w-4 h-4" />
+            </button>
             <textarea
               ref={inputRef}
               value={input}

@@ -835,13 +835,25 @@ def _fr_json(res: dict) -> dict:
 
 
 # ==================== Boucle agentique ====================
-async def run_neo(messages: list, user_id: str, voice: bool = False) -> dict:
+async def run_neo(messages: list, user_id: str, voice: bool = False, attachments: list = None) -> dict:
     if not _client:
         return {"message": "Néo est momentanément indisponible (clé IA manquante).", "available": False}
     contents = []
     for m in messages:
         role = "model" if m.get("role") == "assistant" else "user"
         contents.append(_t.Content(role=role, parts=[_t.Part.from_text(text=(m.get("content") or "")[:8000])]))
+
+    # Fichiers joints (image/PDF lus nativement par Gemini) -> ajoutés au dernier message utilisateur
+    if attachments and contents and contents[-1].role == "user":
+        import base64 as _b64
+        for att in (attachments or [])[:5]:
+            try:
+                raw = _b64.b64decode((att.get("data") or "").split(",")[-1])
+                mime = att.get("mime_type") or "application/octet-stream"
+                if raw and (mime.startswith("image/") or mime == "application/pdf"):
+                    contents[-1].parts.append(_t.Part.from_bytes(data=raw, mime_type=mime))
+            except Exception as e:
+                logger.warning(f"neo attachment skip: {e}")
 
     system = NEO_SYSTEM + _now_line() + await _central_memory()
     if voice:
@@ -883,6 +895,7 @@ class NeoChatRequest(BaseModel):
     messages: List[dict]
     conversation_id: Optional[str] = None
     mode: Optional[str] = None  # "voice" => réponses orales concises
+    attachments: Optional[List[dict]] = None  # [{name, mime_type, data(base64)}] image/PDF
 
 
 class ConfirmRequest(BaseModel):
@@ -1022,7 +1035,7 @@ async def neo_chat(req: NeoChatRequest, current_user: dict = Depends(get_current
     if not msgs:
         raise HTTPException(status_code=400, detail="Message requis")
     try:
-        result = await run_neo(msgs, user_id, voice=(req.mode == "voice"))
+        result = await run_neo(msgs, user_id, voice=(req.mode == "voice"), attachments=req.attachments)
     except Exception as e:
         logger.error(f"neo chat error: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur Néo: {str(e)[:200]}")
