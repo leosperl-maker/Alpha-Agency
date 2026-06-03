@@ -489,27 +489,37 @@ async def _resolve_recipients():
 
 
 def _build_email(kind: str, info: dict):
+    from utils.emailer import email_shell, email_rows, email_button
     if kind == "lead":
         name = f"{info.get('first_name','')} {info.get('last_name','')}".strip() or "Prospect"
         company = info.get("company") or "—"
-        rows = "".join(
-            f"<tr><td style='padding:4px 10px;color:#666'>{k}</td>"
-            f"<td style='padding:4px 10px'><b>{(info.get(v) or '—')}</b></td></tr>"
-            for k, v in [("Nom", "first_name"), ("Email", "email"), ("Téléphone", "phone"),
-                         ("Entreprise", "company"), ("Poste", "poste"),
-                         ("Besoin", "besoin"), ("Budget", "budget")]
-        )
         subject = f"🔔 Nouveau lead chatbot : {name} ({company})"
-        html = (f"<h2>Nouveau lead via le chatbot du site</h2>"
-                f"<table style='border-collapse:collapse'>{rows}</table>"
-                f"<p><a href='{SITE_URL}/admin/demandes'>Voir dans le CRM (Demandes)</a></p>")
+        inner = (
+            "<p>Un visiteur vient d'être qualifié par l'assistant de votre site.</p>"
+            + email_rows([
+                ("Nom", name),
+                ("Email", info.get("email")),
+                ("Téléphone", info.get("phone")),
+                ("Entreprise", info.get("company")),
+                ("Poste", info.get("poste")),
+                ("Besoin", info.get("besoin")),
+                ("Budget", info.get("budget")),
+            ])
+            + email_button("Voir dans le CRM", f"{SITE_URL}/admin/demandes")
+        )
+        html = email_shell("Nouveau lead chatbot", inner, preheader=f"{name} — {company}")
     else:  # devis
         subject = f"📄 Devis prêt à valider : {info.get('number','')} — {info.get('name','')}"
-        html = (f"<h2>Un devis a été pré-rempli par l'assistant IA</h2>"
-                f"<p>Numéro : <b>{info.get('number','')}</b> — Total estimé : "
-                f"<b>{info.get('total',0):.2f} € TTC</b> (à vérifier).</p>"
-                f"<p>Client : <b>{info.get('name','')}</b></p>"
-                f"<p><a href='{SITE_URL}/admin/facturation'>Vérifier le devis</a></p>")
+        inner = (
+            "<p>L'assistant IA a pré-rempli un devis à partir d'une conversation. À vérifier et ajuster avant envoi.</p>"
+            + email_rows([
+                ("Client", info.get("name")),
+                ("N° devis", info.get("number")),
+                ("Total estimé", f"{info.get('total', 0):.2f} € TTC"),
+            ])
+            + email_button("Vérifier le devis", f"{SITE_URL}/admin/facturation")
+        )
+        html = email_shell("Devis prêt à valider", inner, preheader=info.get("name", ""))
     return subject, html
 
 
@@ -605,6 +615,17 @@ async def public_chat(req: PubChatRequest, request: Request):
             lead_captured = True
             if is_new:
                 await _notify_leo("lead", lead)
+                # SMS d'alerte à l'équipe (Twilio)
+                try:
+                    from utils.sms import notify_admin_sms
+                    name = f"{lead.get('first_name','')} {lead.get('last_name','')}".strip() or "Un prospect"
+                    company = lead.get("company") or "particulier"
+                    besoin = lead.get("besoin") or lead.get("project_type") or "un projet"
+                    sms = (f"Alpha Agency : nouvelle demande chatbot de {name} ({company}) "
+                           f"pour {besoin}. Devis en attente d'approbation dans le CRM.")
+                    await asyncio.to_thread(notify_admin_sms, sms)
+                except Exception as e:
+                    logger.error(f"SMS lead alert failed: {e}")
 
     # 3) Devis : bloc [QUOTE] émis par l'agent
     _, quote = _extract_block(raw, "QUOTE")

@@ -656,35 +656,36 @@ async def test_email_notification(request: TestEmailRequest = None, current_user
     if not target_email:
         raise HTTPException(status_code=400, detail="Email non trouvé")
     
-    html = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 20px;">
-        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <div style="background: linear-gradient(135deg, #e63946, #c1121f); color: white; padding: 20px; text-align: center;">
-                <h1 style="margin: 0; font-size: 24px;">✅ Test Email Réussi</h1>
-            </div>
-            <div style="padding: 30px; text-align: center;">
-                <p style="color: #666; font-size: 16px;">
-                    Félicitations ! Votre configuration d'emails fonctionne correctement.
-                </p>
-                <p style="color: #999; font-size: 14px; margin-top: 20px;">
-                    Envoyé depuis Alpha Agency CRM via Brevo API
-                </p>
-                <p style="color: #ccc; font-size: 12px; margin-top: 10px;">
-                    Expéditeur: noreply@alphagency.fr
-                </p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    
+    from utils.emailer import email_shell
+    html = email_shell(
+        "✅ Vos emails fonctionnent",
+        "<p>Félicitations ! La configuration d'emails de votre CRM fonctionne parfaitement.</p>"
+        "<p style='color:#6b7280;font-size:13px;'>Email envoyé via Resend depuis le CRM Alpha Agency.</p>",
+        preheader="Test email Alpha Agency CRM",
+    )
+
     success = await send_email_notification(target_email, "✅ Test Email - Alpha Agency CRM", html, "")
     
     if success:
         return {"message": f"Email de test envoyé à {target_email}", "success": True}
     else:
         raise HTTPException(status_code=500, detail="Échec de l'envoi de l'email de test")
+
+
+class TestSmsRequest(BaseModel):
+    to: Optional[str] = None
+
+@api_router.post("/notifications/test-sms", response_model=dict)
+async def test_sms_notification(request: TestSmsRequest = None, current_user: dict = Depends(get_current_user)):
+    """Envoie un SMS de test via Twilio (vers `to` ou ADMIN_NOTIFY_PHONE)."""
+    from utils.sms import send_sms
+    target = (request.to if request and request.to else os.environ.get("ADMIN_NOTIFY_PHONE", "")).strip()
+    if not target:
+        raise HTTPException(status_code=400, detail="Aucun numéro (définissez ADMIN_NOTIFY_PHONE ou passez 'to')")
+    code, text = await asyncio.to_thread(send_sms, target, "Alpha Agency : test SMS depuis votre CRM. Twilio est bien configuré.")
+    if code in (200, 201):
+        return {"success": True, "to": target}
+    raise HTTPException(status_code=500, detail=f"Échec SMS ({code}): {text}")
 
 # ==================== PDF GENERATION ====================
 
