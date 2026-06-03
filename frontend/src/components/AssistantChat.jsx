@@ -208,7 +208,7 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
 
   // lecture auto de la dernière réponse de Néo quand la voix est activée
   useEffect(() => {
-    if (!voiceOn) return;
+    if (!voiceOn || voiceMode) return; // le mode vocal plein écran gère seul l'audio (sinon double/triple voix)
     const i = messages.length - 1;
     if (i < 0) return;
     const m = messages[i];

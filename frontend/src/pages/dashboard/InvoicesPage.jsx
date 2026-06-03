@@ -95,18 +95,18 @@ const InvoicesPage = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [servicesDialogOpen, setServicesDialogOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
-  // Aperçu PDF inline dans le dialogue de visualisation
-  const [pdfUrl, setPdfUrl] = useState(null);
+  // Aperçu PDF inline (rendu en images -> fiable sur mobile/iOS)
+  const [pdfPages, setPdfPages] = useState([]);
   const [pdfLoading, setPdfLoading] = useState(false);
   useEffect(() => {
     if (!viewDialogOpen || !selectedInvoice?.id) return;
-    let cancelled = false; let url = null;
-    setPdfUrl(null); setPdfLoading(true);
-    invoicesAPI.getPDF(selectedInvoice.id)
-      .then((res) => { if (cancelled) return; url = URL.createObjectURL(new Blob([res.data], { type: "application/pdf" })); setPdfUrl(url); })
-      .catch(() => { if (!cancelled) setPdfUrl(null); })
+    let cancelled = false;
+    setPdfPages([]); setPdfLoading(true);
+    invoicesAPI.getPreview(selectedInvoice.id)
+      .then((res) => { if (!cancelled) setPdfPages(res.data?.pages || []); })
+      .catch(() => { if (!cancelled) setPdfPages([]); })
       .finally(() => { if (!cancelled) setPdfLoading(false); });
-    return () => { cancelled = true; if (url) URL.revokeObjectURL(url); };
+    return () => { cancelled = true; };
   }, [viewDialogOpen, selectedInvoice?.id]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -2467,14 +2467,18 @@ BANQUE : ..."
                 </Button>
               </div>
 
-              {/* Aperçu du vrai PDF (le document tel qu'il sera envoyé) */}
-              <div className="rounded-lg border border-border overflow-hidden bg-white" style={{ height: "60vh" }}>
+              {/* Aperçu du vrai PDF (rendu en images : fiable sur mobile + desktop) */}
+              <div className="rounded-lg border border-border overflow-y-auto bg-neutral-100 max-h-[60vh]">
                 {pdfLoading ? (
-                  <div className="h-full flex items-center justify-center text-muted-foreground text-sm">Génération de l'aperçu…</div>
-                ) : pdfUrl ? (
-                  <iframe title="Aperçu du document" src={pdfUrl} className="w-full h-full border-0" />
+                  <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">Génération de l'aperçu…</div>
+                ) : pdfPages.length > 0 ? (
+                  <div className="flex flex-col items-center gap-2 p-2">
+                    {pdfPages.map((src, i) => (
+                      <img key={i} src={src} alt={`Page ${i + 1}`} className="w-full h-auto rounded shadow-sm" />
+                    ))}
+                  </div>
                 ) : (
-                  <div className="h-full flex items-center justify-center text-muted-foreground text-sm px-4 text-center">
+                  <div className="h-40 flex items-center justify-center text-muted-foreground text-sm px-4 text-center">
                     Aperçu indisponible. Utilise « Télécharger le PDF ».
                   </div>
                 )}

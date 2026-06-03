@@ -147,6 +147,7 @@ export const invoicesAPI = {
   update: (id, data) => api.put(`/invoices/${id}`, data),
   updateStatus: (id, status) => api.put(`/invoices/${id}/status`, { status }),
   getPDF: (id) => api.get(`/invoices/${id}/pdf`, { responseType: 'blob' }),
+  getPreview: (id) => api.get(`/invoices/${id}/preview`),
   delete: (id) => api.delete(`/invoices/${id}`),
   // Payments
   getPayments: (id) => api.get(`/invoices/${id}/payments`),

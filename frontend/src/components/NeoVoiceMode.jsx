@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { X, Mic, MicOff, Loader2, ChevronDown, Check } from "lucide-react";
 import { neoAPI } from "../lib/api";
 
+const IS_IOS = typeof navigator !== "undefined" && /iP(hone|ad|od)/.test(navigator.userAgent || "");
+
 /**
  * Mode vocal « Operator » plein écran pour Néo — façon ChatGPT/Gemini Live.
  * Orbe XL centré, audio-réactif : se déforme quand Néo parle, calme quand il écoute.
@@ -81,20 +83,8 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
       if (!runningRef.current) return;
       const url = URL.createObjectURL(res.data);
       const audio = new Audio(url);
+      audio.preload = "auto";
       audioRef.current = audio;
-      // chaîne Web Audio pour l'analyse d'amplitude
-      try {
-        if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-        const ctx = audioCtxRef.current;
-        if (ctx.state === "suspended") await ctx.resume();
-        const srcNode = ctx.createMediaElementSource(audio);
-        const analyser = ctx.createAnalyser();
-        analyser.fftSize = 256;
-        srcNode.connect(analyser);
-        analyser.connect(ctx.destination);
-        analyserRef.current = analyser;
-        rafRef.current = requestAnimationFrame(animateOrb);
-      } catch (e) { /* pas d'analyse audio -> on joue quand même */ }
       const finish = () => {
         URL.revokeObjectURL(url);
         resetOrb();
@@ -102,6 +92,21 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
       };
       audio.onended = finish;
       audio.onerror = finish;
+      // Analyse d'amplitude (orbe réactif) — desktop uniquement : createMediaElementSource coupe le son sur iOS
+      if (!IS_IOS) {
+        try {
+          if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+          const ctx = audioCtxRef.current;
+          if (ctx.state === "suspended") await ctx.resume();
+          const srcNode = ctx.createMediaElementSource(audio);
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 256;
+          srcNode.connect(analyser);
+          analyser.connect(ctx.destination);
+          analyserRef.current = analyser;
+          rafRef.current = requestAnimationFrame(animateOrb);
+        } catch (e) { analyserRef.current = null; }
+      }
       await audio.play();
     } catch (e) {
       resetOrb();
@@ -122,6 +127,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
   const handleUtterance = useCallback(async (text) => {
     const content = (text || "").trim();
     if (!content) { startListeningRef.current?.(); return; }
+    if (phaseRef.current === "thinking" || phaseRef.current === "speaking") return; // anti double-déclenchement (évite les voix superposées)
     setPhaseBoth("thinking");
     setCaption("");
     const userMsg = { role: "user", content };
@@ -274,7 +280,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
         <button onClick={onOrbTap} className="relative outline-none" aria-label="Interagir avec Néo">
           <span
             ref={orbRef}
-            className={`block rounded-full will-change-transform ${phase === "listening" || phase === "idle" ? "neo-orb-breathe" : ""} ${phase === "thinking" ? "neo-orb-think" : ""}`}
+            className={`block rounded-full will-change-transform ${(phase === "listening" || phase === "idle" || (phase === "speaking" && IS_IOS)) ? "neo-orb-breathe" : ""} ${phase === "thinking" ? "neo-orb-think" : ""}`}
             style={{
               width: 200, height: 200,
               background: "radial-gradient(120% 120% at 32% 26%, #FF8A98 0%, #E11D2E 42%, #7A0F2B 76%, #2C0610 100%)",

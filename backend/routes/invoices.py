@@ -1112,6 +1112,37 @@ async def download_invoice_pdf(invoice_id: str, current_user: dict = Depends(get
     )
 
 
+@router.get("/{invoice_id}/preview")
+async def invoice_pdf_preview(invoice_id: str, current_user: dict = Depends(get_current_user)):
+    """Aperçu du PDF rendu en images PNG (fiable sur mobile/iOS où l'iframe PDF s'affiche en noir)."""
+    import base64, logging
+    _log = logging.getLogger("invoices")
+    invoice = await db.invoices.find_one({"id": invoice_id}, {"_id": 0})
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+    contact = await db.contacts.find_one({"id": invoice['contact_id']}, {"_id": 0}) or {"first_name": "", "last_name": "", "email": "", "company": ""}
+    invoice_settings = await db.settings.find_one({"type": "invoice_settings"}, {"_id": 0})
+    doc_type = invoice.get('document_type', 'facture')
+    pdf_buffer = generate_professional_pdf(invoice, contact, doc_type, invoice_settings)
+    pdf_bytes = pdf_buffer.getvalue() if hasattr(pdf_buffer, "getvalue") else pdf_buffer.read()
+    try:
+        try:
+            import pymupdf as _fitz
+        except ImportError:
+            import fitz as _fitz
+        doc = _fitz.open(stream=pdf_bytes, filetype="pdf")
+        mat = _fitz.Matrix(2, 2)  # ~144 DPI, net mais raisonnable
+        pages = []
+        for page in doc:
+            pix = page.get_pixmap(matrix=mat, alpha=False)
+            pages.append("data:image/png;base64," + base64.b64encode(pix.tobytes("png")).decode())
+        doc.close()
+        return {"pages": pages, "count": len(pages)}
+    except Exception as e:
+        _log.warning(f"preview render error: {e}")
+        raise HTTPException(status_code=500, detail="Aperçu indisponible")
+
+
 @router.get("/{invoice_id}/pdf-url")
 async def get_invoice_pdf_url(invoice_id: str, current_user: dict = Depends(get_current_user)):
     """Generate PDF and upload to Cloudinary, return direct URL (iOS compatible)"""
