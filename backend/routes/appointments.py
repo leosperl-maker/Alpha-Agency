@@ -431,24 +431,16 @@ async def send_admin_confirmation_email(appointment: dict, contact: dict):
         </div>
         """
         
-        response = requests.post(
-            'https://api.brevo.com/v3/smtp/email',
-            headers={
-                'api-key': BREVO_API_KEY,
-                'Content-Type': 'application/json'
-            },
-            json={
-                'sender': {'name': BREVO_SENDER_NAME, 'email': BREVO_SENDER_EMAIL},
-                'to': [{'email': admin_email, 'name': 'Admin Alpha Agency'}],
-                'subject': f"✅ RDV créé - {appointment['title']} - {day_name} {date_str} à {time_str} avec {client_name}",
-                'htmlContent': html_content
-            }
+        from utils.emailer import send_email
+        code, text = send_email(
+            admin_email,
+            f"✅ RDV créé - {appointment['title']} - {day_name} {date_str} à {time_str} avec {client_name}",
+            html_content,
         )
-        
-        if response.status_code in [200, 201, 202]:
+        if code in (200, 201, 202):
             logger.info(f"Admin confirmation email sent to {admin_email} for appointment {appointment['id']}")
         else:
-            logger.error(f"Failed to send admin confirmation email: {response.text}")
+            logger.error(f"Failed to send admin confirmation email: {text}")
             
     except Exception as e:
         logger.error(f"Error sending admin confirmation email: {e}")
@@ -671,20 +663,20 @@ async def send_invitation_email(appointment_id: str, current_user: dict = Depend
     # Send via Brevo with ICS attachment
     try:
         response = requests.post(
-            'https://api.brevo.com/v3/smtp/email',
+            'https://api.resend.com/emails',
             headers={
-                'api-key': BREVO_API_KEY,
+                'Authorization': f"Bearer {os.environ.get('RESEND_API_KEY','')}",
                 'Content-Type': 'application/json'
             },
             json={
-                'sender': {'name': BREVO_SENDER_NAME, 'email': BREVO_SENDER_EMAIL},
-                'to': [{'email': contact['email'], 'name': client_name}],
+                'from': (os.environ.get('SENDER_EMAIL') or 'Alpha Agency <noreply@alphagency.fr>'),
+                'to': [contact['email']],
                 'subject': f"📅 RDV - {apt['title']} - {day_name} {date_str} à {time_str}",
-                'htmlContent': html_content,
-                'attachment': [
+                'html': html_content,
+                'attachments': [
                     {
                         'content': ics_base64,
-                        'name': f"rdv_{date_str.replace('/', '-')}.ics"
+                        'filename': f"rdv_{date_str.replace('/', '-')}.ics"
                     }
                 ]
             }

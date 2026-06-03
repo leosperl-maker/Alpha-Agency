@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List
+import os
 import uuid
 from datetime import datetime, timezone, timedelta
 from io import BytesIO
@@ -1461,30 +1462,30 @@ Cordialement,
     
     filename = f"{'devis' if doc_type == 'devis' else 'facture'}_{doc_number}.pdf"
     
-    # Copy recipient for company
-    copy_email = "leo.sperl@alphagency.com"
-    
+    # Copie cachée pour l'agence
+    copy_email = "leo.sperl@alphagency.fr"
+
     email_data = {
-        "sender": {"name": company_name, "email": sender_email},
-        "to": [{"email": request.recipient_email, "name": client_name}],
-        "bcc": [{"email": copy_email, "name": "Alpha Agency"}],  # Hidden copy
+        "from": (os.environ.get("SENDER_EMAIL") or "Alpha Agency <noreply@alphagency.fr>"),
+        "to": [request.recipient_email],
+        "bcc": [copy_email],
         "subject": subject,
-        "htmlContent": html_body,
-        "attachment": [{"content": pdf_base64, "name": filename}]
+        "html": html_body,
+        "attachments": [{"content": pdf_base64, "filename": filename}]
     }
-    
+
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            "https://api.brevo.com/v3/smtp/email",
+            "https://api.resend.com/emails",
             headers={
-                "api-key": brevo_api_key,
+                "Authorization": f"Bearer {os.environ.get('RESEND_API_KEY','')}",
                 "Content-Type": "application/json"
             },
             json=email_data
         )
-        
+
         if response.status_code not in [200, 201]:
-            logger.error(f"Brevo error: {response.text}")
+            logger.error(f"Resend error: {response.text}")
             raise HTTPException(status_code=500, detail="Erreur lors de l'envoi de l'email")
     
     # Update invoice to mark as sent

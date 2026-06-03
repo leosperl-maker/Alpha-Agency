@@ -232,24 +232,20 @@ async def send_transfer_email(
         </html>
         """
         
-        # Send via Brevo API
-        url = "https://api.brevo.com/v3/smtp/email"
+        # Send via Resend
+        url = "https://api.resend.com/emails"
         headers = {
-            "accept": "application/json",
-            "content-type": "application/json",
-            "api-key": BREVO_API_KEY
+            "Authorization": f"Bearer {os.environ.get('RESEND_API_KEY','')}",
+            "content-type": "application/json"
         }
-        
+
         payload = {
-            "sender": {
-                "name": f"{sender_name} via {COMPANY_NAME}",
-                "email": BREVO_SENDER_EMAIL
-            },
-            "to": [{"email": to_email}],
+            "from": f"{sender_name} via Alpha Agency <noreply@alphagency.fr>",
+            "to": [to_email],
             "subject": f"📁 {sender_name} vous a envoyé des fichiers - {transfer_title}",
-            "htmlContent": html_content
+            "html": html_content
         }
-        
+
         response = requests.post(url, json=payload, headers=headers)
         
         if response.status_code in [200, 201]:
@@ -558,21 +554,17 @@ async def add_comment(transfer_id: str, comment: CommentCreate):
         sender_email = transfer.get("sender_email")
         if sender_email and BREVO_API_KEY:
             try:
-                url = "https://api.brevo.com/v3/smtp/email"
+                url = "https://api.resend.com/emails"
                 headers = {
-                    "accept": "application/json",
-                    "content-type": "application/json",
-                    "api-key": BREVO_API_KEY
+                    "Authorization": f"Bearer {os.environ.get('RESEND_API_KEY','')}",
+                    "content-type": "application/json"
                 }
-                
+
                 payload = {
-                    "sender": {
-                        "name": BREVO_SENDER_NAME,
-                        "email": BREVO_SENDER_EMAIL
-                    },
-                    "to": [{"email": sender_email}],
+                    "from": (os.environ.get("SENDER_EMAIL") or "Alpha Agency <noreply@alphagency.fr>"),
+                    "to": [sender_email],
                     "subject": f"💬 Nouveau commentaire sur votre transfert - {transfer['title']}",
-                    "htmlContent": f"""
+                    "html": f"""
                     <html>
                     <body style="font-family: Arial, sans-serif; padding: 20px;">
                         <h2 style="color: #6366f1;">Nouveau commentaire</h2>

@@ -414,48 +414,31 @@ BREVO_SMTP_KEY = os.environ.get('BREVO_SMTP_KEY', '')
 BREVO_SENDER_EMAIL = os.environ.get('BREVO_SENDER_EMAIL', 'noreply@alphagency.fr')
 BREVO_SENDER_NAME = os.environ.get('BREVO_SENDER_NAME', 'Alpha Agency')
 
+def resend_sender():
+    """Expéditeur Resend (domaine alphagency.fr vérifié)."""
+    s = SENDER_EMAIL
+    if not s or "resend.dev" in s:
+        return "Alpha Agency <noreply@alphagency.fr>"
+    return s if "<" in s else f"Alpha Agency <{s}>"
+
+
 async def send_email_notification(to: str, subject: str, html_content: str, to_name: str = None):
-    """Send transactional email via Brevo API"""
-    if not BREVO_API_KEY:
-        logger.warning("BREVO_API_KEY not configured, skipping email")
+    """Send transactional email via Resend (remplace Brevo)."""
+    if not RESEND_API_KEY:
+        logger.warning("RESEND_API_KEY not configured, skipping email")
         return False
-    
     try:
-        url = "https://api.brevo.com/v3/smtp/email"
-        headers = {
-            "accept": "application/json",
-            "content-type": "application/json",
-            "api-key": BREVO_API_KEY
-        }
-        
-        # Use a verified sender - Brevo requires sender verification
-        sender_email = BREVO_SENDER_EMAIL
-        sender_name = BREVO_SENDER_NAME
-        
-        payload = {
-            "sender": {
-                "name": sender_name,
-                "email": sender_email
-            },
-            "to": [{"email": to, "name": to_name or to.split('@')[0]}],
+        params = {
+            "from": resend_sender(),
+            "to": [to],
             "subject": subject,
-            "htmlContent": html_content
+            "html": html_content,
         }
-        
-        response = await asyncio.to_thread(
-            lambda: requests.post(url, headers=headers, json=payload, timeout=10)
-        )
-        
-        if response.status_code == 201:
-            logger.info(f"Email sent successfully to {to} via Brevo API")
-            return True
-        else:
-            logger.error(f"Brevo API error: {response.status_code} - {response.text}")
-            # Log mais ne pas bloquer l'application
-            return False
-            
+        result = await asyncio.to_thread(lambda: resend.Emails.send(params))
+        logger.info(f"Email sent to {to} via Resend (id={result.get('id') if isinstance(result, dict) else result})")
+        return True
     except Exception as e:
-        logger.error(f"Failed to send email via Brevo: {e}")
+        logger.error(f"Failed to send email via Resend: {e}")
         return False
 
 async def send_new_lead_notification(lead: dict):
@@ -2789,23 +2772,23 @@ async def send_test_email(
     """
     
     email_data = {
-        "sender": {"name": company_name, "email": sender_email},
-        "to": [{"email": test_recipient, "name": "Test"}],
+        "from": resend_sender(),
+        "to": [test_recipient],
         "subject": f"[TEST] {subject}",
-        "htmlContent": html_body
+        "html": html_body
     }
-    
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                "https://api.brevo.com/v3/smtp/email",
-                headers={"api-key": brevo_api_key, "Content-Type": "application/json"},
+                "https://api.resend.com/emails",
+                headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
                 json=email_data
             )
             if response.status_code in [200, 201]:
                 return {"success": True, "message": f"Email de test envoyé à {test_recipient}", "sent_to": test_recipient}
             else:
-                raise HTTPException(status_code=500, detail=f"Erreur Brevo: {response.text}")
+                raise HTTPException(status_code=500, detail=f"Erreur Resend: {response.text}")
     except HTTPException:
         raise
     except Exception as e:

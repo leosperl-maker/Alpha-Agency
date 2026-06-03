@@ -514,24 +514,26 @@ def _build_email(kind: str, info: dict):
 
 
 def _send_brevo(to_emails, subject: str, html: str):
-    """Envoi Brevo synchrone. Retourne (status, text) pour diagnostic."""
-    if not BREVO_API_KEY:
-        return 0, "no_brevo_key"
+    """Envoi email via Resend (synchrone). Retourne (status, text) pour diagnostic."""
+    key = os.environ.get("RESEND_API_KEY", "")
+    if not key:
+        return 0, "no_resend_key"
     import requests
+    sender = os.environ.get("SENDER_EMAIL") or "noreply@alphagency.fr"
+    if "<" not in sender:
+        sender = f"Alpha Agency <{sender}>"
     try:
         r = requests.post(
-            "https://api.brevo.com/v3/smtp/email",
-            headers={"api-key": BREVO_API_KEY, "Content-Type": "application/json", "accept": "application/json"},
-            json={"sender": {"name": BREVO_SENDER_NAME, "email": BREVO_SENDER_EMAIL},
-                  "to": [{"email": e} for e in to_emails],
-                  "subject": subject, "htmlContent": html},
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            json={"from": sender, "to": list(to_emails), "subject": subject, "html": html},
             timeout=15,
         )
         if r.status_code not in (200, 201, 202):
-            logger.error(f"public_chat brevo error {r.status_code}: {r.text[:200]}")
+            logger.error(f"public_chat resend error {r.status_code}: {r.text[:200]}")
         return r.status_code, r.text[:300]
     except Exception as e:
-        logger.error(f"public_chat brevo exception: {e}")
+        logger.error(f"public_chat resend exception: {e}")
         return -1, str(e)[:200]
 
 

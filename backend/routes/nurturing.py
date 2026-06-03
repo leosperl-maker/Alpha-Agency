@@ -121,25 +121,24 @@ async def send_nurturing_email(
     """Send email via Brevo API"""
     import httpx
     
-    if not BREVO_API_KEY:
-        logger.warning("No Brevo API key configured")
+    if not os.environ.get("RESEND_API_KEY"):
+        logger.warning("No RESEND_API_KEY configured")
         return False
-    
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                "https://api.brevo.com/v3/smtp/email",
+                "https://api.resend.com/emails",
                 headers={
-                    "api-key": BREVO_API_KEY,
+                    "Authorization": f"Bearer {os.environ.get('RESEND_API_KEY','')}",
                     "Content-Type": "application/json"
                 },
                 json={
-                    "sender": {"name": SENDER_NAME, "email": SENDER_EMAIL},
-                    "to": [{"email": to_email, "name": to_name}],
+                    "from": (os.environ.get("SENDER_EMAIL") or "Alpha Agency <noreply@alphagency.fr>"),
+                    "to": [to_email],
                     "subject": subject,
-                    "htmlContent": html_content,
-                    "textContent": text_content or "",
-                    "tags": ["nurturing"]
+                    "html": html_content,
+                    "text": text_content or ""
                 }
             )
             
