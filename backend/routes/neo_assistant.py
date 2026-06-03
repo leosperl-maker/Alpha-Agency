@@ -19,7 +19,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Optional, List
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Response
 from pydantic import BaseModel
 
 from .database import db, get_current_user
@@ -51,6 +51,11 @@ NEO_STRATEGIC_MODEL = os.environ.get("NEO_STRATEGIC_MODEL", "claude-sonnet-4-6")
 # Qonto — méthode CLÉ API (Authorization: login:secret), pas l'OAuth (Phase 7).
 QONTO_ID = os.environ.get("QONTO_ID", "")
 QONTO_KEY_SECRET = os.environ.get("QONTO_KEY_SECRET", "")
+
+# ElevenLabs — voix de Néo (synthèse vocale premium). Clé déjà dans Railway (ELEVENLABS_API_KEY).
+ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
+ELEVENLABS_VOICE_ID = os.environ.get("ELEVENLABS_VOICE_ID", "JBFqnCBsd6RMkjVDRZzb")  # « George » (premade, multilingue FR) par défaut
+ELEVENLABS_MODEL = os.environ.get("ELEVENLABS_MODEL", "eleven_multilingual_v2")
 
 MAX_ITERS = 6  # garde-fou anti-boucle de la boucle agentique
 
@@ -871,6 +876,67 @@ async def neo_strategy(current_user: dict = Depends(get_current_user)):
 async def neo_treasury(current_user: dict = Depends(get_current_user)):
     """Tableau de trésorerie Qonto (Phase 7) : soldes par compte + transactions récentes."""
     return await _qonto_treasury(40)
+
+
+class TtsRequest(BaseModel):
+    text: str
+    voice_id: Optional[str] = None
+
+
+def _clean_for_speech(text: str) -> str:
+    """Nettoie le texte pour la voix : retire emojis et markdown (sinon ElevenLabs lit « astérisque »...)."""
+    import re
+    text = re.sub(r"[\U0001F000-\U0001FAFF\U00002600-\U000027BF\U0001F1E6-\U0001F1FF️]", "", text)  # emojis / pictos
+    text = re.sub(r"[`*_#>|]", "", text)            # markdown
+    text = re.sub(r"^\s*[-•]\s*", "", text, flags=re.MULTILINE)  # puces
+    text = re.sub(r"\n{2,}", ". ", text)            # paragraphes -> pause
+    text = re.sub(r"[ \t]{2,}", " ", text)
+    return text.strip()
+
+
+@router.post("/tts")
+async def neo_tts(req: TtsRequest, current_user: dict = Depends(get_current_user)):
+    """Voix de Néo : texte -> audio/mpeg via ElevenLabs (synthèse vocale premium)."""
+    if not ELEVENLABS_API_KEY:
+        raise HTTPException(status_code=503, detail="Voix non configurée (ELEVENLABS_API_KEY manquante).")
+    text = _clean_for_speech((req.text or "").strip())[:5000]
+    if not text:
+        raise HTTPException(status_code=400, detail="Texte requis")
+    voice_id = (req.voice_id or ELEVENLABS_VOICE_ID).strip()
+    import requests
+    try:
+        r = await asyncio.to_thread(
+            requests.post,
+            f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
+            headers={"xi-api-key": ELEVENLABS_API_KEY, "Content-Type": "application/json", "Accept": "audio/mpeg"},
+            json={"text": text, "model_id": ELEVENLABS_MODEL,
+                  "voice_settings": {"stability": 0.5, "similarity_boost": 0.75, "style": 0.0, "use_speaker_boost": True}},
+            timeout=45,
+        )
+        r.raise_for_status()
+    except Exception as e:
+        logger.warning(f"neo TTS error: {e}")
+        raise HTTPException(status_code=502, detail=f"Voix indisponible: {str(e)[:160]}")
+    return Response(content=r.content, media_type="audio/mpeg", headers={"Cache-Control": "no-store"})
+
+
+@router.get("/voices")
+async def neo_voices(current_user: dict = Depends(get_current_user)):
+    """Liste les voix ElevenLabs disponibles (pour choisir/changer la voix de Néo)."""
+    if not ELEVENLABS_API_KEY:
+        return {"connected": False, "voices": []}
+    import requests
+    try:
+        r = await asyncio.to_thread(requests.get, "https://api.elevenlabs.io/v1/voices",
+                                    headers={"xi-api-key": ELEVENLABS_API_KEY}, timeout=20)
+        r.raise_for_status()
+        voices = [{"voice_id": v.get("voice_id"), "name": v.get("name"),
+                   "labels": v.get("labels", {}), "preview_url": v.get("preview_url")}
+                  for v in (r.json().get("voices", []) or [])]
+        return {"connected": True, "current": ELEVENLABS_VOICE_ID, "model": ELEVENLABS_MODEL, "voices": voices}
+    except Exception as e:
+        logger.warning(f"neo voices error: {e}")
+        return {"connected": False, "voices": [], "error": str(e)[:160]}
 
 
 @router.post("/chat")

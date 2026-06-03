@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, X, Loader2, CheckCircle2, Eraser, Sunrise, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Send, X, Loader2, CheckCircle2, Eraser, Sunrise, Clock, ThumbsUp, ThumbsDown, Mic, Volume2, VolumeX, Square } from "lucide-react";
 import { aiEnhancedAPI, neoAPI } from "../lib/api";
 import AssistantOrb from "./AssistantOrb";
 
@@ -124,6 +124,100 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
     }
   }, [loading]);
 
+  // ====== Voix de Néo : dictée (navigateur) + synthèse vocale premium (ElevenLabs) ======
+  const [listening, setListening] = useState(false);
+  const [voiceOn, setVoiceOn] = useState(() => { try { return localStorage.getItem("neoVoice") === "1"; } catch { return false; } });
+  const [speakingIdx, setSpeakingIdx] = useState(null);
+  const recognitionRef = useRef(null);
+  const audioRef = useRef(null);
+  const speakSeqRef = useRef(0);
+  const lastSpokenRef = useRef(-1);
+  const sendRef = useRef(send);
+  useEffect(() => { sendRef.current = send; }, [send]);
+
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) { try { audioRef.current.pause(); } catch (e) { /* noop */ } audioRef.current = null; }
+    setSpeakingIdx(null);
+  }, []);
+
+  // texte -> voix de Néo (ElevenLabs via /api/neo/tts)
+  const speak = useCallback(async (text, idx) => {
+    if (!text) return;
+    stopAudio();
+    const seq = ++speakSeqRef.current;
+    const myIdx = idx ?? -1;
+    setSpeakingIdx(myIdx);
+    try {
+      const res = await neoAPI.tts(text);
+      if (seq !== speakSeqRef.current) return; // une lecture plus récente a pris le relais
+      const url = URL.createObjectURL(res.data);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      const done = () => { setSpeakingIdx((s) => (s === myIdx ? null : s)); URL.revokeObjectURL(url); };
+      audio.onended = done;
+      audio.onerror = done;
+      await audio.play();
+    } catch (e) { setSpeakingIdx(null); }
+  }, [stopAudio]);
+
+  const toggleVoice = useCallback(() => {
+    setVoiceOn((v) => {
+      const nv = !v;
+      try { localStorage.setItem("neoVoice", nv ? "1" : "0"); } catch (e) { /* noop */ }
+      if (nv) lastSpokenRef.current = messages.length - 1; // ne pas relire l'historique en activant
+      else stopAudio();
+      return nv;
+    });
+  }, [stopAudio, messages.length]);
+
+  // micro -> dictée (Web Speech API, fr-FR). À la phrase finale : envoi automatique (mains-libres).
+  const toggleMic = useCallback(() => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert("La dictée vocale n'est pas supportée par ce navigateur (essaie Chrome ou Safari)."); return; }
+    if (listening) { try { recognitionRef.current?.stop(); } catch (e) { /* noop */ } setListening(false); return; }
+    let rec = recognitionRef.current;
+    if (!rec) {
+      rec = new SR();
+      rec.lang = "fr-FR";
+      rec.interimResults = true;
+      rec.continuous = false;
+      rec.onresult = (e) => {
+        let interim = "", final = "";
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const r = e.results[i];
+          if (r.isFinal) final += r[0].transcript; else interim += r[0].transcript;
+        }
+        if (interim) setInput(interim);
+        if (final) {
+          setInput("");
+          setListening(false);
+          try { rec.stop(); } catch (e2) { /* noop */ }
+          sendRef.current(final.trim());
+        }
+      };
+      rec.onend = () => setListening(false);
+      rec.onerror = () => setListening(false);
+      recognitionRef.current = rec;
+    }
+    setInput("");
+    try { rec.start(); setListening(true); } catch (e) { /* déjà démarré */ }
+  }, [listening]);
+
+  // lecture auto de la dernière réponse de Néo quand la voix est activée
+  useEffect(() => {
+    if (!voiceOn) return;
+    const i = messages.length - 1;
+    if (i < 0) return;
+    const m = messages[i];
+    if (m.role === "assistant" && !m.error && m.content && i > lastSpokenRef.current) {
+      lastSpokenRef.current = i;
+      speak(m.content, i);
+    }
+  }, [messages, voiceOn, speak]);
+
+  // nettoyage à la fermeture du composant
+  useEffect(() => () => { stopAudio(); try { recognitionRef.current?.abort(); } catch (e) { /* noop */ } }, [stopAudio]);
+
   if (!open) return null;
 
   return (
@@ -144,6 +238,10 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <button onClick={toggleVoice} title={voiceOn ? "Couper la voix de Néo" : "Activer la voix de Néo"}
+              className={`p-2 rounded-xl transition-colors ${voiceOn ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
+              {voiceOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </button>
             {messages.length > 0 && (
               <button onClick={() => { setMessages([]); setConvId(null); }} title="Effacer"
                 className="p-2 rounded-xl hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
@@ -236,6 +334,9 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
                           <span className="text-[11px] text-muted-foreground">Utile ?</span>
                           <button onClick={() => sendFeedback(i, "up")} title="Bonne réponse" className="text-muted-foreground hover:text-success transition-colors"><ThumbsUp className="w-3.5 h-3.5" /></button>
                           <button onClick={() => setFb((s) => ({ ...s, [i]: "down-open" }))} title="À améliorer" className="text-muted-foreground hover:text-danger transition-colors"><ThumbsDown className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => (speakingIdx === i ? stopAudio() : speak(m.content, i))} title={speakingIdx === i ? "Arrêter" : "Écouter"} className="ml-auto text-muted-foreground hover:text-primary transition-colors">
+                            {speakingIdx === i ? <Square className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                          </button>
                         </div>
                       )}
                     </div>
@@ -264,9 +365,14 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
               rows={1}
-              placeholder="Demande-moi, ou dis-moi quoi faire…"
+              placeholder={listening ? "À l'écoute…" : "Demande-moi, dis-moi quoi faire, ou parle 🎙️"}
               className="flex-1 bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-sm resize-none max-h-32 py-1.5"
             />
+            <button onClick={toggleMic} title={listening ? "Arrêter la dictée" : "Parler à Néo"}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all ${
+                listening ? "bg-danger text-white animate-pulse" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
+              <Mic className="w-4 h-4" />
+            </button>
             <button onClick={() => send()} disabled={loading || !input.trim()}
               className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center flex-shrink-0 disabled:opacity-40 hover:brightness-110 transition-all">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
