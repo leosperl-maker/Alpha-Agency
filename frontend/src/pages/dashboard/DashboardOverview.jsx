@@ -34,7 +34,7 @@ const DashboardOverview = () => {
   const [churnAlerts, setChurnAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState("");
-  const [health, setHealth] = useState(null); // score de santé /100 (Néo)
+  const [checkin, setCheckin] = useState(null); // check-in Néo (message + question + score /100)
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -60,8 +60,8 @@ const DashboardOverview = () => {
           setHotLeads((leadsRes.data?.leads || []).filter(l => l.score >= 60).slice(0, 3));
         } catch (e) { /* optional */ }
         try {
-          const hs = await api.get("/neo/health-score");
-          setHealth(hs.data);
+          const ci = await api.get("/neo/checkin");
+          setCheckin(ci.data);
         } catch (e) { /* optional */ }
         try {
           const churnRes = await api.get("/analytics/churn-alerts", { params: { limit: 5 } });
@@ -137,17 +137,20 @@ const DashboardOverview = () => {
               <p className="text-xs text-muted-foreground capitalize leading-tight">{dateLabel}</p>
               <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight leading-tight">{greeting}, Léo</h1>
             </div>
-            {health && (
-              <div className="flex-shrink-0 text-right" title={`Trésorerie ${formatCurrency(health.balance)} · ${health.overdue_count} impayé(s) · ${health.pending_devis} devis · ${health.hot_leads} lead(s) chaud(s)`}>
-                <div className={`text-2xl sm:text-3xl font-bold leading-none ${health.score >= 75 ? "text-success" : health.score >= 50 ? "text-warning" : "text-danger"}`}>
-                  {health.score}<span className="text-sm text-muted-foreground font-medium">/100</span>
+            {checkin?.score != null && (
+              <div className="flex-shrink-0 text-right" title={(checkin.priorities || []).join(" · ") || "Tout est sous contrôle"}>
+                <div className={`text-2xl sm:text-3xl font-bold leading-none ${checkin.score >= 75 ? "text-success" : checkin.score >= 50 ? "text-warning" : "text-danger"}`}>
+                  {checkin.score}<span className="text-sm text-muted-foreground font-medium">/100</span>
                 </div>
-                <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">Santé · {health.label}</p>
+                <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">Santé · {checkin.label}</p>
               </div>
             )}
           </div>
 
-          <p className="mt-3.5 text-foreground/85 text-sm sm:text-base leading-relaxed max-w-2xl">{briefText}</p>
+          <p className="mt-3.5 text-foreground/85 text-sm sm:text-base leading-relaxed max-w-2xl">{checkin?.message || briefText}</p>
+          {checkin?.question && (
+            <p className="mt-1.5 text-sm text-primary font-medium max-w-2xl">{checkin.question}</p>
+          )}
 
           {/* Conversation input → assistant */}
           <button

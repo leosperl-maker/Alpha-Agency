@@ -553,6 +553,37 @@ async def neo_health_score_endpoint(current_user: dict = Depends(get_current_use
     return await _compute_health_score()
 
 
+@router.get("/checkin")
+async def neo_checkin(current_user: dict = Depends(get_current_user)):
+    """Check-in proactif matin/soir (Phase 3) : Néo te briefe à l'ouverture, ton adapté au
+    moment de la journée, alertes finances incluses, et pose la bonne question. Déterministe (rapide)."""
+    h = (datetime.now(timezone.utc).hour - 4) % 24  # Guadeloupe = UTC-4
+    moment = "matin" if 4 <= h < 12 else ("après-midi" if 12 <= h < 18 else "soir")
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    try:
+        checked = bool(await db.neo_memory.find_one({"type": "daily_log", "key": today}))
+    except Exception:
+        checked = False
+    hs = await _compute_health_score()
+    bits = []
+    if hs.get("overdue_count"):
+        bits.append(f"{hs['overdue_count']} facture(s) en retard ({hs['overdue_total']:.0f}€) à relancer")
+    if hs.get("hot_leads"):
+        bits.append(f"{hs['hot_leads']} lead(s) chaud(s) à traiter")
+    if hs.get("pending_devis"):
+        bits.append(f"{hs['pending_devis']} devis à valider")
+    prio = " · ".join(bits) if bits else "rien d'urgent, avance sur le fond"
+    if moment == "soir":
+        msg = f"Bonne soirée Léo. Bilan : {prio}. Comment a avancé ta journée ?"
+        question = "Raconte-moi où tu en es, je mets le journal à jour."
+    else:
+        salut = "Bonjour" if moment == "matin" else "Bon après-midi"
+        msg = f"{salut} Léo. Aujourd'hui : {prio}. Santé de l'agence : {hs['score']}/100 ({hs['label']})."
+        question = None if checked else "Qu'as-tu de prévu aujourd'hui ? Dis-le-moi, je m'organise avec toi."
+    return {"moment": moment, "checked_in_today": checked, "score": hs.get("score"),
+            "label": hs.get("label"), "message": msg, "question": question, "priorities": bits}
+
+
 @router.post("/chat")
 async def neo_chat(req: NeoChatRequest, current_user: dict = Depends(get_current_user)):
     user_id = current_user.get("user_id") or current_user.get("id")
