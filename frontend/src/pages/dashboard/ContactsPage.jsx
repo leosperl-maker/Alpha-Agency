@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, Search, Filter, Mail, Phone, Building, Calendar, Trash2,
   Edit, Upload, Briefcase, DollarSign, FileText, Info, Eye,
-  X, MapPin, Hash, FolderOpen, User, Target, Sparkles, Star
+  X, MapPin, Hash, FolderOpen, User, Target, Sparkles, Star,
+  Clock, Globe, MessageCircle, Crown, Megaphone
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -32,6 +33,12 @@ const SCORE_TONE = {
   chaud: "bg-danger-soft text-danger", chaude: "bg-danger-soft text-danger",
   tiède: "bg-warning-soft text-warning", tiede: "bg-warning-soft text-warning",
   froid: "bg-info-soft text-info",
+};
+const DECISION_LABEL = { oui: "Oui", probable: "Probable", non: "Non", inconnu: "À confirmer" };
+// Affichage compact du score : "85/100 · chaud"
+const scoreText = (c) => {
+  if (c?.score_value != null && c?.score_value !== "") return `${c.score_value}/100${c.score ? ` · ${c.score}` : ""}`;
+  return c?.score || null;
 };
 
 const InfoRow = ({ icon: Icon, label, value }) => {
@@ -398,7 +405,7 @@ const ContactsPage = () => {
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     <Badge className={`${STATUS_TONE[expandedContact.status] || STATUS_TONE.nouveau} border-0`}>{STATUS_LABEL[expandedContact.status] || expandedContact.status}</Badge>
-                    {expandedContact.score && <Badge className={`${SCORE_TONE[expandedContact.score] || SCORE_TONE.tiède} border-0`}>{expandedContact.score}</Badge>}
+                    {scoreText(expandedContact) && <Badge className={`${SCORE_TONE[expandedContact.score] || SCORE_TONE.tiède} border-0`}>{scoreText(expandedContact)}</Badge>}
                   </div>
                 </div>
 
@@ -420,6 +427,10 @@ const ContactsPage = () => {
                   <InfoRow icon={Briefcase} label="Activité" value={expandedContact.company_activite} />
                   <InfoRow icon={Target} label="Projet" value={expandedContact.project_type} />
                   <InfoRow icon={DollarSign} label="Budget" value={expandedContact.budget} />
+                  <InfoRow icon={Crown} label="Décideur" value={DECISION_LABEL[expandedContact.decision_level]} />
+                  <InfoRow icon={Clock} label="Délai" value={expandedContact.delai} />
+                  <InfoRow icon={MessageCircle} label="Canal préféré" value={expandedContact.canal_rappel} />
+                  <InfoRow icon={Megaphone} label="Connu via" value={expandedContact.comment_connu} />
                   <InfoRow icon={Sparkles} label="Source" value={expandedContact.source} />
                   <InfoRow icon={Calendar} label="Créé le" value={expandedContact.created_at ? new Date(expandedContact.created_at).toLocaleDateString("fr-FR") : null} />
                 </div>
@@ -429,6 +440,22 @@ const ContactsPage = () => {
                   <div className="mt-5 rounded-2xl border border-border bg-popover p-4">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-1.5"><Info className="w-3.5 h-3.5" />Besoin / Notes</p>
                     <p className="text-sm text-foreground whitespace-pre-line">{expandedContact.besoin || expandedContact.note || expandedContact.message}</p>
+                  </div>
+                )}
+
+                {/* enrichissement web (chatbot) */}
+                {(expandedContact.web_site || expandedContact.web_sector || expandedContact.web_google_rating ||
+                  (Array.isArray(expandedContact.web_socials) && expandedContact.web_socials.length > 0)) && (
+                  <div className="mt-3 rounded-2xl border border-border bg-popover p-4">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-2"><Globe className="w-3.5 h-3.5" />Enrichissement web</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                      <InfoRow icon={Globe} label="Site web" value={expandedContact.web_site === "oui" ? (expandedContact.web_url || "Oui") : (expandedContact.web_site === "non" ? "Non" : null)} />
+                      <InfoRow icon={Briefcase} label="Secteur" value={expandedContact.web_sector} />
+                      <InfoRow icon={Star} label="Note Google" value={expandedContact.web_google_rating ? `${expandedContact.web_google_rating}${expandedContact.web_reviews_count ? ` (${expandedContact.web_reviews_count} avis)` : ""}` : null} />
+                      <InfoRow icon={User} label="Taille" value={expandedContact.web_size} />
+                      <InfoRow icon={MessageCircle} label="Réseaux" value={Array.isArray(expandedContact.web_socials) && expandedContact.web_socials.length ? expandedContact.web_socials.join(", ") : null} />
+                      <InfoRow icon={Target} label="Concurrents" value={Array.isArray(expandedContact.web_competitors) && expandedContact.web_competitors.length ? expandedContact.web_competitors.join(", ") : null} />
+                    </div>
                   </div>
                 )}
 

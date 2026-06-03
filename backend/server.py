@@ -174,6 +174,14 @@ class ContactUpdate(BaseModel):
     company_address: Optional[str] = None
     company_activite: Optional[str] = None
     favorite: Optional[bool] = None
+    # Qualification commerciale (chatbot + assistant) — cf. docs d'amélioration
+    besoin: Optional[str] = None
+    score_value: Optional[int] = None
+    decision_level: Optional[str] = None
+    delai: Optional[str] = None
+    canal_rappel: Optional[str] = None
+    comment_connu: Optional[str] = None
+    completion_status: Optional[str] = None
 
 class OpportunityCreate(BaseModel):
     contact_id: str

@@ -9,6 +9,7 @@ from typing import Optional, List
 import uuid
 import base64
 import os
+import re
 from datetime import datetime, timezone, timedelta
 import logging
 import json
@@ -43,23 +44,38 @@ except Exception as _gemini_err:  # ImportError or client init error
     logger.warning(f"google-genai unavailable: {_gemini_err}")
 
 
+# Les noms de modèles Gemini sont retirés régulièrement → chaîne de repli (cf. itér. 17).
+GEMINI_MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite"]
+
+
 async def _gemini_generate(system_message: str, messages, model: str) -> str:
-    """Run a chat completion directly on Gemini with the full conversation."""
+    """Chat completion directe sur Gemini avec toute la conversation.
+    Essaie le modèle demandé puis une chaîne de repli (robustesse aux retraits de modèles)."""
     import asyncio
     contents = []
     for m in messages:
         role = "model" if getattr(m, "role", "user") == "assistant" else "user"
         contents.append({"role": role, "parts": [{"text": m.content or ""}]})
 
-    def _call():
-        resp = _gemini_client.models.generate_content(
-            model=model,
-            contents=contents,
-            config=_genai_types.GenerateContentConfig(system_instruction=system_message),
-        )
-        return (getattr(resp, "text", "") or "").strip()
-
-    return await asyncio.to_thread(_call)
+    chain = [model] + [m for m in GEMINI_MODELS if m != model]
+    last_err = None
+    for mdl in chain:
+        def _call(_m=mdl):
+            resp = _gemini_client.models.generate_content(
+                model=_m,
+                contents=contents,
+                config=_genai_types.GenerateContentConfig(system_instruction=system_message),
+            )
+            return (getattr(resp, "text", "") or "").strip()
+        try:
+            text = await asyncio.to_thread(_call)
+            if text:
+                return text
+        except Exception as e:
+            last_err = e
+            logger.warning(f"ai_enhanced: modèle Gemini {mdl} a échoué: {e}")
+            continue
+    raise RuntimeError(f"all_gemini_models_failed: {last_err}")
 
 
 # ==================== MODELS ====================
@@ -115,6 +131,14 @@ async def execute_action(action_type: str, params: dict, user_id: str) -> dict:
             return await mark_task_done_action(params)
         elif action_type == "update_contact":
             return await update_contact_action(params)
+        elif action_type == "set_contact_status":
+            return await set_contact_status_action(params)
+        elif action_type == "add_contact_note":
+            return await add_contact_note_action(params)
+        elif action_type == "schedule_followup":
+            return await schedule_followup_action(params, user_id)
+        elif action_type == "merge_contacts":
+            return await merge_contacts_action(params)
         elif action_type == "create_quote":
             return await create_quote_action(params, user_id)
         elif action_type == "get_document":
@@ -212,9 +236,13 @@ async def update_contact_action(params: dict) -> dict:
     if not contact:
         return {"success": False, "error": "Contact non trouvé"}
     
-    # Only allow certain fields to be updated
-    allowed_fields = ["phone", "email", "company", "notes", "type", "tags"]
+    # Champs autorisés à la mise à jour (le modèle contact utilise "note", pas "notes")
+    allowed_fields = ["phone", "email", "company", "note", "notes", "status", "score", "score_value",
+                      "poste", "budget", "project_type", "city", "tags", "favorite", "besoin",
+                      "decision_level", "delai", "canal_rappel", "comment_connu"]
     safe_updates = {k: v for k, v in updates.items() if k in allowed_fields}
+    if "notes" in safe_updates:  # alias -> note
+        safe_updates["note"] = safe_updates.pop("notes")
     safe_updates["updated_at"] = datetime.now(timezone.utc).isoformat()
     
     await db.contacts.update_one({"id": contact["id"]}, {"$set": safe_updates})
@@ -225,6 +253,130 @@ async def update_contact_action(params: dict) -> dict:
         "contact_id": contact["id"],
         "updates": safe_updates
     }
+
+
+async def _find_contact(params: dict):
+    """Trouve un contact par id ou par nom/entreprise/email (tokenisé)."""
+    contact_id = params.get("contact_id")
+    contact_name = params.get("contact_name") or params.get("name")
+    if contact_id:
+        return await db.contacts.find_one({"id": contact_id})
+    if contact_name:
+        tokens = [t for t in re.split(r"\s+", str(contact_name).strip()) if len(t) >= 2]
+        ors = []
+        for field in ("first_name", "last_name", "company", "email"):
+            ors.append({field: {"$regex": re.escape(str(contact_name)), "$options": "i"}})
+            for t in tokens:
+                ors.append({field: {"$regex": re.escape(t), "$options": "i"}})
+        return await db.contacts.find_one({"$or": ors}) if ors else None
+    return None
+
+
+def _contact_name(c: dict) -> str:
+    return f"{c.get('first_name', '')} {c.get('last_name', '')}".strip() or c.get("company", "Contact")
+
+
+# Libellés naturels -> statut CRM
+_STATUS_MAP = {
+    "gagné": "client", "gagne": "client", "gagnée": "client", "gagner": "client",
+    "signé": "client", "signe": "client", "client": "client",
+    "perdu": "perdu", "perdue": "perdu", "perte": "perdu", "abandonné": "perdu", "abandonne": "perdu",
+    "en cours": "en_discussion", "en discussion": "en_discussion", "discussion": "en_discussion",
+    "qualifié": "qualifie", "qualifie": "qualifie", "qualifié(e)": "qualifie",
+    "prospect": "prospect", "nouveau": "nouveau", "vip": "vip", "inactif": "inactif",
+}
+_VALID_STATUS = {"nouveau", "prospect", "qualifie", "en_discussion", "client", "vip", "inactif", "perdu"}
+
+
+async def set_contact_status_action(params: dict) -> dict:
+    """Passe un contact dans un statut (gagné/perdu/en cours...)."""
+    contact = await _find_contact(params)
+    if not contact:
+        return {"success": False, "error": "Contact non trouvé"}
+    raw = (params.get("status") or params.get("value") or "").strip().lower()
+    status = _STATUS_MAP.get(raw) or (raw if raw in _VALID_STATUS else None)
+    if not status:
+        return {"success": False, "error": f"Statut non reconnu: {params.get('status')}"}
+    await db.contacts.update_one({"id": contact["id"]},
+                                 {"$set": {"status": status, "updated_at": datetime.now(timezone.utc).isoformat()}})
+    return {"success": True, "message": f"✅ {_contact_name(contact)} → statut « {status} »", "contact_id": contact["id"]}
+
+
+async def add_contact_note_action(params: dict) -> dict:
+    """Ajoute une note horodatée à une fiche (sans écraser l'existant)."""
+    contact = await _find_contact(params)
+    if not contact:
+        return {"success": False, "error": "Contact non trouvé"}
+    note = (params.get("note") or params.get("text") or "").strip()
+    if not note:
+        return {"success": False, "error": "Note vide"}
+    existing = (contact.get("note") or "").strip()
+    stamp = datetime.now(timezone.utc).strftime("%d/%m/%Y")
+    combined = (existing + "\n\n" if existing else "") + f"[{stamp}] {note}"
+    await db.contacts.update_one({"id": contact["id"]},
+                                 {"$set": {"note": combined, "updated_at": datetime.now(timezone.utc).isoformat()}})
+    return {"success": True, "message": f"📝 Note ajoutée à {_contact_name(contact)}", "contact_id": contact["id"]}
+
+
+async def schedule_followup_action(params: dict, user_id: str) -> dict:
+    """Programme une relance = une tâche catégorie 'relance' avec échéance."""
+    contact = await _find_contact(params) if (params.get("contact_id") or params.get("contact_name") or params.get("name")) else None
+    due = params.get("due_date")
+    label = params.get("label") or params.get("title") or (
+        f"Relancer {_contact_name(contact)}" if contact else "Relance à faire")
+    task = {
+        "id": str(uuid.uuid4()),
+        "title": label,
+        "description": params.get("description", ""),
+        "status": "todo",
+        "priority": params.get("priority", "high"),
+        "category": "relance",
+        "due_date": due,
+        "contact_id": contact["id"] if contact else params.get("contact_id"),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": user_id,
+    }
+    await db.tasks.insert_one(task)
+    when = f" pour le {due}" if due else ""
+    return {"success": True, "message": f"⏰ Relance programmée : {label}{when}", "task_id": task["id"]}
+
+
+async def merge_contacts_action(params: dict) -> dict:
+    """Fusionne deux fiches en doublon : garde la principale, déplace les liens, supprime le doublon."""
+    primary = await _find_contact({"contact_id": params.get("primary_id"),
+                                   "contact_name": params.get("primary_name") or params.get("keep")})
+    duplicate = await _find_contact({"contact_id": params.get("duplicate_id"),
+                                     "contact_name": params.get("duplicate_name") or params.get("remove")})
+    if not primary or not duplicate:
+        return {"success": False, "error": "Impossible d'identifier les deux fiches à fusionner."}
+    if primary["id"] == duplicate["id"]:
+        return {"success": False, "error": "Les deux fiches désignées sont la même."}
+    # Complète les champs vides de la principale avec ceux du doublon
+    fill = {}
+    for k, v in duplicate.items():
+        if k in ("_id", "id", "created_at", "email"):
+            continue
+        if v and not primary.get(k):
+            fill[k] = v
+    notes = [n for n in [primary.get("note"), duplicate.get("note")] if n]
+    if len(notes) > 1:
+        fill["note"] = "\n\n".join(notes)
+    fill["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.contacts.update_one({"id": primary["id"]}, {"$set": fill})
+    # Réaffecte les objets liés au doublon vers la principale
+    moved = {}
+    for coll in ("invoices", "tasks", "opportunities", "appointments", "quotes"):
+        try:
+            r = await db[coll].update_many({"contact_id": duplicate["id"]},
+                                           {"$set": {"contact_id": primary["id"]}})
+            if getattr(r, "modified_count", 0):
+                moved[coll] = r.modified_count
+        except Exception as e:
+            logger.warning(f"merge_contacts: réaffectation {coll} échouée: {e}")
+    await db.contacts.delete_one({"id": duplicate["id"]})
+    detail = (" (" + ", ".join(f"{n} {c}" for c, n in moved.items()) + " déplacés)") if moved else ""
+    return {"success": True, "message": f"🔗 Fiches fusionnées dans « {_contact_name(primary)} »{detail}.",
+            "contact_id": primary["id"], "moved": moved}
 
 
 async def create_quote_action(params: dict, user_id: str) -> dict:
@@ -365,7 +517,11 @@ async def get_app_context() -> str:
     """
     context_parts = []
     today = datetime.now(timezone.utc)
-    
+    _JDAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+    context_parts.append(
+        f"📅 AUJOURD'HUI : {_JDAYS[today.weekday()]} {today.strftime('%d/%m/%Y')} "
+        f"(date ISO {today.strftime('%Y-%m-%d')}). Utilise-la pour résoudre les échéances relatives (demain, vendredi...).")
+
     def is_past_due(date_val):
         """Check if a date is in the past, handling various formats"""
         if not date_val:
@@ -627,6 +783,153 @@ async def get_context(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
 
 
+# ==================== Briefing du matin (cf. Assistant-Admin-Ameliorations §2) ====================
+def _to_dt(val):
+    """Parse une date (ISO/str/datetime) -> datetime aware UTC, ou None. Ne lève jamais."""
+    if not val:
+        return None
+    try:
+        if isinstance(val, datetime):
+            return val if val.tzinfo else val.replace(tzinfo=timezone.utc)
+        s = str(val).strip().replace("Z", "+00:00")
+        if "T" not in s:
+            s += "T00:00:00+00:00"
+        dt = datetime.fromisoformat(s)
+        return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+    except Exception:
+        return None
+
+
+async def _compute_briefing() -> dict:
+    """Priorités du jour, calcul déterministe (sans LLM). Robuste : chaque section est isolée."""
+    now = datetime.now(timezone.utc)
+    day_ago = now - timedelta(hours=24)
+    items = []
+
+    # --- Contacts / leads ---
+    try:
+        contacts = await db.contacts.find(
+            {}, {"_id": 0, "id": 1, "first_name": 1, "last_name": 1, "company": 1,
+                 "status": 1, "score": 1, "score_value": 1, "source": 1, "created_at": 1}).to_list(1000)
+    except Exception:
+        contacts = []
+
+    def _is_hot(c):
+        sv = c.get("score_value")
+        if isinstance(sv, (int, float)):
+            return sv >= 70
+        return c.get("score") in ("chaud", "chaude")
+
+    new_leads = [c for c in contacts if (_to_dt(c.get("created_at")) and _to_dt(c.get("created_at")) >= day_ago)]
+    hot_untreated = [c for c in contacts if c.get("status") == "nouveau" and _is_hot(c)]
+    silent_hot = []
+    for c in hot_untreated:
+        dt = _to_dt(c.get("created_at"))
+        if dt and (now - dt).days >= 3:
+            silent_hot.append((c, (now - dt).days))
+
+    if new_leads:
+        items.append({"key": "new_leads", "severity": "info", "count": len(new_leads),
+                      "label": f"{len(new_leads)} nouveau(x) lead(s) depuis hier",
+                      "detail": ", ".join(_contact_name(c) for c in new_leads[:4])})
+    if hot_untreated:
+        items.append({"key": "hot_leads", "severity": "danger", "count": len(hot_untreated),
+                      "label": f"{len(hot_untreated)} lead(s) chaud(s) à traiter",
+                      "detail": ", ".join(_contact_name(c) for c in hot_untreated[:4])})
+    for c, days in silent_hot[:3]:
+        items.append({"key": "silent_hot", "severity": "danger", "count": 1,
+                      "label": f"{_contact_name(c)} : lead chaud jamais rappelé depuis {days} jours",
+                      "contact_id": c.get("id")})
+
+    # --- Factures & devis ---
+    try:
+        invoices = await db.invoices.find(
+            {}, {"_id": 0, "id": 1, "invoice_number": 1, "number": 1, "document_type": 1, "status": 1,
+                 "total": 1, "client_name": 1, "contact_id": 1, "due_date": 1, "created_at": 1}).to_list(1000)
+    except Exception:
+        invoices = []
+    PAID = ("payée", "payee", "payé", "paye", "annulée", "annulee", "annulé")
+    stale_quotes, overdue_inv = [], []
+    for inv in invoices:
+        status = (inv.get("status") or "").lower()
+        if inv.get("document_type", "facture") == "devis":
+            cdt = _to_dt(inv.get("created_at"))
+            if status == "brouillon" and cdt and cdt <= day_ago:
+                stale_quotes.append(inv)
+        else:
+            if status in PAID or status == "brouillon":
+                continue
+            due = _to_dt(inv.get("due_date"))
+            if status == "en_retard" or (due and due < now):
+                overdue_inv.append(inv)
+    if stale_quotes:
+        items.append({"key": "stale_quotes", "severity": "warning", "count": len(stale_quotes),
+                      "label": f"{len(stale_quotes)} devis attendent ta validation (plus de 24h)"})
+    if overdue_inv:
+        tot = sum((i.get("total") or 0) for i in overdue_inv)
+        items.append({"key": "overdue_invoices", "severity": "danger", "count": len(overdue_inv),
+                      "label": f"{len(overdue_inv)} facture(s) en retard ({tot:.0f}€)"})
+
+    # --- Tâches ---
+    try:
+        tasks = await db.tasks.find(
+            {}, {"_id": 0, "id": 1, "title": 1, "status": 1, "category": 1, "due_date": 1}).to_list(1000)
+    except Exception:
+        tasks = []
+    overdue_tasks = []
+    for t in tasks:
+        if (t.get("status") or "") in ("done", "cancelled", "annulée"):
+            continue
+        due = _to_dt(t.get("due_date"))
+        if due and due < now:
+            overdue_tasks.append(t)
+    if overdue_tasks:
+        relances = [t for t in overdue_tasks if t.get("category") == "relance"]
+        lbl = f"{len(overdue_tasks)} tâche(s) en retard"
+        if relances:
+            lbl += f" (dont {len(relances)} relance(s))"
+        items.append({"key": "overdue_tasks", "severity": "warning", "count": len(overdue_tasks), "label": lbl})
+
+    # --- Rendez-vous du jour ---
+    try:
+        start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end = start + timedelta(days=1)
+        appts = await db.appointments.find(
+            {}, {"_id": 0, "id": 1, "title": 1, "start_datetime": 1, "contact_name": 1}).to_list(500)
+        today_appts = [a for a in appts if (_to_dt(a.get("start_datetime")) and start <= _to_dt(a.get("start_datetime")) < end)]
+        if today_appts:
+            items.append({"key": "appointments", "severity": "info", "count": len(today_appts),
+                          "label": f"{len(today_appts)} rendez-vous aujourd'hui",
+                          "detail": ", ".join(a.get("title") or a.get("contact_name") or "RDV" for a in today_appts[:3])})
+    except Exception:
+        pass
+
+    return {"items": items, "generated_at": now.isoformat()}
+
+
+@router.get("/briefing")
+async def get_briefing(current_user: dict = Depends(get_current_user)):
+    """Briefing du matin : priorités du jour (déterministe) + résumé en langage naturel (Gemini, repli sûr)."""
+    data = await _compute_briefing()
+    items = data["items"]
+    brief = ""
+    if items and GEMINI_AVAILABLE and _gemini_client:
+        try:
+            lines = "\n".join("- " + it["label"] + (f" ({it['detail']})" if it.get("detail") else "") for it in items)
+            system = ("Tu es l'assistant d'Alpha Agency (agence de communication, Guadeloupe). "
+                      "Rédige le BRIEFING DU MATIN de l'équipe en 2 à 4 phrases courtes, en français, ton direct et "
+                      "actionnable, sans liste à puces ni salutation pompeuse. Mets en avant l'urgent (leads chauds, "
+                      "retards) et dis par quoi commencer. Si rien n'est urgent, rassure en une phrase.")
+            user = "Priorités détectées aujourd'hui :\n" + lines + "\n\nRédige mon briefing du matin."
+            brief = await _gemini_generate(system, [ChatMessage(role="user", content=user)], "gemini-2.5-flash")
+        except Exception as e:
+            logger.warning(f"briefing NL échoué: {e}")
+    if not brief:
+        brief = ("À traiter aujourd'hui : " + " ; ".join(it["label"] for it in items) + "."
+                 if items else "Tout est sous contrôle : aucune urgence détectée pour le moment.")
+    return {"brief": brief, "items": items, "generated_at": data["generated_at"]}
+
+
 @router.post("/execute-action")
 async def execute_action_endpoint(request: ActionRequest, current_user: dict = Depends(get_current_user)):
     """Execute an action directly (without AI)"""
@@ -689,25 +992,40 @@ Actions disponibles:
 2. mark_task_done - Marquer une tâche comme terminée
    Params: task_title OU task_id
    
-3. update_contact - Modifier un contact
-   Params: contact_name OU contact_id, updates: {phone, email, company, notes, type, tags}
-   
-4. create_quote - Créer un devis
+3. update_contact - Modifier un contact (champs divers)
+   Params: contact_name OU contact_id, updates: {phone, email, company, note, status, score, poste, budget, project_type, city, tags}
+
+4. set_contact_status - Changer le statut d'un contact en langage naturel
+   Params: contact_name OU contact_id, status (ex: "gagné", "perdu", "en cours", "client", "qualifié")
+
+5. add_contact_note - Ajouter une note horodatée à une fiche (sans rien écraser)
+   Params: contact_name OU contact_id, note (texte)
+
+6. schedule_followup - Programmer une relance (crée une tâche catégorie "relance")
+   Params: contact_name OU contact_id (optionnel), due_date (YYYY-MM-DD), label (optionnel)
+
+7. merge_contacts - Fusionner deux fiches en doublon (garde la principale, déplace les liens, supprime le doublon)
+   Params: keep (nom/entreprise de la fiche à garder), remove (nom/entreprise du doublon) — OU primary_id / duplicate_id
+
+8. create_quote - Créer un devis
    Params: client_name (requis), client_email, services: [{title, description, quantity, unit_price}], notes
 
-5. get_document - Obtenir les détails d'un document uploadé
+9. get_document - Obtenir les détails d'un document uploadé
    Params: document_name OU document_id
-   
-6. list_documents - Lister les documents avec filtres
+
+10. list_documents - Lister les documents avec filtres
    Params: folder_name (optionnel), file_type (optionnel: image, document, spreadsheet, video, audio, archive), search (optionnel)
 
 Exemples:
-- "Crée une tâche pour rappeler Jean demain" → Inclure [ACTION]{"action_type": "create_task", "params": {"title": "Rappeler Jean", "due_date": "2026-01-12", "priority": "medium"}}[/ACTION]
+- "Crée une tâche pour rappeler Jean demain" → [ACTION]{"action_type": "create_task", "params": {"title": "Rappeler Jean", "due_date": "2026-06-03", "priority": "medium"}}[/ACTION]
+- "Passe ce lead en gagné" / "Marque Dupont comme client" → [ACTION]{"action_type": "set_contact_status", "params": {"contact_name": "Dupont", "status": "gagné"}}[/ACTION]
+- "Programme une relance pour vendredi pour Martin" → [ACTION]{"action_type": "schedule_followup", "params": {"contact_name": "Martin", "due_date": "2026-06-05"}}[/ACTION]
+- "Ajoute une note : a déjà travaillé avec une agence, déçu du délai" → [ACTION]{"action_type": "add_contact_note", "params": {"contact_name": "...", "note": "A déjà travaillé avec une agence, déçu du délai"}}[/ACTION]
+- "Fusionne les deux fiches Sophie Bernard en doublon" → [ACTION]{"action_type": "merge_contacts", "params": {"keep": "Sophie Bernard", "remove": "Sophie Bernard"}}[/ACTION]
 - "Marque la tâche 'Appeler client' comme terminée" → [ACTION]{"action_type": "mark_task_done", "params": {"task_title": "Appeler client"}}[/ACTION]
 - "Montre-moi les documents PDF" → [ACTION]{"action_type": "list_documents", "params": {"file_type": "document"}}[/ACTION]
-- "Trouve le fichier contrat" → [ACTION]{"action_type": "get_document", "params": {"document_name": "contrat"}}[/ACTION]
 
-IMPORTANT: N'exécute une action que si l'utilisateur le demande explicitement. Demande confirmation pour les actions irréversibles."""
+RÈGLES D'ACTION : la date du jour t'est donnée dans le contexte (utilise-la pour résoudre "demain", "vendredi"). N'exécute une action QUE si l'utilisateur le demande clairement. Pour les actions irréversibles (merge_contacts notamment) ou si un détail manque, reformule ce que tu vas faire et demande confirmation AVANT d'émettre le bloc [ACTION]."""
         
         # Fetch app context if enabled
         context_data = ""

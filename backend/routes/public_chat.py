@@ -83,6 +83,13 @@ DÉROULÉ (suis cet ordre, une question à la fois) :
  • VIDÉO / PHOTO : Quel type (produit, événement, corporate, drone) ? Où (lieu) ? Pour quel usage (réseaux, site, publicité) ? Une date ?
  Si plusieurs besoins, creuse chacun. Reformule régulièrement pour valider ta compréhension. Vise l'exhaustivité : l'équipe doit pouvoir chiffrer sans rappeler le prospect.
 
+ÉTAPE 4bis — SIGNAUX COMMERCIAUX (glisse ces 3 questions naturellement, une à une, vers la fin de la découverte ; ne les enchaîne pas en rafale) :
+ f. DÉLAI : « C'est pour quand, idéalement ? » (un projet pour bientôt vaut beaucoup plus qu'un projet vague)
+ g. COMMENT IL NOUS A CONNUS : « Au fait, comment avez-vous entendu parler d'Alpha Agency ? » (bouche-à-oreille, Google, Instagram, pub...)
+ h. CANAL DE RAPPEL PRÉFÉRÉ : « Vous préférez qu'on vous rappelle, qu'on vous écrive par mail, ou par WhatsApp ? »
+
+DÉCIDEUR : ne demande JAMAIS frontalement « c'est vous qui décidez du budget ? » (ça braque). On le déduit de la fonction déjà donnée. SEULEMENT si la fonction est ambiguë ou non donnée, tu peux glisser une question douce : « Et sur ce projet, c'est vous qui pilotez en interne, ou il y a d'autres personnes à embarquer ? »
+
 ÉTAPE 5 — CLÔTURE
  Dès que le prospect indique qu'il a terminé, qu'on peut préparer la proposition, ou te remercie pour conclure : récapitule le besoin en 2 ou 3 phrases, remercie-le et annonce que l'équipe d'Alpha Agency revient très vite avec une proposition personnalisée. Tu DOIS alors OBLIGATOIREMENT, à la fin de ce message, ré-émettre le bloc [LEAD] complet PUIS le bloc [QUOTE] avec une ligne par prestation identifiée. C'est impératif : sans [QUOTE], l'équipe n'a aucun devis à préparer. N'attends pas d'avoir tous les détails parfaits, fais ta meilleure estimation.
 
@@ -96,8 +103,8 @@ BLOCS TECHNIQUES (invisibles pour le prospect, retirés automatiquement, ne les 
 - Recherche (une fois, dès que tu connais l'entreprise) :
 [RESEARCH]{"company":"","person":"","city":"","website":""}[/RESEARCH]
 - Lead (dès prénom+nom+email ; ré-émets-le enrichi quand tu en sais plus) :
-[LEAD]{"first_name":"","last_name":"","email":"","phone":"","company":"","poste":"","project_type":"","budget":"","besoin":"","details":""}[/LEAD]
-  (besoin = résumé en une phrase ; details = TOUTES les réponses clés de la découverte, en texte)
+[LEAD]{"first_name":"","last_name":"","email":"","phone":"","company":"","poste":"","project_type":"","budget":"","delai":"","canal_rappel":"","comment_connu":"","besoin":"","details":""}[/LEAD]
+  (besoin = résumé en une phrase ; details = TOUTES les réponses clés de la découverte, en texte ; delai = échéance souhaitée ; canal_rappel = rappel/email/whatsapp ; comment_connu = comment il a connu Alpha Agency)
 - Devis recommandé (étape 5 uniquement) :
 [QUOTE]{"items":[{"title":"","description":"","quantity":1,"unit_price":0}],"notes":""}[/QUOTE]
   (estimation pour l'équipe ; unit_price en euros HT ; montants réalistes d'agence, l'équipe ajustera)
@@ -130,10 +137,11 @@ _RATE_WINDOW = 3600
 _RATE_MAX = 120
 _MAX_MESSAGES = 80
 _MAX_CHARS = 2000
-_SESSION_RESEARCH: dict = {}   # session_id -> texte de recherche
-_SESSION_CONTACT: dict = {}    # session_id -> {id, name, email}
-_SESSION_QUOTED: set = set()   # session_ids déjà devisés (évite les doublons)
-_SESSION_WA_SENT: set = set()  # session_ids ayant déjà reçu le récap WhatsApp client
+_SESSION_RESEARCH: dict = {}        # session_id -> texte de recherche
+_SESSION_RESEARCH_STRUCT: dict = {} # session_id -> enrichissement web structuré (dict)
+_SESSION_CONTACT: dict = {}         # session_id -> {id, name, email}
+_SESSION_QUOTED: set = set()        # session_ids déjà devisés (évite les doublons)
+_SESSION_WA_SENT: set = set()       # session_ids ayant déjà reçu le récap WhatsApp client
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 # Signaux de clôture côté prospect (déclenchent le devis de secours)
 _CLOSING_RE = re.compile(
@@ -280,6 +288,35 @@ async def _research(company: str, person: str = "", city: str = "", website: str
     return ""
 
 
+async def _research_structured(research_text: str) -> Optional[dict]:
+    """Extrait des champs structurés du texte de recherche (cf. doc §5). Best-effort."""
+    if not _gemini_client or not research_text:
+        return None
+    prompt = (
+        "À partir de ces informations publiques sur une entreprise, extrais des champs structurés "
+        "réutilisables pour un CRM. Réponds UNIQUEMENT par un JSON valide, sans texte autour. "
+        "Mets null (ou liste vide) pour tout champ inconnu, n'invente rien :\n"
+        '{"site_web":"oui|non","site_url":"","reseaux_actifs":["instagram","facebook","linkedin","tiktok"],'
+        '"derniere_publication":"","note_google":null,"avis_count":null,"secteur":"","taille":"","concurrents":[]}\n\n'
+        "INFOS PUBLIQUES :\n" + research_text[:4000]
+    )
+    for mdl in GEMINI_MODELS:
+        def _call(m=mdl):
+            resp = _gemini_client.models.generate_content(
+                model=m, contents=prompt,
+                config=_genai_types.GenerateContentConfig(response_mime_type="application/json"),
+            )
+            return (getattr(resp, "text", "") or "").strip()
+        try:
+            data = json.loads(await asyncio.to_thread(_call))
+            if isinstance(data, dict):
+                return data
+        except Exception as e:
+            logger.warning(f"public_chat: enrichissement structuré ({mdl}) échoué: {e}")
+            continue
+    return None
+
+
 # ==================== Parsing des blocs ====================
 def _extract_block(text: str, tag: str):
     """Retourne (texte_nettoyé, dict_ou_None) pour [TAG]{...}[/TAG] (closing optionnel)."""
@@ -310,6 +347,108 @@ def _strip_all_blocks(text: str) -> str:
     return text.strip()
 
 
+# ==================== Qualification : décideur + scoring ====================
+_DECIDEUR_OUI = re.compile(
+    r"\b(g[ée]rant|g[ée]rante|dirigeant|dirigeante|fondateur|fondatrice|co-?fondat|ceo|"
+    r"pr[ée]sident|patron|patronne|propri[ée]taire|chef d'entreprise|owner|founder|"
+    r"auto-?entrepreneur|ind[ée]pendant|artisan)\b", re.IGNORECASE)
+_DECIDEUR_PROBABLE = re.compile(
+    r"\b(directeur|directrice|dg|directeur g[ée]n[ée]ral|responsable|associ[ée]|"
+    r"head of|head|manager|chef de projet|chef de service)\b", re.IGNORECASE)
+_DECIDEUR_NON = re.compile(
+    r"\b(charg[ée] de|assistant|assistante|stagiaire|alternant|alternante|employ[ée]|"
+    r"secr[ée]taire|commercial|commerciale|vendeur|vendeuse|conseiller|conseill[èe]re)\b", re.IGNORECASE)
+
+
+def _decision_level(poste: str) -> str:
+    """Déduit le niveau de décision à partir du poste. oui|probable|non|inconnu."""
+    p = (poste or "").strip()
+    if not p:
+        return "inconnu"
+    if _DECIDEUR_OUI.search(p):
+        return "oui"
+    if _DECIDEUR_PROBABLE.search(p):
+        return "probable"
+    if _DECIDEUR_NON.search(p):
+        return "non"
+    return "inconnu"
+
+
+_DELAI_COURT = re.compile(
+    r"(urgent|urgente|asap|au plus vite|tout de suite|imm[ée]diat|d[èe]s que possible|"
+    r"cette semaine|ce mois|sous (?:une|1|deux|2|trois|3|quatre|4) semaines?|"
+    r"d'ici (?:une|1|deux|2|trois|3|quatre|4) semaines?|(?:une|1|deux|2|trois|3|quatre|4) semaines?|"
+    r"\b(?:un|1) mois\b)", re.IGNORECASE)
+_DELAI_LONG = re.compile(
+    r"(pas press[ée]|aucune urgence|un jour|peut-?[êe]tre|plus tard|l'ann[ée]e prochaine|"
+    r"dans (?:[2-9]|10|onze|douze) mois|dans (?:un|1) an|fin d'ann[ée]e|pas d'urgence)", re.IGNORECASE)
+
+
+def _delai_court(delai: str) -> bool:
+    d = (delai or "").strip()
+    if not d:
+        return False
+    if _DELAI_LONG.search(d):
+        return False
+    return bool(_DELAI_COURT.search(d))
+
+
+_HIGH_VALUE = re.compile(
+    r"\b(e-?commerce|boutique en ligne|refonte|publicit[ée]|campagne|google ads|meta ads|"
+    r"\bads\b|site complet|sur-?mesure|application|appli mobile)\b", re.IGNORECASE)
+
+
+def _service_high_value(*texts) -> bool:
+    blob = " ".join(t for t in texts if t)
+    return bool(_HIGH_VALUE.search(blob))
+
+
+def _web_active(web: dict) -> bool:
+    if not isinstance(web, dict):
+        return False
+    if str(web.get("site_web") or "").lower() == "oui":
+        return True
+    socials = web.get("reseaux_actifs") or []
+    if isinstance(socials, list) and any(s for s in socials):
+        return True
+    try:
+        if web.get("note_google") and float(web.get("note_google")) > 0:
+            return True
+    except (TypeError, ValueError):
+        pass
+    return False
+
+
+def _budget_given(budget: str) -> bool:
+    b = (budget or "").strip().lower()
+    if not b or b in ("non", "aucun", "pas de budget", "je ne sais pas", "ne sait pas", "nc", "n/c", "?"):
+        return False
+    return bool(re.search(r"\d", b)) or "€" in b or "euro" in b
+
+
+def _compute_score(data: dict, web: dict) -> tuple:
+    """Score commercial /100 (cf. Chatbot-Public-Ameliorations §7). Retourne (valeur_int, label)."""
+    score = 0
+    decision = _decision_level(data.get("poste"))
+    if _budget_given(data.get("budget")):
+        score += 30
+    if _delai_court(data.get("delai")):
+        score += 20
+    if decision == "oui":
+        score += 20
+    elif decision == "probable":
+        score += 10
+    if (data.get("email") or "").strip() and (data.get("phone") or "").strip():
+        score += 10
+    if _service_high_value(data.get("besoin"), data.get("project_type"), data.get("details")):
+        score += 15
+    if _web_active(web):
+        score += 5
+    score = max(0, min(100, score))
+    label = "chaud" if score >= 70 else ("tiède" if score >= 40 else "froid")
+    return score, label
+
+
 # ==================== Lead + Devis + Email ====================
 async def _save_lead(data: dict, ip: str):
     """Crée/MAJ un lead. Dédup par email. Retourne (contact_id, is_new) ou None."""
@@ -327,7 +466,20 @@ async def _save_lead(data: dict, ip: str):
     besoin = (data.get("besoin") or "").strip()
     details = (data.get("details") or "").strip()
     research = _SESSION_RESEARCH.get(data.get("_sid"), "")
+    web = _SESSION_RESEARCH_STRUCT.get(data.get("_sid")) or {}
+    delai = (data.get("delai") or "").strip()
+    canal = (data.get("canal_rappel") or "").strip()
+    connu = (data.get("comment_connu") or "").strip()
     now = datetime.now(timezone.utc).isoformat()
+
+    decision = _decision_level(poste)
+    score_value, score_label = _compute_score(
+        {"poste": poste, "budget": budget, "delai": delai, "email": email,
+         "phone": phone, "besoin": besoin, "project_type": project, "details": details},
+        web,
+    )
+    # Étape atteinte (repère les conversations abandonnées : cf. doc §4)
+    step = "découverte" if details else ("besoin" if (besoin or project) else "identité")
 
     note_parts = []
     if besoin:
@@ -338,19 +490,36 @@ async def _save_lead(data: dict, ip: str):
         note_parts.append("RECHERCHE WEB : " + research)
     note_text = "\n\n".join(note_parts)
 
+    # Enrichissement web structuré (cf. doc §5)
+    web_fields = {}
+    if web:
+        web_fields = {
+            "web_site": web.get("site_web"),
+            "web_url": web.get("site_url"),
+            "web_socials": web.get("reseaux_actifs") or [],
+            "web_last_post": web.get("derniere_publication"),
+            "web_google_rating": web.get("note_google"),
+            "web_reviews_count": web.get("avis_count"),
+            "web_sector": web.get("secteur"),
+            "web_size": web.get("taille"),
+            "web_competitors": web.get("concurrents") or [],
+        }
+
     existing = await db.contacts.find_one({"email": email})
     if existing:
-        updates = {"updated_at": now}
+        updates = {"updated_at": now, "score": score_label, "score_value": score_value,
+                   "decision_level": decision, "conversation_step": step}
         for key, val in (("first_name", first), ("last_name", last), ("company", company),
                          ("phone", phone), ("poste", poste), ("project_type", project),
-                         ("budget", budget)):
+                         ("budget", budget), ("delai", delai), ("canal_rappel", canal),
+                         ("comment_connu", connu)):
             if val:
                 updates[key] = val
-        if budget:
-            updates["score"] = "chaud"
         if note_text:
             updates["note"] = note_text
             updates["infos_sup"] = besoin or project
+        if web_fields:
+            updates.update({k: v for k, v in web_fields.items() if v not in (None, "", [])})
         await db.contacts.update_one({"id": existing["id"]}, {"$set": updates})
         return existing["id"], False
 
@@ -366,6 +535,9 @@ async def _save_lead(data: dict, ip: str):
         "source": "chatbot",
         "project_type": project or None,
         "budget": budget or None,
+        "delai": delai or None,
+        "canal_rappel": canal or None,
+        "comment_connu": connu or None,
         "besoin": besoin or None,
         "message": besoin or None,
         "note": note_text or None,
@@ -373,12 +545,17 @@ async def _save_lead(data: dict, ip: str):
         "tags": ["chatbot", "site web"],
         "city": None, "siret": None, "company_address": None, "company_activite": None,
         "status": "nouveau",
-        "score": "chaud" if budget else "tiède",
+        "score": score_label,
+        "score_value": score_value,
+        "decision_level": decision,
+        "conversation_step": step,
+        "completion_status": "en_cours",
         "created_at": now,
         "updated_at": now,
+        **web_fields,
     }
     await db.contacts.insert_one(contact_doc)
-    logger.info(f"public_chat: nouveau lead {email} ({company or 'n/c'})")
+    logger.info(f"public_chat: nouveau lead {email} ({company or 'n/c'}) score={score_value}")
     return contact_id, True
 
 
@@ -494,6 +671,10 @@ def _build_email(kind: str, info: dict):
     if kind == "lead":
         name = f"{info.get('first_name','')} {info.get('last_name','')}".strip() or "Prospect"
         company = info.get("company") or "—"
+        decision_map = {"oui": "Oui", "probable": "Probable", "non": "Non", "inconnu": "À confirmer"}
+        decideur = decision_map.get(info.get("decision_level"), None)
+        sv = info.get("score_value")
+        score_txt = f"{sv}/100 ({info.get('score_label','')})" if sv is not None else None
         subject = f"🔔 Nouveau lead chatbot : {name} ({company})"
         inner = (
             "<p>Un visiteur vient d'être qualifié par l'assistant de votre site.</p>"
@@ -503,8 +684,13 @@ def _build_email(kind: str, info: dict):
                 ("Téléphone", info.get("phone")),
                 ("Entreprise", info.get("company")),
                 ("Poste", info.get("poste")),
+                ("Décideur", decideur),
                 ("Besoin", info.get("besoin")),
                 ("Budget", info.get("budget")),
+                ("Délai", info.get("delai")),
+                ("Canal préféré", info.get("canal_rappel")),
+                ("Connu via", info.get("comment_connu")),
+                ("Score", score_txt),
             ])
             + email_button("Voir dans le CRM", f"{SITE_URL}/admin/demandes")
         )
@@ -587,7 +773,7 @@ async def public_chat(req: PubChatRequest, request: Request):
                            "leo.sperl@alphagency.fr et on revient vers vous très vite.",
                 "session_id": sid, "lead_captured": False, "available": True}
 
-    # 1) Recherche web (une seule fois par session)
+    # 1) Recherche web (une seule fois par session) + enrichissement structuré
     if not research:
         _, rdata = _extract_block(raw, "RESEARCH")
         if rdata and rdata.get("company"):
@@ -595,6 +781,12 @@ async def public_chat(req: PubChatRequest, request: Request):
                                     rdata.get("city", ""), rdata.get("website", ""))
             if found:
                 _SESSION_RESEARCH[sid] = found
+                try:
+                    struct = await _research_structured(found)
+                    if struct:
+                        _SESSION_RESEARCH_STRUCT[sid] = struct
+                except Exception as e:
+                    logger.warning(f"public_chat: enrichissement structuré échoué: {e}")
                 try:
                     raw = await _generate(msgs, found)  # réponse ré-informée
                 except Exception:
@@ -615,6 +807,10 @@ async def public_chat(req: PubChatRequest, request: Request):
             }
             lead_captured = True
             if is_new:
+                # Enrichit le mail avec les signaux calculés (décideur + score)
+                lead["decision_level"] = _decision_level(lead.get("poste"))
+                lead["score_value"], lead["score_label"] = _compute_score(
+                    lead, _SESSION_RESEARCH_STRUCT.get(sid) or {})
                 await _notify_leo("lead", lead)
                 # SMS d'alerte à l'équipe (Twilio)
                 try:
@@ -649,6 +845,8 @@ async def public_chat(req: PubChatRequest, request: Request):
         devis = await _create_devis(contact["id"], quote.get("items", []), quote.get("notes", ""))
         if devis:
             _SESSION_QUOTED.add(sid)
+            await db.contacts.update_one({"id": contact["id"]},
+                                         {"$set": {"completion_status": "complet", "conversation_step": "clôturé"}})
             await _notify_leo("devis", {"name": contact["name"], "number": devis[0], "total": devis[1]})
 
     # 3b) Filet de sécurité : prospect qui clôt + lead capturé + pas encore de devis -> génère le devis
@@ -659,8 +857,9 @@ async def public_chat(req: PubChatRequest, request: Request):
             devis = await _create_devis(contact["id"], qdata.get("items", []), qdata.get("notes", ""))
             if devis:
                 _SESSION_QUOTED.add(sid)
-                await asyncio.to_thread(_notify_leo, "devis",
-                                        {"name": contact["name"], "number": devis[0], "total": devis[1]})
+                await db.contacts.update_one({"id": contact["id"]},
+                                             {"$set": {"completion_status": "complet", "conversation_step": "clôturé"}})
+                await _notify_leo("devis", {"name": contact["name"], "number": devis[0], "total": devis[1]})
 
     message = _strip_all_blocks(raw)
     if not message:

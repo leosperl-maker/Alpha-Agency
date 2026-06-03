@@ -399,6 +399,7 @@ export const aiAPI = {
 export const aiEnhancedAPI = {
   getStatus: () => api.get('/ai-enhanced/status'),
   chat: (data) => api.post('/ai-enhanced/chat', data),
+  briefing: () => api.get('/ai-enhanced/briefing'),
   getContext: () => api.get('/ai-enhanced/context'),
   executeAction: (actionType, params) => api.post('/ai-enhanced/execute-action', { action_type: actionType, params }),
   analyzeImage: (file, prompt, model = 'gpt-4o') => {

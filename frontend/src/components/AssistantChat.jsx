@@ -1,14 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, X, Loader2, CheckCircle2, Eraser } from "lucide-react";
+import { Send, X, Loader2, CheckCircle2, Eraser, Sunrise } from "lucide-react";
 import { aiEnhancedAPI } from "../lib/api";
 import AssistantOrb from "./AssistantOrb";
 
 const MODEL = "gemini-2.5-flash";
 const SUGGESTIONS = [
-  "Quelles factures sont en retard ?",
   "Qui je dois relancer en priorité ?",
-  "Crée une tâche : rappeler demain",
-  "Écris un email de relance",
+  "Programme une relance pour vendredi",
+  "Quelles factures sont en retard ?",
+  "Écris un email de relance pour mon dernier lead",
 ];
 
 /**
@@ -68,6 +68,30 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
     }
   }, [input, loading, messages, convId]);
 
+  const loadBriefing = useCallback(async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const res = await aiEnhancedAPI.briefing();
+      const { brief, items = [] } = res.data || {};
+      const sev = { danger: "🔴", warning: "🟠", info: "🔵" };
+      const list = items
+        .map((it) => `${sev[it.severity] || "•"} ${it.label}${it.detail ? ` — ${it.detail}` : ""}`)
+        .join("\n");
+      const content = [brief, list].filter(Boolean).join("\n\n") || "Tout est sous contrôle aujourd'hui.";
+      setMessages((prev) => [...prev, { role: "assistant", content }]);
+    } catch (error) {
+      const detail = error.response?.data?.detail;
+      setMessages((prev) => [...prev, {
+        role: "assistant",
+        content: detail ? `⚠️ ${detail}` : "⚠️ Briefing indisponible pour l'instant (connexion serveur).",
+        error: true,
+      }]);
+    } finally {
+      setLoading(false);
+    }
+  }, [loading]);
+
   if (!open) return null;
 
   return (
@@ -108,7 +132,13 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
               <AssistantOrb size={56} pulse />
               <p className="mt-4 text-foreground font-medium">Comment puis-je t'aider ?</p>
               <p className="text-muted-foreground text-sm mt-1">Pose une question sur ton CRM, ou demande-moi d'agir.</p>
-              <div className="mt-5 grid grid-cols-1 gap-2 w-full max-w-sm">
+              <div className="mt-5 w-full max-w-sm">
+                <button onClick={loadBriefing}
+                  className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:brightness-110 transition-all">
+                  <Sunrise className="w-4 h-4" /> Mon briefing du matin
+                </button>
+              </div>
+              <div className="mt-2.5 grid grid-cols-1 gap-2 w-full max-w-sm">
                 {SUGGESTIONS.map((s) => (
                   <button key={s} onClick={() => send(s)}
                     className="text-left px-3.5 py-2.5 rounded-xl bg-secondary hover:bg-muted border border-transparent hover:border-border text-sm text-foreground/85 transition-colors">
