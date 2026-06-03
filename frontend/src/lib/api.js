@@ -427,6 +427,9 @@ export const neoAPI = {
   feedback: (data) => api.post('/neo/feedback', data),
   tts: (text, voiceId) => api.post('/neo/tts', { text, voice_id: voiceId }, { responseType: 'blob' }),
   voices: () => api.get('/neo/voices'),
+  listConversations: () => api.get('/neo/conversations'),
+  getConversation: (id) => api.get(`/neo/conversations/${id}`),
+  deleteConversation: (id) => api.delete(`/neo/conversations/${id}`),
 };
 
 // File Manager API (Gestionnaire de fichiers)

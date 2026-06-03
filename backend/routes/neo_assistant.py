@@ -953,8 +953,68 @@ async def neo_chat(req: NeoChatRequest, current_user: dict = Depends(get_current
     except Exception as e:
         logger.error(f"neo chat error: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur Néo: {str(e)[:200]}")
-    result["conversation_id"] = req.conversation_id or str(uuid.uuid4())
+    conv_id = req.conversation_id or str(uuid.uuid4())
+    result["conversation_id"] = conv_id
+    try:
+        await _persist_conversation(conv_id, user_id, msgs, result.get("message") or "")
+    except Exception as e:
+        logger.warning(f"neo conv persist: {e}")
     return result
+
+
+def _conv_title(msgs: list) -> str:
+    """Titre de conversation = 1er message utilisateur, tronqué."""
+    for m in msgs:
+        if (m.get("role") == "user") and (m.get("content") or "").strip():
+            t = m["content"].strip().splitlines()[0]
+            return (t[:50] + "…") if len(t) > 50 else t
+    return "Conversation"
+
+
+async def _persist_conversation(conv_id: str, user_id: str, msgs: list, reply: str):
+    """Sauvegarde la conversation (upsert) pour l'historique + reprise."""
+    full = [{"role": m.get("role"), "content": m.get("content") or ""} for m in msgs if m.get("content")]
+    full.append({"role": "assistant", "content": reply})
+    now = datetime.now(timezone.utc).isoformat()
+    await db.neo_conversations.update_one(
+        {"id": conv_id},
+        {"$set": {"messages": full, "title": _conv_title(msgs), "updated_at": now, "user_id": user_id},
+         "$setOnInsert": {"id": conv_id, "created_at": now}},
+        upsert=True,
+    )
+
+
+@router.get("/conversations")
+async def neo_conversations(current_user: dict = Depends(get_current_user)):
+    """Liste des conversations de l'utilisateur (récentes d'abord) pour l'historique."""
+    uid = current_user.get("user_id") or current_user.get("id")
+    rows = await db.neo_conversations.find({"user_id": uid},
+        {"_id": 0, "id": 1, "title": 1, "updated_at": 1, "messages": 1}).sort("updated_at", -1).to_list(80)
+    out = []
+    for r in rows:
+        msgs = r.get("messages") or []
+        last = (msgs[-1]["content"] if msgs else "") or ""
+        out.append({"id": r["id"], "title": r.get("title") or "Conversation",
+                    "updated_at": r.get("updated_at"), "count": len(msgs),
+                    "preview": (last[:90] + "…") if len(last) > 90 else last})
+    return {"conversations": out}
+
+
+@router.get("/conversations/{conv_id}")
+async def neo_conversation_get(conv_id: str, current_user: dict = Depends(get_current_user)):
+    """Récupère une conversation complète (pour la reprendre)."""
+    uid = current_user.get("user_id") or current_user.get("id")
+    r = await db.neo_conversations.find_one({"id": conv_id, "user_id": uid}, {"_id": 0})
+    if not r:
+        raise HTTPException(status_code=404, detail="Conversation introuvable")
+    return r
+
+
+@router.delete("/conversations/{conv_id}")
+async def neo_conversation_delete(conv_id: str, current_user: dict = Depends(get_current_user)):
+    uid = current_user.get("user_id") or current_user.get("id")
+    await db.neo_conversations.delete_one({"id": conv_id, "user_id": uid})
+    return {"success": True}
 
 
 @router.post("/confirm-action")

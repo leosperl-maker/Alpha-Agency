@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, X, Loader2, CheckCircle2, Eraser, Sunrise, Clock, ThumbsUp, ThumbsDown, Mic, Volume2, VolumeX, Square, AudioLines } from "lucide-react";
+import { Send, X, Loader2, CheckCircle2, History, SquarePen, Trash2, Sunrise, Clock, ThumbsUp, ThumbsDown, Mic, Volume2, VolumeX, Square, AudioLines } from "lucide-react";
 import { aiEnhancedAPI, neoAPI } from "../lib/api";
 import AssistantOrb from "./AssistantOrb";
 import NeoVoiceMode from "./NeoVoiceMode";
@@ -220,6 +220,33 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   // nettoyage à la fermeture du composant
   useEffect(() => () => { stopAudio(); try { recognitionRef.current?.abort(); } catch (e) { /* noop */ } }, [stopAudio]);
 
+  // ====== Historique des conversations (mémoire) ======
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [convList, setConvList] = useState([]);
+  const [histLoading, setHistLoading] = useState(false);
+  const loadHistory = useCallback(async () => {
+    setHistLoading(true);
+    try { const r = await neoAPI.listConversations(); setConvList(r.data?.conversations || []); }
+    catch (e) { setConvList([]); }
+    finally { setHistLoading(false); }
+  }, []);
+  const openHistory = useCallback(() => { setHistoryOpen(true); loadHistory(); }, [loadHistory]);
+  const openConv = useCallback(async (id) => {
+    try {
+      const r = await neoAPI.getConversation(id);
+      const conv = r.data || {};
+      setMessages((conv.messages || []).map((m) => ({ role: m.role, content: m.content })));
+      setConvId(conv.id || id);
+      setHistoryOpen(false);
+    } catch (e) { /* ignore */ }
+  }, []);
+  const newConv = useCallback(() => { setMessages([]); setConvId(null); setHistoryOpen(false); }, []);
+  const delConv = useCallback(async (id, e) => {
+    e.stopPropagation();
+    try { await neoAPI.deleteConversation(id); setConvList((l) => l.filter((c) => c.id !== id)); }
+    catch (err) { /* ignore */ }
+  }, []);
+
   if (!open) return null;
 
   return (
@@ -249,10 +276,14 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
               className={`p-2 rounded-xl transition-colors ${voiceOn ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
               {voiceOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
+            <button onClick={openHistory} title="Historique des conversations"
+              className="p-2 rounded-xl hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+              <History className="w-4 h-4" />
+            </button>
             {messages.length > 0 && (
-              <button onClick={() => { setMessages([]); setConvId(null); }} title="Effacer"
+              <button onClick={newConv} title="Nouvelle conversation"
                 className="p-2 rounded-xl hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
-                <Eraser className="w-4 h-4" />
+                <SquarePen className="w-4 h-4" />
               </button>
             )}
             <button onClick={() => onOpenChange(false)} title="Fermer"
@@ -386,6 +417,38 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
             </button>
           </div>
         </div>
+
+        {historyOpen && (
+          <div className="absolute inset-0 bg-card flex flex-col" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+            <div className="flex items-center justify-between px-4 h-16 border-b border-border flex-shrink-0">
+              <h2 className="text-foreground font-semibold text-sm">Conversations</h2>
+              <button onClick={() => setHistoryOpen(false)} title="Fermer" className="p-2 rounded-xl hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-3 flex-shrink-0">
+              <button onClick={newConv} className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:brightness-110 transition-all">
+                <SquarePen className="w-4 h-4" /> Nouvelle conversation
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-1.5">
+              {histLoading ? (
+                <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+              ) : convList.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground py-8">Aucune conversation pour l'instant.</p>
+              ) : convList.map((c) => (
+                <div key={c.id} onClick={() => openConv(c.id)} role="button" tabIndex={0}
+                  className="group rounded-xl px-3 py-2.5 hover:bg-secondary cursor-pointer flex items-start gap-2 transition-colors">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-foreground truncate font-medium">{c.title}</p>
+                    {c.preview && <p className="text-xs text-muted-foreground truncate mt-0.5">{c.preview}</p>}
+                  </div>
+                  <button onClick={(e) => delConv(c.id, e)} title="Supprimer" className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-danger transition-all flex-shrink-0 p-1">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       </div>
 
