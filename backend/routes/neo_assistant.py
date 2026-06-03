@@ -48,6 +48,10 @@ NEO_MODELS = list(dict.fromkeys([m for m in [
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 NEO_STRATEGIC_MODEL = os.environ.get("NEO_STRATEGIC_MODEL", "claude-sonnet-4-6")
 
+# Qonto — méthode CLÉ API (Authorization: login:secret), pas l'OAuth (Phase 7).
+QONTO_ID = os.environ.get("QONTO_ID", "")
+QONTO_KEY_SECRET = os.environ.get("QONTO_KEY_SECRET", "")
+
 MAX_ITERS = 6  # garde-fou anti-boucle de la boucle agentique
 
 NEO_SYSTEM = """Tu es Néo, l'associé co-gérant IA d'Alpha Agency (agence de communication digitale, Guadeloupe).
@@ -170,10 +174,14 @@ async def _exec_get_budget_summary(args, uid):
                and (i.get("status") or "").lower() not in PAID + ("brouillon",)
                and (i.get("status") == "en_retard" or (_to_dt(i.get("due_date")) and _to_dt(i.get("due_date")) < now))]
     pending_devis = [i for i in invoices if i.get("document_type") == "devis" and (i.get("status") or "").lower() == "brouillon"]
-    return {"success": True, "month": month, "income": round(income, 2), "expense": round(expense, 2),
-            "balance": round(income - expense, 2), "overdue_count": len(overdue),
-            "overdue_total": round(sum((i.get("total") or 0) for i in overdue), 2),
-            "pending_devis": len(pending_devis)}
+    res = {"success": True, "month": month, "income": round(income, 2), "expense": round(expense, 2),
+           "balance": round(income - expense, 2), "overdue_count": len(overdue),
+           "overdue_total": round(sum((i.get("total") or 0) for i in overdue), 2),
+           "pending_devis": len(pending_devis)}
+    q = await _qonto_summary()
+    if q.get("connected"):
+        res["solde_bancaire_reel_qonto"] = q.get("total_balance")
+    return res
 
 
 async def _exec_list_overdue_invoices(args, uid):
@@ -297,6 +305,32 @@ async def _central_memory() -> str:
     return out
 
 
+# ==================== Qonto — solde bancaire réel (Phase 7) ====================
+async def _qonto_summary() -> dict:
+    """Solde bancaire RÉEL via Qonto (auth clé API : 'login:secret_key'). {connected:False} si non configuré/échec."""
+    if not (QONTO_ID and QONTO_KEY_SECRET):
+        return {"success": True, "connected": False}
+    import requests
+
+    def _call():
+        r = requests.get("https://thirdparty.qonto.com/v2/organization",
+                         headers={"Authorization": f"{QONTO_ID}:{QONTO_KEY_SECRET}"}, timeout=20)
+        r.raise_for_status()
+        return r.json()
+    try:
+        data = await asyncio.to_thread(_call)
+        org = data.get("organization", {}) or {}
+        accounts = org.get("bank_accounts", []) or []
+        total = sum((a.get("balance", 0) or 0) for a in accounts)
+        accts = [{"name": a.get("name") or a.get("slug"), "balance": a.get("balance"),
+                  "currency": a.get("currency", "EUR"), "iban_last4": (a.get("iban") or "")[-4:]} for a in accounts]
+        return {"success": True, "connected": True, "total_balance": round(total, 2),
+                "currency": "EUR", "accounts": accts}
+    except Exception as e:
+        logger.warning(f"neo: Qonto indisponible: {e}")
+        return {"success": True, "connected": False, "error": str(e)[:200]}
+
+
 # ==================== Health score (Phase 4) ====================
 async def _compute_health_score() -> dict:
     """Score de santé business /100 : trésorerie + impayés + pipeline (devis) + leads chauds non traités."""
@@ -392,7 +426,10 @@ TOOLS = [
      "description": "Liste les leads récents (site + chatbot). only_hot=true pour les leads chauds (score>=70).",
      "params": _obj({"only_hot": _BOOL, "limit": _INT})},
     {"name": "get_budget_summary", "validation": False, "run": _exec_get_budget_summary,
-     "description": "Résumé financier du mois : entrées, sorties, solde, impayés (nb + total), devis en attente.",
+     "description": "Résumé financier du mois : entrées, sorties, solde, impayés (nb + total), devis en attente, + solde bancaire réel Qonto si connecté.",
+     "params": _obj({})},
+    {"name": "get_bank_balance", "validation": False, "run": lambda a, u: _qonto_summary(),
+     "description": "Solde bancaire RÉEL via Qonto (total + comptes). Pour répondre à la trésorerie réelle de l'agence.",
      "params": _obj({})},
     {"name": "list_overdue_invoices", "validation": False, "run": _exec_list_overdue_invoices,
      "description": "Liste les factures en retard (à relancer) avec le total dû.",
