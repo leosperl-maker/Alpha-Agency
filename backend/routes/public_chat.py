@@ -21,7 +21,7 @@ import logging
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, UploadFile, File, Form
 from pydantic import BaseModel
 
 from .database import db
@@ -143,6 +143,16 @@ _SESSION_RESEARCH_STRUCT: dict = {} # session_id -> enrichissement web structur�
 _SESSION_CONTACT: dict = {}         # session_id -> {id, name, email}
 _SESSION_QUOTED: set = set()        # session_ids déjà devisés (évite les doublons)
 _SESSION_WA_SENT: set = set()       # session_ids ayant déjà reçu le récap WhatsApp client
+_SESSION_ATTACHMENTS: dict = {}     # session_id -> [{url, name, type, size}] (pièces jointes du visiteur)
+
+# Pièces jointes : types acceptés + taille max
+_ALLOWED_UPLOAD = {
+    "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/heic",
+    "application/pdf", "text/plain",
+    "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+}
+_MAX_UPLOAD = 10 * 1024 * 1024  # 10 Mo
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 # Signaux de clôture côté prospect (déclenchent le devis de secours)
 _CLOSING_RE = re.compile(
@@ -472,6 +482,7 @@ async def _save_lead(data: dict, ip: str):
     details = (data.get("details") or "").strip()
     research = _SESSION_RESEARCH.get(data.get("_sid"), "")
     web = _SESSION_RESEARCH_STRUCT.get(data.get("_sid")) or {}
+    atts = _SESSION_ATTACHMENTS.get(data.get("_sid")) or []
     delai = (data.get("delai") or "").strip()
     canal = (data.get("canal_rappel") or "").strip()
     connu = (data.get("comment_connu") or "").strip()
@@ -525,6 +536,8 @@ async def _save_lead(data: dict, ip: str):
             updates["infos_sup"] = besoin or project
         if web_fields:
             updates.update({k: v for k, v in web_fields.items() if v not in (None, "", [])})
+        if atts:
+            updates["attachments"] = atts
         await db.contacts.update_one({"id": existing["id"]}, {"$set": updates})
         return existing["id"], False
 
@@ -555,6 +568,7 @@ async def _save_lead(data: dict, ip: str):
         "decision_level": decision,
         "conversation_step": step,
         "completion_status": "en_cours",
+        "attachments": atts,
         "created_at": now,
         "updated_at": now,
         **web_fields,
@@ -680,6 +694,14 @@ def _build_email(kind: str, info: dict):
         decideur = decision_map.get(info.get("decision_level"), None)
         sv = info.get("score_value")
         score_txt = f"{sv}/100 ({info.get('score_label','')})" if sv is not None else None
+        atts = info.get("attachments") or []
+        att_html = ""
+        if atts:
+            links = "".join(
+                f'<li><a href="{a.get("url")}" style="color:#E11D2E;text-decoration:none;">{a.get("name") or "fichier"}</a></li>'
+                for a in atts)
+            att_html = (f'<p style="margin-top:14px;"><strong>Pièces jointes ({len(atts)})</strong></p>'
+                        f'<ul style="margin:6px 0 0;padding-left:18px;">{links}</ul>')
         subject = f"🔔 Nouveau lead chatbot : {name} ({company})"
         inner = (
             "<p>Un visiteur vient d'être qualifié par l'assistant de votre site.</p>"
@@ -697,6 +719,7 @@ def _build_email(kind: str, info: dict):
                 ("Connu via", info.get("comment_connu")),
                 ("Score", score_txt),
             ])
+            + att_html
             + email_button("Voir dans le CRM", f"{SITE_URL}/admin/demandes")
         )
         html = email_shell("Nouveau lead chatbot", inner, preheader=f"{name} — {company}")
@@ -812,11 +835,31 @@ async def public_chat(req: PubChatRequest, request: Request):
             }
             lead_captured = True
             if is_new:
-                # Enrichit le mail avec les signaux calculés (décideur + score)
+                # Enrichit le mail avec les signaux calculés (décideur + score + pièces jointes)
                 lead["decision_level"] = _decision_level(lead.get("poste"))
                 lead["score_value"], lead["score_label"] = _compute_score(
                     lead, _SESSION_RESEARCH_STRUCT.get(sid) or {})
+                lead["attachments"] = _SESSION_ATTACHMENTS.get(sid) or []
                 await _notify_leo("lead", lead)
+                # Accusé de réception au prospect (rassure + couvre) — cf. Assistant-Admin §6
+                try:
+                    from utils.emailer import send_email, email_shell
+                    fn = (lead.get("first_name") or "").strip()
+                    besoin = lead.get("besoin") or lead.get("project_type") or "votre projet"
+                    inner = (
+                        f"<p>Bonjour {fn},</p>"
+                        f"<p>Merci d'avoir pris contact avec Alpha Agency. Nous avons bien reçu votre demande "
+                        f"concernant <strong>{besoin}</strong>.</p>"
+                        f"<p>Un conseiller revient vers vous très vite avec une proposition personnalisée. "
+                        f"En attendant, vous pouvez nous joindre au +596 696 44 73 53.</p>"
+                        f"<p>À très bientôt,<br>L'équipe Alpha Agency</p>"
+                    )
+                    html = email_shell("Votre demande est bien reçue", inner,
+                                       preheader="Nous revenons vers vous très vite.")
+                    await asyncio.to_thread(send_email, lead.get("email"),
+                                            "Votre demande chez Alpha Agency", html)
+                except Exception as e:
+                    logger.error(f"accusé réception prospect échoué: {e}")
                 # SMS d'alerte à l'équipe (Twilio)
                 try:
                     from utils.sms import notify_admin_sms
@@ -871,3 +914,53 @@ async def public_chat(req: PubChatRequest, request: Request):
         message = ("Merci beaucoup ! L'équipe d'Alpha Agency revient vers vous très vite avec une proposition personnalisée."
                    if (contact or lead_captured) else "Pouvez-vous m'en dire un peu plus sur votre projet ?")
     return {"message": message, "session_id": sid, "lead_captured": lead_captured, "available": True}
+
+
+@router.post("/chat/upload")
+async def public_chat_upload(request: Request, file: UploadFile = File(...), session_id: str = Form(None)):
+    """Pièce jointe envoyée par le visiteur (logo, cahier des charges, photo...).
+    Uploadée sur Cloudinary, rattachée au lead de la session. NON authentifié, verrouillé."""
+    ip = _client_ip(request)
+    if not _rate_ok(ip):
+        raise HTTPException(status_code=429, detail="Trop de requêtes, réessayez dans un moment.")
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Fichier vide.")
+    if len(content) > _MAX_UPLOAD:
+        raise HTTPException(status_code=413, detail="Fichier trop volumineux (10 Mo maximum).")
+    ctype = (file.content_type or "").lower()
+    if ctype not in _ALLOWED_UPLOAD:
+        raise HTTPException(status_code=415, detail="Type non accepté (images, PDF, Word, Excel, texte).")
+
+    sid = session_id or str(uuid.uuid4())
+    try:
+        import cloudinary, cloudinary.uploader
+        if not cloudinary.config().cloud_name:
+            cloudinary.config(
+                cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+                api_key=os.environ.get("CLOUDINARY_API_KEY"),
+                api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+            )
+        res = await asyncio.to_thread(
+            cloudinary.uploader.upload, content,
+            resource_type="auto", folder="chatbot_uploads", use_filename=True, unique_filename=True,
+        )
+        url = res.get("secure_url") or res.get("url")
+    except Exception as e:
+        logger.error(f"public_chat upload cloudinary: {e}")
+        raise HTTPException(status_code=502, detail="Échec de l'envoi du fichier, réessayez.")
+    if not url:
+        raise HTTPException(status_code=502, detail="Échec de l'envoi du fichier.")
+
+    att = {"url": url, "name": file.filename or "fichier", "type": ctype, "size": len(content)}
+    _SESSION_ATTACHMENTS.setdefault(sid, []).append(att)
+    # Si un lead existe déjà pour cette session, rattache immédiatement
+    contact = _SESSION_CONTACT.get(sid)
+    if contact:
+        try:
+            await db.contacts.update_one({"id": contact["id"]},
+                                         {"$set": {"attachments": _SESSION_ATTACHMENTS[sid]}})
+        except Exception as e:
+            logger.warning(f"rattachement pièce jointe au lead échoué: {e}")
+    logger.info(f"public_chat: pièce jointe {att['name']} ({len(content)} o) session {sid[:8]}")
+    return {"ok": True, "session_id": sid, "url": url, "name": att["name"], "type": ctype}

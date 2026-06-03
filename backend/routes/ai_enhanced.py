@@ -10,6 +10,7 @@ import uuid
 import base64
 import os
 import re
+import asyncio
 from datetime import datetime, timezone, timedelta
 import logging
 import json
@@ -78,6 +79,27 @@ async def _gemini_generate(system_message: str, messages, model: str) -> str:
     raise RuntimeError(f"all_gemini_models_failed: {last_err}")
 
 
+async def _gemini_json(prompt: str) -> dict:
+    """Génère une réponse JSON fiable (response_mime_type), chaîne de repli. {} si échec."""
+    if not (_gemini_client and _genai_types):
+        return {}
+    for mdl in GEMINI_MODELS:
+        def _call(_m=mdl):
+            resp = _gemini_client.models.generate_content(
+                model=_m, contents=prompt,
+                config=_genai_types.GenerateContentConfig(response_mime_type="application/json"),
+            )
+            return (getattr(resp, "text", "") or "").strip()
+        try:
+            data = json.loads(await asyncio.to_thread(_call))
+            if isinstance(data, dict):
+                return data
+        except Exception as e:
+            logger.warning(f"ai_enhanced: _gemini_json {mdl} échoué: {e}")
+            continue
+    return {}
+
+
 # ==================== MODELS ====================
 
 class ChatMessage(BaseModel):
@@ -139,6 +161,10 @@ async def execute_action(action_type: str, params: dict, user_id: str) -> dict:
             return await schedule_followup_action(params, user_id)
         elif action_type == "merge_contacts":
             return await merge_contacts_action(params)
+        elif action_type == "draft_followup_email":
+            return await draft_followup_email_action(params)
+        elif action_type == "send_followup":
+            return await send_followup_action(params)
         elif action_type == "create_quote":
             return await create_quote_action(params, user_id)
         elif action_type == "get_document":
@@ -377,6 +403,85 @@ async def merge_contacts_action(params: dict) -> dict:
     detail = (" (" + ", ".join(f"{n} {c}" for c, n in moved.items()) + " déplacés)") if moved else ""
     return {"success": True, "message": f"🔗 Fiches fusionnées dans « {_contact_name(primary)} »{detail}.",
             "contact_id": primary["id"], "moved": moved}
+
+
+async def draft_followup_email_action(params: dict) -> dict:
+    """Rédige (sans envoyer) un email de relance personnalisé, le stocke comme brouillon."""
+    contact = await _find_contact(params)
+    if not contact:
+        return {"success": False, "error": "Contact non trouvé"}
+    if not contact.get("email"):
+        return {"success": False, "error": f"{_contact_name(contact)} n'a pas d'adresse email."}
+    if not (GEMINI_AVAILABLE and _gemini_client):
+        return {"success": False, "error": "IA indisponible pour rédiger."}
+    angle = params.get("angle") or params.get("instruction") or ""
+    fiche = (f"Prénom: {contact.get('first_name','')}\nNom: {contact.get('last_name','')}\n"
+             f"Entreprise: {contact.get('company','')}\nBesoin: {contact.get('besoin') or contact.get('project_type','')}\n"
+             f"Budget: {contact.get('budget','')}\nStatut: {contact.get('status','')}\n"
+             f"Notes: {(contact.get('note') or '')[:1200]}")
+    prompt = (
+        "Tu es Léo, d'Alpha Agency (agence de communication, Guadeloupe). Rédige un email de RELANCE "
+        "commerciale court, chaleureux, personnalisé et en français pour ce prospect, sans tiret cadratin, "
+        "ton humain (pas robotique). Termine par une question simple qui invite à répondre. "
+        "Signe « Léo, Alpha Agency ». Réponds UNIQUEMENT en JSON : "
+        '{"subject":"","body":""} (body en texte simple avec des sauts de ligne).'
+        + (f" Angle demandé par l'utilisateur : {angle}." if angle else "")
+        + "\n\nFICHE PROSPECT :\n" + fiche
+    )
+    data = await _gemini_json(prompt)
+    subject = (data.get("subject") or "").strip()
+    body = (data.get("body") or "").strip()
+    if not body:
+        return {"success": False, "error": "La rédaction a échoué, réessaie."}
+    await db.ai_email_drafts.update_one(
+        {"contact_id": contact["id"]},
+        {"$set": {"contact_id": contact["id"], "subject": subject, "body": body,
+                  "to": contact.get("email"), "created_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True)
+    return {
+        "success": True,
+        "message": (f"✉️ Brouillon de relance pour {_contact_name(contact)} ({contact.get('email')}) :\n\n"
+                    f"Objet : {subject}\n\n{body}\n\n— Dis « envoie » pour l'expédier, ou demande une modification."),
+        "contact_id": contact["id"], "draft": {"subject": subject, "body": body},
+    }
+
+
+async def send_followup_action(params: dict) -> dict:
+    """Envoie la relance (brouillon stocké, ou subject/body fournis) au prospect, via Resend. Validation côté utilisateur."""
+    contact = await _find_contact(params)
+    if not contact:
+        return {"success": False, "error": "Contact non trouvé"}
+    email = contact.get("email")
+    if not email:
+        return {"success": False, "error": f"{_contact_name(contact)} n'a pas d'adresse email."}
+    subject = (params.get("subject") or "").strip()
+    body = (params.get("body") or "").strip()
+    if not (subject and body):
+        d = await db.ai_email_drafts.find_one({"contact_id": contact["id"]})
+        if d:
+            subject = subject or (d.get("subject") or "")
+            body = body or (d.get("body") or "")
+    if not body:
+        return {"success": False, "error": "Aucun brouillon à envoyer. Demande-moi d'abord de rédiger la relance."}
+    try:
+        from utils.emailer import send_email, email_shell
+        inner = "".join(f"<p>{p.strip()}</p>" for p in body.split("\n\n") if p.strip())
+        html = email_shell(subject or "Un message d'Alpha Agency", inner or f"<p>{body}</p>")
+        code, _ = await asyncio.to_thread(send_email, email, subject or "Un message d'Alpha Agency", html)
+    except Exception as e:
+        logger.error(f"send_followup: {e}")
+        return {"success": False, "error": "Échec de l'envoi (email)."}
+    if code not in (200, 201, 202):
+        return {"success": False, "error": f"Échec de l'envoi (code {code})."}
+    stamp = datetime.now(timezone.utc).strftime("%d/%m/%Y")
+    note = (contact.get("note") or "")
+    note = (note + "\n\n" if note else "") + f"[{stamp}] Relance envoyée par email : {subject}"
+    await db.contacts.update_one({"id": contact["id"]}, {"$set": {
+        "note": note, "last_followup_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()}})
+    await db.ai_email_drafts.delete_one({"contact_id": contact["id"]})
+    return {"success": True, "message": f"📤 Relance envoyée à {_contact_name(contact)} ({email}).",
+            "contact_id": contact["id"]}
 
 
 async def create_quote_action(params: dict, user_id: str) -> dict:
@@ -1016,6 +1121,12 @@ Actions disponibles:
 10. list_documents - Lister les documents avec filtres
    Params: folder_name (optionnel), file_type (optionnel: image, document, spreadsheet, video, audio, archive), search (optionnel)
 
+11. draft_followup_email - Rédiger (SANS envoyer) un email de relance personnalisé pour un prospect
+   Params: contact_name OU contact_id, angle (optionnel: ton/objectif souhaité)
+
+12. send_followup - Envoyer la relance (le brouillon rédigé juste avant) au prospect
+   Params: contact_name OU contact_id
+
 Exemples:
 - "Crée une tâche pour rappeler Jean demain" → [ACTION]{"action_type": "create_task", "params": {"title": "Rappeler Jean", "due_date": "2026-06-03", "priority": "medium"}}[/ACTION]
 - "Passe ce lead en gagné" / "Marque Dupont comme client" → [ACTION]{"action_type": "set_contact_status", "params": {"contact_name": "Dupont", "status": "gagné"}}[/ACTION]
@@ -1024,8 +1135,11 @@ Exemples:
 - "Fusionne les deux fiches Sophie Bernard en doublon" → [ACTION]{"action_type": "merge_contacts", "params": {"keep": "Sophie Bernard", "remove": "Sophie Bernard"}}[/ACTION]
 - "Marque la tâche 'Appeler client' comme terminée" → [ACTION]{"action_type": "mark_task_done", "params": {"task_title": "Appeler client"}}[/ACTION]
 - "Montre-moi les documents PDF" → [ACTION]{"action_type": "list_documents", "params": {"file_type": "document"}}[/ACTION]
+- "Rédige une relance pour Martin" → [ACTION]{"action_type": "draft_followup_email", "params": {"contact_name": "Martin"}}[/ACTION] (montre le brouillon, n'envoie pas)
 
-RÈGLES D'ACTION : la date du jour t'est donnée dans le contexte (utilise-la pour résoudre "demain", "vendredi"). N'exécute une action QUE si l'utilisateur le demande clairement. Pour les actions irréversibles (merge_contacts notamment) ou si un détail manque, reformule ce que tu vas faire et demande confirmation AVANT d'émettre le bloc [ACTION]."""
+RÈGLES D'ACTION : la date du jour t'est donnée dans le contexte (utilise-la pour résoudre "demain", "vendredi"). N'exécute une action QUE si l'utilisateur le demande clairement. Pour les actions irréversibles (merge_contacts notamment) ou si un détail manque, reformule ce que tu vas faire et demande confirmation AVANT d'émettre le bloc [ACTION].
+
+RELANCES (garde-fou strict) : pour relancer un prospect, fais TOUJOURS 2 temps. 1) `draft_followup_email` : rédige et MONTRE le brouillon (objet + corps). 2) N'utilise `send_followup` QUE si l'utilisateur valide explicitement ("envoie", "ok", "parfait", "vas-y"). N'envoie JAMAIS un email sans cet accord. S'il demande des modifications, re-rédige (draft) avant d'envoyer."""
         
         # Fetch app context if enabled
         context_data = ""

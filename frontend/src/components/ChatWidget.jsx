@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, X, Send, Loader2, Check, Sparkles } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Check, Sparkles, Paperclip } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 const API = process.env.REACT_APP_BACKEND_URL || "";
@@ -30,8 +30,10 @@ const ChatWidget = () => {
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const [leadCaptured, setLeadCaptured] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const endRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -86,6 +88,45 @@ const ChatWidget = () => {
       }
     },
     [input, loading, messages, sessionId]
+  );
+
+  const uploadFile = useCallback(
+    async (e) => {
+      const f = e.target.files?.[0];
+      e.target.value = ""; // permet de re-sélectionner le même fichier
+      if (!f || uploading || loading) return;
+      if (f.size > 10 * 1024 * 1024) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "Le fichier est trop volumineux (10 Mo maximum)." },
+        ]);
+        return;
+      }
+      setUploading(true);
+      try {
+        const fd = new FormData();
+        fd.append("file", f);
+        if (sessionId) fd.append("session_id", sessionId);
+        const res = await fetch(`${API}/api/public/chat/upload`, { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.detail || "upload");
+        if (data.session_id) setSessionId(data.session_id);
+        // une seule bulle, et on informe l'agent pour qu'il accuse réception
+        send(`J'ai joint un fichier : ${data.name} 📎`);
+      } catch (err) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content:
+              "Désolé, l'envoi du fichier a échoué. Réessayez, ou écrivez-nous à leo.sperl@alphagency.fr.",
+          },
+        ]);
+      } finally {
+        setUploading(false);
+      }
+    },
+    [uploading, loading, sessionId, send]
   );
 
   return (
@@ -218,6 +259,22 @@ const ChatWidget = () => {
               style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
             >
               <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt"
+                  onChange={uploadFile}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading || loading}
+                  aria-label="Joindre un fichier"
+                  title="Joindre un fichier (logo, cahier des charges, photo...)"
+                  className="w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 disabled:opacity-40 transition-colors"
+                >
+                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+                </button>
                 <input
                   ref={inputRef}
                   value={input}
