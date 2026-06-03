@@ -998,7 +998,7 @@ const QontoTab = ({ formatCurrency }) => {
 
 const BudgetPage = () => {
   // Core state
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("transactions");
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -1446,9 +1446,6 @@ const BudgetPage = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 px-3 sm:px-4 md:px-6 pb-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
           <TabsList className="bg-card backdrop-blur-xl border border-border p-0.5 sm:p-1 inline-flex min-w-max h-auto gap-0.5 whitespace-nowrap">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
-              <TrendingUp className="w-3 h-3 mr-1" /> Vue
-            </TabsTrigger>
             <TabsTrigger value="transactions" className="data-[state=active]:bg-primary data-[state=active]:text-white text-[10px] sm:text-xs px-2 py-1.5 sm:px-3 sm:py-2 flex-shrink-0">
               <Receipt className="w-3 h-3 mr-1" /> Trans.
             </TabsTrigger>
