@@ -63,6 +63,11 @@ des relances). Avant toute action qui SORT vers un client (email, SMS, devis env
 toute SUPPRESSION, l'outil te répondra « EN ATTENTE DE VALIDATION » : préviens Léo que c'est
 préparé et qu'il doit valider. Tu ne déclenches jamais de paiement.
 
+Tu disposes d'une MÉMOIRE durable (objectifs chiffrés, règles et préférences de Léo, journal quotidien,
+faits clients). Tiens-en compte et mets-la à jour : quand Léo te confie un objectif, une règle, une
+préférence ou un fait important, mémorise-le (remember / update_objective / log_day) ; au besoin, retrouve
+avec recall. Challenge Léo si une demande contredit un objectif ou une règle enregistrés.
+
 Si tu ignores une donnée, dis-le et propose de vérifier (utilise crm_query). N'invente jamais un chiffre.
 Quand tu as fini d'agir, réponds en clair à Léo (résultat + éventuelles validations en attente)."""
 
@@ -176,6 +181,84 @@ async def _exec_crm_query(args, uid):
     return {"success": True, "collection": coll, "count": len(rows), "rows": rows}
 
 
+# ==================== Mémoire de Néo (Phase 3 / B.4) ====================
+_MEM_TYPES = ("objective", "rule", "daily_log", "client_fact", "decision")
+
+
+async def _exec_remember(args, uid):
+    mtype = (args.get("type") or "client_fact").strip()
+    if mtype not in _MEM_TYPES:
+        mtype = "client_fact"
+    content = (args.get("content") or "").strip()
+    if not content:
+        return {"success": False, "error": "Contenu à mémoriser vide"}
+    doc = {"id": str(uuid.uuid4()), "type": mtype, "content": content[:2000],
+           "key": (args.get("key") or "").strip() or None, "contact_id": args.get("contact_id"),
+           "created_at": datetime.now(timezone.utc).isoformat(), "user_id": uid}
+    await db.neo_memory.insert_one(doc)
+    return {"success": True, "message": f"Mémorisé ({mtype}).", "id": doc["id"]}
+
+
+async def _exec_recall(args, uid):
+    q = (args.get("query") or "").strip()
+    mtype = (args.get("type") or "").strip()
+    mongo = {}
+    if mtype in _MEM_TYPES:
+        mongo["type"] = mtype
+    if q:
+        mongo["content"] = {"$regex": q, "$options": "i"}
+    rows = await db.neo_memory.find(mongo, {"_id": 0}).sort("created_at", -1).to_list(40)
+    return {"success": True, "count": len(rows), "memories": rows}
+
+
+async def _exec_update_objective(args, uid):
+    content = (args.get("content") or "").strip()
+    if not content:
+        return {"success": False, "error": "Objectif vide"}
+    key = (args.get("key") or "objectif_principal").strip()
+    now = datetime.now(timezone.utc).isoformat()
+    await db.neo_memory.update_one(
+        {"type": "objective", "key": key},
+        {"$set": {"type": "objective", "key": key, "content": content[:2000], "updated_at": now, "user_id": uid},
+         "$setOnInsert": {"id": str(uuid.uuid4()), "created_at": now}},
+        upsert=True)
+    return {"success": True, "message": f"Objectif « {key} » enregistré."}
+
+
+async def _exec_log_day(args, uid):
+    note = (args.get("note") or "").strip()
+    if not note:
+        return {"success": False, "error": "Note vide"}
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    now = datetime.now(timezone.utc).isoformat()
+    await db.neo_memory.update_one(
+        {"type": "daily_log", "key": today},
+        {"$set": {"type": "daily_log", "key": today, "user_id": uid, "updated_at": now},
+         "$push": {"entries": {"at": now, "note": note[:1000]}},
+         "$setOnInsert": {"id": str(uuid.uuid4()), "created_at": now}},
+        upsert=True)
+    return {"success": True, "message": "Journal du jour mis à jour."}
+
+
+async def _central_memory() -> str:
+    """Mémoire centrale (objectifs + règles) injectée dans le cerveau à chaque appel."""
+    try:
+        rows = await db.neo_memory.find({"type": {"$in": ["objective", "rule"]}},
+                                        {"_id": 0, "type": 1, "content": 1}).sort("created_at", 1).to_list(60)
+    except Exception:
+        return ""
+    objs = [r["content"] for r in rows if r.get("type") == "objective"]
+    rules = [r["content"] for r in rows if r.get("type") == "rule"]
+    if not objs and not rules:
+        return ""
+    out = "\n\n=== MÉMOIRE DE NÉO (tiens-en compte absolument) ==="
+    if objs:
+        out += "\nOBJECTIFS :\n" + "\n".join(f"- {o}" for o in objs)
+    if rules:
+        out += "\nRÈGLES DE LÉO :\n" + "\n".join(f"- {r}" for r in rules)
+    return out
+
+
 # ==================== Registre d'outils (Partie C) ====================
 def _obj(props: dict, required=None):
     return {"type": "object", "properties": props, "required": required or []}
@@ -251,6 +334,19 @@ TOOLS = [
     {"name": "draft_followup_email", "validation": False, "run": lambda a, u: draft_followup_email_action(a),
      "description": "Rédige (sans envoyer) un email de relance personnalisé, stocké en brouillon.",
      "params": _obj({"contact_name": _STR, "contact_id": _STR, "angle": _STR})},
+    # --- Mémoire de Néo (Phase 3) ---
+    {"name": "remember", "validation": False, "run": _exec_remember,
+     "description": "Mémorise un fait durable. type: objective|rule|daily_log|client_fact|decision ; content requis.",
+     "params": _obj({"type": _STR, "content": _STR, "key": _STR, "contact_id": _STR}, ["content"])},
+    {"name": "recall", "validation": False, "run": _exec_recall,
+     "description": "Retrouve dans la mémoire de Néo (filtre par texte 'query' et/ou 'type').",
+     "params": _obj({"query": _STR, "type": _STR})},
+    {"name": "update_objective", "validation": False, "run": _exec_update_objective,
+     "description": "Définit/met à jour un objectif chiffré de l'agence (key optionnel, défaut objectif_principal).",
+     "params": _obj({"content": _STR, "key": _STR}, ["content"])},
+    {"name": "log_day", "validation": False, "run": _exec_log_day,
+     "description": "Ajoute une entrée au journal du jour (check-in matin/soir, avancement de Léo).",
+     "params": _obj({"note": _STR}, ["note"])},
     # --- Actions SORTANTES / IRRÉVERSIBLES → validation humaine (garde-fou A.5) ---
     {"name": "send_followup", "validation": True, "run": lambda a, u: send_followup_action(a),
      "description": "ENVOIE la relance (email) au prospect. Sortie client → nécessite la validation de Léo.",
@@ -311,10 +407,9 @@ def _now_line():
     return f"\n\nAUJOURD'HUI : {jdays[n.weekday()]} {n.strftime('%d/%m/%Y')} (ISO {n.strftime('%Y-%m-%d')})."
 
 
-async def _gemini_call(contents):
+async def _gemini_call(contents, system):
     """Un tour de génération avec outils. Essaie la chaîne de modèles. Retourne (response, model)."""
     tools = _gemini_tools()
-    system = NEO_SYSTEM + _now_line()
     last_err = None
     for mdl in NEO_MODELS:
         def _call(_m=mdl):
@@ -349,10 +444,11 @@ async def run_neo(messages: list, user_id: str) -> dict:
         role = "model" if m.get("role") == "assistant" else "user"
         contents.append(_t.Content(role=role, parts=[_t.Part.from_text(text=(m.get("content") or "")[:8000])]))
 
+    system = NEO_SYSTEM + _now_line() + await _central_memory()
     pending = []
     actions = []
     for _ in range(MAX_ITERS):
-        resp, _mdl = await _gemini_call(contents)
+        resp, _mdl = await _gemini_call(contents, system)
         fcs = list(getattr(resp, "function_calls", None) or [])
         if not fcs:
             txt = (getattr(resp, "text", "") or "").strip()

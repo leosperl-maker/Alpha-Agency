@@ -1,26 +1,31 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, X, Loader2, CheckCircle2, Eraser, Sunrise } from "lucide-react";
-import { aiEnhancedAPI } from "../lib/api";
+import { Send, X, Loader2, CheckCircle2, Eraser, Sunrise, Clock } from "lucide-react";
+import { aiEnhancedAPI, neoAPI } from "../lib/api";
 import AssistantOrb from "./AssistantOrb";
 
-const MODEL = "gemini-2.5-flash";
 const SUGGESTIONS = [
   "Qui je dois relancer en priorité ?",
-  "Programme une relance pour vendredi",
+  "Où en est ma trésorerie ce mois ?",
   "Quelles factures sont en retard ?",
-  "Écris un email de relance pour mon dernier lead",
+  "Trouve mes leads chauds et prépare une relance",
 ];
+// Libellés FR des actions qui demandent ta validation (garde-fous Néo)
+const ACTION_LABELS = {
+  send_followup: "Envoyer la relance par email",
+  merge_contacts: "Fusionner les fiches en doublon",
+};
 
 /**
- * Admin AI assistant — conversational, context-aware (real CRM data) and
- * able to act (create task/quote, update contact) via /api/ai-enhanced/chat.
- * Runs on Gemini (server-side). Theme-aware slide-over.
+ * Néo — l'associé co-gérant IA d'Alpha Agency. Conversationnel, connecté au vrai CRM,
+ * agit via function calling natif (/api/neo/chat). Les actions sortantes/irréversibles
+ * passent par une validation humaine (boutons Valider / Annuler). Slide-over thémé.
  */
 const AssistantChat = ({ open, onOpenChange, seed }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [convId, setConvId] = useState(null);
+  const [resolved, setResolved] = useState({}); // action_id -> 'done' | 'cancelled'
   const endRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -41,18 +46,17 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
     setInput("");
     setLoading(true);
     try {
-      const res = await aiEnhancedAPI.chat({
+      const res = await neoAPI.chat({
         messages: history.map((m) => ({ role: m.role, content: m.content })),
-        model: MODEL,
-        enable_actions: true,
-        include_context: true,
         conversation_id: convId,
       });
-      if (res.data.conversation_id) setConvId(res.data.conversation_id);
+      const d = res.data || {};
+      if (d.conversation_id) setConvId(d.conversation_id);
       setMessages((prev) => [...prev, {
         role: "assistant",
-        content: res.data.message || "…",
-        action: res.data.action_executed?.success ? res.data.action_executed.message : null,
+        content: d.message || "…",
+        actionsDone: d.actions_done || [],
+        pending: d.pending_actions || [],
       }]);
     } catch (error) {
       const detail = error.response?.data?.detail;
@@ -60,13 +64,31 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
         role: "assistant",
         content: detail
           ? `⚠️ ${detail}`
-          : "⚠️ Assistant indisponible pour l'instant (connexion au serveur impossible). Réessaie une fois en ligne.",
+          : "⚠️ Néo est indisponible pour l'instant (connexion au serveur impossible). Réessaie une fois en ligne.",
         error: true,
       }]);
     } finally {
       setLoading(false);
     }
   }, [input, loading, messages, convId]);
+
+  const resolveAction = useCallback(async (actionId, name, confirm) => {
+    if (resolved[actionId]) return;
+    setResolved((r) => ({ ...r, [actionId]: confirm ? "doing" : "cancelled" }));
+    try {
+      if (confirm) {
+        const res = await neoAPI.confirmAction(actionId);
+        setResolved((r) => ({ ...r, [actionId]: "done" }));
+        setMessages((prev) => [...prev, { role: "assistant", content: res.data?.message || "✅ Action exécutée." }]);
+      } else {
+        await neoAPI.cancelAction(actionId);
+        setMessages((prev) => [...prev, { role: "assistant", content: "Action annulée." }]);
+      }
+    } catch (error) {
+      setResolved((r) => { const c = { ...r }; delete c[actionId]; return c; });
+      setMessages((prev) => [...prev, { role: "assistant", content: "⚠️ Impossible de traiter l'action (connexion).", error: true }]);
+    }
+  }, [resolved]);
 
   const loadBriefing = useCallback(async () => {
     if (loading) return;
@@ -107,8 +129,8 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
           <div className="flex items-center gap-3">
             <AssistantOrb size={34} pulse={loading} />
             <div>
-              <h2 className="text-foreground font-semibold text-sm leading-tight">Assistant Alpha</h2>
-              <p className="text-muted-foreground text-[11px] leading-tight">Gemini · connecté à ton CRM</p>
+              <h2 className="text-foreground font-semibold text-sm leading-tight">Néo</h2>
+              <p className="text-muted-foreground text-[11px] leading-tight">Ton associé IA · connecté au CRM</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -159,11 +181,34 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
                       : "bg-secondary text-foreground rounded-bl-md"
                 }`}>
                   {m.content}
-                  {m.action && (
+                  {m.actionsDone?.length > 0 && (
                     <div className="mt-2 flex items-center gap-1.5 text-success text-xs font-medium">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> {m.action}
+                      <CheckCircle2 className="w-3.5 h-3.5" /> {m.actionsDone.length} action{m.actionsDone.length > 1 ? "s" : ""} effectuée{m.actionsDone.length > 1 ? "s" : ""}
                     </div>
                   )}
+                  {(m.pending || []).map((p) => (
+                    <div key={p.action_id} className="mt-2.5 rounded-xl border border-warning/40 bg-warning-soft p-2.5">
+                      <p className="text-xs text-warning font-semibold flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" /> À valider : {ACTION_LABELS[p.name] || p.name}
+                      </p>
+                      {resolved[p.action_id] === "done" ? (
+                        <p className="mt-1.5 text-xs text-success font-medium">✅ Validé et exécuté.</p>
+                      ) : resolved[p.action_id] === "cancelled" ? (
+                        <p className="mt-1.5 text-xs text-muted-foreground">Annulé.</p>
+                      ) : (
+                        <div className="flex gap-2 mt-2">
+                          <button onClick={() => resolveAction(p.action_id, p.name, true)} disabled={resolved[p.action_id] === "doing"}
+                            className="flex-1 px-3 py-1.5 rounded-lg bg-success text-white text-xs font-semibold hover:brightness-110 transition-all disabled:opacity-50">
+                            {resolved[p.action_id] === "doing" ? "…" : "Valider"}
+                          </button>
+                          <button onClick={() => resolveAction(p.action_id, p.name, false)}
+                            className="flex-1 px-3 py-1.5 rounded-lg bg-secondary text-foreground text-xs font-medium hover:bg-muted transition-colors">
+                            Annuler
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             ))

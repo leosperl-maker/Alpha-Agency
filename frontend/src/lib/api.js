@@ -418,6 +418,14 @@ export const aiEnhancedAPI = {
   deleteConversation: (id) => api.delete(`/ai-enhanced/conversations/${id}`),
 };
 
+// Néo — associé IA (function calling natif + garde-fous de validation)
+export const neoAPI = {
+  health: () => api.get('/neo/health'),
+  chat: (data) => api.post('/neo/chat', data),
+  confirmAction: (actionId) => api.post('/neo/confirm-action', { action_id: actionId }),
+  cancelAction: (actionId) => api.post('/neo/cancel-action', { action_id: actionId }),
+};
+
 // File Manager API (Gestionnaire de fichiers)
 export const fileManagerAPI = {
   // Folders
