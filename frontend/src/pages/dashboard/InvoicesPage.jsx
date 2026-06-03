@@ -95,6 +95,19 @@ const InvoicesPage = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [servicesDialogOpen, setServicesDialogOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  // Aperçu PDF inline dans le dialogue de visualisation
+  const [pdfUrl, setPdfUrl] = useState(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  useEffect(() => {
+    if (!viewDialogOpen || !selectedInvoice?.id) return;
+    let cancelled = false; let url = null;
+    setPdfUrl(null); setPdfLoading(true);
+    invoicesAPI.getPDF(selectedInvoice.id)
+      .then((res) => { if (cancelled) return; url = URL.createObjectURL(new Blob([res.data], { type: "application/pdf" })); setPdfUrl(url); })
+      .catch(() => { if (!cancelled) setPdfUrl(null); })
+      .finally(() => { if (!cancelled) setPdfLoading(false); });
+    return () => { cancelled = true; if (url) URL.revokeObjectURL(url); };
+  }, [viewDialogOpen, selectedInvoice?.id]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [expandedParents, setExpandedParents] = useState({});
@@ -2452,6 +2465,19 @@ BANQUE : ..."
                 <Button size="sm" variant="outline" onClick={() => { setViewDialogOpen(false); openEmailDialog(selectedInvoice); }} className="border-border">
                   <Mail className="w-4 h-4 mr-1.5" /> Envoyer
                 </Button>
+              </div>
+
+              {/* Aperçu du vrai PDF (le document tel qu'il sera envoyé) */}
+              <div className="rounded-lg border border-border overflow-hidden bg-white" style={{ height: "60vh" }}>
+                {pdfLoading ? (
+                  <div className="h-full flex items-center justify-center text-muted-foreground text-sm">Génération de l'aperçu…</div>
+                ) : pdfUrl ? (
+                  <iframe title="Aperçu du document" src={pdfUrl} className="w-full h-full border-0" />
+                ) : (
+                  <div className="h-full flex items-center justify-center text-muted-foreground text-sm px-4 text-center">
+                    Aperçu indisponible. Utilise « Télécharger le PDF ».
+                  </div>
+                )}
               </div>
 
               <div className="space-y-6">
