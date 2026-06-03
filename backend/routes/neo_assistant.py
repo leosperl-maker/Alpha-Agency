@@ -306,28 +306,71 @@ async def _central_memory() -> str:
 
 
 # ==================== Qonto — solde bancaire réel (Phase 7) ====================
+def _qonto_balance(a: dict) -> float:
+    """Solde d'un compte Qonto, robuste au champ (balance ou balance_cents)."""
+    b = a.get("balance")
+    if b is None:
+        b = (a.get("balance_cents") or 0) / 100.0
+    try:
+        return round(float(b), 2)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _qonto_get(path: str, params=None):
+    import requests
+    r = requests.get(f"https://thirdparty.qonto.com/v2/{path}",
+                     headers={"Authorization": f"{QONTO_ID}:{QONTO_KEY_SECRET}"}, params=params, timeout=20)
+    r.raise_for_status()
+    return r.json()
+
+
 async def _qonto_summary() -> dict:
     """Solde bancaire RÉEL via Qonto (auth clé API : 'login:secret_key'). {connected:False} si non configuré/échec."""
     if not (QONTO_ID and QONTO_KEY_SECRET):
         return {"success": True, "connected": False}
-    import requests
-
-    def _call():
-        r = requests.get("https://thirdparty.qonto.com/v2/organization",
-                         headers={"Authorization": f"{QONTO_ID}:{QONTO_KEY_SECRET}"}, timeout=20)
-        r.raise_for_status()
-        return r.json()
     try:
-        data = await asyncio.to_thread(_call)
-        org = data.get("organization", {}) or {}
+        org = (await asyncio.to_thread(_qonto_get, "organization")).get("organization", {}) or {}
         accounts = org.get("bank_accounts", []) or []
-        total = sum((a.get("balance", 0) or 0) for a in accounts)
-        accts = [{"name": a.get("name") or a.get("slug"), "balance": a.get("balance"),
+        accts = [{"name": a.get("name") or a.get("slug"), "balance": _qonto_balance(a),
                   "currency": a.get("currency", "EUR"), "iban_last4": (a.get("iban") or "")[-4:]} for a in accounts]
-        return {"success": True, "connected": True, "total_balance": round(total, 2),
+        return {"success": True, "connected": True,
+                "total_balance": round(sum(x["balance"] for x in accts), 2),
                 "currency": "EUR", "accounts": accts}
     except Exception as e:
         logger.warning(f"neo: Qonto indisponible: {e}")
+        return {"success": True, "connected": False, "error": str(e)[:200]}
+
+
+async def _qonto_treasury(limit: int = 40) -> dict:
+    """Tableau de trésorerie Qonto : soldes par compte + transactions récentes (virements, cartes, prélèvements...)."""
+    if not (QONTO_ID and QONTO_KEY_SECRET):
+        return {"success": True, "connected": False}
+    try:
+        org = (await asyncio.to_thread(_qonto_get, "organization")).get("organization", {}) or {}
+        accounts_raw = org.get("bank_accounts", []) or []
+        accounts = [{"name": a.get("name") or a.get("slug"), "balance": _qonto_balance(a),
+                     "currency": a.get("currency", "EUR"), "iban_last4": (a.get("iban") or "")[-4:]} for a in accounts_raw]
+        txs = []
+        for a in accounts_raw:
+            iban = a.get("iban")
+            if not iban:
+                continue
+            try:
+                d = await asyncio.to_thread(_qonto_get, "transactions", {"iban": iban, "per_page": 25})
+                for t in (d.get("transactions", []) or []):
+                    txs.append({"account": a.get("name") or a.get("slug"),
+                                "date": t.get("settled_at") or t.get("emitted_at"),
+                                "amount": t.get("amount"), "side": t.get("side"),
+                                "label": t.get("label") or t.get("clean_counterparty_name") or t.get("note") or "",
+                                "type": t.get("operation_type")})
+            except Exception as e:
+                logger.warning(f"neo: Qonto transactions ({(iban or '')[-4:]}) : {e}")
+        txs.sort(key=lambda x: x.get("date") or "", reverse=True)
+        return {"success": True, "connected": True, "total_balance": round(sum(x["balance"] for x in accounts), 2),
+                "currency": "EUR", "accounts": accounts, "transactions": txs[:limit]}
+    except Exception as e:
+        logger.warning(f"neo: Qonto trésorerie indisponible: {e}")
         return {"success": True, "connected": False, "error": str(e)[:200]}
 
 
@@ -431,6 +474,9 @@ TOOLS = [
     {"name": "get_bank_balance", "validation": False, "run": lambda a, u: _qonto_summary(),
      "description": "Solde bancaire RÉEL via Qonto (total + comptes). Pour répondre à la trésorerie réelle de l'agence.",
      "params": _obj({})},
+    {"name": "list_transactions", "validation": False, "run": lambda a, u: _qonto_treasury(int(a.get("limit") or 25)),
+     "description": "Transactions bancaires récentes (Qonto) : virements, cartes, prélèvements, encaissements + soldes par compte. Pour analyser les mouvements de trésorerie.",
+     "params": _obj({"limit": _INT})},
     {"name": "list_overdue_invoices", "validation": False, "run": _exec_list_overdue_invoices,
      "description": "Liste les factures en retard (à relancer) avec le total dû.",
      "params": _obj({})},
@@ -756,6 +802,12 @@ async def neo_checkin(current_user: dict = Depends(get_current_user)):
 async def neo_strategy(current_user: dict = Depends(get_current_user)):
     """Point stratégique de Néo (Phase 5) — jugement routé vers Claude (repli Gemini)."""
     return await _strategic_review()
+
+
+@router.get("/treasury")
+async def neo_treasury(current_user: dict = Depends(get_current_user)):
+    """Tableau de trésorerie Qonto (Phase 7) : soldes par compte + transactions récentes."""
+    return await _qonto_treasury(40)
 
 
 @router.post("/chat")
