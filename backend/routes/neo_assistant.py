@@ -44,6 +44,10 @@ NEO_MODELS = list(dict.fromkeys([m for m in [
     "gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite",
 ] if m]))
 
+# Lobe « stratégique » : Claude pour le jugement à fort enjeu (Phase 5 / B.2). Repli Gemini si pas de clé.
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+NEO_STRATEGIC_MODEL = os.environ.get("NEO_STRATEGIC_MODEL", "claude-sonnet-4-6")
+
 MAX_ITERS = 6  # garde-fou anti-boucle de la boucle agentique
 
 NEO_SYSTEM = """Tu es Néo, l'associé co-gérant IA d'Alpha Agency (agence de communication digitale, Guadeloupe).
@@ -305,6 +309,40 @@ async def _compute_health_score() -> dict:
             "pending_devis": len(pending_devis), "hot_leads": len(hot)}
 
 
+# ==================== Pilotage stratégique (Phase 5) ====================
+async def _strategic_review(args=None, uid=None) -> dict:
+    """Point stratégique : prévisionnel (encaissé + pipeline), risque n°1, reco 'prêt à déléguer'.
+    Jugement routé vers Claude (repli Gemini). Lecture seule."""
+    hs = await _compute_health_score()
+    invoices = await db.invoices.find({}, {"_id": 0, "document_type": 1, "status": 1, "total": 1}).to_list(2000)
+    pending_devis = [i for i in invoices if i.get("document_type") == "devis"
+                     and (i.get("status") or "").lower() in ("brouillon", "en_attente", "envoyée", "envoyee")]
+    pipeline_total = sum((i.get("total") or 0) for i in pending_devis)
+    try:
+        open_tasks = await db.tasks.count_documents({"status": {"$nin": ["done", "cancelled"]}})
+        total_contacts = await db.contacts.count_documents({})
+        clients = await db.contacts.count_documents({"status": "client"})
+        objs = [r.get("content") for r in await db.neo_memory.find(
+            {"type": "objective"}, {"_id": 0, "content": 1}).to_list(10)]
+    except Exception:
+        open_tasks = total_contacts = clients = 0
+        objs = []
+    data = (f"Trésorerie ce mois (solde): {hs['balance']}€. Impayés à relancer: {hs['overdue_count']} "
+            f"({hs['overdue_total']}€). Pipeline (devis en attente): {len(pending_devis)} pour {pipeline_total:.0f}€ "
+            f"potentiels. Leads chauds non traités: {hs['hot_leads']}. Tâches ouvertes: {open_tasks}. "
+            f"Contacts: {total_contacts}, dont {clients} clients. Score santé: {hs['score']}/100. "
+            f"Objectifs enregistrés: {('; '.join(o for o in objs if o)) if objs else 'aucun (à définir avec Léo)'}.")
+    system = ("Tu es Néo, l'associé co-gérant IA d'Alpha Agency (agence de communication, Guadeloupe). Ta raison "
+              "d'être : faire croître le CA, la marge et le bénéfice. Donne un POINT STRATÉGIQUE concis et "
+              "actionnable, en français, sans tirets longs : 1) prévisionnel du mois (encaissé + pipeline, vs "
+              "objectif si connu, alerte si dérapage) ; 2) le risque n°1 ou là où l'on perd des prospects ; "
+              "3) reco « prêt à déléguer ? » en comparant la charge (tâches) et la trésorerie. 4 à 7 phrases, direct, "
+              "termine par la prochaine action concrète à faire.")
+    review, model = await _strategic_text(system, "Données actuelles du CRM :\n" + data + "\n\nFais ton point stratégique.")
+    return {"success": True, "model": model, "review": review, "pipeline_total": round(pipeline_total, 2),
+            "open_tasks": open_tasks, "score": hs["score"], "balance": hs["balance"]}
+
+
 # ==================== Registre d'outils (Partie C) ====================
 def _obj(props: dict, required=None):
     return {"type": "object", "properties": props, "required": required or []}
@@ -337,6 +375,9 @@ TOOLS = [
      "params": _obj({"status": _STR})},
     {"name": "get_health_score", "validation": False, "run": lambda a, u: _compute_health_score(),
      "description": "Score de santé business /100 (trésorerie, impayés, devis en attente, leads chauds) + détail.",
+     "params": _obj({})},
+    {"name": "strategic_review", "validation": False, "run": lambda a, u: _strategic_review(a, u),
+     "description": "Point stratégique (jugement routé vers Claude) : prévisionnel du mois, risque n°1, reco 'prêt à déléguer'. À utiliser quand Léo demande un point stratégique / prévisionnel / conseil de pilotage.",
      "params": _obj({})},
     {"name": "activity_report", "validation": False, "run": lambda a, u: activity_report_action(a),
      "description": "Reporting d'activité : leads, conversion, valeur moyenne des devis, service & canal n°1.",
@@ -479,6 +520,58 @@ async def _gemini_call(contents, system):
     raise RuntimeError(f"all_neo_models_failed: {last_err}")
 
 
+async def _claude_text(system: str, user_text: str) -> str:
+    """Appel Claude (Anthropic Messages API, HTTP direct, sans dépendance) pour le jugement stratégique."""
+    if not ANTHROPIC_API_KEY:
+        raise RuntimeError("no_anthropic_key")
+    import requests
+
+    def _call():
+        r = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={"x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
+            json={"model": NEO_STRATEGIC_MODEL, "max_tokens": 1500, "system": system,
+                  "messages": [{"role": "user", "content": user_text}]},
+            timeout=60)
+        r.raise_for_status()
+        data = r.json()
+        return "".join(b.get("text", "") for b in data.get("content", []) if b.get("type") == "text").strip()
+    return await asyncio.to_thread(_call)
+
+
+async def _gemini_text(system: str, prompt: str) -> str:
+    """Génération texte simple (sans outils), chaîne de repli de modèles."""
+    if not _client:
+        raise RuntimeError("no_gemini")
+    last = None
+    for mdl in NEO_MODELS:
+        def _c(_m=mdl):
+            resp = _client.models.generate_content(
+                model=_m, contents=prompt,
+                config=_t.GenerateContentConfig(system_instruction=system))
+            return (getattr(resp, "text", "") or "").strip()
+        try:
+            t = await asyncio.to_thread(_c)
+            if t:
+                return t
+        except Exception as e:
+            last = e
+            continue
+    raise RuntimeError(f"gemini_text_failed: {last}")
+
+
+async def _strategic_text(system: str, user_text: str):
+    """Lobe stratégique : Claude si dispo (jugement à fort enjeu), sinon repli Gemini. Retourne (texte, modèle)."""
+    if ANTHROPIC_API_KEY:
+        try:
+            t = await _claude_text(system, user_text)
+            if t:
+                return t, "claude"
+        except Exception as e:
+            logger.warning(f"neo: Claude indisponible, repli Gemini: {e}")
+    return await _gemini_text(system, user_text), "gemini"
+
+
 def _fr_json(res: dict) -> dict:
     """Réponse d'outil sérialisable pour le modèle (jamais d'ObjectId/datetime brut)."""
     return {"result": json.dumps(res, default=str, ensure_ascii=False)[:4000]}
@@ -582,6 +675,12 @@ async def neo_checkin(current_user: dict = Depends(get_current_user)):
         question = None if checked else "Qu'as-tu de prévu aujourd'hui ? Dis-le-moi, je m'organise avec toi."
     return {"moment": moment, "checked_in_today": checked, "score": hs.get("score"),
             "label": hs.get("label"), "message": msg, "question": question, "priorities": bits}
+
+
+@router.get("/strategy")
+async def neo_strategy(current_user: dict = Depends(get_current_user)):
+    """Point stratégique de Néo (Phase 5) — jugement routé vers Claude (repli Gemini)."""
+    return await _strategic_review()
 
 
 @router.post("/chat")
