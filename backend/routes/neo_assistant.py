@@ -767,7 +767,7 @@ def _fr_json(res: dict) -> dict:
 
 
 # ==================== Boucle agentique ====================
-async def run_neo(messages: list, user_id: str) -> dict:
+async def run_neo(messages: list, user_id: str, voice: bool = False) -> dict:
     if not _client:
         return {"message": "Néo est momentanément indisponible (clé IA manquante).", "available": False}
     contents = []
@@ -776,6 +776,9 @@ async def run_neo(messages: list, user_id: str) -> dict:
         contents.append(_t.Content(role=role, parts=[_t.Part.from_text(text=(m.get("content") or "")[:8000])]))
 
     system = NEO_SYSTEM + _now_line() + await _central_memory()
+    if voice:
+        system += ("\n\n[MODE VOCAL] Tu réponds à l'oral : bref et naturel, 2-3 phrases maximum, "
+                   "sans listes à puces, sans markdown, sans emojis. Ton conversationnel, droit au but.")
     pending = []
     actions = []
     for _ in range(MAX_ITERS):
@@ -811,6 +814,7 @@ async def run_neo(messages: list, user_id: str) -> dict:
 class NeoChatRequest(BaseModel):
     messages: List[dict]
     conversation_id: Optional[str] = None
+    mode: Optional[str] = None  # "voice" => réponses orales concises
 
 
 class ConfirmRequest(BaseModel):
@@ -949,7 +953,7 @@ async def neo_chat(req: NeoChatRequest, current_user: dict = Depends(get_current
     if not msgs:
         raise HTTPException(status_code=400, detail="Message requis")
     try:
-        result = await run_neo(msgs, user_id)
+        result = await run_neo(msgs, user_id, voice=(req.mode == "voice"))
     except Exception as e:
         logger.error(f"neo chat error: {e}")
         raise HTTPException(status_code=500, detail=f"Erreur Néo: {str(e)[:200]}")

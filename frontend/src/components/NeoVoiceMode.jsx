@@ -111,6 +111,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
       const res = await neoAPI.chat({
         messages: history.map((m) => ({ role: m.role, content: m.content })),
         conversation_id: convId,
+        mode: "voice",
       });
       const d = res.data || {};
       if (d.conversation_id) onConvId?.(d.conversation_id);
