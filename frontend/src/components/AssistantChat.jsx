@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, X, Loader2, CheckCircle2, Eraser, Sunrise, Clock, ThumbsUp, ThumbsDown, Mic, Volume2, VolumeX, Square } from "lucide-react";
+import { Send, X, Loader2, CheckCircle2, Eraser, Sunrise, Clock, ThumbsUp, ThumbsDown, Mic, Volume2, VolumeX, Square, AudioLines } from "lucide-react";
 import { aiEnhancedAPI, neoAPI } from "../lib/api";
 import AssistantOrb from "./AssistantOrb";
+import NeoVoiceMode from "./NeoVoiceMode";
 
 const SUGGESTIONS = [
   "Qui je dois relancer en priorité ?",
@@ -126,6 +127,7 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
 
   // ====== Voix de Néo : dictée (navigateur) + synthèse vocale premium (ElevenLabs) ======
   const [listening, setListening] = useState(false);
+  const [voiceMode, setVoiceMode] = useState(false); // mode vocal plein écran (Operator)
   const [voiceOn, setVoiceOn] = useState(() => { try { return localStorage.getItem("neoVoice") === "1"; } catch { return false; } });
   const [speakingIdx, setSpeakingIdx] = useState(null);
   const recognitionRef = useRef(null);
@@ -221,7 +223,8 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60]">
+    <>
+      <div className="fixed inset-0 z-[60]">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => onOpenChange(false)} />
 
@@ -238,6 +241,10 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <button onClick={() => setVoiceMode(true)} title="Mode vocal plein écran"
+              className="p-2 rounded-xl text-primary hover:bg-primary/10 transition-colors">
+              <AudioLines className="w-4 h-4" />
+            </button>
             <button onClick={toggleVoice} title={voiceOn ? "Couper la voix de Néo" : "Activer la voix de Néo"}
               className={`p-2 rounded-xl transition-colors ${voiceOn ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
               {voiceOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
@@ -380,7 +387,17 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+
+      <NeoVoiceMode
+        open={voiceMode}
+        onClose={() => setVoiceMode(false)}
+        messages={messages}
+        convId={convId}
+        onConvId={setConvId}
+        onExchange={(u, a) => setMessages((prev) => [...prev, u, a])}
+      />
+    </>
   );
 };
 

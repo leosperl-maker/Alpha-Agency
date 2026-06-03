@@ -4,6 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Néo — orbe du mode vocal (respiration / réflexion) ===== */
+@keyframes neoOrbBreathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+@keyframes neoOrbThink {
+  0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+  50% { transform: scale(1.045) rotate(180deg); filter: brightness(1.18); }
+  100% { transform: scale(1) rotate(360deg); filter: brightness(1); }
+}
+.neo-orb-breathe { animation: neoOrbBreathe 3.6s ease-in-out infinite; }
+.neo-orb-think { animation: neoOrbThink 2.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .neo-orb-breathe, .neo-orb-think { animation: none; }
+}
+
 /* ==========================================
    PWA & MOBILE RESPONSIVE ENHANCEMENTS
    ========================================== */
