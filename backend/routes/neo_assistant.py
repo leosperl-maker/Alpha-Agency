@@ -144,6 +144,40 @@ async def _exec_get_contact_history(args, uid):
     return {"success": True, "contact": _contact_name(c), "status": c.get("status"), "events": events[:40]}
 
 
+async def _exec_read_emails(args, uid):
+    """Lit Gmail via l'intégration existante (moltbot_gmail, scope complet). Import LAZY (zéro risque boot)."""
+    try:
+        from .moltbot_gmail import get_gmail_service
+    except Exception as e:
+        return {"success": False, "error": f"Module Gmail indisponible: {str(e)[:150]}"}
+    try:
+        service = await get_gmail_service(uid)
+    except Exception as e:
+        return {"success": False, "error": f"Gmail: {str(e)[:150]}"}
+    if not service:
+        return {"success": False, "connected": False,
+                "error": "Gmail non connecté pour ce compte. Autorise-le (bouton « Connecter Gmail » / /api/moltbot/gmail/auth)."}
+    query = (args.get("query") or "").strip()
+    limit = min(int(args.get("limit") or 8), 20)
+
+    def _fetch():
+        res = service.users().messages().list(userId="me", q=query, maxResults=limit).execute()
+        out = []
+        for m in (res.get("messages", []) or []):
+            full = service.users().messages().get(
+                userId="me", id=m["id"], format="metadata",
+                metadataHeaders=["From", "Subject", "Date"]).execute()
+            hdr = {h.get("name"): h.get("value") for h in (full.get("payload", {}).get("headers", []) or [])}
+            out.append({"from": hdr.get("From"), "subject": hdr.get("Subject"),
+                        "date": hdr.get("Date"), "snippet": (full.get("snippet") or "")[:200]})
+        return out
+    try:
+        emails = await asyncio.to_thread(_fetch)
+    except Exception as e:
+        return {"success": False, "error": f"Lecture Gmail échouée: {str(e)[:150]}"}
+    return {"success": True, "connected": True, "count": len(emails), "emails": emails}
+
+
 async def _exec_list_leads(args, uid):
     only_hot = bool(args.get("only_hot"))
     limit = min(int(args.get("limit") or 10), 50)
@@ -465,6 +499,9 @@ TOOLS = [
     {"name": "get_contact_history", "validation": False, "run": _exec_get_contact_history,
      "description": "Historique chronologique d'un contact (lead, relances, devis/factures, tâches) — pour raconter son parcours.",
      "params": _obj({"contact_name": _STR, "contact_id": _STR})},
+    {"name": "read_emails", "validation": False, "run": _exec_read_emails,
+     "description": "Lit la boîte Gmail. 'query' = recherche Gmail (ex: 'from:client@x.com', 'is:unread', 'newer_than:7d', un nom). Pour croiser les mails avec les contacts/impayés ou préparer un échange.",
+     "params": _obj({"query": _STR, "limit": _INT})},
     {"name": "list_leads", "validation": False, "run": _exec_list_leads,
      "description": "Liste les leads récents (site + chatbot). only_hot=true pour les leads chauds (score>=70).",
      "params": _obj({"only_hot": _BOOL, "limit": _INT})},
