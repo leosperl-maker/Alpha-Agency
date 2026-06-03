@@ -133,6 +133,7 @@ _MAX_CHARS = 2000
 _SESSION_RESEARCH: dict = {}   # session_id -> texte de recherche
 _SESSION_CONTACT: dict = {}    # session_id -> {id, name, email}
 _SESSION_QUOTED: set = set()   # session_ids déjà devisés (évite les doublons)
+_SESSION_WA_SENT: set = set()  # session_ids ayant déjà reçu le récap WhatsApp client
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 # Signaux de clôture côté prospect (déclenchent le devis de secours)
 _CLOSING_RE = re.compile(
@@ -626,6 +627,20 @@ async def public_chat(req: PubChatRequest, request: Request):
                     await asyncio.to_thread(notify_admin_sms, sms)
                 except Exception as e:
                     logger.error(f"SMS lead alert failed: {e}")
+
+            # Récap WhatsApp au client dès qu'on a son numéro (1×/session)
+            phone = (lead.get("phone") or "").strip()
+            if phone and sid not in _SESSION_WA_SENT:
+                _SESSION_WA_SENT.add(sid)
+                try:
+                    from utils.sms import send_whatsapp
+                    fn = lead.get("first_name") or ""
+                    besoin = lead.get("besoin") or lead.get("project_type") or "votre projet"
+                    wa = (f"Bonjour {fn}, merci pour votre demande chez Alpha Agency. "
+                          f"Récap : {besoin}. Un collaborateur vous recontacte très vite. À bientôt !")
+                    await asyncio.to_thread(send_whatsapp, phone, wa)
+                except Exception as e:
+                    logger.error(f"WhatsApp recap failed: {e}")
 
     # 3) Devis : bloc [QUOTE] émis par l'agent
     _, quote = _extract_block(raw, "QUOTE")

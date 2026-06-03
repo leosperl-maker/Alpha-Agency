@@ -687,6 +687,22 @@ async def test_sms_notification(request: TestSmsRequest = None, current_user: di
         return {"success": True, "to": target}
     raise HTTPException(status_code=500, detail=f"Échec SMS ({code}): {text}")
 
+
+class TestWhatsAppRequest(BaseModel):
+    to: str
+
+@api_router.post("/notifications/test-whatsapp", response_model=dict)
+async def test_whatsapp_notification(request: TestWhatsAppRequest, current_user: dict = Depends(get_current_user)):
+    """Envoie un WhatsApp de test (Sandbox Twilio par défaut). `to` au format E.164 (ex +590690...)."""
+    from utils.sms import send_whatsapp
+    code, text = await asyncio.to_thread(
+        send_whatsapp, request.to,
+        "Bonjour 👋 Test WhatsApp depuis le CRM Alpha Agency. Si vous lisez ceci, la connexion fonctionne.",
+    )
+    if code in (200, 201):
+        return {"success": True, "to": request.to}
+    raise HTTPException(status_code=500, detail=f"Échec WhatsApp ({code}): {text}")
+
 # ==================== PDF GENERATION ====================
 
 import urllib.request
