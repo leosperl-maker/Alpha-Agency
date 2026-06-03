@@ -391,18 +391,41 @@ async def _qonto_treasury(limit: int = 40) -> dict:
             if not iban:
                 continue
             try:
-                d = await asyncio.to_thread(_qonto_get, "transactions", {"iban": iban, "per_page": 25})
+                d = await asyncio.to_thread(_qonto_get, "transactions", {"iban": iban, "per_page": 100})
                 for t in (d.get("transactions", []) or []):
                     txs.append({"account": a.get("name") or a.get("slug"),
                                 "date": t.get("settled_at") or t.get("emitted_at"),
-                                "amount": t.get("amount"), "side": t.get("side"),
+                                "amount": float(t.get("amount") or 0), "side": t.get("side"),
                                 "label": t.get("label") or t.get("clean_counterparty_name") or t.get("note") or "",
                                 "type": t.get("operation_type")})
             except Exception as e:
                 logger.warning(f"neo: Qonto transactions ({(iban or '')[-4:]}) : {e}")
         txs.sort(key=lambda x: x.get("date") or "", reverse=True)
+        # Agrégats : mensuel (revenus/dépenses) + répartition des dépenses par type
+        from collections import defaultdict
+        monthly = {}
+        by_type = defaultdict(float)
+        for t in txs:
+            m = (t.get("date") or "")[:7]
+            if not m:
+                continue
+            slot = monthly.setdefault(m, {"month": m, "income": 0.0, "expense": 0.0})
+            amt = t.get("amount") or 0
+            if t.get("side") == "credit":
+                slot["income"] += amt
+            else:
+                slot["expense"] += amt
+                by_type[t.get("type") or "autre"] += amt
+        months_sorted = sorted(monthly.values(), key=lambda x: x["month"])[-6:]
+        for mm in months_sorted:
+            mm["income"], mm["expense"] = round(mm["income"], 2), round(mm["expense"], 2)
+        by_type_list = sorted(({"type": k, "amount": round(v, 2)} for k, v in by_type.items()),
+                              key=lambda x: x["amount"], reverse=True)
+        cur = monthly.get(datetime.now(timezone.utc).strftime("%Y-%m"), {"income": 0, "expense": 0})
         return {"success": True, "connected": True, "total_balance": round(sum(x["balance"] for x in accounts), 2),
-                "currency": "EUR", "accounts": accounts, "transactions": txs[:limit]}
+                "currency": "EUR", "accounts": accounts, "transactions": txs[:limit],
+                "monthly": months_sorted, "by_type": by_type_list, "tx_count": len(txs),
+                "month_income": round(cur.get("income", 0), 2), "month_expense": round(cur.get("expense", 0), 2)}
     except Exception as e:
         logger.warning(f"neo: Qonto trésorerie indisponible: {e}")
         return {"success": True, "connected": False, "error": str(e)[:200]}
