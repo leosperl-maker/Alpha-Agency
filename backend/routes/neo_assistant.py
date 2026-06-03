@@ -54,7 +54,7 @@ QONTO_KEY_SECRET = os.environ.get("QONTO_KEY_SECRET", "")
 
 # ElevenLabs — voix de Néo (synthèse vocale premium). Clé déjà dans Railway (ELEVENLABS_API_KEY).
 ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
-ELEVENLABS_VOICE_ID = os.environ.get("ELEVENLABS_VOICE_ID", "JBFqnCBsd6RMkjVDRZzb")  # « George » (premade, multilingue FR) par défaut
+ELEVENLABS_VOICE_ID = os.environ.get("ELEVENLABS_VOICE_ID", "PBm6YPbx7WbrxFTZwj3E")  # « Gabriel » (FR haute qualité, masculin) — changeable via env ou /neo/voices
 ELEVENLABS_MODEL = os.environ.get("ELEVENLABS_MODEL", "eleven_multilingual_v2")
 
 MAX_ITERS = 6  # garde-fou anti-boucle de la boucle agentique
