@@ -76,7 +76,8 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
     if (!text) { startListeningRef.current?.(); return; }
     setPhaseBoth("speaking");
     try {
-      const res = await neoAPI.tts(text, voiceIdRef.current || undefined, "eleven_flash_v2_5");
+      // multilingual_v2 (défaut) : Flash ne gagne rien en non-streaming et perd en qualité → on garde le premium
+      const res = await neoAPI.tts(text, voiceIdRef.current || undefined);
       if (!runningRef.current) return;
       const url = URL.createObjectURL(res.data);
       const audio = new Audio(url);
