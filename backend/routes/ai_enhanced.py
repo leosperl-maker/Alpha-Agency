@@ -165,6 +165,12 @@ async def execute_action(action_type: str, params: dict, user_id: str) -> dict:
             return await draft_followup_email_action(params)
         elif action_type == "send_followup":
             return await send_followup_action(params)
+        elif action_type == "enrich_company":
+            return await enrich_company_action(params)
+        elif action_type == "activity_report":
+            return await activity_report_action(params)
+        elif action_type == "prep_meeting":
+            return await prep_meeting_action(params)
         elif action_type == "create_quote":
             return await create_quote_action(params, user_id)
         elif action_type == "get_document":
@@ -482,6 +488,120 @@ async def send_followup_action(params: dict) -> dict:
     await db.ai_email_drafts.delete_one({"contact_id": contact["id"]})
     return {"success": True, "message": f"📤 Relance envoyée à {_contact_name(contact)} ({email}).",
             "contact_id": contact["id"]}
+
+
+# ==================== P3 : enrichissement / reporting / prépa RDV ====================
+async def _gemini_grounded(prompt: str) -> str:
+    """Recherche web via Gemini Google Search grounding. Retourne '' si indisponible."""
+    if not (_gemini_client and _genai_types):
+        return ""
+    try:
+        tools = [_genai_types.Tool(google_search=_genai_types.GoogleSearch())]
+    except Exception:
+        try:
+            tools = [_genai_types.Tool(google_search_retrieval=_genai_types.GoogleSearchRetrieval())]
+        except Exception:
+            return ""
+    for mdl in GEMINI_MODELS:
+        def _call(_m=mdl):
+            resp = _gemini_client.models.generate_content(
+                model=_m, contents=prompt,
+                config=_genai_types.GenerateContentConfig(tools=tools))
+            return (getattr(resp, "text", "") or "").strip()
+        try:
+            t = await asyncio.to_thread(_call)
+            if t:
+                return t
+        except Exception as e:
+            logger.warning(f"ai_enhanced: grounding {mdl} échoué: {e}")
+            continue
+    return ""
+
+
+async def enrich_company_action(params: dict) -> dict:
+    """Recherche web sur l'entreprise d'un contact avant un appel + 3 angles de RDV. Stocke un résumé."""
+    contact = await _find_contact(params)
+    if not contact:
+        return {"success": False, "error": "Contact non trouvé"}
+    company = contact.get("company") or _contact_name(contact)
+    city = contact.get("city") or "Guadeloupe / Antilles"
+    q = (f"Recherche web sur l'entreprise « {company} » ({city}). Donne, factuel et concis : secteur "
+         f"d'activité et taille estimée ; présence en ligne (site web + réseaux sociaux, abonnés si visible) ; "
+         f"réputation / avis Google (note + nombre d'avis) ; concurrents locaux visibles ; actualité récente. "
+         f"Termine par une ligne « 3 ANGLES POUR LE RDV : » puis 3 angles d'approche commerciale concrets pour "
+         f"Alpha Agency (agence de communication digitale). Si tu ne trouves presque rien, dis-le simplement.")
+    text = await _gemini_grounded(q)
+    if not text:
+        return {"success": False, "error": "Recherche web indisponible pour le moment."}
+    stamp = datetime.now(timezone.utc).strftime("%d/%m/%Y")
+    note = (contact.get("note") or "")
+    note = (note + "\n\n" if note else "") + f"[{stamp}] ENRICHISSEMENT IA :\n{text[:3000]}"
+    await db.contacts.update_one({"id": contact["id"]},
+                                 {"$set": {"note": note, "updated_at": datetime.now(timezone.utc).isoformat()}})
+    return {"success": True, "message": f"🔎 {company}\n\n{text}", "contact_id": contact["id"]}
+
+
+async def activity_report_action(params: dict) -> dict:
+    """Reporting d'activité : leads, conversion, valeur moyenne devis, service & canal n°1."""
+    from collections import Counter
+    now = datetime.now(timezone.utc)
+    days = int(params.get("days") or 30)
+    since = now - timedelta(days=days)
+    contacts = await db.contacts.find({}, {"_id": 0, "id": 1, "status": 1, "comment_connu": 1,
+                                           "created_at": 1, "project_type": 1, "besoin": 1}).to_list(3000)
+    invoices = await db.invoices.find({}, {"_id": 0, "document_type": 1, "total": 1}).to_list(3000)
+    leads = [c for c in contacts if (_to_dt(c.get("created_at")) and _to_dt(c.get("created_at")) >= since)]
+    won = [c for c in contacts if c.get("status") == "client"]
+    conv = (len(won) / len(contacts) * 100) if contacts else 0
+    devis = [i for i in invoices if i.get("document_type") == "devis"]
+    avg_devis = (sum((d.get("total") or 0) for d in devis) / len(devis)) if devis else 0
+    services = Counter((c.get("project_type") or c.get("besoin") or "").strip().lower()
+                       for c in contacts if (c.get("project_type") or c.get("besoin")))
+    channels = Counter((c.get("comment_connu") or "").strip().lower() for c in contacts if c.get("comment_connu"))
+    top_service = services.most_common(1)[0][0] if services else "n/c"
+    top_channel = channels.most_common(1)[0][0] if channels else "n/c"
+    msg = (f"📊 Activité ({days} derniers jours)\n"
+           f"• {len(leads)} nouveaux leads\n"
+           f"• {len(contacts)} contacts, {len(won)} clients (conversion {conv:.0f}%)\n"
+           f"• {len(devis)} devis, valeur moyenne {avg_devis:.0f}€\n"
+           f"• Service le plus demandé : {top_service}\n"
+           f"• Canal d'acquisition n°1 : {top_channel}")
+    return {"success": True, "message": msg}
+
+
+async def prep_meeting_action(params: dict) -> dict:
+    """Prépa de RDV : fiche + devis/factures + tâches + points à valider."""
+    contact = await _find_contact(params)
+    if not contact:
+        return {"success": False, "error": "Contact non trouvé"}
+    cid = contact["id"]
+    invs = await db.invoices.find({"contact_id": cid},
+                                  {"_id": 0, "invoice_number": 1, "status": 1, "total": 1}).to_list(20)
+    tasks = await db.tasks.find({"contact_id": cid, "status": {"$nin": ["done", "cancelled"]}},
+                                {"_id": 0, "title": 1}).to_list(20)
+    lines = [f"👤 {_contact_name(contact)} — {contact.get('company') or 'particulier'}"
+             + (f" · {contact.get('poste')}" if contact.get('poste') else "")]
+    if contact.get("besoin") or contact.get("project_type"):
+        lines.append(f"Besoin : {contact.get('besoin') or contact.get('project_type')}")
+    if contact.get("budget"):
+        lines.append(f"Budget : {contact.get('budget')}")
+    if contact.get("delai"):
+        lines.append(f"Délai : {contact.get('delai')}")
+    if invs:
+        lines.append("Devis/factures : " + ", ".join(f"{i['invoice_number']} ({i.get('status')})" for i in invs))
+    if tasks:
+        lines.append("En cours : " + ", ".join(t['title'] for t in tasks[:5]))
+    if contact.get("note"):
+        lines.append("Notes : " + (contact.get("note") or "")[:600])
+    base = "\n".join(lines)
+    angles = ""
+    if GEMINI_AVAILABLE and _gemini_client:
+        d = await _gemini_json('À partir de cette fiche prospect, renvoie en JSON {"a_valider":["",""]} '
+                               '2 à 4 points clés à valider absolument pendant le RDV.\nFICHE:\n' + base)
+        pts = (d.get("a_valider") or []) if isinstance(d, dict) else []
+        if pts:
+            angles = "\n\n✅ À valider pendant le RDV :\n" + "\n".join(f"• {p}" for p in pts if p)
+    return {"success": True, "message": "📋 Prépa RDV\n\n" + base + angles, "contact_id": cid}
 
 
 async def create_quote_action(params: dict, user_id: str) -> dict:
@@ -1127,6 +1247,15 @@ Actions disponibles:
 12. send_followup - Envoyer la relance (le brouillon rédigé juste avant) au prospect
    Params: contact_name OU contact_id
 
+13. enrich_company - Rechercher sur le web tout ce qu'on trouve sur l'entreprise d'un contact (avant un appel) + 3 angles de RDV
+   Params: contact_name OU contact_id
+
+14. activity_report - Reporting d'activité (leads, taux de conversion, valeur moyenne devis, service & canal n°1)
+   Params: days (optionnel, défaut 30)
+
+15. prep_meeting - Préparer un rendez-vous : fiche + devis/factures + tâches + points à valider
+   Params: contact_name OU contact_id
+
 Exemples:
 - "Crée une tâche pour rappeler Jean demain" → [ACTION]{"action_type": "create_task", "params": {"title": "Rappeler Jean", "due_date": "2026-06-03", "priority": "medium"}}[/ACTION]
 - "Passe ce lead en gagné" / "Marque Dupont comme client" → [ACTION]{"action_type": "set_contact_status", "params": {"contact_name": "Dupont", "status": "gagné"}}[/ACTION]
@@ -1136,6 +1265,9 @@ Exemples:
 - "Marque la tâche 'Appeler client' comme terminée" → [ACTION]{"action_type": "mark_task_done", "params": {"task_title": "Appeler client"}}[/ACTION]
 - "Montre-moi les documents PDF" → [ACTION]{"action_type": "list_documents", "params": {"file_type": "document"}}[/ACTION]
 - "Rédige une relance pour Martin" → [ACTION]{"action_type": "draft_followup_email", "params": {"contact_name": "Martin"}}[/ACTION] (montre le brouillon, n'envoie pas)
+- "Donne-moi tout sur l'entreprise de Martin avant mon appel" → [ACTION]{"action_type": "enrich_company", "params": {"contact_name": "Martin"}}[/ACTION]
+- "Fais le point sur mon activité ce mois-ci" → [ACTION]{"action_type": "activity_report", "params": {"days": 30}}[/ACTION]
+- "Prépare mon RDV avec Dupont" → [ACTION]{"action_type": "prep_meeting", "params": {"contact_name": "Dupont"}}[/ACTION]
 
 RÈGLES D'ACTION : la date du jour t'est donnée dans le contexte (utilise-la pour résoudre "demain", "vendredi"). N'exécute une action QUE si l'utilisateur le demande clairement. Pour les actions irréversibles (merge_contacts notamment) ou si un détail manque, reformule ce que tu vas faire et demande confirmation AVANT d'émettre le bloc [ACTION].
 
