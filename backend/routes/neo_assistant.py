@@ -269,6 +269,42 @@ async def _central_memory() -> str:
     return out
 
 
+# ==================== Health score (Phase 4) ====================
+async def _compute_health_score() -> dict:
+    """Score de santé business /100 : trésorerie + impayés + pipeline (devis) + leads chauds non traités."""
+    now = datetime.now(timezone.utc)
+    month = now.strftime("%Y-%m")
+    try:
+        entries = await db.budget.find({"month": {"$regex": f"^{month}"}}, {"_id": 0, "amount": 1, "type": 1}).to_list(500)
+    except Exception:
+        entries = []
+    income = sum((e.get("amount", 0) or 0) for e in entries if e.get("type") == "income")
+    expense = sum((e.get("amount", 0) or 0) for e in entries if e.get("type") == "expense")
+    balance = income - expense
+    invoices = await db.invoices.find({}, {"_id": 0, "document_type": 1, "status": 1, "total": 1, "due_date": 1}).to_list(2000)
+    PAID = ("payée", "payee", "payé", "paye", "annulée", "annulee", "annulé", "brouillon")
+    overdue = [i for i in invoices if i.get("document_type") != "devis"
+               and (i.get("status") or "").lower() not in PAID
+               and (i.get("status") == "en_retard" or (_to_dt(i.get("due_date")) and _to_dt(i.get("due_date")) < now))]
+    pending_devis = [i for i in invoices if i.get("document_type") == "devis" and (i.get("status") or "").lower() == "brouillon"]
+    contacts = await db.contacts.find({"status": "nouveau"}, {"_id": 0, "score": 1, "score_value": 1}).to_list(2000)
+
+    def _hot(c):
+        sv = c.get("score_value")
+        return (sv >= 70) if isinstance(sv, (int, float)) else (c.get("score") in ("chaud", "chaude"))
+    hot = [c for c in contacts if _hot(c)]
+    score = 70
+    score += 15 if balance >= 0 else -20
+    score -= min(35, len(overdue) * 12)
+    score += min(12, len(pending_devis) * 3)
+    score -= min(15, len(hot) * 5)
+    score = max(0, min(100, int(round(score))))
+    label = "solide" if score >= 75 else ("à surveiller" if score >= 50 else "tendu")
+    return {"success": True, "score": score, "label": label, "balance": round(balance, 2),
+            "overdue_count": len(overdue), "overdue_total": round(sum((i.get("total") or 0) for i in overdue), 2),
+            "pending_devis": len(pending_devis), "hot_leads": len(hot)}
+
+
 # ==================== Registre d'outils (Partie C) ====================
 def _obj(props: dict, required=None):
     return {"type": "object", "properties": props, "required": required or []}
@@ -299,6 +335,9 @@ TOOLS = [
     {"name": "list_tasks", "validation": False, "run": _exec_list_tasks,
      "description": "Liste les tâches (par défaut les non terminées). status optionnel.",
      "params": _obj({"status": _STR})},
+    {"name": "get_health_score", "validation": False, "run": lambda a, u: _compute_health_score(),
+     "description": "Score de santé business /100 (trésorerie, impayés, devis en attente, leads chauds) + détail.",
+     "params": _obj({})},
     {"name": "activity_report", "validation": False, "run": lambda a, u: activity_report_action(a),
      "description": "Reporting d'activité : leads, conversion, valeur moyenne des devis, service & canal n°1.",
      "params": _obj({"days": _INT})},
@@ -506,6 +545,12 @@ class FeedbackRequest(BaseModel):
 @router.get("/health")
 async def neo_health():
     return {"available": bool(_client), "model_chain": NEO_MODELS, "tools": [t["name"] for t in TOOLS]}
+
+
+@router.get("/health-score")
+async def neo_health_score_endpoint(current_user: dict = Depends(get_current_user)):
+    """Score de santé business /100 (déterministe, sans LLM) — pour le cockpit + Néo."""
+    return await _compute_health_score()
 
 
 @router.post("/chat")
