@@ -29,6 +29,25 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
   const phaseRef = useRef("idle");
   const histRef = useRef(messages);   // historique courant (sans re-render)
   const voiceIdRef = useRef(voiceId);
+  const audioElRef = useRef(null);   // <audio> persistant (clé pour débloquer l'audio iOS)
+  const srcNodeRef = useRef(null);   // MediaElementSource (desktop, créé une seule fois)
+  const lastUrlRef = useRef(null);
+
+  const getAudioEl = () => {
+    if (!audioElRef.current) { const el = new Audio(); el.preload = "auto"; audioElRef.current = el; }
+    return audioElRef.current;
+  };
+  // Débloque l'audio DANS un geste utilisateur (sinon iOS bloque play() hors-geste)
+  const unlockAudio = () => {
+    try {
+      const el = getAudioEl();
+      el.muted = true;
+      el.src = "data:audio/wav;base64,UklGRiwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQgAAAAAAAAAAAAAAA==";
+      const p = el.play();
+      if (p && p.then) p.then(() => { try { el.pause(); el.currentTime = 0; } catch (e) {} el.muted = false; }).catch(() => { el.muted = false; });
+      if (audioCtxRef.current && audioCtxRef.current.resume) audioCtxRef.current.resume();
+    } catch (e) { /* noop */ }
+  };
 
   useEffect(() => { histRef.current = messages; }, [messages]);
   useEffect(() => { voiceIdRef.current = voiceId; }, [voiceId]);
@@ -61,7 +80,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
   }, []);
 
   const stopAudio = useCallback(() => {
-    if (audioRef.current) { try { audioRef.current.pause(); } catch (e) {} audioRef.current = null; }
+    if (audioElRef.current) { try { audioElRef.current.pause(); } catch (e) {} }
     resetOrb();
   }, [resetOrb]);
 
@@ -78,36 +97,35 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
     if (!text) { startListeningRef.current?.(); return; }
     setPhaseBoth("speaking");
     try {
-      // multilingual_v2 (défaut) : Flash ne gagne rien en non-streaming et perd en qualité → on garde le premium
       const res = await neoAPI.tts(text, voiceIdRef.current || undefined);
       if (!runningRef.current) return;
+      const el = getAudioEl();
+      if (lastUrlRef.current) { try { URL.revokeObjectURL(lastUrlRef.current); } catch (e) {} }
       const url = URL.createObjectURL(res.data);
-      const audio = new Audio(url);
-      audio.preload = "auto";
-      audioRef.current = audio;
-      const finish = () => {
-        URL.revokeObjectURL(url);
-        resetOrb();
-        if (runningRef.current) startListeningRef.current?.();
-      };
-      audio.onended = finish;
-      audio.onerror = finish;
-      // Analyse d'amplitude (orbe réactif) — desktop uniquement : createMediaElementSource coupe le son sur iOS
+      lastUrlRef.current = url;
+      el.muted = false;
+      el.src = url;
+      const finish = () => { resetOrb(); if (runningRef.current) startListeningRef.current?.(); };
+      el.onended = finish;
+      el.onerror = finish;
+      // Analyse d'amplitude (orbe réactif) — desktop uniquement, source créée 1 seule fois sur l'élément persistant
       if (!IS_IOS) {
         try {
           if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
           const ctx = audioCtxRef.current;
           if (ctx.state === "suspended") await ctx.resume();
-          const srcNode = ctx.createMediaElementSource(audio);
-          const analyser = ctx.createAnalyser();
-          analyser.fftSize = 256;
-          srcNode.connect(analyser);
-          analyser.connect(ctx.destination);
-          analyserRef.current = analyser;
+          if (!srcNodeRef.current) {
+            srcNodeRef.current = ctx.createMediaElementSource(el);
+            const analyser = ctx.createAnalyser();
+            analyser.fftSize = 256;
+            srcNodeRef.current.connect(analyser);
+            analyser.connect(ctx.destination);
+            analyserRef.current = analyser;
+          }
           rafRef.current = requestAnimationFrame(animateOrb);
         } catch (e) { analyserRef.current = null; }
       }
-      await audio.play();
+      await el.play();
     } catch (e) {
       resetOrb();
       if (runningRef.current) startListeningRef.current?.();
@@ -199,9 +217,11 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
 
   useEffect(() => { startListeningRef.current = startListening; }, [startListening]);
 
-  // tap sur l'orbe : interrompre Néo (s'il parle) et réécouter tout de suite
+  // tap sur l'orbe : (dé)bloque l'audio iOS + démarre/interrompt
   const onOrbTap = useCallback(() => {
     if (!runningRef.current) return;
+    unlockAudio(); // toujours dans un geste -> débloque l'audio iOS
+    if (phaseRef.current === "idle") { startListeningRef.current?.(); return; }
     if (phaseRef.current === "speaking") { stopAudio(); startListeningRef.current?.(); }
     else if (phaseRef.current === "listening") { stopRecognition(); /* relance via onend */ }
   }, [stopAudio, stopRecognition]);
@@ -221,8 +241,12 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
     if (open) {
       runningRef.current = true;
       setErrMsg("");
-      const t = setTimeout(() => startListeningRef.current?.(), 250);
-      return () => clearTimeout(t);
+      if (IS_IOS) {
+        setPhaseBoth("idle"); // iOS : attendre un tap sur l'orbe (geste) pour débloquer l'audio
+      } else {
+        const t = setTimeout(() => startListeningRef.current?.(), 250);
+        return () => clearTimeout(t);
+      }
     } else {
       teardown();
     }
@@ -236,7 +260,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, onConvId, onExchan
     phase === "listening" ? "Je t'écoute…" :
     phase === "thinking" ? "Néo réfléchit…" :
     phase === "speaking" ? "" :
-    phase === "error" ? errMsg : "Un instant…";
+    phase === "error" ? errMsg : "Touche l'orbe pour parler à Néo";
 
   return (
     <div className="fixed inset-0 z-[80] flex flex-col items-center justify-between overflow-hidden"
