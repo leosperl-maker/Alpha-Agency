@@ -44,7 +44,7 @@ const QontoTreasury = () => {
   const last = monthly[monthly.length - 1] || { income: 0, expense: 0, month: "" };
   const mIncome = last.income || 0, mExpense = last.expense || 0, net = mIncome - mExpense;
   const mLabel = last.month ? monthLabel(last.month) : "mois";
-  const chartData = monthly.map((m) => ({ mois: monthLabel(m.month), Entrées: m.income, Sorties: m.expense }));
+  const chartData = monthly.map((m) => ({ mois: monthLabel(m.month), Encaissements: m.income, Dépenses: m.expense }));
   const maxType = Math.max(1, ...by_type.map((t) => t.amount));
 
   return (
@@ -52,15 +52,15 @@ const QontoTreasury = () => {
       {/* KPI */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KPI label="Solde total" value={fmt(total_balance)} accent="text-foreground" icon={Wallet} />
-        <KPI label={`Entrées (${mLabel})`} value={fmt(mIncome)} accent="text-success" icon={TrendingUp} />
-        <KPI label={`Sorties (${mLabel})`} value={fmt(mExpense)} accent="text-danger" icon={TrendingDown} />
+        <KPI label={`CA encaissé (${mLabel})`} value={fmt(mIncome)} accent="text-success" icon={TrendingUp} />
+        <KPI label={`Dépenses (${mLabel})`} value={fmt(mExpense)} accent="text-danger" icon={TrendingDown} />
         <KPI label={`Net (${mLabel})`} value={fmt(net)} accent={net >= 0 ? "text-success" : "text-danger"} icon={Landmark} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Évolution */}
         <div className="rounded-2xl border border-border bg-card p-4 min-w-0">
-          <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /> Évolution</h3>
+          <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /> Évolution <span className="text-[10px] text-muted-foreground font-normal">(hors virements internes)</span></h3>
           {chartData.length ? (
             <div className="w-full h-56 min-w-0">
               <ResponsiveContainer width="100%" height="100%">
@@ -72,8 +72,8 @@ const QontoTreasury = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="mois" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
                   <Tooltip formatter={(v) => fmtFull(v)} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--foreground)", fontSize: 12 }} />
-                  <Area type="monotone" dataKey="Entrées" stroke="#16a34a" fill="url(#neoRev)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="Sorties" stroke="#E11D2E" fill="url(#neoDep)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="Encaissements" stroke="#16a34a" fill="url(#neoRev)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="Dépenses" stroke="#E11D2E" fill="url(#neoDep)" strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

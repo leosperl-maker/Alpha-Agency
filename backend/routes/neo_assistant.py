@@ -409,6 +409,10 @@ async def _qonto_treasury(limit: int = 40) -> dict:
             m = (t.get("date") or "")[:7]
             if not m:
                 continue
+            # On EXCLUT les virements (transfer) des agrégats CA/dépenses : ce sont surtout des
+            # mouvements internes entre comptes (qui gonflent les totaux). On garde tout dans la liste.
+            if t.get("type") == "transfer":
+                continue
             slot = monthly.setdefault(m, {"month": m, "income": 0.0, "expense": 0.0})
             amt = t.get("amount") or 0
             if t.get("side") == "credit":
