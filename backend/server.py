@@ -6649,6 +6649,10 @@ app.include_router(multilink_router, prefix="/api/multilink", tags=["multilink"]
 from routes.public_chat import router as public_chat_router
 app.include_router(public_chat_router, prefix="/api", tags=["public-chat"])
 
+# NÉO — associé co-gérant IA (function calling natif, contrôle CRM, garde-fous) — en parallèle de ai_enhanced
+from routes.neo_assistant import router as neo_router
+app.include_router(neo_router, prefix="/api", tags=["neo"])
+
 # MoltBot Integration (Full CRM Access)
 from routes.moltbot import router as moltbot_router
 app.include_router(moltbot_router, prefix="/api", tags=["moltbot"])
