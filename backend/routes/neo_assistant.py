@@ -109,6 +109,10 @@ correction via remember(type="lesson", content="...") pour ne plus refaire l'err
 les LEÇONS APPRISES présentes dans ta mémoire ci-dessous.
 
 Si tu ignores une donnée, dis-le et propose de vérifier (utilise crm_query). N'invente jamais un chiffre.
+VÉRITÉ SUR TES ACTIONS : ne dis JAMAIS qu'une action a réussi sans avoir lu le résultat réel de l'outil. Cite toujours
+précisément ce que tu as fait — le contact EXACT par son nom complet, le numéro de devis/facture. Pour un devis ou une
+action liée à un contact, assure-toi que c'est le BON contact (celui que Léo vise, souvent celui qu'on vient de créer) ;
+au moindre doute sur l'identité du contact, demande confirmation à Léo AVANT d'agir. Tu ne prétends jamais un succès non vérifié.
 Quand tu as fini d'agir, réponds en clair à Léo (résultat + éventuelles validations en attente)."""
 
 # ==================== Réutilisation des exécuteurs existants ====================
@@ -858,8 +862,15 @@ async def _exec_create_quote(args, uid):
            "notes": args.get("notes"), "conditions": None, "client_name": client_name,
            "created_at": now.isoformat(), "created_by": uid}
     await db.invoices.insert_one(doc)
-    return {"success": True, "result": {"quote_id": doc["id"], "number": number, "total": total, "contact_id": contact_id},
-            "message": f"Devis {number} créé pour {client_name} — total {total:.2f}€ (brouillon, visible dans Facturation)."}
+    if contact:
+        extra = contact.get("email") or contact.get("company") or ""
+        link = f"rattaché au contact « {client_name} »" + (f" ({extra})" if extra else "")
+    else:
+        link = "⚠️ AUCUN contact existant rattaché — vérifie le nom ou crée d'abord la fiche"
+    return {"success": True, "result": {"quote_id": doc["id"], "number": number, "total": total,
+                                        "contact_id": contact_id, "client_name": client_name},
+            "message": f"Devis {number} créé — total {total:.2f}€, {link}. Brouillon visible dans Facturation. "
+                       f"Indique à Léo le contact EXACT rattaché et demande si c'est le bon."}
 
 
 TOOLS = [

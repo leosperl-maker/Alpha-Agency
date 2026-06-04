@@ -294,13 +294,24 @@ async def _find_contact(params: dict):
     if contact_id:
         return await db.contacts.find_one({"id": contact_id})
     if contact_name:
-        tokens = [t for t in re.split(r"\s+", str(contact_name).strip()) if len(t) >= 2]
+        name = str(contact_name).strip()
+        tokens = [t for t in re.split(r"\s+", name) if len(t) >= 2]
+        # 1) match EXACT prénom + nom, le plus récent d'abord (souvent le contact qu'on vient de créer)
+        if len(tokens) >= 2:
+            exact = await db.contacts.find(
+                {"first_name": {"$regex": f"^{re.escape(tokens[0])}$", "$options": "i"},
+                 "last_name": {"$regex": f"^{re.escape(' '.join(tokens[1:]))}$", "$options": "i"}}
+            ).sort("created_at", -1).to_list(1)
+            if exact:
+                return exact[0]
+        # 2) match large (tokenisé) mais trié du PLUS RÉCENT au plus ancien (évite un vieil homonyme partiel)
         ors = []
         for field in ("first_name", "last_name", "company", "email"):
-            ors.append({field: {"$regex": re.escape(str(contact_name)), "$options": "i"}})
+            ors.append({field: {"$regex": re.escape(name), "$options": "i"}})
             for t in tokens:
                 ors.append({field: {"$regex": re.escape(t), "$options": "i"}})
-        return await db.contacts.find_one({"$or": ors}) if ors else None
+        rows = await db.contacts.find({"$or": ors}).sort("created_at", -1).to_list(1) if ors else []
+        return rows[0] if rows else None
     return None
 
 
