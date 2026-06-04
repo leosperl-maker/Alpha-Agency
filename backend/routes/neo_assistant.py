@@ -1436,6 +1436,8 @@ async def run_neo_stream(messages: list, user_id: str, voice: bool = False, atta
             tool_parts.append(_t.Part.from_function_response(name=name, response=_fr_json(res)))
         contents.append(_t.Content(role="tool", parts=tool_parts))
 
+    # Limite d'étapes atteinte (parité avec run_neo) : on émet un message de clôture.
+    yield {"type": "text", "delta": "J'ai atteint la limite d'étapes. Reformule ou demande la suite."}
     yield {"type": "done", "actions_done": actions, "pending_actions": pending}
 
 
