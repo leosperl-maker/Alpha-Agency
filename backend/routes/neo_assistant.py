@@ -75,6 +75,7 @@ Comportement :
 - Proactif : anticipe, alerte, propose. N'attends pas qu'on te demande.
 - Honnête et direct : challenge Léo si une décision s'éloigne des objectifs.
 - Tu raisonnes toujours en termes d'argent : acquérir, encaisser, scaler.
+- Pilotage du prévisionnel : tu reçois plus bas l'état financier en direct (réel du mois, cumul de l'année, pipeline de devis, atterrissage). Compare-le en continu à l'objectif enregistré dans ta mémoire ; si le rythme ne suffit pas à tenir l'objectif, dis-le spontanément et propose un plan d'accélération concret (quel devis relancer, quel lead signer). Raisonne en « atterrissage » : où finit-on le mois et l'année au rythme actuel.
 
 TON — parle comme un VRAI associé humain, pas comme un assistant :
 - Chaleureux, naturel, vivant, avec de la répartie et un peu d'humour. Tu tutoies Léo, tu l'appelles par son prénom.
@@ -224,7 +225,7 @@ async def _exec_list_leads(args, uid):
 async def _exec_get_budget_summary(args, uid):
     now = datetime.now(timezone.utc)
     month = now.strftime("%Y-%m")
-    entries = await db.budget.find({"month": {"$regex": f"^{month}"}}, {"_id": 0}).to_list(500)
+    entries = await db.budget.find({"date": {"$regex": f"^{month}"}}, {"_id": 0}).to_list(500)
     income = sum((e.get("amount", 0) or 0) for e in entries if e.get("type") == "income")
     expense = sum((e.get("amount", 0) or 0) for e in entries if e.get("type") == "expense")
     invoices = await db.invoices.find({}, {"_id": 0, "document_type": 1, "status": 1, "total": 1,
@@ -466,7 +467,7 @@ async def _compute_health_score() -> dict:
     now = datetime.now(timezone.utc)
     month = now.strftime("%Y-%m")
     try:
-        entries = await db.budget.find({"month": {"$regex": f"^{month}"}}, {"_id": 0, "amount": 1, "type": 1}).to_list(500)
+        entries = await db.budget.find({"date": {"$regex": f"^{month}"}}, {"_id": 0, "amount": 1, "type": 1}).to_list(500)
     except Exception:
         entries = []
     income = sum((e.get("amount", 0) or 0) for e in entries if e.get("type") == "income")
@@ -494,6 +495,55 @@ async def _compute_health_score() -> dict:
     return {"success": True, "score": score, "label": label, "balance": round(balance, 2),
             "overdue_count": len(overdue), "overdue_total": round(sum((i.get("total") or 0) for i in overdue), 2),
             "pending_devis": len(pending_devis), "hot_leads": len(hot)}
+
+
+# ==================== Budget incarné (Phase 2 — VOIR l'argent) ====================
+async def _budget_context() -> str:
+    """État financier EN DIRECT, injecté dans le cerveau de Néo à chaque message : il « voit »
+    la trésorerie sans avoir à appeler un outil. Données locales Mongo uniquement (pas d'appel
+    réseau Qonto ici — gardé pour l'outil get_bank_balance à la demande). Robuste : jamais bloquant."""
+    try:
+        now = datetime.now(timezone.utc)
+        month = now.strftime("%Y-%m")
+        entries = await db.budget.find({"date": {"$regex": f"^{month}"}},
+                                       {"_id": 0, "amount": 1, "type": 1}).to_list(500)
+        income = sum((e.get("amount", 0) or 0) for e in entries if e.get("type") == "income")
+        expense = sum((e.get("amount", 0) or 0) for e in entries if e.get("type") == "expense")
+        balance = income - expense
+        ytd = await db.budget.find({"date": {"$regex": f"^{now.strftime('%Y')}"}, "type": "income"},
+                                   {"_id": 0, "amount": 1}).to_list(3000)
+        income_ytd = sum((e.get("amount", 0) or 0) for e in ytd)
+        invoices = await db.invoices.find({}, {"_id": 0, "document_type": 1, "status": 1,
+                                               "total": 1, "due_date": 1}).to_list(2000)
+        PAID = ("payée", "payee", "payé", "paye", "annulée", "annulee", "annulé", "brouillon")
+        overdue = [i for i in invoices if i.get("document_type") != "devis"
+                   and (i.get("status") or "").lower() not in PAID
+                   and (i.get("status") == "en_retard" or (_to_dt(i.get("due_date")) and _to_dt(i.get("due_date")) < now))]
+        overdue_total = sum((i.get("total") or 0) for i in overdue)
+        pending_devis = [i for i in invoices if i.get("document_type") == "devis"
+                         and (i.get("status") or "").lower() in ("brouillon", "en_attente", "envoyée", "envoyee")]
+        pipeline_total = sum((i.get("total") or 0) for i in pending_devis)
+        try:
+            fc = await db.budget_forecasts.find({"month": month},
+                                                {"_id": 0, "planned_amount": 1, "type": 1}).to_list(500)
+        except Exception:
+            fc = []
+        planned_income = sum((f.get("planned_amount", 0) or 0) for f in fc if f.get("type") == "income")
+        planned_expense = sum((f.get("planned_amount", 0) or 0) for f in fc if f.get("type") == "expense")
+    except Exception as e:
+        logger.warning(f"neo budget_context KO: {e}")
+        return ""
+    lines = [f"\n\n=== ÉTAT FINANCIER EN DIRECT ({month}) — tiens-en compte sans le redemander, cite ces chiffres quand c'est utile ==="]
+    lines.append(f"Réel ce mois : encaissé {income:.0f}€, dépensé {expense:.0f}€, solde {balance:+.0f}€.")
+    lines.append(f"Encaissé cumulé depuis janvier {month[:4]} : {income_ytd:.0f}€.")
+    if planned_income or planned_expense:
+        lines.append(f"Prévisionnel saisi (page Budget) : {planned_income:.0f}€ de recettes prévues, {planned_expense:.0f}€ de dépenses prévues.")
+    lines.append(f"Impayés à relancer : {len(overdue)} facture(s) pour {overdue_total:.0f}€." if overdue
+                 else "Impayés à relancer : aucun.")
+    if pending_devis:
+        lines.append(f"Pipeline (devis en attente) : {len(pending_devis)} pour {pipeline_total:.0f}€ potentiels.")
+        lines.append(f"Atterrissage du mois si ces devis passent : {income + pipeline_total:.0f}€ encaissés.")
+    return "\n".join(lines)
 
 
 # ==================== Pilotage stratégique (Phase 5) ====================
@@ -998,7 +1048,7 @@ async def run_neo(messages: list, user_id: str, voice: bool = False, attachments
             except Exception as e:
                 logger.warning(f"neo attachment skip: {e}")
 
-    system = NEO_SYSTEM + _now_line() + await _central_memory()
+    system = NEO_SYSTEM + _now_line() + await _budget_context() + await _central_memory()
     if voice:
         system += ("\n\n[MODE VOCAL] Tu réponds à l'oral : bref et naturel, 2-3 phrases maximum, "
                    "sans listes à puces, sans markdown, sans emojis. Ton conversationnel, droit au but.")
@@ -1056,7 +1106,7 @@ async def run_neo_claude(messages: list, user_id: str, voice: bool = False) -> d
     import json as _json
     if not ANTHROPIC_API_KEY:
         return await run_neo(messages, user_id, voice=voice)
-    system = NEO_SYSTEM + _now_line() + await _central_memory()
+    system = NEO_SYSTEM + _now_line() + await _budget_context() + await _central_memory()
     if voice:
         system += ("\n\n[MODE VOCAL] Tu réponds à l'oral : bref et naturel, 2-3 phrases maximum, "
                    "sans listes à puces, sans markdown, sans emojis. Ton conversationnel, droit au but.")
