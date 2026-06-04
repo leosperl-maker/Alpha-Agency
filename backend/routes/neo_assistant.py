@@ -20,6 +20,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 
 from fastapi import APIRouter, HTTPException, Depends, Response
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from .database import db, get_current_user
@@ -1242,6 +1243,202 @@ async def run_neo(messages: list, user_id: str, voice: bool = False, attachments
             "available": True, "pending_actions": pending, "actions_done": actions}
 
 
+# ==================== Streaming (« il parle pendant qu'il fait ») ====================
+# Libellés FR des étapes d'outils affichées EN DIRECT dans le chat : (en cours…, fait).
+_TOOL_LABELS = {
+    "web_search": ("Recherche sur le web…", "Recherche web terminée"),
+    "get_invoice_pdf": ("Récupération du document…", "Document prêt"),
+    "delegate_task": ("Délégation à un sous-agent…", "Sous-tâche terminée"),
+    "send_to_cowork": ("Envoi à Cowork…", "Tâche envoyée à Cowork"),
+    "generate_image": ("Génération du visuel…", "Visuel généré"),
+    "search_contacts": ("Recherche de contacts…", "Contacts trouvés"),
+    "get_contact": ("Lecture de la fiche…", "Fiche lue"),
+    "get_contact_history": ("Lecture de l'historique…", "Historique lu"),
+    "read_emails": ("Lecture des emails…", "Emails lus"),
+    "list_leads": ("Lecture des leads…", "Leads listés"),
+    "get_budget_summary": ("Lecture du budget…", "Budget lu"),
+    "get_bank_balance": ("Lecture du solde Qonto…", "Solde bancaire lu"),
+    "list_transactions": ("Lecture des transactions…", "Transactions lues"),
+    "list_overdue_invoices": ("Recherche des impayés…", "Impayés listés"),
+    "list_tasks": ("Lecture des tâches…", "Tâches listées"),
+    "get_health_score": ("Calcul du score de santé…", "Score calculé"),
+    "strategic_review": ("Analyse stratégique…", "Point stratégique prêt"),
+    "activity_report": ("Génération du reporting…", "Reporting prêt"),
+    "prep_meeting": ("Préparation du RDV…", "RDV préparé"),
+    "enrich_company": ("Recherche sur l'entreprise…", "Entreprise enrichie"),
+    "list_documents": ("Lecture des documents…", "Documents listés"),
+    "get_document": ("Lecture du document…", "Document lu"),
+    "crm_query": ("Lecture du CRM…", "Données lues"),
+    "crm_create": ("Création dans le CRM…", "Créé dans le CRM"),
+    "crm_update": ("Mise à jour du CRM…", "CRM mis à jour"),
+    "crm_delete": ("Préparation de la suppression…", "Suppression à valider"),
+    "create_task": ("Création de la tâche…", "Tâche créée"),
+    "mark_task_done": ("Clôture de la tâche…", "Tâche terminée"),
+    "schedule_followup": ("Programmation de la relance…", "Relance programmée"),
+    "create_contact": ("Création de la fiche…", "Fiche contact créée"),
+    "set_contact_status": ("Mise à jour du statut…", "Statut mis à jour"),
+    "add_contact_note": ("Ajout d'une note…", "Note ajoutée"),
+    "update_contact": ("Mise à jour du contact…", "Contact mis à jour"),
+    "create_quote": ("Création du devis…", "Devis créé"),
+    "draft_followup_email": ("Rédaction de l'email…", "Email préparé"),
+    "remember": ("Mémorisation…", "Mémorisé"),
+    "recall": ("Consultation de la mémoire…", "Mémoire consultée"),
+    "update_objective": ("Mise à jour de l'objectif…", "Objectif enregistré"),
+    "log_day": ("Mise à jour du journal…", "Journal mis à jour"),
+    "send_followup": ("Préparation de la relance…", "Relance préparée (à valider)"),
+    "merge_contacts": ("Préparation de la fusion…", "Fusion préparée (à valider)"),
+}
+
+
+def _tool_label(name: str, kind: str) -> str:
+    """Libellé d'étape pour le front. kind: 'start' | 'done' | 'pending' | 'fail'."""
+    ing, done = _TOOL_LABELS.get(name, (f"Néo travaille ({name.replace('_', ' ')})…", name.replace("_", " ")))
+    if kind == "start":
+        return ing
+    if kind == "pending":
+        return done if "valider" in done else f"{done} — à valider"
+    if kind == "fail":
+        return f"{done} — échec"
+    return done
+
+
+async def _gemini_stream_turn(contents, system):
+    """Un tour de génération EN STREAMING (chaîne de repli de modèles).
+    Async-générateur : yield {"type":"text","delta":...} au fil de l'eau, puis un unique
+    {"type":"turn_done","fcs":[...],"content":<Content model>} à la fin du tour.
+    Le repli vers le modèle suivant n'est possible que TANT QU'aucun token n'a été émis."""
+    tools = _gemini_tools()
+    last_err = None
+    for mdl in NEO_MODELS:
+        text_acc = ""
+        fcs = []
+        started = False
+        try:
+            t0 = time.time()
+            cfg = _t.GenerateContentConfig(
+                system_instruction=system, tools=tools,
+                automatic_function_calling=_t.AutomaticFunctionCallingConfig(disable=True),
+            )
+            stream = await _client.aio.models.generate_content_stream(model=mdl, contents=contents, config=cfg)
+            async for chunk in stream:
+                # appels d'outils (parts complètes, accumulées au fil des chunks)
+                try:
+                    for fc in (chunk.function_calls or []):
+                        fcs.append(fc)
+                except Exception:
+                    pass
+                # fragment de texte
+                try:
+                    delta = chunk.text or ""
+                except Exception:
+                    delta = ""
+                if delta:
+                    started = True
+                    text_acc += delta
+                    yield {"type": "text", "delta": delta}
+            await _log("llm_stream", {"model": mdl, "latency_ms": int((time.time() - t0) * 1000)})
+            # Réponse vide (ni texte ni outil) -> on tente le modèle suivant (comme en non-stream)
+            if not (text_acc or fcs):
+                last_err = "empty_response"
+                logger.warning(f"neo stream: modèle {mdl} a renvoyé une réponse vide, essai du suivant")
+                continue
+            parts = []
+            if text_acc:
+                parts.append(_t.Part.from_text(text=text_acc))
+            for fc in fcs:
+                parts.append(_t.Part.from_function_call(name=fc.name, args=dict(fc.args or {})))
+            yield {"type": "turn_done", "fcs": fcs, "content": _t.Content(role="model", parts=parts)}
+            return
+        except Exception as e:
+            last_err = e
+            logger.warning(f"neo stream: modèle {mdl} a échoué: {e}")
+            if started:
+                # Du texte a déjà coulé : on ne peut pas rejouer proprement -> on clôt le tour avec l'acquis.
+                parts = []
+                if text_acc:
+                    parts.append(_t.Part.from_text(text=text_acc))
+                for fc in fcs:
+                    parts.append(_t.Part.from_function_call(name=fc.name, args=dict(fc.args or {})))
+                yield {"type": "turn_done", "fcs": fcs, "content": _t.Content(role="model", parts=parts)}
+                return
+            continue
+    raise RuntimeError(f"all_neo_models_failed: {last_err}")
+
+
+async def run_neo_stream(messages: list, user_id: str, voice: bool = False, attachments: list = None):
+    """Version STREAMING de run_neo : même boucle agentique, mais yield les events au fil de l'eau.
+    Events : text/tool/pending/done/error. Garde-fous (validation) INCHANGÉS via execute_tool."""
+    if not _client:
+        yield {"type": "error", "detail": "Néo est momentanément indisponible (clé IA manquante)."}
+        return
+    contents = []
+    for m in messages:
+        role = "model" if m.get("role") == "assistant" else "user"
+        contents.append(_t.Content(role=role, parts=[_t.Part.from_text(text=(m.get("content") or "")[:8000])]))
+
+    # Fichiers joints (image/PDF lus nativement par Gemini) -> ajoutés au dernier message utilisateur
+    if attachments and contents and contents[-1].role == "user":
+        import base64 as _b64
+        for att in (attachments or [])[:5]:
+            try:
+                raw = _b64.b64decode((att.get("data") or "").split(",")[-1])
+                mime = att.get("mime_type") or "application/octet-stream"
+                name = (att.get("name") or "").lower()
+                if raw and (mime.startswith("image/") or mime == "application/pdf"):
+                    contents[-1].parts.append(_t.Part.from_bytes(data=raw, mime_type=mime))
+                elif raw and (name.endswith(".docx") or "wordprocessingml" in mime):
+                    txt = _extract_docx_text(raw)
+                    if txt:
+                        contents[-1].parts.append(_t.Part.from_text(text=f"[Contenu du fichier {att.get('name')}]\n{txt[:12000]}"))
+                elif raw and (name.endswith(".pptx") or "presentationml" in mime):
+                    txt = _extract_pptx_text(raw)
+                    if txt:
+                        contents[-1].parts.append(_t.Part.from_text(text=f"[Contenu du fichier {att.get('name')}]\n{txt[:12000]}"))
+            except Exception as e:
+                logger.warning(f"neo attachment skip: {e}")
+
+    system = NEO_SYSTEM + _now_line() + await _budget_context() + await _central_memory()
+    if voice:
+        system += ("\n\n[MODE VOCAL] Tu réponds à l'oral : bref et naturel, 2-3 phrases maximum, "
+                   "sans listes à puces, sans markdown, sans emojis. Ton conversationnel, droit au but.")
+    pending = []
+    actions = []
+    for _ in range(MAX_ITERS):
+        fcs = []
+        content_obj = None
+        async for ev in _gemini_stream_turn(contents, system):
+            if ev["type"] == "text":
+                yield ev
+            elif ev["type"] == "turn_done":
+                fcs = ev["fcs"]
+                content_obj = ev["content"]
+        if not fcs:
+            # Le texte final a déjà été streamé -> on clôt.
+            yield {"type": "done", "actions_done": actions, "pending_actions": pending}
+            return
+        # rejoue le tour du modèle (avec ses appels d'outils)
+        contents.append(content_obj)
+        tool_parts = []
+        for fc in fcs:
+            name = fc.name
+            args = dict(fc.args or {})
+            yield {"type": "tool", "name": name, "phase": "start", "label": _tool_label(name, "start")}
+            res = await execute_tool(name, args, user_id)
+            if res.get("pending"):
+                pending.append({"action_id": res["action_id"], "name": name, "args": args})
+                yield {"type": "pending", "action_id": res["action_id"], "name": name, "args": args}
+                yield {"type": "tool", "name": name, "phase": "done", "ok": True, "label": _tool_label(name, "pending")}
+            elif res.get("success", True):
+                actions.append({"name": name})
+                yield {"type": "tool", "name": name, "phase": "done", "ok": True, "label": _tool_label(name, "done")}
+            else:
+                yield {"type": "tool", "name": name, "phase": "done", "ok": False, "label": _tool_label(name, "fail")}
+            tool_parts.append(_t.Part.from_function_response(name=name, response=_fr_json(res)))
+        contents.append(_t.Content(role="tool", parts=tool_parts))
+
+    yield {"type": "done", "actions_done": actions, "pending_actions": pending}
+
+
 # ==================== Cerveau Claude (tool-use Anthropic) — moteur alternatif ====================
 def _anthropic_tools():
     return [{"name": t["name"], "description": t["description"], "input_schema": t["params"]} for t in TOOLS]
@@ -1540,6 +1737,70 @@ async def neo_chat(req: NeoChatRequest, current_user: dict = Depends(get_current
     except Exception as e:
         logger.warning(f"neo conv persist: {e}")
     return result
+
+
+def _sse(obj: dict) -> str:
+    """Sérialise un event en ligne SSE (Server-Sent Events) : 'data: {json}\\n\\n'."""
+    return "data: " + json.dumps(obj, ensure_ascii=False, default=str) + "\n\n"
+
+
+async def _persist_safe(conv_id: str, user_id: str, msgs: list, reply: str):
+    """Persistance best-effort de la conversation après un flux (jamais bloquant)."""
+    try:
+        if reply:
+            await _persist_conversation(conv_id, user_id, msgs, reply)
+    except Exception as e:
+        logger.warning(f"neo conv persist (stream): {e}")
+
+
+@router.post("/chat/stream")
+async def neo_chat_stream(req: NeoChatRequest, current_user: dict = Depends(get_current_user)):
+    """Chat de Néo EN STREAMING (SSE) : le texte s'écrit au fil de l'eau + étapes d'outils en direct.
+    /neo/chat reste le fallback non-stream. Garde-fous (validation humaine) strictement identiques."""
+    user_id = current_user.get("user_id") or current_user.get("id")
+    msgs = req.messages or []
+    if not msgs:
+        raise HTTPException(status_code=400, detail="Message requis")
+    conv_id = req.conversation_id or str(uuid.uuid4())
+    voice = (req.mode == "voice")
+    brain = (req.brain or "gemini").lower()
+
+    async def _gen():
+        yield _sse({"type": "meta", "conversation_id": conv_id})
+        text_acc = []
+        try:
+            # V1 : le cerveau Claude n'est pas encore streamé -> on le joue en non-stream et on
+            # ré-émet sa réponse comme des events, pour que le front garde UN protocole unique.
+            if brain == "claude" and not req.attachments:
+                result = None
+                try:
+                    result = await run_neo_claude(msgs, user_id, voice=voice)
+                except Exception as e:
+                    logger.warning(f"neo claude (stream) KO, repli Gemini stream: {e}")
+                if result is not None:
+                    msg = result.get("message") or ""
+                    if msg:
+                        text_acc.append(msg)
+                        yield _sse({"type": "text", "delta": msg})
+                    for p in (result.get("pending_actions") or []):
+                        yield _sse({"type": "pending", **p})
+                    yield _sse({"type": "done", "actions_done": result.get("actions_done") or [],
+                                "pending_actions": result.get("pending_actions") or []})
+                    await _persist_safe(conv_id, user_id, msgs, "".join(text_acc))
+                    return
+            # Gemini : vrai streaming token par token + étapes d'outils.
+            async for ev in run_neo_stream(msgs, user_id, voice=voice, attachments=req.attachments):
+                if ev.get("type") == "text":
+                    text_acc.append(ev.get("delta") or "")
+                yield _sse(ev)
+        except Exception as e:
+            logger.error(f"neo chat stream error: {e}")
+            yield _sse({"type": "error", "detail": str(e)[:200]})
+        await _persist_safe(conv_id, user_id, msgs, "".join(text_acc))
+
+    return StreamingResponse(_gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no",
+                                      "Connection": "keep-alive"})
 
 
 def _conv_title(msgs: list) -> str:
