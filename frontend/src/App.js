@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 
@@ -39,11 +40,15 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import ThingsPage from "./pages/dashboard/ThingsPage";
 import AgendaPage from "./pages/dashboard/AgendaPage";
 import EditorialCalendarPage from "./pages/dashboard/EditorialCalendarPage";
-import MultilinkPage from "./pages/dashboard/MultilinkPage";
+// Chargée en lazy : embarque @uiw/react-md-editor (micromark/gfm = regex lookbehind
+// non supporté par Safari iOS < 16.4). L'isoler évite que ce regex casse le parsing de tout le bundle.
+const MultilinkPage = lazy(() => import("./pages/dashboard/MultilinkPage"));
 
 // Public pages
 import TransferDownloadPage from "./pages/TransferDownloadPage";
-import LinkBioPage from "./pages/public/LinkBioPage";
+// Chargée en lazy : embarque remark-gfm (regex lookbehind non supporté par Safari iOS < 16.4).
+// L'isoler dans un chunk séparé évite que ce regex casse le parsing de tout le bundle admin.
+const LinkBioPage = lazy(() => import("./pages/public/LinkBioPage"));
 import WidgetPage from "./pages/WidgetPage";
 
 // Layout
@@ -67,6 +72,7 @@ function App() {
         <BrowserRouter>
           <CustomDomainHandler>
             <ScrollToTop />
+            <Suspense fallback={null}>
             <Routes>
             {/* Site vitrine */}
             <Route element={<MainLayout />}>
@@ -121,6 +127,7 @@ function App() {
           {/* Public transfer download page */}
           <Route path="/transfer/:transferId" element={<TransferDownloadPage />} />
         </Routes>
+            </Suspense>
           </CustomDomainHandler>
         </BrowserRouter>
     </div>

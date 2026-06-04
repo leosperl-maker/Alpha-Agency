@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
-import LinkBioPage from '../pages/public/LinkBioPage';
+import { useState, useEffect, lazy, Suspense } from 'react';
+// Lazy : LinkBioPage embarque remark-gfm (regex lookbehind non supporté par Safari iOS < 16.4).
+// L'isoler hors du bundle principal évite que ce regex casse le parsing de toute l'app.
+const LinkBioPage = lazy(() => import('../pages/public/LinkBioPage'));
 
 /**
  * Ce composant détecte si l'utilisateur accède via un domaine personnalisé
@@ -66,7 +68,11 @@ const CustomDomainHandler = ({ children }) => {
 
   // Si c'est un domaine personnalisé, afficher directement la page Multilink
   if (isCustomDomain && customDomain) {
-    return <LinkBioPage customDomain={customDomain} />;
+    return (
+      <Suspense fallback={null}>
+        <LinkBioPage customDomain={customDomain} />
+      </Suspense>
+    );
   }
 
   // Sinon, afficher l'application normale
