@@ -283,6 +283,67 @@ async def _exec_crm_query(args, uid):
     return {"success": True, "collection": coll, "count": len(rows), "rows": rows}
 
 
+# ==================== Écriture générique encadrée (couverture totale du CRM) ====================
+# Collections MÉTIER où Néo peut écrire. EXCLUES volontairement (sécurité) : users, settings,
+# *credentials/*oauth*/*tokens (Gmail/Drive/Qonto/Meta/Insta), bank_transactions, payment_transactions,
+# transfers (mouvements d'argent), subscriptions, ai_usage, internes neo_* / pdf_tokens / counters / notifications.
+_CRM_WRITABLE = {
+    "contacts", "invoices", "quotes", "tasks", "opportunities", "appointments",
+    "documents", "folders", "tags", "portfolio", "services", "notes", "pipeline_columns",
+    "budget", "budget_forecasts", "budget_categories",
+    "multilink_pages", "multilink_sections", "multilink_links", "multilink_blocks",
+    "editorial_posts", "editorial_calendars", "blog_posts", "news_articles", "scheduled_posts",
+    "nurturing_sequences", "nurturing_enrollments",
+}
+
+
+async def _exec_crm_create(args, uid):
+    coll = (args.get("collection") or "").strip()
+    if coll not in _CRM_WRITABLE:
+        return {"success": False, "error": f"Écriture non autorisée sur « {coll} ». Collections permises : {', '.join(sorted(_CRM_WRITABLE))}"}
+    data = args.get("data")
+    if not isinstance(data, dict) or not data:
+        return {"success": False, "error": "Données (data) requises pour créer."}
+    now = datetime.now(timezone.utc).isoformat()
+    doc = {"id": str(uuid.uuid4()), **{k: v for k, v in data.items() if k != "_id"}}
+    doc.setdefault("created_at", now)
+    doc["updated_at"] = now
+    doc.setdefault("created_by", uid)
+    await db[coll].insert_one(doc)
+    return {"success": True, "result": {"id": doc["id"], "collection": coll}, "message": f"Créé dans {coll} (id {doc['id']})."}
+
+
+async def _exec_crm_update(args, uid):
+    coll = (args.get("collection") or "").strip()
+    if coll not in _CRM_WRITABLE:
+        return {"success": False, "error": f"Écriture non autorisée sur « {coll} ». Collections permises : {', '.join(sorted(_CRM_WRITABLE))}"}
+    flt = args.get("filter")
+    updates = args.get("updates")
+    if not isinstance(flt, dict) or not flt:
+        return {"success": False, "error": "Un filtre non vide est requis (ex: {\"id\": \"...\"}) pour cibler le document."}
+    if not isinstance(updates, dict) or not updates:
+        return {"success": False, "error": "Des champs à modifier (updates) sont requis."}
+    safe = {k: v for k, v in updates.items() if k not in ("_id", "id")}
+    safe["updated_at"] = datetime.now(timezone.utc).isoformat()
+    res = await db[coll].update_one(flt, {"$set": safe})
+    if res.matched_count == 0:
+        return {"success": False, "message": f"Aucun document trouvé dans {coll} pour ce filtre."}
+    return {"success": True, "result": {"matched": res.matched_count, "modified": res.modified_count, "collection": coll},
+            "message": f"Mis à jour dans {coll} ({res.modified_count} modifié)."}
+
+
+async def _exec_crm_delete(args, uid):
+    coll = (args.get("collection") or "").strip()
+    if coll not in _CRM_WRITABLE:
+        return {"success": False, "error": f"Suppression non autorisée sur « {coll} ». Collections permises : {', '.join(sorted(_CRM_WRITABLE))}"}
+    flt = args.get("filter")
+    if not isinstance(flt, dict) or not flt:
+        return {"success": False, "error": "Un filtre non vide est requis pour supprimer (sécurité)."}
+    res = await db[coll].delete_one(flt)
+    return {"success": True, "result": {"deleted": res.deleted_count, "collection": coll},
+            "message": f"Supprimé dans {coll} ({res.deleted_count})."}
+
+
 # ==================== Mémoire de Néo (Phase 3 / B.4) ====================
 _MEM_TYPES = ("objective", "rule", "daily_log", "client_fact", "decision", "lesson")
 
@@ -831,6 +892,16 @@ TOOLS = [
      "description": "Lecture seule générique sur une collection du CRM pour répondre à une question imprévue. "
                     "collections: contacts, invoices, tasks, appointments, budget, opportunities, multilink_pages, documents, quotes, portfolio.",
      "params": _obj({"collection": _STR, "filter": {"type": "object"}, "limit": _INT}, ["collection"])},
+    # --- Écriture générique encadrée : couverture TOTALE du CRM (tout ce qui n'a pas d'outil dédié) ---
+    {"name": "crm_create", "validation": False, "run": _exec_crm_create,
+     "description": "Crée un document dans N'IMPORTE QUELLE collection métier du CRM (couverture totale). Utilise-le pour toute création sans outil dédié : opportunité, RDV, service, dossier, document, tâche, colonne de pipeline, séquence de nurturing, post éditorial, etc. Args: collection + data (objet des champs). Collections permises: contacts, invoices, quotes, tasks, opportunities, appointments, documents, folders, tags, portfolio, services, notes, pipeline_columns, budget, budget_forecasts, budget_categories, multilink_*, editorial_*, blog_posts, news_articles, scheduled_posts, nurturing_*.",
+     "params": _obj({"collection": _STR, "data": {"type": "object"}}, ["collection", "data"])},
+    {"name": "crm_update", "validation": False, "run": _exec_crm_update,
+     "description": "Modifie un document du CRM (couverture totale). Args: collection + filter (cible, ex {\"id\":\"...\"}) + updates (champs à changer). Pour toute modification sans outil dédié (changer un statut, un montant, une date, des champs...).",
+     "params": _obj({"collection": _STR, "filter": {"type": "object"}, "updates": {"type": "object"}}, ["collection", "filter", "updates"])},
+    {"name": "crm_delete", "validation": True, "run": _exec_crm_delete,
+     "description": "Supprime un document du CRM. Args: collection + filter ciblant le document. IRRÉVERSIBLE -> validation de Léo requise.",
+     "params": _obj({"collection": _STR, "filter": {"type": "object"}}, ["collection", "filter"])},
     # --- Actions internes (pas de sortie client → exécution directe, journalisée) ---
     {"name": "create_task", "validation": False, "run": lambda a, u: create_task_action(a, u),
      "description": "Crée une tâche. title requis ; due_date YYYY-MM-DD ; priority low/medium/high/urgent.",
