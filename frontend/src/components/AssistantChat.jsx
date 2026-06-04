@@ -33,7 +33,7 @@ const renderContent = (text) => {
  * agit via function calling natif (/api/neo/chat). Les actions sortantes/irréversibles
  * passent par une validation humaine (boutons Valider / Annuler). Slide-over thémé.
  */
-const AssistantChat = ({ open, onOpenChange, seed }) => {
+const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -312,15 +312,18 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   }, []);
 
   if (!open) return null;
+  const isPage = variant === "page";
 
   return (
     <>
-      <div className="fixed inset-0 z-[60]">
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => onOpenChange(false)} />
+      <div className={isPage ? "relative h-full w-full" : "fixed inset-0 z-[60]"}>
+      {/* Overlay (slide-over uniquement) */}
+      {!isPage && <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => onOpenChange(false)} />}
 
-      {/* Slide-over */}
-      <div className="absolute inset-y-0 right-0 w-full sm:w-[440px] bg-card border-l border-border shadow-pop flex flex-col"
+      {/* Conteneur : plein écran en mode page, slide-over à droite sinon */}
+      <div className={isPage
+          ? "relative h-full w-full bg-card flex flex-col"
+          : "absolute inset-y-0 right-0 w-full sm:w-[440px] bg-card border-l border-border shadow-pop flex flex-col"}
         style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
         {/* Header */}
         <div className="flex items-center justify-between px-4 h-16 border-b border-border flex-shrink-0">

@@ -22,6 +22,7 @@ import LegalPage from "./pages/LegalPage";
 import LoginPage from "./pages/dashboard/LoginPage";
 import DashboardLayout from "./pages/dashboard/DashboardLayout";
 import DashboardOverview from "./pages/dashboard/DashboardOverview";
+import NeoPage from "./pages/dashboard/NeoPage";
 import ContactsPage from "./pages/dashboard/ContactsPage";
 import InvoicesPage from "./pages/dashboard/InvoicesPage";
 import PortfolioManagePage from "./pages/dashboard/PortfolioManagePageNew";
@@ -91,6 +92,7 @@ function App() {
           <Route path="/admin/login" element={<LoginPage />} />
           <Route path="/admin" element={<DashboardLayout />}>
             <Route index element={<DashboardOverview />} />
+            <Route path="neo" element={<NeoPage />} />
             <Route path="demandes" element={<DemandesPage />} />
             <Route path="contacts" element={<ContactsPage />} />
             <Route path="facturation" element={<InvoicesPage />} />

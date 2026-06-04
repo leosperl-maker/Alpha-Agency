@@ -36,7 +36,7 @@ const DashboardLayout = () => {
   const [lastKeyPressed, setLastKeyPressed] = useState(null);
   const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
-  const openAssistant = useCallback(() => setAssistantOpen(true), []);
+  const openAssistant = useCallback(() => navigate("/admin/neo"), [navigate]);
 
   useEffect(() => {
     const token = localStorage.getItem("alpha_token");
