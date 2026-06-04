@@ -1495,6 +1495,126 @@ async def run_neo_claude(messages: list, user_id: str, voice: bool = False) -> d
             "available": True, "pending_actions": pending, "actions_done": actions, "brain": "claude"}
 
 
+# ==================== Cerveau Claude EN STREAMING (V2) ====================
+async def _claude_stream_turn(system: str, conv: list, tools: list):
+    """Un tour Claude EN STREAMING (Anthropic Messages API, stream:true, via httpx async).
+    Async-générateur : yield {"type":"text","delta":...} au fil de l'eau, puis un unique
+    {"type":"turn_done","blocks":[...],"tool_uses":[...]} (blocks = contenu assistant à rejouer)."""
+    import httpx
+    import json as _json
+    headers = {"x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"}
+    payload = {"model": NEO_STRATEGIC_MODEL, "max_tokens": 2000, "system": system,
+               "tools": tools, "messages": conv, "stream": True}
+    blocks = {}   # index -> {"type":"text","text":...} | {"type":"tool_use","id","name","json"}
+    order = []
+    t0 = time.time()
+    async with httpx.AsyncClient(timeout=httpx.Timeout(120.0, connect=15.0)) as client:
+        async with client.stream("POST", "https://api.anthropic.com/v1/messages",
+                                 headers=headers, json=payload) as resp:
+            resp.raise_for_status()
+            async for line in resp.aiter_lines():
+                if not line or not line.startswith("data:"):
+                    continue
+                data = line[5:].strip()
+                if not data:
+                    continue
+                try:
+                    ev = _json.loads(data)
+                except Exception:
+                    continue
+                etype = ev.get("type")
+                if etype == "content_block_start":
+                    idx = ev.get("index")
+                    cb = ev.get("content_block") or {}
+                    if cb.get("type") == "tool_use":
+                        blocks[idx] = {"type": "tool_use", "id": cb.get("id"), "name": cb.get("name"), "json": ""}
+                    else:
+                        blocks[idx] = {"type": "text", "text": ""}
+                    order.append(idx)
+                elif etype == "content_block_delta":
+                    idx = ev.get("index")
+                    d = ev.get("delta") or {}
+                    b = blocks.get(idx)
+                    if not b:
+                        continue
+                    if d.get("type") == "text_delta":
+                        t = d.get("text") or ""
+                        if t:
+                            b["text"] += t
+                            yield {"type": "text", "delta": t}
+                    elif d.get("type") == "input_json_delta":
+                        b["json"] += d.get("partial_json") or ""
+                elif etype == "message_stop":
+                    break
+    await _log("llm_stream", {"model": "claude", "latency_ms": int((time.time() - t0) * 1000)})
+    content, tool_uses = [], []
+    for idx in order:
+        b = blocks[idx]
+        if b["type"] == "text":
+            if b["text"].strip():
+                content.append({"type": "text", "text": b["text"]})
+        else:
+            inp = {}
+            if (b.get("json") or "").strip():
+                try:
+                    inp = _json.loads(b["json"])
+                except Exception:
+                    inp = {}
+            content.append({"type": "tool_use", "id": b["id"], "name": b["name"], "input": inp})
+            tool_uses.append({"id": b["id"], "name": b["name"], "input": inp})
+    yield {"type": "turn_done", "blocks": content, "tool_uses": tool_uses}
+
+
+async def run_neo_claude_stream(messages: list, user_id: str, voice: bool = False):
+    """Version STREAMING de run_neo_claude (V2). Même boucle agentique, events au fil de l'eau.
+    Repli sur le stream Gemini si pas de clé Anthropic. Garde-fous (validation) inchangés."""
+    import json as _json
+    if not ANTHROPIC_API_KEY:
+        async for ev in run_neo_stream(messages, user_id, voice=voice):
+            yield ev
+        return
+    system = NEO_SYSTEM + _now_line() + await _budget_context() + await _central_memory()
+    if voice:
+        system += ("\n\n[MODE VOCAL] Tu réponds à l'oral : bref et naturel, 2-3 phrases maximum, "
+                   "sans listes à puces, sans markdown, sans emojis. Ton conversationnel, droit au but.")
+    conv = [{"role": ("assistant" if m.get("role") == "assistant" else "user"),
+             "content": (m.get("content") or "")[:8000]} for m in messages if m.get("content")]
+    tools = _anthropic_tools()
+    pending, actions = [], []
+    for _ in range(MAX_ITERS):
+        tool_uses, blocks = [], None
+        async for ev in _claude_stream_turn(system, conv, tools):
+            if ev["type"] == "text":
+                yield ev
+            elif ev["type"] == "turn_done":
+                tool_uses = ev["tool_uses"]
+                blocks = ev["blocks"]
+        if not tool_uses:
+            yield {"type": "done", "actions_done": actions, "pending_actions": pending}
+            return
+        conv.append({"role": "assistant", "content": blocks})
+        results = []
+        for tu in tool_uses:
+            name = tu["name"]
+            args = tu.get("input") or {}
+            yield {"type": "tool", "name": name, "phase": "start", "label": _tool_label(name, "start")}
+            res = await execute_tool(name, args, user_id)
+            if res.get("pending"):
+                pending.append({"action_id": res["action_id"], "name": name, "args": args})
+                yield {"type": "pending", "action_id": res["action_id"], "name": name, "args": args}
+                yield {"type": "tool", "name": name, "phase": "done", "ok": True, "label": _tool_label(name, "pending")}
+            elif res.get("success", True):
+                actions.append({"name": name})
+                yield {"type": "tool", "name": name, "phase": "done", "ok": True, "label": _tool_label(name, "done")}
+            else:
+                yield {"type": "tool", "name": name, "phase": "done", "ok": False, "label": _tool_label(name, "fail")}
+            results.append({"type": "tool_result", "tool_use_id": tu["id"],
+                            "content": _json.dumps(res, ensure_ascii=False, default=str)[:6000]})
+        conv.append({"role": "user", "content": results})
+    yield {"type": "text", "delta": "J'ai atteint la limite d'étapes. Reformule ou demande la suite."}
+    yield {"type": "done", "actions_done": actions, "pending_actions": pending}
+
+
 # ==================== Endpoints ====================
 class NeoChatRequest(BaseModel):
     messages: List[dict]
@@ -1770,34 +1890,30 @@ async def neo_chat_stream(req: NeoChatRequest, current_user: dict = Depends(get_
     async def _gen():
         yield _sse({"type": "meta", "conversation_id": conv_id})
         text_acc = []
+        # V2 : Claude est streamé nativement. Avec pièces jointes -> Gemini (multimodal).
+        use_claude = (brain == "claude" and not req.attachments)
+        gen = (run_neo_claude_stream(msgs, user_id, voice=voice) if use_claude
+               else run_neo_stream(msgs, user_id, voice=voice, attachments=req.attachments))
         try:
-            # V1 : le cerveau Claude n'est pas encore streamé -> on le joue en non-stream et on
-            # ré-émet sa réponse comme des events, pour que le front garde UN protocole unique.
-            if brain == "claude" and not req.attachments:
-                result = None
-                try:
-                    result = await run_neo_claude(msgs, user_id, voice=voice)
-                except Exception as e:
-                    logger.warning(f"neo claude (stream) KO, repli Gemini stream: {e}")
-                if result is not None:
-                    msg = result.get("message") or ""
-                    if msg:
-                        text_acc.append(msg)
-                        yield _sse({"type": "text", "delta": msg})
-                    for p in (result.get("pending_actions") or []):
-                        yield _sse({"type": "pending", **p})
-                    yield _sse({"type": "done", "actions_done": result.get("actions_done") or [],
-                                "pending_actions": result.get("pending_actions") or []})
-                    await _persist_safe(conv_id, user_id, msgs, "".join(text_acc))
-                    return
-            # Gemini : vrai streaming token par token + étapes d'outils.
-            async for ev in run_neo_stream(msgs, user_id, voice=voice, attachments=req.attachments):
+            async for ev in gen:
                 if ev.get("type") == "text":
                     text_acc.append(ev.get("delta") or "")
                 yield _sse(ev)
         except Exception as e:
             logger.error(f"neo chat stream error: {e}")
-            yield _sse({"type": "error", "detail": str(e)[:200]})
+            # Repli serveur : si Claude casse AVANT tout texte, on bascule sur le flux Gemini.
+            if use_claude and not text_acc:
+                logger.warning("neo: repli Claude -> Gemini stream")
+                try:
+                    async for ev in run_neo_stream(msgs, user_id, voice=voice):
+                        if ev.get("type") == "text":
+                            text_acc.append(ev.get("delta") or "")
+                        yield _sse(ev)
+                except Exception as e2:
+                    logger.error(f"neo chat stream (repli Gemini) KO: {e2}")
+                    yield _sse({"type": "error", "detail": str(e2)[:200]})
+            else:
+                yield _sse({"type": "error", "detail": str(e)[:200]})
         await _persist_safe(conv_id, user_id, msgs, "".join(text_acc))
 
     return StreamingResponse(_gen(), media_type="text/event-stream",
