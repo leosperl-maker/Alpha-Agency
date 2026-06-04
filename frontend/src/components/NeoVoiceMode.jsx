@@ -1,9 +1,38 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Mic, MicOff, Loader2, ChevronDown, Check } from "lucide-react";
+import { X, Mic, MicOff, Loader2, ChevronDown, Check, FileText, UserPlus, CheckSquare, Clock, Send, Euro, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { neoAPI } from "../lib/api";
 
 const IS_IOS = typeof navigator !== "undefined" && /iP(hone|ad|od)/.test(navigator.userAgent || "");
 const SILENCE_MS = 2500; // délai de silence avant d'envoyer (laisse Léo respirer/réfléchir sans le couper)
+
+// Cartes contextuelles « Jarvis » : ce que Néo a fait -> une carte visuelle animée
+const ACTION_CARDS = {
+  create_quote: { icon: FileText, label: "Devis créé" },
+  create_contact: { icon: UserPlus, label: "Fiche contact créée" },
+  create_task: { icon: CheckSquare, label: "Tâche créée" },
+  schedule_followup: { icon: Clock, label: "Relance programmée" },
+  draft_followup_email: { icon: Send, label: "Email préparé" },
+  send_followup: { icon: Send, label: "Relance à valider" },
+  set_contact_status: { icon: UserPlus, label: "Statut contact mis à jour" },
+  crm_create: { icon: Sparkles, label: "Créé dans le CRM" },
+  crm_update: { icon: Sparkles, label: "Mise à jour CRM" },
+};
+
+// Construit les cartes à afficher à partir de la réponse de Néo (actions + entités détectées)
+const deriveCards = (reply, actionsDone, pending) => {
+  const cards = [];
+  (actionsDone || []).forEach((a, i) => {
+    const c = ACTION_CARDS[a.name] || { icon: Sparkles, label: (a.name || "Action").replace(/_/g, " ") };
+    cards.push({ id: `a${i}`, icon: c.icon, label: c.label, kind: "done" });
+  });
+  (pending || []).forEach((p, i) => cards.push({ id: `p${i}`, icon: Clock, label: "À valider", kind: "pending" }));
+  const money = (reply || "").match(/(\d[\d ., ]{1,12})\s*€/);
+  if (money) cards.push({ id: "money", icon: Euro, label: `${money[1].trim()} €`, kind: "info" });
+  const num = (reply || "").match(/\b(?:DEV|FAC)-\d{4}-\d+/);
+  if (num) cards.push({ id: "num", icon: FileText, label: num[0], kind: "info" });
+  return cards.slice(0, 5);
+};
 
 /**
  * Mode vocal « Operator » plein écran pour Néo — façon ChatGPT/Gemini Live.
@@ -19,6 +48,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
   const [voices, setVoices] = useState([]);
   const [voiceId, setVoiceId] = useState(() => { try { return localStorage.getItem("neoVoiceId") || ""; } catch { return ""; } });
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [cards, setCards] = useState([]); // cartes contextuelles animées (façon Jarvis)
 
   const recRef = useRef(null);
   const audioCtxRef = useRef(null);
@@ -170,6 +200,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
       histRef.current = [...history, assistantMsg];
       onExchange?.(userMsg, assistantMsg);
       setCaption(reply);
+      setCards(deriveCards(reply, d.actions_done, d.pending_actions));
       if (!runningRef.current) return;
       await speak(reply);
     } catch (error) {
@@ -186,6 +217,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
     if (!SR) { setErrMsg("La reconnaissance vocale n'est pas supportée par ce navigateur (essaie Chrome)."); setPhaseBoth("error"); return; }
     stopAudio();
     setTranscript("");
+    setCards([]);
     accumRef.current = ""; committedRef.current = "";
     if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
     let rec = recRef.current;
@@ -329,6 +361,28 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
             }}
           />
         </button>
+
+        {/* Cartes contextuelles animées (façon Jarvis) — surgissent quand Néo agit/répond */}
+        {cards.length > 0 && (
+          <div className="flex flex-wrap items-center justify-center gap-2 max-w-xl">
+            <AnimatePresence>
+              {cards.map((c, i) => (
+                <motion.div key={c.id}
+                  initial={{ opacity: 0, y: 16, scale: 0.85 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.85 }}
+                  transition={{ delay: i * 0.08, type: "spring", stiffness: 320, damping: 22 }}
+                  className={`flex items-center gap-2 rounded-2xl backdrop-blur-md border px-3 py-2 text-sm shadow-pop ${
+                    c.kind === "pending" ? "bg-warning/15 border-warning/30 text-warning"
+                    : c.kind === "done" ? "bg-success/15 border-success/30 text-white"
+                    : "bg-white/10 border-white/15 text-white"}`}>
+                  <c.icon className="w-4 h-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">{c.label}</span>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
 
         {/* statut + sous-titres */}
         <div className="relative text-center min-h-[72px] max-w-lg">
