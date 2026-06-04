@@ -337,6 +337,13 @@ async def _exec_crm_update(args, uid):
             "message": f"Mis à jour dans {coll} ({res.modified_count} modifié)."}
 
 
+def _doc_peek(d: dict) -> dict:
+    """Aperçu lisible et non sensible d'un document (pour lister des candidats à supprimer)."""
+    return {k: d.get(k) for k in ("id", "invoice_number", "number", "title", "name", "client_name",
+                                  "first_name", "last_name", "company", "document_type", "status", "total")
+            if d.get(k) is not None}
+
+
 async def _exec_crm_delete(args, uid):
     coll = (args.get("collection") or "").strip()
     if coll not in _CRM_WRITABLE:
@@ -344,9 +351,30 @@ async def _exec_crm_delete(args, uid):
     flt = args.get("filter")
     if not isinstance(flt, dict) or not flt:
         return {"success": False, "error": "Un filtre non vide est requis pour supprimer (sécurité)."}
-    res = await db[coll].delete_one(flt)
-    return {"success": True, "result": {"deleted": res.deleted_count, "collection": coll},
-            "message": f"Supprimé dans {coll} ({res.deleted_count})."}
+    # SÉCURITÉ (anti-suppression du mauvais document) : on ne supprime QUE si le filtre cible
+    # EXACTEMENT 1 document. 0 -> rien. >1 -> on REFUSE et on liste les candidats (avec leur id)
+    # pour que Néo recible précisément (idéalement par id). On supprime ensuite par l'id du match.
+    try:
+        matches = await db[coll].find(flt, {"_id": 0}).to_list(11)
+    except Exception as e:
+        return {"success": False, "error": f"Filtre invalide pour {coll}: {str(e)[:150]}"}
+    n = len(matches)
+    if n == 0:
+        return {"success": False, "deleted": 0,
+                "message": f"Aucun document ne correspond à ce filtre dans « {coll} » — RIEN supprimé. Vérifie le filtre (le devis/la facture est peut-être dans la collection 'invoices')."}
+    if n > 1:
+        return {"success": False, "ambiguous": True, "match_count": (">10" if n > 10 else n),
+                "candidates": [_doc_peek(d) for d in matches[:10]],
+                "message": (f"REFUSÉ par sécurité : {('plus de 10' if n > 10 else n)} documents de « {coll} » correspondent à ce filtre. "
+                            f"Je ne supprime jamais plusieurs documents d'un coup. Cible UN SEUL document précis, "
+                            f"idéalement par son id. Candidats : {[_doc_peek(d) for d in matches[:5]]}")}
+    target = matches[0]
+    del_filter = {"id": target["id"]} if target.get("id") else flt  # suppression ciblée par id
+    res = await db[coll].delete_one(del_filter)
+    label = (target.get("invoice_number") or target.get("number") or target.get("title")
+             or target.get("name") or target.get("client_name") or target.get("id") or "document")
+    return {"success": True, "result": {"deleted": res.deleted_count, "collection": coll, "document": label},
+            "message": f"Supprimé dans « {coll} » : {label} ({res.deleted_count})."}
 
 
 # ==================== Mémoire de Néo (Phase 3 / B.4) ====================
@@ -972,7 +1000,8 @@ TOOLS = [
      "params": _obj({"document_name": _STR, "document_id": _STR})},
     {"name": "crm_query", "validation": False, "run": _exec_crm_query,
      "description": "Lecture seule générique sur une collection du CRM pour répondre à une question imprévue. "
-                    "collections: contacts, invoices, tasks, appointments, budget, opportunities, multilink_pages, documents, quotes, portfolio.",
+                    "collections: contacts, invoices, tasks, appointments, budget, opportunities, multilink_pages, documents, quotes, portfolio. "
+                    "IMPORTANT : les DEVIS et FACTURES (et le pipeline) sont dans 'invoices' (champ document_type='devis'/'facture'), PAS dans 'quotes' (collection héritée).",
      "params": _obj({"collection": _STR, "filter": {"type": "object"}, "limit": _INT}, ["collection"])},
     # --- Écriture générique encadrée : couverture TOTALE du CRM (tout ce qui n'a pas d'outil dédié) ---
     {"name": "crm_create", "validation": False, "run": _exec_crm_create,
@@ -982,7 +1011,11 @@ TOOLS = [
      "description": "Modifie un document du CRM (couverture totale). Args: collection + filter (cible, ex {\"id\":\"...\"}) + updates (champs à changer). Pour toute modification sans outil dédié (changer un statut, un montant, une date, des champs...).",
      "params": _obj({"collection": _STR, "filter": {"type": "object"}, "updates": {"type": "object"}}, ["collection", "filter", "updates"])},
     {"name": "crm_delete", "validation": True, "run": _exec_crm_delete,
-     "description": "Supprime un document du CRM. Args: collection + filter ciblant le document. IRRÉVERSIBLE -> validation de Léo requise.",
+     "description": "Supprime UN SEUL document précis du CRM. Args: collection + filter. Le filtre DOIT cibler EXACTEMENT 1 document — "
+                    "idéalement par son id (ex {\"id\":\"...\"}). Au moindre doute, fais d'abord un crm_query pour récupérer l'id exact, "
+                    "puis supprime par cet id. Si plusieurs documents correspondent au filtre, l'outil REFUSE de supprimer et te liste "
+                    "les candidats (avec leur id) : recible alors par id. IMPORTANT : les DEVIS et FACTURES sont dans la collection "
+                    "'invoices' (champ document_type 'devis'/'facture'), JAMAIS dans 'quotes'. IRRÉVERSIBLE -> validation de Léo requise.",
      "params": _obj({"collection": _STR, "filter": {"type": "object"}}, ["collection", "filter"])},
     # --- Actions internes (pas de sortie client → exécution directe, journalisée) ---
     {"name": "create_task", "validation": False, "run": lambda a, u: create_task_action(a, u),
