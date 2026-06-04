@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, X, Loader2, CheckCircle2, History, SquarePen, Trash2, Sunrise, Clock, ThumbsUp, ThumbsDown, Mic, Volume2, VolumeX, Square, AudioLines, Paperclip, Cpu } from "lucide-react";
+import { Send, X, Loader2, CheckCircle2, History, SquarePen, Trash2, Sunrise, Clock, ThumbsUp, ThumbsDown, Mic, Volume2, VolumeX, Square, AudioLines, Paperclip, Cpu, Copy, Check } from "lucide-react";
 import { aiEnhancedAPI, neoAPI } from "../lib/api";
 import AssistantOrb from "./AssistantOrb";
 import NeoVoiceMode from "./NeoVoiceMode";
@@ -42,6 +42,7 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   const [fb, setFb] = useState({});        // msgIndex -> 'up' | 'down-open' | 'sent'
   const [fbNote, setFbNote] = useState({}); // msgIndex -> texte de correction
   const [attachments, setAttachments] = useState([]); // [{name, mime_type, data}]
+  const [copiedIdx, setCopiedIdx] = useState(null); // index du message copié (feedback visuel)
   const [brain, setBrain] = useState(() => { try { return localStorage.getItem("neoBrain") || "gemini"; } catch { return "gemini"; } });
   const toggleBrain = useCallback(() => {
     setBrain((b) => { const nb = b === "claude" ? "gemini" : "claude"; try { localStorage.setItem("neoBrain", nb); } catch (e) { /* noop */ } return nb; });
@@ -49,6 +50,7 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   const endRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
+  const abortRef = useRef(null); // AbortController de la requête en cours (bouton Stop)
 
   const handleFiles = useCallback((e) => {
     const files = Array.from(e.target.files || []);
@@ -81,13 +83,15 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
     setInput("");
     setAttachments([]);
     setLoading(true);
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       const res = await neoAPI.chat({
         messages: history.map((m) => ({ role: m.role, content: m.content })),
         conversation_id: convId,
         attachments: atts.length ? atts : undefined,
         brain,
-      });
+      }, { signal: controller.signal });
       const d = res.data || {};
       if (d.conversation_id) setConvId(d.conversation_id);
       setMessages((prev) => [...prev, {
@@ -97,18 +101,33 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
         pending: d.pending_actions || [],
       }]);
     } catch (error) {
-      const detail = error.response?.data?.detail;
-      setMessages((prev) => [...prev, {
-        role: "assistant",
-        content: detail
-          ? `⚠️ ${detail}`
-          : "⚠️ Néo est indisponible pour l'instant (connexion au serveur impossible). Réessaie une fois en ligne.",
-        error: true,
-      }]);
+      if (error.code === "ERR_CANCELED" || error.name === "CanceledError") {
+        setMessages((prev) => [...prev, { role: "assistant", content: "⏹️ Arrêté." }]);
+      } else {
+        const detail = error.response?.data?.detail;
+        setMessages((prev) => [...prev, {
+          role: "assistant",
+          content: detail
+            ? `⚠️ ${detail}`
+            : "⚠️ Néo est indisponible pour l'instant (connexion au serveur impossible). Réessaie une fois en ligne.",
+          error: true,
+        }]);
+      }
     } finally {
+      abortRef.current = null;
       setLoading(false);
     }
   }, [input, loading, messages, convId, attachments, brain]);
+
+  const stop = useCallback(() => { try { abortRef.current?.abort(); } catch (e) { /* noop */ } }, []);
+
+  const copyMsg = useCallback((text, i) => {
+    try {
+      navigator.clipboard.writeText(text || "");
+      setCopiedIdx(i);
+      setTimeout(() => setCopiedIdx((c) => (c === i ? null : c)), 1500);
+    } catch (e) { /* noop */ }
+  }, []);
 
   const resolveAction = useCallback(async (actionId, name, confirm) => {
     if (resolved[actionId]) return;
@@ -412,7 +431,10 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
                           <span className="text-[11px] text-muted-foreground">Utile ?</span>
                           <button onClick={() => sendFeedback(i, "up")} title="Bonne réponse" className="text-muted-foreground hover:text-success transition-colors"><ThumbsUp className="w-3.5 h-3.5" /></button>
                           <button onClick={() => setFb((s) => ({ ...s, [i]: "down-open" }))} title="À améliorer" className="text-muted-foreground hover:text-danger transition-colors"><ThumbsDown className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => (speakingIdx === i ? stopAudio() : speak(m.content, i))} title={speakingIdx === i ? "Arrêter" : "Écouter"} className="ml-auto text-muted-foreground hover:text-primary transition-colors">
+                          <button onClick={() => copyMsg(m.content, i)} title="Copier le message" className="ml-auto text-muted-foreground hover:text-foreground transition-colors">
+                            {copiedIdx === i ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                          <button onClick={() => (speakingIdx === i ? stopAudio() : speak(m.content, i))} title={speakingIdx === i ? "Arrêter" : "Écouter"} className="text-muted-foreground hover:text-primary transition-colors">
                             {speakingIdx === i ? <Square className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
                           </button>
                         </div>
@@ -466,10 +488,17 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
                 listening ? "bg-danger text-white animate-pulse" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
               <Mic className="w-4 h-4" />
             </button>
-            <button onClick={() => send()} disabled={loading || !input.trim()}
-              className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center flex-shrink-0 disabled:opacity-40 hover:brightness-110 transition-all">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            </button>
+            {loading ? (
+              <button onClick={stop} title="Arrêter Néo"
+                className="w-9 h-9 rounded-xl bg-danger text-white flex items-center justify-center flex-shrink-0 hover:brightness-110 transition-all">
+                <Square className="w-4 h-4" fill="currentColor" />
+              </button>
+            ) : (
+              <button onClick={() => send()} disabled={!input.trim()}
+                className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center flex-shrink-0 disabled:opacity-40 hover:brightness-110 transition-all">
+                <Send className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 

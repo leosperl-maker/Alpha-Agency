@@ -422,7 +422,7 @@ export const aiEnhancedAPI = {
 // Néo — associé IA (function calling natif + garde-fous de validation)
 export const neoAPI = {
   health: () => api.get('/neo/health'),
-  chat: (data) => api.post('/neo/chat', data),
+  chat: (data, config) => api.post('/neo/chat', data, config),
   confirmAction: (actionId) => api.post('/neo/confirm-action', { action_id: actionId }),
   cancelAction: (actionId) => api.post('/neo/cancel-action', { action_id: actionId }),
   feedback: (data) => api.post('/neo/feedback', data),
