@@ -1168,12 +1168,11 @@ async def neo_health_score_endpoint(current_user: dict = Depends(get_current_use
     return await _compute_health_score()
 
 
-@router.get("/checkin")
-async def neo_checkin(current_user: dict = Depends(get_current_user)):
-    """Check-in proactif matin/soir (Phase 3) : Néo te briefe à l'ouverture, ton adapté au
-    moment de la journée, alertes finances incluses, et pose la bonne question. Déterministe (rapide)."""
+async def _checkin_payload(moment: str = None) -> dict:
+    """Données du check-in (déterministe, chiffres corrigés). Réutilisé par l'endpoint ET le push proactif."""
     h = (datetime.now(timezone.utc).hour - 4) % 24  # Guadeloupe = UTC-4
-    moment = "matin" if 4 <= h < 12 else ("après-midi" if 12 <= h < 18 else "soir")
+    if moment not in ("matin", "après-midi", "soir"):
+        moment = "matin" if 4 <= h < 12 else ("après-midi" if 12 <= h < 18 else "soir")
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     try:
         checked = bool(await db.neo_memory.find_one({"type": "daily_log", "key": today}))
@@ -1197,6 +1196,86 @@ async def neo_checkin(current_user: dict = Depends(get_current_user)):
         question = None if checked else "Qu'as-tu de prévu aujourd'hui ? Dis-le-moi, je m'organise avec toi."
     return {"moment": moment, "checked_in_today": checked, "score": hs.get("score"),
             "label": hs.get("label"), "message": msg, "question": question, "priorities": bits}
+
+
+# ==================== Pousse proactive (Phase 3-4 : in-app + WhatsApp) ====================
+async def _deposit_notification(ntype: str, title: str, message: str, priority: str = "normal",
+                                data: dict = None, dedup_key: str = None) -> bool:
+    """Dépose une notif in-app (db.notifications) + push WebSocket temps réel. Dédup optionnelle par jour.
+    Sûr : jamais bloquant."""
+    try:
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        if dedup_key:
+            exists = await db.notifications.find_one({"type": ntype, "data.dedup": dedup_key, "data.day": today})
+            if exists:
+                return False
+        notif = {"id": str(uuid.uuid4()), "type": ntype, "title": title, "message": message,
+                 "data": {**(data or {}), "dedup": dedup_key, "day": today},
+                 "priority": priority, "target_users": ["all"], "read_by": [],
+                 "created_at": datetime.now(timezone.utc).isoformat()}
+        await db.notifications.insert_one(notif)
+        try:
+            from .notifications import manager  # import lazy (évite la circularité au chargement)
+            await manager.broadcast(notif)
+        except Exception as e:
+            logger.warning(f"neo notif broadcast KO: {e}")
+        return True
+    except Exception as e:
+        logger.warning(f"neo deposit notif KO: {e}")
+        return False
+
+
+async def _whatsapp_push(message: str) -> bool:
+    """Pousse un message sur le WhatsApp de l'admin via le microservice existant (si admin_phone configuré)."""
+    try:
+        cfg = await db.settings.find_one({"type": "whatsapp_config"}, {"_id": 0})
+        phone = (cfg or {}).get("admin_phone")
+        if not phone:
+            return False
+        url = os.environ.get("WHATSAPP_SERVICE_URL", "http://localhost:3001")
+        import requests
+        def _call():
+            return requests.post(f"{url}/send", json={"phone": phone, "message": message}, timeout=30)
+        r = await asyncio.to_thread(_call)
+        return getattr(r, "status_code", 0) == 200
+    except Exception as e:
+        logger.warning(f"neo whatsapp push KO: {e}")
+        return False
+
+
+async def neo_proactive_push(moment: str = None) -> dict:
+    """Briefing proactif de Néo (matin/soir) : dépose une notif in-app + pousse WhatsApp si configuré.
+    Réutilise le check-in (chiffres corrects), dédupliqué par jour+moment. Sûr : jamais bloquant.
+    Appelé par le scheduler (cron) ou manuellement via POST /neo/run-proactive."""
+    try:
+        payload = await _checkin_payload(moment)
+    except Exception as e:
+        logger.warning(f"neo proactive payload KO: {e}")
+        return {"success": False, "error": str(e)[:160]}
+    moment = payload["moment"]
+    prio = payload.get("priorities") or []
+    title = "Briefing du matin" if moment == "matin" else ("Récap du soir" if moment == "soir" else "Point de Néo")
+    level = "high" if any(("retard" in b or "chaud" in b) for b in prio) else "normal"
+    deposited = await _deposit_notification("neo_briefing", title, payload["message"], priority=level,
+                                            data={"priorities": prio, "score": payload.get("score")},
+                                            dedup_key=f"brief-{moment}")
+    wa = await _whatsapp_push(f"{title}\n\n{payload['message']}")
+    await _log("proactive", {"moment": moment, "inapp": deposited, "whatsapp": wa})
+    return {"success": True, "moment": moment, "inapp_deposited": deposited,
+            "whatsapp_sent": wa, "message": payload["message"]}
+
+
+@router.get("/checkin")
+async def neo_checkin(current_user: dict = Depends(get_current_user)):
+    """Check-in proactif matin/soir (Phase 3) : Néo te briefe à l'ouverture, ton adapté au
+    moment de la journée, alertes finances incluses, et pose la bonne question. Déterministe (rapide)."""
+    return await _checkin_payload()
+
+
+@router.post("/run-proactive")
+async def neo_run_proactive(moment: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    """Déclenche le briefing proactif de Néo (in-app + WhatsApp). Pour le scheduler (cron) ou test manuel."""
+    return await neo_proactive_push(moment)
 
 
 @router.get("/strategy")

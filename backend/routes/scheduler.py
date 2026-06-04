@@ -247,13 +247,19 @@ class MoltBotScheduler:
     
     async def send_morning_briefing(self):
         """Send morning briefing to admin"""
-        if not self.morning_enabled or not self.admin_phone:
-            logger.info("Morning briefing skipped (disabled or no phone)")
+        if not self.morning_enabled:
+            logger.info("Morning briefing skipped (disabled)")
             return
-        
-        logger.info(f"Sending morning briefing to {self.admin_phone}")
-        message = await self.generate_briefing()
-        await self.send_whatsapp_message(self.admin_phone, message)
+
+        logger.info("Briefing du matin — piloté par Néo (in-app + WhatsApp si configuré)")
+        try:
+            from .neo_assistant import neo_proactive_push  # lazy: évite la circularité au chargement
+            res = await neo_proactive_push("matin")
+            logger.info(f"Néo morning briefing: {res}")
+        except Exception as e:
+            logger.warning(f"Néo morning briefing KO, fallback moltbot: {e}")
+            if self.admin_phone:
+                await self.send_whatsapp_message(self.admin_phone, await self.generate_briefing())
         
         # Log
         if self.db:
@@ -266,13 +272,19 @@ class MoltBotScheduler:
     
     async def send_evening_recap(self):
         """Send evening recap to admin"""
-        if not self.evening_enabled or not self.admin_phone:
-            logger.info("Evening recap skipped (disabled or no phone)")
+        if not self.evening_enabled:
+            logger.info("Evening recap skipped (disabled)")
             return
-        
-        logger.info(f"Sending evening recap to {self.admin_phone}")
-        message = await self.generate_recap()
-        await self.send_whatsapp_message(self.admin_phone, message)
+
+        logger.info("Récap du soir — piloté par Néo (in-app + WhatsApp si configuré)")
+        try:
+            from .neo_assistant import neo_proactive_push  # lazy: évite la circularité au chargement
+            res = await neo_proactive_push("soir")
+            logger.info(f"Néo evening recap: {res}")
+        except Exception as e:
+            logger.warning(f"Néo evening recap KO, fallback moltbot: {e}")
+            if self.admin_phone:
+                await self.send_whatsapp_message(self.admin_phone, await self.generate_recap())
         
         # Log
         if self.db:
