@@ -37,6 +37,7 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [thinkSec, setThinkSec] = useState(0); // chrono "Néo réfléchit Xs" (montre qu'il bosse encore)
   const [convId, setConvId] = useState(null);
   const [resolved, setResolved] = useState({}); // action_id -> 'done' | 'cancelled'
   const [fb, setFb] = useState({});        // msgIndex -> 'up' | 'down-open' | 'sent'
@@ -70,6 +71,14 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  // Chrono de réflexion : repart de 0 à chaque requête, s'incrémente tant que Néo travaille
+  useEffect(() => {
+    if (!loading) { setThinkSec(0); return undefined; }
+    setThinkSec(0);
+    const t = setInterval(() => setThinkSec((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [loading]);
 
   const send = useCallback(async (text) => {
     const typed = (text ?? input).trim();
@@ -447,9 +456,10 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
           )}
           {loading && (
             <div className="flex gap-2.5">
-              <AssistantOrb size={26} className="mt-0.5" />
-              <div className="bg-secondary rounded-2xl rounded-bl-md px-3.5 py-2.5">
+              <AssistantOrb size={26} pulse className="mt-0.5" />
+              <div className="bg-secondary rounded-2xl rounded-bl-md px-3.5 py-2.5 flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                <span className="text-xs text-muted-foreground tabular-nums">Néo réfléchit… {thinkSec}s</span>
               </div>
             </div>
           )}
