@@ -423,6 +423,49 @@ export const aiEnhancedAPI = {
 export const neoAPI = {
   health: () => api.get('/neo/health'),
   chat: (data, config) => api.post('/neo/chat', data, config),
+  // Chat EN STREAMING (SSE) : fetch natif (axios ne streame pas le body en navigateur).
+  // Réutilise le baseURL + le token d'axios. onEvent({type,...}) appelé à chaque event.
+  // Lance une erreur si la réponse HTTP n'est pas OK -> l'appelant peut retomber sur chat().
+  streamChat: async (data, { signal, onEvent } = {}) => {
+    const token = localStorage.getItem('alpha_token');
+    const resp = await fetch(`${API_URL}/api/neo/chat/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(data),
+      signal,
+    });
+    if (!resp.ok || !resp.body) {
+      const err = new Error(`stream_http_${resp.status}`);
+      err.status = resp.status;
+      throw err;
+    }
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    try {
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let idx;
+        // Les events SSE sont séparés par une ligne vide ("\n\n").
+        while ((idx = buffer.indexOf('\n\n')) !== -1) {
+          const rawEvent = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 2);
+          const dataLine = rawEvent.split('\n').find((l) => l.startsWith('data:'));
+          if (!dataLine) continue;
+          const payload = dataLine.slice(5).trim();
+          if (!payload) continue;
+          try { onEvent?.(JSON.parse(payload)); } catch (e) { /* event malformé, on ignore */ }
+        }
+      }
+    } finally {
+      try { reader.releaseLock(); } catch (e) { /* noop */ }
+    }
+  },
   confirmAction: (actionId) => api.post('/neo/confirm-action', { action_id: actionId }),
   cancelAction: (actionId) => api.post('/neo/cancel-action', { action_id: actionId }),
   feedback: (data) => api.post('/neo/feedback', data),

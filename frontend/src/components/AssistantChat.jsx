@@ -80,6 +80,19 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
     return () => clearInterval(t);
   }, [loading]);
 
+  // Met à jour le message assistant EN COURS d'écriture (le streaming), où qu'il soit.
+  const patchStreaming = useCallback((patch) => {
+    setMessages((prev) => {
+      const copy = [...prev];
+      let i = -1;
+      for (let k = copy.length - 1; k >= 0; k--) { if (copy[k].role === "assistant" && copy[k].streaming) { i = k; break; } }
+      if (i < 0) for (let k = copy.length - 1; k >= 0; k--) { if (copy[k].role === "assistant") { i = k; break; } }
+      if (i < 0) return prev;
+      copy[i] = typeof patch === "function" ? patch(copy[i]) : { ...copy[i], ...patch };
+      return copy;
+    });
+  }, []);
+
   const send = useCallback(async (text) => {
     const typed = (text ?? input).trim();
     const atts = attachments;
@@ -88,45 +101,97 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
     const label = atts.length ? `${content}\n📎 ${atts.map((a) => a.name).join(", ")}` : content;
     const userMsg = { role: "user", content: label };
     const history = [...messages, userMsg];
-    setMessages(history);
+    // Placeholder assistant : il va s'écrire au fil de l'eau (streaming).
+    setMessages([...history, { role: "assistant", content: "", streaming: true, steps: [], actionsDone: [], pending: [] }]);
     setInput("");
     setAttachments([]);
     setLoading(true);
     const controller = new AbortController();
     abortRef.current = controller;
+    const payload = {
+      messages: history.map((m) => ({ role: m.role, content: m.content })),
+      conversation_id: convId,
+      attachments: atts.length ? atts : undefined,
+      brain,
+    };
+
+    let gotContent = false; // a-t-on reçu du texte / une étape via le flux ?
+    const onEvent = (ev) => {
+      if (!ev || !ev.type) return;
+      switch (ev.type) {
+        case "meta":
+          if (ev.conversation_id) setConvId(ev.conversation_id);
+          break;
+        case "text":
+          gotContent = true;
+          patchStreaming((m) => ({ ...m, content: (m.content || "") + (ev.delta || "") }));
+          break;
+        case "tool":
+          gotContent = true;
+          if (ev.phase === "start") {
+            patchStreaming((m) => ({ ...m, steps: [...(m.steps || []), { name: ev.name, label: ev.label, done: false }] }));
+          } else {
+            patchStreaming((m) => {
+              const steps = [...(m.steps || [])];
+              for (let k = steps.length - 1; k >= 0; k--) {
+                if (steps[k].name === ev.name && !steps[k].done) { steps[k] = { ...steps[k], done: true, ok: ev.ok !== false, label: ev.label || steps[k].label }; break; }
+              }
+              return { ...m, steps };
+            });
+          }
+          break;
+        case "pending":
+          patchStreaming((m) => ((m.pending || []).some((p) => p.action_id === ev.action_id)
+            ? m : { ...m, pending: [...(m.pending || []), { action_id: ev.action_id, name: ev.name, args: ev.args }] }));
+          break;
+        case "done":
+          patchStreaming((m) => {
+            const merged = [...(m.pending || [])];
+            (ev.pending_actions || []).forEach((p) => { if (!merged.some((x) => x.action_id === p.action_id)) merged.push(p); });
+            return { ...m, streaming: false, actionsDone: ev.actions_done || m.actionsDone || [], pending: merged };
+          });
+          break;
+        case "error":
+          throw new Error(ev.detail || "stream_error"); // -> déclenche le fallback non-stream
+        default:
+          break;
+      }
+    };
+
     try {
-      const res = await neoAPI.chat({
-        messages: history.map((m) => ({ role: m.role, content: m.content })),
-        conversation_id: convId,
-        attachments: atts.length ? atts : undefined,
-        brain,
-      }, { signal: controller.signal });
-      const d = res.data || {};
-      if (d.conversation_id) setConvId(d.conversation_id);
-      setMessages((prev) => [...prev, {
-        role: "assistant",
-        content: d.message || "…",
-        actionsDone: d.actions_done || [],
-        pending: d.pending_actions || [],
-      }]);
+      await neoAPI.streamChat(payload, { signal: controller.signal, onEvent });
+      patchStreaming((m) => ({ ...m, streaming: false }));
+      if (!gotContent) throw new Error("stream_empty"); // flux vide -> tente le fallback
     } catch (error) {
-      if (error.code === "ERR_CANCELED" || error.name === "CanceledError") {
-        setMessages((prev) => [...prev, { role: "assistant", content: "⏹️ Arrêté." }]);
+      if (error.name === "AbortError" || controller.signal.aborted) {
+        patchStreaming((m) => ({ ...m, streaming: false, content: m.content ? `${m.content}\n\n⏹️ Arrêté.` : "⏹️ Arrêté." }));
       } else {
-        const detail = error.response?.data?.detail;
-        setMessages((prev) => [...prev, {
-          role: "assistant",
-          content: detail
-            ? `⚠️ ${detail}`
-            : "⚠️ Néo est indisponible pour l'instant (connexion au serveur impossible). Réessaie une fois en ligne.",
-          error: true,
-        }]);
+        // Fallback : ancien endpoint non-stream (robustesse — ne jamais casser ce qui marche).
+        try {
+          const res = await neoAPI.chat(payload, { signal: controller.signal });
+          const d = res.data || {};
+          if (d.conversation_id) setConvId(d.conversation_id);
+          patchStreaming((m) => ({
+            ...m, streaming: false, steps: [], content: d.message || m.content || "…",
+            actionsDone: d.actions_done || [], pending: d.pending_actions || [],
+          }));
+        } catch (e2) {
+          if (e2.code === "ERR_CANCELED" || e2.name === "CanceledError" || controller.signal.aborted) {
+            patchStreaming((m) => ({ ...m, streaming: false, content: m.content || "⏹️ Arrêté." }));
+          } else {
+            const detail = e2.response?.data?.detail;
+            patchStreaming((m) => ({
+              ...m, streaming: false, error: true,
+              content: detail ? `⚠️ ${detail}` : "⚠️ Néo est indisponible pour l'instant (connexion au serveur impossible). Réessaie une fois en ligne.",
+            }));
+          }
+        }
       }
     } finally {
       abortRef.current = null;
       setLoading(false);
     }
-  }, [input, loading, messages, convId, attachments, brain]);
+  }, [input, loading, messages, convId, attachments, brain, patchStreaming]);
 
   const stop = useCallback(() => { try { abortRef.current?.abort(); } catch (e) { /* noop */ } }, []);
 
@@ -275,7 +340,7 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
     const i = messages.length - 1;
     if (i < 0) return;
     const m = messages[i];
-    if (m.role === "assistant" && !m.error && m.content && i > lastSpokenRef.current) {
+    if (m.role === "assistant" && !m.error && m.content && !m.streaming && i > lastSpokenRef.current) {
       lastSpokenRef.current = i;
       speak(m.content, i);
     }
@@ -313,6 +378,9 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
 
   if (!open) return null;
   const isPage = variant === "page";
+  // « Néo réfléchit… » : seulement AVANT que le flux n'écrive (1er token/étape) ; ensuite la bulle live prend le relais.
+  const lastMsg = messages[messages.length - 1];
+  const showThinking = loading && (!lastMsg || lastMsg.role !== "assistant" || (!lastMsg.content && !(lastMsg.steps && lastMsg.steps.length)));
 
   return (
     <>
@@ -387,9 +455,12 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
               </div>
             </div>
           ) : (
-            messages.map((m, i) => (
+            messages.map((m, i) => {
+              // Placeholder assistant encore vide (avant le 1er token/étape) -> couvert par la bulle « réfléchit ».
+              if (m.role === "assistant" && m.streaming && !m.content && !(m.steps && m.steps.length)) return null;
+              return (
               <div key={i} className={`flex gap-2.5 ${m.role === "user" ? "justify-end" : ""}`}>
-                {m.role === "assistant" && <AssistantOrb size={26} className="mt-0.5" />}
+                {m.role === "assistant" && <AssistantOrb size={26} pulse={m.streaming} className="mt-0.5" />}
                 <div className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap leading-relaxed ${
                   m.role === "user"
                     ? "bg-primary text-white rounded-br-md"
@@ -397,7 +468,18 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
                       ? "bg-danger-soft text-danger rounded-bl-md"
                       : "bg-secondary text-foreground rounded-bl-md"
                 }`}>
+                  {m.steps?.length > 0 && (
+                    <div className="mb-1.5 space-y-1">
+                      {m.steps.map((s, si) => (
+                        <div key={si} className={`flex items-center gap-1.5 text-xs ${s.done ? (s.ok === false ? "text-danger" : "text-muted-foreground") : "text-primary"}`}>
+                          {s.done ? (s.ok === false ? <X className="w-3 h-3 flex-shrink-0" /> : <Check className="w-3 h-3 flex-shrink-0" />) : <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />}
+                          <span>{s.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {renderContent(m.content)}
+                  {m.streaming && m.content && <span className="inline-block w-1.5 h-3.5 ml-0.5 align-[-2px] bg-primary/70 animate-pulse rounded-sm" />}
                   {m.actionsDone?.length > 0 && (
                     <div className="mt-2 flex items-center gap-1.5 text-success text-xs font-medium">
                       <CheckCircle2 className="w-3.5 h-3.5" /> {m.actionsDone.length} action{m.actionsDone.length > 1 ? "s" : ""} effectuée{m.actionsDone.length > 1 ? "s" : ""}
@@ -426,7 +508,7 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
                       )}
                     </div>
                   ))}
-                  {m.role === "assistant" && !m.error && m.content && (
+                  {m.role === "assistant" && !m.error && m.content && !m.streaming && (
                     <div className="mt-2 pt-1.5 border-t border-border/50">
                       {fb[i] === "sent" ? (
                         <span className="text-[11px] text-muted-foreground">Merci, c'est noté ✓</span>
@@ -455,9 +537,10 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
                   )}
                 </div>
               </div>
-            ))
+              );
+            })
           )}
-          {loading && (
+          {showThinking && (
             <div className="flex gap-2.5">
               <AssistantOrb size={26} pulse className="mt-0.5" />
               <div className="bg-secondary rounded-2xl rounded-bl-md px-3.5 py-2.5 flex items-center gap-2">
