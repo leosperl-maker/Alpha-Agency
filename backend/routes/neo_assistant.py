@@ -729,6 +729,36 @@ async def _exec_generate_image(args, uid):
     return {"success": True, "result": {"image_url": url}, "message": f"Visuel généré : {url}"}
 
 
+async def _exec_create_contact(args, uid):
+    """Crée une fiche contact dans db.contacts (même schéma que la route POST /contacts)."""
+    first = (args.get("first_name") or "").strip()
+    last = (args.get("last_name") or "").strip()
+    if not first and not last:
+        name = (args.get("name") or "").strip()
+        if name:
+            parts = name.split()
+            first = parts[0]
+            last = " ".join(parts[1:])
+    if not first and not last:
+        return {"success": False, "message": "Donne au moins un nom pour créer la fiche."}
+    contact_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    doc = {"id": contact_id, "first_name": first, "last_name": last,
+           "email": (args.get("email") or "").strip() or None,
+           "phone": (args.get("phone") or "").strip() or None,
+           "company": (args.get("company") or "").strip() or None,
+           "position": (args.get("position") or "").strip() or None,
+           "city": (args.get("city") or "").strip() or None,
+           "notes": (args.get("notes") or "").strip() or None,
+           "source": (args.get("source") or "Néo").strip(),
+           "status": "nouveau", "score": "tiède",
+           "created_at": now, "updated_at": now, "created_by": uid}
+    await db.contacts.insert_one(doc)
+    full = f"{first} {last}".strip()
+    return {"success": True, "result": {"contact_id": contact_id, "name": full},
+            "message": f"Fiche contact créée : {full}."}
+
+
 TOOLS = [
     # --- Lecture ---
     {"name": "web_search", "validation": False, "run": _exec_web_search,
@@ -811,6 +841,9 @@ TOOLS = [
     {"name": "schedule_followup", "validation": False, "run": lambda a, u: schedule_followup_action(a, u),
      "description": "Programme une relance (crée une tâche catégorie relance).",
      "params": _obj({"contact_name": _STR, "contact_id": _STR, "due_date": _STR, "label": _STR})},
+    {"name": "create_contact", "validation": False, "run": _exec_create_contact,
+     "description": "Crée une fiche contact dans le CRM (nouveau prospect/client). 'first_name' requis (ou 'name' = nom complet) ; optionnels : last_name, email, phone, company, position, city, notes. Quand Léo veut créer un client puis un devis, crée D'ABORD le contact ici, puis enchaîne create_quote.",
+     "params": _obj({"first_name": _STR, "last_name": _STR, "name": _STR, "email": _STR, "phone": _STR, "company": _STR, "position": _STR, "city": _STR, "notes": _STR})},
     {"name": "set_contact_status", "validation": False, "run": lambda a, u: set_contact_status_action(a),
      "description": "Change le statut d'un contact (gagné/perdu/en cours/client/qualifié...).",
      "params": _obj({"contact_name": _STR, "contact_id": _STR, "status": _STR}, ["status"])},
