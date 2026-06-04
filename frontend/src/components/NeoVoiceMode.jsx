@@ -3,6 +3,7 @@ import { X, Mic, MicOff, Loader2, ChevronDown, Check } from "lucide-react";
 import { neoAPI } from "../lib/api";
 
 const IS_IOS = typeof navigator !== "undefined" && /iP(hone|ad|od)/.test(navigator.userAgent || "");
+const SILENCE_MS = 2500; // délai de silence avant d'envoyer (laisse Léo respirer/réfléchir sans le couper)
 
 /**
  * Mode vocal « Operator » plein écran pour Néo — façon ChatGPT/Gemini Live.
@@ -32,6 +33,10 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
   const audioElRef = useRef(null);   // <audio> persistant (clé pour débloquer l'audio iOS)
   const srcNodeRef = useRef(null);   // MediaElementSource (desktop, créé une seule fois)
   const lastUrlRef = useRef(null);
+  const accumRef = useRef("");          // tout ce que Léo dit dans sa prise de parole en cours
+  const committedRef = useRef("");      // segments figés avant un redémarrage de la reco (survit aux coupures ~60s)
+  const silenceTimerRef = useRef(null); // timer de silence : on envoie quand Léo s'est vraiment tu
+  const sendNowRef = useRef(null);      // pour forcer l'envoi (tap sur l'orbe = "j'ai fini")
 
   const getAudioEl = () => {
     if (!audioElRef.current) { const el = new Audio(); el.preload = "auto"; audioElRef.current = el; }
@@ -181,28 +186,37 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
     if (!SR) { setErrMsg("La reconnaissance vocale n'est pas supportée par ce navigateur (essaie Chrome)."); setPhaseBoth("error"); return; }
     stopAudio();
     setTranscript("");
+    accumRef.current = ""; committedRef.current = "";
+    if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
     let rec = recRef.current;
     if (!rec) {
       rec = new SR();
       rec.lang = "fr-FR";
       rec.interimResults = true;
-      rec.continuous = false;
+      rec.continuous = true; // on garde l'écoute ouverte à travers les pauses (ne coupe plus Léo)
+      const sendNow = () => {
+        if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+        const text = (accumRef.current || "").trim();
+        if (!text || !runningRef.current || phaseRef.current !== "listening") return;
+        committedRef.current = ""; accumRef.current = "";
+        try { rec.stop(); } catch (e2) {}
+        handleUtterance(text);
+      };
+      sendNowRef.current = sendNow;
       rec.onresult = (e) => {
-        let interim = "", final = "";
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          const r = e.results[i];
-          if (r.isFinal) final += r[0].transcript; else interim += r[0].transcript;
-        }
-        if (interim) setTranscript(interim);
-        if (final) {
-          setTranscript(final.trim());
-          try { rec.stop(); } catch (e2) {}
-          handleUtterance(final.trim());
-        }
+        let sess = "";
+        for (let i = 0; i < e.results.length; i++) sess += e.results[i][0].transcript;
+        accumRef.current = (committedRef.current + " " + sess).trim();
+        setTranscript(accumRef.current);
+        // à chaque mot on repousse l'envoi : on n'envoie que quand Léo s'est tu SILENCE_MS
+        if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = setTimeout(sendNow, SILENCE_MS);
       };
       rec.onend = () => {
-        // si on est resté en écoute sans rien capter, on relance doucement
+        // la reco s'arrête (pause longue ou limite navigateur ~60s). Si Léo n'a pas fini,
+        // on relance SANS perdre ce qu'il a déjà dit (committedRef garde l'accumulé)
         if (runningRef.current && phaseRef.current === "listening") {
+          committedRef.current = accumRef.current;
           try { rec.start(); } catch (e) {}
         }
       };
@@ -224,12 +238,14 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
     unlockAudio(); // toujours dans un geste -> débloque l'audio iOS
     if (phaseRef.current === "idle") { startListeningRef.current?.(); return; }
     if (phaseRef.current === "speaking") { stopAudio(); startListeningRef.current?.(); }
-    else if (phaseRef.current === "listening") { stopRecognition(); /* relance via onend */ }
+    else if (phaseRef.current === "listening") { sendNowRef.current?.(); /* tap = « j'ai fini, envoie » */ }
   }, [stopAudio, stopRecognition]);
 
   // ---- cycle de vie : ouverture / fermeture ----
   const teardown = useCallback(() => {
     runningRef.current = false;
+    if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+    accumRef.current = ""; committedRef.current = "";
     stopRecognition();
     try { recRef.current?.abort(); } catch (e) {}
     recRef.current = null;
