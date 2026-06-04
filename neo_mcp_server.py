@@ -94,5 +94,25 @@ def neo_health_score() -> str:
     return _j.dumps(d, ensure_ascii=False, indent=2)
 
 
+@mcp.tool()
+def get_cowork_tasks() -> str:
+    """Récupère les tâches que NÉO t'a envoyées (à toi, Cowork) à traiter. Néo dépose des
+    briefs depuis Alpha Agency ; cet outil te les liste (id, titre, brief). Travaille dessus
+    puis appelle complete_cowork_task avec le résultat."""
+    import json as _j
+    tasks = _req("GET", "/neo/cowork-inbox").json().get("tasks", [])
+    if not tasks:
+        return "Aucune tâche en attente de la part de Néo."
+    return _j.dumps(tasks, ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+def complete_cowork_task(task_id: str, result: str = "") -> str:
+    """Marque une tâche reçue de Néo comme traitée et lui renvoie le résultat (Néo pourra le
+    consulter). task_id = l'id donné par get_cowork_tasks."""
+    _req("POST", f"/neo/cowork-inbox/{task_id}/done", json={"result": result})
+    return f"Tâche {task_id} traitée, résultat transmis à Néo."
+
+
 if __name__ == "__main__":
     mcp.run()

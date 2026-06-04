@@ -86,7 +86,9 @@ Tu PEUX chercher sur le WEB en temps réel via l'outil web_search (prix du march
 veille, tendances, actualité, inspiration). Ne dis JAMAIS que tu n'as pas accès à internet : utilise web_search.
 Tu PEUX recevoir et LIRE des FICHIERS JOINTS (images, PDF) joints directement au message de Léo : analyse-les,
 décris-les, extrais-en l'info utile. Ne les confonds pas avec les documents du CRM (outil get_document). Ne dis
-JAMAIS que tu ne peux pas lire une pièce jointe — si un fichier est joint, lis-le. Avant toute action qui SORT vers un client (email, SMS, devis envoyé, relance) ou
+JAMAIS que tu ne peux pas lire une pièce jointe — si un fichier est joint, lis-le.
+Tu peux CONFIER une tâche à Claude Cowork (le Claude de Léo sur son PC) via l'outil send_to_cowork
+quand Léo dit « envoie ça à Cowork » / « fais bosser Cowork là-dessus » : donne un titre + un brief clair. Avant toute action qui SORT vers un client (email, SMS, devis envoyé, relance) ou
 toute SUPPRESSION, l'outil te répondra « EN ATTENTE DE VALIDATION » : préviens Léo que c'est
 préparé et qu'il doit valider. Tu ne déclenches jamais de paiement.
 
@@ -612,6 +614,20 @@ async def _exec_delegate_task(args, uid):
             return {"success": False, "message": f"Sous-agent indisponible: {str(e2)[:120]}"}
 
 
+async def _exec_send_to_cowork(args, uid):
+    """Néo envoie une tâche/brief à Claude Cowork (sur le PC de Léo) via la boîte cowork_inbox.
+    Cowork la récupère ensuite (outil MCP get_cowork_tasks) et la traite."""
+    title = (args.get("title") or "").strip()
+    brief = (args.get("brief") or "").strip()
+    if not (title or brief):
+        return {"success": False, "message": "Titre ou brief requis."}
+    doc = {"id": str(uuid.uuid4()), "title": title or "Tâche", "brief": brief, "status": "pending",
+           "created_at": datetime.now(timezone.utc).isoformat(), "user_id": uid}
+    await db.cowork_inbox.insert_one(doc)
+    return {"success": True, "result": {"id": doc["id"], "title": doc["title"]},
+            "message": f"Tâche déposée pour Cowork : « {doc['title']} ». Le Claude de Léo sur PC la récupérera."}
+
+
 TOOLS = [
     # --- Lecture ---
     {"name": "web_search", "validation": False, "run": _exec_web_search,
@@ -623,6 +639,9 @@ TOOLS = [
     {"name": "delegate_task", "validation": False, "run": _exec_delegate_task,
      "description": "Délègue une sous-tâche lourde à un sous-agent focalisé : rédiger une proposition/offre commerciale, analyser un marché, générer des idées de contenu/campagne, structurer un plan. Donne un objectif clair + le contexte utile. À utiliser quand la tâche mérite un vrai travail dédié.",
      "params": _obj({"objective": _STR, "context": _STR})},
+    {"name": "send_to_cowork", "validation": False, "run": _exec_send_to_cowork,
+     "description": "Envoie une tâche / un brief à Claude Cowork sur le PC de Léo (pour qu'il bosse ou réfléchisse dessus côté code/dev). Donne un titre court + un brief détaillé. Utilise-le quand Léo dit d'envoyer/confier quelque chose à Cowork ou à son Claude sur PC.",
+     "params": _obj({"title": _STR, "brief": _STR})},
     {"name": "search_contacts", "validation": False, "run": _exec_search_contacts,
      "description": "Cherche des contacts par texte (nom/entreprise/email) et/ou statut.",
      "params": _obj({"query": _STR, "status": _STR, "limit": _INT})},
@@ -1235,6 +1254,24 @@ async def neo_conversation_get(conv_id: str, current_user: dict = Depends(get_cu
 async def neo_conversation_delete(conv_id: str, current_user: dict = Depends(get_current_user)):
     uid = current_user.get("user_id") or current_user.get("id")
     await db.neo_conversations.delete_one({"id": conv_id, "user_id": uid})
+    return {"success": True}
+
+
+class CoworkDoneRequest(BaseModel):
+    result: Optional[str] = None
+
+
+@router.get("/cowork-inbox")
+async def neo_cowork_inbox(current_user: dict = Depends(get_current_user)):
+    """Tâches déposées par Néo pour Cowork (récupérées par le Claude PC via MCP get_cowork_tasks)."""
+    rows = await db.cowork_inbox.find({"status": "pending"}, {"_id": 0}).sort("created_at", 1).to_list(50)
+    return {"tasks": rows}
+
+
+@router.post("/cowork-inbox/{task_id}/done")
+async def neo_cowork_done(task_id: str, req: CoworkDoneRequest, current_user: dict = Depends(get_current_user)):
+    await db.cowork_inbox.update_one({"id": task_id},
+        {"$set": {"status": "done", "result": (req.result or "")[:8000], "done_at": datetime.now(timezone.utc).isoformat()}})
     return {"success": True}
 
 
