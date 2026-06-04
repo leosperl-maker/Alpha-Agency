@@ -820,6 +820,48 @@ async def _exec_create_contact(args, uid):
             "message": f"Fiche contact créée : {full}."}
 
 
+async def _exec_create_quote(args, uid):
+    """Crée un VRAI devis dans db.invoices (document_type=devis) -> visible dans la page Facturation
+    ET compté dans le pipeline/prévisionnel. Lié au contact si on le retrouve. Reste un brouillon (pas d'envoi)."""
+    from .invoices import get_next_invoice_number, calculate_invoice_totals  # lazy (évite la circularité)
+    contact = None
+    if args.get("contact_id") or args.get("contact_name") or args.get("client_name"):
+        try:
+            contact = await _find_contact({"contact_id": args.get("contact_id"),
+                                           "contact_name": args.get("contact_name") or args.get("client_name")})
+        except Exception:
+            contact = None
+    contact_id = contact.get("id") if contact else None
+    raw = args.get("services") or args.get("items") or []
+    items = []
+    for s in (raw if isinstance(raw, list) else []):
+        if not isinstance(s, dict):
+            continue
+        items.append({"title": s.get("title") or s.get("name") or "",
+                      "description": s.get("description") or s.get("title") or "Prestation",
+                      "quantity": s.get("quantity") or 1,
+                      "unit_price": s.get("unit_price") or s.get("price") or 0,
+                      "discount": s.get("discount") or 0,
+                      "discountType": s.get("discountType") or "%"})
+    if not items:
+        return {"success": False, "message": "Décris au moins une ligne de prestation (services) pour le devis."}
+    subtotal, tva, total = calculate_invoice_totals(items, 0, "%")
+    number = await get_next_invoice_number("devis", "standard", None)
+    now = datetime.now(timezone.utc)
+    client_name = (args.get("client_name")
+                   or (f"{contact.get('first_name','')} {contact.get('last_name','')}".strip() if contact else "")) or "Client"
+    doc = {"id": str(uuid.uuid4()), "invoice_number": number, "quote_id": None, "contact_id": contact_id,
+           "document_type": "devis", "invoice_type": "standard", "parent_invoice_id": None, "parent_invoice_number": None,
+           "items": items, "subtotal": subtotal, "tva": tva, "total": total, "total_paid": 0, "remaining": total,
+           "globalDiscount": 0, "globalDiscountType": "%", "status": "brouillon",
+           "due_date": (now + timedelta(days=30)).strftime("%Y-%m-%d"), "payment_terms": "30",
+           "notes": args.get("notes"), "conditions": None, "client_name": client_name,
+           "created_at": now.isoformat(), "created_by": uid}
+    await db.invoices.insert_one(doc)
+    return {"success": True, "result": {"quote_id": doc["id"], "number": number, "total": total, "contact_id": contact_id},
+            "message": f"Devis {number} créé pour {client_name} — total {total:.2f}€ (brouillon, visible dans Facturation)."}
+
+
 TOOLS = [
     # --- Lecture ---
     {"name": "web_search", "validation": False, "run": _exec_web_search,
@@ -924,10 +966,10 @@ TOOLS = [
     {"name": "update_contact", "validation": False, "run": lambda a, u: update_contact_action(a),
      "description": "Met à jour des champs d'un contact (phone, email, company, budget, poste, project_type, city, note...).",
      "params": _obj({"contact_name": _STR, "contact_id": _STR, "updates": {"type": "object"}}, ["updates"])},
-    {"name": "create_quote", "validation": False, "run": lambda a, u: create_quote_action(a, u),
-     "description": "Crée un DEVIS BROUILLON (pas envoyé). client_name requis ; services: [{title,description,quantity,unit_price}].",
-     "params": _obj({"client_name": _STR, "client_email": _STR,
-                     "services": {"type": "array", "items": {"type": "object"}}, "notes": _STR}, ["client_name"])},
+    {"name": "create_quote", "validation": False, "run": _exec_create_quote,
+     "description": "Crée un VRAI devis (brouillon) dans la FACTURATION : visible dans la page Facturation et compté dans le pipeline/prévisionnel. Lie-le à un contact existant via contact_name (si le client n'existe pas, crée d'abord la fiche avec create_contact). services: [{title,description,quantity,unit_price}]. Ne l'envoie pas (l'envoi est une étape séparée avec validation).",
+     "params": _obj({"contact_name": _STR, "client_name": _STR, "client_email": _STR,
+                     "services": {"type": "array", "items": {"type": "object"}}, "notes": _STR})},
     {"name": "draft_followup_email", "validation": False, "run": lambda a, u: draft_followup_email_action(a),
      "description": "Rédige (sans envoyer) un email de relance personnalisé, stocké en brouillon.",
      "params": _obj({"contact_name": _STR, "contact_id": _STR, "angle": _STR})},
