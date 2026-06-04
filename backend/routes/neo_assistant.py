@@ -641,30 +641,40 @@ async def _exec_generate_image(args, uid):
     if not _client:
         return {"success": False, "message": "Génération d'image indisponible (IA non configurée)."}
     import base64 as _b64
-    def _call():
-        cfg = _t.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
-        return _client.models.generate_content(model=NEO_IMAGE_MODEL, contents=prompt, config=cfg)
-    try:
-        resp = await asyncio.to_thread(_call)
-        raw, mime = None, "image/png"
-        for part in (resp.candidates[0].content.parts or []):
-            inl = getattr(part, "inline_data", None)
-            if inl and getattr(inl, "data", None):
-                d = inl.data
-                raw = d if isinstance(d, (bytes, bytearray)) else _b64.b64decode(d)
-                mime = getattr(inl, "mime_type", "image/png") or "image/png"
+    # Chaîne de modèles image (le 1er accessible gagne) — robuste aux renommages/dispos de la clé
+    models = list(dict.fromkeys([m for m in [
+        NEO_IMAGE_MODEL, "gemini-2.5-flash-image-preview", "gemini-2.5-flash-image",
+        "gemini-2.0-flash-exp-image-generation", "imagen-3.0-generate-002",
+    ] if m]))
+    raw, mime, last_err = None, "image/png", "?"
+    for mdl in models:
+        def _call(_m=mdl):
+            cfg = _t.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
+            return _client.models.generate_content(model=_m, contents=prompt, config=cfg)
+        try:
+            resp = await asyncio.to_thread(_call)
+            for part in (resp.candidates[0].content.parts or []):
+                inl = getattr(part, "inline_data", None)
+                if inl and getattr(inl, "data", None):
+                    d = inl.data
+                    raw = d if isinstance(d, (bytes, bytearray)) else _b64.b64decode(d)
+                    mime = getattr(inl, "mime_type", "image/png") or "image/png"
+                    break
+            if raw:
                 break
-        if not raw:
-            return {"success": False, "message": "Aucune image générée (modèle image indisponible sur la clé ?)."}
-        img_id = str(uuid.uuid4())
-        await db.neo_images.insert_one({"id": img_id, "data": _b64.b64encode(raw).decode(), "mime": mime,
-                                        "prompt": prompt[:500], "user_id": uid,
-                                        "created_at": datetime.now(timezone.utc).isoformat()})
-        url = f"{PUBLIC_BASE}/api/neo/image/{img_id}"
-        return {"success": True, "result": {"image_url": url}, "message": f"Visuel généré : {url}"}
-    except Exception as e:
-        logger.warning(f"neo generate_image: {e}")
-        return {"success": False, "message": f"Génération échouée: {str(e)[:160]}"}
+            last_err = "réponse sans image"
+        except Exception as e:
+            last_err = str(e)[:120]
+            continue
+    if not raw:
+        logger.warning(f"neo generate_image: aucun modèle ({last_err})")
+        return {"success": False, "message": f"Génération d'image indisponible (modèle image absent de la clé : {last_err})."}
+    img_id = str(uuid.uuid4())
+    await db.neo_images.insert_one({"id": img_id, "data": _b64.b64encode(raw).decode(), "mime": mime,
+                                    "prompt": prompt[:500], "user_id": uid,
+                                    "created_at": datetime.now(timezone.utc).isoformat()})
+    url = f"{PUBLIC_BASE}/api/neo/image/{img_id}"
+    return {"success": True, "result": {"image_url": url}, "message": f"Visuel généré : {url}"}
 
 
 TOOLS = [
