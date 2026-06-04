@@ -44,9 +44,11 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
   const [fbNote, setFbNote] = useState({}); // msgIndex -> texte de correction
   const [attachments, setAttachments] = useState([]); // [{name, mime_type, data}]
   const [copiedIdx, setCopiedIdx] = useState(null); // index du message copié (feedback visuel)
-  const [brain, setBrain] = useState(() => { try { return localStorage.getItem("neoBrain") || "gemini"; } catch { return "gemini"; } });
+  const [brain, setBrain] = useState(() => { try { return localStorage.getItem("neoBrain") || "auto"; } catch { return "auto"; } });
+  const [brainUsed, setBrainUsed] = useState(null); // en mode auto : quel cerveau a été choisi (dernier message)
+  // Cycle : Auto -> Gemini -> Claude -> Auto. Auto = Néo choisit selon la complexité/l'enjeu.
   const toggleBrain = useCallback(() => {
-    setBrain((b) => { const nb = b === "claude" ? "gemini" : "claude"; try { localStorage.setItem("neoBrain", nb); } catch (e) { /* noop */ } return nb; });
+    setBrain((b) => { const nb = b === "auto" ? "gemini" : b === "gemini" ? "claude" : "auto"; try { localStorage.setItem("neoBrain", nb); } catch (e) { /* noop */ } return nb; });
   }, []);
   const endRef = useRef(null);
   const inputRef = useRef(null);
@@ -121,6 +123,7 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
       switch (ev.type) {
         case "meta":
           if (ev.conversation_id) setConvId(ev.conversation_id);
+          if (ev.brain) setBrainUsed(ev.brain);
           break;
         case "text":
           gotContent = true;
@@ -403,9 +406,11 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={toggleBrain} title={`Cerveau : ${brain === "claude" ? "Claude" : "Gemini"} — cliquer pour changer`}
+            <button onClick={toggleBrain}
+              title={`Cerveau : ${brain === "auto" ? "Auto (Néo choisit selon la complexité)" : brain === "claude" ? "Claude" : "Gemini"}${brain === "auto" && brainUsed ? ` — dernier : ${brainUsed === "claude" ? "Claude" : "Gemini"}` : ""} — cliquer pour changer`}
               className="flex items-center gap-1 px-2 h-8 rounded-xl text-[11px] font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
-              <Cpu className="w-3.5 h-3.5" />{brain === "claude" ? "Claude" : "Gemini"}
+              <Cpu className="w-3.5 h-3.5" />{brain === "auto" ? "Auto" : brain === "claude" ? "Claude" : "Gemini"}
+              {brain === "auto" && brainUsed && <span className="opacity-50">·{brainUsed === "claude" ? "C" : "G"}</span>}
             </button>
             <button onClick={() => setVoiceMode(true)} title="Mode vocal plein écran"
               className="p-2 rounded-xl text-primary hover:bg-primary/10 transition-colors">
