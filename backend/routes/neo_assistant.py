@@ -60,6 +60,9 @@ ELEVENLABS_MODEL = os.environ.get("ELEVENLABS_MODEL", "eleven_multilingual_v2")
 # Base URL publique (pour les liens de téléchargement de fichiers que Néo génère)
 PUBLIC_BASE = os.environ.get("PUBLIC_BASE_URL", "https://www.alphagency.fr").rstrip("/")
 
+# Modèle de génération d'image (Gemini). Changeable par env si besoin d'un autre modèle image.
+NEO_IMAGE_MODEL = os.environ.get("NEO_IMAGE_MODEL", "gemini-2.0-flash-preview-image-generation")
+
 MAX_ITERS = 6  # garde-fou anti-boucle de la boucle agentique
 
 NEO_SYSTEM = """Tu es Néo, l'associé co-gérant IA d'Alpha Agency (agence de communication digitale, Guadeloupe).
@@ -88,7 +91,9 @@ Tu PEUX recevoir et LIRE des FICHIERS JOINTS (images, PDF) joints directement au
 décris-les, extrais-en l'info utile. Ne les confonds pas avec les documents du CRM (outil get_document). Ne dis
 JAMAIS que tu ne peux pas lire une pièce jointe — si un fichier est joint, lis-le.
 Tu peux CONFIER une tâche à Claude Cowork (le Claude de Léo sur son PC) via l'outil send_to_cowork
-quand Léo dit « envoie ça à Cowork » / « fais bosser Cowork là-dessus » : donne un titre + un brief clair. Avant toute action qui SORT vers un client (email, SMS, devis envoyé, relance) ou
+quand Léo dit « envoie ça à Cowork » / « fais bosser Cowork là-dessus » : donne un titre + un brief clair.
+Tu peux GÉNÉRER des IMAGES / visuels via l'outil generate_image (visuel de post réseaux, illustration,
+concept créatif). Ne dis JAMAIS que tu ne peux pas créer d'image : utilise generate_image avec un prompt riche. Avant toute action qui SORT vers un client (email, SMS, devis envoyé, relance) ou
 toute SUPPRESSION, l'outil te répondra « EN ATTENTE DE VALIDATION » : préviens Léo que c'est
 préparé et qu'il doit valider. Tu ne déclenches jamais de paiement.
 
@@ -628,6 +633,40 @@ async def _exec_send_to_cowork(args, uid):
             "message": f"Tâche déposée pour Cowork : « {doc['title']} ». Le Claude de Léo sur PC la récupérera."}
 
 
+async def _exec_generate_image(args, uid):
+    """Génère une image/visuel via Gemini et renvoie une URL affichable (stockée en base)."""
+    prompt = (args.get("prompt") or "").strip()
+    if not prompt:
+        return {"success": False, "message": "Décris l'image à générer."}
+    if not _client:
+        return {"success": False, "message": "Génération d'image indisponible (IA non configurée)."}
+    import base64 as _b64
+    def _call():
+        cfg = _t.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
+        return _client.models.generate_content(model=NEO_IMAGE_MODEL, contents=prompt, config=cfg)
+    try:
+        resp = await asyncio.to_thread(_call)
+        raw, mime = None, "image/png"
+        for part in (resp.candidates[0].content.parts or []):
+            inl = getattr(part, "inline_data", None)
+            if inl and getattr(inl, "data", None):
+                d = inl.data
+                raw = d if isinstance(d, (bytes, bytearray)) else _b64.b64decode(d)
+                mime = getattr(inl, "mime_type", "image/png") or "image/png"
+                break
+        if not raw:
+            return {"success": False, "message": "Aucune image générée (modèle image indisponible sur la clé ?)."}
+        img_id = str(uuid.uuid4())
+        await db.neo_images.insert_one({"id": img_id, "data": _b64.b64encode(raw).decode(), "mime": mime,
+                                        "prompt": prompt[:500], "user_id": uid,
+                                        "created_at": datetime.now(timezone.utc).isoformat()})
+        url = f"{PUBLIC_BASE}/api/neo/image/{img_id}"
+        return {"success": True, "result": {"image_url": url}, "message": f"Visuel généré : {url}"}
+    except Exception as e:
+        logger.warning(f"neo generate_image: {e}")
+        return {"success": False, "message": f"Génération échouée: {str(e)[:160]}"}
+
+
 TOOLS = [
     # --- Lecture ---
     {"name": "web_search", "validation": False, "run": _exec_web_search,
@@ -642,6 +681,9 @@ TOOLS = [
     {"name": "send_to_cowork", "validation": False, "run": _exec_send_to_cowork,
      "description": "Envoie une tâche / un brief à Claude Cowork sur le PC de Léo (pour qu'il bosse ou réfléchisse dessus côté code/dev). Donne un titre court + un brief détaillé. Utilise-le quand Léo dit d'envoyer/confier quelque chose à Cowork ou à son Claude sur PC.",
      "params": _obj({"title": _STR, "brief": _STR})},
+    {"name": "generate_image", "validation": False, "run": _exec_generate_image,
+     "description": "Génère une IMAGE / un visuel à partir d'une description détaillée (visuel de post réseaux, illustration, concept créatif, mockup). Renvoie une URL d'image à montrer à Léo. Utilise-le dès que Léo demande de créer/générer une image, un visuel ou une illustration.",
+     "params": _obj({"prompt": _STR})},
     {"name": "search_contacts", "validation": False, "run": _exec_search_contacts,
      "description": "Cherche des contacts par texte (nom/entreprise/email) et/ou statut.",
      "params": _obj({"query": _STR, "status": _STR, "limit": _INT})},
@@ -1273,6 +1315,17 @@ async def neo_cowork_done(task_id: str, req: CoworkDoneRequest, current_user: di
     await db.cowork_inbox.update_one({"id": task_id},
         {"$set": {"status": "done", "result": (req.result or "")[:8000], "done_at": datetime.now(timezone.utc).isoformat()}})
     return {"success": True}
+
+
+@router.get("/image/{image_id}")
+async def neo_image(image_id: str):
+    """Sert une image générée par Néo (public, id UUID non devinable)."""
+    import base64 as _b64
+    doc = await db.neo_images.find_one({"id": image_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Image introuvable")
+    return Response(content=_b64.b64decode(doc["data"]), media_type=doc.get("mime", "image/png"),
+                    headers={"Cache-Control": "public, max-age=86400"})
 
 
 @router.post("/confirm-action")

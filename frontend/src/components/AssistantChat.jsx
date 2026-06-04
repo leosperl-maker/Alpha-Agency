@@ -16,14 +16,16 @@ const ACTION_LABELS = {
   merge_contacts: "Fusionner les fiches en doublon",
 };
 
-// Rend les URLs cliquables dans les réponses de Néo (liens de fichiers / devis)
+// Rend les URLs cliquables (liens fichiers/devis) et affiche les images générées
 const renderContent = (text) => {
   if (!text) return text;
-  return String(text).split(/(https?:\/\/[^\s]+)/g).map((p, i) =>
-    /^https?:\/\//.test(p)
-      ? <a key={i} href={p} target="_blank" rel="noopener noreferrer" className="underline break-all font-medium">{p}</a>
-      : p
-  );
+  return String(text).split(/(https?:\/\/[^\s]+)/g).map((p, i) => {
+    if (!/^https?:\/\//.test(p)) return p;
+    if (/\/neo\/image\/|\.(png|jpe?g|webp|gif)(\?|$)/i.test(p)) {
+      return <img key={i} src={p} alt="visuel généré par Néo" className="mt-2 rounded-xl max-w-full border border-border" />;
+    }
+    return <a key={i} href={p} target="_blank" rel="noopener noreferrer" className="underline break-all font-medium">{p}</a>;
+  });
 };
 
 /**
