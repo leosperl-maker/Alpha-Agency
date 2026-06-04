@@ -67,6 +67,11 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
   const committedRef = useRef("");      // segments figés avant un redémarrage de la reco (survit aux coupures ~60s)
   const silenceTimerRef = useRef(null); // timer de silence : on envoie quand Léo s'est vraiment tu
   const sendNowRef = useRef(null);      // pour forcer l'envoi (tap sur l'orbe = "j'ai fini")
+  // V2 — TTS par phrases : Néo parle dès la 1ère phrase pendant que la suite streame.
+  const ttsQueueRef = useRef([]);       // file des phrases à dire
+  const ttsRunnerRef = useRef(false);   // un lecteur de file tourne-t-il ?
+  const ttsResolveRef = useRef(null);   // pour débloquer la lecture en cours (barge-in)
+  const streamDoneRef = useRef(false);  // le flux texte est-il terminé ?
 
   const getAudioEl = () => {
     if (!audioElRef.current) { const el = new Audio(); el.preload = "auto"; audioElRef.current = el; }
@@ -115,7 +120,9 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
   }, []);
 
   const stopAudio = useCallback(() => {
+    ttsQueueRef.current = [];                 // vide la file (stoppe la suite à dire)
     if (audioElRef.current) { try { audioElRef.current.pause(); } catch (e) {} }
+    try { ttsResolveRef.current?.(); } catch (e) {} // débloque la phrase en cours (barge-in)
     resetOrb();
   }, [resetOrb]);
 
@@ -167,6 +174,78 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
     }
   }, [animateOrb, resetOrb]);
 
+  // ---- V2 : lecture d'UNE phrase (sans revenir à l'écoute) — brique de la file TTS ----
+  const playTts = useCallback(async (text) => {
+    if (!text || !runningRef.current) return;
+    let res;
+    try { res = await neoAPI.tts(text, voiceIdRef.current || undefined); }
+    catch (e) { return; }
+    if (!runningRef.current) return;
+    const el = getAudioEl();
+    if (lastUrlRef.current) { try { URL.revokeObjectURL(lastUrlRef.current); } catch (e) {} }
+    const url = URL.createObjectURL(res.data);
+    lastUrlRef.current = url;
+    el.muted = false;
+    el.src = url;
+    if (!IS_IOS) {
+      try {
+        if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        const ctx = audioCtxRef.current;
+        if (ctx.state === "suspended") await ctx.resume();
+        if (!srcNodeRef.current) {
+          srcNodeRef.current = ctx.createMediaElementSource(el);
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 256;
+          srcNodeRef.current.connect(analyser);
+          analyser.connect(ctx.destination);
+          analyserRef.current = analyser;
+        }
+        rafRef.current = requestAnimationFrame(animateOrb);
+      } catch (e) { analyserRef.current = null; }
+    }
+    await new Promise((resolve) => {
+      let done = false;
+      const fin = () => { if (done) return; done = true; ttsResolveRef.current = null; resolve(); };
+      ttsResolveRef.current = fin;          // stopAudio() peut débloquer (barge-in)
+      el.onended = fin;
+      el.onerror = fin;
+      el.play().catch(() => fin());
+    });
+  }, [animateOrb]);
+
+  // ---- V2 : lecteur de file — joue les phrases en séquence dès qu'elles arrivent ----
+  const startTtsRunner = useCallback(() => {
+    if (ttsRunnerRef.current) return;
+    ttsRunnerRef.current = true;
+    setPhaseBoth("speaking");
+    (async () => {
+      while (runningRef.current && ttsQueueRef.current.length) {
+        const next = ttsQueueRef.current.shift();
+        await playTts(next);
+      }
+      ttsRunnerRef.current = false;
+      if (runningRef.current && !ttsQueueRef.current.length) resetOrb();
+    })();
+  }, [playTts, resetOrb]);
+
+  const enqueueTts = useCallback((text) => {
+    const t = (text || "").trim();
+    if (!t) return;
+    ttsQueueRef.current.push(t);
+    startTtsRunner();
+  }, [startTtsRunner]);
+
+  // attend que toute la file soit lue (auto-répare la course file/runner)
+  const waitTtsDrain = useCallback(() => new Promise((resolve) => {
+    const check = () => {
+      if (!runningRef.current) return resolve();
+      if (ttsQueueRef.current.length && !ttsRunnerRef.current) startTtsRunner();
+      if (!ttsRunnerRef.current && !ttsQueueRef.current.length) return resolve();
+      setTimeout(check, 80);
+    };
+    check();
+  }), [startTtsRunner]);
+
   // changer la voix de Néo (persisté) + échantillon immédiat
   const pickVoice = useCallback((id) => {
     setVoiceId(id);
@@ -186,6 +265,8 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
     setPhaseBoth("thinking");
     setCaption("");
     setCards([]);
+    ttsQueueRef.current = [];        // file TTS propre pour cette réplique
+    streamDoneRef.current = false;
     const userMsg = { role: "user", content };
     const history = [...histRef.current, userMsg];
     histRef.current = history;
@@ -196,26 +277,30 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
       brain,
     };
 
-    const finish = async (reply, actionsDone, pendingActions) => {
-      const assistantMsg = { role: "assistant", content: reply, actionsDone: actionsDone || [], pending: pendingActions || [] };
-      histRef.current = [...history, assistantMsg];
-      onExchange?.(userMsg, assistantMsg);
-      setCaption(reply);
-      setCards(deriveCards(reply, actionsDone, pendingActions));
-      if (!runningRef.current) return;
-      await speak(reply);
-    };
-
     let replyAcc = "";
+    let spokenLen = 0;        // longueur déjà mise en file pour la voix
     let actionsDone = [];
     let pendingActions = [];
     const liveCards = [];
     const pushCard = (c) => { liveCards.push(c); setCards(liveCards.slice(0, 5)); };
+    // Découpe le texte au fil de l'eau en phrases complètes -> file TTS (Néo parle dès le 1er point).
+    // On ne coupe qu'à une ponctuation SUIVIE d'un espace/fin (évite de couper "3580.50€").
+    const feedTts = () => {
+      const chunk = replyAcc.slice(spokenLen);
+      let boundary = -1;
+      const re = /[.!?…](\s|$)|\n/g;
+      let m;
+      while ((m = re.exec(chunk)) !== null) boundary = m.index + 1;
+      if (boundary > 0) {
+        const ready = chunk.slice(0, boundary).trim();
+        if (ready.length >= 2) { enqueueTts(ready); spokenLen += boundary; }
+      }
+    };
     const onEvent = (ev) => {
       if (!ev || !ev.type) return;
       switch (ev.type) {
         case "meta": if (ev.conversation_id) onConvId?.(ev.conversation_id); break;
-        case "text": replyAcc += ev.delta || ""; setCaption(replyAcc); break;
+        case "text": replyAcc += ev.delta || ""; setCaption(replyAcc); feedTts(); break;
         case "tool":
           if (ev.phase === "done" && ev.ok !== false) {
             const c = ACTION_CARDS[ev.name];
@@ -237,14 +322,36 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
 
     try {
       await neoAPI.streamChat(payload, { onEvent }); // pas de signal : le mode vocal pilote son cycle
-      await finish(replyAcc || "…", actionsDone, pendingActions);
+      const reply = replyAcc || "…";
+      const assistantMsg = { role: "assistant", content: reply, actionsDone, pending: pendingActions };
+      histRef.current = [...history, assistantMsg];
+      onExchange?.(userMsg, assistantMsg);
+      setCaption(reply);
+      setCards(deriveCards(reply, actionsDone, pendingActions));
+      if (!runningRef.current) return;
+      if (replyAcc.trim()) {
+        const tail = replyAcc.slice(spokenLen).trim(); // dernier morceau pas encore mis en file
+        if (tail) enqueueTts(tail);
+        streamDoneRef.current = true;
+        await waitTtsDrain();                          // attend la fin de toute la voix
+        if (runningRef.current && phaseRef.current !== "listening") startListeningRef.current?.();
+      } else {
+        startListeningRef.current?.();                 // pas de texte (que des outils) -> réécoute
+      }
     } catch (error) {
       // Fallback non-stream (robustesse — ne jamais casser le vocal qui marche).
       try {
         const res = await neoAPI.chat(payload);
         const d = res.data || {};
         if (d.conversation_id) onConvId?.(d.conversation_id);
-        await finish(d.message || "…", d.actions_done, d.pending_actions);
+        const reply = d.message || "…";
+        const assistantMsg = { role: "assistant", content: reply, actionsDone: d.actions_done || [], pending: d.pending_actions || [] };
+        histRef.current = [...history, assistantMsg];
+        onExchange?.(userMsg, assistantMsg);
+        setCaption(reply);
+        setCards(deriveCards(reply, d.actions_done, d.pending_actions));
+        if (!runningRef.current) return;
+        await speak(reply); // one-shot (gère lui-même le retour à l'écoute)
       } catch (e2) {
         const detail = e2.response?.data?.detail;
         const msg = detail ? `Souci : ${detail}` : "Je n'arrive pas à joindre le serveur, là.";
@@ -252,7 +359,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
         if (runningRef.current) await speak(msg);
       }
     }
-  }, [convId, onConvId, onExchange, speak, brain]);
+  }, [convId, onConvId, onExchange, speak, brain, enqueueTts, waitTtsDrain]);
 
   const startListening = useCallback(() => {
     if (!runningRef.current) return;
