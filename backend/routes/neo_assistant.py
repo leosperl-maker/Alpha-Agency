@@ -656,6 +656,12 @@ def _obj(props: dict, required=None):
 _STR = {"type": "string"}
 _INT = {"type": "integer"}
 _BOOL = {"type": "boolean"}
+_NUM = {"type": "number"}
+# Ligne de devis/facture, avec remise EXPLICITE par ligne (le moteur sait la calculer + l'afficher).
+_QUOTE_ITEM = {"type": "object", "properties": {
+    "title": _STR, "description": _STR, "quantity": _NUM, "unit_price": _NUM,
+    "discount": _NUM, "discountType": {"type": "string", "enum": ["%", "€"]},
+}}
 
 # Chaque outil : name, description, params (json schema), validation (garde-fou A.5), run(args, uid)
 async def _exec_web_search(args, uid):
@@ -838,19 +844,33 @@ async def _exec_create_quote(args, uid):
             contact = None
     contact_id = contact.get("id") if contact else None
     raw = args.get("services") or args.get("items") or []
+
+    def _num(v, d=0.0):
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return d
     items = []
     for s in (raw if isinstance(raw, list) else []):
         if not isinstance(s, dict):
             continue
+        up = s.get("unit_price")
+        if up is None:
+            up = s.get("price")
+        dtype = (s.get("discountType") or "%")
+        dtype = "%" if dtype in ("%", "percent") else "€"
         items.append({"title": s.get("title") or s.get("name") or "",
                       "description": s.get("description") or s.get("title") or "Prestation",
-                      "quantity": s.get("quantity") or 1,
-                      "unit_price": s.get("unit_price") or s.get("price") or 0,
-                      "discount": s.get("discount") or 0,
-                      "discountType": s.get("discountType") or "%"})
+                      "quantity": _num(s.get("quantity"), 1) or 1,
+                      "unit_price": _num(up),
+                      "discount": _num(s.get("discount")),       # remise par ligne (jamais bakée dans le prix)
+                      "discountType": dtype})
     if not items:
         return {"success": False, "message": "Décris au moins une ligne de prestation (services) pour le devis."}
-    subtotal, tva, total = calculate_invoice_totals(items, 0, "%")
+    gd = _num(args.get("global_discount"))
+    gdt = (args.get("global_discount_type") or "%")
+    gdt = "%" if gdt in ("%", "percent") else "€"
+    subtotal, tva, total = calculate_invoice_totals(items, gd, gdt)
     number = await get_next_invoice_number("devis", "standard", None)
     now = datetime.now(timezone.utc)
     client_name = (args.get("client_name")
@@ -858,7 +878,7 @@ async def _exec_create_quote(args, uid):
     doc = {"id": str(uuid.uuid4()), "invoice_number": number, "quote_id": None, "contact_id": contact_id,
            "document_type": "devis", "invoice_type": "standard", "parent_invoice_id": None, "parent_invoice_number": None,
            "items": items, "subtotal": subtotal, "tva": tva, "total": total, "total_paid": 0, "remaining": total,
-           "globalDiscount": 0, "globalDiscountType": "%", "status": "brouillon",
+           "globalDiscount": gd, "globalDiscountType": gdt, "status": "brouillon",
            "due_date": (now + timedelta(days=30)).strftime("%Y-%m-%d"), "payment_terms": "30",
            "notes": args.get("notes"), "conditions": None, "client_name": client_name,
            "created_at": now.isoformat(), "created_by": uid}
@@ -868,10 +888,18 @@ async def _exec_create_quote(args, uid):
         link = f"rattaché au contact « {client_name} »" + (f" ({extra})" if extra else "")
     else:
         link = "⚠️ AUCUN contact existant rattaché — vérifie le nom ou crée d'abord la fiche"
+    has_line_remise = any(it["discount"] for it in items)
+    if gd:
+        remise_txt = f" Remise globale de {gd:.0f}{'%' if gdt == '%' else '€'} appliquée (le devis affiche le prix d'origine + la remise)."
+    elif has_line_remise:
+        remise_txt = " Remise(s) par ligne appliquée(s) (le devis affiche le prix d'origine + la remise)."
+    else:
+        remise_txt = ""
     return {"success": True, "result": {"quote_id": doc["id"], "number": number, "total": total,
+                                        "subtotal_ht": round(subtotal, 2), "global_discount": gd,
                                         "contact_id": contact_id, "client_name": client_name},
-            "message": f"Devis {number} créé — total {total:.2f}€, {link}. Brouillon visible dans Facturation. "
-                       f"Indique à Léo le contact EXACT rattaché et demande si c'est le bon."}
+            "message": f"Devis {number} créé — total TTC {total:.2f}€ (HT après remise {subtotal:.2f}€).{remise_txt} {link}. "
+                       f"Brouillon visible dans Facturation. Indique à Léo le contact EXACT rattaché et demande si c'est le bon."}
 
 
 TOOLS = [
@@ -979,9 +1007,16 @@ TOOLS = [
      "description": "Met à jour des champs d'un contact (phone, email, company, budget, poste, project_type, city, note...).",
      "params": _obj({"contact_name": _STR, "contact_id": _STR, "updates": {"type": "object"}}, ["updates"])},
     {"name": "create_quote", "validation": False, "run": _exec_create_quote,
-     "description": "Crée un VRAI devis (brouillon) dans la FACTURATION : visible dans la page Facturation et compté dans le pipeline/prévisionnel. Lie-le à un contact existant via contact_name (si le client n'existe pas, crée d'abord la fiche avec create_contact). services: [{title,description,quantity,unit_price}]. Ne l'envoie pas (l'envoi est une étape séparée avec validation).",
+     "description": "Crée un VRAI devis (brouillon) dans la FACTURATION : visible dans la page Facturation et compté dans le pipeline/prévisionnel. Lie-le à un contact existant via contact_name (si le client n'existe pas, crée d'abord la fiche avec create_contact). "
+                    "services: [{title, description, quantity, unit_price, discount, discountType}]. "
+                    "REMISE — TRÈS IMPORTANT : pour une réduction, mets le PRIX NORMAL (avant remise) dans unit_price et le montant de la remise dans discount, avec discountType '€' (montant en euros) ou '%' (pourcentage). "
+                    "Ne calcule JAMAIS le prix remisé toi-même pour le mettre dans unit_price, et n'explique PAS la remise dans la description : le devis affiche déjà une colonne remise et recalcule le total. "
+                    "Pour une remise sur le TOTAL du devis (et non une ligne), utilise global_discount + global_discount_type. "
+                    "Ne l'envoie pas (l'envoi est une étape séparée avec validation).",
      "params": _obj({"contact_name": _STR, "client_name": _STR, "client_email": _STR,
-                     "services": {"type": "array", "items": {"type": "object"}}, "notes": _STR})},
+                     "services": {"type": "array", "items": _QUOTE_ITEM},
+                     "global_discount": _NUM, "global_discount_type": {"type": "string", "enum": ["%", "€"]},
+                     "notes": _STR})},
     {"name": "draft_followup_email", "validation": False, "run": lambda a, u: draft_followup_email_action(a),
      "description": "Rédige (sans envoyer) un email de relance personnalisé, stocké en brouillon.",
      "params": _obj({"contact_name": _STR, "contact_id": _STR, "angle": _STR})},
@@ -1615,6 +1650,72 @@ async def run_neo_claude_stream(messages: list, user_id: str, voice: bool = Fals
     yield {"type": "done", "actions_done": actions, "pending_actions": pending}
 
 
+# ==================== Choix AUTOMATIQUE du cerveau (routage hybride) ====================
+# Signaux d'une demande COMPLEXE / à fort enjeu -> Claude (raisonnement profond).
+_COMPLEX_HINTS = (
+    "stratég", "analyse", "analyser", "réfléch", "réflexion", "penses-tu", "ton avis",
+    "qu'en penses", "conseil", "recommand", "négoci", "convainc", "argumentaire", "argument",
+    "proposition", "offre commerciale", "plan d'", "business plan", "pitch", "rédige", "rédiger",
+    "écris-moi", "écris un", "écris une", "idée", "brainstorm", "créati", "complexe", "compliqué",
+    "décision", "dois-je", "faut-il", "devrais-je", "pourquoi", "compare", "comparais", "vision",
+    "prévision", "anticipe", "scénario", "simul", "optimis", "structure", "challenge", "enjeu",
+    "long terme", "rentab", "marge", "positionnement", "diagnostic", "audit", "synthèse", "synthétise",
+)
+# Démarrages typiques d'un lookup/commande SIMPLE -> Gemini (rapide).
+_SIMPLE_HINTS = (
+    "liste", "montre", "affiche", "combien", "quel", "quelle", "quels", "qui ", "donne-moi",
+    "c'est quoi", "statut", "trouve", "cherche", "ajoute", "crée une tâche", "crée la tâche",
+    "marque", "trésorerie", "solde", "factures", "leads", "contacts", "rdv", "rendez-vous",
+)
+
+
+def _last_user_text(messages: list) -> str:
+    for m in reversed(messages or []):
+        if m.get("role") == "user" and (m.get("content") or "").strip():
+            return m["content"].strip()
+    return ""
+
+
+async def _classify_brain(text: str) -> str:
+    """Mini-classifieur (modèle rapide) pour les cas AMBIGUS : 'simple' -> gemini, 'complexe' -> claude."""
+    if not _client:
+        return "gemini"
+    prompt = ("Tu classes la demande d'un dirigeant à son associé IA. Réponds UNIQUEMENT par 'simple' ou 'complexe'. "
+              "'complexe' = stratégie, analyse, jugement, conseil important, rédaction soignée, négociation, décision à enjeu. "
+              "'simple' = consultation du CRM, info factuelle, petite action. "
+              f"Demande : « {text[:500]} »\nRéponse :")
+
+    def _call():
+        cfg = _t.GenerateContentConfig(max_output_tokens=5, temperature=0)
+        return _client.models.generate_content(model="gemini-2.5-flash-lite", contents=prompt, config=cfg)
+    try:
+        resp = await asyncio.wait_for(asyncio.to_thread(_call), timeout=4.0)
+        out = (getattr(resp, "text", "") or "").strip().lower()
+        return "claude" if "complex" in out else "gemini"
+    except Exception as e:
+        logger.warning(f"neo classify_brain KO: {e}")
+        return "gemini"
+
+
+async def _resolve_brain(messages: list, attachments=None) -> str:
+    """Routage HYBRIDE : heuristique instantanée pour les cas évidents, mini-classifieur pour les ambigus.
+    Retourne 'gemini' (rapide, défaut) ou 'claude' (raisonnement profond)."""
+    if attachments:
+        return "gemini"  # multimodal -> Gemini (Claude n'a pas les pièces jointes ici)
+    text = _last_user_text(messages)
+    low = text.lower()
+    n = len(text)
+    if any(h in low for h in _COMPLEX_HINTS):
+        return "claude"                       # signal de complexité/enjeu -> Claude
+    if n > 320:
+        return "claude"                       # demande longue/élaborée
+    if n <= 60:
+        return "gemini"                        # très court -> lookup/commande
+    if any(h in low for h in _SIMPLE_HINTS):
+        return "gemini"                        # lookup/commande clair
+    return await _classify_brain(text)         # cas ambigu -> mini-classifieur rapide
+
+
 # ==================== Endpoints ====================
 class NeoChatRequest(BaseModel):
     messages: List[dict]
@@ -1840,7 +1941,9 @@ async def neo_chat(req: NeoChatRequest, current_user: dict = Depends(get_current
     if not msgs:
         raise HTTPException(status_code=400, detail="Message requis")
     try:
-        brain = (req.brain or "gemini").lower()
+        brain = (req.brain or "auto").lower()
+        if brain not in ("gemini", "claude"):
+            brain = await _resolve_brain(msgs, req.attachments)  # choix auto (hybride)
         if brain == "claude" and not req.attachments:
             try:
                 result = await run_neo_claude(msgs, user_id, voice=(req.mode == "voice"))
@@ -1885,13 +1988,22 @@ async def neo_chat_stream(req: NeoChatRequest, current_user: dict = Depends(get_
         raise HTTPException(status_code=400, detail="Message requis")
     conv_id = req.conversation_id or str(uuid.uuid4())
     voice = (req.mode == "voice")
-    brain = (req.brain or "gemini").lower()
+    brain = (req.brain or "auto").lower()
+    auto = brain not in ("gemini", "claude")
 
     async def _gen():
-        yield _sse({"type": "meta", "conversation_id": conv_id})
+        # Choix AUTO du cerveau (hybride) résolu AVANT le 1er event -> on l'annonce dans meta.
+        resolved = brain
+        if auto:
+            try:
+                resolved = await _resolve_brain(msgs, req.attachments)
+            except Exception as e:
+                logger.warning(f"neo resolve_brain KO: {e}")
+                resolved = "gemini"
+        yield _sse({"type": "meta", "conversation_id": conv_id, "brain": resolved, "auto": auto})
         text_acc = []
         # V2 : Claude est streamé nativement. Avec pièces jointes -> Gemini (multimodal).
-        use_claude = (brain == "claude" and not req.attachments)
+        use_claude = (resolved == "claude" and not req.attachments)
         gen = (run_neo_claude_stream(msgs, user_id, voice=voice) if use_claude
                else run_neo_stream(msgs, user_id, voice=voice, attachments=req.attachments))
         try:
