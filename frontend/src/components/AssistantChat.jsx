@@ -40,6 +40,10 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   const [fb, setFb] = useState({});        // msgIndex -> 'up' | 'down-open' | 'sent'
   const [fbNote, setFbNote] = useState({}); // msgIndex -> texte de correction
   const [attachments, setAttachments] = useState([]); // [{name, mime_type, data}]
+  const [brain, setBrain] = useState(() => { try { return localStorage.getItem("neoBrain") || "gemini"; } catch { return "gemini"; } });
+  const toggleBrain = useCallback(() => {
+    setBrain((b) => { const nb = b === "claude" ? "gemini" : "claude"; try { localStorage.setItem("neoBrain", nb); } catch (e) { /* noop */ } return nb; });
+  }, []);
   const endRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -157,10 +161,6 @@ const AssistantChat = ({ open, onOpenChange, seed }) => {
   // ====== Voix de Néo : dictée (navigateur) + synthèse vocale premium (ElevenLabs) ======
   const [listening, setListening] = useState(false);
   const [voiceMode, setVoiceMode] = useState(false); // mode vocal plein écran (Operator)
-  const [brain, setBrain] = useState(() => { try { return localStorage.getItem("neoBrain") || "gemini"; } catch { return "gemini"; } });
-  const toggleBrain = useCallback(() => {
-    setBrain((b) => { const nb = b === "claude" ? "gemini" : "claude"; try { localStorage.setItem("neoBrain", nb); } catch (e) {} return nb; });
-  }, []);
   const [voiceOn, setVoiceOn] = useState(() => { try { return localStorage.getItem("neoVoice") === "1"; } catch { return false; } });
   const [speakingIdx, setSpeakingIdx] = useState(null);
   const recognitionRef = useRef(null);
