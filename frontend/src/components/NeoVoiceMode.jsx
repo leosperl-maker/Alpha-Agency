@@ -176,38 +176,81 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
     speak("Voilà ma nouvelle voix. On continue ?");
   }, [speak]);
 
-  // ---- Une réplique : envoie au moteur Néo puis fait parler ----
+  // ---- Une réplique : envoie au moteur Néo (EN STREAMING) puis fait parler ----
+  // Le sous-titre s'écrit au fil de l'eau + les cartes « Jarvis » surgissent quand Néo agit.
+  // V1 : le TTS se déclenche quand le texte est complet (V2 : par phrases dès le 1er point).
   const handleUtterance = useCallback(async (text) => {
     const content = (text || "").trim();
     if (!content) { startListeningRef.current?.(); return; }
     if (phaseRef.current === "thinking" || phaseRef.current === "speaking") return; // anti double-déclenchement (évite les voix superposées)
     setPhaseBoth("thinking");
     setCaption("");
+    setCards([]);
     const userMsg = { role: "user", content };
     const history = [...histRef.current, userMsg];
     histRef.current = history;
-    try {
-      const res = await neoAPI.chat({
-        messages: history.map((m) => ({ role: m.role, content: m.content })),
-        conversation_id: convId,
-        mode: "voice",
-        brain,
-      });
-      const d = res.data || {};
-      if (d.conversation_id) onConvId?.(d.conversation_id);
-      const reply = d.message || "…";
-      const assistantMsg = { role: "assistant", content: reply, actionsDone: d.actions_done || [], pending: d.pending_actions || [] };
+    const payload = {
+      messages: history.map((m) => ({ role: m.role, content: m.content })),
+      conversation_id: convId,
+      mode: "voice",
+      brain,
+    };
+
+    const finish = async (reply, actionsDone, pendingActions) => {
+      const assistantMsg = { role: "assistant", content: reply, actionsDone: actionsDone || [], pending: pendingActions || [] };
       histRef.current = [...history, assistantMsg];
       onExchange?.(userMsg, assistantMsg);
       setCaption(reply);
-      setCards(deriveCards(reply, d.actions_done, d.pending_actions));
+      setCards(deriveCards(reply, actionsDone, pendingActions));
       if (!runningRef.current) return;
       await speak(reply);
+    };
+
+    let replyAcc = "";
+    let actionsDone = [];
+    let pendingActions = [];
+    const liveCards = [];
+    const pushCard = (c) => { liveCards.push(c); setCards(liveCards.slice(0, 5)); };
+    const onEvent = (ev) => {
+      if (!ev || !ev.type) return;
+      switch (ev.type) {
+        case "meta": if (ev.conversation_id) onConvId?.(ev.conversation_id); break;
+        case "text": replyAcc += ev.delta || ""; setCaption(replyAcc); break;
+        case "tool":
+          if (ev.phase === "done" && ev.ok !== false) {
+            const c = ACTION_CARDS[ev.name];
+            if (c) pushCard({ id: `t${liveCards.length}`, icon: c.icon, label: c.label, kind: "done" });
+          }
+          break;
+        case "pending":
+          pendingActions.push({ action_id: ev.action_id, name: ev.name, args: ev.args });
+          pushCard({ id: `p${liveCards.length}`, icon: Clock, label: "À valider", kind: "pending" });
+          break;
+        case "done":
+          actionsDone = ev.actions_done || [];
+          pendingActions = ev.pending_actions || pendingActions;
+          break;
+        case "error": throw new Error(ev.detail || "stream_error");
+        default: break;
+      }
+    };
+
+    try {
+      await neoAPI.streamChat(payload, { onEvent }); // pas de signal : le mode vocal pilote son cycle
+      await finish(replyAcc || "…", actionsDone, pendingActions);
     } catch (error) {
-      const detail = error.response?.data?.detail;
-      const msg = detail ? `Souci : ${detail}` : "Je n'arrive pas à joindre le serveur, là.";
-      setCaption(msg);
-      if (runningRef.current) await speak(msg);
+      // Fallback non-stream (robustesse — ne jamais casser le vocal qui marche).
+      try {
+        const res = await neoAPI.chat(payload);
+        const d = res.data || {};
+        if (d.conversation_id) onConvId?.(d.conversation_id);
+        await finish(d.message || "…", d.actions_done, d.pending_actions);
+      } catch (e2) {
+        const detail = e2.response?.data?.detail;
+        const msg = detail ? `Souci : ${detail}` : "Je n'arrive pas à joindre le serveur, là.";
+        setCaption(msg);
+        if (runningRef.current) await speak(msg);
+      }
     }
   }, [convId, onConvId, onExchange, speak, brain]);
 
