@@ -39,6 +39,13 @@ const NeoPage = () => {
 
       {/* QG de Néo : ses infos en direct (desktop) */}
       <aside className="hidden lg:flex flex-col w-80 shrink-0 gap-3 overflow-y-auto pr-0.5">
+        {/* Mot de Néo (le QG prend vie) */}
+        {checkin?.message && (
+          <div className="rounded-2xl border border-primary/20 bg-brand-soft p-4">
+            <div className="flex items-center gap-2 mb-1.5"><AssistantOrb size={18} /><span className="text-xs font-semibold text-primary">Néo</span></div>
+            <p className="text-sm text-foreground/90 leading-relaxed">{checkin.message}</p>
+          </div>
+        )}
         {/* Santé de l'agence */}
         <div className="rounded-2xl border border-border bg-card p-4">
           <div className="flex items-center justify-between">

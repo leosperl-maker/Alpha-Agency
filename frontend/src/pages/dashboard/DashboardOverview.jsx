@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import {
   FileText, Receipt, Clock, Flame, TrendingDown, Calendar,
-  ChevronRight, ShieldCheck, Send, ArrowRight
+  ChevronRight, ShieldCheck, Send, ArrowRight, Users, Wallet, Sparkles
 } from "lucide-react";
 import { dashboardAPI, tasksAPI, budgetAPI } from "../../lib/api";
 import api from "../../lib/api";
@@ -20,6 +20,15 @@ const SUGGESTIONS = [
   "Qui je dois relancer ?",
   "Écris un post Instagram",
   "Crée un devis",
+];
+
+const QUICK_LINKS = [
+  { label: "Contacts", icon: Users, to: "/admin/contacts", tone: "bg-info-soft text-info" },
+  { label: "Devis", icon: FileText, to: "/admin/facturation?tab=devis", tone: "bg-brand-soft text-primary" },
+  { label: "Factures", icon: Receipt, to: "/admin/facturation?tab=facture", tone: "bg-success-soft text-success" },
+  { label: "Agenda", icon: Calendar, to: "/admin/agenda", tone: "bg-warning-soft text-warning" },
+  { label: "Budget", icon: Wallet, to: "/admin/budget", tone: "bg-info-soft text-info" },
+  { label: "Néo", icon: Sparkles, to: "/admin/neo", tone: "bg-brand-soft text-primary" },
 ];
 
 const DashboardOverview = () => {
@@ -175,6 +184,17 @@ const DashboardOverview = () => {
         </div>
       </section>
 
+      {/* ===== Accès rapides (outils) ===== */}
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+        {QUICK_LINKS.map(q => (
+          <button key={q.label} onClick={() => navigate(q.to)}
+            className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-elev transition-all">
+            <span className={`w-9 h-9 rounded-xl flex items-center justify-center ${q.tone}`}><q.icon className="w-5 h-5" /></span>
+            <span className="text-[11px] font-medium text-foreground/80">{q.label}</span>
+          </button>
+        ))}
+      </div>
+
       {/* ===== À faire maintenant ===== */}
       <section>
         <div className="flex items-center justify-between mb-2.5 px-1">
@@ -216,24 +236,31 @@ const DashboardOverview = () => {
         )}
       </section>
 
-      {/* ===== Compact metrics strip (hybrid) ===== */}
-      <div className="rounded-2xl border border-border bg-card px-5 py-4 flex flex-wrap items-center gap-x-8 gap-y-3">
-        {metrics.map(m => (
-          <div key={m.label} className="flex items-baseline gap-2">
-            <span className="text-muted-foreground text-xs">{m.label}</span>
-            <span className="text-foreground font-bold font-mono text-base">{m.value}</span>
-          </div>
-        ))}
-        {budgetSummary && (
-          <div className="flex items-baseline gap-2">
-            <span className="text-muted-foreground text-xs">Solde mois</span>
-            <span className={`font-bold font-mono text-base ${(budgetSummary?.balance || 0) >= 0 ? "text-success" : "text-warning"}`}>{formatCurrency(budgetSummary?.balance || 0)}</span>
-          </div>
-        )}
-        <Link to="/admin/budget" className="ml-auto text-xs text-primary hover:underline flex items-center gap-0.5">
-          Détails <ArrowRight className="w-3 h-3" />
-        </Link>
-      </div>
+      {/* ===== KPIs (cartes) ===== */}
+      <section>
+        <div className="flex items-center justify-between mb-2.5 px-1">
+          <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary" /> Chiffres clés
+          </h2>
+          <Link to="/admin/budget" className="text-xs text-primary hover:underline flex items-center gap-0.5">
+            Budget <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+          {metrics.map(m => (
+            <div key={m.label} className="rounded-2xl border border-border bg-card p-4">
+              <p className="text-xs text-muted-foreground">{m.label}</p>
+              <p className="text-lg sm:text-xl font-bold text-foreground font-mono mt-1">{m.value}</p>
+            </div>
+          ))}
+          {budgetSummary && (
+            <div className="rounded-2xl border border-border bg-card p-4 col-span-2 lg:col-span-1">
+              <p className="text-xs text-muted-foreground">Solde du mois</p>
+              <p className={`text-lg sm:text-xl font-bold font-mono mt-1 ${(budgetSummary?.balance || 0) >= 0 ? "text-success" : "text-warning"}`}>{formatCurrency(budgetSummary?.balance || 0)}</p>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 };
