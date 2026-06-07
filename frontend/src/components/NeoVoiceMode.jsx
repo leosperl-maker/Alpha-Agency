@@ -5,6 +5,7 @@ import { neoAPI } from "../lib/api";
 
 const IS_IOS = typeof navigator !== "undefined" && /iP(hone|ad|od)/.test(navigator.userAgent || "");
 const SILENCE_MS = 2500; // délai de silence avant d'envoyer (laisse Léo respirer/réfléchir sans le couper)
+const VOICE_TTS_MODEL = "eleven_flash_v2_5"; // ElevenLabs basse latence : Néo parle plus tôt en vocal
 
 // Cartes contextuelles « Jarvis » : ce que Néo a fait -> une carte visuelle animée
 const ACTION_CARDS = {
@@ -72,6 +73,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
   const ttsRunnerRef = useRef(false);   // un lecteur de file tourne-t-il ?
   const ttsResolveRef = useRef(null);   // pour débloquer la lecture en cours (barge-in)
   const streamDoneRef = useRef(false);  // le flux texte est-il terminé ?
+  const utterAbortRef = useRef(null);   // AbortController du flux en cours (couper net au barge-in)
 
   const getAudioEl = () => {
     if (!audioElRef.current) { const el = new Audio(); el.preload = "auto"; audioElRef.current = el; }
@@ -121,6 +123,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
 
   const stopAudio = useCallback(() => {
     ttsQueueRef.current = [];                 // vide la file (stoppe la suite à dire)
+    try { utterAbortRef.current?.abort(); } catch (e) {} // coupe le flux en cours (anti « il reprend par-dessus »)
     if (audioElRef.current) { try { audioElRef.current.pause(); } catch (e) {} }
     try { ttsResolveRef.current?.(); } catch (e) {} // débloque la phrase en cours (barge-in)
     resetOrb();
@@ -139,7 +142,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
     if (!text) { startListeningRef.current?.(); return; }
     setPhaseBoth("speaking");
     try {
-      const res = await neoAPI.tts(text, voiceIdRef.current || undefined);
+      const res = await neoAPI.tts(text, voiceIdRef.current || undefined, VOICE_TTS_MODEL);
       if (!runningRef.current) return;
       const el = getAudioEl();
       if (lastUrlRef.current) { try { URL.revokeObjectURL(lastUrlRef.current); } catch (e) {} }
@@ -178,7 +181,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
   const playTts = useCallback(async (text) => {
     if (!text || !runningRef.current) return;
     let res;
-    try { res = await neoAPI.tts(text, voiceIdRef.current || undefined); }
+    try { res = await neoAPI.tts(text, voiceIdRef.current || undefined, VOICE_TTS_MODEL); }
     catch (e) { return; }
     if (!runningRef.current) return;
     const el = getAudioEl();
@@ -267,6 +270,8 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
     setCards([]);
     ttsQueueRef.current = [];        // file TTS propre pour cette réplique
     streamDoneRef.current = false;
+    const controller = new AbortController(); // permet de COUPER le flux si Léo interrompt (barge-in)
+    utterAbortRef.current = controller;
     const userMsg = { role: "user", content };
     const history = [...histRef.current, userMsg];
     histRef.current = history;
@@ -288,7 +293,9 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
     const feedTts = () => {
       const chunk = replyAcc.slice(spokenLen);
       let boundary = -1;
-      const re = /[.!?…](\s|$)|\n/g;
+      // Frontière = ponctuation SUIVIE d'un espace DÉJÀ présent (pas fin de buffer) ou saut de ligne.
+      // Sinon "3580.50€" se coupe en "3580." | "50€" car le "." est transitoirement en fin de buffer.
+      const re = /[.!?…]\s|\n/g;
       let m;
       while ((m = re.exec(chunk)) !== null) boundary = m.index + 1;
       if (boundary > 0) {
@@ -321,7 +328,8 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
     };
 
     try {
-      await neoAPI.streamChat(payload, { onEvent }); // pas de signal : le mode vocal pilote son cycle
+      await neoAPI.streamChat(payload, { signal: controller.signal, onEvent });
+      if (controller.signal.aborted || !runningRef.current) return; // interrompu (barge-in) -> ne pas reprendre la parole
       const reply = replyAcc || "…";
       const assistantMsg = { role: "assistant", content: reply, actionsDone, pending: pendingActions };
       histRef.current = [...history, assistantMsg];
@@ -339,6 +347,7 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
         startListeningRef.current?.();                 // pas de texte (que des outils) -> réécoute
       }
     } catch (error) {
+      if (controller.signal.aborted || error.name === "AbortError" || !runningRef.current) return; // interrompu -> ne rien faire
       // Fallback non-stream (robustesse — ne jamais casser le vocal qui marche).
       try {
         const res = await neoAPI.chat(payload);
@@ -419,7 +428,8 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
     if (!runningRef.current) return;
     unlockAudio(); // toujours dans un geste -> débloque l'audio iOS
     if (phaseRef.current === "idle") { startListeningRef.current?.(); return; }
-    if (phaseRef.current === "speaking") { stopAudio(); startListeningRef.current?.(); }
+    // pendant qu'il réfléchit OU parle : un tap coupe net (abort du flux + audio) et réécoute
+    if (phaseRef.current === "thinking" || phaseRef.current === "speaking") { stopAudio(); startListeningRef.current?.(); }
     else if (phaseRef.current === "listening") { sendNowRef.current?.(); /* tap = « j'ai fini, envoie » */ }
   }, [stopAudio, stopRecognition]);
 
