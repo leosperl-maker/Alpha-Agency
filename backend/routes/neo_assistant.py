@@ -1612,6 +1612,10 @@ async def _claude_stream_turn(system: str, conv: list, tools: list):
                             yield {"type": "text", "delta": t}
                     elif d.get("type") == "input_json_delta":
                         b["json"] += d.get("partial_json") or ""
+                elif etype == "error":
+                    # Anthropic peut envoyer une erreur EN COURS de stream (overloaded_error, api_error)
+                    # après le 200 initial -> on lève pour déclencher le repli, jamais une réponse tronquée.
+                    raise RuntimeError(f"anthropic_stream_error: {((ev.get('error') or {}).get('message') or '')[:120]}")
                 elif etype == "message_stop":
                     break
     await _log("llm_stream", {"model": "claude", "latency_ms": int((time.time() - t0) * 1000)})
@@ -1686,13 +1690,12 @@ async def run_neo_claude_stream(messages: list, user_id: str, voice: bool = Fals
 # ==================== Choix AUTOMATIQUE du cerveau (routage hybride) ====================
 # Signaux d'une demande COMPLEXE / à fort enjeu -> Claude (raisonnement profond).
 _COMPLEX_HINTS = (
-    "stratég", "analyse", "analyser", "réfléch", "réflexion", "penses-tu", "ton avis",
-    "qu'en penses", "conseil", "recommand", "négoci", "convainc", "argumentaire", "argument",
-    "proposition", "offre commerciale", "plan d'", "business plan", "pitch", "rédige", "rédiger",
-    "écris-moi", "écris un", "écris une", "idée", "brainstorm", "créati", "complexe", "compliqué",
-    "décision", "dois-je", "faut-il", "devrais-je", "pourquoi", "compare", "comparais", "vision",
-    "prévision", "anticipe", "scénario", "simul", "optimis", "structure", "challenge", "enjeu",
-    "long terme", "rentab", "marge", "positionnement", "diagnostic", "audit", "synthèse", "synthétise",
+    # Signaux FORTS uniquement (les mots business courants — marge, analyse, conseil, prévision… —
+    # sont volontairement EXCLUS car Néo les emploie en permanence : ils sur-routaient vers Claude).
+    "stratég", "négoci", "argumentaire", "convainc", "business plan", "plan d'action",
+    "pitch", "rédige-moi", "rédige un", "rédige une", "écris-moi un", "écris-moi une",
+    "brainstorm", "proposition commerciale", "propal", "à fort enjeu", "raisonne bien",
+    "diagnostic complet", "approfondi",
 )
 # Démarrages typiques d'un lookup/commande SIMPLE -> Gemini (rapide).
 _SIMPLE_HINTS = (
@@ -1730,23 +1733,22 @@ async def _classify_brain(text: str) -> str:
         return "gemini"
 
 
-async def _resolve_brain(messages: list, attachments=None) -> str:
-    """Routage HYBRIDE : heuristique instantanée pour les cas évidents, mini-classifieur pour les ambigus.
-    Retourne 'gemini' (rapide, défaut) ou 'claude' (raisonnement profond)."""
+async def _resolve_brain(messages: list, attachments=None, voice: bool = False) -> str:
+    """Routage du cerveau, INSTANTANÉ : heuristique seule, AUCUN appel LLM bloquant avant le flux
+    (le mini-classifieur, qui ajoutait 0,3–4 s avant le 1er token, est retiré du chemin critique).
+    Gemini (rapide) par défaut ; Claude uniquement sur signaux FORTS. Le vocal force Gemini (latence
+    critique). Retourne 'gemini' ou 'claude'."""
+    if voice:
+        return "gemini"                        # vocal -> instantané, jamais Claude (TTFT REST trop lent)
     if attachments:
-        return "gemini"  # multimodal -> Gemini (Claude n'a pas les pièces jointes ici)
+        return "gemini"                        # multimodal -> Gemini
     text = _last_user_text(messages)
     low = text.lower()
-    n = len(text)
     if any(h in low for h in _COMPLEX_HINTS):
-        return "claude"                       # signal de complexité/enjeu -> Claude
-    if n > 320:
-        return "claude"                       # demande longue/élaborée
-    if n <= 60:
-        return "gemini"                        # très court -> lookup/commande
-    if any(h in low for h in _SIMPLE_HINTS):
-        return "gemini"                        # lookup/commande clair
-    return await _classify_brain(text)         # cas ambigu -> mini-classifieur rapide
+        return "claude"                        # signal fort de stratégie/jugement -> Claude
+    if len(text) > 600:
+        return "claude"                        # demande très longue/élaborée
+    return "gemini"                            # défaut rapide
 
 
 # ==================== Endpoints ====================
@@ -1976,7 +1978,7 @@ async def neo_chat(req: NeoChatRequest, current_user: dict = Depends(get_current
     try:
         brain = (req.brain or "auto").lower()
         if brain not in ("gemini", "claude"):
-            brain = await _resolve_brain(msgs, req.attachments)  # choix auto (hybride)
+            brain = await _resolve_brain(msgs, req.attachments, voice=(req.mode == "voice"))  # choix auto
         if brain == "claude" and not req.attachments:
             try:
                 result = await run_neo_claude(msgs, user_id, voice=(req.mode == "voice"))
@@ -2029,7 +2031,7 @@ async def neo_chat_stream(req: NeoChatRequest, current_user: dict = Depends(get_
         resolved = brain
         if auto:
             try:
-                resolved = await _resolve_brain(msgs, req.attachments)
+                resolved = await _resolve_brain(msgs, req.attachments, voice=voice)
             except Exception as e:
                 logger.warning(f"neo resolve_brain KO: {e}")
                 resolved = "gemini"
