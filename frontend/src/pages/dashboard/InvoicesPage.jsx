@@ -417,8 +417,10 @@ const InvoicesPage = () => {
       });
       
       toast.success(response.data.message);
+      const parentId = selectedParentInvoice.id;
       setDepositDialogOpen(false);
       setSelectedParentInvoice(null);
+      setExpandedParents(prev => ({ ...prev, [parentId]: true })); // déplie le parent -> l'acompte est visible tout de suite
       fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || "Erreur lors de la création de l'acompte");
@@ -439,8 +441,10 @@ const InvoicesPage = () => {
       });
       
       toast.success(response.data.message);
+      const parentId = selectedParentInvoice.id;
       setBalanceDialogOpen(false);
       setSelectedParentInvoice(null);
+      setExpandedParents(prev => ({ ...prev, [parentId]: true })); // déplie le parent -> le solde est visible tout de suite
       fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || "Erreur lors de la création de la facture de solde");
@@ -1295,8 +1299,10 @@ const InvoicesPage = () => {
               const totalPaid = invoice.total_paid || 0;
               const isDevis = invoice.invoice_number?.startsWith('DEV-') || invoice.document_type === 'devis';
               const isSelected = selectedIds.includes(invoice.id);
+              const kids = childrenMap[invoice.id] || [];
               return (
-                <div key={invoice.id} className={`bg-card backdrop-blur-xl rounded-lg border ${isSelected ? 'border-indigo-500' : 'border-border'} p-4`}>
+                <React.Fragment key={invoice.id}>
+                <div className={`bg-card backdrop-blur-xl rounded-lg border ${isSelected ? 'border-indigo-500' : 'border-border'} p-4`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start gap-3">
                       <button onClick={() => toggleSelect(invoice.id)} className="mt-0.5 text-muted-foreground hover:text-foreground">
@@ -1364,6 +1370,28 @@ const InvoicesPage = () => {
                     </div>
                   </div>
                 </div>
+                {kids.map(child => {
+                  const isBalance = child.invoice_type === 'balance';
+                  return (
+                    <div key={child.id} className="ml-5 bg-card/60 rounded-lg border border-border border-l-4 border-l-indigo-300 p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${isBalance ? 'bg-brand-soft text-primary' : 'bg-info-soft text-info'}`}>{isBalance ? 'SOLDE' : 'ACOMPTE'}</span>
+                          <span className="font-mono text-xs text-foreground truncate">{child.invoice_number}</span>
+                        </div>
+                        <span className="font-mono font-bold text-foreground text-sm whitespace-nowrap">{formatCurrency(child.total)}</span>
+                      </div>
+                      <div className="flex items-center justify-end gap-0.5 mt-2">
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-foreground hover:bg-secondary" onClick={() => { setSelectedInvoice(child); setViewDialogOpen(true); }} title="Voir"><Eye className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-primary hover:bg-brand-soft" onClick={() => handleDownloadPDF(child)} title="Télécharger"><Download className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-foreground hover:bg-secondary" onClick={() => openEditSheet(child)} title="Modifier"><Edit className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-success hover:bg-success-soft" onClick={() => openPaymentDialog(child)} title="Paiement"><CreditCard className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-danger hover:bg-danger-soft" onClick={() => handleDelete(child.id)} title="Supprimer"><Trash2 className="w-3.5 h-3.5" /></Button>
+                      </div>
+                    </div>
+                  );
+                })}
+                </React.Fragment>
               );
             })}
           </div>
@@ -1582,8 +1610,10 @@ const InvoicesPage = () => {
                             <Badge className={`text-xs ${cs.color}`}><CsIcon className="w-3 h-3 mr-1" />{cs.label}</Badge>
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-primary hover:bg-brand-soft" onClick={() => handleDownloadPDF(child)} title="PDF"><Download className="w-3 h-3" /></Button>
+                            <div className="flex items-center justify-end gap-0.5">
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-foreground hover:bg-secondary" onClick={() => { setSelectedInvoice(child); setViewDialogOpen(true); }} title="Voir"><Eye className="w-3 h-3" /></Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-primary hover:bg-brand-soft" onClick={() => handleDownloadPDF(child)} title="Télécharger PDF"><Download className="w-3 h-3" /></Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-foreground hover:bg-secondary" onClick={() => openEditSheet(child)} title="Modifier"><Edit className="w-3 h-3" /></Button>
                               <Button variant="ghost" size="icon" className="h-7 w-7 text-success hover:bg-success-soft" onClick={() => openPaymentDialog(child)} title="Paiement"><CreditCard className="w-3 h-3" /></Button>
                               <Button variant="ghost" size="icon" className="h-7 w-7 text-danger hover:bg-danger-soft" onClick={() => handleDelete(child.id)} title="Supprimer"><Trash2 className="w-3 h-3" /></Button>
                             </div>
@@ -3284,16 +3314,23 @@ BANQUE : ..."
                   </h3>
                   <div className="space-y-2">
                     {relatedInvoices.deposits.map((deposit) => (
-                      <div key={deposit.id} className="bg-card rounded-lg p-3 flex justify-between items-center">
-                        <div>
-                          <p className="font-mono font-medium text-foreground">{deposit.invoice_number}</p>
-                          <p className="text-xs text-muted-foreground">{deposit.deposit_percent}% - {formatDate(deposit.created_at)}</p>
+                      <div key={deposit.id} className="bg-card rounded-lg p-3 flex justify-between items-center gap-3">
+                        <div className="min-w-0">
+                          <p className="font-mono font-medium text-foreground truncate">{deposit.invoice_number}</p>
+                          <p className="text-xs text-muted-foreground">{deposit.deposit_percent ? `${deposit.deposit_percent}% - ` : ''}{formatDate(deposit.created_at)}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="font-mono font-bold text-foreground">{formatCurrency(deposit.total)}</p>
-                          <Badge className={`${deposit.status === 'payée' ? 'bg-success-soft text-success' : 'bg-secondary text-muted-foreground'}`}>
-                            {deposit.status}
-                          </Badge>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <div className="text-right">
+                            <p className="font-mono font-bold text-foreground">{formatCurrency(deposit.total)}</p>
+                            <Badge className={`${deposit.status === 'payée' ? 'bg-success-soft text-success' : 'bg-secondary text-muted-foreground'}`}>
+                              {deposit.status}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-0.5">
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-foreground hover:bg-secondary" onClick={() => { setRelatedDialogOpen(false); setSelectedInvoice(deposit); setViewDialogOpen(true); }} title="Voir"><Eye className="w-3.5 h-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-primary hover:bg-brand-soft" onClick={() => handleDownloadPDF(deposit)} title="Télécharger"><Download className="w-3.5 h-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-foreground hover:bg-secondary" onClick={() => { setRelatedDialogOpen(false); openEditSheet(deposit); }} title="Modifier"><Edit className="w-3.5 h-3.5" /></Button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -3308,16 +3345,23 @@ BANQUE : ..."
                     <Banknote className="w-4 h-4" />
                     FACTURE DE SOLDE
                   </h3>
-                  <div className="bg-card rounded-lg p-3 flex justify-between items-center">
-                    <div>
-                      <p className="font-mono font-medium text-foreground">{relatedInvoices.balance.invoice_number}</p>
+                  <div className="bg-card rounded-lg p-3 flex justify-between items-center gap-3">
+                    <div className="min-w-0">
+                      <p className="font-mono font-medium text-foreground truncate">{relatedInvoices.balance.invoice_number}</p>
                       <p className="text-xs text-muted-foreground">{formatDate(relatedInvoices.balance.created_at)}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-mono font-bold text-foreground">{formatCurrency(relatedInvoices.balance.total)}</p>
-                      <Badge className={`${relatedInvoices.balance.status === 'payée' ? 'bg-success-soft text-success' : 'bg-secondary text-muted-foreground'}`}>
-                        {relatedInvoices.balance.status}
-                      </Badge>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <div className="text-right">
+                        <p className="font-mono font-bold text-foreground">{formatCurrency(relatedInvoices.balance.total)}</p>
+                        <Badge className={`${relatedInvoices.balance.status === 'payée' ? 'bg-success-soft text-success' : 'bg-secondary text-muted-foreground'}`}>
+                          {relatedInvoices.balance.status}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-0.5">
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-foreground hover:bg-secondary" onClick={() => { setRelatedDialogOpen(false); setSelectedInvoice(relatedInvoices.balance); setViewDialogOpen(true); }} title="Voir"><Eye className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-primary hover:bg-brand-soft" onClick={() => handleDownloadPDF(relatedInvoices.balance)} title="Télécharger"><Download className="w-3.5 h-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-foreground hover:bg-secondary" onClick={() => { setRelatedDialogOpen(false); openEditSheet(relatedInvoices.balance); }} title="Modifier"><Edit className="w-3.5 h-3.5" /></Button>
+                      </div>
                     </div>
                   </div>
                 </div>
