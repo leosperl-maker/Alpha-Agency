@@ -95,6 +95,8 @@ export const opportunitiesAPI = {
   update: (id, data) => api.put(`/opportunities/${id}`, data),
   updateStatus: (id, status) => api.patch(`/opportunities/${id}/status`, { status }),
   delete: (id) => api.delete(`/opportunities/${id}`),
+  getPipelineConfig: () => api.get('/opportunities/pipeline/config'),
+  updatePipelineConfig: (stages) => api.put('/opportunities/pipeline/config', stages),
 };
 
 // Pipeline Columns API

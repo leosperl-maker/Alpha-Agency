@@ -31,6 +31,7 @@ const DashboardLayout = lazy(() => import("./pages/dashboard/DashboardLayout"));
 const DashboardOverview = lazy(() => import("./pages/dashboard/DashboardOverview"));
 const NeoPage = lazy(() => import("./pages/dashboard/NeoPage"));
 const ContactsPage = lazy(() => import("./pages/dashboard/ContactsPage"));
+const PipelinePage = lazy(() => import("./pages/dashboard/PipelinePage"));
 const InvoicesPage = lazy(() => import("./pages/dashboard/InvoicesPage"));
 const PortfolioManagePage = lazy(() => import("./pages/dashboard/PortfolioManagePageNew"));
 const DemandesPage = lazy(() => import("./pages/dashboard/DemandesPage"));
@@ -113,6 +114,7 @@ function App() {
             <Route path="neo" element={<NeoPage />} />
             <Route path="demandes" element={<DemandesPage />} />
             <Route path="contacts" element={<ContactsPage />} />
+            <Route path="pipeline" element={<PipelinePage />} />
             <Route path="facturation" element={<InvoicesPage />} />
             <Route path="devis" element={<Navigate to="/admin/facturation?tab=devis" replace />} />
             <Route path="factures" element={<Navigate to="/admin/facturation?tab=facture" replace />} />

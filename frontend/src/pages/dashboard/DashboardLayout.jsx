@@ -70,6 +70,7 @@ const DashboardLayout = () => {
   const allNavigationItems = [
     { id: 'nav-dashboard', type: 'Navigation', title: "Aujourd'hui", icon: LayoutDashboard, action: () => navigate('/admin'), keywords: 'dashboard accueil home vue ensemble' },
     { id: 'nav-contacts', type: 'Navigation', title: "Contacts", icon: Users, action: () => navigate('/admin/contacts'), keywords: 'clients prospects' },
+    { id: 'nav-pipeline', type: 'Navigation', title: "Pipeline", icon: Kanban, action: () => navigate('/admin/pipeline'), keywords: 'deals opportunités kanban commercial ventes' },
     { id: 'nav-agenda', type: 'Navigation', title: "Agenda / RDV", icon: Calendar, action: () => navigate('/admin/agenda'), keywords: 'calendrier rendez-vous' },
     { id: 'nav-editorial', type: 'Navigation', title: "Calendrier Éditorial", icon: CalendarDays, action: () => navigate('/admin/editorial'), keywords: 'posts publications' },
     { id: 'nav-multilink', type: 'Navigation', title: "Multilink", icon: Link2, action: () => navigate('/admin/multilink'), keywords: 'bio links page' },
@@ -154,6 +155,7 @@ const DashboardLayout = () => {
       { path: "/admin", icon: LayoutDashboard, label: "Aujourd'hui", end: true },
       { path: "/admin/demandes", icon: Inbox, label: "Demandes" },
       { path: "/admin/contacts", icon: Users, label: "Contacts" },
+      { path: "/admin/pipeline", icon: Kanban, label: "Pipeline" },
       { path: "/admin/agenda", icon: Calendar, label: "Agenda" },
     ]},
     { label: "Finances", items: [
