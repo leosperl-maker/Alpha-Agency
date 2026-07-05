@@ -6645,6 +6645,10 @@ app.include_router(public_chat_router, prefix="/api", tags=["public-chat"])
 from routes.neo_assistant import router as neo_router
 app.include_router(neo_router, prefix="/api", tags=["neo"])
 
+# NÉO — moteur de signaux proactifs (deal qui stagne, impayé, devis sans réponse, lead chaud…)
+from routes import neo_signals
+app.include_router(neo_signals.router, prefix="/api", tags=["neo-signals"])
+
 # MoltBot Integration (Full CRM Access)
 from routes.moltbot import router as moltbot_router
 app.include_router(moltbot_router, prefix="/api", tags=["moltbot"])
@@ -6718,6 +6722,8 @@ async def start_moltbot_scheduler():
     """Start MoltBot scheduler on app startup"""
     moltbot_scheduler.set_database(db)
     await moltbot_scheduler.start()
+    # Scans proactifs de Néo (07:45 / 17:45 Guadeloupe) sur le même scheduler
+    neo_signals.register_jobs(moltbot_scheduler.scheduler)
 
 @app.on_event("startup")
 async def start_whatsapp_service_on_startup():

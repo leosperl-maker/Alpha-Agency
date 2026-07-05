@@ -268,6 +268,20 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
   const sendRef = useRef(send);
   useEffect(() => { sendRef.current = send; }, [send]);
 
+  // Action « 1 clic » : un signal (Radar, notification) peut envoyer un prompt à Néo.
+  // - événement window "neo:prompt" quand le chat est déjà monté (page Néo, panneau ouvert)
+  // - sessionStorage "neo_prompt_pending" quand on arrive d'une autre page (notification)
+  useEffect(() => {
+    if (!open) return undefined;
+    try {
+      const p = sessionStorage.getItem("neo_prompt_pending");
+      if (p) { sessionStorage.removeItem("neo_prompt_pending"); setTimeout(() => sendRef.current(p), 250); }
+    } catch (e) { /* noop */ }
+    const onPrompt = (e) => { const p = e?.detail?.prompt; if (p) sendRef.current(p); };
+    window.addEventListener("neo:prompt", onPrompt);
+    return () => window.removeEventListener("neo:prompt", onPrompt);
+  }, [open]);
+
   const stopAudio = useCallback(() => {
     if (audioRef.current) { try { audioRef.current.pause(); } catch (e) { /* noop */ } audioRef.current = null; }
     setSpeakingIdx(null);

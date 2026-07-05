@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, X, FileWarning, UserPlus, CheckCheck } from "lucide-react";
-import { invoicesAPI, contactsAPI } from "../lib/api";
+import { Bell, X, FileWarning, UserPlus, CheckCheck, Radar, Sparkles } from "lucide-react";
+import api, { invoicesAPI, contactsAPI } from "../lib/api";
 
 /**
- * Notifications derived from real, already-working CRM data
- * (overdue invoices, overdue tasks, new leads). No dependency on a
- * separate /api/notifications endpoint or WebSocket. Theme-aware.
+ * Notifications = celles du serveur (db.notifications : briefings et signaux de Néo,
+ * déposées par le moteur proactif) + celles dérivées des données CRM déjà chargées
+ * (factures en retard, nouveaux leads). Theme-aware.
+ * Une notification portant un `neo_prompt` se traite en 1 clic : on ouvre le QG de
+ * Néo et le prompt part tout seul (relais sessionStorage lu par AssistantChat).
  */
 const NotificationCenter = () => {
   const navigate = useNavigate();
@@ -18,11 +20,26 @@ const NotificationCenter = () => {
   const load = useCallback(async () => {
     const next = [];
     try {
-      const [invoicesRes, contactsRes] = await Promise.all([
+      const [serverRes, invoicesRes, contactsRes] = await Promise.all([
+        api.get("/notifications/", { params: { limit: 15, unread_only: true } }).catch(() => ({ data: { notifications: [] } })),
         invoicesAPI.getAll({ status: "pending,overdue" }).catch(() => ({ data: [] })),
         contactsAPI.getAll({ type: "lead" }).catch(() => ({ data: [] })),
       ]);
 
+      // 1) Notifications serveur (Néo : signaux du radar, briefings)
+      (serverRes.data?.notifications || []).forEach((n) => {
+        const isSignal = n.type === "neo_signal";
+        next.push({
+          id: n.id, serverId: n.id,
+          type: isSignal ? (n.priority === "high" ? "danger" : "warning") : "info",
+          icon: isSignal ? Radar : Sparkles,
+          title: n.title, message: n.message,
+          neoPrompt: n.data?.neo_prompt || null,
+          link: isSignal ? "/admin/neo" : null,
+        });
+      });
+
+      // 2) Dérivées des données CRM (comportement historique conservé)
       (invoicesRes.data || []).filter(i => i.status === "overdue").slice(0, 4).forEach(i => next.push({
         id: `invoice-${i.id}`, type: "danger", icon: FileWarning,
         title: "Facture en retard", message: `${i.number || "Facture"} · ${i.total?.toFixed(0) || 0}€`,
@@ -62,6 +79,14 @@ const NotificationCenter = () => {
   const open = (item) => {
     setDismissed(prev => new Set(prev).add(item.id));
     setIsOpen(false);
+    if (item.serverId) {
+      api.put(`/notifications/${item.serverId}/read`).catch(() => {}); // marquage lu, jamais bloquant
+    }
+    if (item.neoPrompt) {
+      try { sessionStorage.setItem("neo_prompt_pending", item.neoPrompt); } catch (e) { /* noop */ }
+      navigate("/admin/neo");
+      return;
+    }
     if (item.link) navigate(item.link);
   };
 
