@@ -1302,7 +1302,8 @@ const InvoicesPage = () => {
               const kids = childrenMap[invoice.id] || [];
               return (
                 <React.Fragment key={invoice.id}>
-                <div className={`bg-card backdrop-blur-xl rounded-lg border ${isSelected ? 'border-indigo-500' : 'border-border'} p-4`}>
+                <div className={`bg-card backdrop-blur-xl rounded-lg border ${isSelected ? 'border-indigo-500' : 'border-border'} p-4`}
+                     style={{ contentVisibility: "auto", containIntrinsicSize: "auto 150px" }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start gap-3">
                       <button onClick={() => toggleSelect(invoice.id)} className="mt-0.5 text-muted-foreground hover:text-foreground">

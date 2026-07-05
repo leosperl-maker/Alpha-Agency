@@ -97,9 +97,13 @@ const DashboardLayout = () => {
     const actionResults = quickActionItems.filter(i => i.title.toLowerCase().includes(q) || i.keywords.toLowerCase().includes(q));
     let dbResults = [];
     try {
-      const [contactsRes, invoicesRes] = await Promise.all([
+      // Recherche globale : contacts, factures/devis, deals, tâches (filtre côté client
+      // pour deals/tâches : listes courtes, et l'API n'a pas de paramètre search)
+      const [contactsRes, invoicesRes, oppsRes, tasksRes] = await Promise.all([
         contactsAPI.getAll({ search: query }).catch(() => ({ data: [] })),
-        invoicesAPI.getAll({ search: query }).catch(() => ({ data: [] }))
+        invoicesAPI.getAll({ search: query }).catch(() => ({ data: [] })),
+        opportunitiesAPI.getAll().catch(() => ({ data: [] })),
+        tasksAPI.getAll().catch(() => ({ data: [] })),
       ]);
       (contactsRes.data || []).slice(0, 3).forEach(c => dbResults.push({
         id: `contact-${c.id}`, type: 'Contact', title: `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.email,
@@ -109,6 +113,19 @@ const DashboardLayout = () => {
         id: `invoice-${i.id}`, type: 'Facture', title: i.number || `Facture ${i.client_name}`,
         subtitle: `${i.total?.toFixed(2) || 0}€`, icon: Receipt, action: () => { setCommandPaletteOpen(false); navigate('/admin/facturation'); }
       }));
+      (Array.isArray(oppsRes.data) ? oppsRes.data : [])
+        .filter(o => (o.title || '').toLowerCase().includes(q)).slice(0, 3).forEach(o => dbResults.push({
+          id: `deal-${o.id}`, type: 'Deal', title: o.title,
+          subtitle: `${Math.round(o.amount || 0)}€ · ${o.stage}`, icon: Kanban,
+          action: () => { setCommandPaletteOpen(false); navigate('/admin/pipeline'); }
+        }));
+      (Array.isArray(tasksRes.data) ? tasksRes.data : [])
+        .filter(t => (t.status !== 'done' && t.status !== 'cancelled') && (t.title || '').toLowerCase().includes(q))
+        .slice(0, 3).forEach(t => dbResults.push({
+          id: `task-${t.id}`, type: 'Tâche', title: t.title,
+          subtitle: t.due_date ? `échéance ${t.due_date.slice(0, 10)}` : null, icon: CheckSquare,
+          action: () => { setCommandPaletteOpen(false); navigate('/admin/things'); }
+        }));
     } catch (e) { /* offline / no backend */ }
     setCommandResults([...navResults, ...actionResults, ...dbResults]);
     setSelectedCommandIndex(0);
@@ -448,7 +465,7 @@ const DashboardLayout = () => {
               </div>
             ) : (
               <div className="space-y-1">
-                {['Navigation', 'Action rapide', 'Contact', 'Tâche', 'Facture', 'Opportunité'].map(type => {
+                {['Navigation', 'Action rapide', 'Contact', 'Deal', 'Tâche', 'Facture', 'Opportunité'].map(type => {
                   const items = commandResults.filter(r => r.type === type);
                   if (items.length === 0) return null;
                   return (

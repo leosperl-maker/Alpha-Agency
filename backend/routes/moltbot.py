@@ -1056,8 +1056,15 @@ async def chat_with_ai(
     """
     Chat with MoltBot using AI (Gemini) for any question.
     Can answer general questions, provide CRM context, search data, and more.
+    DÉPRÉCIÉ : remplacé par Néo (/api/neo/chat). Usage compté (legacy_hit) avant retrait.
     """
-    
+    logger.warning("DEPRECATED: /moltbot/chat appelé — migrer vers /api/neo/chat")
+    try:
+        from .neo_assistant import _log as _neo_log
+        await _neo_log("legacy_hit", {"endpoint": "/moltbot/chat"})
+    except Exception:
+        pass
+
     access = get_access_level(phone, secret)
     if access == "none":
         raise HTTPException(status_code=403, detail="Accès non autorisé")

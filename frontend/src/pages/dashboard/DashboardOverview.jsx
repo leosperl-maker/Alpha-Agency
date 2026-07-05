@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import {
   FileText, Receipt, Clock, Flame, TrendingDown, Calendar,
-  ChevronRight, ShieldCheck, Send, ArrowRight, Users, Wallet, Sparkles
+  ChevronRight, ShieldCheck, Send, ArrowRight, Users, Wallet, Sparkles, Radar, Kanban, Activity
 } from "lucide-react";
-import { dashboardAPI, tasksAPI, budgetAPI } from "../../lib/api";
+import { dashboardAPI, tasksAPI, budgetAPI, opportunitiesAPI } from "../../lib/api";
 import api from "../../lib/api";
 import AssistantOrb from "../../components/AssistantOrb";
 
@@ -44,6 +44,8 @@ const DashboardOverview = () => {
   const [loading, setLoading] = useState(true);
   const [greeting, setGreeting] = useState("");
   const [checkin, setCheckin] = useState(null); // check-in Néo (message + question + score /100)
+  const [signals, setSignals] = useState(null); // radar Néo (null = pas encore chargé / API KO)
+  const [pipeline, setPipeline] = useState(null); // {total, weighted, open}
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -76,6 +78,19 @@ const DashboardOverview = () => {
           const churnRes = await api.get("/analytics/churn-alerts", { params: { limit: 5 } });
           setChurnAlerts((churnRes.data?.alerts || []).slice(0, 3));
         } catch (e) { /* optional */ }
+        try {
+          const sigRes = await api.get("/neo/signals");
+          if (Array.isArray(sigRes.data?.signals)) setSignals(sigRes.data.signals);
+        } catch (e) { /* optional : repli sur la liste historique */ }
+        try {
+          const oppsRes = await opportunitiesAPI.getAll();
+          const opps = (Array.isArray(oppsRes.data) ? oppsRes.data : []).filter(o => !["gagne", "perdu"].includes(o.stage));
+          setPipeline({
+            open: opps.length,
+            total: opps.reduce((s, o) => s + (o.amount || 0), 0),
+            weighted: opps.reduce((s, o) => s + (o.amount || 0) * ((o.probability || 0) / 100), 0),
+          });
+        } catch (e) { /* optional */ }
       } catch (error) {
         console.error("Error fetching stats:", error);
       } finally {
@@ -94,14 +109,38 @@ const DashboardOverview = () => {
   const dateLabel = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 
   // ---- Build the prioritized action list (danger → warning → info) ----
+  // Source primaire : le radar de Néo (moteur de signaux, mêmes règles que le QG).
+  // Repli : la liste historique dérivée des stats si l'API signaux ne répond pas.
+  const SIGNAL_META = {
+    invoice_overdue: { icon: FileText, tone: "danger" },
+    deal_stagnant: { icon: Activity, tone: "warning" },
+    quote_pending: { icon: Receipt, tone: "info" },
+    task_overdue: { icon: Clock, tone: "warning" },
+    hot_lead: { icon: Flame, tone: "brand" },
+  };
+  const treatWithNeo = (prompt) => {
+    try { sessionStorage.setItem("neo_prompt_pending", prompt); } catch (e) { /* noop */ }
+    navigate("/admin/neo");
+  };
   const actions = [];
   const overdueInv = stats?.invoices?.overdue || 0;
-  if (overdueInv > 0) actions.push({ id: "inv", icon: FileText, tone: "danger", label: `${overdueInv} facture${overdueInv > 1 ? "s" : ""} en retard à relancer`, sub: "Encaisse plus vite", link: "/admin/facturation" });
-  churnAlerts.forEach((c, i) => actions.push({ id: `churn-${i}`, icon: TrendingDown, tone: c.risk_level === "critical" ? "danger" : "warning", label: `Client à risque : ${c.contact_name || "Client"}`, sub: c.warning_signs?.[0] || `${c.days_since_contact || "?"}j sans contact`, link: c.contact_id ? `/admin/contacts/${c.contact_id}` : "/admin/contacts" }));
-  hotLeads.forEach((l, i) => actions.push({ id: `lead-${i}`, icon: Flame, tone: "brand", label: `Rappeler ${l.contact_name || "un lead chaud"}`, sub: `Lead chaud · score ${l.score}`, link: l.contact_id ? `/admin/contacts/${l.contact_id}` : "/admin/contacts" }));
-  upcomingEvents.forEach((e, i) => actions.push({ id: `evt-${i}`, icon: Calendar, tone: "info", label: e.title || "Rendez-vous", sub: `${e.start_time || ""}${e.location ? ` · ${e.location}` : ""}`.trim() || "Aujourd'hui", link: "/admin/agenda" }));
   const pendingQuotes = stats?.quotes?.pending || 0;
-  if (pendingQuotes > 0) actions.push({ id: "quotes", icon: Receipt, tone: "info", label: `${pendingQuotes} devis en attente de réponse`, sub: "Relancer le client", link: "/admin/facturation" });
+  if (signals) {
+    signals.slice(0, 6).forEach((s) => {
+      const meta = SIGNAL_META[s.type] || { icon: Radar, tone: s.severity === "high" ? "danger" : "info" };
+      actions.push({
+        id: s.id, icon: meta.icon, tone: s.severity === "high" ? (meta.tone === "info" ? "warning" : meta.tone) : meta.tone,
+        label: s.title, sub: `${s.message} · Traiter avec Néo`,
+        onClick: () => treatWithNeo(s.neo_prompt),
+      });
+    });
+  } else {
+    if (overdueInv > 0) actions.push({ id: "inv", icon: FileText, tone: "danger", label: `${overdueInv} facture${overdueInv > 1 ? "s" : ""} en retard à relancer`, sub: "Encaisse plus vite", link: "/admin/facturation" });
+    hotLeads.forEach((l, i) => actions.push({ id: `lead-${i}`, icon: Flame, tone: "brand", label: `Rappeler ${l.contact_name || "un lead chaud"}`, sub: `Lead chaud · score ${l.score}`, link: l.contact_id ? `/admin/contacts/${l.contact_id}` : "/admin/contacts" }));
+    if (pendingQuotes > 0) actions.push({ id: "quotes", icon: Receipt, tone: "info", label: `${pendingQuotes} devis en attente de réponse`, sub: "Relancer le client", link: "/admin/facturation" });
+  }
+  churnAlerts.forEach((c, i) => actions.push({ id: `churn-${i}`, icon: TrendingDown, tone: c.risk_level === "critical" ? "danger" : "warning", label: `Client à risque : ${c.contact_name || "Client"}`, sub: c.warning_signs?.[0] || `${c.days_since_contact || "?"}j sans contact`, link: c.contact_id ? `/admin/contacts/${c.contact_id}` : "/admin/contacts" }));
+  upcomingEvents.forEach((e, i) => actions.push({ id: `evt-${i}`, icon: Calendar, tone: "info", label: e.title || "Rendez-vous", sub: `${e.start_time || ""}${e.location ? ` · ${e.location}` : ""}`.trim() || "Aujourd'hui", link: "/admin/agenda" }));
 
   const shownActions = actions.slice(0, 7);
 
@@ -217,7 +256,7 @@ const DashboardOverview = () => {
         ) : (
           <div className="space-y-2.5">
             {shownActions.map(a => (
-              <button key={a.id} onClick={() => navigate(a.link)}
+              <button key={a.id} onClick={() => (a.onClick ? a.onClick() : navigate(a.link))}
                 className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-elev transition-all text-left">
                 <span className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${TONE[a.tone]}`}>
                   <a.icon className="w-5 h-5" />
@@ -258,6 +297,14 @@ const DashboardOverview = () => {
               <p className="text-xs text-muted-foreground">Solde du mois</p>
               <p className={`text-lg sm:text-xl font-bold font-mono mt-1 ${(budgetSummary?.balance || 0) >= 0 ? "text-success" : "text-warning"}`}>{formatCurrency(budgetSummary?.balance || 0)}</p>
             </div>
+          )}
+          {pipeline && pipeline.open > 0 && (
+            <button onClick={() => navigate("/admin/pipeline")}
+              className="rounded-2xl border border-border bg-card p-4 col-span-2 lg:col-span-1 text-left hover:border-primary/30 hover:shadow-elev transition-all">
+              <p className="text-xs text-muted-foreground flex items-center gap-1"><Kanban className="w-3 h-3" /> Pipeline pondéré</p>
+              <p className="text-lg sm:text-xl font-bold text-foreground font-mono mt-1">{formatCurrency(pipeline.weighted)}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{pipeline.open} deal{pipeline.open > 1 ? "s" : ""} · {formatCurrency(pipeline.total)} au total</p>
+            </button>
           )}
         </div>
       </section>

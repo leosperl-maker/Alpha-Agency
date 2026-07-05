@@ -339,6 +339,8 @@ const ContactsPage = () => {
               whileTap={{ scale: 0.96 }}
               transition={{ type: "spring", stiffness: 420, damping: 32 }}
               className="group relative flex flex-col items-center text-center rounded-2xl border border-border bg-card p-4 overflow-hidden shadow-elev hover:shadow-pop hover:border-primary/40"
+              // Virtualisation native : le navigateur ne rend pas les cartes hors écran
+              style={{ contentVisibility: "auto", containIntrinsicSize: "auto 190px" }}
             >
               {/* reflet holographique au survol */}
               <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[linear-gradient(125deg,transparent_30%,rgba(225,29,46,0.07)_50%,transparent_70%)]" />

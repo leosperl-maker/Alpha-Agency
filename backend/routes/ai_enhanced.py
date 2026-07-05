@@ -1181,7 +1181,15 @@ async def execute_action_endpoint(request: ActionRequest, current_user: dict = D
 
 @router.post("/chat")
 async def enhanced_chat(request: ChatRequest, current_user: dict = Depends(get_current_user)):
-    """Chat with AI - supports text and image attachments. Now context-aware!"""
+    """Chat with AI - supports text and image attachments. Now context-aware!
+    DÉPRÉCIÉ : remplacé par /api/neo/chat[/stream]. Chaque appel est compté
+    (neo_action_log kind=legacy_hit) pour décider du retrait après observation."""
+    logger.warning("DEPRECATED: /ai-enhanced/chat appelé — migrer vers /api/neo/chat")
+    try:
+        from .neo_assistant import _log as _neo_log
+        await _neo_log("legacy_hit", {"endpoint": "/ai-enhanced/chat"})
+    except Exception:
+        pass
     # Prefer direct Gemini when a gemini model is requested and the key is set.
     use_gemini = (request.model or "").startswith("gemini") and GEMINI_AVAILABLE
     if not use_gemini:
