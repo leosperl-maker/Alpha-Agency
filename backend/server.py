@@ -6653,6 +6653,10 @@ app.include_router(neo_signals.router, prefix="/api", tags=["neo-signals"])
 from routes import neo_agents
 app.include_router(neo_agents.router, prefix="/api", tags=["neo-agents"])
 
+# NÉO — mémoire consultable/corrigeable par Léo (« Ce que Néo sait »)
+from routes import neo_memory_api
+app.include_router(neo_memory_api.router, prefix="/api", tags=["neo-memory"])
+
 # MoltBot Integration (Full CRM Access)
 from routes.moltbot import router as moltbot_router
 app.include_router(moltbot_router, prefix="/api", tags=["moltbot"])
