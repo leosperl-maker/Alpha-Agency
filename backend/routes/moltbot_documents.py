@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 # API Key
 EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
 
-# JWT Config for authentication
-JWT_SECRET = os.environ.get('JWT_SECRET', 'alpha-agency-secret-key-2024')
+# JWT Config — secret partagé (source unique dans routes.database)
+from .database import JWT_SECRET
 JWT_ALGORITHM = "HS256"
 
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials

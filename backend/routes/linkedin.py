@@ -66,7 +66,7 @@ class LinkedInPostRequest(BaseModel):
 def get_current_user_from_token(token: str):
     """Simplified token verification"""
     import jwt
-    JWT_SECRET = os.environ.get('JWT_SECRET', 'alpha-agency-secret-key-2024')
+    from .database import JWT_SECRET  # secret partagé (source unique)
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         return payload

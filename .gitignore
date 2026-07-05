@@ -283,3 +283,7 @@ frontend/node_modules/.cache/default-development/16.pack
 # Environment files
 *.env
 *.env.*
+
+# graphify knowledge graph artifacts (generated, ~7MB)
+graphify-out/
+.venv-backend/

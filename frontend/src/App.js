@@ -1,54 +1,71 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 
 // Contexts
 import { ThemeProvider } from "./contexts/ThemeContext";
 
-// Components
+// Components (coquille, chargée immédiatement)
 import ScrollToTop from "./components/ScrollToTop";
 import CustomDomainHandler from "./components/CustomDomainHandler";
+import MainLayout from "./components/MainLayout";
+
+// Chargées immédiatement : première peinture publique + login (léger)
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/dashboard/LoginPage";
+
+// Code-splitting par route : chaque page part dans son propre chunk.
+// Le CRM admin (21 pages, ~22k lignes) ne pèse plus sur le site vitrine, et vice-versa.
 
 // Pages vitrine
-import HomePage from "./pages/HomePage";
-import AgencyPage from "./pages/AgencyPage";
-import OffersPage from "./pages/OffersPage";
-import PortfolioPageNew from "./pages/PortfolioPageNew";
-import BlogPage from "./pages/BlogPage";
-import BlogPostPage from "./pages/BlogPostPage";
-import ContactPage from "./pages/ContactPage";
-import LegalPage from "./pages/LegalPage";
+const AgencyPage = lazy(() => import("./pages/AgencyPage"));
+const OffersPage = lazy(() => import("./pages/OffersPage"));
+const PortfolioPageNew = lazy(() => import("./pages/PortfolioPageNew"));
+const BlogPage = lazy(() => import("./pages/BlogPage"));
+const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
 
-// Dashboard pages
-import LoginPage from "./pages/dashboard/LoginPage";
-import DashboardLayout from "./pages/dashboard/DashboardLayout";
-import DashboardOverview from "./pages/dashboard/DashboardOverview";
-import NeoPage from "./pages/dashboard/NeoPage";
-import ContactsPage from "./pages/dashboard/ContactsPage";
-import InvoicesPage from "./pages/dashboard/InvoicesPage";
-import PortfolioManagePage from "./pages/dashboard/PortfolioManagePageNew";
-import DemandesPage from "./pages/dashboard/DemandesPage";
-import SettingsPage from "./pages/dashboard/SettingsPage";
-import DocumentsPage from "./pages/dashboard/DocumentsPage";
-import TransfersPage from "./pages/dashboard/TransfersPage";
-import BudgetPage from "./pages/dashboard/BudgetPage";
-import BackupPage from "./pages/dashboard/BackupPage";
-import UsersPage from "./pages/dashboard/UsersPage";
-import AIAssistantPage from "./pages/dashboard/AIAssistantPageNew";
-import NewsPage from "./pages/dashboard/NewsPage";
-import BlogAdminPage from "./pages/dashboard/BlogAdminPage";
-import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
-import ThingsPage from "./pages/dashboard/ThingsPage";
-import AgendaPage from "./pages/dashboard/AgendaPage";
-import EditorialCalendarPage from "./pages/dashboard/EditorialCalendarPage";
-import MultilinkPage from "./pages/dashboard/MultilinkPage";
+// Dashboard
+const DashboardLayout = lazy(() => import("./pages/dashboard/DashboardLayout"));
+const DashboardOverview = lazy(() => import("./pages/dashboard/DashboardOverview"));
+const NeoPage = lazy(() => import("./pages/dashboard/NeoPage"));
+const ContactsPage = lazy(() => import("./pages/dashboard/ContactsPage"));
+const InvoicesPage = lazy(() => import("./pages/dashboard/InvoicesPage"));
+const PortfolioManagePage = lazy(() => import("./pages/dashboard/PortfolioManagePageNew"));
+const DemandesPage = lazy(() => import("./pages/dashboard/DemandesPage"));
+const SettingsPage = lazy(() => import("./pages/dashboard/SettingsPage"));
+const DocumentsPage = lazy(() => import("./pages/dashboard/DocumentsPage"));
+const TransfersPage = lazy(() => import("./pages/dashboard/TransfersPage"));
+const BudgetPage = lazy(() => import("./pages/dashboard/BudgetPage"));
+const BackupPage = lazy(() => import("./pages/dashboard/BackupPage"));
+const UsersPage = lazy(() => import("./pages/dashboard/UsersPage"));
+const AIAssistantPage = lazy(() => import("./pages/dashboard/AIAssistantPageNew"));
+const NewsPage = lazy(() => import("./pages/dashboard/NewsPage"));
+const BlogAdminPage = lazy(() => import("./pages/dashboard/BlogAdminPage"));
+const ResetPasswordPage = lazy(() => import("./pages/auth/ResetPasswordPage"));
+const ThingsPage = lazy(() => import("./pages/dashboard/ThingsPage"));
+const AgendaPage = lazy(() => import("./pages/dashboard/AgendaPage"));
+const EditorialCalendarPage = lazy(() => import("./pages/dashboard/EditorialCalendarPage"));
+const MultilinkPage = lazy(() => import("./pages/dashboard/MultilinkPage"));
 
-// Public pages
-import TransferDownloadPage from "./pages/TransferDownloadPage";
-import LinkBioPage from "./pages/public/LinkBioPage";
-import WidgetPage from "./pages/WidgetPage";
+// Pages publiques annexes
+const TransferDownloadPage = lazy(() => import("./pages/TransferDownloadPage"));
+const LinkBioPage = lazy(() => import("./pages/public/LinkBioPage"));
+const WidgetPage = lazy(() => import("./pages/WidgetPage"));
 
-// Layout
-import MainLayout from "./components/MainLayout";
+// Fallback discret pendant le chargement d'un chunk (thème-aware via tokens CSS)
+function RouteLoader() {
+  return (
+    <div
+      className="flex min-h-[50vh] items-center justify-center"
+      role="status"
+      aria-label="Chargement"
+    >
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -68,6 +85,7 @@ function App() {
         <BrowserRouter>
           <CustomDomainHandler>
             <ScrollToTop />
+            <Suspense fallback={<RouteLoader />}>
             <Routes>
             {/* Site vitrine */}
             <Route element={<MainLayout />}>
@@ -85,7 +103,7 @@ function App() {
             <Route path="/confidentialite" element={<LegalPage type="privacy" />} />
             <Route path="/cookies" element={<LegalPage type="cookies" />} />
           </Route>
-          
+
           {/* Dashboard - Accès caché */}
           <Route path="/alpha-admin-2024" element={<LoginPage />} />
           <Route path="/alpha-admin-2024/reset-password" element={<ResetPasswordPage />} />
@@ -113,16 +131,17 @@ function App() {
             <Route path="editorial" element={<EditorialCalendarPage />} />
             <Route path="multilink" element={<MultilinkPage />} />
           </Route>
-          
+
           {/* PWA Widget Page for iPhone */}
           <Route path="/widget" element={<WidgetPage />} />
-          
+
           {/* Public Multilink Pages */}
           <Route path="/lien-bio/:slug" element={<LinkBioPage />} />
-          
+
           {/* Public transfer download page */}
           <Route path="/transfer/:transferId" element={<TransferDownloadPage />} />
         </Routes>
+            </Suspense>
           </CustomDomainHandler>
         </BrowserRouter>
     </div>

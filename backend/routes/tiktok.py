@@ -20,8 +20,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 client = AsyncIOMotorClient(os.environ.get('MONGO_URL', 'mongodb://localhost:27017'))
 db = client[os.environ.get('DB_NAME', 'test_database')]
 
-# Auth dependency - imported from server
-JWT_SECRET = os.environ.get('JWT_SECRET', 'alpha-agency-secret-key-2024')
+# Auth — secret partagé (source unique dans routes.database)
+from .database import JWT_SECRET
 
 logger = logging.getLogger(__name__)
 

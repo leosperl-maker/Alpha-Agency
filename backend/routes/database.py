@@ -22,8 +22,18 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# JWT Config
-JWT_SECRET = os.environ.get('JWT_SECRET', 'alpha-agency-secret-key-2024')
+# JWT Config — source UNIQUE de vérité pour tout le backend.
+# Le secret DOIT venir de l'environnement. À défaut on en génère un aléatoire
+# (sessions invalidées à chaque redémarrage) plutôt qu'une valeur prévisible.
+JWT_SECRET = os.environ.get('JWT_SECRET')
+if not JWT_SECRET:
+    import secrets as _secrets
+    JWT_SECRET = _secrets.token_urlsafe(48)
+    logger.critical(
+        "JWT_SECRET absent de l'environnement : secret aléatoire généré. "
+        "Toutes les sessions seront invalidées à chaque redémarrage — "
+        "définir JWT_SECRET dans les variables Railway."
+    )
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
@@ -73,7 +83,7 @@ META_APP_ID = os.environ.get('META_APP_ID', '')
 META_APP_SECRET = os.environ.get('META_APP_SECRET', '')
 
 # Stripe Config
-STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', 'sk_test_emergent')
+STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', '')
 
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):

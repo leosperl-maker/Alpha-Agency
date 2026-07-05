@@ -18,7 +18,11 @@ const path = require('path');
 // Configuration - Railway provides PORT automatically
 const PORT = process.env.PORT || 3001;
 const BACKEND_URL = process.env.BACKEND_URL || 'https://alphagency.fr';
-const MOLTBOT_SECRET = process.env.MOLTBOT_SECRET || 'moltbot-alpha-secret-2024';
+const MOLTBOT_SECRET = process.env.MOLTBOT_SECRET;
+if (!MOLTBOT_SECRET) {
+  console.error('FATAL: MOLTBOT_SECRET manquant dans l\'environnement (aucun fallback : l\'ancienne valeur committée est compromise).');
+  process.exit(1);
+}
 
 const app = express();
 app.use(cors());

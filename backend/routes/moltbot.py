@@ -21,7 +21,13 @@ logger = logging.getLogger(__name__)
 
 # Admin phone numbers (whitelisted for full CRM access)
 ADMIN_PHONES = os.environ.get('MOLTBOT_ADMIN_PHONES', '').split(',')
-MOLTBOT_SECRET = os.environ.get('MOLTBOT_SECRET', 'moltbot-alpha-secret-2024')
+# Secret d'accès au pont WhatsApp. JAMAIS de valeur prévisible en fallback :
+# si absent de l'env, on génère un aléatoire → aucun appel externe ne peut matcher.
+MOLTBOT_SECRET = os.environ.get('MOLTBOT_SECRET')
+if not MOLTBOT_SECRET:
+    import secrets as _secrets
+    MOLTBOT_SECRET = _secrets.token_urlsafe(32)
+    logger.critical("MOLTBOT_SECRET absent de l'environnement : accès MoltBot par secret désactivé (secret aléatoire).")
 
 # ==================== MODELS ====================
 

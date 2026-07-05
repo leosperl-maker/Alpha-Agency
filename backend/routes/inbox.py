@@ -24,7 +24,7 @@ db = client[DB_NAME]
 
 # Auth
 security = HTTPBearer()
-JWT_SECRET = os.environ.get('JWT_SECRET', 'alpha-agency-secret-key-2024')
+from .database import JWT_SECRET  # secret partagé (source unique)
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:

@@ -37,17 +37,9 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# JWT Config
-# Le secret DOIT venir de l'environnement. À défaut, on en génère un aléatoire
-# au démarrage (les sessions seront invalidées à chaque redémarrage) plutôt que
-# d'utiliser une valeur prévisible codée en dur.
-JWT_SECRET = os.environ.get('JWT_SECRET')
-if not JWT_SECRET:
-    import secrets as _secrets
-    JWT_SECRET = _secrets.token_urlsafe(48)
-    logging.warning("JWT_SECRET absent de l'environnement : secret aléatoire généré (sessions non persistantes entre redémarrages).")
-JWT_ALGORITHM = "HS256"
-JWT_EXPIRATION_HOURS = 24
+# JWT Config — importé depuis routes.database (source unique de vérité) pour
+# garantir que création (auth) et vérification utilisent le même secret.
+from routes.database import JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRATION_HOURS
 
 # Resend Config
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')

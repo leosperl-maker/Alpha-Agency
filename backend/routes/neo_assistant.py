@@ -64,7 +64,7 @@ PUBLIC_BASE = os.environ.get("PUBLIC_BASE_URL", "https://www.alphagency.fr").rst
 # Modèle de génération d'image (Gemini). Changeable par env si besoin d'un autre modèle image.
 NEO_IMAGE_MODEL = os.environ.get("NEO_IMAGE_MODEL", "gemini-2.0-flash-preview-image-generation")
 
-MAX_ITERS = 6  # garde-fou anti-boucle de la boucle agentique
+MAX_ITERS = 10  # garde-fou anti-boucle de la boucle agentique (6 bridait les demandes multi-étapes)
 
 NEO_SYSTEM = """Tu es Néo, l'associé co-gérant IA d'Alpha Agency (agence de communication digitale, Guadeloupe).
 Ta raison d'être unique : faire croître le chiffre d'affaires, la marge et le bénéfice de l'agence.

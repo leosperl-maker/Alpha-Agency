@@ -22,9 +22,19 @@ client = MongoClient(MONGO_URL)
 db = client[DB_NAME]
 
 # Qonto API Configuration - OAuth2 Authorization Code Flow
+# Les identifiants viennent EXCLUSIVEMENT de l'environnement (jamais en dur :
+# les anciennes valeurs committées doivent être révoquées côté Qonto).
 QONTO_API_BASE = "https://thirdparty.qonto.com/v2"
-QONTO_CLIENT_ID = os.environ.get("QONTO_CLIENT_ID", "e140adc5-560d-4bed-8dbf-8500767bd49c")
-QONTO_CLIENT_SECRET = os.environ.get("QONTO_CLIENT_SECRET", "S3vc0ir927G37S8AOZSU2SzQpD")
+QONTO_CLIENT_ID = os.environ.get("QONTO_CLIENT_ID", "")
+QONTO_CLIENT_SECRET = os.environ.get("QONTO_CLIENT_SECRET", "")
+
+def _require_qonto_config():
+    """Échec explicite (503) si l'app OAuth Qonto n'est pas configurée."""
+    if not QONTO_CLIENT_ID or not QONTO_CLIENT_SECRET:
+        raise HTTPException(
+            status_code=503,
+            detail="Qonto non configuré : définir QONTO_CLIENT_ID et QONTO_CLIENT_SECRET dans l'environnement."
+        )
 QONTO_AUTH_URL = "https://oauth.qonto.com/oauth2/auth"
 QONTO_TOKEN_URL = "https://oauth.qonto.com/oauth2/token"
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://moltbot-ai-4.preview.emergentagent.com")
@@ -113,6 +123,7 @@ def get_qonto_headers(token: str = None):
 @router.get("/auth/url")
 async def get_auth_url():
     """Generate OAuth2 authorization URL for Qonto"""
+    _require_qonto_config()
     state = secrets.token_urlsafe(32)
     
     # Store state for verification
@@ -139,6 +150,7 @@ async def get_auth_url():
 @router.post("/auth/callback")
 async def oauth_callback(code: str, state: str):
     """Handle OAuth2 callback and exchange code for tokens"""
+    _require_qonto_config()
     # Verify state
     state_doc = db.qonto_oauth_states.find_one({"_id": state})
     if not state_doc:

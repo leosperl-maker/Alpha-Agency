@@ -21,7 +21,11 @@ const path = require('path');
 // Configuration
 const PORT = process.env.WHATSAPP_PORT || 3001;
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8001';
-const MOLTBOT_SECRET = process.env.MOLTBOT_SECRET || 'moltbot-alpha-secret-2024';
+const MOLTBOT_SECRET = process.env.MOLTBOT_SECRET;
+if (!MOLTBOT_SECRET) {
+  console.error('FATAL: MOLTBOT_SECRET manquant dans l\'environnement (aucun fallback : l\'ancienne valeur committée est compromise).');
+  process.exit(1);
+}
 
 // Express app
 const app = express();

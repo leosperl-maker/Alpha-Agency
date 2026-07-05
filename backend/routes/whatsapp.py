@@ -27,7 +27,8 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 WHATSAPP_SERVICE_URL = os.environ.get('WHATSAPP_SERVICE_URL', 'http://localhost:3001')
-MOLTBOT_SECRET = os.environ.get('MOLTBOT_SECRET', 'moltbot-alpha-secret-2024')
+# Secret partagé avec routes.moltbot (même génération aléatoire si env absent)
+from .moltbot import MOLTBOT_SECRET
 
 # Admin phone numbers for full access
 ADMIN_PHONES = os.environ.get('MOLTBOT_ADMIN_PHONES', '').split(',')
