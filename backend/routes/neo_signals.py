@@ -38,12 +38,14 @@ DEFAULT_RULES = {
     "quote_pending_days": 7,    # devis sans réponse au-delà → relance
     "hot_lead_days": 3,         # lead chaud sans suite au-delà → signal
     "big_deal_amount": 3000,    # montant à partir duquel un signal passe en priorité haute
+    "backup_stale_hours": 48,   # aucune sauvegarde réussie depuis X h → alerte (leçon de juin)
     "enabled": {
         "invoice_overdue": True,
         "deal_stagnant": True,
         "quote_pending": True,
         "task_overdue": True,
         "hot_lead": True,
+        "backup_stale": True,
     },
 }
 
@@ -72,7 +74,7 @@ async def get_rules() -> dict:
     try:
         saved = await db.settings.find_one({"type": "neo_signal_rules"}, {"_id": 0})
         if saved:
-            for k in ("deal_stagnant_days", "quote_pending_days", "hot_lead_days", "big_deal_amount"):
+            for k in ("deal_stagnant_days", "quote_pending_days", "hot_lead_days", "big_deal_amount", "backup_stale_hours"):
                 if isinstance(saved.get(k), (int, float)) and saved[k] > 0:
                     rules[k] = int(saved[k])
             if isinstance(saved.get("enabled"), dict):
@@ -225,6 +227,31 @@ async def detect_signals(rules: dict = None) -> list:
         except Exception as e:
             logger.warning(f"neo_signals hot_lead KO: {e}")
 
+    # 6) Sauvegardes : aucune sauvegarde réussie récente = risque majeur (incident de juin).
+    if enabled.get("backup_stale", True):
+        try:
+            history = await db.backup_history.find({}, {"_id": 0, "started_at": 1, "status": 1,
+                                                        "success": 1}).to_list(200)
+            ok_runs = [h for h in history
+                       if h.get("success") is True or (h.get("status") or "").lower() in ("success", "completed", "ok")]
+            last_ok = max((_to_dt(h.get("started_at")) for h in ok_runs if _to_dt(h.get("started_at"))),
+                          default=None)
+            stale_h = rules.get("backup_stale_hours", 48)
+            hours = int((now - last_ok).total_seconds() // 3600) if last_ok else None
+            if last_ok is None or hours >= stale_h:
+                msg = (f"Dernière sauvegarde réussie il y a {hours} h." if last_ok
+                       else "Aucune sauvegarde réussie trouvée dans l'historique.")
+                signals.append(_signal(
+                    "backup_stale", "high",
+                    "Sauvegardes en retard",
+                    msg + " Après l'incident de juin, c'est le risque n°1.",
+                    "backup_history", "backup", "sauvegardes",
+                    "Les sauvegardes MongoDB semblent en retard. Vérifie l'état du système de "
+                    "sauvegarde (page Sauvegardes) et dis-moi ce qui bloque.",
+                    days=(hours // 24) if hours else None))
+        except Exception as e:
+            logger.warning(f"neo_signals backup_stale KO: {e}")
+
     # Priorité haute d'abord, puis montant décroissant, puis ancienneté
     signals.sort(key=lambda s: (0 if s["severity"] == "high" else 1,
                                 -(s.get("amount") or 0), -(s.get("days") or 0)))
@@ -292,7 +319,7 @@ async def run_scan(current_user: dict = Depends(get_current_user)):
 async def update_rules(payload: dict, current_user: dict = Depends(get_current_user)):
     """Met à jour les seuils/activations des signaux."""
     safe = {}
-    for k in ("deal_stagnant_days", "quote_pending_days", "hot_lead_days", "big_deal_amount"):
+    for k in ("deal_stagnant_days", "quote_pending_days", "hot_lead_days", "big_deal_amount", "backup_stale_hours"):
         if isinstance(payload.get(k), (int, float)) and payload[k] > 0:
             safe[k] = int(payload[k])
     if isinstance(payload.get("enabled"), dict):

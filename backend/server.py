@@ -6657,6 +6657,10 @@ app.include_router(neo_agents.router, prefix="/api", tags=["neo-agents"])
 from routes import neo_memory_api
 app.include_router(neo_memory_api.router, prefix="/api", tags=["neo-memory"])
 
+# Réconciliation quotes → invoices (audit + migration sûre, dry-run par défaut)
+from routes import quotes_legacy
+app.include_router(quotes_legacy.router, prefix="/api", tags=["quotes-legacy"])
+
 # MoltBot Integration (Full CRM Access)
 from routes.moltbot import router as moltbot_router
 app.include_router(moltbot_router, prefix="/api", tags=["moltbot"])

@@ -55,6 +55,13 @@ def test_collections_sensibles_hors_whitelists(coll):
     assert coll not in neo._CRM_READONLY, f"{coll} ne doit pas être lisible via crm_query"
 
 
+def test_quotes_heritee_lisible_mais_plus_inscriptible():
+    """Réconciliation C3 : la collection héritée 'quotes' reste inspectable en lecture
+    mais Néo ne peut PLUS y écrire (source de l'incident de juin)."""
+    assert "quotes" in neo._CRM_READONLY
+    assert "quotes" not in neo._CRM_WRITABLE
+
+
 def test_crm_query_refuse_collection_non_listee(fake_db):
     res = run(neo._exec_crm_query({"collection": "users"}, "u1"))
     assert res["success"] is False

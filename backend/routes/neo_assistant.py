@@ -298,8 +298,10 @@ async def _exec_crm_query(args, uid):
 # Collections MÉTIER où Néo peut écrire. EXCLUES volontairement (sécurité) : users, settings,
 # *credentials/*oauth*/*tokens (Gmail/Drive/Qonto/Meta/Insta), bank_transactions, payment_transactions,
 # transfers (mouvements d'argent), subscriptions, ai_usage, internes neo_* / pdf_tokens / counters / notifications.
+# 'quotes' aussi exclu de l'ÉCRITURE (héritée, en réconciliation vers invoices — cause de
+# l'incident de juin) ; lecture toujours possible via crm_query.
 _CRM_WRITABLE = {
-    "contacts", "invoices", "quotes", "tasks", "opportunities", "appointments",
+    "contacts", "invoices", "tasks", "opportunities", "appointments",
     "documents", "folders", "tags", "portfolio", "services", "notes", "pipeline_columns",
     "budget", "budget_forecasts", "budget_categories",
     "multilink_pages", "multilink_sections", "multilink_links", "multilink_blocks",
@@ -1011,7 +1013,7 @@ TOOLS = [
      "params": _obj({"collection": _STR, "filter": {"type": "object"}, "limit": _INT}, ["collection"])},
     # --- Écriture générique encadrée : couverture TOTALE du CRM (tout ce qui n'a pas d'outil dédié) ---
     {"name": "crm_create", "validation": False, "run": _exec_crm_create,
-     "description": "Crée un document dans N'IMPORTE QUELLE collection métier du CRM (couverture totale). Utilise-le pour toute création sans outil dédié : opportunité, RDV, service, dossier, document, tâche, colonne de pipeline, séquence de nurturing, post éditorial, etc. Args: collection + data (objet des champs). Collections permises: contacts, invoices, quotes, tasks, opportunities, appointments, documents, folders, tags, portfolio, services, notes, pipeline_columns, budget, budget_forecasts, budget_categories, multilink_*, editorial_*, blog_posts, news_articles, scheduled_posts, nurturing_*.",
+     "description": "Crée un document dans N'IMPORTE QUELLE collection métier du CRM (couverture totale). Utilise-le pour toute création sans outil dédié : opportunité, RDV, service, dossier, document, tâche, colonne de pipeline, séquence de nurturing, post éditorial, etc. Args: collection + data (objet des champs). Collections permises: contacts, invoices, tasks, opportunities, appointments, documents, folders, tags, portfolio, services, notes, pipeline_columns, budget, budget_forecasts, budget_categories, multilink_*, editorial_*, blog_posts, news_articles, scheduled_posts, nurturing_* (JAMAIS 'quotes' : les devis se créent dans invoices).",
      "params": _obj({"collection": _STR, "data": {"type": "object"}}, ["collection", "data"])},
     {"name": "crm_update", "validation": False, "run": _exec_crm_update,
      "description": "Modifie un document du CRM (couverture totale). Args: collection + filter (cible, ex {\"id\":\"...\"}) + updates (champs à changer). Pour toute modification sans outil dédié (changer un statut, un montant, une date, des champs...).",
@@ -1798,6 +1800,29 @@ async def neo_health_score_endpoint(current_user: dict = Depends(get_current_use
     return await _compute_health_score()
 
 
+async def _gmail_unread_count() -> int:
+    """Nombre de mails non lus des dernières 48 h (0 si Gmail non connecté).
+    Seul l'appel Google (bloquant) part dans un thread ; le lookup du user
+    connecté se fait sur le premier credential Gmail présent (mono-utilisateur)."""
+    try:
+        creds = await db.gmail_credentials.find_one({}, {"user_id": 1})
+        if not creds or not creds.get("user_id"):
+            return 0
+        from .moltbot_gmail import get_gmail_service
+        service = await get_gmail_service(creds["user_id"])
+        if not service:
+            return 0
+
+        def _count():
+            res = service.users().messages().list(userId="me", q="is:unread newer_than:2d",
+                                                  maxResults=25).execute()
+            return len(res.get("messages", []) or [])
+
+        return await asyncio.to_thread(_count)
+    except Exception:
+        return 0
+
+
 async def _checkin_payload(moment: str = None) -> dict:
     """Données du check-in (déterministe, chiffres corrigés). Réutilisé par l'endpoint ET le push proactif."""
     h = (datetime.now(timezone.utc).hour - 4) % 24  # Guadeloupe = UTC-4
@@ -1816,6 +1841,15 @@ async def _checkin_payload(moment: str = None) -> dict:
         bits.append(f"{hs['hot_leads']} lead(s) chaud(s) à traiter")
     if hs.get("pending_devis"):
         bits.append(f"{hs['pending_devis']} devis à valider")
+    # Gmail en contexte automatique (lot C2) : mails non lus récents dans le briefing.
+    # Best-effort STRICT : 3 s max, silencieux si Gmail non connecté ou lent.
+    inbox_unread = None
+    try:
+        inbox_unread = await asyncio.wait_for(_gmail_unread_count(), timeout=3.0)
+    except Exception:
+        pass
+    if inbox_unread:
+        bits.append(f"{inbox_unread} mail(s) non lu(s) récents")
     prio = " · ".join(bits) if bits else "rien d'urgent, avance sur le fond"
     if moment == "soir":
         msg = f"Bonne soirée Léo. Bilan : {prio}. Comment a avancé ta journée ?"
@@ -1825,7 +1859,8 @@ async def _checkin_payload(moment: str = None) -> dict:
         msg = f"{salut} Léo. Aujourd'hui : {prio}. Santé de l'agence : {hs['score']}/100 ({hs['label']})."
         question = None if checked else "Qu'as-tu de prévu aujourd'hui ? Dis-le-moi, je m'organise avec toi."
     return {"moment": moment, "checked_in_today": checked, "score": hs.get("score"),
-            "label": hs.get("label"), "message": msg, "question": question, "priorities": bits}
+            "label": hs.get("label"), "message": msg, "question": question, "priorities": bits,
+            "inbox_unread": inbox_unread}
 
 
 # ==================== Pousse proactive (Phase 3-4 : in-app + WhatsApp) ====================

@@ -11,9 +11,9 @@ import {
 import NotificationCenter from "../../components/NotificationCenter";
 import AssistantOrb from "../../components/AssistantOrb";
 import AssistantChat from "../../components/AssistantChat";
-import { tasksAPI, contactsAPI, invoicesAPI, opportunitiesAPI } from "../../lib/api";
+import api, { tasksAPI, contactsAPI, invoicesAPI, opportunitiesAPI } from "../../lib/api";
 import { useTheme } from "../../contexts/ThemeContext";
-import { Dialog, DialogContent } from "../../components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "../../components/ui/dialog";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 
 const DashboardLayout = () => {
@@ -99,11 +99,12 @@ const DashboardLayout = () => {
     try {
       // Recherche globale : contacts, factures/devis, deals, tâches (filtre côté client
       // pour deals/tâches : listes courtes, et l'API n'a pas de paramètre search)
-      const [contactsRes, invoicesRes, oppsRes, tasksRes] = await Promise.all([
+      const [contactsRes, invoicesRes, oppsRes, tasksRes, docsRes] = await Promise.all([
         contactsAPI.getAll({ search: query }).catch(() => ({ data: [] })),
         invoicesAPI.getAll({ search: query }).catch(() => ({ data: [] })),
         opportunitiesAPI.getAll().catch(() => ({ data: [] })),
         tasksAPI.getAll().catch(() => ({ data: [] })),
+        api.get('/documents', { params: { search: query, flat: true } }).catch(() => ({ data: [] })),
       ]);
       (contactsRes.data || []).slice(0, 3).forEach(c => dbResults.push({
         id: `contact-${c.id}`, type: 'Contact', title: `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.email,
@@ -125,6 +126,12 @@ const DashboardLayout = () => {
           id: `task-${t.id}`, type: 'Tâche', title: t.title,
           subtitle: t.due_date ? `échéance ${t.due_date.slice(0, 10)}` : null, icon: CheckSquare,
           action: () => { setCommandPaletteOpen(false); navigate('/admin/things'); }
+        }));
+      (Array.isArray(docsRes.data) ? docsRes.data : (docsRes.data?.documents || []))
+        .slice(0, 3).forEach(d => dbResults.push({
+          id: `doc-${d.id}`, type: 'Document', title: d.name || d.filename || 'Document',
+          subtitle: d.file_type || d.folder_name || null, icon: FileSearch,
+          action: () => { setCommandPaletteOpen(false); navigate('/admin/documents'); }
         }));
     } catch (e) { /* offline / no backend */ }
     setCommandResults([...navResults, ...actionResults, ...dbResults]);
@@ -445,6 +452,7 @@ const DashboardLayout = () => {
       {/* ===================== COMMAND PALETTE (recherche ⌘K) ===================== */}
       <Dialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
         <DialogContent className="bg-popover/95 backdrop-blur-xl border-border text-foreground p-0 max-w-xl overflow-hidden shadow-pop">
+          <DialogTitle className="sr-only">Recherche et commandes</DialogTitle>
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
             <AssistantOrb size={22} />
             <input ref={commandInputRef} value={commandQuery}
@@ -465,7 +473,7 @@ const DashboardLayout = () => {
               </div>
             ) : (
               <div className="space-y-1">
-                {['Navigation', 'Action rapide', 'Contact', 'Deal', 'Tâche', 'Facture', 'Opportunité'].map(type => {
+                {['Navigation', 'Action rapide', 'Contact', 'Deal', 'Tâche', 'Facture', 'Document', 'Opportunité'].map(type => {
                   const items = commandResults.filter(r => r.type === type);
                   if (items.length === 0) return null;
                   return (
@@ -512,6 +520,7 @@ const DashboardLayout = () => {
       {/* ===================== SHORTCUTS HELP ===================== */}
       <Dialog open={showShortcutsHelp} onOpenChange={setShowShortcutsHelp}>
         <DialogContent className="bg-popover/95 backdrop-blur-xl border-border text-foreground shadow-pop max-w-lg">
+          <DialogTitle className="sr-only">Raccourcis clavier</DialogTitle>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E11D2E] to-[#7A0F2B] flex items-center justify-center"><Keyboard className="w-5 h-5 text-white" /></div>
             <div>

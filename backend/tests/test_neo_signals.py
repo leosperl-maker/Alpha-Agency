@@ -30,6 +30,10 @@ iso = lambda d: d.isoformat()  # noqa: E731
 def fake_db(monkeypatch):
     fdb = FakeDB()
     monkeypatch.setattr(ns, "db", fdb)
+    # Sauvegarde fraîche par défaut : le signal backup_stale ne parasite pas les
+    # autres tests (il a les siens plus bas).
+    run(fdb["backup_history"].insert_one({"started_at": iso(NOW - timedelta(hours=2)),
+                                          "status": "success"}))
     return fdb
 
 
@@ -130,6 +134,36 @@ def test_lead_chaud_sans_suite(fake_db):
     sigs = run(ns.detect_signals())
     assert [s["entity_id"] for s in sigs] == ["c1"]
     assert "Sonia Rime" in sigs[0]["title"]
+
+
+# ==================== Sauvegardes (gardien anti-incident) ====================
+
+def test_backup_recent_pas_de_signal(fake_db):
+    assert run(ns.detect_signals()) == []  # fixture : backup d'il y a 2 h
+
+
+def test_backup_trop_ancien_alerte(fake_db):
+    fake_db["backup_history"].docs.clear()
+    run(fake_db["backup_history"].insert_one({"started_at": iso(NOW - timedelta(hours=72)),
+                                              "status": "success"}))
+    sigs = run(ns.detect_signals())
+    assert [s["type"] for s in sigs] == ["backup_stale"]
+    assert sigs[0]["severity"] == "high" and "72 h" in sigs[0]["message"]
+
+
+def test_aucun_backup_alerte(fake_db):
+    fake_db["backup_history"].docs.clear()
+    sigs = run(ns.detect_signals())
+    assert [s["type"] for s in sigs] == ["backup_stale"]
+    assert "Aucune sauvegarde" in sigs[0]["message"]
+
+
+def test_backup_echoue_ne_compte_pas(fake_db):
+    fake_db["backup_history"].docs.clear()
+    run(fake_db["backup_history"].insert_one({"started_at": iso(NOW - timedelta(hours=1)),
+                                              "status": "failed"}))
+    sigs = run(ns.detect_signals())
+    assert [s["type"] for s in sigs] == ["backup_stale"]  # un échec récent ne rassure pas
 
 
 # ==================== Règles configurables ====================
