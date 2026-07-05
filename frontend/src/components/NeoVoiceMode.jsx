@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { X, Mic, MicOff, Loader2, ChevronDown, Check, FileText, UserPlus, CheckSquare, Clock, Send, Euro, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { neoAPI } from "../lib/api";
+import NeoParticleOrbLazy from "./three/NeoParticleOrbLazy";
 
 const IS_IOS = typeof navigator !== "undefined" && /iP(hone|ad|od)/.test(navigator.userAgent || "");
 const SILENCE_MS = 2500; // délai de silence avant d'envoyer (laisse Léo respirer/réfléchir sans le couper)
@@ -511,6 +512,8 @@ const NeoVoiceMode = ({ open, onClose, messages = [], convId, brain, onConvId, o
       {/* Orbe central */}
       <div className="relative flex-1 w-full flex flex-col items-center justify-center gap-8 px-6">
         <button onClick={onOrbTap} className="relative outline-none" aria-label="Interagir avec Néo">
+          {/* Halo de particules (three.js, lazy, coupé si reduced-motion / machine faible) */}
+          <NeoParticleOrbLazy phaseRef={phaseRef} analyserRef={analyserRef} size={Math.min(430, window.innerWidth * 0.92)} />
           <span
             ref={orbRef}
             className={`block rounded-full will-change-transform ${(phase === "listening" || phase === "idle" || (phase === "speaking" && IS_IOS)) ? "neo-orb-breathe" : ""} ${phase === "thinking" ? "neo-orb-think" : ""}`}
