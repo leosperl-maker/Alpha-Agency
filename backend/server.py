@@ -6649,6 +6649,10 @@ app.include_router(neo_router, prefix="/api", tags=["neo"])
 from routes import neo_signals
 app.include_router(neo_signals.router, prefix="/api", tags=["neo-signals"])
 
+# NÉO — sous-agents spécialisés (multi-agents : l'import enregistre l'outil consult_agent)
+from routes import neo_agents
+app.include_router(neo_agents.router, prefix="/api", tags=["neo-agents"])
+
 # MoltBot Integration (Full CRM Access)
 from routes.moltbot import router as moltbot_router
 app.include_router(moltbot_router, prefix="/api", tags=["moltbot"])
