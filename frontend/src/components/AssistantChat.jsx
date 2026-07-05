@@ -489,12 +489,17 @@ const AssistantChat = ({ open, onOpenChange, seed, variant = "panel" }) => {
                 }`}>
                   {m.steps?.length > 0 && (
                     <div className="mb-1.5 space-y-1">
-                      {m.steps.map((s, si) => (
-                        <div key={si} className={`flex items-center gap-1.5 text-xs ${s.done ? (s.ok === false ? "text-danger" : "text-muted-foreground") : "text-primary"}`}>
-                          {s.done ? (s.ok === false ? <X className="w-3 h-3 flex-shrink-0" /> : <Check className="w-3 h-3 flex-shrink-0" />) : <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />}
-                          <span>{s.label}</span>
-                        </div>
-                      ))}
+                      {m.steps.map((s, si) => {
+                        const isAgent = s.name === "consult_agent"; // mission déléguée à un sous-agent → étape mise en avant
+                        return (
+                          <div key={si}
+                               className={`flex items-center gap-1.5 text-xs ${isAgent ? "rounded-lg bg-brand-soft px-2 py-1 font-medium" : ""} ${s.done ? (s.ok === false ? "text-danger" : (isAgent ? "text-primary/80" : "text-muted-foreground")) : "text-primary"}`}>
+                            {s.done ? (s.ok === false ? <X className="w-3 h-3 flex-shrink-0" /> : <Check className="w-3 h-3 flex-shrink-0" />) : <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />}
+                            {isAgent && <span className="h-2 w-2 flex-shrink-0 rounded-full bg-primary shadow-[0_0_6px_rgba(225,29,46,0.8)]" />}
+                            <span>{s.label}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                   {renderContent(m.content)}

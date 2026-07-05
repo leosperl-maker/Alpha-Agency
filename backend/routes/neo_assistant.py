@@ -1361,12 +1361,22 @@ _TOOL_LABELS = {
     "log_day": ("Mise à jour du journal…", "Journal mis à jour"),
     "send_followup": ("Préparation de la relance…", "Relance préparée (à valider)"),
     "merge_contacts": ("Préparation de la fusion…", "Fusion préparée (à valider)"),
+    "consult_agent": ("Sous-agent en mission…", "Rapport du sous-agent reçu"),
 }
 
 
-def _tool_label(name: str, kind: str) -> str:
-    """Libellé d'étape pour le front. kind: 'start' | 'done' | 'pending' | 'fail'."""
+def _tool_label(name: str, kind: str, args: dict = None) -> str:
+    """Libellé d'étape pour le front. kind: 'start' | 'done' | 'pending' | 'fail'.
+    Pour consult_agent, le libellé inclut le NOM du sous-agent mobilisé (timeline lisible)."""
     ing, done = _TOOL_LABELS.get(name, (f"Néo travaille ({name.replace('_', ' ')})…", name.replace("_", " ")))
+    if name == "consult_agent" and isinstance(args, dict) and args.get("agent"):
+        try:
+            from .neo_agents import AGENTS  # import tardif (neo_agents importe ce module)
+            label = AGENTS.get(args["agent"], {}).get("label", args["agent"])
+            ing = f"Sous-agent {label} en mission…"
+            done = f"Rapport du sous-agent {label} reçu"
+        except Exception:
+            pass
     if kind == "start":
         return ing
     if kind == "pending":
@@ -1496,17 +1506,17 @@ async def run_neo_stream(messages: list, user_id: str, voice: bool = False, atta
         for fc in fcs:
             name = fc.name
             args = dict(fc.args or {})
-            yield {"type": "tool", "name": name, "phase": "start", "label": _tool_label(name, "start")}
+            yield {"type": "tool", "name": name, "phase": "start", "label": _tool_label(name, "start", args)}
             res = await execute_tool(name, args, user_id)
             if res.get("pending"):
                 pending.append({"action_id": res["action_id"], "name": name, "args": args})
                 yield {"type": "pending", "action_id": res["action_id"], "name": name, "args": args}
-                yield {"type": "tool", "name": name, "phase": "done", "ok": True, "label": _tool_label(name, "pending")}
+                yield {"type": "tool", "name": name, "phase": "done", "ok": True, "label": _tool_label(name, "pending", args)}
             elif res.get("success", True):
                 actions.append({"name": name})
-                yield {"type": "tool", "name": name, "phase": "done", "ok": True, "label": _tool_label(name, "done")}
+                yield {"type": "tool", "name": name, "phase": "done", "ok": True, "label": _tool_label(name, "done", args)}
             else:
-                yield {"type": "tool", "name": name, "phase": "done", "ok": False, "label": _tool_label(name, "fail")}
+                yield {"type": "tool", "name": name, "phase": "done", "ok": False, "label": _tool_label(name, "fail", args)}
             tool_parts.append(_t.Part.from_function_response(name=name, response=_fr_json(res)))
         contents.append(_t.Content(role="tool", parts=tool_parts))
 
@@ -1675,17 +1685,17 @@ async def run_neo_claude_stream(messages: list, user_id: str, voice: bool = Fals
         for tu in tool_uses:
             name = tu["name"]
             args = tu.get("input") or {}
-            yield {"type": "tool", "name": name, "phase": "start", "label": _tool_label(name, "start")}
+            yield {"type": "tool", "name": name, "phase": "start", "label": _tool_label(name, "start", args)}
             res = await execute_tool(name, args, user_id)
             if res.get("pending"):
                 pending.append({"action_id": res["action_id"], "name": name, "args": args})
                 yield {"type": "pending", "action_id": res["action_id"], "name": name, "args": args}
-                yield {"type": "tool", "name": name, "phase": "done", "ok": True, "label": _tool_label(name, "pending")}
+                yield {"type": "tool", "name": name, "phase": "done", "ok": True, "label": _tool_label(name, "pending", args)}
             elif res.get("success", True):
                 actions.append({"name": name})
-                yield {"type": "tool", "name": name, "phase": "done", "ok": True, "label": _tool_label(name, "done")}
+                yield {"type": "tool", "name": name, "phase": "done", "ok": True, "label": _tool_label(name, "done", args)}
             else:
-                yield {"type": "tool", "name": name, "phase": "done", "ok": False, "label": _tool_label(name, "fail")}
+                yield {"type": "tool", "name": name, "phase": "done", "ok": False, "label": _tool_label(name, "fail", args)}
             results.append({"type": "tool_result", "tool_use_id": tu["id"],
                             "content": _json.dumps(res, ensure_ascii=False, default=str)[:6000]})
         conv.append({"role": "user", "content": results})
