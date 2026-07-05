@@ -17,6 +17,23 @@ const SIGNAL_ICON = {
   task_overdue: AlertTriangle, hot_lead: Flame,
 };
 
+/** Command Deck (agentic OS) : missions récurrentes en 1 clic — chaque bouton
+ *  envoie une mission complète à Néo, qui mobilise outils et sous-agents. */
+const COMMAND_DECK = [
+  { label: "Briefing", icon: Sparkles, prompt:
+    "Fais-moi le briefing complet du moment : finances du mois (encaissé, dépensé, solde, Qonto), radar (impayés, deals qui stagnent, devis sans réponse, leads chauds), mails importants, et tes 3 recommandations concrètes pour aujourd'hui." },
+  { label: "Inbox", icon: FileText, prompt:
+    "Lis ma boîte Gmail des dernières 48 h : résume ce qui compte, liste ce qui attend une réponse de ma part, et propose un brouillon pour les 2 plus urgents." },
+  { label: "Plan du jour", icon: Activity, prompt:
+    "Construis mon plan du jour : croise mes tâches ouvertes, mes RDV, les relances à faire et les deals à pousser. Donne-moi un ordre d'exécution réaliste, créneau par créneau." },
+  { label: "Radar", icon: Radar, prompt:
+    "Passe en revue TOUS les signaux du radar (impayés, deals qui stagnent, devis sans réponse, tâches en retard, leads chauds) et propose un plan d'action priorisé. Traite directement ce qui peut l'être (relances en brouillon, tâches)." },
+  { label: "Revue semaine", icon: Wallet, prompt:
+    "Fais la revue de la semaine : encaissé, signé, évolution du pipeline, devis envoyés/acceptés, contenus publiés, ce qui a avancé et ce qui a traîné. Termine par le plan de la semaine prochaine en 5 points." },
+  { label: "Stratégie", icon: Brain, prompt:
+    "Fais-moi un point stratégique : prévisionnel du mois, risque n°1, opportunité n°1, et ta recommandation de pilotage. Prends le temps d'un vrai jugement (strategic_review)." },
+];
+
 /** Panneau « Ce que Néo sait » : consulter, corriger, faire oublier (exigence Jarvis :
  *  la mémoire de l'IA n'est jamais une boîte noire). */
 const MemoryDialog = ({ open, onOpenChange }) => {
@@ -147,7 +164,19 @@ const NeoPage = () => {
   const priorities = checkin?.priorities || [];
 
   return (
-    <div className="flex gap-4 h-[calc(100vh-7.5rem)] min-h-[460px]">
+    <div className="flex flex-col gap-3 h-[calc(100vh-7.5rem)] min-h-[460px]">
+      {/* Command Deck : missions 1-clic (agentic OS) */}
+      <div className="flex gap-2 overflow-x-auto pb-0.5 -mx-1 px-1">
+        {COMMAND_DECK.map((c) => (
+          <button key={c.label} onClick={() => askNeo(c.prompt)}
+                  className="flex flex-shrink-0 items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-medium text-foreground/85 transition-all hover:border-primary/40 hover:text-foreground hover:shadow-elev">
+            <c.icon className="h-3.5 w-3.5 text-primary" />
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex gap-4 min-h-0 flex-1">
       {/* Chat Néo plein écran */}
       <div className="flex-1 min-w-0 rounded-2xl border border-border overflow-hidden shadow-elev">
         <AssistantChat open variant="page" onOpenChange={(v) => { if (!v) navigate("/admin"); }} />
@@ -274,6 +303,7 @@ const NeoPage = () => {
           )}
         </div>
       </aside>
+      </div>
     </div>
   );
 };

@@ -120,7 +120,18 @@ TON ÉQUIPE : tu diriges des sous-agents spécialisés (outil consult_agent) —
 communication, trésorerie, veille, actions CRM. Délègue-leur les missions qui méritent un spécialiste ou
 plusieurs étapes focalisées (analyse de pipeline, rédaction soignée, synthèse chiffrée, série d'opérations CRM),
 et garde pour toi le dialogue avec Léo, la décision et la synthèse finale. Mission déléguée = objectif précis
-+ critères de succès + contexte utile."""
++ critères de succès + contexte utile.
+
+CARTE DE VISITE / FLYER EN PHOTO : si Léo t'envoie la photo d'une carte de visite, d'un flyer ou d'une
+capture de coordonnées, lis les infos (nom, entreprise, poste, email, téléphone, ville…) et crée la fiche
+avec create_contact (vérifie d'abord le doublon via search_contacts). Cite exactement ce que tu as lu.
+
+QUALIFICATION FINANCIÈRE : avant un devis important ou une négo, utilise company_finances (data.gouv) pour
+connaître le CA/résultat publiés du prospect et le conseil de crédit (acompte ou 30 j).
+
+MODIFIER LE CRM LUI-MÊME : si Léo demande une évolution du CRM (nouvel onglet, nouvelle fonctionnalité,
+changement de code), utilise request_crm_change : la spécification part sur le poste de développement
+(Claude Code) qui code, teste et déploie proprement. Tu ne modifies JAMAIS le code en direct toi-même."""
 
 # ==================== Réutilisation des exécuteurs existants ====================
 # (ai_enhanced.py contient déjà des handlers d'action fiables — on les recâble en outils natifs.)
@@ -793,6 +804,33 @@ async def _exec_send_to_cowork(args, uid):
             "message": f"Tâche déposée pour Cowork : « {doc['title']} ». Le Claude de Léo sur PC la récupérera."}
 
 
+async def _exec_request_crm_change(args, uid):
+    """Néo demande une évolution du CRM : la spec part en tâche Cowork (Claude Code
+    sur le poste de Léo, qui code + teste + déploie) + notification. Néo ne touche
+    JAMAIS au code en direct : pas d'environnement de test, la prod se déploie au push."""
+    feature = (args.get("feature") or "").strip()
+    details = (args.get("details") or "").strip()
+    if not feature:
+        return {"success": False, "error": "Décris la fonctionnalité demandée (feature)."}
+    brief = (
+        f"ÉVOLUTION CRM DEMANDÉE PAR LÉO (via Néo)\n\n"
+        f"Fonctionnalité : {feature}\n\n"
+        f"Détails / contexte :\n{details or '(aucun détail supplémentaire)'}\n\n"
+        f"Méthode attendue : explorer l'existant, implémenter, TESTER (unitaires + navigateur), "
+        f"committer par incrément, pousser (Railway déploie sur push), vérifier /health et la route en prod."
+    )
+    doc = {"id": str(uuid.uuid4()), "title": f"[CRM] {feature[:80]}", "brief": brief,
+           "kind": "crm_change", "status": "pending",
+           "created_at": datetime.now(timezone.utc).isoformat(), "user_id": uid}
+    await db.cowork_inbox.insert_one(doc)
+    await _deposit_notification("crm_change", "Évolution CRM en file",
+                                f"Spécification envoyée au poste de dev : {feature[:120]}",
+                                data={"cowork_id": doc["id"]})
+    return {"success": True, "result": {"id": doc["id"]},
+            "message": (f"Spécification déposée pour le poste de développement : « {feature} ». "
+                        f"Claude Code la traitera (code + tests + déploiement) — Léo n'a qu'à ouvrir Cowork.")}
+
+
 async def _exec_generate_image(args, uid):
     """Génère une image/visuel via Gemini et renvoie une URL affichable (stockée en base)."""
     prompt = (args.get("prompt") or "").strip()
@@ -952,6 +990,9 @@ TOOLS = [
     {"name": "send_to_cowork", "validation": False, "run": _exec_send_to_cowork,
      "description": "Envoie une tâche / un brief à Claude Cowork sur le PC de Léo (pour qu'il bosse ou réfléchisse dessus côté code/dev). Donne un titre court + un brief détaillé. Utilise-le quand Léo dit d'envoyer/confier quelque chose à Cowork ou à son Claude sur PC.",
      "params": _obj({"title": _STR, "brief": _STR})},
+    {"name": "request_crm_change", "validation": False, "run": _exec_request_crm_change,
+     "description": "Demande une ÉVOLUTION DU CRM lui-même (nouvel onglet, nouvelle fonctionnalité, modification d'écran ou de comportement). La spécification part au poste de développement (Claude Code) qui code, teste et déploie. Utilise-le dès que Léo demande de modifier/ajouter quelque chose DANS l'application CRM. feature = la demande en une phrase ; details = tout le contexte utile (où, comment, pourquoi).",
+     "params": _obj({"feature": _STR, "details": _STR}, ["feature"])},
     {"name": "generate_image", "validation": False, "run": _exec_generate_image,
      "description": "Génère une IMAGE / un visuel à partir d'une description détaillée (visuel de post réseaux, illustration, concept créatif, mockup). Renvoie une URL d'image à montrer à Léo. Utilise-le dès que Léo demande de créer/générer une image, un visuel ou une illustration.",
      "params": _obj({"prompt": _STR})},
@@ -1879,6 +1920,13 @@ async def _deposit_notification(ntype: str, title: str, message: str, priority: 
                  "priority": priority, "target_users": ["all"], "read_by": [],
                  "created_at": datetime.now(timezone.utc).isoformat()}
         await db.notifications.insert_one(notif)
+        # Web Push PWA (iPhone/Android) pour le prioritaire — inerte sans clés VAPID
+        if priority == "high":
+            try:
+                from .web_push import push_to_all
+                await push_to_all(title, message, url="/admin/neo", tag=dedup_key or ntype)
+            except Exception as e:
+                logger.warning(f"web push KO (non bloquant): {e}")
         try:
             from .notifications import manager  # import lazy (évite la circularité au chargement)
             await manager.broadcast(notif)

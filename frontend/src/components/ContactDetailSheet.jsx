@@ -57,6 +57,8 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
   const [editorialCalendars, setEditorialCalendars] = useState([]);
   const [financialData, setFinancialData] = useState(null);
   const [loadingFinancials, setLoadingFinancials] = useState(false);
+  const [gouv, setGouv] = useState(null);           // {company, credit} — data.gouv + conseil de crédit
+  const [loadingGouv, setLoadingGouv] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -72,6 +74,23 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
       fetchFinancialData(contact.siret);
     }
   }, [contact?.siret]);
+
+  // data.gouv : comptes publiés + conseil de crédit (SIRET OU nom d'entreprise).
+  // Rafraîchi côté serveur (cache sur la fiche) au plus 1×/30 j, sinon cache local.
+  useEffect(() => {
+    if (!contact?.id || !(contact?.siret || contact?.company)) return;
+    const fresh = contact.company_insights_at &&
+      (Date.now() - new Date(contact.company_insights_at).getTime()) < 30 * 86400000;
+    if (fresh && contact.company_insights) {
+      setGouv({ company: contact.company_insights, credit: contact.company_credit });
+      return;
+    }
+    setLoadingGouv(true);
+    api.post(`/societe/contacts/${contact.id}/refresh-insights`)
+      .then((r) => { if (r.data?.success !== false) setGouv({ company: r.data.company, credit: r.data.credit }); })
+      .catch(() => {})
+      .finally(() => setLoadingGouv(false));
+  }, [contact?.id, contact?.siret, contact?.company]); // eslint-disable-line
 
   const fetchFinancialData = async (siret) => {
     if (!siret) return;
@@ -401,7 +420,7 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                   <FileText className="w-3.5 h-3.5 sm:mr-1" />
                   <span className="hidden sm:inline">Docs</span>
                 </TabsTrigger>
-                {contact?.siret && (
+                {(contact?.siret || contact?.company) && (
                   <TabsTrigger value="finances" className="data-[state=active]:bg-card text-xs sm:text-sm px-1 sm:px-2">
                     <BarChart3 className="w-3.5 h-3.5 sm:mr-1" />
                     <span className="hidden sm:inline">Finances</span>
@@ -631,11 +650,59 @@ const ContactDetailSheet = ({ open, onOpenChange, contactId }) => {
                 </ScrollArea>
               </TabsContent>
 
-              {/* Financial Data Tab - Societe.com */}
-              {contact?.siret && (
+              {/* Financial Data Tab - data.gouv (officiel) + Societe.com */}
+              {(contact?.siret || contact?.company) && (
                 <TabsContent value="finances" className="flex-1 overflow-hidden mt-0 px-3 sm:px-4 pb-4">
                   <ScrollArea className="h-full">
                     <div className="space-y-4 pt-3">
+                      {/* ---- Conseil de crédit + comptes publiés (data.gouv, source officielle) ---- */}
+                      {loadingGouv ? (
+                        <div className="h-24 animate-pulse rounded-xl bg-secondary/60" />
+                      ) : gouv?.credit && (
+                        <Card className={`border ${gouv.credit.level === "vert" ? "border-success/40 bg-success-soft"
+                          : gouv.credit.level === "orange" ? "border-warning/40 bg-warning-soft"
+                          : "border-danger/40 bg-danger-soft"}`}>
+                          <CardContent className="p-4 space-y-2.5">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className={`text-sm font-semibold ${gouv.credit.level === "vert" ? "text-success"
+                                : gouv.credit.level === "orange" ? "text-warning" : "text-danger"}`}>
+                                Conseil de crédit — {gouv.credit.level === "vert" ? "30 j acceptable"
+                                  : gouv.credit.level === "orange" ? "acompte conseillé" : "paiement d'avance"}
+                              </p>
+                              {gouv.credit.limit > 0 && (
+                                <Badge variant="outline" className="tabular-nums font-semibold">
+                                  encours ≤ {gouv.credit.limit.toLocaleString("fr-FR")} €
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-foreground/80">{gouv.credit.advice}</p>
+                            {gouv.company?.finances && (
+                              <div className="grid grid-cols-2 gap-2 pt-1">
+                                {Object.entries(gouv.company.finances).sort((a, b) => b[0] - a[0]).slice(0, 2).map(([year, f]) => (
+                                  <div key={year} className="rounded-lg bg-card/60 p-2">
+                                    <p className="text-[10px] uppercase text-muted-foreground">Comptes {year}</p>
+                                    <p className="text-sm font-semibold tabular-nums text-foreground">
+                                      CA {Math.round((f.ca || 0) / 1000).toLocaleString("fr-FR")} k€
+                                    </p>
+                                    <p className={`text-xs tabular-nums ${(f.resultat_net || 0) >= 0 ? "text-success" : "text-danger"}`}>
+                                      résultat {Math.round((f.resultat_net || 0) / 1000).toLocaleString("fr-FR")} k€
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {gouv.company && !gouv.company.finances && (
+                              <p className="text-[11px] text-muted-foreground">Comptes non publiés au greffe.</p>
+                            )}
+                            <p className="text-[10px] text-muted-foreground">
+                              {gouv.company?.nom ? `${gouv.company.nom} · ` : ""}
+                              {gouv.company?.date_creation ? `créée le ${gouv.company.date_creation} · ` : ""}
+                              {gouv.company?.effectif ? `${gouv.company.effectif} salariés · ` : ""}
+                              source data.gouv (indicatif, pas une notation bancaire)
+                            </p>
+                          </CardContent>
+                        </Card>
+                      )}
                       {loadingFinancials ? (
                         <div className="flex items-center justify-center py-8">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

@@ -1,7 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, X, FileWarning, UserPlus, CheckCheck, Radar, Sparkles } from "lucide-react";
+import { Bell, X, FileWarning, UserPlus, CheckCheck, Radar, Sparkles, BellRing, Loader2 } from "lucide-react";
 import api, { invoicesAPI, contactsAPI } from "../lib/api";
+
+// clé VAPID (base64 url-safe) → Uint8Array pour pushManager.subscribe
+const urlB64ToUint8 = (b64) => {
+  const pad = "=".repeat((4 - (b64.length % 4)) % 4);
+  const raw = atob((b64 + pad).replace(/-/g, "+").replace(/_/g, "/"));
+  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+};
 
 /**
  * Notifications = celles du serveur (db.notifications : briefings et signaux de Néo,
@@ -16,6 +23,40 @@ const NotificationCenter = () => {
   const [dismissed, setDismissed] = useState(() => new Set());
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef(null);
+  // Web Push : "off" (activable) | "on" (abonné) | "unavailable" (pas de clés/API) | "busy"
+  const [pushState, setPushState] = useState("unavailable");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+        const cfg = (await api.get("/push/config")).data;
+        if (!cfg?.configured) return;
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        setPushState(sub ? "on" : "off");
+      } catch (e) { /* push indisponible : bouton masqué */ }
+    })();
+  }, []);
+
+  const enablePush = async () => {
+    setPushState("busy");
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm !== "granted") { setPushState("off"); return; }
+      const cfg = (await api.get("/push/config")).data;
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlB64ToUint8(cfg.public_key),
+      });
+      await api.post("/push/subscribe", { subscription: sub.toJSON(), device_label: navigator.userAgent.slice(0, 80) });
+      setPushState("on");
+      api.post("/push/test").catch(() => {});
+    } catch (e) {
+      setPushState("off");
+    }
+  };
 
   const load = useCallback(async () => {
     const next = [];
@@ -151,6 +192,23 @@ const NotificationCenter = () => {
               ))
             )}
           </div>
+
+          {/* Web Push (PWA iPhone/Android) : proposé seulement si le serveur a des clés VAPID */}
+          {pushState !== "unavailable" && (
+            <div className="border-t border-border px-3 py-2">
+              {pushState === "on" ? (
+                <p className="flex items-center gap-1.5 text-xs text-success">
+                  <BellRing className="w-3.5 h-3.5" /> Notifications push actives sur cet appareil
+                </p>
+              ) : (
+                <button onClick={enablePush} disabled={pushState === "busy"}
+                        className="flex w-full items-center gap-1.5 rounded-lg px-1 py-1 text-xs text-primary hover:underline disabled:opacity-50">
+                  {pushState === "busy" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <BellRing className="w-3.5 h-3.5" />}
+                  Activer les notifications push sur cet appareil (iPhone : app installée sur l'écran d'accueil)
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

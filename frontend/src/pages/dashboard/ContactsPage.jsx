@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, Search, Filter, Mail, Phone, Building, Calendar, Trash2,
   Edit, Upload, Briefcase, DollarSign, FileText, Info, Eye,
   X, MapPin, Hash, FolderOpen, User, Target, Sparkles, Star,
-  Clock, Globe, MessageCircle, Crown, Megaphone
+  Clock, Globe, MessageCircle, Crown, Megaphone, Camera, Loader2
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -13,7 +13,7 @@ import { Badge } from "../../components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../components/ui/dialog";
 import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { contactsAPI } from "../../lib/api";
+import api, { contactsAPI } from "../../lib/api";
 import { toast } from "sonner";
 import ImportContactsDialog from "../../components/ImportContactsDialog";
 import ContactDetailSheet from "../../components/ContactDetailSheet";
@@ -59,6 +59,8 @@ const ContactsPage = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const scanInputRef = useRef(null);
   const [editingContact, setEditingContact] = useState(null);
   const [detailSheetOpen, setDetailSheetOpen] = useState(false);
   const [selectedContactId, setSelectedContactId] = useState(null);
@@ -107,6 +109,47 @@ const ContactsPage = () => {
     } catch (error) {
       toast.error("Erreur lors de l'enregistrement");
     }
+  };
+
+  // ---- Scan carte de visite / flyer : photo → champs extraits → formulaire prérempli ----
+  const handleScanFile = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 15 * 1024 * 1024) { toast.error("Fichier trop lourd (max 15 Mo)"); return; }
+    setScanning(true);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const res = await api.post("/contacts/scan-card", { image_base64: reader.result });
+        if (!res.data?.success) {
+          toast.error(res.data?.error || "Aucune coordonnée lisible sur ce document");
+          return;
+        }
+        const f = res.data.fields || {};
+        if (res.data.duplicate) {
+          const d = res.data.duplicate;
+          toast.warning(`Contact déjà existant : ${[d.first_name, d.last_name].filter(Boolean).join(" ") || d.company}`);
+        }
+        setEditingContact(null);
+        setFormData((prev) => ({
+          ...prev,
+          first_name: f.first_name || "", last_name: f.last_name || "",
+          email: f.email || "", phone: f.phone || "", company: f.company || "",
+          city: f.city || "", poste: f.poste || "", siret: f.siret || "",
+          note: [f.notes, f.website].filter(Boolean).join(" · "),
+          status: "nouveau",
+        }));
+        setDialogOpen(true);
+        toast.success("Coordonnées extraites — vérifie et enregistre");
+      } catch (err) {
+        toast.error("Lecture impossible : " + (err.response?.data?.detail || "réessaie avec une photo plus nette"));
+      } finally {
+        setScanning(false);
+      }
+    };
+    reader.onerror = () => { setScanning(false); toast.error("Fichier illisible"); };
+    reader.readAsDataURL(file);
   };
 
   const handleDelete = async (id) => {
@@ -193,6 +236,14 @@ const ContactsPage = () => {
           <p className="text-muted-foreground text-sm">{contacts.length} contacts · {clientCount} clients</p>
         </div>
         <div className="flex gap-2">
+          {/* Scan carte de visite / flyer → fiche préremplie (photo mobile ou fichier) */}
+          <input ref={scanInputRef} type="file" accept="image/*,.pdf" capture="environment"
+                 className="hidden" onChange={handleScanFile} />
+          <Button variant="outline" disabled={scanning} className="border-border"
+                  onClick={() => scanInputRef.current?.click()} data-testid="scan-card-btn">
+            {scanning ? <Loader2 className="w-4 h-4 animate-spin sm:mr-2" /> : <Camera className="w-4 h-4 sm:mr-2" />}
+            <span className="hidden sm:inline">{scanning ? "Lecture…" : "Scanner"}</span>
+          </Button>
           <Button variant="outline" onClick={() => setImportDialogOpen(true)} className="border-border">
             <Upload className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Importer</span>
@@ -366,6 +417,16 @@ const ContactsPage = () => {
               <div className="mt-2 flex flex-wrap items-center justify-center gap-1">
                 <Badge className={`${STATUS_TONE[contact.status] || STATUS_TONE.nouveau} border-0 text-[10px] px-1.5`}>{STATUS_LABEL[contact.status] || contact.status}</Badge>
                 {contact.score && <Badge className={`${SCORE_TONE[contact.score] || SCORE_TONE.tiède} border-0 text-[10px] px-1.5`}>{contact.score}</Badge>}
+                {/* solvabilité data.gouv (cache fiche) : € vert = 30j ok, orange = acompte, rouge = avance */}
+                {contact.company_credit?.level && (
+                  <Badge title={contact.company_credit.advice}
+                         className={`border-0 text-[10px] px-1.5 tabular-nums ${
+                           contact.company_credit.level === "vert" ? "bg-success-soft text-success"
+                           : contact.company_credit.level === "orange" ? "bg-warning-soft text-warning"
+                           : "bg-danger-soft text-danger"}`}>
+                    {contact.company_credit.limit > 0 ? `≤${contact.company_credit.limit.toLocaleString("fr-FR")}€` : "avance"}
+                  </Badge>
+                )}
               </div>
             </motion.button>
           ))}

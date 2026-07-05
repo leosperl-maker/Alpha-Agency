@@ -6661,6 +6661,18 @@ app.include_router(neo_memory_api.router, prefix="/api", tags=["neo-memory"])
 from routes import quotes_legacy
 app.include_router(quotes_legacy.router, prefix="/api", tags=["quotes-legacy"])
 
+# Renseignement entreprise data.gouv (CA/résultat publiés + conseil de crédit) — enregistre aussi l'outil Néo
+from routes import company_finance
+app.include_router(company_finance.router, prefix="/api", tags=["company-finance"])
+
+# Scan carte de visite / flyer → fiche contact (Gemini vision, anti-doublon)
+from routes import contact_scan
+app.include_router(contact_scan.router, prefix="/api", tags=["contact-scan"])
+
+# Web Push PWA (iPhone/Android) — inerte sans clés VAPID
+from routes import web_push
+app.include_router(web_push.router, prefix="/api", tags=["web-push"])
+
 # MoltBot Integration (Full CRM Access)
 from routes.moltbot import router as moltbot_router
 app.include_router(moltbot_router, prefix="/api", tags=["moltbot"])
